@@ -20,6 +20,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -168,14 +169,15 @@ public class PoseHandler {
         return new ModelInfomation(map, animations);
     }
 
-    public AnimationPass createPass(DinosaurEntity entity, TabulaModel model, GrowthStage growthStage, boolean useInertialTweens) {
+    public AnimationPassesWrapper<DinosaurEntity> createPass(DinosaurEntity entity, TabulaModel model, GrowthStage growthStage, boolean useInertialTweens) {
         ModelInfomation modelInfo = this.modelInfomationMap.get(growthStage);
         if (!entity.getDinosaur().getModelGrowthStages().contains(growthStage)) {
             modelInfo = this.modelInfomationMap.get(GrowthStage.ADULT);
         }
-        AnimationPass pass = new AnimationPass(modelInfo.getAnimations(), modelInfo.getReferences(), useInertialTweens);
-        pass.init(model, entity);
-        return pass;
+        return new AnimationPassesWrapper<>(entity, model,
+                Pair.of(e -> true, new AnimationPass<>(modelInfo.getAnimations(), modelInfo.getReferences(), useInertialTweens)),
+                Pair.of(e -> true/*Add a check to make sure not carcass*/, new MovementAnimationPass<>(modelInfo.getAnimations(), modelInfo.getReferences(), useInertialTweens))
+        );
     }
 
     private Map<Animation, List<ModelData>> getAnimations(GrowthStage growthStage) {

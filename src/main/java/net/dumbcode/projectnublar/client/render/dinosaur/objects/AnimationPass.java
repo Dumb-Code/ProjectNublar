@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.client.render.dinosaur.objects;
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
 import net.dumbcode.projectnublar.client.render.dinosaur.PoseHandler;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityAnimatable;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.ilexiconn.llibrary.server.animation.Animation;
@@ -13,33 +13,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class AnimationPass {
+public class AnimationPass<T extends EntityAnimatable> {
 
-    private final Map<Animation,List<PoseHandler.ModelData>> animations;
-    private final Map<String, Map<String, CubeReference>> poses;
-    private final boolean useInertia;
+    protected final Map<Animation,List<PoseHandler.ModelData>> animations;
+    protected final Map<String, Map<String, CubeReference>> poses;
+    protected final boolean useInertia;
 
     //~~~~~~~~~~~
-    private Map<String, Vector3f> rotationIncrements = Maps.newHashMap();
-    private Map<String, Vector3f> positionIncrements = Maps.newHashMap();
+    protected Map<String, Vector3f> rotationIncrements = Maps.newHashMap();
+    protected Map<String, Vector3f> positionIncrements = Maps.newHashMap();
 
-    private Map<String, Vector3f> prevRotationIncrements = Maps.newHashMap();
+    protected Map<String, Vector3f> prevRotationIncrements = Maps.newHashMap();
     private Map<String, Vector3f> prevPositionIncrements = Maps.newHashMap();
     //~~~~~~~~~~~
 
-    private int poseCount;
-    private int poseIndex;
-    private float poseLength;
+    protected int poseCount;
+    protected int poseIndex;
+    protected float poseLength;
 
-    private float animationTick;
-    private float prevTicks;
+    protected float animationTick;
+    protected float prevTicks;
 
-    private Function<String, AdvancedModelRenderer> partFunc;
-    private Map<String, CubeReference> currentPose = Maps.newHashMap();
+    protected Function<String, AdvancedModelRenderer> partFunc;
+    protected Map<String, CubeReference> currentPose = Maps.newHashMap();
 
-    private Animation animation;
+    protected Animation animation;
 
-    private float inertiaFactor;
+    protected float inertiaFactor;
+    protected float limbSwing;
+    protected float limbSwingAmount;
 
     public AnimationPass(Map<Animation, List<PoseHandler.ModelData>> animations, Map<String, Map<String, CubeReference>> poses, boolean useInertia) {
         this.animations = animations;
@@ -47,7 +49,7 @@ public class AnimationPass {
         this.useInertia = useInertia;
     }
 
-    public void init(TabulaModel model, DinosaurEntity entity) {
+    public void init(TabulaModel model, T entity) {
         this.partFunc = model::getCube;
         this.animation = this.getRequestedAnimation(entity);
         this.initPoseModel();
@@ -56,7 +58,7 @@ public class AnimationPass {
 
         this.prevTicks = 0.0F;
         this.initIncrements(entity);
-        this.performAnimations(entity, 0.0F);
+        this.performAnimations(entity, 0.0F, 0.0F, 0.0F);
     }
 
     private void initPoseModel() {
@@ -68,7 +70,7 @@ public class AnimationPass {
         }
     }
 
-    private void initIncrements(DinosaurEntity entity) {
+    private void initIncrements(T entity) {
         float animationDegree = this.getAnimationDegree(entity);
         for (String name : this.currentPose.keySet()) {
             AdvancedModelRenderer part = this.partFunc.apply(name);
@@ -130,8 +132,11 @@ public class AnimationPass {
         return Math.min(1.0F, Math.max(0.0F, inertiaFactor));
     }
 
-    void performAnimations(DinosaurEntity entity, float ticks) {
+    void performAnimations(T entity, float limbSwing, float limbSwingAmount, float ticks) {
         Animation requestedAnimation = this.getRequestedAnimation(entity);
+
+        this.limbSwing = limbSwing;
+        this.limbSwingAmount = limbSwingAmount;
 
         if (requestedAnimation != this.animation) {
             this.setAnimation(entity, requestedAnimation);
@@ -155,7 +160,7 @@ public class AnimationPass {
         this.prevTicks = ticks;
     }
 
-    private boolean updateAnimationTick(DinosaurEntity entity, float ticks) {
+    private boolean updateAnimationTick(T entity,  float ticks) {
         float incrementAmount = (ticks - this.prevTicks) * this.getAnimationSpeed(entity);
         if (this.animationTick < 0.0F) {
             this.animationTick = 0.0F;
@@ -184,7 +189,7 @@ public class AnimationPass {
         }
     }
 
-    private void initAnimationTicks(DinosaurEntity entity) {
+    private void initAnimationTicks(T entity) {
         this.startAnimation(entity);
         if (DinosaurAnimations.getAnimation(this.animation).shouldHold()) {
             this.poseIndex = this.poseCount - 1;
@@ -198,7 +203,7 @@ public class AnimationPass {
         this.currentPose = currentPose;
     }
 
-    private void startAnimation(DinosaurEntity entity) {
+    private void startAnimation(T entity) {
         List<PoseHandler.ModelData> pose = this.animations.get(this.animation);
         if (pose != null) {
             String model = this.getModelData().getModelName();
@@ -210,7 +215,7 @@ public class AnimationPass {
         }
     }
 
-    private void setPose(DinosaurEntity entity, float ticks) {
+    private void setPose(T entity, float ticks) {
         this.setCurrentPose(this.poses.get(this.getModelData().getModelName()));
         this.poseLength = this.animations.get(this.animation).get(this.poseIndex).getTime();
         this.animationTick = 0;
@@ -218,7 +223,7 @@ public class AnimationPass {
         this.initIncrements(entity);
     }
 
-    private void onPoseFinish(DinosaurEntity entity, float ticks) {
+    private void onPoseFinish(T entity, float ticks) {
         if (this.incrementPose()) {
             this.setAnimation(entity, this.isEntityAnimationDependent() ? DinosaurAnimations.IDLE.get() : this.getRequestedAnimation(entity));
         } else {
@@ -241,7 +246,7 @@ public class AnimationPass {
         return false;
     }
 
-    private void setAnimation(DinosaurEntity entity, Animation requestedAnimation) {
+    private void setAnimation(T entity, Animation requestedAnimation) {
         this.updatePreviousPose();
 
         if (this.animations.get(requestedAnimation) != null && !(this.animation != DinosaurAnimations.IDLE.get() && this.animation == requestedAnimation && !this.isLooping())) {
@@ -272,23 +277,23 @@ public class AnimationPass {
         return this.animations.get(this.animation).get(this.poseIndex);
     }
 
-    private float getAnimationSpeed(DinosaurEntity entity) {
-        return 1.0F;//TODO
+    protected float getAnimationSpeed(T entity) {
+        return 1.0F;
     }
 
-    private float getAnimationDegree(DinosaurEntity entity) {
-        return 1.0F; //TODO
+    protected float getAnimationDegree(T entity) {
+        return 1.0F;
     }
 
-    private Animation getRequestedAnimation(DinosaurEntity entity) {
+    protected Animation getRequestedAnimation(T entity) {
         return entity.getAnimation();
     }
 
-    private boolean isEntityAnimationDependent() {
+    protected boolean isEntityAnimationDependent() {
         return true;
     }
 
-    private boolean isLooping() {
-        return true;
+    protected boolean isLooping() {
+        return false;
     }
 }

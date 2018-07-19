@@ -1,20 +1,25 @@
 package net.dumbcode.projectnublar.server.entity;
 
+import io.netty.buffer.ByteBuf;
 import lombok.NonNull;
 import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
 import net.ilexiconn.llibrary.server.animation.Animation;
 import net.ilexiconn.llibrary.server.animation.AnimationHandler;
-import net.ilexiconn.llibrary.server.animation.IAnimatedEntity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
-public class DinosaurEntity extends EntityCreature implements IEntityAdditionalSpawnData, IAnimatedEntity {
+public class DinosaurEntity extends EntityCreature implements IEntityAdditionalSpawnData, EntityAnimatable {
+
+    private static final DataParameter<Boolean> WATCHER_IS_RUNNING = EntityDataManager.createKey(DinosaurEntity.class, DataSerializers.BOOLEAN);
 
     private Dinosaur dinosaur = Dinosaur.MISSING;
 
@@ -31,12 +36,33 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
         super(worldIn);
     }
 
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+
+        this.dataManager.register(WATCHER_IS_RUNNING, false);
+    }
+
     private void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
     }
 
     public Dinosaur getDinosaur() {
         return dinosaur;
+    }
+
+    @Override
+    public void onUpdate() {
+        super.onUpdate();
+
+        if(!this.world.isRemote) {
+            this.dataManager.set(WATCHER_IS_RUNNING, this.getAIMoveSpeed() > this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+        }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return this.dataManager.get(WATCHER_IS_RUNNING);
     }
 
     @Override
