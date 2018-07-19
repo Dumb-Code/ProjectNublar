@@ -9,7 +9,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nonnull;
 
-public interface DinosaurStack extends StackModelVarient<Dinosaur> {
+public interface DinosaurStack extends RegistryStackNBTProvider<Dinosaur> {
 
     @Override
     default IForgeRegistry<Dinosaur> getRegistry() {
