@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class AnimationPassesWrapper<T extends EntityAnimatable> {
-    private List<Pair<Predicate<T>, AnimationPass<T>>> entityList = Lists.newArrayList();
+    private List<Pair<Predicate<T>, AnimationPass<T>>> entityList;
 
     @SafeVarargs
     public AnimationPassesWrapper(T entity, TabulaModel model, Pair<Predicate<T>, AnimationPass<T>>... pairs) {
