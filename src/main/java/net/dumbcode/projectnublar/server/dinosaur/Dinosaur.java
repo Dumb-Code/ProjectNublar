@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import net.dumbcode.projectnublar.client.render.model.DinosaurModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
@@ -10,7 +12,8 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 
-@Data
+@Getter
+@Setter
 public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     @GameRegistry.ObjectHolder(ProjectNublar.MODID + ":velociraptor")
     public static Dinosaur MISSING = null;
@@ -26,15 +29,5 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             throw new RuntimeException("Null Registry Name Found");
         }
         return this.getRegistryName();
-    }
-
-    @Override
-    public int hashCode() { //Prevent Lombok from overriding this
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) { //Prevent Lombok from overriding this
-        return super.equals(o);
     }
 }
