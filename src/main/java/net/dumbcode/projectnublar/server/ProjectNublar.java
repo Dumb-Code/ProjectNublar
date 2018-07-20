@@ -1,11 +1,9 @@
 package net.dumbcode.projectnublar.server;
 
 import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurRenderer;
-import net.dumbcode.projectnublar.client.render.dinosaur.PoseHandler;
-import net.dumbcode.projectnublar.client.render.dinosaur.TabulaUtils;
-import net.dumbcode.projectnublar.client.render.dinosaur.objects.EntityAnimator;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.NublarItems;
@@ -69,10 +67,7 @@ public class ProjectNublar
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
-            dinosaur.setPoseHandler(new PoseHandler(dinosaur));
-            dinosaur.setModel(new TabulaModel(TabulaUtils.getModelContainer(new ResourceLocation(ProjectNublar.MODID, "models/entities/velociraptor/adult/velociraptor_adult_idle")), new EntityAnimator()));
-        }
+
     }
 
     @SubscribeEvent
@@ -84,6 +79,11 @@ public class ProjectNublar
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .add((owner, stage, id, obj, oldObj) -> System.out.println(obj))
                 .create();
+    }
+
+    @SubscribeEvent
+    public static void register(RegistryEvent.Register<Dinosaur> event) {
+        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
     }
 
     @SubscribeEvent
@@ -102,7 +102,7 @@ public class ProjectNublar
 
         NublarItems.DINOSAUR_MEAT.registerOreNames();
     }
-    
+
     public static Logger getLogger() {
         return logger;
     }
@@ -111,5 +111,4 @@ public class ProjectNublar
     public void onServerStart(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandProjectNublar());
     }
-
 }

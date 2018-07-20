@@ -12,12 +12,12 @@ import java.util.Map;
 
 public class ModelInfomation {
     @SideOnly(Side.CLIENT)
-    private Map<String, Map<String, CubeReference>> references;
-    private Map<Animation, List<PoseHandler.ModelData>> animations;
+    private Map<String, Map<String, CubeReference>> references; //Map of <Model locaion, <Cube Name, Cube Reference>> //TO-DO: maybe change the first String into an animation ?
+    private Map<Animation, List<PoseHandler.ModelData>> animations; //A map of the list of model datas to use in per animation
 
-//    public ModelInfomation() {
-//        this(null);
-//    }
+    public ModelInfomation() {
+        this(null);
+    }
 
     @SideOnly(Side.CLIENT)
     public ModelInfomation(Map<String, Map<String, CubeReference>> cuboids, Map<Animation,List<PoseHandler.ModelData>> animations) {

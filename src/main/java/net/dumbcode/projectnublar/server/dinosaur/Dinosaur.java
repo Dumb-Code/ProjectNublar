@@ -1,12 +1,11 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
-import com.google.common.collect.Lists;
-import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-import net.dumbcode.projectnublar.client.render.dinosaur.PoseHandler;
+import net.dumbcode.projectnublar.client.render.model.DinosaurModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
 import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
@@ -16,20 +15,17 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
-
     @GameRegistry.ObjectHolder(ProjectNublar.MODID + ":velociraptor")
     public static Dinosaur MISSING = null;
 
-    List<GrowthStage> modelGrowthStages = Lists.newArrayList(GrowthStage.ADULT);
+    private final ModelProperties modelProperties = new ModelProperties();
 
-//    @Setter(AccessLevel.NONE)
-    private PoseHandler poseHandler;
+    private DinosaurModelContainer modelContainer;
 
-    private TabulaModel model; //TODO: remove
 
     private int cookedMeatHealAmount;
     private int rawMeatHealAmount;
@@ -78,21 +74,11 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return builder.toString();
     }
 
-    @Nonnull
+    @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings
     public ResourceLocation getRegName() {
         if(this.getRegistryName() == null) {
             throw new RuntimeException("Null Registry Name Found");
         }
         return this.getRegistryName();
-    }
-
-    @Override
-    public int hashCode() { //Prevent Lombok from overriding this
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) { //Prevent Lombok from overriding this
-        return super.equals(o);
     }
 }

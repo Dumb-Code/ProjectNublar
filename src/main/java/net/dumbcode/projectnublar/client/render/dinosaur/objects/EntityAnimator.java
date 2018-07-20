@@ -1,9 +1,7 @@
 package net.dumbcode.projectnublar.client.render.dinosaur.objects;
 
-import lombok.val;
 import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.EntityAnimatable;
 import net.ilexiconn.llibrary.client.model.tabula.ITabulaModelAnimator;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraftforge.fml.relauncher.Side;
@@ -18,8 +16,8 @@ public class EntityAnimator implements ITabulaModelAnimator<DinosaurEntity> {
     protected EnumMap<GrowthStage, Map<DinosaurEntity, AnimationPassesWrapper<DinosaurEntity>>> animationHandlers = new EnumMap<>(GrowthStage.class);
 
     private AnimationPassesWrapper<DinosaurEntity> getAnimationHelper(DinosaurEntity entity, TabulaModel model, boolean useInertialTweens) {
-        GrowthStage growth = GrowthStage.ADULT;//TODO: link to entity
-        return this.animationHandlers.computeIfAbsent(growth, g -> new WeakHashMap<>()).computeIfAbsent(entity, e -> e.getDinosaur().getPoseHandler().createPass(e, model, growth, useInertialTweens));
+        GrowthStage growth = entity.getGrowthStage();
+        return this.animationHandlers.computeIfAbsent(growth, g -> new WeakHashMap<>()).computeIfAbsent(entity, e -> e.getDinosaur().getModelContainer().getPoseHandler().createPass(e, model, growth, useInertialTweens));
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.client.render.dinosaur;
 import com.google.gson.Gson;
 import lombok.Cleanup;
 import lombok.experimental.UtilityClass;
+import net.ilexiconn.llibrary.client.model.tabula.ITabulaModelAnimator;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tabula.container.TabulaModelContainer;
 import net.minecraft.client.Minecraft;
@@ -18,16 +19,16 @@ import java.util.zip.ZipInputStream;
 public class TabulaUtils {
 
     public static TabulaModel getModel(ResourceLocation location){
-        return new TabulaModel(getModelContainer(location));
+        return getModel(location, null);
     }
 
-    public static TabulaModelContainer getModelContainer(ResourceLocation location){
+    public static TabulaModel getModel(ResourceLocation location, ITabulaModelAnimator animator){
         if(!location.getResourcePath().endsWith(".tbl")) {
             location = new ResourceLocation(location.getResourceDomain(), location.getResourcePath() + ".tbl");
         }
         try {
             @Cleanup InputStream stream = Minecraft.getMinecraft().getResourceManager().getResource(location).getInputStream();
-            return new Gson().fromJson(new InputStreamReader(getModelJsonStream(stream)), TabulaModelContainer.class);
+            return new TabulaModel(new Gson().fromJson(new InputStreamReader(getModelJsonStream(stream)), TabulaModelContainer.class), animator);
         } catch (IOException e) {
             throw new IllegalArgumentException("Unable to load model " + location, e);
         }
