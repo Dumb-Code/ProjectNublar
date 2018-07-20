@@ -42,10 +42,10 @@ public class PoseHandler {
     private final Map<GrowthStage, ModelInfomation> modelInfomationMap = new EnumMap<>(GrowthStage.class);
 
     public PoseHandler(Dinosaur dinosaur) {
-        this(dinosaur.getRegName(), dinosaur.getModelProperties().getModelGrowthStages());
+        this(dinosaur.getRegName(), dinosaur.getModelProperties().getModelGrowthStages(), dinosaur.getModelProperties().getMainModelMap());
     }
 
-    public PoseHandler(ResourceLocation regname, List<GrowthStage> growthStages) {
+    public PoseHandler(ResourceLocation regname, List<GrowthStage> growthStages, Map<GrowthStage, String> mainModelMap) {
         String baseLoc = "models/entities/" + regname.getResourcePath() + "/";
         for (GrowthStage growth : GrowthStage.values()) {
             GrowthStage reference = growth;
@@ -69,9 +69,6 @@ public class PoseHandler {
                     } catch (IOException e) {
                         throw new IllegalArgumentException("Could not main json load input stream for " + regname, e);
                     }
-                    if (rawData.getPoses().get(DinosaurAnimations.IDLE) == null || rawData.getPoses().get(DinosaurAnimations.IDLE).isEmpty()) {
-                        throw new IllegalArgumentException("Animation files must define at least one pose for the IDLE animation");
-                    }
                     List<ModelLocation> posedModelResources = Lists.newArrayList();
                     for (List<PoseObject> poses : rawData.getPoses().values()) {
                         for (PoseObject pose : poses) {
@@ -92,7 +89,11 @@ public class PoseHandler {
                         }
                     }
                     if(FMLCommonHandler.instance().getSide() == Side.CLIENT) {
-                        info = loadClientInfomation(new ResourceLocation(regname.getResourceDomain(), posedModelResources.get(0).getFullLocation()), posedModelResources, animationMap);
+                        String location = mainModelMap.get(reference);
+                        if(location == null) {
+                            throw new IllegalArgumentException("Could not find main model location for " + regname + " as it was not defined");
+                        }
+                        info = loadClientInfomation(new ResourceLocation(regname.getResourceDomain(), growthDirectory + location), posedModelResources, animationMap);
                     } else {
                         info = new ModelInfomation(animationMap);
                     }
