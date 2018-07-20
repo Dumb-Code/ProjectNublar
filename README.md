@@ -31,6 +31,9 @@ or for IntelliJ IDEA:
 gradlew.bat idea
 ```
 
+## Build troubleshooting
+See [Build troubleshooting](BuildTroubles.md)
+
 ## Built With
 
 * [Gradle](https://gradle.org/) - Dependency Management
