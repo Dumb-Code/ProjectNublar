@@ -44,7 +44,7 @@ public class DinosaurModelContainer {
                 } else {
                     ResourceLocation modelName = new ResourceLocation(regname.getResourceDomain(), "models/entities/" + regname.getResourcePath() + "/" + referneced.name().toLowerCase(Locale.ROOT) + "/" + mainModelName);
                     try {
-                        model = TabulaUtils.getModel(modelName);
+                        model = TabulaUtils.getModel(modelName, properties.getEntityAnimatorSupplier().get());
                     } catch (Exception e) {
                         ProjectNublar.getLogger().error("Unable to load model: " + modelName.toString(), e);
                         model = null;

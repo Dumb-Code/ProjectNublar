@@ -1,9 +1,7 @@
 package net.dumbcode.projectnublar.client.render.dinosaur.objects;
 
-import lombok.val;
 import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.EntityAnimatable;
 import net.ilexiconn.llibrary.client.model.tabula.ITabulaModelAnimator;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraftforge.fml.relauncher.Side;
