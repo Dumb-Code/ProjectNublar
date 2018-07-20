@@ -37,6 +37,11 @@ public interface DinosaurStack extends RegistryStackNBTProvider<Dinosaur> {
         return this == MISSING_PROVIDER;
     }
 
+    @Override
+    default Dinosaur getFallbackValue() {
+        return Dinosaur.MISSING;
+    }
+
     DinosaurStack MISSING_PROVIDER = new DinosaurStack() {
         @Override
         public ItemStack getItemStack(Dinosaur dinosaur) {
@@ -45,6 +50,11 @@ public interface DinosaurStack extends RegistryStackNBTProvider<Dinosaur> {
 
         @Override
         public Dinosaur getValue(ItemStack stack) {
+            return Dinosaur.MISSING;
+        }
+
+        @Override
+        public Dinosaur getFallbackValue() {
             return Dinosaur.MISSING;
         }
     };

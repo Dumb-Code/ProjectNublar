@@ -27,7 +27,10 @@ public interface RegistryStackNBTProvider<T extends IForgeRegistryEntry.Impl<T>>
     @Nonnull
     @Override
     default T getValueFromName(String string) {
-        return getRegistry().getValue(new ResourceLocation(string));
+        T result = getRegistry().getValue(new ResourceLocation(string));
+        if(result == null)
+            return getFallbackValue();
+        return result;
     }
 
     default Map<Object, ResourceLocation> getModelResourceLocations(T value) {

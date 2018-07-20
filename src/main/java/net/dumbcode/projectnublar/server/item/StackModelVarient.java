@@ -55,6 +55,12 @@ public interface StackModelVarient<T> {
     String getKey();
 
     /**
+     * Returns a fallback value in case no value was found for a given name
+     * @return a fallback value when a value is not found <b>MUST BE IMMUTABLE</b>
+     */
+    T getFallbackValue();
+
+    /**
      * Get the default object for this stack. Must also bee immutable
      * @return a immutable, unchanging object
      */
