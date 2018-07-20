@@ -8,10 +8,6 @@ buildscript {
     }
 }
 
-plugins {
-    id 'io.franzbecker.gradle-lombok' version '1.14'
-}
-
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
@@ -45,13 +41,9 @@ dependencies {
     deobfCompile "mezz.jei:jei_1.12.2:4.9.1.187:api"
     runtime "mezz.jei:jei_1.12.2:4.9.1.187"
     compile "net.ilexiconn:llibrary:1.7.14-1.12.2"
-    testCompile "junit:junit:4.12"
+    compile 'org.projectlombok:lombok:1.18.0'
 }
 
-lombok {
-    version = "1.18.0"
-    sha256 = ""
-}
 
 processResources {
     // this will ensure that this task is redone when the versions change.
