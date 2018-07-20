@@ -1,13 +1,10 @@
 package net.dumbcode.projectnublar.server;
 
 import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurRenderer;
-import net.dumbcode.projectnublar.client.render.dinosaur.PoseHandler;
-import net.dumbcode.projectnublar.client.render.dinosaur.TabulaUtils;
-import net.dumbcode.projectnublar.client.render.dinosaur.objects.EntityAnimator;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -15,15 +12,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.annotation.Nullable;
 
 @Mod.EventBusSubscriber
 @Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION)
@@ -46,10 +39,7 @@ public class ProjectNublar
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
-            dinosaur.setPoseHandler(new PoseHandler(dinosaur));
-            dinosaur.setModel(new TabulaModel(TabulaUtils.getModelContainer(new ResourceLocation(ProjectNublar.MODID, "models/entities/velociraptor/adult/velociraptor_adult_idle")), new EntityAnimator()));
-        }
+
     }
 
     @SubscribeEvent
@@ -63,10 +53,10 @@ public class ProjectNublar
                 .create();
     }
 
-//    @SubscribeEvent
-//    public static void register(RegistryEvent.Register<Dinosaur> event) {
-//        event.getRegistry().register(new Dinosaur().setRegistryName("projectnublar:velociraptor"));
-//    }
+    @SubscribeEvent
+    public static void register(RegistryEvent.Register<Dinosaur> event) {
+        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
+    }
     
     public static Logger getLogger() {
         return logger;

@@ -3,11 +3,12 @@ package net.dumbcode.projectnublar.client.render.dinosaur;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
+import lombok.AllArgsConstructor;
 import lombok.Cleanup;
-import lombok.Value;
+import lombok.Getter;
 import lombok.val;
 import net.dumbcode.projectnublar.client.render.dinosaur.objects.*;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
@@ -26,8 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.JarURLConnection;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class PoseHandler {
 
@@ -39,7 +42,7 @@ public class PoseHandler {
     private final Map<GrowthStage, ModelInfomation> modelInfomationMap = new EnumMap<>(GrowthStage.class);
 
     public PoseHandler(Dinosaur dinosaur) {
-        this(dinosaur.getRegName(), dinosaur.getModelGrowthStages());
+        this(dinosaur.getRegName(), dinosaur.getModelProperties().getModelGrowthStages());
     }
 
     public PoseHandler(ResourceLocation regname, List<GrowthStage> growthStages) {
@@ -49,49 +52,53 @@ public class PoseHandler {
             if(!growthStages.contains(growth)) {
                 reference = GrowthStage.ADULT;
             }
-
             ModelInfomation info;
             if(this.modelInfomationMap.containsKey(reference)) {
                 info = this.modelInfomationMap.get(reference);
             } else {
-                String growthName = reference.name().toLowerCase(Locale.ROOT);
-                String growthDirectory = baseLoc + growthName + "/";
-                String jsonFile = growthDirectory + regname.getResourcePath() + "_" + growthName + ".json";
-                InputStream jsonStream;
-                DinosaurAnimationInfomation rawData;
                 try {
-                    jsonStream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(regname.getResourceDomain(), jsonFile)).getInputStream();
-                    @Cleanup Reader reader = new InputStreamReader(jsonStream);
-                    rawData = GSON.fromJson(reader, DinosaurAnimationInfomation.class);
-                } catch (IOException e) {
-                    throw new IllegalArgumentException("Could not load input stream for " + regname, e);
-                }
-                if (rawData.getPoses().get(DinosaurAnimations.IDLE) == null || rawData.getPoses().get(DinosaurAnimations.IDLE).isEmpty()) {
-                    throw new IllegalArgumentException("Animation files must define at least one pose for the IDLE animation");
-                }
-                List<ModelLocation> posedModelResources = Lists.newArrayList();
-                for (List<PoseObject> poses : rawData.getPoses().values()) {
-                    for (PoseObject pose : poses) {
-                        String fileLoc = growthDirectory + pose.getPoseLocation();
-                        ModelLocation loc = new ModelLocation(pose.getPoseLocation(), fileLoc);
-                        if(!posedModelResources.contains(loc)) {
-                            posedModelResources.add(loc);
+                    String growthName = reference.name().toLowerCase(Locale.ROOT);
+                    String growthDirectory = baseLoc + growthName + "/";
+                    String jsonFile = growthDirectory + regname.getResourcePath() + "_" + growthName + ".json";
+                    InputStream jsonStream;
+                    DinosaurAnimationInfomation rawData;
+                    try {
+                        jsonStream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(regname.getResourceDomain(), jsonFile)).getInputStream();
+                        @Cleanup Reader reader = new InputStreamReader(jsonStream);
+                        rawData = GSON.fromJson(reader, DinosaurAnimationInfomation.class);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException("Could not main json load input stream for " + regname, e);
+                    }
+                    if (rawData.getPoses().get(DinosaurAnimations.IDLE) == null || rawData.getPoses().get(DinosaurAnimations.IDLE).isEmpty()) {
+                        throw new IllegalArgumentException("Animation files must define at least one pose for the IDLE animation");
+                    }
+                    List<ModelLocation> posedModelResources = Lists.newArrayList();
+                    for (List<PoseObject> poses : rawData.getPoses().values()) {
+                        for (PoseObject pose : poses) {
+                            String fileLoc = growthDirectory + pose.getPoseLocation();
+                            ModelLocation loc = new ModelLocation(pose.getPoseLocation(), fileLoc);
+                            if(!posedModelResources.contains(loc)) {
+                                posedModelResources.add(loc);
+                            }
                         }
                     }
-                }
 
-                Map<Animation, List<ModelData>> animationMap = Maps.newHashMap();
-                for (val entry : rawData.getPoses().entrySet()) {
-                    Animation animation = entry.getKey().get();
-                    List<ModelData> data = animationMap.computeIfAbsent(animation, a -> Lists.newArrayList());
-                    for (PoseObject pose : entry.getValue()) {
-                        data.add(new ModelData(pose.getPoseLocation(), pose.getTicksTime()));
+                    Map<Animation, List<ModelData>> animationMap = Maps.newHashMap();
+                    for (val entry : rawData.getPoses().entrySet()) {
+                        Animation animation = entry.getKey().get();
+                        List<ModelData> data = animationMap.computeIfAbsent(animation, a -> Lists.newArrayList());
+                        for (PoseObject pose : entry.getValue()) {
+                            data.add(new ModelData(pose.getPoseLocation(), pose.getTicksTime()));
+                        }
                     }
-                }
-                if(FMLCommonHandler.instance().getSide() == Side.CLIENT) {
-                    info = loadClientInfomation(new ResourceLocation(regname.getResourceDomain(), posedModelResources.get(0).getFullLocation()), posedModelResources, animationMap);
-                } else {
-                    info = new ModelInfomation(animationMap);
+                    if(FMLCommonHandler.instance().getSide() == Side.CLIENT) {
+                        info = loadClientInfomation(new ResourceLocation(regname.getResourceDomain(), posedModelResources.get(0).getFullLocation()), posedModelResources, animationMap);
+                    } else {
+                        info = new ModelInfomation(animationMap);
+                    }
+                } catch (Exception e) {
+                    ProjectNublar.getLogger().error("Unable to load poses stage " + reference + " for " + regname, e);
+                    info = new ModelInfomation();
                 }
             }
             this.modelInfomationMap.put(growth, info);
@@ -111,7 +118,13 @@ public class PoseHandler {
                 }
             } else {
                 if(modelResource.getFileName().endsWith(".tbl") || true) { //The old way. Currently only the working way. Need to check the integrity of the python script
-                    TabulaModel model = TabulaUtils.getModel(location);
+                    TabulaModel model;
+                    try {
+                        model = TabulaUtils.getModel(location);
+                    } catch (Exception e) {
+                        ProjectNublar.getLogger().error("Unable to load tabula model " + location, e);
+                        continue;
+                    }
                     for (String cubeName : mainModel.getCubes().keySet()) {
                         AdvancedModelRenderer cube = model.getCube(cubeName);
                         if(cube == null) {
@@ -171,7 +184,7 @@ public class PoseHandler {
 
     public AnimationPassesWrapper<DinosaurEntity> createPass(DinosaurEntity entity, TabulaModel model, GrowthStage growthStage, boolean useInertialTweens) {
         ModelInfomation modelInfo = this.modelInfomationMap.get(growthStage);
-        if (!entity.getDinosaur().getModelGrowthStages().contains(growthStage)) {
+        if (!entity.getDinosaur().getModelProperties().getModelGrowthStages().contains(growthStage)) {
             modelInfo = this.modelInfomationMap.get(GrowthStage.ADULT);
         }
         return new AnimationPassesWrapper<>(entity, model,
@@ -196,20 +209,17 @@ public class PoseHandler {
         return duration;
     }
 
-    @Value
+    @Getter
+    @AllArgsConstructor
     public class ModelData {
         String modelName;
         float time;
     }
 
-    @Value
+    @Getter
+    @AllArgsConstructor
     private class ModelLocation {
-        String fileName;
-        String fullLocation;
-
-        @Override
-        public int hashCode() {
-            return this.fullLocation.hashCode();
-        }
+        private String fileName;
+        private String fullLocation;
     }
 }

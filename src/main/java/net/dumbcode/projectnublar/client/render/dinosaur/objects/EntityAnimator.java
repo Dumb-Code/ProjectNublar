@@ -18,8 +18,8 @@ public class EntityAnimator implements ITabulaModelAnimator<DinosaurEntity> {
     protected EnumMap<GrowthStage, Map<DinosaurEntity, AnimationPassesWrapper<DinosaurEntity>>> animationHandlers = new EnumMap<>(GrowthStage.class);
 
     private AnimationPassesWrapper<DinosaurEntity> getAnimationHelper(DinosaurEntity entity, TabulaModel model, boolean useInertialTweens) {
-        GrowthStage growth = GrowthStage.ADULT;//TODO: link to entity
-        return this.animationHandlers.computeIfAbsent(growth, g -> new WeakHashMap<>()).computeIfAbsent(entity, e -> e.getDinosaur().getPoseHandler().createPass(e, model, growth, useInertialTweens));
+        GrowthStage growth = entity.getGrowthStage();
+        return this.animationHandlers.computeIfAbsent(growth, g -> new WeakHashMap<>()).computeIfAbsent(entity, e -> e.getDinosaur().getModelContainer().getPoseHandler().createPass(e, model, growth, useInertialTweens));
     }
 
     @Override

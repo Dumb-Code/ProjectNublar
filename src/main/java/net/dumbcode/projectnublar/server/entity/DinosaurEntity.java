@@ -10,9 +10,11 @@ import net.ilexiconn.llibrary.server.animation.Animation;
 import net.ilexiconn.llibrary.server.animation.AnimationHandler;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -27,6 +29,8 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
     private int animationTick;
     private int animationLength;
 
+    private boolean isMale;
+
     public DinosaurEntity(World worldIn, Dinosaur dinosaur) {
         this(worldIn);
         this.dinosaur = dinosaur;
@@ -39,7 +43,6 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
     @Override
     protected void entityInit() {
         super.entityInit();
-
         this.dataManager.register(WATCHER_IS_RUNNING, false);
     }
 
@@ -88,14 +91,38 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
 
         if (oldAnimation != newAnimation) {
             this.animationTick = 0;
-            this.animationLength = (int) this.dinosaur.getPoseHandler().getAnimationLength(this.animation, this.getGrowthStage());
+            this.animationLength = (int) this.dinosaur.getModelContainer().getPoseHandler().getAnimationLength(this.animation, this.getGrowthStage());
 
             AnimationHandler.INSTANCE.sendAnimationMessage(this, newAnimation);
         }
     }
 
-    private GrowthStage getGrowthStage() {
+    public GrowthStage getGrowthStage() { //TODO
         return GrowthStage.ADULT;
+    }
+
+    public boolean isMale() {
+        return this.isMale;
+    }
+
+    public void setMale(boolean isMale) {
+        this.isMale = isMale;
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        nbt.setString("Dinosaur", this.getDinosaur().getRegName().toString());
+        nbt.setBoolean("Male", this.isMale);
+
+        return super.writeToNBT(nbt);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur")));
+        this.isMale = nbt.getBoolean("Male");
+
+        super.readFromNBT(nbt);
     }
 
     @Override
@@ -106,10 +133,12 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         ByteBufUtils.writeRegistryEntry(buffer, this.dinosaur);
+        buffer.writeBoolean(this.isMale);
     }
 
     @Override
     public void readSpawnData(ByteBuf buffer) {
         this.dinosaur = ByteBufUtils.readRegistryEntry(buffer, ProjectNublar.DINOSAUR_REGISTRY);
+        this.isMale = buffer.readBoolean();
     }
 }

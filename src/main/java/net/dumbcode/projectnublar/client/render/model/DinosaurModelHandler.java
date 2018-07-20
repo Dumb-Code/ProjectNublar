@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.render.model;
 
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.StackModelVarient;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -9,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -21,7 +23,14 @@ public class DinosaurModelHandler {
 
     private static Map<Item, DinosaurItemModel> itemMap = Maps.newHashMap();
 
-    public static IBakedModel MISSING_MODEL;
+    static IBakedModel MISSING_MODEL;
+
+    @SubscribeEvent
+    public static void onModelReady(ModelRegistryEvent event) {
+        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()) {
+            dinosaur.setModelContainer(new DinosaurModelContainer(dinosaur));
+        }
+    }
 
     @SubscribeEvent
     public static void onModelsBaked(ModelBakeEvent event) {
