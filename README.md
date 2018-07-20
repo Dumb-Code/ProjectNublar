@@ -1,6 +1,6 @@
 # Project: Nublar
 
-A mod that Dinosaurs into the world of Minecraft
+A mod that adds Dinosaurs into the world of Minecraft
 
 ### Contributing
 
@@ -41,6 +41,7 @@ gradlew.bat idea
 * [Jack Goldsworth](https://github.com/JackGoldsworth)
 * [Wyn Price](https://github.com/Wyn-Price)
 * [TheXFactor117](https://github.com/TheXFactor117)
+* [jglrxavpok](https://github.com/jglrxavpok)
 
 #### Modelers
 * HarvNut
@@ -62,7 +63,7 @@ gradlew.bat idea
 
 #### Contributors
 
-See also the list of [contributors](https://github.com/dumb-code/todm/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/dumb-code/ProjectNublar/contributors) who participated in this project.
 
 ## License
 
