@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurRenderer;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
+import net.dumbcode.projectnublar.server.dinosaur.data.CachedItems;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.NublarItems;
@@ -20,6 +21,7 @@ import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -53,21 +55,19 @@ public class ProjectNublar
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
+        if(!Loader.isModLoaded("todm")) {
+
+        }
         logger = event.getModLog();
         RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, DinosaurRenderer::new);
-        createItems();
-    }
-
-    private void createItems() {
-        NublarItems.DINOSAUR_MEAT = (ItemDinosaurMeat)(new ItemDinosaurMeat()
-                .setRegistryName(new ResourceLocation(MODID, "dinosaur_meat"))
-                .setUnlocalizedName("dinosaur_meat")
-                .setCreativeTab(TAB));
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-
+        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
+            dinosaur.setCachedItems(new CachedItems(dinosaur));
+        }
+        NublarItems.DINOSAUR_MEAT.registerOreNames();
     }
 
     @SubscribeEvent
@@ -82,20 +82,8 @@ public class ProjectNublar
     }
 
     @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().registerAll(NublarItems.getAllItems());
-    }
-
-    @SubscribeEvent
     public static void register(RegistryEvent.Register<Dinosaur> event) {
-        Dinosaur velociraptor = new Velociraptor().setRegistryName("projectnublar:velociraptor");
-        velociraptor.setCookedMeatHealAmount(10);
-        velociraptor.setCookedMeatSaturation(1f);
-        velociraptor.setRawMeatHealAmount(4);
-        velociraptor.setRawMeatSaturation(0.6f);
-        event.getRegistry().register(velociraptor);
-
-        NublarItems.DINOSAUR_MEAT.registerOreNames();
+        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
     }
 
     public static Logger getLogger() {

@@ -31,10 +31,6 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
 
     private boolean isMale;
 
-    public DinosaurEntity(World worldIn, Dinosaur dinosaur) {
-        this(worldIn);
-        this.dinosaur = dinosaur;
-    }
 
     public DinosaurEntity(World worldIn) {
         super(worldIn);
@@ -46,8 +42,9 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
         this.dataManager.register(WATCHER_IS_RUNNING, false);
     }
 
-    private void setDinosaur(Dinosaur dinosaur) {
+    public DinosaurEntity setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
+        return this;
     }
 
     public Dinosaur getDinosaur() {

@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.item;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -42,19 +43,21 @@ public class ItemDinosaurMeat extends ItemFood implements DinosaurStack {
     @Override
     public int getHealAmount(ItemStack stack) {
         Dinosaur dino = getValue(stack);
+        ItemProperties itemProperties = dino.getItemProperties();
         if(getVarient(stack) == CookState.COOKED) {
-            return dino.getCookedMeatHealAmount();
+            return itemProperties.getCookedMeatHealAmount();
         }
-        return dino.getRawMeatHealAmount();
+        return itemProperties.getRawMeatHealAmount();
     }
 
     @Override
     public float getSaturationModifier(ItemStack stack) {
         Dinosaur dino = getValue(stack);
+        ItemProperties itemProperties = dino.getItemProperties();
         if(getVarient(stack) == CookState.COOKED) {
-            return dino.getCookedMeatSaturation();
+            return itemProperties.getCookedMeatSaturation();
         }
-        return dino.getRawMeatSaturation();
+        return itemProperties.getRawMeatSaturation();
     }
 
     @Nonnull
@@ -98,8 +101,9 @@ public class ItemDinosaurMeat extends ItemFood implements DinosaurStack {
 
     public void registerOreNames() {
         for(Dinosaur dino : ProjectNublar.DINOSAUR_REGISTRY) {
-            ItemStack rawStack = dino.getRawMeat().copy();
-            ItemStack cookedStack = dino.getCookedMeat().copy();
+
+            ItemStack rawStack = dino.getCachedItems().getRawMeat().copy();
+            ItemStack cookedStack = dino.getCachedItems().getCookedMeat().copy();
 
             OreDictionary.registerOre("meatDinosaur", rawStack);
             OreDictionary.registerOre("meatDinosaur"+dino.getOreSuffix(), rawStack);
