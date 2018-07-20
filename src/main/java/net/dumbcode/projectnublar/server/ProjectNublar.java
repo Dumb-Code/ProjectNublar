@@ -82,18 +82,13 @@ public class ProjectNublar
     }
 
     @SubscribeEvent
-    public static void register(RegistryEvent.Register<Dinosaur> event) {
-        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
-    }
-
-    @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
         event.getRegistry().registerAll(NublarItems.getAllItems());
     }
 
     @SubscribeEvent
     public static void register(RegistryEvent.Register<Dinosaur> event) {
-        Dinosaur velociraptor = new Dinosaur().setRegistryName("projectnublar:velociraptor");
+        Dinosaur velociraptor = new Velociraptor().setRegistryName("projectnublar:velociraptor");
         velociraptor.setCookedMeatHealAmount(10);
         velociraptor.setCookedMeatSaturation(1f);
         velociraptor.setRawMeatHealAmount(4);

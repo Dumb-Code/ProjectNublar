@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
