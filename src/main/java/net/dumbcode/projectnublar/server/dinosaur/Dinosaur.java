@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.dumbcode.projectnublar.client.render.model.DinosaurModelContainer;
+import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.CachedItems;
 import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
@@ -28,7 +28,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final EntityProperties entityProperties = new EntityProperties();
     private CachedItems cachedItems;
 
-    private DinosaurModelContainer modelContainer;
+    private ModelContainer modelContainer;
 
     public String getOreSuffix() {
         return StringUtils.toCamelCase(getRegName().getResourcePath());

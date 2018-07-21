@@ -1,14 +1,14 @@
 package net.dumbcode.projectnublar.client.render.dinosaur;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.dumblibrary.client.animation.AnimationInfo;
 import net.ilexiconn.llibrary.server.animation.Animation;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-public enum DinosaurAnimations {
+public enum DinosaurAnimations implements AnimationInfo {
     IDLE(false, false, false),
     ATTACKING(false, false),
     INJURED(false, false),
@@ -90,6 +90,15 @@ public enum DinosaurAnimations {
         }
 
         return DinosaurAnimations.IDLE;
+    }
+
+    public static DinosaurAnimations fromName(String name) {
+        for (DinosaurAnimations animations : values()) {
+            if(animations.name().equalsIgnoreCase(name)) {
+                return animations;
+            }
+        }
+        return IDLE;
     }
 
     public Animation get() {

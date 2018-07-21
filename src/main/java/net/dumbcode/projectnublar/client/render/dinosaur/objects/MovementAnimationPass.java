@@ -1,17 +1,21 @@
 package net.dumbcode.projectnublar.client.render.dinosaur.objects;
 
+import net.dumbcode.dumblibrary.client.animation.AnimationInfo;
+import net.dumbcode.dumblibrary.client.animation.PoseHandler;
+import net.dumbcode.dumblibrary.client.animation.objects.AnimationPass;
+import net.dumbcode.dumblibrary.client.animation.objects.CubeReference;
 import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
-import net.dumbcode.projectnublar.client.render.dinosaur.PoseHandler;
-import net.dumbcode.projectnublar.server.entity.EntityAnimatable;
+import net.dumbcode.projectnublar.server.entity.EntityPNAnimatable;
 import net.ilexiconn.llibrary.server.animation.Animation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-public class MovementAnimationPass<T extends EntityAnimatable> extends AnimationPass<T> {
+public class MovementAnimationPass extends AnimationPass<EntityPNAnimatable> {
 
-    public MovementAnimationPass(Map<Animation, List<PoseHandler.ModelData>> animations, Map<String, Map<String, CubeReference>> poses, boolean useInertia) {
-        super(animations, poses, useInertia);
+    public MovementAnimationPass(Animation defaultAnimation, Map<Animation, List<PoseHandler.PoseData>> animations, Map<String, Map<String, CubeReference>> poses, Function<Animation, AnimationInfo> animationInfoGetter, boolean useInertia) {
+        super(defaultAnimation, animations, poses, animationInfoGetter, useInertia);
     }
 
     @Override
@@ -20,12 +24,12 @@ public class MovementAnimationPass<T extends EntityAnimatable> extends Animation
     }
 
     @Override
-    protected float getAnimationSpeed(T entity) {
+    protected float getAnimationSpeed(EntityPNAnimatable entity) {
         return entity.isMoving() ? this.getAnimationDegree(entity) : 3.0F;
     }
 
     @Override
-    protected float getAnimationDegree(T entity) {
+    protected float getAnimationDegree(EntityPNAnimatable entity) {
         float degree;
         if (this.animation == DinosaurAnimations.WALKING.get() || this.animation == DinosaurAnimations.RUNNING.get() || this.animation == DinosaurAnimations.SWIMMING.get() || this.animation == DinosaurAnimations.CLIMBING.get()) {
             if (entity.inWater() || entity.inLava()) {
@@ -41,7 +45,7 @@ public class MovementAnimationPass<T extends EntityAnimatable> extends Animation
     }
 
     @Override
-    protected Animation getRequestedAnimation(T entity) {
+    protected Animation getRequestedAnimation(EntityPNAnimatable entity) {
         if (entity.isClimbing()) {
             return DinosaurAnimations.CLIMBING.get();
         } else if (entity.isMoving()) {

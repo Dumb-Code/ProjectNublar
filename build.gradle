@@ -35,6 +35,10 @@ repositories {
     maven {
         url = "http://dvs1.progwml6.com/files/maven"
     }
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
 }
 
 dependencies {
@@ -42,8 +46,29 @@ dependencies {
     runtime "mezz.jei:jei_1.12.2:4.9.1.187"
     compile "net.ilexiconn:llibrary:1.7.14-1.12.2"
     compile 'org.projectlombok:lombok:1.18.0'
+    compile "dumb-library:dumblibrary-1.12.2:0.0.2:dev"
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+task devJar(type: Jar) {
+    classifier = "dev"
+    from sourceSets.main.output
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from javadoc.getDestinationDir()
+}
+
+artifacts {
+    archives sourcesJar
+    archives devJar
+    archives javadocJar
+}
 
 processResources {
     // this will ensure that this task is redone when the versions change.

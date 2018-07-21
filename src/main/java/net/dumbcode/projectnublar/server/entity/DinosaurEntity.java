@@ -2,10 +2,11 @@ package net.dumbcode.projectnublar.server.entity;
 
 import io.netty.buffer.ByteBuf;
 import lombok.NonNull;
+import net.dumbcode.dumblibrary.server.entity.EntityAnimatable;
+import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
 import net.ilexiconn.llibrary.server.animation.Animation;
 import net.ilexiconn.llibrary.server.animation.AnimationHandler;
 import net.minecraft.entity.EntityCreature;
@@ -19,7 +20,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
-public class DinosaurEntity extends EntityCreature implements IEntityAdditionalSpawnData, EntityAnimatable {
+public class DinosaurEntity extends EntityCreature implements IEntityAdditionalSpawnData, EntityPNAnimatable {
 
     private static final DataParameter<Boolean> WATCHER_IS_RUNNING = EntityDataManager.createKey(DinosaurEntity.class, DataSerializers.BOOLEAN);
 

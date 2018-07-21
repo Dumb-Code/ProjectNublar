@@ -1,12 +1,9 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import net.ilexiconn.llibrary.server.animation.IAnimatedEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.dumbcode.dumblibrary.server.entity.EntityAnimatable;
 
-public interface EntityAnimatable extends IAnimatedEntity  {
-
+public interface EntityPNAnimatable extends EntityAnimatable {
     default boolean isMoving() {
         Entity entity = (Entity)this;
         float deltaX = (float) (entity.posX - entity.prevPosX);
@@ -32,5 +29,4 @@ public interface EntityAnimatable extends IAnimatedEntity  {
     }
 
     boolean isRunning();
-
 }

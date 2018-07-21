@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import lombok.val;
-import net.dumbcode.projectnublar.server.dinosaur.data.GrowthStage;
+import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 
 public class Velociraptor extends Dinosaur {

@@ -1,8 +1,14 @@
 package net.dumbcode.projectnublar.client.render.model;
 
 import com.google.common.collect.Maps;
+import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.client.animation.objects.AnimationPass;
+import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
+import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
+import net.dumbcode.projectnublar.client.render.dinosaur.objects.MovementAnimationPass;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.item.StackModelVarient;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -28,7 +34,12 @@ public class DinosaurModelHandler {
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()) {
-            dinosaur.setModelContainer(new DinosaurModelContainer(dinosaur));
+            dinosaur.setModelContainer(new ModelContainer(dinosaur.getRegName(),
+                    dinosaur.getModelProperties().getModelGrowthStages(), dinosaur.getModelProperties().getMainModelMap(),
+                    DinosaurAnimations.getNames(), dinosaur.getModelProperties().getEntityAnimatorSupplier(),
+                    s -> DinosaurAnimations.fromName(s).get(), DinosaurAnimations.IDLE.get(),
+                    DinosaurAnimations::getAnimation,
+                    AnimationPass::new, MovementAnimationPass::new));
         }
     }
 
