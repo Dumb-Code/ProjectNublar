@@ -13,13 +13,16 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -43,8 +46,7 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
                     List<String> boneList = info.getDinosaur().getSkeletalInfomation().getBoneListed();
                     if(entity.modelIndex < boneList.size()) {
                         if(info.getType().equals(boneList.get(entity.modelIndex))) {
-                            entity.modelIndex++;
-                            stack.shrink(1);
+                            skeletalBuilder.getBoneHandler().setStackInSlot(entity.modelIndex++, stack.splitStack(1));
                         }
                     }
                 }
@@ -57,7 +59,19 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
 
     @Override
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
-        return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand).withProperty(FACING, EnumFacing.getDirectionFromEntityLiving(pos, placer));
+        return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand).withProperty(FACING, facing);
+    }
+
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        TileEntity tileentity = worldIn.getTileEntity(pos);
+        if (tileentity instanceof BlockEntitySkeletalBuilder) {
+            ItemStackHandler itemHandler = ((BlockEntitySkeletalBuilder)tileentity).getBoneHandler();
+            for (int i = 0; i < itemHandler.getSlots(); i++) {
+                InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), itemHandler.getStackInSlot(i));
+            }
+        }
+
+        super.breakBlock(worldIn, pos, state);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
         for (String s : dinosaur.getSkeletalInfomation().getIndividualBones()) {
             modelList.addAll(dinosaur.getSkeletalInfomation().getBoneToModelMap().get(s));
         }
-        int id = modelList.size();//entity.modelIndex % (modelList.size() + 1);
+        int id = entity.modelIndex % (modelList.size() + 1);
         List<ModelRenderer> nonHiddenCubes = Lists.newArrayList();
         if(id != 0) {
             String currentState = modelList.get(id - 1);
