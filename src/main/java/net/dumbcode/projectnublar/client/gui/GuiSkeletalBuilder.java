@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
+import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
@@ -11,6 +12,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -89,25 +91,31 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
         GlStateManager.disableBlend();
         GlStateManager.disableTexture2D();
-        for (int index = 0;index<model.boxList.size();index++) {
-            AdvancedModelRenderer box = (AdvancedModelRenderer) model.boxList.get(index);
-            float color = index / 255f;
-            GlStateManager.color(color, color, color);
-            int prevColor = getColorUnderMouse();
+        Object reflectOut = ReflectionHelper.getPrivateValue(TabulaModel.class, this.model, "tabulaAnimator");
+        if(reflectOut instanceof DinosaurAnimator) {
+            DinosaurAnimator animator = (DinosaurAnimator)reflectOut;
+            animator.setScalingDisabled(true);
+            for (int index = 0; index < model.boxList.size(); index++) {
+                AdvancedModelRenderer box = (AdvancedModelRenderer) model.boxList.get(index);
+                float color = index / 255f;
+                GlStateManager.color(color, color, color);
+                int prevColor = getColorUnderMouse();
 
-            box.scaleX = 1f;
-            box.scaleY = 1f;
-            box.scaleZ = 1f;
-            model.render(builder.getDinosaurEntity(), 0, 0, -1f, 0, 0f, modelScale);
-            box.scaleX = 0f;
-            box.scaleY = 0f;
-            box.scaleZ = 0f;
+                box.scaleX = 1f;
+                box.scaleY = 1f;
+                box.scaleZ = 1f;
+                model.render(builder.getDinosaurEntity(), 0, 0, 0f, 0, 0f, modelScale);
+                box.scaleX = 0f;
+                box.scaleY = 0f;
+                box.scaleZ = 0f;
 
-            int newColor = getColorUnderMouse();
+                int newColor = getColorUnderMouse();
 
-            if(newColor != prevColor) {
-                newSelection = box;
+                if (newColor != prevColor) {
+                    newSelection = box;
+                }
             }
+            animator.setScalingDisabled(false);
         }
         GlStateManager.enableTexture2D();
         GlStateManager.enableBlend();
@@ -136,7 +144,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.translate((float)posX, (float)posY, 50.0F);
         GlStateManager.scale((float)(-scale), (float)scale, (float)scale);
         GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
-        GlStateManager.rotate(135.0F+((System.currentTimeMillis() % 2000) / 1000f) * 180f, 0.0F, 1.0F, 0.0F);
+//        GlStateManager.rotate(135.0F+((System.currentTimeMillis() % 2000) / 1000f) * 180f, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
         GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
         RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();

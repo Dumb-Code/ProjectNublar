@@ -19,6 +19,8 @@ import java.util.function.Function;
 
 public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
 
+    private boolean scalingDisabled;
+
     public DinosaurAnimator(PoseHandler poseHandler, Animation defaultAnimation, Function<Animation, AnimationInfo> animationInfoGetter, PoseHandler.AnimationPassesFactory... factories) {
         super(poseHandler, defaultAnimation, animationInfoGetter, factories);
     }
@@ -47,7 +49,7 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
                 nonHiddenCubes.addAll(modelChildMap.get(activeState));
             }
         }
-        if(ticks >= 0f) { // FIXME: Hard hack to avoid resetting the scale (used in the Skeletal Builder GUI)
+        if(!this.scalingDisabled) {
             for (ModelRenderer modelRenderer : parModel.boxList) {
                 AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
                 if(nonHiddenCubes.contains(modelRenderer)) {
@@ -62,5 +64,9 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
             }
         }
         super.performAnimations(parModel, entity, limbSwing, limbSwingAmount, ticks, rotationYaw, rotationPitch, scale);
+    }
+
+    public void setScalingDisabled(boolean scalingDisabled) {
+        this.scalingDisabled = scalingDisabled;
     }
 }
