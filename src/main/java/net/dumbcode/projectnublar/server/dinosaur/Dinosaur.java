@@ -4,10 +4,12 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.server.entity.EntityAnimatable;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.*;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -15,6 +17,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Locale;
 
 @Getter
 @Setter
@@ -30,6 +33,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private CachedItems cachedItems;
 
     private ModelContainer modelContainer;
+    private ModelContainer noAnimationModelContainer;
 
     public String getOreSuffix() {
         return StringUtils.toCamelCase(getRegName().getResourcePath());
@@ -45,5 +49,10 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             throw new RuntimeException("Null Registry Name Found");
         }
         return this.getRegistryName();
+    }
+
+    public ResourceLocation getTextureLocation(DinosaurEntity entity) {
+        ResourceLocation regname = getRegName();
+        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (entity.isMale() ? "male" : "female") + "_" + entity.getGrowthStage().name().toLowerCase(Locale.ROOT) + ".png");
     }
 }

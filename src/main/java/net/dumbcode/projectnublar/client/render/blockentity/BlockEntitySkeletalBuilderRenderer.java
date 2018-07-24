@@ -1,13 +1,16 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
+import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilder;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.EnumFacing;
 
 import javax.vecmath.Vector3f;
+import java.util.Map;
 
 public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<BlockEntitySkeletalBuilder> {
     private Minecraft mc = Minecraft.getMinecraft();
@@ -38,7 +41,21 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             GlStateManager.rotate(angle, rotation.x, rotation.y, rotation.z);
         }
         GlStateManager.rotate(te.getRotation().ordinal() * 90, 0, 1, 0);
-        this.mc.getRenderManager().renderEntity(te.getDinosaurEntity(), 0, 0, 0, 0, partialTicks, false);
+        GlStateManager.translate(0f, 2f, 0f);
+        GlStateManager.rotate(180f, 0f, 0f, 1f);
+        mc.getTextureManager().bindTexture(te.getDinosaur().getTextureLocation(te.getDinosaurEntity()));
+
+        Map<String, org.lwjgl.util.vector.Vector3f> poseData = te.getPoseData();
+        for(ModelRenderer box : te.getModel().boxList) {
+            org.lwjgl.util.vector.Vector3f rotations = poseData.get(box.boxName);
+            if(rotations != null) {
+                box.rotateAngleX = rotations.x;
+                box.rotateAngleY = rotations.y;
+                box.rotateAngleZ = rotations.z;
+            }
+        }
+        MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
+//        this.mc.getRenderManager().renderEntity(te.getDinosaurEntity(), 0, 0, 0, 0, partialTicks, false);
         GlStateManager.rotate(te.getRotation().ordinal() * 90, 0, -1, 0);
         if(facing != EnumFacing.UP) {
             GlStateManager.rotate(-angle, rotation.x, rotation.y, rotation.z);
