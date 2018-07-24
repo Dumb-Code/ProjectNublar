@@ -1,7 +1,9 @@
 package net.dumbcode.projectnublar.server.block;
 
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.block.Block;
@@ -52,6 +54,8 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
                 }
             } else if(playerIn.isSneaking()) {
                 skeletalBuilder.setRotation(Rotation.values()[(skeletalBuilder.getRotation().ordinal() + 1) % Rotation.values().length]);
+            } else if(playerIn.getHeldItem(hand).isEmpty()) {
+                playerIn.openGui(ProjectNublar.INSTANCE, GuiHandler.SKELETAL_BUILDER_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
             }
         }
         return true;

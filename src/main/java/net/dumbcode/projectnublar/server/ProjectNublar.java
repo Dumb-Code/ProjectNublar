@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
 import net.dumbcode.projectnublar.server.dinosaur.data.CachedItems;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -21,6 +22,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -40,6 +42,9 @@ public class ProjectNublar
 
     private static Logger logger;
 
+    @Mod.Instance(MODID)
+    public static ProjectNublar INSTANCE;
+
     public static CreativeTabs TAB = new CreativeTabs("projectnublar") {
         @Override
         public ItemStack getTabIconItem() {
@@ -50,6 +55,7 @@ public class ProjectNublar
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
         RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, manager -> new AnimatableRenderer<>(manager, entity -> entity.getDinosaur().getModelContainer(),
                 entity -> {
                     ResourceLocation regname = entity.getDinosaur().getRegName();

@@ -47,16 +47,18 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
                 nonHiddenCubes.addAll(modelChildMap.get(activeState));
             }
         }
-        for (ModelRenderer modelRenderer : parModel.boxList) {
-            AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-            if(nonHiddenCubes.contains(modelRenderer)) {
-                box.scaleX = 1;
-                box.scaleY = 1;
-                box.scaleZ = 1;
-            } else {
-                box.scaleX = 0;
-                box.scaleY = 0;
-                box.scaleZ = 0;
+        if(ticks >= 0f) { // FIXME: Hard hack to avoid resetting the scale (used in the Skeletal Builder GUI)
+            for (ModelRenderer modelRenderer : parModel.boxList) {
+                AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+                if(nonHiddenCubes.contains(modelRenderer)) {
+                    box.scaleX = 1;
+                    box.scaleY = 1;
+                    box.scaleZ = 1;
+                } else {
+                    box.scaleX = 0;
+                    box.scaleY = 0;
+                    box.scaleZ = 0;
+                }
             }
         }
         super.performAnimations(parModel, entity, limbSwing, limbSwingAmount, ticks, rotationYaw, rotationPitch, scale);
