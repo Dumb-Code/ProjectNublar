@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         int x = Mouse.getX();
         int y = Mouse.getY();
         colorBuffer.rewind();
-        GL11.glReadPixels(x, y, 1, 1, 32993, 33639, colorBuffer); // TODO: remove magic numbers (OpenGL format&type)
+        GL11.glReadPixels(x, y, 1, 1, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, colorBuffer);
         return colorBuffer.get(0);
     }
 
