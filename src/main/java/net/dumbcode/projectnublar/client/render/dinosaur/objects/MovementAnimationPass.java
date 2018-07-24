@@ -4,7 +4,7 @@ import net.dumbcode.dumblibrary.client.animation.AnimationInfo;
 import net.dumbcode.dumblibrary.client.animation.PoseHandler;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationPass;
 import net.dumbcode.dumblibrary.client.animation.objects.CubeReference;
-import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
+import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.entity.EntityPNAnimatable;
 import net.ilexiconn.llibrary.server.animation.Animation;
 
@@ -31,7 +31,7 @@ public class MovementAnimationPass extends AnimationPass<EntityPNAnimatable> {
     @Override
     protected float getAnimationDegree(EntityPNAnimatable entity) {
         float degree;
-        if (this.animation == DinosaurAnimations.WALKING.get() || this.animation == DinosaurAnimations.RUNNING.get() || this.animation == DinosaurAnimations.SWIMMING.get() || this.animation == DinosaurAnimations.CLIMBING.get()) {
+        if (this.animation == EnumAnimation.WALKING.get() || this.animation == EnumAnimation.RUNNING.get() || this.animation == EnumAnimation.SWIMMING.get() || this.animation == EnumAnimation.CLIMBING.get()) {
             if (entity.inWater() || entity.inLava()) {
                 degree = this.limbSwingAmount * 4.0F;
             } else {
@@ -47,19 +47,19 @@ public class MovementAnimationPass extends AnimationPass<EntityPNAnimatable> {
     @Override
     protected Animation getRequestedAnimation(EntityPNAnimatable entity) {
         if (entity.isClimbing()) {
-            return DinosaurAnimations.CLIMBING.get();
+            return EnumAnimation.CLIMBING.get();
         } else if (entity.isMoving()) {
             if (entity.isSwimming()) {
-                return this.animations.containsKey(DinosaurAnimations.SWIMMING.get()) ? DinosaurAnimations.SWIMMING.get() : DinosaurAnimations.WALKING.get();
+                return this.animations.containsKey(EnumAnimation.SWIMMING.get()) ? EnumAnimation.SWIMMING.get() : EnumAnimation.WALKING.get();
             } else {
                 if (entity.isRunning()) {
-                    return DinosaurAnimations.RUNNING.get();
+                    return EnumAnimation.RUNNING.get();
                 } else {
-                    return DinosaurAnimations.WALKING.get();
+                    return EnumAnimation.WALKING.get();
                 }
             }
         } else {
-            return DinosaurAnimations.IDLE.get();
+            return EnumAnimation.IDLE.get();
         }
     }
 

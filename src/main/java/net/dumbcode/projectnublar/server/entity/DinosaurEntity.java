@@ -2,19 +2,20 @@ package net.dumbcode.projectnublar.server.entity;
 
 import io.netty.buffer.ByteBuf;
 import lombok.NonNull;
-import net.dumbcode.dumblibrary.server.entity.EntityAnimatable;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
-import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
+import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.ilexiconn.llibrary.server.animation.Animation;
 import net.ilexiconn.llibrary.server.animation.AnimationHandler;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -26,11 +27,13 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
 
     private Dinosaur dinosaur = Dinosaur.MISSING;
 
-    private Animation animation = DinosaurAnimations.IDLE.get();
+    private Animation animation = EnumAnimation.IDLE.get();
     private int animationTick;
     private int animationLength;
 
     private boolean isMale;
+
+    public int modelIndex; //Not final name
 
 
     public DinosaurEntity(World worldIn) {
@@ -55,7 +58,6 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
     @Override
     public void onUpdate() {
         super.onUpdate();
-
         if(!this.world.isRemote) {
             this.dataManager.set(WATCHER_IS_RUNNING, this.getAIMoveSpeed() > this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
         }
@@ -108,6 +110,15 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
     }
 
     @Override
+    protected boolean processInteract(EntityPlayer player, EnumHand hand) {
+        if(player.world.isRemote) {
+            modelIndex++;
+        }
+        player.swingArm(hand);
+        return true;
+    }
+
+    @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setString("Dinosaur", this.getDinosaur().getRegName().toString());
         nbt.setBoolean("Male", this.isMale);
@@ -125,7 +136,7 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
 
     @Override
     public Animation[] getAnimations() {
-        return DinosaurAnimations.getAnimations();
+        return EnumAnimation.getAnimations();
     }
 
     @Override

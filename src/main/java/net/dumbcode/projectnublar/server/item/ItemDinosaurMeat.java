@@ -5,7 +5,6 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -17,7 +16,6 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -92,7 +90,7 @@ public class ItemDinosaurMeat extends ItemFood implements DinosaurStack {
     }
 
     public static ItemStack createMeat(Dinosaur dinosaur, CookState cookState) {
-        ItemDinosaurMeat meatItem = (ItemDinosaurMeat)NublarItems.DINOSAUR_MEAT;
+        ItemDinosaurMeat meatItem = (ItemDinosaurMeat)ItemHandler.DINOSAUR_MEAT;
         ItemStack result = new ItemStack(meatItem);
         meatItem.putValue(result, dinosaur);
         result.getOrCreateSubCompound(ProjectNublar.MODID).setBoolean("cooked", cookState == CookState.COOKED);

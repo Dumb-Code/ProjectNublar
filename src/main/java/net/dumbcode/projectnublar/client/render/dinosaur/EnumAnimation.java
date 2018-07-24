@@ -2,13 +2,14 @@ package net.dumbcode.projectnublar.client.render.dinosaur;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.animation.AnimationInfo;
+import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.ilexiconn.llibrary.server.animation.Animation;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-public enum DinosaurAnimations implements AnimationInfo {
+public enum EnumAnimation implements AnimationInfo {
     IDLE(false, false, false),
     ATTACKING(false, false),
     INJURED(false, false),
@@ -50,19 +51,21 @@ public enum DinosaurAnimations implements AnimationInfo {
     private boolean doesBlockMovement;
     private boolean useInertia;
 
-    DinosaurAnimations(boolean hold, boolean blockMovement) {
+    EnumAnimation() {
+        this(false, true);
+    }
+
+    EnumAnimation(boolean hold, boolean blockMovement) {
         this(hold, blockMovement, true);
     }
 
-    DinosaurAnimations(boolean hold, boolean blockMovement, boolean useInertia) {
+    EnumAnimation(boolean hold, boolean blockMovement, boolean useInertia) {
         this.hold = hold;
         this.doesBlockMovement = blockMovement;
         this.useInertia = useInertia;
     }
 
-    DinosaurAnimations() {
-        this(false, true);
-    }
+
 
     public static Animation[] getAnimations() {
         Animation[] animations = new Animation[values().length];
@@ -76,36 +79,35 @@ public enum DinosaurAnimations implements AnimationInfo {
 
     public static Collection<String> getNames() {
         List<String> list = Lists.newArrayList();
-        for (DinosaurAnimations dinosaurAnimations : values()) {
-            list.add(dinosaurAnimations.name().toLowerCase(Locale.ROOT));
+        for (EnumAnimation animation : values()) {
+            list.add(animation.name().toLowerCase(Locale.ROOT));
         }
         return list;
     }
 
-    public static DinosaurAnimations getAnimation(Animation animation) {
-        for (DinosaurAnimations animations : values()) {
+    public static EnumAnimation getAnimation(Animation animation) {
+        for (EnumAnimation animations : values()) {
             if (animation.equals(animations.animation)) {
                 return animations;
             }
         }
-
-        return DinosaurAnimations.IDLE;
+        return EnumAnimation.IDLE;
     }
 
-    public static DinosaurAnimations fromName(String name) {
-        for (DinosaurAnimations animations : values()) {
+    public static Animation fromName(String name) {
+        EnumAnimation animation = IDLE;
+        for (EnumAnimation animations : values()) {
             if(animations.name().equalsIgnoreCase(name)) {
-                return animations;
+                animation = animations;
             }
         }
-        return IDLE;
+        return animation.get();
     }
 
     public Animation get() {
         if (this.animation == null) {
             this.animation = Animation.create(-1);
         }
-
         return this.animation;
     }
 

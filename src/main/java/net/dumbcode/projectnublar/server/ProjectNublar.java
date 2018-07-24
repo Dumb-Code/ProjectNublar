@@ -1,12 +1,13 @@
 package net.dumbcode.projectnublar.server;
 
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
 import net.dumbcode.projectnublar.server.dinosaur.data.CachedItems;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.item.NublarItems;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -14,13 +15,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.Logger;
@@ -47,13 +48,9 @@ public class ProjectNublar
     };
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-        if(!Loader.isModLoaded("todm")) {
-
-        }
+    public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
-        RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, manager -> new AnimatableRenderer<DinosaurEntity>(manager, entity -> entity.getDinosaur().getModelContainer(),
+        RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, manager -> new AnimatableRenderer<>(manager, entity -> entity.getDinosaur().getModelContainer(),
                 entity -> {
                     ResourceLocation regname = entity.getDinosaur().getRegName();
                     return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (entity.isMale() ? "male" : "female") + "_" + entity.getGrowthStage().name().toLowerCase(Locale.ROOT) + ".png");
@@ -66,7 +63,9 @@ public class ProjectNublar
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             dinosaur.setCachedItems(new CachedItems(dinosaur));
         }
-        NublarItems.DINOSAUR_MEAT.registerOreNames();
+        ItemHandler.DINOSAUR_MEAT.registerOreNames();
+
+        GameRegistry.registerTileEntity(BlockEntitySkeletalBuilder.class, new ResourceLocation(MODID, "skeletal_builder"));
     }
 
     @SubscribeEvent
@@ -76,7 +75,6 @@ public class ProjectNublar
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
                 .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"velociraptor"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
-                .add((owner, stage, id, obj, oldObj) -> System.out.println(obj))
                 .create();
     }
 

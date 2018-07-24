@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.command;
 
 import com.google.common.collect.Lists;
-import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
+import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -27,7 +27,7 @@ public class AnimateCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        DinosaurAnimations animation = DinosaurAnimations.valueOf(args[0].toUpperCase(Locale.ROOT));
+        EnumAnimation animation = EnumAnimation.valueOf(args[0].toUpperCase(Locale.ROOT));
         for (Entity entity : sender.getEntityWorld().loadedEntityList) {
             if(entity instanceof DinosaurEntity) {
                 ((DinosaurEntity)entity).setAnimation(animation.get());
@@ -37,6 +37,6 @@ public class AnimateCommand extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, DinosaurAnimations.getNames()) : Lists.newArrayList();
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, EnumAnimation.getNames()) : Lists.newArrayList();
     }
 }

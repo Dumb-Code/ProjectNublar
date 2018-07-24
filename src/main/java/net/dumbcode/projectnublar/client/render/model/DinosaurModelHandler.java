@@ -3,12 +3,12 @@ package net.dumbcode.projectnublar.client.render.model;
 import com.google.common.collect.Maps;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationPass;
-import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
-import net.dumbcode.projectnublar.client.render.dinosaur.DinosaurAnimations;
+import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
+import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.client.render.dinosaur.objects.MovementAnimationPass;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.item.StackModelVarient;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -18,6 +18,7 @@ import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -36,9 +37,9 @@ public class DinosaurModelHandler {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()) {
             dinosaur.setModelContainer(new ModelContainer(dinosaur.getRegName(),
                     dinosaur.getModelProperties().getModelGrowthStages(), dinosaur.getModelProperties().getMainModelMap(),
-                    DinosaurAnimations.getNames(), dinosaur.getModelProperties().getEntityAnimatorSupplier(),
-                    s -> DinosaurAnimations.fromName(s).get(), DinosaurAnimations.IDLE.get(),
-                    DinosaurAnimations::getAnimation,
+                    EnumAnimation.getNames(), dinosaur.getModelProperties().getEntityAnimatorSupplier(),
+                    EnumAnimation::fromName, EnumAnimation.IDLE.get(),
+                    EnumAnimation::getAnimation,
                     AnimationPass::new, MovementAnimationPass::new));
         }
     }
@@ -51,6 +52,8 @@ public class DinosaurModelHandler {
                 .stream()
                 .filter(entry -> entry.getValue().shouldRegister())
                 .forEach(entry -> map.putObject(new ModelResourceLocation(entry.getKey().getRegistryName(), "inventory"), entry.getValue()));
+
+        ClientRegistry.bindTileEntitySpecialRenderer(BlockEntitySkeletalBuilder.class, new BlockEntitySkeletalBuilderRenderer());
     }
 
     @SubscribeEvent
