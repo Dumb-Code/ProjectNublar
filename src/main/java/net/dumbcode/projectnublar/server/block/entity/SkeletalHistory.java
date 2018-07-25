@@ -9,6 +9,10 @@ import net.dumbcode.projectnublar.server.network.S1UpdateSkeletalBuilder;
 import net.dumbcode.projectnublar.server.network.S5UpdateHistoryIndex;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.HashMap;
@@ -83,6 +87,8 @@ public class SkeletalHistory {
     }
 
     private ModelRenderer getPart(String name) {
+        if(builder.getModel() == null)
+            return null;
         for(ModelRenderer box : builder.getModel().boxList) {
             if(box.boxName.equals(name))
                 return box;
@@ -140,12 +146,56 @@ public class SkeletalHistory {
         record(RESET_NAME);
     }
 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        nbt.setInteger("index", getIndex());
+        NBTTagList recordList = new NBTTagList();
+        for(Record record : records) {
+            NBTTagCompound recordNBT = new NBTTagCompound();
+            recordNBT.setString("partID", record.part);
+            if(record.isResetRecord()) {
+                recordNBT.setTag("poseData", builder.writePoseToNBT(record.previousPoseData));
+            } else {
+                recordNBT.setFloat("prevX", record.previousAngles.x);
+                recordNBT.setFloat("prevY", record.previousAngles.y);
+                recordNBT.setFloat("prevZ", record.previousAngles.z);
+                recordNBT.setFloat("newX", record.newAngles.x);
+                recordNBT.setFloat("newY", record.newAngles.y);
+                recordNBT.setFloat("newZ", record.newAngles.z);
+            }
+            recordList.appendTag(recordNBT);
+        }
+        nbt.setTag("records", recordList);
+        return nbt;
+    }
+
+    public void readFromNBT(NBTTagCompound nbt) {
+        index = nbt.getInteger("index");
+        records.clear();
+        NBTTagList recordsNBT = nbt.getTagList("records", Constants.NBT.TAG_COMPOUND);
+        for(NBTBase nbtBase : recordsNBT) {
+            NBTTagCompound tag = (NBTTagCompound)nbtBase;
+            Record record = new Record();
+            record.setPart(tag.getString("partID"));
+            if(record.isResetRecord()) {
+                record.setPreviousPoseData(builder.readPoseFromNBT(tag.getCompoundTag("poseData")));
+            } else {
+                record.setNewAngles(new Vector3f(tag.getFloat("newX"), tag.getFloat("newY"), tag.getFloat("newZ")));
+                record.setPreviousAngles(new Vector3f(tag.getFloat("prevX"), tag.getFloat("prevY"), tag.getFloat("prevZ")));
+            }
+            records.add(record);
+        }
+    }
+
     @Data
     private class Record {
         private String part;
         private Vector3f previousAngles;
         private Vector3f newAngles;
         private Map<String, Vector3f> previousPoseData;
+
+        public boolean isResetRecord() {
+            return part.equals(RESET_NAME);
+        }
     }
 
     public enum MovementType {

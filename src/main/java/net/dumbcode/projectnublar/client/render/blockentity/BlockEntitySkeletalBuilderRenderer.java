@@ -46,15 +46,17 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         mc.getTextureManager().bindTexture(te.getDinosaur().getTextureLocation(te.getDinosaurEntity()));
 
         Map<String, org.lwjgl.util.vector.Vector3f> poseData = te.getPoseData();
-        for(ModelRenderer box : te.getModel().boxList) {
-            org.lwjgl.util.vector.Vector3f rotations = poseData.get(box.boxName);
-            if(rotations != null) {
-                box.rotateAngleX = rotations.x;
-                box.rotateAngleY = rotations.y;
-                box.rotateAngleZ = rotations.z;
+        if(te.getModel() != null) {
+            for(ModelRenderer box : te.getModel().boxList) {
+                org.lwjgl.util.vector.Vector3f rotations = poseData.get(box.boxName);
+                if(rotations != null) {
+                    box.rotateAngleX = rotations.x;
+                    box.rotateAngleY = rotations.y;
+                    box.rotateAngleZ = rotations.z;
+                }
             }
+            MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
         }
-        MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
 //        this.mc.getRenderManager().renderEntity(te.getDinosaurEntity(), 0, 0, 0, 0, partialTicks, false);
         GlStateManager.rotate(te.getRotation().ordinal() * 90, 0, -1, 0);
         if(facing != EnumFacing.UP) {

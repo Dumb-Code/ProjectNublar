@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -39,8 +40,14 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
         nbt.setString("Dinosaur", this.dinosaur.getRegName().toString());
         nbt.setTag("Inventory", this.boneHandler.serializeNBT());
         nbt.setInteger("Rotation", this.rotation.ordinal());
+        nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
 
         // save pose data
+        nbt.setTag("pose", writePoseToNBT(poseData));
+        return super.writeToNBT(nbt);
+    }
+
+    public NBTTagCompound writePoseToNBT(Map<String, Vector3f> poseData) {
         NBTTagCompound pose = new NBTTagCompound();
         for(String partName : poseData.keySet()) {
             Vector3f eulerAngles = poseData.get(partName);
@@ -50,8 +57,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
             partNBT.setFloat("rotationZ", eulerAngles.z);
             pose.setTag(partName, partNBT);
         }
-        nbt.setTag("pose", pose);
-        return super.writeToNBT(nbt);
+        return pose;
     }
 
     @Override
@@ -61,13 +67,21 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
         this.rotation = Rotation.values()[nbt.getInteger("Rotation")];
         // load pose data
         NBTTagCompound pose = nbt.getCompoundTag("pose");
+        poseData.clear();
+        poseData.putAll(readPoseFromNBT(pose));
+        this.reassureSize();
+        this.history.readFromNBT(nbt.getCompoundTag("History"));
+        super.readFromNBT(nbt);
+    }
+
+    public Map<String, Vector3f> readPoseFromNBT(NBTTagCompound pose) {
+        Map<String, Vector3f> result = new HashMap<>();
         for(String partName : pose.getKeySet()) {
             NBTTagCompound part = pose.getCompoundTag(partName);
             Vector3f eulerAngles = new Vector3f(part.getFloat("rotationX"), part.getFloat("rotationY"), part.getFloat("rotationZ"));
-            poseData.put(partName, eulerAngles);
+            result.put(partName, eulerAngles);
         }
-        this.reassureSize();
-        super.readFromNBT(nbt);
+        return result;
     }
 
     private void reassureSize() {
