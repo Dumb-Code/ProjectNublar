@@ -4,18 +4,22 @@ import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
-import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalHistory;
 import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
-import net.ilexiconn.llibrary.client.model.tabula.ITabulaModelAnimator;
+import net.dumbcode.projectnublar.server.network.C2SkeletalMovement;
+import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
+import net.dumbcode.projectnublar.server.network.C6ResetPose;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
@@ -37,6 +41,13 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private Vector2f lastClickPosition = new Vector2f();
     private IntBuffer colorBuffer = BufferUtils.createIntBuffer(1);
     private AdvancedModelRenderer selectedPart;
+    private boolean movedPart;
+    private TextComponentTranslation undoText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.undo");
+    private TextComponentTranslation redoText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.redo");
+    private TextComponentTranslation resetText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.reset");
+    private GuiButton undoButton = new GuiButton(0, 0, 0, undoText.getUnformattedText());
+    private GuiButton redoButton = new GuiButton(1, 0, 0, redoText.getUnformattedText());
+    private GuiButton resetButton = new GuiButton(2, 0, 0, resetText.getUnformattedText());
 
     public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
         this.builder = builder;
@@ -47,6 +58,34 @@ public class GuiSkeletalBuilder extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
+        undoButton.x = 250;
+        redoButton.x = 250;
+        resetButton.x = 250;
+
+        redoButton.y = 20;
+        resetButton.y = 40;
+        addButton(undoButton);
+        addButton(redoButton);
+        addButton(resetButton);
+    }
+
+    @Override
+    protected void actionPerformed(GuiButton button) throws IOException {
+        super.actionPerformed(button);
+        if(button == undoButton) {
+            ProjectNublar.NETWORK.sendToServer(new C4MoveInHistory(builder, -1));
+        } else if(button == redoButton) {
+            ProjectNublar.NETWORK.sendToServer(new C4MoveInHistory(builder, +1));
+        } else if(button == resetButton) {
+            ProjectNublar.NETWORK.sendToServer(new C6ResetPose(builder));
+        }
+    }
+
+    @Override
+    public void updateScreen() {
+        super.updateScreen();
+        undoButton.enabled = !builder.getHistory().atHistoryBeginning();
+        redoButton.enabled = !builder.getHistory().atHistoryEnd();
     }
 
     @Override
@@ -58,6 +97,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
         fontRenderer.drawString("Dinosaur ID: "+builder.getDinosaur().getRegName(), mouseX, mouseY, 0xFFFFFFFF);
+        fontRenderer.drawString("History length: "+builder.getHistory().getHistoryLength(), 0, 20, 0xFFFFFFFF);
+        fontRenderer.drawString("History index: "+builder.getHistory().getIndex(), 0, 30, 0xFFFFFFFF);
         String selectionText;
         if(selectedPart != null)
             selectionText = "Selected part: "+selectedPart.boxName;
@@ -142,8 +183,21 @@ public class GuiSkeletalBuilder extends GuiScreen {
             float dy = Mouse.getY() - lastClickPosition.y;
             lastClickPosition.set(Mouse.getX(), Mouse.getY());
             if(selectedPart != null) {
+                if(!movedPart) {
+                    ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STARTING));
+                    movedPart = true;
+                }
                 ProjectNublar.NETWORK.sendToServer(new C0MoveSelectedSkeletalPart(builder, selectedPart.boxName, dx*0.1f, dy*0.1f));
             }
+        }
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int button) {
+        super.mouseReleased(mouseX, mouseY, button);
+        if(button == 1 && movedPart) {
+            movedPart = false;
+            ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STOPPING));
         }
     }
 

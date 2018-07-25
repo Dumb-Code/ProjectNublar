@@ -1,3 +1,7 @@
 spawnegg.genderchange.male=Spawn Egg will spawn male dinosaurs
 spawnegg.genderchange.female=Spawn Egg will spawn female dinosaurs
 spawnegg.genderchange.random=Spawn Egg will spawn random dinosaurs
+
+projectnublar.gui.skeletal_builder.name=Skeletal Builder
+projectnublar.gui.skeletal_builder.undo=Undo
+projectnublar.gui.skeletal_builder.redo=Redo

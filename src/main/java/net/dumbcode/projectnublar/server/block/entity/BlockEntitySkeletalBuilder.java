@@ -5,6 +5,7 @@ import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,6 +30,9 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
 
     @Getter(lazy = true)
     private final DinosaurEntity dinosaurEntity = createEntity();
+
+    @Getter
+    private final SkeletalHistory history = new SkeletalHistory(this);
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -80,12 +84,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     public void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
         this.model = dinosaur.getModelContainer().getModelMap().get(GrowthStage.ADULT);
-        poseData.clear();
-        model.resetToDefaultPose();
-        for(ModelRenderer box : model.boxList) {
-            Vector3f rotations = new Vector3f(box.rotateAngleX, box.rotateAngleY, box.rotateAngleZ);
-            poseData.put(box.boxName, rotations);
-        }
+        resetPoseDataToDefaultPose();
         this.reassureSize();
     }
 
@@ -113,5 +112,31 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
 
     public Map<String, Vector3f> getPoseData() {
         return poseData;
+    }
+
+    public void updateAngles(String affectedPart, Vector3f anglesToApply) {
+        if(!poseData.containsKey(affectedPart)) {
+            poseData.put(affectedPart, new Vector3f());
+        }
+        Vector3f angles = poseData.get(affectedPart);
+        angles.set(anglesToApply);
+        markDirty();
+    }
+
+    public void resetPose() {
+        history.recordPoseReset();
+        model.resetToDefaultPose();
+        resetPoseDataToDefaultPose();
+        ProjectNublar.NETWORK.sendToAll(new S7FullPoseChange(this, getPoseData()));
+    }
+
+    public void resetPoseDataToDefaultPose() {
+        poseData.clear();
+        model.resetToDefaultPose();
+        for(ModelRenderer box : model.boxList) {
+            Vector3f rotations = new Vector3f(box.rotateAngleX, box.rotateAngleY, box.rotateAngleZ);
+            poseData.put(box.boxName, rotations);
+        }
+        markDirty();
     }
 }

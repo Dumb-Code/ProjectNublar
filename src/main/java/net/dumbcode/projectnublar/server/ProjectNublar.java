@@ -9,8 +9,7 @@ import net.dumbcode.projectnublar.server.dinosaur.data.CachedItems;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
-import net.dumbcode.projectnublar.server.network.S1UpdateSkeletalBuilder;
+import net.dumbcode.projectnublar.server.network.*;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -31,8 +30,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Locale;
 
 @Mod.EventBusSubscriber
 @Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION)
@@ -72,6 +69,12 @@ public class ProjectNublar
     private void registerPackets() {
         NETWORK.registerMessage(C0MoveSelectedSkeletalPart.Handler.class, C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
         NETWORK.registerMessage(S1UpdateSkeletalBuilder.Handler.class, S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
+        NETWORK.registerMessage(C2SkeletalMovement.Handler.class, C2SkeletalMovement.class, 2, Side.SERVER);
+        NETWORK.registerMessage(S3HistoryRecord.Handler.class, S3HistoryRecord.class, 3, Side.CLIENT);
+        NETWORK.registerMessage(C4MoveInHistory.Handler.class, C4MoveInHistory.class, 4, Side.SERVER);
+        NETWORK.registerMessage(S5UpdateHistoryIndex.Handler.class, S5UpdateHistoryIndex.class, 5, Side.CLIENT);
+        NETWORK.registerMessage(C6ResetPose.Handler.class, C6ResetPose.class, 6, Side.SERVER);
+        NETWORK.registerMessage(S7FullPoseChange.Handler.class, S7FullPoseChange.class, 7, Side.CLIENT);
     }
 
     @EventHandler
