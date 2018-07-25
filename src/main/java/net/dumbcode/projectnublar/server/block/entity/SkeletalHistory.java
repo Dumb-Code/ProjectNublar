@@ -36,7 +36,7 @@ public class SkeletalHistory {
     }
 
     public void truncateAtIndex() {
-        while(records.size() > index) {
+        while(records.size() > index+1) {
             records.remove(records.size()-1);
         }
     }

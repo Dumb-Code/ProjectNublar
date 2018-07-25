@@ -67,8 +67,8 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
                 }
                 Vector3f angles = builder.getPoseData().get(message.part);
                 // TODO: better rotations (in camera space?)
-                angles.x += message.dx;
-                angles.y += message.dy;
+                angles.y += message.dx;
+                angles.x += message.dy;
                 builder.markDirty();
                 ProjectNublar.NETWORK.sendToAll(new S1UpdateSkeletalBuilder(builder, message.part, angles));
             }

@@ -48,6 +48,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private GuiButton undoButton = new GuiButton(0, 0, 0, undoText.getUnformattedText());
     private GuiButton redoButton = new GuiButton(1, 0, 0, redoText.getUnformattedText());
     private GuiButton resetButton = new GuiButton(2, 0, 0, resetText.getUnformattedText());
+    private float cameraPitch;
+    private float cameraYaw;
 
     public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
         this.builder = builder;
@@ -189,6 +191,15 @@ public class GuiSkeletalBuilder extends GuiScreen {
                 }
                 ProjectNublar.NETWORK.sendToServer(new C0MoveSelectedSkeletalPart(builder, selectedPart.boxName, dx*0.1f, dy*0.1f));
             }
+        } else if(clickedMouseButton == 2) {
+            float dx = Mouse.getX() - lastClickPosition.x;
+            float dy = Mouse.getY() - lastClickPosition.y;
+            lastClickPosition.set(Mouse.getX(), Mouse.getY());
+            cameraPitch += dy*0.1f;
+            cameraYaw += dx*0.1f;
+
+            cameraPitch %= 360f;
+            cameraYaw %= 360f;
         }
     }
 
@@ -207,7 +218,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.translate((float)posX, (float)posY, 50.0F);
         GlStateManager.scale((float)(-scale), (float)scale, (float)scale);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotate(-35.0F-90f, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(cameraPitch, 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotate(cameraYaw, 0.0F, 1.0F, 0.0F);
         RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
         rendermanager.setPlayerViewY(180.0F);
         rendermanager.setRenderShadow(false);
