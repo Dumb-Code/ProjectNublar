@@ -13,8 +13,8 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 
 version = "1.0"
-group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
+group = "net.dumbcode.projectnublar" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "projectnublar"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -46,7 +46,7 @@ dependencies {
     runtime "mezz.jei:jei_1.12.2:4.9.1.187"
     compile "net.ilexiconn:llibrary:1.7.14-1.12.2"
     compile 'org.projectlombok:lombok:1.18.0'
-    compile "dumb-library:dumblibrary-1.12.2:0.0.2:dev"
+    compile "dumb-library:dumblibrary-1.12.2:0.1.2:dev"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
