@@ -22,7 +22,6 @@ public final class ItemHandler {
 
     @SubscribeEvent
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
-        System.out.println("ITEM REGISTER");
         ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection().stream()
                 .filter(d -> d != Dinosaur.MISSING)
                 .forEach(d -> {

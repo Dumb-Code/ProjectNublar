@@ -96,7 +96,6 @@ public class ProjectNublar
 
     @SubscribeEvent
     public static void register(RegisterDinosaurEvent event) {
-        System.out.println("DINO REGISTER");
         event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:missing")); // TODO: custom class?
         event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
     }
