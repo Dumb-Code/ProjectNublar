@@ -5,10 +5,8 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
-import net.dumbcode.projectnublar.server.dinosaur.data.CachedItems;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -88,7 +86,7 @@ public class ProjectNublar
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
                 .setType(Dinosaur.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
-                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"velociraptor"))
+                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"missing"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .create();
         MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
