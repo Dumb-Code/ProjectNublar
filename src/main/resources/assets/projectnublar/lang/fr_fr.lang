@@ -1,0 +1,11 @@
+spawnegg.genderchange.male=L'Oeuf de spawn ne va faire apparaître que des males
+spawnegg.genderchange.female=L'Oeuf de spawn ne va faire apparaître que des femelles
+spawnegg.genderchange.random=L'Oeuf de spawn va faire apparaître des dinosaures au sexe aléatoire
+
+projectnublar.gui.skeletal_builder.name=Constructeur de squelette
+projectnublar.gui.skeletal_builder.undo=Annuler
+projectnublar.gui.skeletal_builder.redo=Refaire
+projectnublar.gui.skeletal_builder.reset=Réinitialiser la pose
+
+item.meat_dinosaur_velociraptor_raw.name=Viande crue de Vélociraptor
+item.meat_dinosaur_velociraptor_cooked.name=Viande cuite de Vélociraptor

@@ -6,3 +6,6 @@ projectnublar.gui.skeletal_builder.name=Skeletal Builder
 projectnublar.gui.skeletal_builder.undo=Undo move
 projectnublar.gui.skeletal_builder.redo=Redo move
 projectnublar.gui.skeletal_builder.reset=Reset pose
+
+item.meat_dinosaur_velociraptor_raw.name=Raw Velociraptor meat
+item.meat_dinosaur_velociraptor_cooked.name=Cooked Velociraptor meat
