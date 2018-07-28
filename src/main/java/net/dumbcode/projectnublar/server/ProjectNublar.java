@@ -15,6 +15,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -48,7 +49,7 @@ public class ProjectNublar
 
     public static SimpleNetworkWrapper NETWORK = new SimpleNetworkWrapper(MODID);
 
-    public static CreativeTabs TAB = new CreativeTabs("projectnublar") {
+    public static CreativeTabs TAB = new CreativeTabs(MODID) {
         @Override
         public ItemStack getTabIconItem() {
             return new ItemStack(ItemBlock.getItemFromBlock(Blocks.DEADBUSH)); // TODO: custom item
@@ -79,11 +80,6 @@ public class ProjectNublar
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
-            dinosaur.setCachedItems(new CachedItems(dinosaur));
-        }
-        ItemHandler.DINOSAUR_MEAT.registerOreNames();
-
         GameRegistry.registerTileEntity(BlockEntitySkeletalBuilder.class, new ResourceLocation(MODID, "skeletal_builder"));
     }
 
@@ -95,10 +91,13 @@ public class ProjectNublar
                 .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"velociraptor"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .create();
+        MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
     }
 
     @SubscribeEvent
-    public static void register(RegistryEvent.Register<Dinosaur> event) {
+    public static void register(RegisterDinosaurEvent event) {
+        System.out.println("DINO REGISTER");
+        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:missing")); // TODO: custom class?
         event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
     }
 

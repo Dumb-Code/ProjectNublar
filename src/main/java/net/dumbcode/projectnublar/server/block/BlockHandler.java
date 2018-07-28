@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.block;
 
-import com.sun.istack.internal.NotNull;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.block.Block;
 import net.minecraftforge.event.RegistryEvent;

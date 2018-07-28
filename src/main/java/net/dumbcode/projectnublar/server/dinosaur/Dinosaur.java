@@ -22,7 +22,7 @@ import java.util.Locale;
 @Getter
 @Setter
 public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
-    @GameRegistry.ObjectHolder(ProjectNublar.MODID + ":velociraptor")
+    @GameRegistry.ObjectHolder(ProjectNublar.MODID + ":missing")
     public static Dinosaur MISSING = null;
 
     private final ModelProperties modelProperties = new ModelProperties();
@@ -34,6 +34,10 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     private ModelContainer modelContainer;
     private ModelContainer noAnimationModelContainer;
+
+    public Dinosaur() {
+
+    }
 
     public String getOreSuffix() {
         return StringUtils.toCamelCase(getRegName().getResourcePath());

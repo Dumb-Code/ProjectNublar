@@ -18,6 +18,8 @@ import org.lwjgl.util.vector.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
+
 public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private Dinosaur dinosaur = Dinosaur.MISSING;
@@ -62,7 +64,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
 
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
-        setDinosaur(ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
+        setDinosaur(DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
         this.rotation = Rotation.values()[nbt.getInteger("Rotation")];
         // load pose data

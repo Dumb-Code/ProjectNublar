@@ -1,13 +1,17 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
+import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilder;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
+import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.vecmath.Vector3f;
 import java.util.Map;
@@ -55,6 +59,8 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     box.rotateAngleZ = rotations.z;
                 }
             }
+            DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
+            animator.setRotationAngles(te.getModel(), te.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
             MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
         }
 //        this.mc.getRenderManager().renderEntity(te.getDinosaurEntity(), 0, 0, 0, 0, partialTicks, false);
