@@ -25,17 +25,10 @@ public final class ItemHandler {
 
     @SubscribeEvent
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
-        populateMap(RAW_MEAT_ITEMS, d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
-        populateMap(COOKED_MEAT_ITEMS, d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED));
-        ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection().stream()
-                .filter(d -> d != Dinosaur.MISSING)
-                .forEach(d -> {
-                    ItemDinosaurMeat rawMeat = RAW_MEAT_ITEMS.get(d);
-                    ItemDinosaurMeat cookedMeat = COOKED_MEAT_ITEMS.get(d);
-                    event.getRegistry().registerAll(rawMeat, cookedMeat);
-                    rawMeat.registerOreNames();
-                    cookedMeat.registerOreNames();
-                });
+        populateMap(event, RAW_MEAT_ITEMS, d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
+        populateMap(event, COOKED_MEAT_ITEMS, d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED));
+        registerOreNames(RAW_MEAT_ITEMS);
+        registerOreNames(COOKED_MEAT_ITEMS);
         event.getRegistry().registerAll(
                 new DinosaurSpawnEgg()
                         .setRegistryName("spawn_egg")
@@ -57,11 +50,25 @@ public final class ItemHandler {
         }
     }
 
-    private static <T extends Item> void populateMap(Map<Dinosaur, T> itemMap, Function<Dinosaur, T> supplier) {
+    /**
+     * Needs to be called **after** registering the item
+     * @param items
+     */
+    private static void registerOreNames(Map<Dinosaur, ? extends Item> items) {
+        items.values().stream()
+                .filter(item -> item instanceof ItemWithOreName)
+                .forEach(item -> ((ItemWithOreName)item).registerOreNames());
+    }
+
+    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, Function<Dinosaur, T> supplier) {
         ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()
                 .stream()
                 .filter(d -> d != Dinosaur.MISSING)
-                .forEach(d -> itemMap.put(d, supplier.apply(d)));
+                .forEach(d -> {
+                    T item = supplier.apply(d);
+                    itemMap.put(d, item);
+                    event.getRegistry().register(item);
+                });
     }
 
 //    @Nonnull

@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ItemDinosaurMeat extends ItemFood implements DinosaurStack {
+public class ItemDinosaurMeat extends ItemFood implements DinosaurStack, ItemWithOreName {
 
     private final Dinosaur dinosaur;
     private final CookState cookState;
