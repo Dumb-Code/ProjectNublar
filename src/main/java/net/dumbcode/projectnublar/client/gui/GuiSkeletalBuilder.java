@@ -37,6 +37,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private final BlockEntitySkeletalBuilder builder;
     private final TabulaModel model;
     private final DinosaurAnimator animator;
+    private final TextComponentTranslation titleText;
     private boolean refreshSelectedPart;
     private Vector2f lastClickPosition = new Vector2f();
     private IntBuffer colorBuffer = BufferUtils.createIntBuffer(1);
@@ -50,22 +51,32 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private GuiButton resetButton = new GuiButton(2, 0, 0, resetText.getUnformattedText());
     private float cameraPitch;
     private float cameraYaw;
+    private double zoom = 1.0;
 
     public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
         this.builder = builder;
         this.model = builder.getModel(); // TODO: child models? -> Selectable
         this.animator = ReflectionHelper.getPrivateValue(TabulaModel.class, this.model, "tabulaAnimator");
+        TextComponentTranslation dinosaurNameComponent = builder.getDinosaur().createNameComponent();
+        this.titleText = new TextComponentTranslation("projectnublar.gui.skeletal_builder.title", dinosaurNameComponent.getUnformattedText());
     }
 
     @Override
     public void initGui() {
         super.initGui();
-        undoButton.x = 250;
-        redoButton.x = 250;
-        resetButton.x = 250;
+        int buttonWidth = width/3; // TODO: handle when > 200px (eg Gui Scale Small)
+        undoButton.x = 0;
+        redoButton.x = buttonWidth;
+        resetButton.x = buttonWidth*2;
 
-        redoButton.y = 20;
-        resetButton.y = 40;
+        undoButton.width = buttonWidth;
+        redoButton.width = buttonWidth;
+        resetButton.width = buttonWidth;
+
+        undoButton.y = height-undoButton.height-1;
+        redoButton.y = height-redoButton.height-1;
+        resetButton.y = height-resetButton.height-1;
+
         addButton(undoButton);
         addButton(redoButton);
         addButton(resetButton);
@@ -86,6 +97,11 @@ public class GuiSkeletalBuilder extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
+        int scrollDirection = (int) Math.signum(Mouse.getDWheel());
+        final double zoomSpeed = 0.1;
+        zoom += scrollDirection * zoomSpeed;
+        if(zoom < zoomSpeed)
+            zoom = zoomSpeed;
         undoButton.enabled = !builder.getHistory().atHistoryBeginning();
         redoButton.enabled = !builder.getHistory().atHistoryEnd();
     }
@@ -96,24 +112,44 @@ public class GuiSkeletalBuilder extends GuiScreen {
     }
 
     @Override
+    public void drawBackground(int tint) {
+        super.drawBackground(tint);
+        drawDefaultBackground();
+    }
+
+    @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+
+        drawBackground(0);
+
+        GlStateManager.pushMatrix();
+        // ensures that the button show above the model
+        GlStateManager.translate(0f, 0f, 1000f);
         super.drawScreen(mouseX, mouseY, partialTicks);
-        fontRenderer.drawString("Dinosaur ID: "+builder.getDinosaur().getRegName(), mouseX, mouseY, 0xFFFFFFFF);
-        fontRenderer.drawString("History length: "+builder.getHistory().getHistoryLength(), 0, 20, 0xFFFFFFFF);
-        fontRenderer.drawString("History index: "+builder.getHistory().getIndex(), 0, 30, 0xFFFFFFFF);
+        GlStateManager.popMatrix();
+
         String selectionText;
         if(selectedPart != null)
             selectionText = "Selected part: "+selectedPart.boxName;
         else
             selectionText = "No part selected :c";
         fontRenderer.drawString(selectionText, 0,0, 0xFFFFFFFF);
-        prepareModelRendering(150, 150, 50f);
+        prepareModelRendering(width/2, height/2, 30f);
+        AdvancedModelRenderer partBelowMouse = findPartBelowMouse();
         if(refreshSelectedPart) {
-            selectPart();
+            this.selectedPart = partBelowMouse;
             refreshSelectedPart = false;
         }
-        actualModelRender(partialTicks);
+        actualModelRender(partialTicks, partBelowMouse);
         cleanupModelRendering();
+
+        SkeletalHistory history = builder.getHistory();
+        drawCenteredString(fontRenderer, (history.getIndex()+1)+"/"+history.getHistoryLength(), width/2, height-redoButton.height-fontRenderer.FONT_HEIGHT, GuiConstants.NICE_WHITE);
+        drawCenteredString(fontRenderer, titleText.getUnformattedText(), width/2, 1, GuiConstants.NICE_WHITE);
+
+        if(partBelowMouse != null) {
+            drawHoveringText(partBelowMouse.boxName, mouseX, mouseY);
+        }
     }
 
     private int getColorUnderMouse() {
@@ -124,7 +160,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         return colorBuffer.get(0);
     }
 
-    private void selectPart() {
+    private AdvancedModelRenderer findPartBelowMouse() {
         AdvancedModelRenderer newSelection = null;
         hideAllModelParts();
 
@@ -163,9 +199,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.color(1f, 1f, 1f);
         GlStateManager.enableTexture2D();
         GlStateManager.enableBlend();
-
-        this.selectedPart = newSelection;
         GlStateManager.popMatrix();
+        return newSelection;
     }
 
     @Override
@@ -213,9 +248,11 @@ public class GuiSkeletalBuilder extends GuiScreen {
     }
 
     private void prepareModelRendering(int posX, int posY, float scale) {
+        scale *= zoom;
         GlStateManager.enableColorMaterial();
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float)posX, (float)posY, 50.0F);
+        GlStateManager.translate((float)posX, (float)posY, 500.0F);
+        GlStateManager.translate(0f, -20f, 0f);
         GlStateManager.scale((float)(-scale), (float)scale, (float)scale);
         RenderHelper.enableStandardItemLighting();
         GlStateManager.rotate(cameraPitch, 1.0F, 0.0F, 0.0F);
@@ -236,29 +273,40 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
     }
 
-    private void actualModelRender(float partialTicks) {
+    private void actualModelRender(float partialTicks, AdvancedModelRenderer partBelowMouse) {
         animator.setRescalingEnabled(false);
-        if(selectedPart != null) {
-            hideAllModelParts();
-            selectedPart.scaleX = 1f;
-            selectedPart.scaleY = 1f;
-            selectedPart.scaleZ = 1f;
-            GlStateManager.disableTexture2D();
-            GlStateManager.color(0f, 0f, 1f);
-            renderModel();
-            GlStateManager.enableTexture2D();
-
-            resetScalings();
-            selectedPart.scaleX = 0f;
-            selectedPart.scaleY = 0f;
-            selectedPart.scaleZ = 0f;
-        } else {
-            resetScalings();
-        }
+        highlight(selectedPart, 0f, 0f, 1f);
+        highlight(partBelowMouse, 1f, 1f, 0f);
+        resetScalings();
+        hidePart(selectedPart);
+        hidePart(partBelowMouse);
         GlStateManager.color(1f, 1f, 1f);
         renderModel();
         animator.setRescalingEnabled(true);
         resetScalings();
+    }
+
+    private void hidePart(AdvancedModelRenderer part) {
+        if(part == null)
+            return;
+        part.scaleX = 0f;
+        part.scaleY = 0f;
+        part.scaleZ = 0f;
+    }
+
+    private void highlight(AdvancedModelRenderer part, float red, float green, float blue) {
+        if(part != null) {
+            hideAllModelParts();
+            part.scaleX = 1f;
+            part.scaleY = 1f;
+            part.scaleZ = 1f;
+            GlStateManager.disableTexture2D();
+            GlStateManager.color(red, green, blue);
+            renderModel();
+            GlStateManager.enableTexture2D();
+
+            resetScalings();
+        }
     }
 
     private void resetScalings() {
