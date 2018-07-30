@@ -63,7 +63,6 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             animator.setRotationAngles(te.getModel(), te.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
             MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
         }
-//        this.mc.getRenderManager().renderEntity(te.getDinosaurEntity(), 0, 0, 0, 0, partialTicks, false);
         GlStateManager.rotate(te.getRotation().ordinal() * 90, 0, -1, 0);
         if(facing != EnumFacing.UP) {
             GlStateManager.rotate(-angle, rotation.x, rotation.y, rotation.z);

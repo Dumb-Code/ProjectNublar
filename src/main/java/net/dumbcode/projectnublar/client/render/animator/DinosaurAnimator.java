@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
 
-    private boolean scalingDisabled;
+    private boolean rescalingEnabled = true;
 
     public DinosaurAnimator(PoseHandler poseHandler, Animation defaultAnimation, Function<Animation, AnimationInfo> animationInfoGetter, PoseHandler.AnimationPassesFactory... factories) {
         super(poseHandler, defaultAnimation, animationInfoGetter, factories);
@@ -49,24 +49,28 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
                 nonHiddenCubes.addAll(modelChildMap.get(activeState));
             }
         }
-        if(!this.scalingDisabled) {
-            for (ModelRenderer modelRenderer : parModel.boxList) {
-                AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-                if(nonHiddenCubes.contains(modelRenderer)) {
+        for (ModelRenderer modelRenderer : parModel.boxList) {
+            AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+            if(nonHiddenCubes.contains(modelRenderer)) {
+                if(this.rescalingEnabled) {
                     box.scaleX = 1;
                     box.scaleY = 1;
                     box.scaleZ = 1;
-                } else {
-                    box.scaleX = 0;
-                    box.scaleY = 0;
-                    box.scaleZ = 0;
                 }
+            } else {
+                box.scaleX = 0;
+                box.scaleY = 0;
+                box.scaleZ = 0;
             }
         }
         super.performAnimations(parModel, entity, limbSwing, limbSwingAmount, ticks, rotationYaw, rotationPitch, scale);
     }
 
-    public void setScalingDisabled(boolean scalingDisabled) {
-        this.scalingDisabled = scalingDisabled;
+    /**
+     * Sets an internal flag that tells the animator not to rescale the model parts to their normal size when rendering non-hidden parts. Used in {@link net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder GuiSkeletalBuilder}
+     * @param rescalingEnabled Should non hidden parts be rescaled?
+     */
+    public void setRescalingEnabled(boolean rescalingEnabled) {
+        this.rescalingEnabled = rescalingEnabled;
     }
 }

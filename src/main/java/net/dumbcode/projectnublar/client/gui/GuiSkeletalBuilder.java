@@ -132,7 +132,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.disableBlend();
         GlStateManager.disableTexture2D();
 
-        animator.setScalingDisabled(true);
+        animator.setRescalingEnabled(false);
         for (int index = 0; index < model.boxList.size(); index++) {
             // Render the model part with a specific color and check if the color below the mouse has changed.
             // If it did, the mouse is over this given box
@@ -159,7 +159,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
                 newSelection = box;
             }
         }
-        animator.setScalingDisabled(false);
+        animator.setRescalingEnabled(true);
         GlStateManager.color(1f, 1f, 1f);
         GlStateManager.enableTexture2D();
         GlStateManager.enableBlend();
@@ -237,7 +237,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     }
 
     private void actualModelRender(float partialTicks) {
-        animator.setScalingDisabled(true);
+        animator.setRescalingEnabled(false);
         if(selectedPart != null) {
             hideAllModelParts();
             selectedPart.scaleX = 1f;
@@ -257,7 +257,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         }
         GlStateManager.color(1f, 1f, 1f);
         renderModel();
-        animator.setScalingDisabled(false);
+        animator.setRescalingEnabled(true);
         resetScalings();
     }
 
@@ -283,6 +283,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
                 box.rotateAngleZ = rotations.z;
             }
         }
+        animator.setRotationAngles(model, builder.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
         MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
     }
 
