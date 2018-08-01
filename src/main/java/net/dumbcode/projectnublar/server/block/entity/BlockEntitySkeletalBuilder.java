@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -36,6 +38,15 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
 
     @Getter
     private final SkeletalHistory history = new SkeletalHistory(this);
+
+    // Not saved to NBT, player-specific only to help with posing
+    @Getter
+    private float cameraPitch;
+    @Getter
+    private float cameraYaw = 90f;
+    @Getter
+    @Setter
+    private double cameraZoom = 1.0;
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -154,5 +165,10 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
             poseData.put(box.boxName, rotations);
         }
         markDirty();
+    }
+
+    public void setCameraAngles(float cameraYaw, float cameraPitch) {
+        this.cameraYaw = cameraYaw;
+        this.cameraPitch = cameraPitch;
     }
 }

@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
@@ -21,18 +22,18 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
     private int y;
     private int z;
     private String part;
-    private float dx;
-    private float dy;
+    private RotationAxis axis;
+    private float rotationAmount;
 
     public C0MoveSelectedSkeletalPart() { }
 
-    public C0MoveSelectedSkeletalPart(BlockEntitySkeletalBuilder builder, String selectedPart, float dx, float dy) {
+    public C0MoveSelectedSkeletalPart(BlockEntitySkeletalBuilder builder, String selectedPart, RotationAxis axis, float rotationAmount) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
         this.part = selectedPart;
-        this.dx = dx;
-        this.dy = dy;
+        this.axis = axis;
+        this.rotationAmount = rotationAmount;
     }
 
     @Override
@@ -41,8 +42,8 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
         y = buf.readInt();
         z = buf.readInt();
         part = ByteBufUtils.readUTF8String(buf);
-        dx = buf.readFloat();
-        dy = buf.readFloat();
+        axis = RotationAxis.values()[buf.readInt()];
+        rotationAmount = buf.readFloat();
     }
 
     @Override
@@ -51,8 +52,8 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
         buf.writeInt(y);
         buf.writeInt(z);
         ByteBufUtils.writeUTF8String(buf, part);
-        buf.writeFloat(dx);
-        buf.writeFloat(dy);
+        buf.writeInt(axis.ordinal());
+        buf.writeFloat(rotationAmount);
     }
 
     public static class Handler extends WorldModificationsMessageHandler<C0MoveSelectedSkeletalPart, IMessage> {
@@ -68,8 +69,17 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
                 }
                 Vector3f angles = builder.getPoseData().get(message.part);
                 // TODO: better rotations (in camera space?)
-                angles.y += message.dx;
-                angles.x += message.dy;
+                switch (message.axis) {
+                    case X_AXIS:
+                        angles.x += message.rotationAmount;
+                        break;
+                    case Y_AXIS:
+                        angles.y += message.rotationAmount;
+                        break;
+                    case Z_AXIS:
+                        angles.z += message.rotationAmount;
+                        break;
+                }
                 builder.markDirty();
                 ProjectNublar.NETWORK.sendToAll(new S1UpdateSkeletalBuilder(builder, message.part, angles));
             }
