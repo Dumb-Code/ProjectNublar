@@ -4,7 +4,7 @@ spawnegg.genderchange.random=L'Oeuf de spawn va faire apparaître des dinosaures
 
 projectnublar.gui.skeletal_builder.name=Constructeur de squelette
 projectnublar.gui.skeletal_builder.undo=Annuler
-projectnublar.gui.skeletal_builder.redo=Refaire
+projectnublar.gui.skeletal_builder.redo=Répéter
 projectnublar.gui.skeletal_builder.reset=Réinitialiser la pose
 projectnublar.gui.skeletal_builder.title=Edition de la pose d'un(e) %s
 
