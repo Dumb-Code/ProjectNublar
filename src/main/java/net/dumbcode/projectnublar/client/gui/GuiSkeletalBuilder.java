@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client.gui;
 
+import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -23,12 +24,19 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.util.glu.GLU;
+import org.lwjgl.util.glu.Project;
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 
+import javax.vecmath.Matrix3f;
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Map;
 
@@ -38,7 +46,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private final TabulaModel model;
     private final DinosaurAnimator animator;
     private final TextComponentTranslation titleText;
-    private boolean refreshSelectedPart;
+    private boolean registeredLeftClick;
     private Vector2f lastClickPosition = new Vector2f();
     private IntBuffer colorBuffer = BufferUtils.createIntBuffer(1);
     private AdvancedModelRenderer selectedPart;
@@ -52,6 +60,10 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private float cameraPitch;
     private float cameraYaw;
     private double zoom = 1.0;
+    private TabulaModel rotationRingModel;
+    private RotationRing currentSelectedRing = RotationRing.NONE;
+    private boolean draggingRing = false;
+    private Vector2f dMouse = new Vector2f();
 
     public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
         this.builder = builder;
@@ -59,6 +71,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         this.animator = ReflectionHelper.getPrivateValue(TabulaModel.class, this.model, "tabulaAnimator");
         TextComponentTranslation dinosaurNameComponent = builder.getDinosaur().createNameComponent();
         this.titleText = new TextComponentTranslation("projectnublar.gui.skeletal_builder.title", dinosaurNameComponent.getUnformattedText());
+        this.rotationRingModel = TabulaUtils.getModel(GuiConstants.ROTATION_RING_LOCATION);
     }
 
     @Override
@@ -119,7 +132,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-
         drawBackground(0);
 
         GlStateManager.pushMatrix();
@@ -134,11 +146,25 @@ public class GuiSkeletalBuilder extends GuiScreen {
         else
             selectionText = "No part selected :c";
         fontRenderer.drawString(selectionText, 0,0, 0xFFFFFFFF);
+        fontRenderer.drawString("Current ring: "+currentSelectedRing.name(), 0,10, 0xFFFFFFFF);
         prepareModelRendering(width/2, height/2, 30f);
+        RotationRing ringBelowMouse = findRingBelowMouse();
+        if(draggingRing) {
+            if(ringBelowMouse != RotationRing.NONE) {
+                handleRingDrag(dMouse.x, dMouse.y);
+            }
+            dMouse.set(0f, 0f);
+            draggingRing = false;
+        }
         AdvancedModelRenderer partBelowMouse = findPartBelowMouse();
-        if(refreshSelectedPart) {
-            this.selectedPart = partBelowMouse;
-            refreshSelectedPart = false;
+        if(registeredLeftClick) {
+            if(ringBelowMouse == RotationRing.NONE) {
+                this.selectedPart = partBelowMouse;
+                this.currentSelectedRing = RotationRing.NONE;
+            } else {
+                this.currentSelectedRing = ringBelowMouse;
+            }
+            registeredLeftClick = false;
         }
         actualModelRender(partialTicks, partBelowMouse);
         cleanupModelRendering();
@@ -150,6 +176,31 @@ public class GuiSkeletalBuilder extends GuiScreen {
         if(partBelowMouse != null) {
             drawHoveringText(partBelowMouse.boxName, mouseX, mouseY);
         }
+    }
+
+    private RotationRing findRingBelowMouse() {
+        if(selectedPart == null)
+            return RotationRing.NONE;
+        int color = getColorUnderMouse();
+        renderRotationRing();
+        int newColor = getColorUnderMouse();
+        if(newColor != color) {
+            int red = (newColor >> 16) & 0xFF;
+            int green = (newColor >> 8) & 0xFF;
+            int blue = newColor & 0xFF;
+            if(red > 0xF0 && green < 0x0A && blue < 0x0A) {
+                return RotationRing.Y_AXIS;
+            }
+
+            if(green > 0xF0 && red < 0x0A && blue < 0x0A) {
+                return RotationRing.Z_AXIS;
+            }
+
+            if(blue > 0xF0 && red < 0x0A && green < 0x0A) {
+                return RotationRing.X_AXIS;
+            }
+        }
+        return RotationRing.NONE;
     }
 
     private int getColorUnderMouse() {
@@ -207,7 +258,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         if(mouseButton == 0) {
-            refreshSelectedPart = true;
+            registeredLeftClick = true;
         }
         lastClickPosition.set(Mouse.getX(), Mouse.getY());
     }
@@ -218,7 +269,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
         if(clickedMouseButton == 1) {
             float dx = Mouse.getX() - lastClickPosition.x;
             float dy = Mouse.getY() - lastClickPosition.y;
-            lastClickPosition.set(Mouse.getX(), Mouse.getY());
             if(selectedPart != null) {
                 if(!movedPart) {
                     ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STARTING));
@@ -229,13 +279,137 @@ public class GuiSkeletalBuilder extends GuiScreen {
         } else if(clickedMouseButton == 2) {
             float dx = Mouse.getX() - lastClickPosition.x;
             float dy = Mouse.getY() - lastClickPosition.y;
-            lastClickPosition.set(Mouse.getX(), Mouse.getY());
             cameraPitch += dy*0.1f;
             cameraYaw += dx*0.1f;
 
             cameraPitch %= 360f;
             cameraYaw %= 360f;
+        } else if(clickedMouseButton == 0 && currentSelectedRing != RotationRing.NONE) {
+            float dx = Mouse.getX() - lastClickPosition.x;
+            float dy = Mouse.getY() - lastClickPosition.y;
+            draggingRing = true;
+            dMouse.x += dx;
+            dMouse.y += dy;
         }
+        lastClickPosition.set(Mouse.getX(), Mouse.getY());
+    }
+
+    private void handleRingDrag(float dx, float dy) {
+        if(selectedPart == null)
+            return;
+        if(currentSelectedRing == RotationRing.NONE)
+            return;
+        Matrix3f rotationMatrix = computeRotationMatrix(selectedPart);
+        Vector3f force = new Vector3f(-dx, -dy, 0f);
+        rotationMatrix.transform(force);
+
+        // === START OF CODE FOR MOUSE WORLD POS ===
+        FloatBuffer modelMatrix = BufferUtils.createFloatBuffer(16);
+        FloatBuffer projectionMatrix = BufferUtils.createFloatBuffer(16);
+        IntBuffer viewport = BufferUtils.createIntBuffer(4);
+        viewport.put(0).put(0).put(Display.getWidth()).put(Display.getHeight());
+        viewport.flip();
+        GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelMatrix);
+        GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projectionMatrix);
+        modelMatrix.rewind();
+        projectionMatrix.rewind();
+        FloatBuffer out = BufferUtils.createFloatBuffer(3);
+        Project.gluUnProject(Mouse.getX(), Mouse.getY(), 0f, modelMatrix, projectionMatrix, viewport, out);
+
+        // === END OF CODE FOR MOUSE WORLD POS ===
+
+        float mouseZ = 400f;
+        System.out.println(">>>> "+out.get(0)+" ; "+out.get(1)+" ; " +mouseZ);
+
+        Vector3f offset = new Vector3f(out.get(0), out.get(1), mouseZ);
+        Matrix4f model = new Matrix4f();
+        float[] modelCopy = new float[16];
+        for (int j = 0;j<4;j++) {
+            for(int i = 0;i<4;i++) {
+                modelCopy[i*4+j] = modelMatrix.get(i*4+j);
+            }
+        }
+        model.set(modelCopy);
+        Vector3f partOrigin = computeTranslationVector(selectedPart);
+        model.transform(partOrigin);
+        model.transform(force);
+        offset.sub(partOrigin);
+        System.out.println(">>! "+offset+" - "+force);
+        Vector3f moment = new Vector3f();
+        moment.cross(offset, force);
+        float rotAmount = Math.signum(moment.dot(currentSelectedRing.getAxis()))*0.1f;
+
+        // TODO: packet
+        Vector3f angles = builder.getPoseData().get(selectedPart.boxName);
+        switch (currentSelectedRing) {
+            case X_AXIS:
+                angles.x += rotAmount;
+                break;
+            case Y_AXIS:
+                angles.y += rotAmount;
+                break;
+            case Z_AXIS:
+                angles.z += rotAmount;
+                break;
+        }
+        System.out.println("> "+rotAmount);
+    }
+
+
+    private Vector3f computeTranslationVector(AdvancedModelRenderer part) {
+        Matrix4f transform = computeTransformMatrix(part);
+        Vector3f result = new Vector3f(0f, 0f, 0f);
+        transform.transform(result);
+        return result;
+    }
+
+    private Matrix4f computeTransformMatrix(AdvancedModelRenderer part) {
+        Matrix4f result = new Matrix4f();
+        result.setIdentity();
+        applyTransformations(part, result);
+        return result;
+    }
+
+    private void applyTransformations(AdvancedModelRenderer part, Matrix4f out) {
+        AdvancedModelRenderer parent = part.getParent();
+        if(parent != null) {
+            applyTransformations(parent, out);
+        }
+        Matrix4f translation = new Matrix4f();
+        translation.setIdentity();
+        translation.setTranslation(new Vector3f(part.offsetX, part.offsetY, part.offsetZ));
+        out.mul(translation);
+
+        float scale = 1f/16f;
+        translation.setIdentity();
+        translation.setTranslation(new Vector3f(part.rotationPointX*scale, part.rotationPointY*scale, part.rotationPointZ*scale));
+        out.mul(translation);
+
+        out.rotZ(part.rotateAngleZ * GuiConstants.DEGREES_TO_RADIANS_f);
+        out.rotY(part.rotateAngleY * GuiConstants.DEGREES_TO_RADIANS_f);
+        out.rotX(part.rotateAngleX * GuiConstants.DEGREES_TO_RADIANS_f);
+
+        if(part.scaleChildren) {
+            Matrix4f scaling = new Matrix4f();
+            scaling.setIdentity();
+            scaling.m00 = part.scaleX;
+            scaling.m11 = part.scaleY;
+            scaling.m22 = part.scaleZ;
+            out.mul(scaling);
+        }
+    }
+
+    private Matrix3f computeRotationMatrix(AdvancedModelRenderer part) {
+        Matrix3f result = new Matrix3f();
+        result.setIdentity();
+        AdvancedModelRenderer parent = part.getParent();
+        if(parent != null) {
+            result.mul(computeRotationMatrix(parent));
+        }
+        result.rotZ(part.rotateAngleZ * GuiConstants.DEGREES_TO_RADIANS_f);
+        result.rotY(part.rotateAngleY * GuiConstants.DEGREES_TO_RADIANS_f);
+        result.rotX(part.rotateAngleX * GuiConstants.DEGREES_TO_RADIANS_f);
+        return result;
     }
 
     @Override
@@ -244,6 +418,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
         if(button == 1 && movedPart) {
             movedPart = false;
             ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STOPPING));
+        } else if(button == 0) {
+            currentSelectedRing = RotationRing.NONE;
         }
     }
 
@@ -284,6 +460,41 @@ public class GuiSkeletalBuilder extends GuiScreen {
         renderModel();
         animator.setRescalingEnabled(true);
         resetScalings();
+
+        // render rotation ring
+        if(selectedPart != null) {
+            renderRotationRing();
+        }
+    }
+
+    private void renderRotationRing() {
+        final float ringScale = 1.5f;
+        GlStateManager.disableLighting();
+        GlStateManager.disableTexture2D();
+        GlStateManager.pushMatrix();
+        selectedPart.parentedPostRender(1f/16f);
+        GlStateManager.color(1f, 0f, 0f);
+        GlStateManager.scale(ringScale, ringScale, ringScale);
+        rotationRingModel.render(null, 0f, 0f, 0f, 0f, 0f, 1f/16f);
+        GlStateManager.popMatrix();
+
+        GlStateManager.pushMatrix();
+        selectedPart.parentedPostRender(1f/16f);
+        GlStateManager.rotate(90f, 1f, 0f, 0f);
+        GlStateManager.color(0f, 1f, 0f);
+        GlStateManager.scale(ringScale, ringScale, ringScale);
+        rotationRingModel.render(null, 0f, 0f, 0f, 0f, 0f, 1f/16f);
+        GlStateManager.popMatrix();
+
+        GlStateManager.pushMatrix();
+        selectedPart.parentedPostRender(1f/16f);
+        GlStateManager.rotate(90f, 0f, 0f, 1f);
+        GlStateManager.color(0f, 0f, 1f);
+        GlStateManager.scale(ringScale, ringScale, ringScale);
+        rotationRingModel.render(null, 0f, 0f, 0f, 0f, 0f, 1f/16f);
+        GlStateManager.popMatrix();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableLighting();
     }
 
     private void hidePart(AdvancedModelRenderer part) {
@@ -341,6 +552,23 @@ public class GuiSkeletalBuilder extends GuiScreen {
             renderer.scaleX = 0f;
             renderer.scaleY = 0f;
             renderer.scaleZ = 0f;
+        }
+    }
+
+    private enum RotationRing {
+        X_AXIS(new Vector3f(1f, 0f, 0f)),
+        Y_AXIS(new Vector3f(0f, 1f, 0f)),
+        Z_AXIS(new Vector3f(0f, 0f, 1f)),
+        NONE(new Vector3f(0f, 0f, 0f));
+
+        private Vector3f axis;
+
+        RotationRing(Vector3f axis) {
+            this.axis = axis;
+        }
+
+        public Vector3f getAxis() {
+            return axis;
         }
     }
 }

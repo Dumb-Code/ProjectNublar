@@ -13,8 +13,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraftforge.items.ItemStackHandler;
-import org.lwjgl.util.vector.Vector3f;
 
+import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 

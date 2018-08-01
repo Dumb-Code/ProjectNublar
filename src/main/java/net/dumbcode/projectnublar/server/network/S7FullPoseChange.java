@@ -9,8 +9,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import org.lwjgl.util.vector.Vector3f;
 
+import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 

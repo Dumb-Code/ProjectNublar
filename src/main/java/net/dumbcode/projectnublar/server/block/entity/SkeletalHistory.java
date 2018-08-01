@@ -12,8 +12,8 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
-import org.lwjgl.util.vector.Vector3f;
 
+import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

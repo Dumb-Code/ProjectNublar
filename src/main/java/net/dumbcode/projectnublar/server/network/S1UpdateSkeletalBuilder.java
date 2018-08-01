@@ -12,7 +12,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import org.lwjgl.util.vector.Vector3f;
+
+import javax.vecmath.Vector3f;
 
 public class S1UpdateSkeletalBuilder implements IMessage {
 
