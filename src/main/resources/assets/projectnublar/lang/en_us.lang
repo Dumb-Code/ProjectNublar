@@ -8,6 +8,11 @@ projectnublar.gui.skeletal_builder.redo=Redo move
 projectnublar.gui.skeletal_builder.reset=Reset pose
 projectnublar.gui.skeletal_builder.title=Editing pose of %s
 
+projectnublar.gui.skeletal_builder.rotation_slider.prefix=Angle around the %s axis:
+projectnublar.gui.skeletal_builder.rotation_slider.suffix=°
+
+projectnublar.action.skeletal_builder.no_dino_to_display=No dinosaur to display!
+
 item.meat_dinosaur_velociraptor_raw.name=Raw Velociraptor meat
 item.meat_dinosaur_velociraptor_cooked.name=Cooked Velociraptor meat
 

@@ -56,7 +56,8 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
         nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
 
         // save pose data
-        nbt.setTag("pose", writePoseToNBT(poseData));
+        nbt.setTag("Pose", writePoseToNBT(poseData));
+        nbt.setInteger("ModelIndex", getDinosaurEntity().modelIndex);
         return super.writeToNBT(nbt);
     }
 
@@ -65,9 +66,9 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
         for(String partName : poseData.keySet()) {
             Vector3f eulerAngles = poseData.get(partName);
             NBTTagCompound partNBT = new NBTTagCompound();
-            partNBT.setFloat("rotationX", eulerAngles.x);
-            partNBT.setFloat("rotationY", eulerAngles.y);
-            partNBT.setFloat("rotationZ", eulerAngles.z);
+            partNBT.setFloat("RotationX", eulerAngles.x);
+            partNBT.setFloat("RotationY", eulerAngles.y);
+            partNBT.setFloat("RotationZ", eulerAngles.z);
             pose.setTag(partName, partNBT);
         }
         return pose;
@@ -79,19 +80,20 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
         this.rotation = Rotation.values()[nbt.getInteger("Rotation")];
         // load pose data
-        NBTTagCompound pose = nbt.getCompoundTag("pose");
+        NBTTagCompound pose = nbt.getCompoundTag("Pose");
         poseData.clear();
         poseData.putAll(readPoseFromNBT(pose));
         this.reassureSize();
         this.history.readFromNBT(nbt.getCompoundTag("History"));
         super.readFromNBT(nbt);
+        getDinosaurEntity().modelIndex = nbt.getInteger("ModelIndex");
     }
 
     public Map<String, Vector3f> readPoseFromNBT(NBTTagCompound pose) {
         Map<String, Vector3f> result = new HashMap<>();
         for(String partName : pose.getKeySet()) {
             NBTTagCompound part = pose.getCompoundTag(partName);
-            Vector3f eulerAngles = new Vector3f(part.getFloat("rotationX"), part.getFloat("rotationY"), part.getFloat("rotationZ"));
+            Vector3f eulerAngles = new Vector3f(part.getFloat("RotationX"), part.getFloat("RotationY"), part.getFloat("RotationZ"));
             result.put(partName, eulerAngles);
         }
         return result;

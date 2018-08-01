@@ -8,8 +8,13 @@ projectnublar.gui.skeletal_builder.redo=Refaire
 projectnublar.gui.skeletal_builder.reset=Réinitialiser la pose
 projectnublar.gui.skeletal_builder.title=Edition de la pose d'un(e) %s
 
+projectnublar.gui.skeletal_builder.rotation_slider.prefix=Angle autour de l'axe %s:
+projectnublar.gui.skeletal_builder.rotation_slider.suffix=°
+
+projectnublar.action.skeletal_builder.no_dino_to_display=Pas de dinosaure à montrer!
+
 item.meat_dinosaur_velociraptor_raw.name=Viande crue de Vélociraptor
 item.meat_dinosaur_velociraptor_cooked.name=Viande cuite de Vélociraptor
 
 projectnublar.dino.velociraptor.name=Vélociraptor
-projectnublar.dino.missing.name=<!Missing Dinosaur!>
+projectnublar.dino.missing.name=<!Dinosaure Manquant!>

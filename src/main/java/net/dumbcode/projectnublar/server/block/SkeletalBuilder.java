@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
@@ -23,6 +24,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -30,6 +32,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
+
+    public static final TextComponentTranslation NO_DINOSAUR_TO_DISPLAY_TEXT = new TextComponentTranslation(ProjectNublar.MODID+".action.skeletal_builder.no_dino_to_display");
 
     public SkeletalBuilder() {
         super(Material.IRON);
@@ -43,6 +47,9 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
             BlockEntitySkeletalBuilder skeletalBuilder = (BlockEntitySkeletalBuilder) tileEntity;
             if(stack.getItem() == ItemHandler.FOSSIL) {
                 FossilItem.FossilInfomation info = FossilItem.getFossilInfomation(stack);
+                if(skeletalBuilder.getDinosaur() == Dinosaur.MISSING) {
+                    skeletalBuilder.setDinosaur(info.getDinosaur());
+                }
                 if(info.getDinosaur() == skeletalBuilder.getDinosaur()) {
                     DinosaurEntity entity = skeletalBuilder.getDinosaurEntity();
                     List<String> boneList = info.getDinosaur().getSkeletalInfomation().getBoneListed();
@@ -55,7 +62,11 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
             } else if(playerIn.isSneaking()) {
                 skeletalBuilder.setRotation(Rotation.values()[(skeletalBuilder.getRotation().ordinal() + 1) % Rotation.values().length]);
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
-                playerIn.openGui(ProjectNublar.INSTANCE, GuiHandler.SKELETAL_BUILDER_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                if(skeletalBuilder.getDinosaur() == Dinosaur.MISSING) {
+                    playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);
+                } else {
+                    playerIn.openGui(ProjectNublar.INSTANCE, GuiHandler.SKELETAL_BUILDER_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                }
             }
         }
         return true;

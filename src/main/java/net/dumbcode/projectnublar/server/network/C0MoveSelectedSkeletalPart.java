@@ -5,13 +5,11 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.vecmath.Vector3f;
@@ -23,17 +21,17 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
     private int z;
     private String part;
     private RotationAxis axis;
-    private float rotationAmount;
+    private float newAngle;
 
     public C0MoveSelectedSkeletalPart() { }
 
-    public C0MoveSelectedSkeletalPart(BlockEntitySkeletalBuilder builder, String selectedPart, RotationAxis axis, float rotationAmount) {
+    public C0MoveSelectedSkeletalPart(BlockEntitySkeletalBuilder builder, String selectedPart, RotationAxis axis, float newAngle) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
         this.part = selectedPart;
         this.axis = axis;
-        this.rotationAmount = rotationAmount;
+        this.newAngle = newAngle;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
         z = buf.readInt();
         part = ByteBufUtils.readUTF8String(buf);
         axis = RotationAxis.values()[buf.readInt()];
-        rotationAmount = buf.readFloat();
+        newAngle = buf.readFloat();
     }
 
     @Override
@@ -53,7 +51,7 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
         buf.writeInt(z);
         ByteBufUtils.writeUTF8String(buf, part);
         buf.writeInt(axis.ordinal());
-        buf.writeFloat(rotationAmount);
+        buf.writeFloat(newAngle);
     }
 
     public static class Handler extends WorldModificationsMessageHandler<C0MoveSelectedSkeletalPart, IMessage> {
@@ -68,16 +66,15 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
                     builder.getPoseData().put(message.part, new Vector3f());
                 }
                 Vector3f angles = builder.getPoseData().get(message.part);
-                // TODO: better rotations (in camera space?)
                 switch (message.axis) {
                     case X_AXIS:
-                        angles.x += message.rotationAmount;
+                        angles.x = message.newAngle;
                         break;
                     case Y_AXIS:
-                        angles.y += message.rotationAmount;
+                        angles.y = message.newAngle;
                         break;
                     case Z_AXIS:
-                        angles.z += message.rotationAmount;
+                        angles.z = message.newAngle;
                         break;
                 }
                 builder.markDirty();
