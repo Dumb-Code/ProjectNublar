@@ -23,6 +23,7 @@
       "tail": "tail1",
       "shoulders": "body2",
       "arm": ["Right arm", "Left arm"],
+      "hand": ["Right hand", "Left hand"],
       "neck": "body1",
       "head": "neck5"
     }
