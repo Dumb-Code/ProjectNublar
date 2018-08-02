@@ -11,11 +11,12 @@ public class Velociraptor extends Dinosaur {
         val map = getModelProperties().getMainModelMap();
         map.put(GrowthStage.ADULT, "velociraptor_adult_idle");
 
-        ItemProperties itemProperties = this.getItemProperties();
-        itemProperties.setCookedMeatHealAmount(10);
-        itemProperties.setCookedMeatSaturation(1f);
-        itemProperties.setRawMeatHealAmount(4);
-        itemProperties.setRawMeatSaturation(0.6f);
+        getItemProperties()
+                .setCookedMeatHealAmount(10)
+                .setCookedMeatSaturation(1f)
+                .setRawMeatHealAmount(4)
+                .setRawMeatSaturation(0.6f)
+                .setCookingExperience(1f);
 
         SkeletalInformation skeletalInformation = this.getSkeletalInformation();
         skeletalInformation.initilizeMap(

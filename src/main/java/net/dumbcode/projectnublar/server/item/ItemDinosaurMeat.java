@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
@@ -39,11 +40,6 @@ public class ItemDinosaurMeat extends ItemFood implements DinosaurStack, ItemWit
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-
-        int[] ids = OreDictionary.getOreIDs(stack);
-        for(int i=0;i<ids.length;i++) {
-            tooltip.add(TextFormatting.BOLD.toString()+OreDictionary.getOreName(ids[i]));
-        }
     }
 
     @Override
@@ -77,7 +73,19 @@ public class ItemDinosaurMeat extends ItemFood implements DinosaurStack, ItemWit
         OreDictionary.registerOre("meatDinosaur"+dinosaur.getOreSuffix(), this);
     }
 
+    @Override
+    public String getMostSpecificOreName() {
+        return "meatDinosaur"+cookState.getOrePart()+dinosaur.getOreSuffix();
+    }
+
     public enum CookState {
-        RAW, COOKED
+        RAW("Raw"), COOKED("Cooked");
+
+        @Getter
+        private final String orePart;
+
+        CookState(String orePart) {
+            this.orePart = orePart;
+        }
     }
 }
