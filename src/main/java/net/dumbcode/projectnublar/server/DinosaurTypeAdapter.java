@@ -15,9 +15,6 @@ public class DinosaurTypeAdapter extends TypeAdapter {
     public void write(JsonWriter out, Object value) throws IOException {
         Dinosaur dino = (Dinosaur)value;
         JsonWriter writer = out.beginObject();
-        writer
-                .name("id")
-                .value(dino.getRegName().toString());
         writer.name("growth_stages").beginObject();
         for(GrowthStage stage : GrowthStage.values()) {
             String modelName = dino.getModelProperties().getMainModelMap().get(stage);
@@ -74,6 +71,8 @@ public class DinosaurTypeAdapter extends TypeAdapter {
 
     @Override
     public Dinosaur read(JsonReader in) {
-        return null;
+        Dinosaur dinosaur = new Dinosaur();
+
+        return dinosaur;
     }
 }
