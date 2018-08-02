@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import lombok.val;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
-import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 
 public class Velociraptor extends Dinosaur {
@@ -19,7 +18,7 @@ public class Velociraptor extends Dinosaur {
                 .setCookingExperience(1f);
 
         SkeletalInformation skeletalInformation = this.getSkeletalInformation();
-        skeletalInformation.initilizeMap(
+        skeletalInformation.initializeMap(
                 "foot", "Right upper foot",
                 "foot", "Left upper foot",
                 "leg", "Right thigh",

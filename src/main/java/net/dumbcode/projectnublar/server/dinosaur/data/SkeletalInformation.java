@@ -15,7 +15,7 @@ public class SkeletalInformation {
     private List<String> boneListed = Lists.newArrayList();
     private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
 
-    public void initilizeMap(String... boneModels) {
+    public void initializeMap(String... boneModels) {
         if(boneModels.length % 2 != 0) {
             throw new RuntimeException("Dont know how to handle list of length " + boneModels.length);
         }
