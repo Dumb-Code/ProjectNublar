@@ -1,6 +1,11 @@
 package net.dumbcode.projectnublar.server;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonWriter;
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
+import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -15,9 +20,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -35,6 +42,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
@@ -99,6 +109,22 @@ public class ProjectNublar
                 FurnaceRecipes.instance().addSmeltingRecipe(rawMeat, new ItemStack(referenceCookedMeat), dino.getItemProperties().getCookingExperience());
             }
         }
+
+        // TODO: Remove, debug only
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        builder.registerTypeHierarchyAdapter(Dinosaur.class, new DinosaurTypeAdapter());
+        Gson gson = builder.create();
+        DINOSAUR_REGISTRY.getValuesCollection().forEach(dino -> {
+            File jsonFile = new File("./mods/projectnublar/debug/"+dino.getRegName().getResourcePath()+".json");
+            if(!jsonFile.getParentFile().exists())
+                jsonFile.getParentFile().mkdirs();
+            try(FileWriter writer = new FileWriter(jsonFile)) {
+                gson.toJson(dino, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @SubscribeEvent
@@ -109,7 +135,15 @@ public class ProjectNublar
                 .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"missing"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .create();
+        registerJsonDinosaurs();
         MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
+    }
+
+    private static void registerJsonDinosaurs() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeHierarchyAdapter(Dinosaur.class, new DinosaurTypeAdapter());
+        Gson gson = builder.create();
+        JsonUtil.registerModJsons(DINOSAUR_REGISTRY, gson, ProjectNublar.MODID, "dinosaurs");
     }
 
     @SubscribeEvent

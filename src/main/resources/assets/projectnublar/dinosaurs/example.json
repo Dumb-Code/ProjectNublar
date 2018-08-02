@@ -1,6 +1,6 @@
 {
   "_comment": "This is an example file describing a dinosaur",
-  "id": "velociraptor",
+  "id": "projectnublar:example",
   "growth_stages": {
     "adult": "velociraptor_adult_idle"
   },
