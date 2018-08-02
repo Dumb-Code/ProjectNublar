@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class SkeletalInfomation {
+public class SkeletalInformation {
     private List<String> individualBones = Lists.newArrayList();
     private List<String> boneListed = Lists.newArrayList();
     private Map<String, List<String>> boneToModelMap = Maps.newHashMap();

@@ -10,7 +10,6 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -100,7 +99,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     }
 
     private void reassureSize() {
-        int size = this.dinosaur.getSkeletalInfomation().getBoneListed().size();
+        int size = this.dinosaur.getSkeletalInformation().getBoneListed().size();
         if(size != this.boneHandler.getSlots()) {
             this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
         }

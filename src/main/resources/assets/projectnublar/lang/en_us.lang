@@ -11,6 +11,8 @@ projectnublar.gui.skeletal_builder.title=Editing pose of %s
 projectnublar.gui.skeletal_builder.rotation_slider.prefix=Angle around the %s axis:
 projectnublar.gui.skeletal_builder.rotation_slider.suffix=°
 
+projectnublar.item.fossil.name=Fossil: %1$s %2$s
+
 projectnublar.action.skeletal_builder.no_dino_to_display=No dinosaur to display!
 
 item.meat_dinosaur_velociraptor_raw.name=Raw Velociraptor meat

@@ -4,12 +4,10 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
-import net.dumbcode.dumblibrary.server.entity.EntityAnimatable;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.*;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -29,7 +27,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final ModelProperties modelProperties = new ModelProperties();
     private final ItemProperties itemProperties = new ItemProperties();
     private final EntityProperties entityProperties = new EntityProperties();
-    private final SkeletalInfomation skeletalInfomation = new SkeletalInfomation();
+    private final SkeletalInformation skeletalInformation = new SkeletalInformation();
+    @Getter(lazy = true)
+    private final List<FossilInformation> fossilInformation = createFossilInformation();
 
     private ModelContainer modelContainer;
     private ModelContainer noAnimationModelContainer;
@@ -44,6 +44,12 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     public DinosaurEntity createEntity(World world) {
         return this.getEntityProperties().getEntityCreateFunction().apply(world).setDinosaur(this);
+    }
+
+    private List<FossilInformation> createFossilInformation() {
+        List<FossilInformation> list = Lists.newArrayList();
+        getSkeletalInformation().getIndividualBones().forEach(bone -> list.add(new FossilInformation(Dinosaur.this, bone)));
+        return list;
     }
 
     @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings

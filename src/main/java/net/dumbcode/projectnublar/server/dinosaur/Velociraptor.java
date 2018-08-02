@@ -1,10 +1,9 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
-import com.google.common.collect.Lists;
 import lombok.val;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
-import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInfomation;
+import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 
 public class Velociraptor extends Dinosaur {
 
@@ -18,8 +17,8 @@ public class Velociraptor extends Dinosaur {
         itemProperties.setRawMeatHealAmount(4);
         itemProperties.setRawMeatSaturation(0.6f);
 
-        SkeletalInfomation skeletalInfomation = this.getSkeletalInfomation();
-        skeletalInfomation.initilizeMap(
+        SkeletalInformation skeletalInformation = this.getSkeletalInformation();
+        skeletalInformation.initilizeMap(
                 "foot", "Right upper foot",
                 "foot", "Left upper foot",
                 "leg", "Right thigh",
