@@ -15,6 +15,7 @@ import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
+import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -113,7 +114,7 @@ public class ProjectNublar
         // TODO: Remove, debug only
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
-        builder.registerTypeHierarchyAdapter(Dinosaur.class, new DinosaurTypeAdapter());
+        JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
         DINOSAUR_REGISTRY.getValuesCollection().forEach(dino -> {
             File jsonFile = new File("./mods/projectnublar/debug/"+dino.getRegName().getResourcePath()+".json");
@@ -141,7 +142,7 @@ public class ProjectNublar
 
     private static void registerJsonDinosaurs() {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeHierarchyAdapter(Dinosaur.class, new DinosaurTypeAdapter());
+        JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
         JsonUtil.registerModJsons(DINOSAUR_REGISTRY, gson, ProjectNublar.MODID, "dinosaurs");
     }
