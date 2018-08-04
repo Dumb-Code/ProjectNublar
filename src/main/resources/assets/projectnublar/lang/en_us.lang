@@ -11,6 +11,20 @@ projectnublar.gui.skeletal_builder.title=Editing pose of %s
 projectnublar.gui.skeletal_builder.rotation_slider.prefix=Angle around the %s axis:
 projectnublar.gui.skeletal_builder.rotation_slider.suffix=°
 
+projectnublar.gui.skeletal_builder.no_part_selected=No part selected ;c
+projectnublar.gui.skeletal_builder.selected_part=Selected part: %s
+projectnublar.gui.skeletal_builder.controls.select_part=Select a model part
+projectnublar.gui.skeletal_builder.controls.rotate_camera=Rotate the camera
+projectnublar.gui.skeletal_builder.controls.zoom=Zoom
+
+projectnublar.gui.controls=Controls
+projectnublar.gui.controls.trackpad_zoom=Trackpad zoom
+projectnublar.gui.controls.mouse_wheel=Mouse wheel
+projectnublar.gui.controls.middle_click_drag=Middle click drag
+projectnublar.gui.controls.left_click=Left click
+projectnublar.gui.controls.movement_keys=Movement keys
+projectnublar.gui.controls.arrow_keys=Arrow keys
+
 projectnublar.item.fossil.name=Fossil: %1$s %2$s
 
 projectnublar.action.skeletal_builder.no_dino_to_display=No dinosaur to display!

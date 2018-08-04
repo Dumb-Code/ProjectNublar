@@ -14,6 +14,7 @@ import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.model.ModelRenderer;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
@@ -75,6 +77,16 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private FloatBuffer projectionMatrix = BufferUtils.createFloatBuffer(16);
     private IntBuffer viewport = BufferUtils.createIntBuffer(4);
 
+    /**
+     * Base Y component for control text, selected part text & sliders
+     */
+    private int baseYOffset = 20;
+
+    private TextComponentTranslation noPartSelectedText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.no_part_selected");
+    private TextComponentTranslation zoomText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.zoom");
+    private TextComponentTranslation selectModelPartText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.select_part");
+    private TextComponentTranslation rotateCameraText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.rotate_camera");
+
     private GuiSlider xRotationSlider = new GuiSlider(3, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "X").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "X").getUnformattedText(),
@@ -120,9 +132,10 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         yRotationSlider.x = width-yRotationSlider.width-1;
         zRotationSlider.x = width-zRotationSlider.width-1;
 
-        xRotationSlider.y = height/2-35;
-        yRotationSlider.y = height/2-10;
-        zRotationSlider.y = height/2-10+20+5;
+        // + height+2 to leave space for the text
+        xRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2;
+        yRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2+xRotationSlider.height+5;
+        zRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2+xRotationSlider.height+yRotationSlider.height+5+5;
 
         xRotationSlider.setValue(180.0);
         yRotationSlider.setValue(180.0);
@@ -214,10 +227,38 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         SkeletalHistory history = builder.getHistory();
         drawCenteredString(fontRenderer, (history.getIndex()+1)+"/"+history.getHistoryLength(), width/2, height-redoButton.height-fontRenderer.FONT_HEIGHT, GuiConstants.NICE_WHITE);
         drawCenteredString(fontRenderer, titleText.getUnformattedText(), width/2, 1, GuiConstants.NICE_WHITE);
+
+        int yOffset = baseYOffset;
+        drawString(fontRenderer, TextFormatting.BOLD.toString()+TextFormatting.UNDERLINE.toString()+GuiConstants.CONTROLS_TEXT.getUnformattedText(), 5, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 15;
+        drawString(fontRenderer, TextFormatting.UNDERLINE.toString()+selectModelPartText.getUnformattedText(), 5, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 12;
+        drawString(fontRenderer, GuiConstants.LEFT_CLICK_TEXT.getUnformattedText(), 10, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 10;
+        drawString(fontRenderer, TextFormatting.UNDERLINE.toString()+rotateCameraText.getUnformattedText(), 5, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 12;
+        drawString(fontRenderer, GuiConstants.MIDDLE_CLICK_DRAG_TEXT.getUnformattedText(), 10, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 10;
+        drawString(fontRenderer, GuiConstants.MOVEMENT_KEYS_TEXT.getUnformattedText(), 10, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 10;
+        drawString(fontRenderer, GuiConstants.ARROW_KEYS_TEXT.getUnformattedText(), 10, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 10;
+        drawString(fontRenderer, TextFormatting.UNDERLINE.toString()+zoomText.getUnformattedText(), 5, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 12;
+        drawString(fontRenderer, GuiConstants.MOUSE_WHEEL_TEXT.getUnformattedText(), 10, yOffset, GuiConstants.NICE_WHITE);
+        yOffset += 10;
+        drawString(fontRenderer, GuiConstants.TRACKPAD_ZOOM_TEXT.getUnformattedText(), 10, yOffset, GuiConstants.NICE_WHITE);
+
+        String selectionText;
+        if(selectedPart == null)
+            selectionText = noPartSelectedText.getUnformattedText();
+        else
+            selectionText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.selected_part", selectedPart.boxName).getUnformattedText();
+        drawCenteredString(fontRenderer, selectionText, xRotationSlider.x+xRotationSlider.width/2, baseYOffset, GuiConstants.NICE_WHITE);
         GlStateManager.popMatrix();
 
         setModelToPose();
-        prepareModelRendering(width/3, height/2, 30f);
+        prepareModelRendering(width/8*3, height/2, 30f);
         RotationAxis ringBelowMouse = findRingBelowMouse();
         if(draggingRing) {
             if(ringBelowMouse != RotationAxis.NONE) {
