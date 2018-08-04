@@ -21,12 +21,14 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -101,7 +103,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     @Override
     public void initGui() {
         super.initGui();
-        int buttonWidth = width/3; // TODO: handle when > 200px (eg Gui Scale Small)
+        int buttonWidth = width/3;
         undoButton.x = 0;
         redoButton.x = buttonWidth;
         resetButton.x = buttonWidth*2;
@@ -515,6 +517,25 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STOPPING));
         } else if(button == 0) {
             currentSelectedRing = RotationAxis.NONE;
+        }
+    }
+
+    @Override
+    public void handleKeyboardInput() throws IOException {
+        super.handleKeyboardInput();
+        GameSettings settings = mc.gameSettings;
+        final float cameraSpeed = 10f;
+        if(Keyboard.isKeyDown(settings.keyBindLeft.getKeyCode()) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+            cameraYaw -= cameraSpeed;
+        }
+        if(Keyboard.isKeyDown(settings.keyBindRight.getKeyCode()) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+            cameraYaw += cameraSpeed;
+        }
+        if(Keyboard.isKeyDown(settings.keyBindBack.getKeyCode()) || Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+            cameraPitch += cameraSpeed;
+        }
+        if(Keyboard.isKeyDown(settings.keyBindForward.getKeyCode()) || Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+            cameraPitch -= cameraSpeed;
         }
     }
 
