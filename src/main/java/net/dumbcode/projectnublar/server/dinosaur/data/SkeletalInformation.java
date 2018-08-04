@@ -75,6 +75,7 @@ public class SkeletalInformation {
                     boneToModelMap.put(bone, Collections.singletonList(element.getAsString()));
                 }
             }
+            information.initializeFromBoneMap(boneToModelMap);
             return information;
         }
 

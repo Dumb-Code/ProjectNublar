@@ -78,6 +78,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         @Override
         public Dinosaur deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject object = element.getAsJsonObject();
+            if(object.has("_is_example") && object.get("_is_example").getAsBoolean()) {
+                return null;
+            }
             Dinosaur dinosaur = new Dinosaur();
             ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
             ModelProperties readModelProperties = context.deserialize(object.get("model_properties"), TypeToken.of(ModelProperties.class).getType());
