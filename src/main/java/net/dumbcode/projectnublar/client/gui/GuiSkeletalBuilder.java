@@ -191,7 +191,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
     @Override
     public void drawBackground(int tint) {
-        super.drawBackground(tint);
         drawDefaultBackground();
     }
 
@@ -213,12 +212,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         SkeletalHistory history = builder.getHistory();
         drawCenteredString(fontRenderer, (history.getIndex()+1)+"/"+history.getHistoryLength(), width/2, height-redoButton.height-fontRenderer.FONT_HEIGHT, GuiConstants.NICE_WHITE);
         drawCenteredString(fontRenderer, titleText.getUnformattedText(), width/2, 1, GuiConstants.NICE_WHITE);
-        String selectionText;
-        if(selectedPart != null)
-            selectionText = "Selected part: "+selectedPart.boxName;
-        else
-            selectionText = "No part selected :c";
-        fontRenderer.drawString(selectionText, 0,0, 0xFFFFFFFF); // TODO: remove?
         GlStateManager.popMatrix();
 
         setModelToPose();
