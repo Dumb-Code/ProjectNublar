@@ -2,12 +2,10 @@ package net.dumbcode.projectnublar.server.block;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
-import net.dumbcode.projectnublar.server.dinosaur.data.FossilInformation;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
@@ -44,15 +42,16 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
             BlockEntitySkeletalBuilder skeletalBuilder = (BlockEntitySkeletalBuilder) tileEntity;
             if(stack.getItem() instanceof FossilItem) {
                 FossilItem item = (FossilItem)stack.getItem();
-                FossilInformation info = item.getInformation();
+                Dinosaur dinosaur = item.getDinosaur();
+                String varient = item.getVarient();
                 if(skeletalBuilder.getDinosaur() == Dinosaur.MISSING) {
-                    skeletalBuilder.setDinosaur(info.getDinosaur());
+                    skeletalBuilder.setDinosaur(dinosaur);
                 }
-                if(info.getDinosaur() == skeletalBuilder.getDinosaur()) {
+                if(dinosaur == skeletalBuilder.getDinosaur()) {
                     DinosaurEntity entity = skeletalBuilder.getDinosaurEntity();
-                    List<String> boneList = info.getDinosaur().getSkeletalInformation().getBoneListed();
+                    List<String> boneList = dinosaur.getSkeletalInformation().getBoneListed();
                     if(entity.modelIndex < boneList.size()) {
-                        if(info.getType().equals(boneList.get(entity.modelIndex))) {
+                        if(varient.equals(boneList.get(entity.modelIndex))) {
                             skeletalBuilder.getBoneHandler().setStackInSlot(entity.modelIndex++, stack.splitStack(1));
                         }
                     }

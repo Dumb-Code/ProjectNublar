@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
@@ -23,20 +24,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Locale;
 
-public class DinosaurSpawnEgg extends Item implements DinosaurStack {
+public class DinosaurSpawnEgg extends Item implements DinosaurProvider {
+
+    @Getter
+    private final Dinosaur dinosaur;
+
+    public DinosaurSpawnEgg(Dinosaur dinosaur) {
+        this.dinosaur = dinosaur;
+    }
+
     @Override
     public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand) {
         return super.itemInteractionForEntity(stack, playerIn, target, hand);
-    }
-
-    @Override
-    public boolean shouldOverrideModel(Dinosaur value) {
-        return false;
-    }
-
-    @Override
-    public boolean canBeInCreativeTab(Dinosaur value) {
-        return true;
     }
 
     @Override
@@ -95,8 +94,7 @@ public class DinosaurSpawnEgg extends Item implements DinosaurStack {
     }
 
     public DinosaurEntity createDinosaurEntity(World world, EntityPlayer player, ItemStack stack, double x, double y, double z) {
-        Dinosaur dinosaur = this.getValue(stack);
-        DinosaurEntity entity = dinosaur.createEntity(world);
+        DinosaurEntity entity = this.dinosaur.createEntity(world);
 
         boolean male;
         switch (SpawnEggInfo.fromStack(stack).getState()) {
@@ -112,26 +110,6 @@ public class DinosaurSpawnEgg extends Item implements DinosaurStack {
         entity.rotationYawHead = entity.rotationYaw;
         entity.renderYawOffset = entity.rotationYaw;
         return entity;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> subtypes) {
-        if(this.isInCreativeTab(tab)) {
-            subtypes.addAll(this.getAllStacksOrdered());
-        }
-    }
-
-    @Override
-    public Dinosaur getValue(ItemStack stack) {
-        return SpawnEggInfo.fromStack(stack).getDinosaur();
-    }
-
-    @Override
-    public ItemStack putValue(ItemStack stack, Dinosaur value) {
-        SpawnEggInfo info = SpawnEggInfo.fromStack(stack);
-        stack.getOrCreateSubCompound(ProjectNublar.MODID).setTag("SpawnEggInfo", info.serialize());
-        return stack;
     }
 
     @Data

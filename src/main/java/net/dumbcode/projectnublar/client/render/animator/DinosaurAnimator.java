@@ -48,19 +48,19 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
             for (String activeState : activeStates) {
                 nonHiddenCubes.addAll(modelChildMap.get(activeState));
             }
-        }
-        for (ModelRenderer modelRenderer : parModel.boxList) {
-            AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-            if(nonHiddenCubes.contains(modelRenderer)) {
-                if(this.rescalingEnabled) {
-                    box.scaleX = 1;
-                    box.scaleY = 1;
-                    box.scaleZ = 1;
+            for (ModelRenderer modelRenderer : parModel.boxList) {
+                AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+                if(nonHiddenCubes.contains(modelRenderer)) {
+                    if(this.rescalingEnabled) {
+                        box.scaleX = 1;
+                        box.scaleY = 1;
+                        box.scaleZ = 1;
+                    }
+                } else {
+                    box.scaleX = 0;
+                    box.scaleY = 0;
+                    box.scaleZ = 0;
                 }
-            } else {
-                box.scaleX = 0;
-                box.scaleY = 0;
-                box.scaleZ = 0;
             }
         }
         super.performAnimations(parModel, entity, limbSwing, limbSwingAmount, ticks, rotationYaw, rotationPitch, scale);

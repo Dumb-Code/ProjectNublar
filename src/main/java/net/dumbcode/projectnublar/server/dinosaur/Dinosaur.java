@@ -32,8 +32,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final ItemProperties itemProperties = new ItemProperties();
     private final EntityProperties entityProperties = new EntityProperties();
     private final SkeletalInformation skeletalInformation = new SkeletalInformation();
-    @Getter(lazy = true)
-    private final List<FossilInformation> fossilInformation = createFossilInformation();
 
     private ModelContainer modelContainer;
     private ModelContainer noAnimationModelContainer;
@@ -46,14 +44,12 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return StringUtils.toCamelCase(getRegName().getResourcePath());
     }
 
-    public DinosaurEntity createEntity(World world) {
-        return this.getEntityProperties().getEntityCreateFunction().apply(world).setDinosaur(this);
+    public String getFormattedName() {
+        return this.getRegName().toString().toLowerCase().replace(":", "_");
     }
 
-    private List<FossilInformation> createFossilInformation() {
-        List<FossilInformation> list = Lists.newArrayList();
-        getSkeletalInformation().getIndividualBones().forEach(bone -> list.add(new FossilInformation(Dinosaur.this, bone)));
-        return list;
+    public DinosaurEntity createEntity(World world) {
+        return this.getEntityProperties().getEntityCreateFunction().apply(world).setDinosaur(this);
     }
 
     @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings

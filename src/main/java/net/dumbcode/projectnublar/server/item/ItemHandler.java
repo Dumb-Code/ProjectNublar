@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.item;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.dinosaur.data.FossilInformation;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -14,44 +13,24 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, Collection<FossilItem>> FOSSIL_ITEMS = new HashMap<>();
+    public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
+    public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
     @SubscribeEvent
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
-        populateMap(event, RAW_MEAT_ITEMS, d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
-        populateMap(event, COOKED_MEAT_ITEMS, d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED));
-        populateCollectionMap(event, FOSSIL_ITEMS, d -> {
-            List<FossilInformation> information = d.getFossilInformation();
-            return information.stream()
-                    .map(info -> {
-                        FossilItem fossil = new FossilItem(d, info);
-                        String id = "fossil_"+d.getRegName().getResourcePath()+"_"+info.getType().toLowerCase();
-                        fossil.setRegistryName(new ResourceLocation(ProjectNublar.MODID, id))
-                                .setUnlocalizedName(id)
-                                .setCreativeTab(ProjectNublar.TAB);
-                        return fossil;
-                    })
-                    .collect(Collectors.toList());
-        });
-        registerOreNames(RAW_MEAT_ITEMS);
-        registerOreNames(COOKED_MEAT_ITEMS);
-        registerCollectionOreNames(FOSSIL_ITEMS);
-        event.getRegistry().registerAll(
-                new DinosaurSpawnEgg()
-                        .setRegistryName("spawn_egg")
-                        .setUnlocalizedName("spawn_egg")
-                        .setCreativeTab(ProjectNublar.TAB)
-        );
+        populateMap(event, RAW_MEAT_ITEMS, "meat_dinosaur_%s_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
+        populateMap(event, COOKED_MEAT_ITEMS, "meat_dinosaur_%s_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED));
+        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
+        populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new);
         for (Block block : ForgeRegistries.BLOCKS) {
             if(block instanceof IItemBlock) {
                 event.getRegistry().register(((IItemBlock)block).createItem()
@@ -60,56 +39,56 @@ public final class ItemHandler {
                         .setCreativeTab(block.getCreativeTabToDisplayOn()));
             }
         }
+
+        //TODO: iterate through all items, and check the cast
+        registerOreNames(RAW_MEAT_ITEMS);
+        registerOreNames(COOKED_MEAT_ITEMS);
+        FOSSIL_ITEMS.values().forEach(ItemHandler::registerOreNames);
     }
 
     /**
      * Needs to be called **after** registering all the items
      * @param items
      */
-    private static void registerOreNames(Map<Dinosaur, ? extends Item> items) {
+    private static void registerOreNames(Map<?, ? extends Item> items) {
         items.values().stream()
-                .filter(item -> item instanceof ItemWithOreName)
-                .forEach(item -> ((ItemWithOreName)item).registerOreNames());
+                .filter(ItemWithOreName.class::isInstance)
+                .map(ItemWithOreName.class::cast)
+                .forEach(ItemWithOreName::registerOreNames);
     }
 
-    /**
-     * Needs to be called **after** registering all the items
-     * @param items
-     */
-    private static <T extends Item> void registerCollectionOreNames(Map<Dinosaur, Collection<T>> items) {
-        items.values()
-                .forEach(collection ->
-                        collection.stream()
-                                .filter(item -> item instanceof ItemWithOreName)
-                                .forEach(item -> ((ItemWithOreName)item).registerOreNames()
-                                ));
+
+    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier) {
+        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
+            if(dinosaur != Dinosaur.MISSING) {
+                T item = supplier.apply(dinosaur);
+                String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
+                item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
+                item.setUnlocalizedName(name);
+                item.setCreativeTab(ProjectNublar.TAB);
+                itemMap.put(dinosaur, item);
+                event.getRegistry().register(item);
+            }
+        }
     }
 
-    private static <T extends Item> void populateCollectionMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Collection<T>> itemMap, Function<Dinosaur, Collection<T>> supplier) {
-        ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()
-                .stream()
-                .filter(d -> d != Dinosaur.MISSING)
-                .forEach(d -> {
-                    Collection<T> item = supplier.apply(d);
-                    itemMap.put(d, item);
-                    item.forEach(event.getRegistry()::register);
-                });
+    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
+        populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname);
     }
 
-    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, Function<Dinosaur, T> supplier) {
-        ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()
-                .stream()
-                .filter(d -> d != Dinosaur.MISSING)
-                .forEach(d -> {
-                    T item = supplier.apply(d);
-                    itemMap.put(d, item);
+    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
+        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
+            if(dinosaur != Dinosaur.MISSING) {
+                for (S s : getterFunction.apply(dinosaur)) {
+                    T item = creationFunc.apply(dinosaur, s);
+                    String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
+                    item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
+                    item.setUnlocalizedName(name);
+                    item.setCreativeTab(ProjectNublar.TAB);
+                    itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
                     event.getRegistry().register(item);
-                });
-    }
-
-//    @Nonnull
-    @SuppressWarnings("all")
-    private static <T> T getNonNull() { //Used to prevent compiler warnings on object holders
-        return null;
+                }
+            }
+        }
     }
 }

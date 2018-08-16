@@ -22,8 +22,9 @@ import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ItemDinosaurMeat extends ItemFood implements DinosaurStack, ItemWithOreName {
+public class ItemDinosaurMeat extends ItemFood implements DinosaurProvider, ItemWithOreName {
 
+    @Getter
     private final Dinosaur dinosaur;
     private final CookState cookState;
 
@@ -31,10 +32,6 @@ public class ItemDinosaurMeat extends ItemFood implements DinosaurStack, ItemWit
         super(1, 1, true); // amount and saturation are overridden with methods to depend on the dinosaur
         this.dinosaur = dinosaur;
         this.cookState = cookState;
-        String id = "meat_dinosaur_"+dinosaur.getOreSuffix().toLowerCase()+"_"+cookState.name().toLowerCase();
-        setRegistryName(new ResourceLocation(ProjectNublar.MODID, id));
-        setUnlocalizedName(id);
-        setCreativeTab(ProjectNublar.TAB);
     }
 
     @Override
