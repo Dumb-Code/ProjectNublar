@@ -1,15 +1,14 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
+import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileHandler;
+import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileInfomation;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalHistory;
-import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
-import net.dumbcode.projectnublar.server.network.C2SkeletalMovement;
-import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
-import net.dumbcode.projectnublar.server.network.C6ResetPose;
+import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
@@ -65,6 +64,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private GuiButton undoButton = new GuiButtonExt(0, 0, 0, undoText.getUnformattedText());
     private GuiButton redoButton = new GuiButtonExt(1, 0, 0, redoText.getUnformattedText());
     private GuiButton resetButton = new GuiButtonExt(2, 0, 0, resetText.getUnformattedText());
+    private GuiButton exportButton = new GuiButtonExt(3, 0, 0, 20, 20, "E");
+    private GuiButton importButton = new GuiButtonExt(4, 20, 0, 20, 20, "I");
     private float cameraPitch;
     private float cameraYaw = 90f;
     private double zoom = 1.0;
@@ -147,6 +148,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         addButton(xRotationSlider);
         addButton(yRotationSlider);
         addButton(zRotationSlider);
+        addButton(exportButton);
+        addButton(importButton);
     }
 
     @Override
@@ -158,6 +161,11 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             ProjectNublar.NETWORK.sendToServer(new C4MoveInHistory(builder, +1));
         } else if(button == resetButton) {
             ProjectNublar.NETWORK.sendToServer(new C6ResetPose(builder));
+        } else if(button == exportButton) {
+            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.builder.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
+        } else if(button == importButton) {
+            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Import", file -> ProjectNublar.NETWORK.sendToServer(new C8FullPoseChange(this.builder, SkeletalBuilderFileHandler.deserilize(file).getPoseData())))); //TODO: localize
+
         }
     }
 
