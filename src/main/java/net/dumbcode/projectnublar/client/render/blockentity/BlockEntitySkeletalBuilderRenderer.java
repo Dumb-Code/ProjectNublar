@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.model.InfoTabulaModel;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilder;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
@@ -17,9 +18,11 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
@@ -47,7 +50,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.enableLighting();
         Vector3f rotation = new Vector3f();
         float angle = 90F;
-        switch (facing.getAxis()) {
+        switch (facing.getAxis()) { //There gotta be a better way than this
             case X:
                 rotation = new Vector3f(0, 0, 1);
                 angle = facing == EnumFacing.WEST ? 90F : 270F;
@@ -64,17 +67,18 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         Matrix4d translateMatrix = new Matrix4d();
         Matrix4d rotateMatrix = new Matrix4d();
-        translateMatrix.set(new Vector3d(te.getPos().getX(), te.getPos().getY() + 1, te.getPos().getZ()));
+        Matrix4d facingMatrix = new Matrix4d();
 
-        if(facing != EnumFacing.UP) { //TODO: dosnt currently work with support poles
-            GlStateManager.rotate(angle, rotation.x, rotation.y, rotation.z);
-            if(rotation.x != 0) {
-                rotateMatrix.rotX(angle);
-            } else if(rotation.y != 0) {
-                rotateMatrix.rotY(angle);
-            } else if(rotation.z != 0) {
-                rotateMatrix.rotZ(angle);
-            }
+        Vec3i facingRot = facing.getDirectionVec();
+        translateMatrix.set(new Vector3d(te.getPos().getX() + facingRot.getX(), te.getPos().getY() + facingRot.getY(), te.getPos().getZ() + facingRot.getZ()));
+
+        GlStateManager.rotate(angle, rotation.x, rotation.y, rotation.z);
+        if(rotation.x != 0) {
+            facingMatrix.rotX(angle / 180F * Math.PI);
+        } else if(rotation.y != 0) {
+            facingMatrix.rotY(angle / 180F * Math.PI);
+        } else if(rotation.z != 0) {
+            facingMatrix.rotZ(angle / 180F * Math.PI);
         }
         GlStateManager.rotate(te.getRotation(), 0, 1, 0);
         rotateMatrix.rotY(te.getRotation() / 180D * PI);
@@ -102,18 +106,23 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
         GlStateManager.popMatrix();
 
-        List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "head", "chest"); //TODO: move to dinosaur class
+        List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
 
         World world = te.getWorld();
-        double poleLength = 0.1F;
+        double poleWidth = 1/16F;
+        double baseWidth = 8/16F;
+        double baseHeight = 1/16F;
+
+        double halfPoleWidth = poleWidth/2F;
+        double halfBaseWidth = baseWidth/2F;
+
         if(te.getModel() != null) {
             for (String anchoredPart : anchoredParts) {
                 AdvancedModelRenderer cube = te.getModel().getCube(anchoredPart);
                 if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
                     InfoTabulaModel infoModel = (InfoTabulaModel) te.getModel();
                     int[] dimensions = infoModel.getDimension(cube);
-                    ModelBox box = ((List<ModelBox>)ReflectionHelper.getPrivateValue(ModelRenderer.class, cube, "cubeList")).get(0);
-
+                    ModelBox box = ((List<ModelBox>)ReflectionHelper.getPrivateValue(ModelRenderer.class, cube, "cubeList")).get(0); //TODO: remove this god awful method
 
                     Point3d endPoint = new Point3d( (box.posX1 + dimensions[0] / 2F) / 16F, (box.posY1 + dimensions[1] / 2F) / -16F, (box.posZ1 + dimensions[2] / 2F) / -16F);
 
@@ -135,37 +144,97 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
                     Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y, partOrigin.z);
                     rotateMatrix.transform(rendererPos);
+                    facingMatrix.transform(rendererPos);
                     translateMatrix.transform(rendererPos);
 
-                    BlockPos sectionPos = new BlockPos(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F);
-                    List<AxisAlignedBB> aabbList = Lists.newArrayList();
-                    while (aabbList.isEmpty() && sectionPos.getY() >= 0) {
-                        world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, new AxisAlignedBB(rendererPos.x + 0.5F - poleLength / 2D, rendererPos.y + 0.5F, rendererPos.z + 0.5F - poleLength / 2D, rendererPos.x + 0.5F + poleLength / 2D, 0/*Maybe a better solution?*/, rendererPos.z + 0.5F + poleLength / 2D), aabbList, null, false);
-                        sectionPos = sectionPos.down();
-                    }
                     double yPos = 0;
-                    if (!aabbList.isEmpty()) {
-                        for (AxisAlignedBB aabb : aabbList) {
-                            yPos = Math.max(0, aabb.maxY - 0.5F);
+                    for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F - halfBaseWidth, rendererPos.z + 0.5F - halfBaseWidth), new BlockPos(rendererPos.x + 0.5F + halfBaseWidth, rendererPos.y + 0.5F + halfBaseWidth, rendererPos.z + 0.5F + halfBaseWidth))) {
+                        List<AxisAlignedBB> aabbList = Lists.newArrayList();
+                        while (aabbList.isEmpty() && sectionPos.getY() >= 0) {
+                            world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, new AxisAlignedBB(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F, rendererPos.z + 0.5F - halfBaseWidth, rendererPos.x + 0.5F + halfBaseWidth, 0/*Maybe a better solution?*/, rendererPos.z + 0.5F + halfBaseWidth), aabbList, null, false);
+                            sectionPos = sectionPos.down();
+                        }
+                        if (!aabbList.isEmpty()) {
+                            for (AxisAlignedBB aabb : aabbList) {
+                                yPos = Math.max(yPos, aabb.maxY - 0.5F);
+                            }
                         }
                     }
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate(-te.getPos().getX(), -te.getPos().getY(), -te.getPos().getZ());
+                    GlStateManager.translate(-te.getPos().getX() + rendererPos.x, -te.getPos().getY(), -te.getPos().getZ() + rendererPos.z);
+                    float globalRotation = facing.getAxis() == EnumFacing.Axis.Y ? te.getRotation() * (facing == EnumFacing.UP ? -1 : 1) : 0;
+                    AdvancedModelRenderer reference = cube;
+                    while(reference.getParent() != null) {
+                        double rot = Math.toDegrees(facing.getAxis() == EnumFacing.Axis.Y ? reference.rotateAngleY : facing.getAxis() == EnumFacing.Axis.X ? reference.rotateAngleX : reference.rotateAngleZ);
+                        globalRotation += facing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? rot : -rot;
+                        reference = reference.getParent();
+                    }
+                    GlStateManager.rotate(-globalRotation, 0, 1, 0);
                     GlStateManager.disableAlpha();
                     GlStateManager.disableBlend();
                     GlStateManager.color(1f, 1f, 1f, 1f);
                     Tessellator tes = Tessellator.getInstance();
                     BufferBuilder buff = tes.getBuffer();
-                    buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
-                    buff.pos(rendererPos.x, rendererPos.y, rendererPos.z).endVertex();
-                    buff.pos(rendererPos.x, yPos, rendererPos.z).endVertex();
+                    this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
+                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+                    double poleLength = rendererPos.y - yPos;
+
+                    //Render pole
+                    buff.pos( - halfPoleWidth, rendererPos.y, halfPoleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
+                    buff.pos( - halfPoleWidth, yPos, halfPoleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos( + halfPoleWidth, yPos, halfPoleWidth).tex(1/16F, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos( + halfPoleWidth, rendererPos.y, halfPoleWidth).tex(1/16F, 0).normal(0, 0, 1).endVertex();
+
+                    buff.pos( - halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(0, 0).normal(-1, 0, 0).endVertex();
+                    buff.pos( - halfPoleWidth, yPos, -halfPoleWidth).tex(0, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos( - halfPoleWidth, yPos, halfPoleWidth).tex(1/16F, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos( - halfPoleWidth, rendererPos.y, halfPoleWidth).tex(1/16F, 0).normal(-1, 0, -1).endVertex();
+
+                    buff.pos( + halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(0, 0).normal(0, 0, -1).endVertex();
+                    buff.pos( + halfPoleWidth, yPos, -halfPoleWidth).tex(0, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos( - halfPoleWidth, yPos, -halfPoleWidth).tex(1/16F, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos( - halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(1/16F, 0).normal(0, 0, -1).endVertex();
+
+                    buff.pos( + halfPoleWidth, rendererPos.y, halfPoleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
+                    buff.pos( + halfPoleWidth, yPos, halfPoleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos( + halfPoleWidth, yPos, -halfPoleWidth).tex(1/16F, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos( + halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(1/16F, 0).normal(1, 0, 0).endVertex();
+
                     tes.draw();
-                    GlStateManager.translate(rendererPos.x, yPos + 0.0001, rendererPos.z);
-                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-                    buff.pos(-0.1, 0, -0.1).endVertex();
-                    buff.pos(-0.1, 0, 0.1).endVertex();
-                    buff.pos(0.1, 0, 0.1).endVertex();
-                    buff.pos(0.1, 0, -0.1).endVertex();
+                    GlStateManager.translate(0, yPos + 0.001, 0);
+                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+
+                    //Render base. Chunks of code are in U-D-N-E-S-W order
+
+                    buff.pos(-halfBaseWidth, baseHeight, -halfBaseWidth).tex(1/16F, 0).normal(0, 1, 0).endVertex();
+                    buff.pos(-halfBaseWidth, baseHeight, halfBaseWidth).tex(1/16F, 8/16F).normal(0, 1, 0).endVertex();
+                    buff.pos(halfBaseWidth, baseHeight, halfBaseWidth).tex(9/16F, 8/16F).normal(0, 1, 0).endVertex();
+                    buff.pos(halfBaseWidth, baseHeight, -halfBaseWidth).tex(9/16F, 0).normal(0, 1, 0).endVertex();
+
+                    buff.pos(halfBaseWidth, 0, -halfBaseWidth).tex(1/16F, 8/16F).normal(0, -1, 0).endVertex();
+                    buff.pos(halfBaseWidth, 0, halfBaseWidth).tex(1/16F, 16/16F).normal(0, -1, 0).endVertex();
+                    buff.pos(-halfBaseWidth, 0, halfBaseWidth).tex(9/16F, 16/16F).normal(0, -1, 0).endVertex();
+                    buff.pos(-halfBaseWidth, 0, -halfBaseWidth).tex(9/16F, 8/16F).normal(0, -1, 0).endVertex();
+
+                    buff.pos(halfBaseWidth, baseHeight, -halfBaseWidth).tex(9/16F, 8/16F).normal(0, 0, -1).endVertex();
+                    buff.pos(halfBaseWidth, 0, -halfBaseWidth).tex(9/16F, 8/16F).normal(0, 0, -1).endVertex();
+                    buff.pos(-halfBaseWidth, 0, -halfBaseWidth).tex(9/16F, 0).normal(0, 0, -1).endVertex();
+                    buff.pos(-halfBaseWidth, baseHeight, -halfBaseWidth).tex(9/16F, 0).normal(0, 0, -1).endVertex();
+
+                    buff.pos(halfBaseWidth, baseHeight, halfBaseWidth).tex(10/16F, 8/16F).normal(1, 0, 0).endVertex();
+                    buff.pos(halfBaseWidth, 0, halfBaseWidth).tex(10/16F, 8/16F).normal(1, 0, 0).endVertex();
+                    buff.pos(halfBaseWidth, 0, -halfBaseWidth).tex(10/16F, 0/16F).normal(1, 0, 0).endVertex();
+                    buff.pos(halfBaseWidth, baseHeight, -halfBaseWidth).tex(10/16F, 0/16F).normal(1, 0, 0).endVertex();
+
+                    buff.pos(-halfBaseWidth, baseHeight, halfBaseWidth).tex(11/16F, 8/16F).normal(0, 0, 1).endVertex();
+                    buff.pos(-halfBaseWidth, 0, halfBaseWidth).tex(11/16F, 8/16F).normal(0, 0, 1).endVertex();
+                    buff.pos(halfBaseWidth, 0, halfBaseWidth).tex(11/16F, 0).normal(0, 0, 1).endVertex();
+                    buff.pos(halfBaseWidth, baseHeight, halfBaseWidth).tex(11/16F, 0).normal(0, 0, 1).endVertex();
+
+                    buff.pos(-halfBaseWidth, baseHeight, -halfBaseWidth).tex(12/16F, 8/16F).normal(-1, 0, 0).endVertex();
+                    buff.pos(-halfBaseWidth, 0, -halfBaseWidth).tex(12/16F, 8/16F).normal(-1, 0, 0).endVertex();
+                    buff.pos(-halfBaseWidth, 0, halfBaseWidth).tex(12/16F, 0).normal(-1, 0, 0).endVertex();
+                    buff.pos(-halfBaseWidth, baseHeight, halfBaseWidth).tex(12/16F, 0).normal(-1, 0, 0).endVertex();
 
                     tes.draw();
                     GlStateManager.popMatrix();
@@ -174,4 +243,5 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
         GlStateManager.popMatrix();
     }
+
 }
