@@ -27,6 +27,9 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
 
     @Override
     protected void performAnimations(TabulaModel parModel, DinosaurEntity entity, float limbSwing, float limbSwingAmount, float ticks, float rotationYaw, float rotationPitch, float scale) {
+        if(!rescalingEnabled) {
+            return;
+        }
         Dinosaur dinosaur = entity.getDinosaur();
         Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
         List<String> modelList = Lists.newArrayList();
@@ -51,16 +54,21 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
             for (ModelRenderer modelRenderer : parModel.boxList) {
                 AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
                 if(nonHiddenCubes.contains(modelRenderer)) {
-                    if(this.rescalingEnabled) {
-                        box.scaleX = 1;
-                        box.scaleY = 1;
-                        box.scaleZ = 1;
-                    }
+                    box.scaleX = 1;
+                    box.scaleY = 1;
+                    box.scaleZ = 1;
                 } else {
                     box.scaleX = 0;
                     box.scaleY = 0;
                     box.scaleZ = 0;
                 }
+            }
+        } else {
+            for (ModelRenderer modelRenderer : parModel.boxList) {
+                AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+                box.scaleX = 1;
+                box.scaleY = 1;
+                box.scaleZ = 1;
             }
         }
         super.performAnimations(parModel, entity, limbSwing, limbSwingAmount, ticks, rotationYaw, rotationPitch, scale);

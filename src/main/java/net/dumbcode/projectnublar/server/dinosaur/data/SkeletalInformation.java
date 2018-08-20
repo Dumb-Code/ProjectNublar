@@ -17,6 +17,7 @@ public class SkeletalInformation {
     private List<String> boneListed = Lists.newArrayList();
     private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
 
+    //Currently, if a cube dosnt have a parent (or the parents parents ect...) linked with a bone, it dosnt render at all. TODO: fix that
     public void initializeMap(String... boneModels) {
         if(boneModels.length % 2 != 0) {
             throw new RuntimeException("Dont know how to handle list of length " + boneModels.length);
