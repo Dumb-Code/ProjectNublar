@@ -161,6 +161,7 @@ public class GuiFileExplorer extends GuiScreen {
             fileConsumer.accept(out);
             this.mc.displayGuiScreen(this.parent);
         } else if (button == this.addFolderButton && new File(this.root, this.superseedingFolder + "/" + this.fileName.getText().trim()).mkdirs()) {
+            this.fileName.setText("");
             this.updateEntries();
         }
     }
