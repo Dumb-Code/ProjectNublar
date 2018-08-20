@@ -13,11 +13,13 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.DoubleConsumer;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
@@ -166,6 +168,16 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
             poseData.put(box.boxName, rotations);
         }
         markDirty();
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        return INFINITE_EXTENT_AABB; //TODO: get size of dinosaur, and fit this to it
+    }
+
+    @Override
+    public double getMaxRenderDistanceSquared() {
+        return Double.MAX_VALUE;
     }
 
     public void setCameraAngles(float cameraYaw, float cameraPitch) {
