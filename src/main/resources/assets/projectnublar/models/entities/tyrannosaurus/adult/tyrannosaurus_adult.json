@@ -1,0 +1,11 @@
+{
+  "version": 0,
+  "poses": {
+    "idle": [
+      {
+        "pose": "tyrannosaurus_adult_idle",
+        "time": 10
+      }
+    ]
+  }
+}

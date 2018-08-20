@@ -2,14 +2,12 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonWriter;
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.dinosaur.Velociraptor;
+import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
@@ -21,11 +19,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.util.JsonUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -150,8 +146,8 @@ public class ProjectNublar
 
     @SubscribeEvent
     public static void register(RegisterDinosaurEvent event) {
-        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:missing")); // TODO: custom class?
-        event.getRegistry().register(new Velociraptor().setRegistryName("projectnublar:velociraptor"));
+        event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:missing")); // TODO: custom class?
+        event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
     }
 
     public static Logger getLogger() {
