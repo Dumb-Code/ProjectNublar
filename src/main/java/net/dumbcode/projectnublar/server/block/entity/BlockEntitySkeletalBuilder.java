@@ -24,7 +24,7 @@ import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private Dinosaur dinosaur = Dinosaur.MISSING;
-    private Rotation rotation = Rotation.NONE;
+    private float rotation;
     private TabulaModel model;
     private Map<String, Vector3f> poseData = new HashMap<>();
 
@@ -51,7 +51,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setString("Dinosaur", this.dinosaur.getRegName().toString());
         nbt.setTag("Inventory", this.boneHandler.serializeNBT());
-        nbt.setInteger("Rotation", this.rotation.ordinal());
+        nbt.setFloat("Rotation", this.rotation);
         nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
 
         // save pose data
@@ -77,7 +77,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     public void readFromNBT(NBTTagCompound nbt) {
         setDinosaur(DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
-        this.rotation = Rotation.values()[nbt.getInteger("Rotation")];
+        this.rotation = nbt.getFloat("Rotation");
         // load pose data
         NBTTagCompound pose = nbt.getCompoundTag("Pose");
         poseData.clear();
@@ -124,11 +124,11 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
         return boneHandler;
     }
 
-    public void setRotation(Rotation rotation) {
+    public void setRotation(float rotation) {
         this.rotation = rotation;
     }
 
-    public Rotation getRotation() {
+    public float getRotation() {
         return rotation;
     }
 

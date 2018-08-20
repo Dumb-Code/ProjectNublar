@@ -57,8 +57,6 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
                         }
                     }
                 }
-            } else if(playerIn.isSneaking()) {
-                skeletalBuilder.setRotation(Rotation.values()[(skeletalBuilder.getRotation().ordinal() + 1) % Rotation.values().length]);
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
                 if(skeletalBuilder.getDinosaur() == Dinosaur.MISSING) {
                     playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);

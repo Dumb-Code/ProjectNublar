@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -73,6 +74,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private RotationAxis currentSelectedRing = RotationAxis.NONE;
     private boolean draggingRing = false;
     private Vector2f dMouse = new Vector2f();
+    private float previousZoom;
 
     private FloatBuffer modelMatrix = BufferUtils.createFloatBuffer(16);
     private FloatBuffer projectionMatrix = BufferUtils.createFloatBuffer(16);
@@ -88,18 +90,24 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private TextComponentTranslation selectModelPartText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.select_part");
     private TextComponentTranslation rotateCameraText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.rotate_camera");
 
-    private GuiSlider xRotationSlider = new GuiSlider(3, 0, 0, 200, 20,
+    private GuiSlider xRotationSlider = new GuiSlider(5, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "X").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "X").getUnformattedText(),
             -180.0, 180.0, 0.0, true, true, this);
-    private GuiSlider yRotationSlider = new GuiSlider(4, 0, 0, 200, 20,
+    private GuiSlider yRotationSlider = new GuiSlider(6, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "Y").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Y").getUnformattedText(),
             -180.0, 180.0, 0.0, true, true, this);
-    private GuiSlider zRotationSlider = new GuiSlider(5, 0, 0, 200, 20,
+    private GuiSlider zRotationSlider = new GuiSlider(7, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "Z").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Z").getUnformattedText(),
             -180.0, 180.0, 0.0, true, true, this);
+
+
+    private GuiSlider globalRotation = new GuiSlider(8, 0, 0, 200, 20,
+            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_global").getUnformattedText(),
+            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Z").getUnformattedText(),
+            0, 360, 0.0, true, true, this);
 
     public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
         this.builder = builder;
@@ -111,6 +119,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         this.cameraPitch = builder.getCameraPitch();
         this.cameraYaw = builder.getCameraYaw();
         this.zoom = builder.getCameraZoom();
+        this.globalRotation.setValue(builder.getRotation());
+        this.previousZoom = builder.getRotation();
     }
 
     @Override
@@ -133,10 +143,14 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         yRotationSlider.x = width-yRotationSlider.width-1;
         zRotationSlider.x = width-zRotationSlider.width-1;
 
+        globalRotation.x = width-globalRotation.width-1;
+
         // + height+2 to leave space for the text
         xRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2;
         yRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2+xRotationSlider.height+5;
         zRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2+xRotationSlider.height+yRotationSlider.height+5+5;
+
+        globalRotation.y = resetButton.y-2-globalRotation.height;
 
         xRotationSlider.setValue(180.0);
         yRotationSlider.setValue(180.0);
@@ -148,6 +162,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         addButton(xRotationSlider);
         addButton(yRotationSlider);
         addButton(zRotationSlider);
+        addButton(globalRotation);
         addButton(exportButton);
         addButton(importButton);
     }
@@ -171,21 +186,27 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
     @Override
     public void onChangeSliderValue(GuiSlider slider) {
-        if(currentSelectedRing != RotationAxis.NONE)
-            return;
-        if(selectedPart == null)
-            return;
-        RotationAxis axis;
-        if(slider == xRotationSlider) {
-            axis = RotationAxis.X_AXIS;
-        } else if(slider == yRotationSlider) {
-            axis = RotationAxis.Y_AXIS;
-        } else if (slider == zRotationSlider) {
-            axis = RotationAxis.Z_AXIS;
-        } else {
-            return;
+        if(slider == xRotationSlider || slider == yRotationSlider || slider == zRotationSlider) {
+            if(currentSelectedRing != RotationAxis.NONE)
+                return;
+            if(selectedPart == null)
+                return;
+            RotationAxis axis;
+            if(slider == xRotationSlider) {
+                axis = RotationAxis.X_AXIS;
+            } else if(slider == yRotationSlider) {
+                axis = RotationAxis.Y_AXIS;
+            } else {
+                axis = RotationAxis.Z_AXIS;
+            }
+            actualizeRotation(selectedPart, axis, (float)Math.toRadians(slider.getValue()));
+        } else if(slider == globalRotation) {
+            float val = (float)globalRotation.getValue();
+            if(previousZoom != val) {
+                previousZoom = val;
+                ProjectNublar.NETWORK.sendToServer(new C9ChangeGlobalRotation(this.builder, (float)slider.getValue()));
+            }
         }
-        actualizeRotation(selectedPart, axis, (float)Math.toRadians(slider.getValue()));
     }
 
     @Override
@@ -205,6 +226,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         xRotationSlider.updateSlider();
         yRotationSlider.updateSlider();
         zRotationSlider.updateSlider();
+        globalRotation.updateSlider();
     }
 
     @Override
@@ -725,6 +747,15 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             renderer.scaleY = 0f;
             renderer.scaleZ = 0f;
         }
+    }
+
+    public void setRotation(float rotation) {
+        this.globalRotation.setValue(MathHelper.clamp(rotation, 0, 360));
+        this.previousZoom = rotation;
+    }
+
+    public BlockPos getBuilderPos() {
+        return this.builder.getPos();
     }
 
 }

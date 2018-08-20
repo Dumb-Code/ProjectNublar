@@ -89,6 +89,8 @@ public class ProjectNublar
         NETWORK.registerMessage(C6ResetPose.Handler.class, C6ResetPose.class, 6, Side.SERVER);
         NETWORK.registerMessage(S7FullPoseChange.Handler.class, S7FullPoseChange.class, 7, Side.CLIENT);
         NETWORK.registerMessage(C8FullPoseChange.Handler.class, C8FullPoseChange.class, 8, Side.SERVER);
+        NETWORK.registerMessage(C9ChangeGlobalRotation.Handler.class, C9ChangeGlobalRotation.class, 9, Side.SERVER);
+        NETWORK.registerMessage(S10ChangeGlobalRotation.Handler.class, S10ChangeGlobalRotation.class, 10, Side.CLIENT);
     }
 
     @EventHandler

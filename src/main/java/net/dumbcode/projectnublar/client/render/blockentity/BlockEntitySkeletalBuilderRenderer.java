@@ -76,8 +76,8 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 rotateMatrix.rotZ(angle);
             }
         }
-        GlStateManager.rotate(te.getRotation().ordinal() * 90, 0, 1, 0);
-        rotateMatrix.rotY(te.getRotation().ordinal() * 0.5D * PI);
+        GlStateManager.rotate(te.getRotation(), 0, 1, 0);
+        rotateMatrix.rotY(te.getRotation() / 180D * PI);
 
         GlStateManager.translate(0f, 1f, 0f);
         GlStateManager.rotate(180f, 0f, 0f, 1f);
