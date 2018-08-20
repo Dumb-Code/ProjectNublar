@@ -68,6 +68,7 @@ public class SkeletalBuilderFileHandler {
             while ((entry = zip.getNextEntry()) != null) {
                 if (entry.getName().equals("pose")) {
                     stream = zip;
+                    break;
                 }
             }
             if(stream == null) {
@@ -75,7 +76,7 @@ public class SkeletalBuilderFileHandler {
             }
             int lineNum = 0;
             String prevName = "";
-            for (String line : IOUtils.readLines(stream, "UTF-8")) {
+            for (String line : Lists.newArrayList(IOUtils.readLines(stream, "UTF-8"))) {
                 line = line.trim(); //maybe not needed ?
                 if(lineNum == 0) {
                     fileLocation = new ResourceLocation(line);
@@ -85,7 +86,6 @@ public class SkeletalBuilderFileHandler {
                     } else {
                         String[] astr = line.split(" ");
                         map.put(prevName, new Vector3f(Float.valueOf(astr[0]), Float.valueOf(astr[1]), Float.valueOf(astr[2])));
-
                     }
                 }
                 lineNum++;
