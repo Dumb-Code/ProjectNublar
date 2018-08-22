@@ -26,6 +26,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLSync;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -109,12 +110,20 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
 
         World world = te.getWorld();
+
         double poleWidth = 1/16F;
-        double baseWidth = 8/16F;
-        double baseHeight = 1/16F;
+        double baseWidth = 6/16F;
+        double baseHeight = 6/16F;
+
+        double notchWidth = 3/16F;
+        double notchHeight = 3/16F;
 
         double halfPoleWidth = poleWidth/2F;
         double halfBaseWidth = baseWidth/2F;
+        double halfNotchWidth = notchWidth/2F;
+
+        float textureWidth = 32F;
+        float textureHeight = 16F;
 
         if(te.getModel() != null) {
             for (String anchoredPart : anchoredParts) {
@@ -122,7 +131,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
                     InfoTabulaModel infoModel = (InfoTabulaModel) te.getModel();
                     int[] dimensions = infoModel.getDimension(cube);
-                    ModelBox box = ((List<ModelBox>)ReflectionHelper.getPrivateValue(ModelRenderer.class, cube, "cubeList")).get(0); //TODO: remove this god awful method
+                    ModelBox box = ((List<ModelBox>)ReflectionHelper.getPrivateValue(ModelRenderer.class, cube, "cubeList")).get(0); //TODO: remove this god awful method of getting the offsets
 
                     Point3d endPoint = new Point3d( (box.posX1 + dimensions[0] / 2F) / 16F, (box.posY1 + dimensions[1] / 2F) / -16F, (box.posZ1 + dimensions[2] / 2F) / -16F);
 
@@ -176,71 +185,111 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     Tessellator tes = Tessellator.getInstance();
                     BufferBuilder buff = tes.getBuffer();
                     this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(-halfPoleWidth, 0, -halfPoleWidth);
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
                     double poleLength = rendererPos.y - yPos;
 
                     //Render pole
-                    buff.pos( - halfPoleWidth, rendererPos.y, halfPoleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
-                    buff.pos( - halfPoleWidth, yPos, halfPoleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
-                    buff.pos( + halfPoleWidth, yPos, halfPoleWidth).tex(1/16F, poleLength).normal(0, 0, 1).endVertex();
-                    buff.pos( + halfPoleWidth, rendererPos.y, halfPoleWidth).tex(1/16F, 0).normal(0, 0, 1).endVertex();
+                    buff.pos(0, rendererPos.y, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
+                    buff.pos(0, yPos, poleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos(poleWidth, yPos, poleWidth).tex(1/textureWidth, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos(poleWidth, rendererPos.y, poleWidth).tex(1/textureWidth, 0).normal(0, 0, 1).endVertex();
 
-                    buff.pos( - halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(0, 0).normal(-1, 0, 0).endVertex();
-                    buff.pos( - halfPoleWidth, yPos, -halfPoleWidth).tex(0, poleLength).normal(-1, 0, 0).endVertex();
-                    buff.pos( - halfPoleWidth, yPos, halfPoleWidth).tex(1/16F, poleLength).normal(-1, 0, 0).endVertex();
-                    buff.pos( - halfPoleWidth, rendererPos.y, halfPoleWidth).tex(1/16F, 0).normal(-1, 0, -1).endVertex();
+                    buff.pos(0, rendererPos.y, 0).tex(0, 0).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, yPos, 0).tex(0, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, yPos, poleWidth).tex(1/textureWidth, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, rendererPos.y, poleWidth).tex(1/textureWidth, 0).normal(-1, 0, -1).endVertex();
 
-                    buff.pos( + halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(0, 0).normal(0, 0, -1).endVertex();
-                    buff.pos( + halfPoleWidth, yPos, -halfPoleWidth).tex(0, poleLength).normal(0, 0, -1).endVertex();
-                    buff.pos( - halfPoleWidth, yPos, -halfPoleWidth).tex(1/16F, poleLength).normal(0, 0, -1).endVertex();
-                    buff.pos( - halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(1/16F, 0).normal(0, 0, -1).endVertex();
+                    buff.pos(poleWidth, rendererPos.y, 0).tex(0, 0).normal(0, 0, -1).endVertex();
+                    buff.pos(poleWidth, yPos, 0).tex(0, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos(0, yPos, 0).tex(1/textureWidth, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos(0, rendererPos.y, 0).tex(1/textureWidth, 0).normal(0, 0, -1).endVertex();
 
-                    buff.pos( + halfPoleWidth, rendererPos.y, halfPoleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
-                    buff.pos( + halfPoleWidth, yPos, halfPoleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
-                    buff.pos( + halfPoleWidth, yPos, -halfPoleWidth).tex(1/16F, poleLength).normal(1, 0, 0).endVertex();
-                    buff.pos( + halfPoleWidth, rendererPos.y, -halfPoleWidth).tex(1/16F, 0).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, rendererPos.y, poleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, yPos, poleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, yPos, 0).tex(1/textureWidth, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, rendererPos.y, 0).tex(1/textureWidth, 0).normal(1, 0, 0).endVertex();
 
                     tes.draw();
+                    GlStateManager.popMatrix();
                     GlStateManager.translate(0, yPos + 0.001, 0);
-                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-
-                    //Render base. Chunks of code are in U-D-N-E-S-W order
-
-                    buff.pos(-halfBaseWidth, baseHeight, -halfBaseWidth).tex(1/16F, 0).normal(0, 1, 0).endVertex();
-                    buff.pos(-halfBaseWidth, baseHeight, halfBaseWidth).tex(1/16F, 8/16F).normal(0, 1, 0).endVertex();
-                    buff.pos(halfBaseWidth, baseHeight, halfBaseWidth).tex(9/16F, 8/16F).normal(0, 1, 0).endVertex();
-                    buff.pos(halfBaseWidth, baseHeight, -halfBaseWidth).tex(9/16F, 0).normal(0, 1, 0).endVertex();
-
-                    buff.pos(halfBaseWidth, 0, -halfBaseWidth).tex(1/16F, 8/16F).normal(0, -1, 0).endVertex();
-                    buff.pos(halfBaseWidth, 0, halfBaseWidth).tex(1/16F, 16/16F).normal(0, -1, 0).endVertex();
-                    buff.pos(-halfBaseWidth, 0, halfBaseWidth).tex(9/16F, 16/16F).normal(0, -1, 0).endVertex();
-                    buff.pos(-halfBaseWidth, 0, -halfBaseWidth).tex(9/16F, 8/16F).normal(0, -1, 0).endVertex();
-
-                    buff.pos(halfBaseWidth, baseHeight, -halfBaseWidth).tex(9/16F, 8/16F).normal(0, 0, -1).endVertex();
-                    buff.pos(halfBaseWidth, 0, -halfBaseWidth).tex(9/16F, 8/16F).normal(0, 0, -1).endVertex();
-                    buff.pos(-halfBaseWidth, 0, -halfBaseWidth).tex(9/16F, 0).normal(0, 0, -1).endVertex();
-                    buff.pos(-halfBaseWidth, baseHeight, -halfBaseWidth).tex(9/16F, 0).normal(0, 0, -1).endVertex();
-
-                    buff.pos(halfBaseWidth, baseHeight, halfBaseWidth).tex(10/16F, 8/16F).normal(1, 0, 0).endVertex();
-                    buff.pos(halfBaseWidth, 0, halfBaseWidth).tex(10/16F, 8/16F).normal(1, 0, 0).endVertex();
-                    buff.pos(halfBaseWidth, 0, -halfBaseWidth).tex(10/16F, 0/16F).normal(1, 0, 0).endVertex();
-                    buff.pos(halfBaseWidth, baseHeight, -halfBaseWidth).tex(10/16F, 0/16F).normal(1, 0, 0).endVertex();
-
-                    buff.pos(-halfBaseWidth, baseHeight, halfBaseWidth).tex(11/16F, 8/16F).normal(0, 0, 1).endVertex();
-                    buff.pos(-halfBaseWidth, 0, halfBaseWidth).tex(11/16F, 8/16F).normal(0, 0, 1).endVertex();
-                    buff.pos(halfBaseWidth, 0, halfBaseWidth).tex(11/16F, 0).normal(0, 0, 1).endVertex();
-                    buff.pos(halfBaseWidth, baseHeight, halfBaseWidth).tex(11/16F, 0).normal(0, 0, 1).endVertex();
-
-                    buff.pos(-halfBaseWidth, baseHeight, -halfBaseWidth).tex(12/16F, 8/16F).normal(-1, 0, 0).endVertex();
-                    buff.pos(-halfBaseWidth, 0, -halfBaseWidth).tex(12/16F, 8/16F).normal(-1, 0, 0).endVertex();
-                    buff.pos(-halfBaseWidth, 0, halfBaseWidth).tex(12/16F, 0).normal(-1, 0, 0).endVertex();
-                    buff.pos(-halfBaseWidth, baseHeight, halfBaseWidth).tex(12/16F, 0).normal(-1, 0, 0).endVertex();
-
-                    tes.draw();
+                    this.renderCube(baseWidth, baseHeight, textureWidth, textureHeight, 1, 0);
+                    GlStateManager.translate(0, baseHeight, 0);
+                    this.renderCube(notchWidth, notchHeight, textureWidth, textureHeight, 19, 0);
                     GlStateManager.popMatrix();
                 }
             }
         }
+        GlStateManager.popMatrix();
+    }
+
+    private void renderCube(double width, double height, float textureWidth, float textureHeight, int uOffset, int vOffset) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-width / 2F, 0, -height / 2F);
+
+        Tessellator tes = Tessellator.getInstance();
+        BufferBuilder buff = tes.getBuffer();
+
+        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+
+        //Chunks of code are in U-D-N-E-S-W order
+
+        double uFrom = uOffset/textureWidth;
+        double vFrom = vOffset/textureHeight;
+        double uTo = uFrom+width*16F/textureWidth;
+        double vTo = vFrom+height*16F/textureHeight;
+
+        buff.pos(0, height, 0).tex(uFrom, vFrom).normal(0, 1, 0).endVertex();
+        buff.pos(0, height, width).tex(uFrom, vTo).normal(0, 1, 0).endVertex();
+        buff.pos(width, height, width).tex(uTo, vTo).normal(0, 1, 0).endVertex();
+        buff.pos(width, height, 0).tex(uTo, vFrom).normal(0, 1, 0).endVertex();
+
+        vTo += height*16F/textureHeight;
+        vFrom += height*16F/textureHeight;
+
+        buff.pos(width, 0, 0).tex(uFrom, vFrom).normal(0, -1, 0).endVertex();
+        buff.pos(width, 0, width).tex(uFrom, vTo).normal(0, -1, 0).endVertex();
+        buff.pos(0, 0, width).tex(uTo, vTo).normal(0, -1, 0).endVertex();
+        buff.pos(0, 0, 0).tex(uTo, vFrom).normal(0, -1, 0).endVertex();
+
+        uFrom += width*16F/textureWidth;
+        uTo += width*16F/textureWidth;
+        vTo -= height*16F/textureHeight;
+        vFrom -= height*16F/textureHeight;
+
+        buff.pos(width, height, 0).tex(uFrom, vFrom).normal(0, 0, -1).endVertex();
+        buff.pos(width, 0, 0).tex(uFrom, vTo).normal(0, 0, -1).endVertex();
+        buff.pos(0, 0, 0).tex(uTo, vTo).normal(0, 0, -1).endVertex();
+        buff.pos(0, height, 0).tex(uTo, vFrom).normal(0, 0, -1).endVertex();
+
+        vTo += height*16F/textureHeight;
+        vFrom += height*16F/textureHeight;
+
+        buff.pos(width, height, width).tex(uFrom, vFrom).normal(1, 0, 0).endVertex();
+        buff.pos(width, 0, width).tex(uFrom, vTo).normal(1, 0, 0).endVertex();
+        buff.pos(width, 0, 0).tex(uTo, vTo).normal(1, 0, 0).endVertex();
+        buff.pos(width, height, 0).tex(uTo, vFrom).normal(1, 0, 0).endVertex();
+
+        uFrom += width*16F/textureWidth;
+        uTo += width*16F/textureWidth;
+        vTo -= height*16F/textureHeight;
+        vFrom -= height*16F/textureHeight;
+
+        buff.pos(0, height, width).tex(uFrom, vFrom).normal(0, 0, 1).endVertex();
+        buff.pos(0, 0, width).tex(uFrom, vTo).normal(0, 0, 1).endVertex();
+        buff.pos(width, 0, width).tex(uTo, vTo).normal(0, 0, 1).endVertex();
+        buff.pos(width, height, width).tex(uTo, vFrom).normal(0, 0, 1).endVertex();
+
+        vTo += height*16F/textureHeight;
+        vFrom += height*16F/textureHeight;
+
+        buff.pos(0, height, 0).tex(uFrom, vFrom).normal(-1, 0, 0).endVertex();
+        buff.pos(0, 0, 0).tex(uFrom, vTo).normal(-1, 0, 0).endVertex();
+        buff.pos(0, 0, width).tex(uTo, vTo).normal(-1, 0, 0).endVertex();
+        buff.pos(0, height, width).tex(uTo, vFrom).normal(-1, 0, 0).endVertex();
+
+        tes.draw();
         GlStateManager.popMatrix();
     }
 
