@@ -5,6 +5,7 @@ import lombok.Setter;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
@@ -21,42 +22,40 @@ import java.util.Map;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
+@Getter
+@Setter
 public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
+    private final SkeletalProperties skeletalProperties = new SkeletalProperties();
     private Dinosaur dinosaur = Dinosaur.MISSING;
-    private float rotation;
     private TabulaModel model;
     private Map<String, Vector3f> poseData = new HashMap<>();
+
+    @Getter(lazy = true)
+    private final DinosaurEntity dinosaurEntity = createEntity();
+
+    private final SkeletalHistory history = new SkeletalHistory(this);
+
+    // Not saved to NBT, player-specific only to help with posing
+
+    private float cameraPitch;
+    private float cameraYaw = 90f;
+    private double cameraZoom = 1.0;
 
     public BlockEntitySkeletalBuilder() {
         this.reassureSize();
     }
 
-    @Getter(lazy = true)
-    private final DinosaurEntity dinosaurEntity = createEntity();
-
-    @Getter
-    private final SkeletalHistory history = new SkeletalHistory(this);
-
-    // Not saved to NBT, player-specific only to help with posing
-    @Getter
-    private float cameraPitch;
-    @Getter
-    private float cameraYaw = 90f;
-    @Getter
-    @Setter
-    private double cameraZoom = 1.0;
-
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setString("Dinosaur", this.dinosaur.getRegName().toString());
         nbt.setTag("Inventory", this.boneHandler.serializeNBT());
-        nbt.setFloat("Rotation", this.rotation);
         nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
 
         // save pose data
         nbt.setTag("Pose", writePoseToNBT(poseData));
         nbt.setInteger("ModelIndex", getDinosaurEntity().modelIndex);
+        nbt.setTag("SkeletalProperties", this.skeletalProperties.serialize(new NBTTagCompound()));
         return super.writeToNBT(nbt);
     }
 
@@ -77,15 +76,15 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     public void readFromNBT(NBTTagCompound nbt) {
         setDinosaur(DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
-        this.rotation = nbt.getFloat("Rotation");
         // load pose data
         NBTTagCompound pose = nbt.getCompoundTag("Pose");
         poseData.clear();
         poseData.putAll(readPoseFromNBT(pose));
         this.reassureSize();
         this.history.readFromNBT(nbt.getCompoundTag("History"));
-        super.readFromNBT(nbt);
         getDinosaurEntity().modelIndex = nbt.getInteger("ModelIndex");
+        this.skeletalProperties.deserialize(nbt.getCompoundTag("SkeletalProperties"));
+        super.readFromNBT(nbt);
     }
 
     public Map<String, Vector3f> readPoseFromNBT(NBTTagCompound pose) {
@@ -122,14 +121,6 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
 
     public ItemStackHandler getBoneHandler() {
         return boneHandler;
-    }
-
-    public void setRotation(float rotation) {
-        this.rotation = rotation;
-    }
-
-    public float getRotation() {
-        return rotation;
     }
 
     private DinosaurEntity createEntity() {

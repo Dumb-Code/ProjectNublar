@@ -3,28 +3,28 @@ package net.dumbcode.projectnublar.server.network;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.gui.ForgeGuiFactory;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class C9ChangeGlobalRotation implements IMessage {
+public class C11ChangePoleFacing implements IMessage {
 
     private int x;
     private int y;
     private int z;
-    private float newRotation;
+    private PoleFacing newFacing;
 
-    public C9ChangeGlobalRotation() { }
+    public C11ChangePoleFacing() { }
 
-    public C9ChangeGlobalRotation(BlockEntitySkeletalBuilder builder, float newRotation) {
+    public C11ChangePoleFacing(BlockEntitySkeletalBuilder builder, PoleFacing newFacing) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
-        this.newRotation = newRotation;
+        this.newFacing = newFacing;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class C9ChangeGlobalRotation implements IMessage {
         x = buf.readInt();
         y = buf.readInt();
         z = buf.readInt();
-        newRotation = buf.readFloat();
+        newFacing = PoleFacing.values()[buf.readInt()];
     }
 
     @Override
@@ -40,19 +40,19 @@ public class C9ChangeGlobalRotation implements IMessage {
         buf.writeInt(x);
         buf.writeInt(y);
         buf.writeInt(z);
-        buf.writeFloat(newRotation);
+        buf.writeInt(newFacing.ordinal());
     }
 
-    public static class Handler extends WorldModificationsMessageHandler<C9ChangeGlobalRotation, IMessage> {
+    public static class Handler extends WorldModificationsMessageHandler<C11ChangePoleFacing, IMessage> {
         @Override
-        protected void handleMessage(C9ChangeGlobalRotation message, MessageContext ctx, World world, EntityPlayer player) {
+        protected void handleMessage(C11ChangePoleFacing message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
             if(te instanceof BlockEntitySkeletalBuilder) {
                 BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
-                builder.getSkeletalProperties().setRotation(message.newRotation);
+                builder.getSkeletalProperties().setPoleFacing(message.newFacing);
                 builder.markDirty();
-                ProjectNublar.NETWORK.sendToAll(new S10ChangeGlobalRotation(builder, message.newRotation));
+                ProjectNublar.NETWORK.sendToAll(new S12ChangePoleFacing(builder, message.newFacing));
             }
             pos.release();
         }

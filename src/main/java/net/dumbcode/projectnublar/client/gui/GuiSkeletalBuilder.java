@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
@@ -50,6 +51,7 @@ import static net.dumbcode.projectnublar.client.gui.GuiConstants.mouseOn;
 public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
     private final BlockEntitySkeletalBuilder builder;
+    private final SkeletalProperties properties;
     private final TabulaModel model;
     private final DinosaurAnimator animator;
     private final TextComponentTranslation titleText;
@@ -61,6 +63,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private TextComponentTranslation undoText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.undo");
     private TextComponentTranslation redoText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.redo");
     private TextComponentTranslation resetText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.reset");
+    private TextComponentTranslation propertiesGui = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.edit_properties");
     private GuiButton undoButton = new GuiButtonExt(0, 0, 0, undoText.getUnformattedText());
     private GuiButton redoButton = new GuiButtonExt(1, 0, 0, redoText.getUnformattedText());
     private GuiButton resetButton = new GuiButtonExt(2, 0, 0, resetText.getUnformattedText());
@@ -73,7 +76,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private RotationAxis currentSelectedRing = RotationAxis.NONE;
     private boolean draggingRing = false;
     private Vector2f dMouse = new Vector2f();
-    private float previousZoom;
 
     private FloatBuffer modelMatrix = BufferUtils.createFloatBuffer(16);
     private FloatBuffer projectionMatrix = BufferUtils.createFloatBuffer(16);
@@ -103,13 +105,11 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             -180.0, 180.0, 0.0, true, true, this);
 
 
-    private GuiSlider globalRotation = new GuiSlider(8, 0, 0, 200, 20,
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_global").getUnformattedText(),
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Z").getUnformattedText(),
-            0, 360, 0.0, true, true, this);
+    private GuiButton propertiesButton = new GuiButtonExt(8, 0, 0, propertiesGui.getUnformattedText());
 
     public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
         this.builder = builder;
+        this.properties = builder.getSkeletalProperties();
         this.model = builder.getModel(); // TODO: child models? -> Selectable
         this.animator = ReflectionHelper.getPrivateValue(TabulaModel.class, this.model, "tabulaAnimator");
         TextComponentTranslation dinosaurNameComponent = builder.getDinosaur().createNameComponent();
@@ -118,8 +118,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         this.cameraPitch = builder.getCameraPitch();
         this.cameraYaw = builder.getCameraYaw();
         this.zoom = builder.getCameraZoom();
-        this.globalRotation.setValue(builder.getRotation());
-        this.previousZoom = builder.getRotation();
     }
 
     @Override
@@ -142,14 +140,14 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         yRotationSlider.x = width-yRotationSlider.width-1;
         zRotationSlider.x = width-zRotationSlider.width-1;
 
-        globalRotation.x = width-globalRotation.width-1;
+        propertiesButton.x = width-propertiesButton.width-1;
 
         // + height+2 to leave space for the text
         xRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2;
         yRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2+xRotationSlider.height+5;
         zRotationSlider.y = baseYOffset+fontRenderer.FONT_HEIGHT+2+xRotationSlider.height+yRotationSlider.height+5+5;
 
-        globalRotation.y = resetButton.y-2-globalRotation.height;
+        propertiesButton.y = resetButton.y-2-propertiesButton.height;
 
         xRotationSlider.setValue(180.0);
         yRotationSlider.setValue(180.0);
@@ -161,7 +159,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         addButton(xRotationSlider);
         addButton(yRotationSlider);
         addButton(zRotationSlider);
-        addButton(globalRotation);
+        addButton(propertiesButton);
         addButton(exportButton);
         addButton(importButton);
     }
@@ -179,7 +177,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.builder.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
         } else if(button == importButton) {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Import", file -> ProjectNublar.NETWORK.sendToServer(new C8FullPoseChange(this.builder, SkeletalBuilderFileHandler.deserilize(file).getPoseData())))); //TODO: localize
-
+        } else if(button == propertiesButton) {
+            this.mc.displayGuiScreen(new GuiSkeletalProperties(this, this.builder));
         }
     }
 
@@ -199,12 +198,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
                 axis = RotationAxis.Z_AXIS;
             }
             actualizeRotation(selectedPart, axis, (float)Math.toRadians(slider.getValue()));
-        } else if(slider == globalRotation) {
-            float val = (float)globalRotation.getValue();
-            if(previousZoom != val) {
-                previousZoom = val;
-                ProjectNublar.NETWORK.sendToServer(new C9ChangeGlobalRotation(this.builder, (float)slider.getValue()));
-            }
         }
     }
 
@@ -225,7 +218,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         xRotationSlider.updateSlider();
         yRotationSlider.updateSlider();
         zRotationSlider.updateSlider();
-        globalRotation.updateSlider();
     }
 
     @Override
@@ -746,11 +738,6 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             renderer.scaleY = 0f;
             renderer.scaleZ = 0f;
         }
-    }
-
-    public void setRotation(float rotation) {
-        this.globalRotation.setValue(MathHelper.clamp(rotation, 0, 360));
-        this.previousZoom = rotation;
     }
 
     public BlockPos getBuilderPos() {

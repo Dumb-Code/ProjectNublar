@@ -3,17 +3,16 @@ package net.dumbcode.projectnublar.server.block.entity.skeletalbuilder;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public enum PoleFacing {
     NONE(null, aabb -> 0D),
     DOWN(EnumFacing.DOWN, a -> a.maxY),
-    UP(EnumFacing.UP, a -> a.minY),
     NORTH(EnumFacing.NORTH, a -> a.maxZ),
-    SOUTH(EnumFacing.SOUTH, a -> a.minZ),
     WEST(EnumFacing.WEST, a -> a.maxX),
-    EAST(EnumFacing.EAST, a -> a.minX);
+    SOUTH(EnumFacing.SOUTH, a -> a.minZ),
+    EAST(EnumFacing.EAST, a -> a.minX),
+    UP(EnumFacing.UP, a -> a.minY);
 
     private final EnumFacing facing;
     private final Function<AxisAlignedBB, Double> getterFunc;
@@ -38,5 +37,9 @@ public enum PoleFacing {
             }
         }
         return NONE;
+    }
+
+    public PoleFacing cycle() {
+        return PoleFacing.values()[(this.ordinal() + 1) % PoleFacing.values().length];
     }
 }

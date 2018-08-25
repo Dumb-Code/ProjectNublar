@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -28,7 +27,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLSync;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -49,6 +47,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         GlStateManager.translate(x + 0.5, y + 0.5, z + 0.5);
         GlStateManager.pushMatrix();
+
+        PoleFacing pole = te.getSkeletalProperties().getPoleFacing();
+        EnumFacing poleFacing = pole.getFacing();
 
         GlStateManager.enableLighting();
         Vector3f rotation = new Vector3f();
@@ -83,8 +84,11 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         } else if(rotation.z != 0) {
             facingMatrix.rotZ(angle / 180F * Math.PI);
         }
-        GlStateManager.rotate(te.getRotation(), 0, 1, 0);
-        rotateMatrix.rotY(te.getRotation() / 180D * PI);
+
+        float teRot = te.getSkeletalProperties().getRotation();
+
+        GlStateManager.rotate(teRot, 0, 1, 0);
+        rotateMatrix.rotY(teRot / 180D * PI);
 
         GlStateManager.translate(0f, 1f, 0f);
         GlStateManager.rotate(180f, 0f, 0f, 1f);
@@ -109,8 +113,12 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
         GlStateManager.popMatrix();
 
-        List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
+        if(pole == PoleFacing.NONE) {
+            GlStateManager.popMatrix();
+            return;
+        }
 
+        List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
         World world = te.getWorld();
 
         double poleWidth = 1/16F;
@@ -158,15 +166,12 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     facingMatrix.transform(rendererPos);
                     translateMatrix.transform(rendererPos);
 
-                    PoleFacing pole = PoleFacing.getFromFacing(facing.getOpposite());
-
-                    EnumFacing poleFacing = pole.getFacing();
-
-                    AxisAlignedBB bounding = new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
+                    AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
+                            new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
                             .offset(rendererPos.x+0.5F,rendererPos.y+0.5F,rendererPos.z+0.5F)
                             .grow(halfBaseWidth);
 
-                    double cubeEndPos = 0;
+                    double cubeEndPos = -1;
                     for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F - halfBaseWidth, rendererPos.z + 0.5F - halfBaseWidth), new BlockPos(rendererPos.x + 0.5F + halfBaseWidth, rendererPos.y + 0.5F + halfBaseWidth, rendererPos.z + 0.5F + halfBaseWidth))) {
                         List<AxisAlignedBB> aabbList = Lists.newArrayList();
                         int counter = 0;
@@ -181,6 +186,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                             }
                         }
                     }
+                    if(cubeEndPos == -1) {
+                        continue;
+                    }
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(-te.getPos().getX() + rendererPos.x, -te.getPos().getY() + rendererPos.y, -te.getPos().getZ() + rendererPos.z);
 
@@ -190,19 +198,29 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     Tessellator tes = Tessellator.getInstance();
                     BufferBuilder buff = tes.getBuffer();
                     this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
-                    float globalRotation = poleFacing.getAxisDirection().getOffset() * te.getRotation();
+                    float globalRotation = poleFacing.getAxis() == EnumFacing.Axis.Y ? poleFacing.getAxisDirection().getOffset() * te.getSkeletalProperties().getRotation() : 0;
                     AdvancedModelRenderer reference = cube;
                     while(reference != null) {
-                        globalRotation += -poleFacing.getAxisDirection().getOffset() * Math.toDegrees(reference.rotateAngleY);
+                        double axisRotation;
+                        switch (poleFacing.getAxis()) {
+                            case X: axisRotation = reference.rotateAngleX; break;
+                            case Y: axisRotation = reference.rotateAngleY; break;
+                            case Z: axisRotation = reference.rotateAngleZ; break;
+                            default: throw new IllegalArgumentException("Unacceptable facingdir " + facing.getAxis());
+                        }
+                        globalRotation += poleFacing.getAxisDirection().getOffset() * Math.toDegrees(axisRotation);
                         reference = reference.getParent();
                     }
-                    GlStateManager.rotate(angle, rotation.x, rotation.y, rotation.z);
+                    switch (poleFacing.getAxis()) {
+                        case X: GlStateManager.rotate(poleFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1); break;
+                        case Y: GlStateManager.rotate(poleFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0); break;
+                        case Z: GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0); break;
+                    }
                     GlStateManager.rotate(globalRotation, 0, 1, 0);
-
                     GlStateManager.translate(-halfPoleWidth, 0, -halfPoleWidth);
 
                     double renderPosition;
-                    switch (facing.getAxis()) {
+                    switch (poleFacing.getAxis()) {
                         case X: renderPosition = rendererPos.x; break;
                         case Y: renderPosition = rendererPos.y; break;
                         case Z: renderPosition = rendererPos.z; break;
@@ -210,7 +228,6 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     }
 
                     double poleLength = (cubeEndPos - renderPosition) * -pole.getFacing().getAxisDirection().getOffset();
-
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
                     //Render pole
                     buff.pos(0, 0, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
