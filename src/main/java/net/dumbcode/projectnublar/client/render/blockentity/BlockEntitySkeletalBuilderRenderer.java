@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -141,7 +142,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
                     InfoTabulaModel infoModel = (InfoTabulaModel) te.getModel();
                     int[] dimensions = infoModel.getDimension(cube);
-                    ModelBox box = ((List<ModelBox>)ReflectionHelper.getPrivateValue(ModelRenderer.class, cube, "cubeList")).get(0); //TODO: remove this god awful method of getting the offsets
+                    ModelBox box = ObfuscationReflectionHelper.<List<ModelBox>, ModelRenderer>getPrivateValue(ModelRenderer.class, cube, "cubeList", "field_78804"+"_l").get(0); //TODO: remove this god awful method of getting the offsets
 
                     Point3d endPoint = new Point3d( (box.posX1 + dimensions[0] / 2F) / 16F, (box.posY1 + dimensions[1] / 2F) / -16F, (box.posZ1 + dimensions[2] / 2F) / -16F);
 
