@@ -3,14 +3,13 @@ package net.dumbcode.projectnublar.server.network;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
-import net.dumbcode.projectnublar.server.block.entity.SkeletalHistory;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class C2SkeletalMovement implements IMessage {

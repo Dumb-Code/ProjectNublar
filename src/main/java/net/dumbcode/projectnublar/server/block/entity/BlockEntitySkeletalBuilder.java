@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
@@ -12,14 +12,12 @@ import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.DoubleConsumer;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 

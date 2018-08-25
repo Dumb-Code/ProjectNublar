@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilder;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -156,64 +158,83 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     facingMatrix.transform(rendererPos);
                     translateMatrix.transform(rendererPos);
 
-                    double yPos = 0;
+                    PoleFacing pole = PoleFacing.getFromFacing(facing.getOpposite());
+
+                    EnumFacing poleFacing = pole.getFacing();
+
+                    AxisAlignedBB bounding = new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
+                            .offset(rendererPos.x+0.5F,rendererPos.y+0.5F,rendererPos.z+0.5F)
+                            .grow(halfBaseWidth);
+
+                    double cubeEndPos = 0;
                     for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F - halfBaseWidth, rendererPos.z + 0.5F - halfBaseWidth), new BlockPos(rendererPos.x + 0.5F + halfBaseWidth, rendererPos.y + 0.5F + halfBaseWidth, rendererPos.z + 0.5F + halfBaseWidth))) {
                         List<AxisAlignedBB> aabbList = Lists.newArrayList();
-                        while (aabbList.isEmpty() && sectionPos.getY() >= 0) {
-                            world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, new AxisAlignedBB(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F, rendererPos.z + 0.5F - halfBaseWidth, rendererPos.x + 0.5F + halfBaseWidth, 0/*Maybe a better solution?*/, rendererPos.z + 0.5F + halfBaseWidth), aabbList, null, false);
-                            sectionPos = sectionPos.down();
+                        int counter = 0;
+                        while (aabbList.isEmpty() && counter <= 100) {
+                            world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, bounding, aabbList, null, false);
+                            sectionPos = sectionPos.add(pole.getFacing().getDirectionVec());
+                            counter++;
                         }
                         if (!aabbList.isEmpty()) {
                             for (AxisAlignedBB aabb : aabbList) {
-                                yPos = Math.max(yPos, aabb.maxY - 0.5F);
+                                cubeEndPos = Math.max(cubeEndPos, pole.apply(aabb) - 0.5F);
                             }
                         }
                     }
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate(-te.getPos().getX() + rendererPos.x, -te.getPos().getY(), -te.getPos().getZ() + rendererPos.z);
-                    float globalRotation = facing.getAxis() == EnumFacing.Axis.Y ? te.getRotation() * (facing == EnumFacing.UP ? -1 : 1) : 0;
-                    AdvancedModelRenderer reference = cube;
-                    while(reference.getParent() != null) {
-                        double rot = Math.toDegrees(facing.getAxis() == EnumFacing.Axis.Y ? reference.rotateAngleY : facing.getAxis() == EnumFacing.Axis.X ? reference.rotateAngleX : reference.rotateAngleZ);
-                        globalRotation += facing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? rot : -rot;
-                        reference = reference.getParent();
-                    }
-                    GlStateManager.rotate(-globalRotation, 0, 1, 0);
+                    GlStateManager.translate(-te.getPos().getX() + rendererPos.x, -te.getPos().getY() + rendererPos.y, -te.getPos().getZ() + rendererPos.z);
+
                     GlStateManager.disableAlpha();
                     GlStateManager.disableBlend();
                     GlStateManager.color(1f, 1f, 1f, 1f);
                     Tessellator tes = Tessellator.getInstance();
                     BufferBuilder buff = tes.getBuffer();
                     this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
-                    GlStateManager.pushMatrix();
+                    float globalRotation = poleFacing.getAxisDirection().getOffset() * te.getRotation();
+                    AdvancedModelRenderer reference = cube;
+                    while(reference != null) {
+                        globalRotation += -poleFacing.getAxisDirection().getOffset() * Math.toDegrees(reference.rotateAngleY);
+                        reference = reference.getParent();
+                    }
+                    GlStateManager.rotate(angle, rotation.x, rotation.y, rotation.z);
+                    GlStateManager.rotate(globalRotation, 0, 1, 0);
+
                     GlStateManager.translate(-halfPoleWidth, 0, -halfPoleWidth);
+
+                    double renderPosition;
+                    switch (facing.getAxis()) {
+                        case X: renderPosition = rendererPos.x; break;
+                        case Y: renderPosition = rendererPos.y; break;
+                        case Z: renderPosition = rendererPos.z; break;
+                        default: throw new IllegalArgumentException("Unacceptable facingdir " + facing.getAxis()); //Impossible ?
+                    }
+
+                    double poleLength = (cubeEndPos - renderPosition) * -pole.getFacing().getAxisDirection().getOffset();
+
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                    double poleLength = rendererPos.y - yPos;
-
                     //Render pole
-                    buff.pos(0, rendererPos.y, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
-                    buff.pos(0, yPos, poleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
-                    buff.pos(poleWidth, yPos, poleWidth).tex(1/textureWidth, poleLength).normal(0, 0, 1).endVertex();
-                    buff.pos(poleWidth, rendererPos.y, poleWidth).tex(1/textureWidth, 0).normal(0, 0, 1).endVertex();
+                    buff.pos(0, 0, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
+                    buff.pos(0, poleLength, poleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos(poleWidth, poleLength, poleWidth).tex(1/textureWidth, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos(poleWidth, 0, poleWidth).tex(1/textureWidth, 0).normal(0, 0, 1).endVertex();
 
-                    buff.pos(0, rendererPos.y, 0).tex(0, 0).normal(-1, 0, 0).endVertex();
-                    buff.pos(0, yPos, 0).tex(0, poleLength).normal(-1, 0, 0).endVertex();
-                    buff.pos(0, yPos, poleWidth).tex(1/textureWidth, poleLength).normal(-1, 0, 0).endVertex();
-                    buff.pos(0, rendererPos.y, poleWidth).tex(1/textureWidth, 0).normal(-1, 0, -1).endVertex();
+                    buff.pos(0, 0, 0).tex(0, 0).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, poleLength, 0).tex(0, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, poleLength, poleWidth).tex(1/textureWidth, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, 0, poleWidth).tex(1/textureWidth, 0).normal(-1, 0, -1).endVertex();
 
-                    buff.pos(poleWidth, rendererPos.y, 0).tex(0, 0).normal(0, 0, -1).endVertex();
-                    buff.pos(poleWidth, yPos, 0).tex(0, poleLength).normal(0, 0, -1).endVertex();
-                    buff.pos(0, yPos, 0).tex(1/textureWidth, poleLength).normal(0, 0, -1).endVertex();
-                    buff.pos(0, rendererPos.y, 0).tex(1/textureWidth, 0).normal(0, 0, -1).endVertex();
+                    buff.pos(poleWidth, 0, 0).tex(0, 0).normal(0, 0, -1).endVertex();
+                    buff.pos(poleWidth, poleLength, 0).tex(0, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos(0, poleLength, 0).tex(1/textureWidth, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos(0, 0, 0).tex(1/textureWidth, 0).normal(0, 0, -1).endVertex();
 
-                    buff.pos(poleWidth, rendererPos.y, poleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
-                    buff.pos(poleWidth, yPos, poleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
-                    buff.pos(poleWidth, yPos, 0).tex(1/textureWidth, poleLength).normal(1, 0, 0).endVertex();
-                    buff.pos(poleWidth, rendererPos.y, 0).tex(1/textureWidth, 0).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, 0, poleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, poleLength, poleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, poleLength, 0).tex(1/textureWidth, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, 0, 0).tex(1/textureWidth, 0).normal(1, 0, 0).endVertex();
 
                     tes.draw();
-                    GlStateManager.popMatrix();
-                    GlStateManager.translate(0, yPos + 0.001, 0);
+                    GlStateManager.translate(poleWidth / 2F, poleLength, poleWidth / 2F);
                     this.renderCube(baseWidth, baseHeight, textureWidth, textureHeight, 1, 0);
                     GlStateManager.translate(0, baseHeight, 0);
                     this.renderCube(notchWidth, notchHeight, textureWidth, textureHeight, 19, 0);
@@ -293,4 +314,8 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.popMatrix();
     }
 
+    @Override
+    public boolean isGlobalRenderer(BlockEntitySkeletalBuilder te) {
+        return true;
+    }
 }

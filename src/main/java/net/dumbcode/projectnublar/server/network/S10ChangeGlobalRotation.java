@@ -2,9 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
-import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
-import net.dumbcode.projectnublar.server.block.entity.SkeletalHistory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;

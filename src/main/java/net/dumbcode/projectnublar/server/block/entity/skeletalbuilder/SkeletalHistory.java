@@ -1,9 +1,10 @@
-package net.dumbcode.projectnublar.server.block.entity;
+package net.dumbcode.projectnublar.server.block.entity.skeletalbuilder;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
 import net.dumbcode.projectnublar.server.network.S1UpdateSkeletalBuilder;
 import net.dumbcode.projectnublar.server.network.S5UpdateHistoryIndex;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
