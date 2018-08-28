@@ -2,12 +2,11 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.gui.ForgeGuiFactory;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
@@ -20,7 +19,7 @@ public class C9ChangeGlobalRotation implements IMessage {
 
     public C9ChangeGlobalRotation() { }
 
-    public C9ChangeGlobalRotation(BlockEntitySkeletalBuilder builder, float newRotation) {
+    public C9ChangeGlobalRotation(SkeletalBuilderBlockEntity builder, float newRotation) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -48,8 +47,8 @@ public class C9ChangeGlobalRotation implements IMessage {
         protected void handleMessage(C9ChangeGlobalRotation message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
                 builder.getSkeletalProperties().setRotation(message.newRotation);
                 builder.markDirty();
                 ProjectNublar.NETWORK.sendToAll(new S10ChangeGlobalRotation(builder, message.newRotation));

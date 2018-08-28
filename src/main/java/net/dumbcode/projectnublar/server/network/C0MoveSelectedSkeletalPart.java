@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -25,7 +25,7 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
 
     public C0MoveSelectedSkeletalPart() { }
 
-    public C0MoveSelectedSkeletalPart(BlockEntitySkeletalBuilder builder, String selectedPart, RotationAxis axis, float newAngle) {
+    public C0MoveSelectedSkeletalPart(SkeletalBuilderBlockEntity builder, String selectedPart, RotationAxis axis, float newAngle) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -60,8 +60,8 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
             // FIXME: security checks?
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
                 if(!builder.getPoseData().containsKey(message.part)) {
                     builder.getPoseData().put(message.part, new Vector3f());
                 }

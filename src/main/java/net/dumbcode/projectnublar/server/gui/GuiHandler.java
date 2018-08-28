@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.gui;
 
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -27,8 +27,8 @@ public class GuiHandler implements IGuiHandler {
             case SKELETAL_BUILDER_ID: {
                 BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
                 TileEntity te = world.getTileEntity(pos);
-                if(te instanceof BlockEntitySkeletalBuilder) {
-                    return new GuiSkeletalBuilder((BlockEntitySkeletalBuilder)te);
+                if(te instanceof SkeletalBuilderBlockEntity) {
+                    return new GuiSkeletalBuilder((SkeletalBuilderBlockEntity)te);
                 }
                 return null;
             }

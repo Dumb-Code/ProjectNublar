@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalB
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.client.render.dinosaur.objects.MovementAnimationPass;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -31,6 +31,6 @@ public class DinosaurModelHandler {
 
     @SubscribeEvent
     public static void onModelsBaked(ModelBakeEvent event) {
-        ClientRegistry.bindTileEntitySpecialRenderer(BlockEntitySkeletalBuilder.class, new BlockEntitySkeletalBuilderRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(SkeletalBuilderBlockEntity.class, new BlockEntitySkeletalBuilderRenderer());
     }
 }

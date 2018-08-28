@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.client.gui;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.network.C11ChangePoleFacing;
@@ -19,7 +19,7 @@ import java.io.IOException;
 public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlider {
 
     private final GuiSkeletalBuilder parent;
-    @Getter private final BlockEntitySkeletalBuilder builder;
+    @Getter private final SkeletalBuilderBlockEntity builder;
     @Getter private final SkeletalProperties properties;
 
     private GuiSlider globalRotation = new GuiSlider(0, 0, 0, 200, 20, "rotaion", "",0, 360, 0.0, true, true, this);
@@ -30,7 +30,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
     private GuiButton poleListGui = new GuiButtonExt(1, 0, 0, "Pole List");
     @Getter @Setter private PoleFacing poleFacing;
 
-    public GuiSkeletalProperties(GuiSkeletalBuilder parent, BlockEntitySkeletalBuilder builder) {
+    public GuiSkeletalProperties(GuiSkeletalBuilder parent, SkeletalBuilderBlockEntity builder) {
         this.parent = parent;
         this.builder = builder;
         this.properties = builder.getSkeletalProperties();

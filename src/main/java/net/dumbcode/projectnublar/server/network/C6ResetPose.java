@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -19,7 +19,7 @@ public class C6ResetPose implements IMessage {
 
     public C6ResetPose() { }
 
-    public C6ResetPose(BlockEntitySkeletalBuilder builder) {
+    public C6ResetPose(SkeletalBuilderBlockEntity builder) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -45,8 +45,8 @@ public class C6ResetPose implements IMessage {
             // FIXME: security checks?
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
                 builder.resetPose();
                 ProjectNublar.NETWORK.sendToAll(new S3HistoryRecord(builder, SkeletalHistory.RESET_NAME));
             }

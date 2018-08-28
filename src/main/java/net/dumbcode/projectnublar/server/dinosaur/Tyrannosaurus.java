@@ -1,8 +1,12 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
+import com.google.common.collect.Lists;
 import lombok.val;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
+import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInfomation;
+import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
+import net.minecraftforge.common.BiomeDictionary;
 
 public class Tyrannosaurus extends Dinosaur {
 
@@ -25,6 +29,17 @@ public class Tyrannosaurus extends Dinosaur {
                 "leg", "legUpperRight",
                 "body", "hips"
         );
+
+        DinosaurInfomation dinosaurInfomation = this.getDinosaurInfomation();
+        dinosaurInfomation.setPeriod(DinosaurPeriod.CRETACEOUS);
+        dinosaurInfomation.getBiomeTypes().addAll(Lists.newArrayList(
+                BiomeDictionary.Type.CONIFEROUS,
+                BiomeDictionary.Type.DRY,
+                BiomeDictionary.Type.PLAINS,
+                BiomeDictionary.Type.MESA,
+                BiomeDictionary.Type.FOREST,
+                BiomeDictionary.Type.MOUNTAIN
+        ));
     }
 
 }

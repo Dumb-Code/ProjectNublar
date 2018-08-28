@@ -32,6 +32,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final ItemProperties itemProperties = new ItemProperties();
     private final EntityProperties entityProperties = new EntityProperties();
     private final SkeletalInformation skeletalInformation = new SkeletalInformation();
+    private final DinosaurInfomation dinosaurInfomation = new DinosaurInfomation();
 
     private ModelContainer modelContainer;
     private ModelContainer noAnimationModelContainer;

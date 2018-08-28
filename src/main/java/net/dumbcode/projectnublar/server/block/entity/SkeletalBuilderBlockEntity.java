@@ -24,7 +24,7 @@ import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
 @Getter
 @Setter
-public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
+public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
     private Dinosaur dinosaur = Dinosaur.MISSING;
@@ -42,7 +42,7 @@ public class BlockEntitySkeletalBuilder extends SimpleBlockEntity {
     private float cameraYaw = 90f;
     private double cameraZoom = 1.0;
 
-    public BlockEntitySkeletalBuilder() {
+    public SkeletalBuilderBlockEntity() {
         this.reassureSize();
     }
 

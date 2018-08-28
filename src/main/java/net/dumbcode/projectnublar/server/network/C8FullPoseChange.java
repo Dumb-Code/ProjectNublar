@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -25,7 +25,7 @@ public class C8FullPoseChange implements IMessage {
 
     public C8FullPoseChange() { }
 
-    public C8FullPoseChange(BlockEntitySkeletalBuilder builder, Map<String, Vector3f> newPose) {
+    public C8FullPoseChange(SkeletalBuilderBlockEntity builder, Map<String, Vector3f> newPose) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -69,8 +69,8 @@ public class C8FullPoseChange implements IMessage {
         protected void handleMessage(C8FullPoseChange message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
                 builder.getPoseData().clear();
                 builder.getPoseData().putAll(message.pose);
                 builder.markDirty();

@@ -4,16 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
+import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -76,7 +79,10 @@ public class ProjectNublar
             Dinosaur dinosaur = entity.getDinosaur();
             return dinosaur.getTextureLocation(entity);
         }));
+        RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, GyrosphereRenderer::new);
         registerPackets();
+
+        GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
     }
 
     private void registerPackets() {
@@ -93,11 +99,12 @@ public class ProjectNublar
         NETWORK.registerMessage(S10ChangeGlobalRotation.Handler.class, S10ChangeGlobalRotation.class, 10, Side.CLIENT);
         NETWORK.registerMessage(C11ChangePoleFacing.Handler.class, C11ChangePoleFacing.class, 11, Side.SERVER);
         NETWORK.registerMessage(S12ChangePoleFacing.Handler.class, S12ChangePoleFacing.class, 12, Side.CLIENT);
+        NETWORK.registerMessage(C13VehicleInputStateUpdated.Handler.class, C13VehicleInputStateUpdated.class, 13, Side.SERVER);
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        GameRegistry.registerTileEntity(BlockEntitySkeletalBuilder.class, new ResourceLocation(MODID, "skeletal_builder"));
+        GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
         for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();
             ItemDinosaurMeat referenceRawMeat = entry.getValue();

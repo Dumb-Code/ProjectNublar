@@ -1,9 +1,8 @@
 package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
-import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalProperties;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,7 +21,7 @@ public class S10ChangeGlobalRotation implements IMessage {
 
     public S10ChangeGlobalRotation() { }
 
-    public S10ChangeGlobalRotation(BlockEntitySkeletalBuilder builder, float newRotation) {
+    public S10ChangeGlobalRotation(SkeletalBuilderBlockEntity builder, float newRotation) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -50,8 +49,8 @@ public class S10ChangeGlobalRotation implements IMessage {
         protected void handleMessage(S10ChangeGlobalRotation message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                ((BlockEntitySkeletalBuilder)te).getSkeletalProperties().setRotation(message.newRotation);
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                ((SkeletalBuilderBlockEntity)te).getSkeletalProperties().setRotation(message.newRotation);
             }
             GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if(screen instanceof GuiSkeletalProperties) {

@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileInfomation;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.network.*;
@@ -50,7 +50,7 @@ import static net.dumbcode.projectnublar.client.gui.GuiConstants.mouseOn;
 
 public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
-    private final BlockEntitySkeletalBuilder builder;
+    private final SkeletalBuilderBlockEntity builder;
     private final SkeletalProperties properties;
     private final TabulaModel model;
     private final DinosaurAnimator animator;
@@ -107,7 +107,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
     private GuiButton propertiesButton = new GuiButtonExt(8, 0, 0, propertiesGui.getUnformattedText());
 
-    public GuiSkeletalBuilder(BlockEntitySkeletalBuilder builder) {
+    public GuiSkeletalBuilder(SkeletalBuilderBlockEntity builder) {
         this.builder = builder;
         this.properties = builder.getSkeletalProperties();
         this.model = builder.getModel(); // TODO: child models? -> Selectable

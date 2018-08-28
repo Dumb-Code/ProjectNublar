@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalProperties;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -22,7 +22,7 @@ public class S12ChangePoleFacing implements IMessage {
 
     public S12ChangePoleFacing() { }
 
-    public S12ChangePoleFacing(BlockEntitySkeletalBuilder builder, PoleFacing newFacing) {
+    public S12ChangePoleFacing(SkeletalBuilderBlockEntity builder, PoleFacing newFacing) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -50,8 +50,8 @@ public class S12ChangePoleFacing implements IMessage {
         protected void handleMessage(S12ChangePoleFacing message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                ((BlockEntitySkeletalBuilder)te).getSkeletalProperties().setPoleFacing(message.newFacing);
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                ((SkeletalBuilderBlockEntity)te).getSkeletalProperties().setPoleFacing(message.newFacing);
             }
             GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if(screen instanceof GuiSkeletalProperties) {

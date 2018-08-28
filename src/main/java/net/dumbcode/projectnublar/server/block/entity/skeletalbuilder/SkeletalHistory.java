@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.network.S1UpdateSkeletalBuilder;
 import net.dumbcode.projectnublar.server.network.S5UpdateHistoryIndex;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class SkeletalHistory {
 
     public static final String RESET_NAME = "$$RESET_NAME$$";
-    private final BlockEntitySkeletalBuilder builder;
+    private final SkeletalBuilderBlockEntity builder;
     @Getter
     @Setter
     private int index;
@@ -31,7 +31,7 @@ public class SkeletalHistory {
     private final List<Record> records = new LinkedList<>();
     private final Vector3f preparationAngles = new Vector3f();
 
-    public SkeletalHistory(BlockEntitySkeletalBuilder builder) {
+    public SkeletalHistory(SkeletalBuilderBlockEntity builder) {
         this.builder = builder;
     }
 

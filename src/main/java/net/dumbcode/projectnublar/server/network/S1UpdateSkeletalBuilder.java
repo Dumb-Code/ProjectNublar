@@ -1,16 +1,13 @@
 package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
-import net.minecraft.client.Minecraft;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.vecmath.Vector3f;
@@ -27,7 +24,7 @@ public class S1UpdateSkeletalBuilder implements IMessage {
 
     public S1UpdateSkeletalBuilder() { }
 
-    public S1UpdateSkeletalBuilder(BlockEntitySkeletalBuilder builder, String selectedPart, Vector3f rotations) {
+    public S1UpdateSkeletalBuilder(SkeletalBuilderBlockEntity builder, String selectedPart, Vector3f rotations) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -64,8 +61,8 @@ public class S1UpdateSkeletalBuilder implements IMessage {
         protected void handleMessage(S1UpdateSkeletalBuilder message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
                 if(!builder.getPoseData().containsKey(message.part)) {
                     builder.getPoseData().put(message.part, new Vector3f());
                 }

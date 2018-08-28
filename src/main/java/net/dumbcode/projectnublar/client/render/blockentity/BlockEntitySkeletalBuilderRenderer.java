@@ -5,11 +5,13 @@ import net.dumbcode.dumblibrary.client.model.InfoTabulaModel;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.SkeletalBuilder;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.block.SkeletalBuilderBlock;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
@@ -38,12 +40,16 @@ import java.util.Map;
 
 import static java.lang.Math.PI;
 
-public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<BlockEntitySkeletalBuilder> {
+public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<SkeletalBuilderBlockEntity> {
     private Minecraft mc = Minecraft.getMinecraft();
     @Override
-    public void render(BlockEntitySkeletalBuilder te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+    public void render(SkeletalBuilderBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+        IBlockState state = te.getWorld().getBlockState(te.getPos());
+        if(state.getBlock() != BlockHandler.SKELETAL_BUILDER) { //Can sometimes happen when loading in a save. Not sure why, but it happens
+            return;
+        }
         GlStateManager.pushMatrix();
-        EnumFacing facing = te.getWorld().getBlockState(te.getPos()).getValue(SkeletalBuilder.FACING);
+        EnumFacing facing = state.getValue(SkeletalBuilderBlock.FACING);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
         GlStateManager.translate(x + 0.5, y + 0.5, z + 0.5);
@@ -333,7 +339,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
     }
 
     @Override
-    public boolean isGlobalRenderer(BlockEntitySkeletalBuilder te) {
+    public boolean isGlobalRenderer(SkeletalBuilderBlockEntity te) {
         return true;
     }
 }

@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -22,7 +22,7 @@ public class C2SkeletalMovement implements IMessage {
 
     public C2SkeletalMovement() { }
 
-    public C2SkeletalMovement(BlockEntitySkeletalBuilder builder, String selectedPart, SkeletalHistory.MovementType type) {
+    public C2SkeletalMovement(SkeletalBuilderBlockEntity builder, String selectedPart, SkeletalHistory.MovementType type) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
@@ -54,8 +54,8 @@ public class C2SkeletalMovement implements IMessage {
             // FIXME: security checks?
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = world.getTileEntity(pos);
-            if(te instanceof BlockEntitySkeletalBuilder) {
-                BlockEntitySkeletalBuilder builder = (BlockEntitySkeletalBuilder)te;
+            if(te instanceof SkeletalBuilderBlockEntity) {
+                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
                 if(message.type == SkeletalHistory.MovementType.STOPPING) {
                     builder.getHistory().record(message.part);
                     ProjectNublar.NETWORK.sendToAll(new S3HistoryRecord(builder, message.part));

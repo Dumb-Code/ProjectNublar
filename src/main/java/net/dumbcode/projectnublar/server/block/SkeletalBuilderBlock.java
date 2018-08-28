@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntitySkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
@@ -18,7 +18,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -29,11 +28,11 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
+public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock {
 
     public static final TextComponentTranslation NO_DINOSAUR_TO_DISPLAY_TEXT = new TextComponentTranslation(ProjectNublar.MODID+".action.skeletal_builder.no_dino_to_display");
 
-    public SkeletalBuilder() {
+    public SkeletalBuilderBlock() {
         super(Material.IRON);
     }
 
@@ -47,8 +46,8 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         ItemStack stack = playerIn.getHeldItem(hand);
-        if(tileEntity instanceof BlockEntitySkeletalBuilder) {
-            BlockEntitySkeletalBuilder skeletalBuilder = (BlockEntitySkeletalBuilder) tileEntity;
+        if(tileEntity instanceof SkeletalBuilderBlockEntity) {
+            SkeletalBuilderBlockEntity skeletalBuilder = (SkeletalBuilderBlockEntity) tileEntity;
             if(stack.getItem() instanceof FossilItem) {
                 FossilItem item = (FossilItem)stack.getItem();
                 Dinosaur dinosaur = item.getDinosaur();
@@ -88,8 +87,8 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
 
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         TileEntity tileentity = worldIn.getTileEntity(pos);
-        if (tileentity instanceof BlockEntitySkeletalBuilder) {
-            ItemStackHandler itemHandler = ((BlockEntitySkeletalBuilder)tileentity).getBoneHandler();
+        if (tileentity instanceof SkeletalBuilderBlockEntity) {
+            ItemStackHandler itemHandler = ((SkeletalBuilderBlockEntity)tileentity).getBoneHandler();
             for (int i = 0; i < itemHandler.getSlots(); i++) {
                 InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), itemHandler.getStackInSlot(i));
             }
@@ -136,6 +135,6 @@ public class SkeletalBuilder extends BlockDirectional implements IItemBlock {
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        return new BlockEntitySkeletalBuilder();
+        return new SkeletalBuilderBlockEntity();
     }
 }
