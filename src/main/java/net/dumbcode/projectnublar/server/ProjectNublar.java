@@ -68,7 +68,7 @@ public class ProjectNublar
     public static CreativeTabs TAB = new CreativeTabs(MODID) {
         @Override
         public ItemStack getTabIconItem() {
-            return new ItemStack(ItemBlock.getItemFromBlock(Blocks.DEADBUSH)); // TODO: custom item
+            return new ItemStack(ItemBlock.getItemFromBlock(Blocks.DEADBUSH)); //TODO: custom item
         }
     };
 
