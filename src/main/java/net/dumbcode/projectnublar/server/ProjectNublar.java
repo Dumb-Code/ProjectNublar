@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.projectnublar.client.render.entity.DummyRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
@@ -80,7 +81,7 @@ public class ProjectNublar
             Dinosaur dinosaur = entity.getDinosaur();
             return dinosaur.getTextureLocation(entity);
         }));
-        RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, GyrosphereRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, DummyRenderer::new);
         registerPackets();
 
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
