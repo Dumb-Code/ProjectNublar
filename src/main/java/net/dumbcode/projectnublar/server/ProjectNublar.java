@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
+import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -105,6 +106,7 @@ public class ProjectNublar
     @EventHandler
     public void init(FMLInitializationEvent event) {
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
+        GameRegistry.registerTileEntity(MachineModuleBlockEntity.class, new ResourceLocation(MODID, "machine_module"));
         for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();
             ItemDinosaurMeat referenceRawMeat = entry.getValue();

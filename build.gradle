@@ -14,7 +14,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = "1.0"
 group = "net.dumbcode.projectnublar" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "projectnublar"
+archivesBaseName = "projectnublar" //MODID
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -86,5 +86,11 @@ processResources {
     // copy everything else except the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
+    }
+}
+
+jar {
+    manifest {
+        attributes 'FMLAT': 'projectnublar_at.cfg'
     }
 }
