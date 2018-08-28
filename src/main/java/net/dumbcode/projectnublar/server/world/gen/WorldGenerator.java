@@ -24,6 +24,12 @@ public enum  WorldGenerator implements IWorldGenerator {
 
     @Override
     public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) {
+        if(world.provider.getDimension() == 0) {
+            this.generateOverworld(world, random, chunkX * 16, chunkZ * 16);
+        }
+    }
+
+    public void generateOverworld(World world, Random random, int chunkX, int chunkZ) {
         Biome biome = world.getBiome(new BlockPos(chunkX, 0, chunkZ));
 
         dinosaurList:
@@ -43,6 +49,5 @@ public enum  WorldGenerator implements IWorldGenerator {
                 }
             }
         }
-
     }
 }
