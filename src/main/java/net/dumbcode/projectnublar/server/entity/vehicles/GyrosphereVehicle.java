@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.vehicles;
 
 import net.dumbcode.projectnublar.server.utils.InterpValue;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,6 +9,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.MovementInput;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Quaternion;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -45,7 +48,15 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
 
     @Override
     public boolean canBeCollidedWith() {
+        if(this.world.isRemote) {
+            return !this.isPlayerIn();
+        }
         return true;
+    }
+
+    @SideOnly(Side.CLIENT)
+    private boolean isPlayerIn() {
+        return this.getPassengers().contains(Minecraft.getMinecraft().player);
     }
 
     @Override
