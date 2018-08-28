@@ -25,6 +25,7 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     public GyrosphereVehicle(World worldIn) {
         super(worldIn, DefaultInput.values());
         this.setSize(4, 4);
+        this.stepHeight = this.height/2;
     }
 
     @Override
@@ -43,7 +44,6 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
         nbt.setFloat("BallRotationY", this.rotation.y);
         nbt.setFloat("BallRotationZ", this.rotation.z);
         nbt.setFloat("BallRotationW", this.rotation.w);
-
     }
 
     @Override
@@ -61,8 +61,6 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
 
     @Override
     protected void applyMovement() {
-        this.stepHeight = this.height/2;
-
         Entity driver = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0); //Move to controlling passanger
         if(driver != null)
         this.rotationYaw = driver.rotationYaw;
