@@ -35,7 +35,7 @@ public enum  WorldGenerator implements IWorldGenerator {
         dinosaurList:
         for (int i = 0; i < 32; i++) {
             int posX = chunkX + random.nextInt(16);
-            int posZ = chunkX + random.nextInt(16);
+            int posZ = chunkZ + random.nextInt(16);
 
             List<Dinosaur> dinoList = Lists.newArrayList(ProjectNublar.DINOSAUR_REGISTRY);
             Collections.shuffle(dinoList, random);
