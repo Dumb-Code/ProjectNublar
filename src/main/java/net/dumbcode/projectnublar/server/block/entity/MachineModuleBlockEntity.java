@@ -3,10 +3,15 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -27,6 +32,18 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setInteger("StateID", this.stateID);
+        compound.setInteger("ProcessCount", this.processes.size());
+        for (int i = 0; i < this.processes.size(); i++) {
+            Process process = this.processes.get(i);
+            NBTTagCompound nbt = new NBTTagCompound();
+            nbt.setInteger("Time", process.time);
+            nbt.setInteger("TotalTime", process.totalTime);
+            if(process.currentRecipe != null) {
+                nbt.setString("Recipe", process.currentRecipe.toString());
+            }
+            nbt.setBoolean("Processing", process.processing); //Is this really needed?
+            compound.setTag("Process_" + i, nbt);
+        }
         return super.writeToNBT(compound);
     }
 
@@ -34,6 +51,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.stateID = compound.getInteger("StateID");
+        for (int i = 0; i < compound.getInteger("ProcessCount"); i++) {
+            Process process = this.processes.get(i);
+            NBTTagCompound nbt = compound.getCompoundTag("Process_" + i);
+            process.setTime(nbt.getInteger("Time"));
+            process.setTotalTime(nbt.getInteger("TotalTime"));
+            process.setCurrentRecipe(nbt.hasKey("Recipe", Constants.NBT.TAG_STRING) ? new ResourceLocation(nbt.getString("Recipe")) : null);
+            process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
+        }
     }
 
     @Override
@@ -42,13 +67,17 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             if(this.canProcess(process)) {
                 if(process.isProcessing() || this.searchForRecipes(process)) {
                     if(process.isFinished()) {
-                        for (MachineRecipe<B> recipe : this.recipes) {
-                            if(recipe.accpets(this.asB, process)) { //TODO: maybe move the recipes to a registry, and cache them instead ?
-                                recipe.onRecipeFinished(this.asB, process);
-                                process.setTime(0);
+                        MachineRecipe<B> recipe = this.getRecipe(process);
+                        if(recipe != null) {
+                            recipe.onRecipeFinished(this.asB, process);
+                            process.setTime(0);
+                            if(!recipe.accpets(this.asB, process)) {
                                 process.setProcessing(false);
+                                process.setCurrentRecipe(null);
                                 this.searchForRecipes(process);
                             }
+                        } else {
+                            ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
                         }
                     } else {
                         process.tick();
@@ -79,12 +108,25 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         for (MachineRecipe<B> recipe : this.recipes) {
             if(recipe.accpets(this.asB, process) && this.canProcess(process)) {
                 process.setProcessing(true);
+                process.setCurrentRecipe(recipe.getRegistryName());
                 process.setTotalTime(recipe.getRecipeTime(this.asB, process));
                 this.markDirty();
                 return true;
             }
         }
         return false;
+    }
+
+    @Nullable
+    public MachineRecipe<B> getRecipe(Process process) {
+        if(process.getCurrentRecipe() != null) {
+            for (MachineRecipe<B> recipe : this.recipes) {
+                if(recipe.getRegistryName().equals(process.getCurrentRecipe())) {
+                    return recipe;
+                }
+            }
+        }
+        return null;
     }
 
     protected boolean canProcess(Process process) {
@@ -109,8 +151,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         final int[] inputSlots;
         final int[] outputSlots;
 
-        int totalTime;
         int time;
+        int totalTime;
+        ResourceLocation currentRecipe;
         boolean processing;
 
         public Process(int[] inputSlots, int[] outputSlots) {
