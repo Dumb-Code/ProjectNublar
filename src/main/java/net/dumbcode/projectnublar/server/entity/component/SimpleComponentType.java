@@ -35,7 +35,7 @@ public class SimpleComponentType<T extends EntityComponent> implements EntityCom
 
     @Nonnull
     @Override
-    public Class<T> getType() {
+    public Class<? extends T> getType() {
         return this.type;
     }
 

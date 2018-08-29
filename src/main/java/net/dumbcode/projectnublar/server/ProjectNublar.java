@@ -10,8 +10,10 @@ import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
-import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityManager;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
+import net.dumbcode.projectnublar.server.entity.component.RegisterComponentEvent;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
@@ -76,6 +78,7 @@ public class ProjectNublar
     public static final String VERSION = "0.0.1";
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
+    public static IForgeRegistry<EntityComponentType<?>> COMPONENT_REGISTRY;
 
     @CapabilityInject(EntityManager.class)
     public static final Capability<EntityManager> ENTITY_MANAGER = InjectedUtils.injected();
@@ -163,7 +166,13 @@ public class ProjectNublar
     }
 
     @SubscribeEvent
-    public static void createRegisteries(RegistryEvent.NewRegistry event) {
+    public static void createRegistries(RegistryEvent.NewRegistry event) {
+        COMPONENT_REGISTRY = new RegistryBuilder<EntityComponentType<?>>()
+                .setType(EntityComponentType.getWildcardType())
+                .setName(new ResourceLocation(ProjectNublar.MODID, "component"))
+                .create();
+        MinecraftForge.EVENT_BUS.post(new RegisterComponentEvent(COMPONENT_REGISTRY));
+
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
                 .setType(Dinosaur.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
