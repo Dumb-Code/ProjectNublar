@@ -32,6 +32,11 @@ public class ComposableCreatureEntity extends EntityCreature implements Componen
     }
 
     @Override
+    public boolean contains(EntityComponentType<?> type) {
+        return this.components.containsKey(type);
+    }
+
+    @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound = super.writeToNBT(compound);
 

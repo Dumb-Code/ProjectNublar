@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.entity;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
 import net.minecraft.entity.Entity;
@@ -33,7 +32,7 @@ public interface EntityManager extends ICapabilityProvider {
 
     void populateSystemBuffers();
 
-    <T extends EntityComponent> T[] populate(EntityComponentType<T> type);
+    <T> EntityFamily<T> resolveFamily(EntityComponentType<?> types);
 
     class Impl implements EntityManager {
         private final List<ComponentAccess> managedEntities = new ArrayList<>();
@@ -63,17 +62,14 @@ public interface EntityManager extends ICapabilityProvider {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        public <T extends EntityComponent> T[] populate(EntityComponentType<T> type) {
-            // TODO: Ideally don't want to reallocate arrays if the size hasn't changed
-            List<T> components = new ArrayList<>(this.managedEntities.size());
+        public <T> EntityFamily<T> resolveFamily(EntityComponentType<?> types) {
+            List<ComponentAccess> entities = new ArrayList<>(this.managedEntities.size());
             for (ComponentAccess entity : this.managedEntities) {
-                T component = entity.getOrNull(type);
-                if (component != null) {
-                    components.add(component);
+                if (entity.matchesAll(types)) {
+                    entities.add(entity);
                 }
             }
-            return (T[]) components.toArray();
+            return new EntityFamily<>(entities.toArray(new ComponentAccess[0]));
         }
 
         @Override

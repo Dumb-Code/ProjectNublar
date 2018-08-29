@@ -8,4 +8,17 @@ import javax.annotation.Nullable;
 public interface ComponentAccess {
     @Nullable
     <T extends EntityComponent> T getOrNull(EntityComponentType<T> type);
+
+    default boolean contains(EntityComponentType<?> type) {
+        return this.getOrNull(type) != null;
+    }
+
+    default boolean matchesAll(EntityComponentType<?>... types) {
+        for (EntityComponentType<?> type : types) {
+            if (!this.contains(type)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
