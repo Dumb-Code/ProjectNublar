@@ -4,11 +4,11 @@ import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.registries.IForgeRegistry;
 
-public class RegisterComponentEvent extends Event {
+public class RegisterComponentsEvent extends Event {
     @Getter
     private final IForgeRegistry<EntityComponentType<?>> registry;
 
-    public RegisterComponentEvent(IForgeRegistry<EntityComponentType<?>> registry) {
+    public RegisterComponentsEvent(IForgeRegistry<EntityComponentType<?>> registry) {
         this.registry = registry;
     }
 }

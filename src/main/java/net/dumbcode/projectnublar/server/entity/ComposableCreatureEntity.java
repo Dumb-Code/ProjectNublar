@@ -25,6 +25,10 @@ public class ComposableCreatureEntity extends EntityCreature implements Componen
         this.components.put(type, component);
     }
 
+    public <T extends EntityComponent> void attachComponent(EntityComponentType<T> type) {
+        this.components.put(type, type.construct());
+    }
+
     @Nullable
     @Override
     public <T extends EntityComponent> T getOrNull(EntityComponentType<T> type) {

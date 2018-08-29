@@ -3,15 +3,18 @@ package net.dumbcode.projectnublar.server.entity;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
+import net.dumbcode.projectnublar.server.entity.system.RegisterSystemsEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,27 +25,54 @@ import java.util.List;
 public interface EntityManager extends ICapabilityProvider {
     @SubscribeEvent
     static void onAttachWorldCapabilities(AttachCapabilitiesEvent<World> event) {
-        EntityManager capability = new Impl();
+        EntityManager.Impl capability = new EntityManager.Impl();
         event.addCapability(new ResourceLocation(ProjectNublar.MODID, "entity_manager"), capability);
+
+        MinecraftForge.EVENT_BUS.post(new RegisterSystemsEvent(event.getObject(), capability.systems));
     }
+
+    @SubscribeEvent
+    static void onWorldTick(TickEvent.WorldTickEvent event) {
+        // TODO: We probably need to run this when entity ticking starts
+        if (event.phase == TickEvent.Phase.START) {
+            EntityManager entityManager = event.world.getCapability(ProjectNublar.ENTITY_MANAGER, null);
+            if (entityManager != null) {
+                entityManager.updateSystems();
+            }
+        }
+    }
+
+    void updateSystems();
 
     void addEntity(Entity entity);
 
     void removeEntity(Entity entity);
 
-    void populateSystemBuffers();
-
-    <T> EntityFamily<T> resolveFamily(EntityComponentType<?> types);
+    EntityFamily resolveFamily(EntityComponentType<?> types);
 
     class Impl implements EntityManager {
-        private final List<ComponentAccess> managedEntities = new ArrayList<>();
+        private final List<Entity> managedEntities = new ArrayList<>();
         private final List<EntitySystem> systems = new ArrayList<>();
+        private boolean systemsDirty = true;
+
+        @Override
+        public void updateSystems() {
+            if (this.systemsDirty) {
+                this.systemsDirty = false;
+                for (EntitySystem system : this.systems) {
+                    system.populateBuffers(this);
+                }
+            }
+            for (EntitySystem system : this.systems) {
+                system.update();
+            }
+        }
 
         @Override
         public void addEntity(Entity entity) {
             if (entity instanceof ComponentAccess) {
-                this.managedEntities.add((ComponentAccess) entity);
-                this.populateSystemBuffers();
+                this.managedEntities.add(entity);
+                this.systemsDirty = true;
             }
         }
 
@@ -50,26 +80,19 @@ public interface EntityManager extends ICapabilityProvider {
         public void removeEntity(Entity entity) {
             if (entity instanceof ComponentAccess) {
                 this.managedEntities.remove(entity);
-                this.populateSystemBuffers();
+                this.systemsDirty = true;
             }
         }
 
         @Override
-        public void populateSystemBuffers() {
-            for (EntitySystem system : this.systems) {
-                system.populateBuffers(this);
-            }
-        }
-
-        @Override
-        public <T> EntityFamily<T> resolveFamily(EntityComponentType<?> types) {
-            List<ComponentAccess> entities = new ArrayList<>(this.managedEntities.size());
-            for (ComponentAccess entity : this.managedEntities) {
-                if (entity.matchesAll(types)) {
+        public EntityFamily resolveFamily(EntityComponentType<?> types) {
+            List<Entity> entities = new ArrayList<>(this.managedEntities.size());
+            for (Entity entity : this.managedEntities) {
+                if (((ComponentAccess) entity).matchesAll(types)) {
                     entities.add(entity);
                 }
             }
-            return new EntityFamily<>(entities.toArray(new ComponentAccess[0]));
+            return new EntityFamily(entities.toArray(new Entity[0]));
         }
 
         @Override

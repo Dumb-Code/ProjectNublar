@@ -13,7 +13,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
-import net.dumbcode.projectnublar.server.entity.component.RegisterComponentEvent;
+import net.dumbcode.projectnublar.server.entity.component.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
@@ -171,7 +171,7 @@ public class ProjectNublar
                 .setType(EntityComponentType.getWildcardType())
                 .setName(new ResourceLocation(ProjectNublar.MODID, "component"))
                 .create();
-        MinecraftForge.EVENT_BUS.post(new RegisterComponentEvent(COMPONENT_REGISTRY));
+        MinecraftForge.EVENT_BUS.post(new RegisterComponentsEvent(COMPONENT_REGISTRY));
 
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
                 .setType(Dinosaur.class)
