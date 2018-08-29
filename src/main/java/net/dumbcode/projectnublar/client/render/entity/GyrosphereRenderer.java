@@ -54,7 +54,6 @@ public class GyrosphereRenderer {
         GlStateManager.pushMatrix();
         GlStateManager.enableLighting();
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.enableBlend();
         GlStateManager.shadeModel(7425);
         GlStateManager.depthMask(true);
         GlStateManager.enableBlend();
@@ -92,8 +91,6 @@ public class GyrosphereRenderer {
 
                 GlStateManager.scale(entity.width/2F,entity.width/2F,entity.width/2F);
                 GlStateManager.callList(getSphereID());
-                GlStateManager.disableBlend();
-                GlStateManager.depthMask(true);
                 GlStateManager.popMatrix();
             }
         }
