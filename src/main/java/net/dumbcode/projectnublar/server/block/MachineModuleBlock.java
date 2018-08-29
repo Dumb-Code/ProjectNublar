@@ -21,19 +21,24 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializable> extends Block implements IItemBlock{
 
     private final I[] values; //Not needed
     private final Map<I, PropertyBool> propertyMap = Maps.newHashMap();
+    private final Supplier<? extends MachineModuleBlockEntity> machineSupplier;
 
-    public MachineModuleBlock(I[] values) {
+    public MachineModuleBlock(I[] values, Supplier<? extends MachineModuleBlockEntity> machineSupplier) {
         super(Material.IRON);
         this.values = values;
+        this.machineSupplier = machineSupplier;
+
         for (I value : this.values) {
             this.propertyMap.put(value, PropertyBool.create(value.getName()));
         }
-        this.blockState = this.createBlockState(); //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
+
+        this.blockState = new BlockStateContainer(this, this.propertyMap.values().toArray(new IProperty[0])); //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
         IBlockState baseState = this.blockState.getBaseState();
         for (I value : this.values) {
             baseState = baseState.withProperty(this.propertyMap.get(value), false);
@@ -98,19 +103,11 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        return new MachineModuleBlockEntity();
+        return this.machineSupplier.get();
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
         return 0;
-    }
-
-    @Override
-    protected BlockStateContainer createBlockState() {
-        if(this.propertyMap == null) { //This is called during <init>, meaning that the map isnt set. I have to reset all the values in this blocks init, after this has been set
-            return new BlockStateContainer(this);
-        }
-        return new BlockStateContainer(this, this.propertyMap.values().toArray(new IProperty[0]));
     }
 }
