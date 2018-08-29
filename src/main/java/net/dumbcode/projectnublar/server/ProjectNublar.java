@@ -5,19 +5,34 @@ import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.client.render.entity.DummyRenderer;
-import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
+import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.dumbcode.projectnublar.server.network.*;
+import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
+import net.dumbcode.projectnublar.server.network.C11ChangePoleFacing;
+import net.dumbcode.projectnublar.server.network.C13VehicleInputStateUpdated;
+import net.dumbcode.projectnublar.server.network.C2SkeletalMovement;
+import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
+import net.dumbcode.projectnublar.server.network.C6ResetPose;
+import net.dumbcode.projectnublar.server.network.C8FullPoseChange;
+import net.dumbcode.projectnublar.server.network.C9ChangeGlobalRotation;
+import net.dumbcode.projectnublar.server.network.S10ChangeGlobalRotation;
+import net.dumbcode.projectnublar.server.network.S12ChangePoleFacing;
+import net.dumbcode.projectnublar.server.network.S1UpdateSkeletalBuilder;
+import net.dumbcode.projectnublar.server.network.S3HistoryRecord;
+import net.dumbcode.projectnublar.server.network.S5UpdateHistoryIndex;
+import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
+import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
+import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -27,6 +42,9 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -59,6 +77,9 @@ public class ProjectNublar
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
 
+    @CapabilityInject(EntityManager.class)
+    public static final Capability<EntityManager> ENTITY_MANAGER = InjectedUtils.injected();
+
     private static Logger logger;
 
     @Mod.Instance(MODID)
@@ -85,6 +106,8 @@ public class ProjectNublar
         registerPackets();
 
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
+
+        CapabilityManager.INSTANCE.register(EntityManager.class, new VoidStorage<>(), EntityManager.Impl::new);
     }
 
     private void registerPackets() {
