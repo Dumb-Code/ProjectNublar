@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Maps;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -71,19 +72,27 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
         if(tileEntity instanceof MachineModuleBlockEntity) {
             MachineModuleBlockEntity blockEntity = (MachineModuleBlockEntity) tileEntity;
             int stateID = blockEntity.getStateID();
+            boolean valid = true;
             for (int i = 0; i < this.values.length; i++) {
                 int mask = (int) Math.pow(2, i);
-                if((stateID & mask) == 0 && this.values[i].test(stack)) {
-                    blockEntity.setStateID(stateID | mask);
-                    stack.shrink(1);
-                    if(worldIn.isRemote) {
-                        worldIn.markBlockRangeForRenderUpdate(pos, pos);
+                if((stateID & mask) == 0) {
+                    valid = false;
+                    if(this.values[i].test(stack)) {
+                        blockEntity.setStateID(stateID | mask);
+                        stack.shrink(1);
+                        if(worldIn.isRemote) {
+                            worldIn.markBlockRangeForRenderUpdate(pos, pos);
+                        }
+                        blockEntity.markDirty();
+                        break;
                     }
-                    break;
                 }
             }
+            if(valid) {
+                playerIn.openGui(ProjectNublar.INSTANCE, -1/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            }
         }
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        return true;
     }
 
     @Override

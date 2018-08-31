@@ -5,19 +5,27 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements ITickable {
 
@@ -25,21 +33,44 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     private final B asB = asB();
 
     @Getter private final MachineModuleItemStackHandler handler = new MachineModuleItemStackHandler<>(this, 9);
-    protected final List<Process> processes = Lists.newArrayList();
+    private final List<MachineProcess<B>> processes = this.createProcessList();
+
+    private final MachineModuleItemStackWrapper inputWrapper;
+    private final MachineModuleItemStackWrapper outputWrapper;
 
     @Getter @Setter private int stateID;
 
+    public MachineModuleBlockEntity(){
+        this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots);
+        this.outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots);
+    }
+
+    private MachineModuleItemStackWrapper getFromProcesses(Function<MachineProcess<B>, int[]> func) {
+        List<Integer> list = Lists.newArrayList();
+        for (MachineProcess<B> process : this.processes) {
+            for (int i : func.apply(process)) {
+                list.add(i);
+            }
+        }
+        int[] aint = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            aint[i] = list.get(i);
+        }
+        return new MachineModuleItemStackWrapper(this.handler, aint);
+    }
+
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        compound.setTag("ItemHandler", this.handler.serializeNBT());
         compound.setInteger("StateID", this.stateID);
         compound.setInteger("ProcessCount", this.processes.size());
         for (int i = 0; i < this.processes.size(); i++) {
-            Process process = this.processes.get(i);
+            MachineProcess process = this.processes.get(i);
             NBTTagCompound nbt = new NBTTagCompound();
             nbt.setInteger("Time", process.time);
             nbt.setInteger("TotalTime", process.totalTime);
             if(process.currentRecipe != null) {
-                nbt.setString("Recipe", process.currentRecipe.toString());
+                nbt.setString("Recipe", process.currentRecipe.getRegistryName().toString());
             }
             nbt.setBoolean("Processing", process.processing); //Is this really needed?
             compound.setTag("Process_" + i, nbt);
@@ -50,24 +81,25 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
+        this.handler.deserializeNBT(compound.getCompoundTag("ItemHandler"));
         this.stateID = compound.getInteger("StateID");
         for (int i = 0; i < compound.getInteger("ProcessCount"); i++) {
-            Process process = this.processes.get(i);
+            MachineProcess<B> process = this.processes.get(i);
             NBTTagCompound nbt = compound.getCompoundTag("Process_" + i);
             process.setTime(nbt.getInteger("Time"));
             process.setTotalTime(nbt.getInteger("TotalTime"));
-            process.setCurrentRecipe(nbt.hasKey("Recipe", Constants.NBT.TAG_STRING) ? new ResourceLocation(nbt.getString("Recipe")) : null);
+            process.setCurrentRecipe(nbt.hasKey("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
             process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
         }
     }
 
     @Override
     public void update() {
-        for (Process process : this.processes) {
-            if(this.canProcess(process)) {
+        for (MachineProcess<B> process : this.processes) {
+            if(this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accpets(this.asB, process))) {
                 if(process.isProcessing() || this.searchForRecipes(process)) {
                     if(process.isFinished()) {
-                        MachineRecipe<B> recipe = this.getRecipe(process);
+                        MachineRecipe<B> recipe = process.getCurrentRecipe();
                         if(recipe != null) {
                             recipe.onRecipeFinished(this.asB, process);
                             process.setTime(0);
@@ -88,13 +120,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 this.getInterruptAction(process).processConsumer.accept(process);
             }
         }
-
-        this.processes.removeIf(Process::isFinished);
     }
 
     @Nullable
-    public Process getProcess(int slot) {
-        for (Process process : this.processes) {
+    public MachineProcess<B> getProcess(int slot) {
+        for (MachineProcess<B> process : this.processes) {
             for (int i : process.getInputSlots()) {
                 if(i == slot) {
                     return process;
@@ -104,11 +134,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return null;
     }
 
-    public boolean searchForRecipes(Process process) {
+    public boolean searchForRecipes(MachineProcess<B> process) {
         for (MachineRecipe<B> recipe : this.recipes) {
             if(recipe.accpets(this.asB, process) && this.canProcess(process)) {
                 process.setProcessing(true);
-                process.setCurrentRecipe(recipe.getRegistryName());
+                process.setCurrentRecipe(recipe);
                 process.setTotalTime(recipe.getRecipeTime(this.asB, process));
                 this.markDirty();
                 return true;
@@ -118,22 +148,41 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     @Nullable
-    public MachineRecipe<B> getRecipe(Process process) {
-        if(process.getCurrentRecipe() != null) {
-            for (MachineRecipe<B> recipe : this.recipes) {
-                if(recipe.getRegistryName().equals(process.getCurrentRecipe())) {
-                    return recipe;
-                }
+    public MachineRecipe<B> getRecipe(ResourceLocation location) {
+        for (MachineRecipe<B> recipe : this.recipes) {
+            if(recipe.getRegistryName().equals(location)) {
+                return recipe;
             }
         }
         return null;
     }
 
-    protected boolean canProcess(Process process) {
+    @Override
+    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+    {
+        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Nullable
+    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+    {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            if(facing == EnumFacing.DOWN) {
+                return (T) this.outputWrapper;
+            } else {
+                return (T) this.inputWrapper;
+            }
+        }
+        return super.getCapability(capability, facing);
+    }
+
+    protected boolean canProcess(MachineProcess process) {
         return true;
     }
 
-    protected ProcessInterruptAction getInterruptAction(Process process) {
+    protected ProcessInterruptAction getInterruptAction(MachineProcess process) {
         return ProcessInterruptAction.RESET;
     }
 
@@ -145,18 +194,25 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     protected abstract B asB();
 
+    protected abstract List<MachineProcess<B>> createProcessList();
+
+    @SideOnly(Side.CLIENT)
+    public abstract GuiScreen createScreen(EntityPlayer player);
+
+    public abstract Container createContainer(EntityPlayer player);
+
     @Getter
     @Setter
-    public static class Process {
+    public static class MachineProcess<B extends MachineModuleBlockEntity<B>> {
         final int[] inputSlots;
         final int[] outputSlots;
 
         int time;
         int totalTime;
-        ResourceLocation currentRecipe;
+        MachineRecipe<B> currentRecipe;
         boolean processing;
 
-        public Process(int[] inputSlots, int[] outputSlots) {
+        public MachineProcess(int[] inputSlots, int[] outputSlots) {
             this.inputSlots = inputSlots;
             this.outputSlots = outputSlots;
         }
@@ -175,9 +231,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         DECREASE(p -> p.setTime(p.getTime() - 1)),
         PAUSE(p -> {});
 
-        private final Consumer<Process> processConsumer;
+        private final Consumer<MachineProcess> processConsumer;
 
-        ProcessInterruptAction(Consumer<Process> processConsumer) {
+        ProcessInterruptAction(Consumer<MachineProcess> processConsumer) {
             this.processConsumer = processConsumer;
         }
     }

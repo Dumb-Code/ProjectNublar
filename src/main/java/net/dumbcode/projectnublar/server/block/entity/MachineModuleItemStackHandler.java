@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
-import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -26,12 +25,13 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
 
     @Override
     protected void onContentsChanged(int slot) {
-        MachineModuleBlockEntity.Process process = this.blockEntity.getProcess(slot);
+        MachineModuleBlockEntity.MachineProcess<B> process = this.blockEntity.getProcess(slot);
         if(process != null) {
             if(!process.isProcessing()) {
                 this.blockEntity.searchForRecipes(process);
             }
         }
+        this.blockEntity.markDirty();
         super.onContentsChanged(slot);
     }
 }

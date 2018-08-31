@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.gui;
 
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
+import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -17,21 +18,29 @@ public class GuiHandler implements IGuiHandler {
     @Nullable
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
+        TileEntity te = world.getTileEntity(pos);
+        if(te instanceof MachineModuleBlockEntity) {
+            return ((MachineModuleBlockEntity)te).createContainer(player);
+        }
         return null;
     }
 
     @Nullable
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
+        TileEntity te = world.getTileEntity(pos);
         switch (ID) {
             case SKELETAL_BUILDER_ID: {
-                BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
-                TileEntity te = world.getTileEntity(pos);
                 if(te instanceof SkeletalBuilderBlockEntity) {
                     return new GuiSkeletalBuilder((SkeletalBuilderBlockEntity)te);
                 }
                 return null;
             }
+        }
+        if(te instanceof MachineModuleBlockEntity) {
+            return ((MachineModuleBlockEntity)te).createScreen(player);
         }
         return null;
     }

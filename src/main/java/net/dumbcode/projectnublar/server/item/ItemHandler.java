@@ -21,6 +21,7 @@ import java.util.function.Function;
 public final class ItemHandler {
 
     public static Item EMPTY_TEST_TUBE = new Item();
+    public static Item FILTER = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -34,7 +35,8 @@ public final class ItemHandler {
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
 
         event.getRegistry().registerAll(
-                EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB)
+                EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB),
+                FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB)
         );
 
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
