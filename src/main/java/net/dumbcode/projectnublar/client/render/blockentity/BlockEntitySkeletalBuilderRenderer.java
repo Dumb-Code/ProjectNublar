@@ -271,7 +271,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
     private void renderCube(double width, double height, float textureWidth, float textureHeight, int uOffset, int vOffset) {
         GlStateManager.pushMatrix();
-        GlStateManager.translate(-width / 2F, 0, -height / 2F);
+        GlStateManager.translate(-width / 2F, 0, -width / 2F);
 
         Tessellator tes = Tessellator.getInstance();
         BufferBuilder buff = tes.getBuffer();
