@@ -38,6 +38,7 @@ public class DinosaurEntity extends EntityCreature implements IEntityAdditionalS
 
     public DinosaurEntity(World worldIn) {
         super(worldIn);
+        this.isMale = worldIn.rand.nextBoolean();
     }
 
     @Override
