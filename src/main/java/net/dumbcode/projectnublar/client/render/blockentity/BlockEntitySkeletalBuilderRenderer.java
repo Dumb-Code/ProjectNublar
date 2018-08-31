@@ -205,7 +205,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     Tessellator tes = Tessellator.getInstance();
                     BufferBuilder buff = tes.getBuffer();
                     this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
-                    float globalRotation = poleFacing.getAxis() == EnumFacing.Axis.Y ? poleFacing.getAxisDirection().getOffset() * te.getSkeletalProperties().getRotation() : 0;
+                    float globalRotation = poleFacing.getAxis() == EnumFacing.Axis.Y ? -poleFacing.getAxisDirection().getOffset() * te.getSkeletalProperties().getRotation() : 0;
                     AdvancedModelRenderer reference = cube;
                     while(reference != null) {
                         double axisRotation;
