@@ -88,9 +88,3 @@ processResources {
         exclude 'mcmod.info'
     }
 }
-
-jar {
-    manifest {
-        attributes 'FMLAT': 'projectnublar_at.cfg'
-    }
-}

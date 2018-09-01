@@ -29,6 +29,7 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
     private final I[] values; //Not needed
     private final Map<I, PropertyBool> propertyMap = Maps.newHashMap();
     private final Supplier<? extends MachineModuleBlockEntity> machineSupplier;
+    private final BlockStateContainer blockState;
 
     public MachineModuleBlock(I[] values, Supplier<? extends MachineModuleBlockEntity> machineSupplier) {
         super(Material.IRON);
@@ -63,6 +64,11 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
             state = state.withProperty(this.propertyMap.get(this.values[i]), (id & (int) Math.pow(2, i)) != 0);
         }
         return state;
+    }
+
+    @Override
+    public BlockStateContainer getBlockState() {
+        return this.blockState;
     }
 
     @Override
