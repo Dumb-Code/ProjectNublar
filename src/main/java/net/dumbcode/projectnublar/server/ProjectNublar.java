@@ -2,18 +2,12 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
-import net.dumbcode.projectnublar.client.render.entity.DummyRenderer;
-import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -29,7 +23,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -78,11 +71,6 @@ public class ProjectNublar
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-        RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, manager -> new AnimatableRenderer<>(manager, entity -> entity.getDinosaur().getModelContainer(), entity -> {
-            Dinosaur dinosaur = entity.getDinosaur();
-            return dinosaur.getTextureLocation(entity);
-        }));
-        RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, DummyRenderer::new);
         registerPackets();
 
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
