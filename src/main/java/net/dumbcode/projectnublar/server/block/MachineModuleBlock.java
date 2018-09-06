@@ -82,7 +82,7 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
             for (int i = 0; i < this.values.length; i++) {
                 int mask = (int) Math.pow(2, i);
                 if((stateID & mask) == 0) {
-                    valid = false;
+//                    valid = false;
                     if(this.values[i].test(stack)) {
                         blockEntity.setStateID(stateID | mask);
                         stack.shrink(1);

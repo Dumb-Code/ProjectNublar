@@ -1,11 +1,9 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.Singular;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.*;
@@ -19,7 +17,6 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Locale;
 
 @Getter

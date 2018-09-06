@@ -32,7 +32,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public final Collection<MachineRecipe<B>> recipes = Collections.unmodifiableCollection(this.getAllRecipes());
     private final B asB = asB();
 
-    @Getter private final MachineModuleItemStackHandler handler = new MachineModuleItemStackHandler<>(this, 9);
+    @Getter protected final MachineModuleItemStackHandler handler = new MachineModuleItemStackHandler<>(this, 9);
     private final List<MachineProcess<B>> processes = this.createProcessList();
 
     private final MachineModuleItemStackWrapper inputWrapper;
@@ -185,6 +185,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     protected ProcessInterruptAction getInterruptAction(MachineProcess process) {
         return ProcessInterruptAction.RESET;
     }
+
+    protected void onSlotChanged(int slot) {}
 
     protected abstract int getInventorySize();
 

@@ -31,6 +31,7 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
                 this.blockEntity.searchForRecipes(process);
             }
         }
+        this.blockEntity.onSlotChanged(slot);
         this.blockEntity.markDirty();
         super.onContentsChanged(slot);
     }
