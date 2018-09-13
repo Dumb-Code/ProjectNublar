@@ -22,12 +22,12 @@ public final class ItemHandler {
 
     public static Item EMPTY_TEST_TUBE = new Item();
     public static Item FILTER = new Item();
+    public static Item AMBER = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem> TEST_TUBES = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem> GENETIC_MATERIAL = new HashMap<>();
+    public static final Map<Dinosaur, BasicDinosaurItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
@@ -36,14 +36,14 @@ public final class ItemHandler {
 
         event.getRegistry().registerAll(
                 EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB),
-                FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB)
+                FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB),
+                AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB)
         );
 
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
         populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED));
         populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new);
-        populateMap(event, TEST_TUBES, "%s_test_tube", BasicDinosaurItem::new);
-        populateMap(event, GENETIC_MATERIAL, "%s_genetic_material", BasicDinosaurItem::new);
+        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", BasicDinosaurItem::new);
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
         for (Block block : ForgeRegistries.BLOCKS) {

@@ -32,7 +32,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public final Collection<MachineRecipe<B>> recipes = Collections.unmodifiableCollection(this.getAllRecipes());
     private final B asB = asB();
 
-    @Getter protected final MachineModuleItemStackHandler handler = new MachineModuleItemStackHandler<>(this, 9);
+    @Getter protected final MachineModuleItemStackHandler handler = new MachineModuleItemStackHandler<>(this, this.getInventorySize());
     private final List<MachineProcess<B>> processes = this.createProcessList();
 
     private final MachineModuleItemStackWrapper inputWrapper;
@@ -197,6 +197,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     protected abstract B asB();
 
     protected abstract List<MachineProcess<B>> createProcessList();
+
+    public int slotSize(int slot) {
+        return 64;
+    }
 
     @SideOnly(Side.CLIENT)
     public abstract GuiScreen createScreen(EntityPlayer player);

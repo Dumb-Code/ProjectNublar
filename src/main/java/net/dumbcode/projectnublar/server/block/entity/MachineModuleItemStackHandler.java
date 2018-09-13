@@ -17,10 +17,15 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-        if(!blockEntity.isItemValidFor(slot, stack)) {
+        if(!this.blockEntity.isItemValidFor(slot, stack)) {
             return stack;
         }
         return super.insertItem(slot, stack, simulate);
+    }
+
+    @Override
+    public int getSlotLimit(int slot) {
+        return this.blockEntity.slotSize(slot);
     }
 
     @Override

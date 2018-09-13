@@ -3,7 +3,8 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.containers.machines.FossilProcessorContainer;
+import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.recipes.FossilProcessorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
@@ -180,6 +181,11 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public Container createContainer(EntityPlayer player) {
-        return new FossilProcessorContainer(player, this);
+        return new MachineModuleContainer(player, 138,
+                new MachineModuleSlot(this, 0, 8, 116), //water
+                new MachineModuleSlot(this, 1, 100, 50), //fossil
+                new MachineModuleSlot(this, 2, 150, 50), //test tub
+                new MachineModuleSlot(this, 3, 100, 100), //Filter
+                new MachineModuleSlot(this, 4, 150, 100)); //output
     }
 }

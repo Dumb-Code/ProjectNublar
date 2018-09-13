@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.containers.machines;
 
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -7,6 +8,17 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 public class MachineModuleContainer extends Container {
+
+    public MachineModuleContainer(EntityPlayer player, int playerOffset, MachineModuleSlot... slots) {
+
+        for (MachineModuleSlot slot : slots) {
+            this.addSlotToContainer(slot);
+        }
+
+        if(playerOffset >= 0) {
+            this.addPlayerSlots(player, playerOffset);
+        }
+    }
 
     protected void addPlayerSlots(EntityPlayer player, int yOffet) {
         InventoryPlayer playerInventory = player.inventory;
