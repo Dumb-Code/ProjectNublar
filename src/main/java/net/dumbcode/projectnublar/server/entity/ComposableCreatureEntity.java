@@ -1,25 +1,39 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import net.dumbcode.projectnublar.server.ProjectNublar;
+import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentMap;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
+import net.dumbcode.projectnublar.server.entity.component.impl.AiComponent;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 
-public class ComposableCreatureEntity extends EntityCreature implements ComponentAccess {
+public abstract class ComposableCreatureEntity extends EntityCreature implements ComponentAccess, IEntityAdditionalSpawnData {
     private final EntityComponentMap components = new EntityComponentMap();
 
     public ComposableCreatureEntity(World world) {
         super(world);
     }
+
+    @Override
+    protected void initEntityAI() {
+        super.initEntityAI();
+        for (EntityComponent component : this.components.values()) {
+            if (component instanceof AiComponent) {
+                AiComponent aiComponent = (AiComponent) component;
+                aiComponent.apply(this.tasks);
+            }
+        }
+    }
+
+    protected abstract void attachComponents();
 
     public <T extends EntityComponent> void attachComponent(EntityComponentType<T> type, T component) {
         this.components.put(type, component);
@@ -35,6 +49,16 @@ public class ComposableCreatureEntity extends EntityCreature implements Componen
         return this.components.get(type);
     }
 
+    @Nonnull
+    @Override
+    public <T extends EntityComponent> T getOrExcept(EntityComponentType<T> type) {
+        T component = this.components.get(type);
+        if (component == null) {
+            throw new IllegalArgumentException("Component '" + type.getIdentifier() + "' is not present on entity");
+        }
+        return component;
+    }
+
     @Override
     public boolean contains(EntityComponentType<?> type) {
         return this.components.containsKey(type);
@@ -43,16 +67,7 @@ public class ComposableCreatureEntity extends EntityCreature implements Componen
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound = super.writeToNBT(compound);
-
-        NBTTagList componentList = new NBTTagList();
-        for (Map.Entry<EntityComponentType<?>, EntityComponent> entry : this.components.entrySet()) {
-            NBTTagCompound componentTag = entry.getValue().serialize(new NBTTagCompound());
-            componentTag.setString("identifier", entry.getKey().getIdentifier().toString());
-
-            componentList.appendTag(componentTag);
-        }
-
-        compound.setTag("components", componentList);
+        compound.setTag("components", this.components.serialize(new NBTTagList()));
 
         return compound;
     }
@@ -62,17 +77,16 @@ public class ComposableCreatureEntity extends EntityCreature implements Componen
         super.readFromNBT(compound);
 
         NBTTagList componentList = compound.getTagList("components", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < componentList.tagCount(); i++) {
-            NBTTagCompound componentTag = componentList.getCompoundTagAt(i);
-            ResourceLocation identifier = new ResourceLocation(componentTag.getString("identifier"));
-            EntityComponentType<?> componentType = ProjectNublar.COMPONENT_REGISTRY.getValue(identifier);
-            if (componentType != null) {
-                EntityComponent component = componentType.construct();
-                component.deserialize(componentTag);
-                this.components.put(componentType, component);
-            } else {
-                ProjectNublar.getLogger().warn("Skipped invalid entity component: '{}'", identifier);
-            }
-        }
+        this.components.deserialize(componentList);
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buf) {
+        this.components.serialize(buf);
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf buf) {
+        this.components.deserialize(buf);
     }
 }

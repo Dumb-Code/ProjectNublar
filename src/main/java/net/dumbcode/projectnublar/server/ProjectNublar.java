@@ -71,8 +71,7 @@ import java.util.Map;
 
 @Mod.EventBusSubscriber
 @Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION)
-public class ProjectNublar
-{
+public class ProjectNublar {
     public static final String MODID = "projectnublar";
     public static final String NAME = "Project Nublar";
     public static final String VERSION = "0.0.1";
@@ -134,12 +133,13 @@ public class ProjectNublar
     public void init(FMLInitializationEvent event) {
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
         GameRegistry.registerTileEntity(MachineModuleBlockEntity.class, new ResourceLocation(MODID, "machine_module"));
-        for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
+        for (Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();
             ItemDinosaurMeat referenceRawMeat = entry.getValue();
             ItemDinosaurMeat referenceCookedMeat = ItemHandler.COOKED_MEAT_ITEMS.get(dino);
-            if(referenceCookedMeat == null)
+            if (referenceCookedMeat == null) {
                 continue;
+            }
 
             // handle all items linked to the most specific name
             NonNullList<ItemStack> rawMeats = OreDictionary.getOres(referenceRawMeat.getMostSpecificOreName());
@@ -154,10 +154,11 @@ public class ProjectNublar
         JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
         DINOSAUR_REGISTRY.getValuesCollection().forEach(dino -> {
-            File jsonFile = new File("./mods/projectnublar/debug/"+dino.getRegName().getResourcePath()+".json");
-            if(!jsonFile.getParentFile().exists())
+            File jsonFile = new File("./mods/projectnublar/debug/" + dino.getRegName().getResourcePath() + ".json");
+            if (!jsonFile.getParentFile().exists()) {
                 jsonFile.getParentFile().mkdirs();
-            try(FileWriter writer = new FileWriter(jsonFile)) {
+            }
+            try (FileWriter writer = new FileWriter(jsonFile)) {
                 gson.toJson(dino, writer);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -176,7 +177,7 @@ public class ProjectNublar
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
                 .setType(Dinosaur.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
-                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"missing"))
+                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .create();
         registerJsonDinosaurs();
