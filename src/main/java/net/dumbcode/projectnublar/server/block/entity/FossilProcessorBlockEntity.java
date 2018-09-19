@@ -88,13 +88,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
-        switch (slot) {
-            case 0: return getWaterAmount(stack) != -1;
-            case 1: return true;
-            case 2: return stack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
-            case 3: return stack.getItem() == ItemHandler.FILTER;
-        }
-        return false;
+        return slot == 0 ? getWaterAmount(stack) != -1 : super.isItemValidFor(slot, stack);
     }
 
     @Override

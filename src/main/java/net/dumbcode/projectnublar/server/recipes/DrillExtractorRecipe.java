@@ -47,13 +47,29 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
     public void onRecipeFinished(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         ItemStackHandler handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
-        for (int i = 0; i < process.getOutputSlots().length; i++) {
+        for (int i : process.getOutputSlots()) {
             if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE) {
-                handler.setStackInSlot(i, this.outputStack.apply(inSlot));
-                inSlot.shrink(1);
+                ItemStack stack = this.outputStack.apply(inSlot);
+                if(!blockEntity.getWorld().isRemote) {
+                    handler.setStackInSlot(i, stack);
+                    inSlot.shrink(1);
+                }
                 return;
             }
         }
+    }
+
+    @Override
+    public boolean acceptsInputSlot(int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+        switch (slotIndex) {
+            case 0: return this.inputPredicate.test(testStack);
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
+        }
+        return false;
     }
 
     @Override

@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.recipes;
 
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.ItemStackHandler;
@@ -52,6 +53,16 @@ public class FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlock
         } else {
             outSlot.grow(output.getCount());
         }
+    }
+
+    @Override
+    public boolean acceptsInputSlot(int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+        switch (slotIndex) {
+            case 1: return this.inputTest.test(testStack);
+            case 2: return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
+            case 3: return testStack.getItem() == ItemHandler.FILTER;
+        }
+        return false;
     }
 
     @Override

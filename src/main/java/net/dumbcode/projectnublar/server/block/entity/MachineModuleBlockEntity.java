@@ -18,6 +18,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -190,8 +191,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     protected abstract int getInventorySize();
 
-    public abstract boolean isItemValidFor(int slot, ItemStack stack);
-
     protected abstract List<MachineRecipe<B>> getAllRecipes();
 
     protected abstract B asB();
@@ -200,6 +199,31 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public int slotSize(int slot) {
         return 64;
+    }
+
+    public boolean isItemValidFor(int slot, ItemStack stack) {
+        return this.isRecipeSlotValid(slot, stack);
+    }
+
+    protected boolean isRecipeSlotValid(int slot, ItemStack stack) {
+        for (MachineProcess<B> process : this.processes) {
+            for (int i = 0; i < process.getAllSlots().length; i++) {
+                if(process.getAllSlots()[i] == slot) { //Get the process that contains the slot
+                    if(process.getCurrentRecipe() != null) {
+                        return process.getCurrentRecipe().acceptsInputSlot(i, stack, process);
+                    } else {
+                        for (MachineRecipe<B> recipe : this.recipes) {
+                            if(recipe.acceptsInputSlot(i, stack, process)) {
+                                process.setCurrentRecipe(recipe); //thonk
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return false; //Slot index was not an input. Log error?
     }
 
     @SideOnly(Side.CLIENT)
@@ -213,6 +237,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         final int[] inputSlots;
         final int[] outputSlots;
 
+        final int[] allSlots;
+
         int time;
         int totalTime;
         MachineRecipe<B> currentRecipe;
@@ -221,6 +247,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         public MachineProcess(int[] inputSlots, int[] outputSlots) {
             this.inputSlots = inputSlots;
             this.outputSlots = outputSlots;
+
+            this.allSlots = ArrayUtils.addAll(this.inputSlots, this.outputSlots);
         }
 
         public void tick() {

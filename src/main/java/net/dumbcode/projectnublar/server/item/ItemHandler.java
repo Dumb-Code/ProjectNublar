@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -11,6 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +22,7 @@ import java.util.function.Function;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
 
-    public static Item EMPTY_TEST_TUBE = new Item();
+    public static Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
 
@@ -28,6 +30,7 @@ public final class ItemHandler {
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, BasicDinosaurItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
+    public static final Map<Dinosaur, BasicDinosaurItem> STORAGE_CHIP = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
@@ -40,10 +43,11 @@ public final class ItemHandler {
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB)
         );
 
-        populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW));
-        populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED));
-        populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new);
-        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", BasicDinosaurItem::new);
+        populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), new TabInitilizer<>(ProjectNublar.TAB));
+        populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), new TabInitilizer<>(ProjectNublar.TAB));
+        populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, new TabInitilizer<>(ProjectNublar.TAB));
+        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", BasicDinosaurItem::new, new TabInitilizer<BasicDinosaurItem>(ProjectNublar.TAB).andThen(i -> i.setMaxStackSize(1)));
+        populateMap(event, STORAGE_CHIP, "%s_storage_chip", BasicDinosaurItem::new, new TabInitilizer<>(ProjectNublar.TAB));
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
         for (Block block : ForgeRegistries.BLOCKS) {
@@ -72,15 +76,21 @@ public final class ItemHandler {
                 .forEach(ItemWithOreName::registerOreNames);
     }
 
-
     private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier) {
+        populateMap(event, itemMap, dinosaurRegname, supplier, null);
+    }
+
+    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier, @Nullable Function<T, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
+
             if(dinosaur != Dinosaur.MISSING) {
                 T item = supplier.apply(dinosaur);
                 String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
                 item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
                 item.setUnlocalizedName(name);
-                item.setCreativeTab(ProjectNublar.TAB);
+                if(initializer != null) {
+                    item = runInitilizer(item, initializer);
+                }
                 itemMap.put(dinosaur, item);
                 event.getRegistry().register(item);
             }
@@ -88,10 +98,10 @@ public final class ItemHandler {
     }
 
     private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
-        populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname);
+        populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname, null);
     }
 
-    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
+    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<T, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
             if(dinosaur != Dinosaur.MISSING) {
                 for (S s : getterFunction.apply(dinosaur)) {
@@ -99,11 +109,37 @@ public final class ItemHandler {
                     String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
                     item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
                     item.setUnlocalizedName(name);
-                    item.setCreativeTab(ProjectNublar.TAB);
+                    if(initializer != null) {
+                        item = runInitilizer(item, initializer);
+                    }
                     itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
                     event.getRegistry().register(item);
                 }
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Item> T runInitilizer(T item, Function<T, Item> initializer) {
+        Item initializedItem = initializer.apply(item);
+        if(!item.getClass().isInstance(initializedItem)) {
+            throw new RuntimeException("Initialized class did not give same as (of subclass of) initial class. Initial: " + item.getClass() + " Initialized: " + initializedItem.getClass());
+        }
+        return (T) initializedItem;
+    }
+
+
+    private static class TabInitilizer<T extends Item> implements Function<T, Item> {
+
+        private final CreativeTabs tab;
+
+        private TabInitilizer(CreativeTabs tab) {
+            this.tab = tab;
+        }
+
+        @Override
+        public Item apply(T t) {
+            return t.setCreativeTab(this.tab);
         }
     }
 }

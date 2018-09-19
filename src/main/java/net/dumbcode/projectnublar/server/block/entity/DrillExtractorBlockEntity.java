@@ -23,14 +23,6 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     }
 
     @Override
-    public boolean isItemValidFor(int slot, ItemStack stack) {
-        if(slot > 0) {
-            return stack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
-        }
-        return true;
-    }
-
-    @Override
     protected List<MachineRecipe<DrillExtractorBlockEntity>> getAllRecipes() {
         return Lists.newArrayList(
                 new DrillExtractorRecipe(new ResourceLocation("test"),
@@ -48,7 +40,7 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     @Override
     protected List<MachineProcess<DrillExtractorBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(new int[]{0}, new int[]{4, 5, 6, 7})
+                new MachineProcess<>(new int[]{0}, new int[]{1, 2, 3, 4})
         );
     }
 
