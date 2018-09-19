@@ -45,7 +45,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     }
 
     public String getFormattedName() {
-        return this.getRegName().toString().toLowerCase().replace(":", "_");
+        return (this.getRegName().getResourceDomain().equals(ProjectNublar.MODID) ? this.getRegName().getResourcePath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
     }
 
     public DinosaurEntity createEntity(World world) {
