@@ -9,7 +9,7 @@ public interface MachineRecipe<B extends MachineModuleBlockEntity> {
     int getRecipeTime(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
     void onRecipeFinished(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
 
-    boolean acceptsInputSlot(int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process);
+    boolean acceptsInputSlot(B blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process);
 
     ResourceLocation getRegistryName();
 }

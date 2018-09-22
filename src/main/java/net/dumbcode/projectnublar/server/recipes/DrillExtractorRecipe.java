@@ -60,7 +60,7 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
     }
 
     @Override
-    public boolean acceptsInputSlot(int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean acceptsInputSlot(DrillExtractorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
         switch (slotIndex) {
             case 0: return this.inputPredicate.test(testStack);
             case 1:

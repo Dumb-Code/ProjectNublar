@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.data.ChipInfomation;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.minecraft.client.gui.GuiScreen;
@@ -26,9 +27,13 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     protected List<MachineRecipe<SequencingSynthesizerBlockEntity>> getAllRecipes() {
         return Lists.newArrayList(
-                new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "test"), 30,
+                new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "genetic_material"), 30,
                         stack -> stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_GENETIC_MATERIAL.values().contains(stack.getItem()),
-                        stack -> new ItemStack(ItemHandler.EMPTY_CHIP))
+                        ChipInfomation::combine),
+
+                new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "filled_syringe"), 30,
+                        stack -> stack.getItem() == ItemHandler.FILLED_SYRINGE,
+                        ChipInfomation::combine)
         );
     }
 
@@ -50,8 +55,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     public Container createContainer(EntityPlayer player) {
         return new MachineModuleContainer(player, 100,
-                new MachineModuleSlot(this, 0, 62, 70),
-                new MachineModuleSlot(this, 1, 82, 70),
-                new MachineModuleSlot(this, 2, 80, 100));
+                new MachineModuleSlot(this, 0, 62, 30),
+                new MachineModuleSlot(this, 1, 98, 30),
+                new MachineModuleSlot(this, 2, 80, 50));
     }
 }

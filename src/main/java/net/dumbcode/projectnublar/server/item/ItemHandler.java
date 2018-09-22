@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static net.dumbcode.projectnublar.server.ProjectNublar.TAB;
+
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
 
@@ -25,6 +27,9 @@ public final class ItemHandler {
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
     public static Item EMPTY_CHIP = new Item();
+    public static Item EMPTY_SYRINGE = new Item();
+    public static Item FILLED_SYRINGE = new Item();
+
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -38,13 +43,15 @@ public final class ItemHandler {
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
 
         event.getRegistry().registerAll(
-                EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB),
-                FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB),
-                AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB),
-                EMPTY_CHIP.setRegistryName("empty_chip").setUnlocalizedName("empty_chip").setCreativeTab(ProjectNublar.TAB).setMaxStackSize(1)
+                EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(TAB),
+                FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(TAB),
+                AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(TAB),
+                EMPTY_CHIP.setRegistryName("empty_chip").setUnlocalizedName("empty_chip").setCreativeTab(TAB).setMaxStackSize(1),
+                EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB).setMaxStackSize(1),
+                FILLED_SYRINGE.setRegistryName("filled_syringe").setUnlocalizedName("filled_syringe").setCreativeTab(TAB).setMaxStackSize(1)
         );
 
-        Function<Item, Item> tab = item -> item.setCreativeTab(ProjectNublar.TAB);
+        Function<Item, Item> tab = item -> item.setCreativeTab(TAB);
 
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
         populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);

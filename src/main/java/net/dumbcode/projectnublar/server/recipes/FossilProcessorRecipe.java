@@ -51,7 +51,7 @@ public class FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlock
     }
 
     @Override
-    public boolean acceptsInputSlot(int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
         switch (slotIndex) {
             case 1: return this.inputTest.test(testStack);
             case 2: return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;

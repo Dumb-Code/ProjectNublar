@@ -210,10 +210,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             for (int i = 0; i < process.getAllSlots().length; i++) {
                 if(process.getAllSlots()[i] == slot) { //Get the process that contains the slot
                     if(process.getCurrentRecipe() != null) {
-                        return process.getCurrentRecipe().acceptsInputSlot(i, stack, process);
+                        return process.getCurrentRecipe().acceptsInputSlot(this.asB, i, stack, process);
                     } else {
                         for (MachineRecipe<B> recipe : this.recipes) {
-                            if(recipe.acceptsInputSlot(i, stack, process)) {
+                            if(recipe.acceptsInputSlot(this.asB, i, stack, process)) {
                                 process.setCurrentRecipe(recipe); //thonk
                                 return true;
                             }
@@ -241,6 +241,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         int time;
         int totalTime;
+        @Nullable
         MachineRecipe<B> currentRecipe;
         boolean processing;
 
