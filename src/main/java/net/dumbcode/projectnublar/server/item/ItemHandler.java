@@ -45,7 +45,7 @@ public final class ItemHandler {
                 DISC.setRegistryName("disc").setUnlocalizedName("disc").setCreativeTab(ProjectNublar.TAB).setMaxStackSize(1)
         );
 
-        TabInitilizer tab = new TabInitilizer(ProjectNublar.TAB);
+        Function<Item, Item> tab = item -> item.setCreativeTab(ProjectNublar.TAB);
 
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
         populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);
@@ -130,20 +130,5 @@ public final class ItemHandler {
             throw new RuntimeException("Initialized class did not give same as (of subclass of) initial class. Initial: " + item.getClass() + " Initialized: " + initializedItem.getClass());
         }
         return (T) initializedItem;
-    }
-
-
-    private static class TabInitilizer implements Function<Item, Item> {
-
-        private final CreativeTabs tab;
-
-        private TabInitilizer(CreativeTabs tab) {
-            this.tab = tab;
-        }
-
-        @Override
-        public Item apply(Item item) {
-            return item.setCreativeTab(this.tab);
-        }
     }
 }
