@@ -25,6 +25,7 @@ public final class ItemHandler {
     public static Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
+    public static Item DISC = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -40,7 +41,8 @@ public final class ItemHandler {
         event.getRegistry().registerAll(
                 EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB),
                 FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB),
-                AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB)
+                AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB),
+                DISC.setRegistryName("disc").setUnlocalizedName("disc").setCreativeTab(ProjectNublar.TAB)
         );
 
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), new TabInitilizer<>(ProjectNublar.TAB));

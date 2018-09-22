@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -99,6 +100,7 @@ public class ProjectNublar
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
         GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
         GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
+        GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
 
         for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();

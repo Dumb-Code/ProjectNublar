@@ -26,14 +26,9 @@ public class FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlock
 
     @Override
     public boolean accpets(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        ItemStackHandler itemStackHandler = blockEntity.getHandler();
-        ItemStack inputStack = itemStackHandler.getStackInSlot(process.getInputSlots()[0]);
-        if(this.inputTest.test(inputStack)) {
-            ItemStack outSlot = itemStackHandler.getStackInSlot(process.getOutputSlots()[0]);
-            ItemStack output = this.outputCreator.apply(inputStack);
-            return outSlot.isEmpty() || (outSlot.getCount() + output.getCount() <= outSlot.getMaxStackSize() && ItemStack.areItemStacksEqualUsingNBTShareTag(outSlot, output));
-        }
-        return false;
+        ItemStackHandler handler = blockEntity.getHandler();
+        ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
+        return this.inputTest.test(inSlot) && handler.insertItem(process.getOutputSlots()[0], this.outputCreator.apply(inSlot), true).isEmpty();
     }
 
     @Override
