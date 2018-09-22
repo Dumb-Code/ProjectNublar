@@ -28,7 +28,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return Lists.newArrayList(
                 new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "test"), 30,
                         stack -> stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_GENETIC_MATERIAL.values().contains(stack.getItem()),
-                        stack -> new ItemStack(ItemHandler.DISC))
+                        stack -> new ItemStack(ItemHandler.EMPTY_CHIP))
         );
     }
 

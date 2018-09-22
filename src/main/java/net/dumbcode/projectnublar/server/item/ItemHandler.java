@@ -4,7 +4,6 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -25,7 +24,7 @@ public final class ItemHandler {
     public static Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
-    public static Item DISC = new Item();
+    public static Item EMPTY_CHIP = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -42,7 +41,7 @@ public final class ItemHandler {
                 EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB),
                 FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB),
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB),
-                DISC.setRegistryName("disc").setUnlocalizedName("disc").setCreativeTab(ProjectNublar.TAB).setMaxStackSize(1)
+                EMPTY_CHIP.setRegistryName("empty_chip").setUnlocalizedName("empty_chip").setCreativeTab(ProjectNublar.TAB).setMaxStackSize(1)
         );
 
         Function<Item, Item> tab = item -> item.setCreativeTab(ProjectNublar.TAB);

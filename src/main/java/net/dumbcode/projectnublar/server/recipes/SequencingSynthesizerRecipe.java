@@ -45,7 +45,7 @@ public class SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynt
     public boolean acceptsInputSlot(int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
         switch (slotIndex) {
             case 0: return this.input.test(testStack);
-            case 1: return testStack.getItem() == ItemHandler.DISC;
+            case 1: return testStack.getItem() == ItemHandler.EMPTY_CHIP;
             default: return false;
         }
     }
