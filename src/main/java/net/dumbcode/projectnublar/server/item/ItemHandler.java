@@ -42,14 +42,16 @@ public final class ItemHandler {
                 EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(ProjectNublar.TAB),
                 FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(ProjectNublar.TAB),
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(ProjectNublar.TAB),
-                DISC.setRegistryName("disc").setUnlocalizedName("disc").setCreativeTab(ProjectNublar.TAB)
+                DISC.setRegistryName("disc").setUnlocalizedName("disc").setCreativeTab(ProjectNublar.TAB).setMaxStackSize(1)
         );
 
-        populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), new TabInitilizer<>(ProjectNublar.TAB));
-        populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), new TabInitilizer<>(ProjectNublar.TAB));
-        populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, new TabInitilizer<>(ProjectNublar.TAB));
-        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", BasicDinosaurItem::new, new TabInitilizer<BasicDinosaurItem>(ProjectNublar.TAB).andThen(i -> i.setMaxStackSize(1)));
-        populateMap(event, STORAGE_CHIP, "%s_storage_chip", BasicDinosaurItem::new, new TabInitilizer<>(ProjectNublar.TAB));
+        TabInitilizer tab = new TabInitilizer(ProjectNublar.TAB);
+
+        populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
+        populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);
+        populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
+        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", BasicDinosaurItem::new, tab.andThen(i -> i.setMaxStackSize(1)));
+        populateMap(event, STORAGE_CHIP, "%s_storage_chip", BasicDinosaurItem::new, tab);
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
         for (Block block : ForgeRegistries.BLOCKS) {
@@ -82,7 +84,7 @@ public final class ItemHandler {
         populateMap(event, itemMap, dinosaurRegname, supplier, null);
     }
 
-    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier, @Nullable Function<T, Item> initializer) {
+    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier, @Nullable Function<Item, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
 
             if(dinosaur != Dinosaur.MISSING) {
@@ -103,7 +105,7 @@ public final class ItemHandler {
         populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname, null);
     }
 
-    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<T, Item> initializer) {
+    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
             if(dinosaur != Dinosaur.MISSING) {
                 for (S s : getterFunction.apply(dinosaur)) {
@@ -122,7 +124,7 @@ public final class ItemHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Item> T runInitilizer(T item, Function<T, Item> initializer) {
+    private static <T extends Item> T runInitilizer(T item, Function<Item, Item> initializer) {
         Item initializedItem = initializer.apply(item);
         if(!item.getClass().isInstance(initializedItem)) {
             throw new RuntimeException("Initialized class did not give same as (of subclass of) initial class. Initial: " + item.getClass() + " Initialized: " + initializedItem.getClass());
@@ -131,7 +133,7 @@ public final class ItemHandler {
     }
 
 
-    private static class TabInitilizer<T extends Item> implements Function<T, Item> {
+    private static class TabInitilizer implements Function<Item, Item> {
 
         private final CreativeTabs tab;
 
@@ -140,8 +142,8 @@ public final class ItemHandler {
         }
 
         @Override
-        public Item apply(T t) {
-            return t.setCreativeTab(this.tab);
+        public Item apply(Item item) {
+            return item.setCreativeTab(this.tab);
         }
     }
 }
