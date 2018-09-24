@@ -26,7 +26,7 @@ public final class ItemHandler {
     public static Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
-    public static Item EMPTY_CHIP = new Item();
+    public static Item STORAGE_DRIVE = new DriveItem();
     public static Item EMPTY_SYRINGE = new Item();
     public static Item FILLED_SYRINGE = new Item();
 
@@ -34,8 +34,7 @@ public final class ItemHandler {
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem> STORAGE_CHIP = new HashMap<>();
+    public static final Map<Dinosaur, DefaultDriveInformation> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
@@ -46,7 +45,7 @@ public final class ItemHandler {
                 EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(TAB),
                 FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(TAB),
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(TAB),
-                EMPTY_CHIP.setRegistryName("empty_chip").setUnlocalizedName("empty_chip").setCreativeTab(TAB).setMaxStackSize(1),
+                STORAGE_DRIVE.setRegistryName("storage_drive").setUnlocalizedName("storage_drive").setCreativeTab(TAB).setMaxStackSize(1),
                 EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB).setMaxStackSize(1),
                 FILLED_SYRINGE.setRegistryName("filled_syringe").setUnlocalizedName("filled_syringe").setCreativeTab(TAB).setMaxStackSize(1)
         );
@@ -56,8 +55,7 @@ public final class ItemHandler {
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
         populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);
         populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
-        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", BasicDinosaurItem::new, tab.andThen(i -> i.setMaxStackSize(1)));
-        populateMap(event, STORAGE_CHIP, "%s_storage_chip", BasicDinosaurItem::new, tab);
+        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", d -> new DefaultDriveInformation(d, d.getRegName().toString(), 50/*Change per dino?*/), tab.andThen(i -> i.setMaxStackSize(1)));
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
         for (Block block : ForgeRegistries.BLOCKS) {

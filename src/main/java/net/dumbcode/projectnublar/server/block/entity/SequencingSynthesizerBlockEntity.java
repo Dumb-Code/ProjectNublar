@@ -7,7 +7,6 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.dumbcode.projectnublar.server.item.data.ChipInfomation;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.minecraft.client.gui.GuiScreen;
@@ -28,12 +27,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     protected List<MachineRecipe<SequencingSynthesizerBlockEntity>> getAllRecipes() {
         return Lists.newArrayList(
                 new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "genetic_material"), 30,
-                        stack -> stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_GENETIC_MATERIAL.values().contains(stack.getItem()),
-                        ChipInfomation::combine),
+                        stack -> stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_GENETIC_MATERIAL.values().contains(stack.getItem())),
 
                 new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "filled_syringe"), 30,
-                        stack -> stack.getItem() == ItemHandler.FILLED_SYRINGE,
-                        ChipInfomation::combine)
+                        stack -> stack.getItem() == ItemHandler.FILLED_SYRINGE)
         );
     }
 
@@ -44,7 +41,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Override
     protected List<MachineProcess<SequencingSynthesizerBlockEntity>> createProcessList() {
-        return Lists.newArrayList(new MachineProcess<>(new int[]{0, 1}, new int[]{2}));
+        return Lists.newArrayList(new MachineProcess<>(new int[]{1}, new int[]{2}));
+    }
+
+    @Override
+    public boolean isItemValidFor(int slot, ItemStack stack) {
+        return slot == 0 ? stack.getItem() == ItemHandler.STORAGE_DRIVE : super.isItemValidFor(slot, stack);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     public Container createContainer(EntityPlayer player) {
         return new MachineModuleContainer(player, 100,
-                new MachineModuleSlot(this, 0, 62, 30),
+                new MachineModuleSlot(this, 0, 120, 20),
                 new MachineModuleSlot(this, 1, 98, 30),
                 new MachineModuleSlot(this, 2, 80, 50));
     }
