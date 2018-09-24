@@ -19,16 +19,6 @@ public class DriveUtils {
 
         DriveInformation info = (DriveInformation) inItem.getItem();
 
-        List<Integer> list = Lists.newArrayList();
-        for (int i1 = 0; i1 < 50; i1++) {
-            int[] aint = MathUtils.generateWeightedList(info.getSize(inItem));
-            list.add(aint[new Random().nextInt(aint.length)]);
-        }
-        list.sort(null);
-        for (Integer integer : list) {
-            System.out.println(integer.intValue());
-        }
-
         int[] aint = MathUtils.generateWeightedList(info.getSize(inItem));
         //Fisher–Yates shuffle
         Random rnd = new Random();
@@ -38,6 +28,15 @@ public class DriveUtils {
             int a = aint[index];
             aint[index] = aint[i];
             aint[i] = a;
+        }
+
+        List<Integer> list = Lists.newArrayList();
+        for (int i1 = 0; i1 < 50; i1++) {
+            list.add(aint[new Random().nextInt(aint.length)]);
+        }
+        list.sort(null);
+        for (Integer integer : list) {
+            System.out.println(integer.intValue());
         }
 
         int result = aint[new Random().nextInt(aint.length)];
