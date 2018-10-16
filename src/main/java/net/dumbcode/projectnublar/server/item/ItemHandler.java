@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -27,8 +28,8 @@ public final class ItemHandler {
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
     public static Item STORAGE_DRIVE = new DriveItem();
-    public static Item EMPTY_SYRINGE = new Item();
-    public static Item FILLED_SYRINGE = new Item();
+    public static Item EMPTY_SYRINGE = new ItemSyringe(false);
+    public static Item FILLED_SYRINGE = new ItemSyringe(true);
 
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
@@ -46,8 +47,8 @@ public final class ItemHandler {
                 FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(TAB),
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(TAB),
                 STORAGE_DRIVE.setRegistryName("storage_drive").setUnlocalizedName("storage_drive").setCreativeTab(TAB).setMaxStackSize(1),
-                EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB).setMaxStackSize(1),
-                FILLED_SYRINGE.setRegistryName("filled_syringe").setUnlocalizedName("filled_syringe").setCreativeTab(TAB).setMaxStackSize(1)
+                EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB),
+                FILLED_SYRINGE.setRegistryName("filled_syringe").setUnlocalizedName("filled_syringe").setCreativeTab(TAB)
         );
 
         Function<Item, Item> tab = item -> item.setCreativeTab(TAB);
@@ -61,7 +62,7 @@ public final class ItemHandler {
         for (Block block : ForgeRegistries.BLOCKS) {
             if(block instanceof IItemBlock) {
                 event.getRegistry().register(((IItemBlock)block).createItem()
-                        .setRegistryName(block.getRegistryName())
+                        .setRegistryName(Objects.requireNonNull(block.getRegistryName()))
                         .setUnlocalizedName(block.getUnlocalizedName().substring("tile.".length()))
                         .setCreativeTab(block.getCreativeTabToDisplayOn()));
             }

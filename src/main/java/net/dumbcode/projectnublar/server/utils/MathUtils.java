@@ -1,6 +1,10 @@
 package net.dumbcode.projectnublar.server.utils;
 
+import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
+import java.util.Random;
 
 @UtilityClass
 public class MathUtils {
@@ -14,5 +18,19 @@ public class MathUtils {
             }
         }
         return out;
+    }
+
+    public static int getWeightedResult(int size) {
+        int[] aint = generateWeightedList(size);
+        //Fisher–Yates shuffle
+        Random rnd = new Random();
+        for (int i = aint.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            int a = aint[index];
+            aint[index] = aint[i];
+            aint[i] = a;
+        }
+        return aint[new Random().nextInt(aint.length)];
     }
 }

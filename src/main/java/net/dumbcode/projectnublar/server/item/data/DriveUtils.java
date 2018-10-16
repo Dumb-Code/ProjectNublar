@@ -5,11 +5,25 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.common.asm.transformers.ItemStackTransformer;
 
 import java.util.List;
 import java.util.Random;
 
 public class DriveUtils {
+
+    public static boolean canAdd(ItemStack drive, ItemStack inItem) {
+        if (!(inItem.getItem() instanceof DriveInformation)) {
+            return false;
+        }
+        DriveInformation info = (DriveInformation) inItem.getItem();
+        String key = info.getKey(inItem);
+        if(key.isEmpty()) {
+            return false;
+        }
+        return drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(key).getInteger("amount") < 100;
+    }
 
     public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
 
@@ -18,42 +32,19 @@ public class DriveUtils {
         }
 
         DriveInformation info = (DriveInformation) inItem.getItem();
-
-        int[] aint = MathUtils.generateWeightedList(info.getSize(inItem));
-        //Fisher–Yates shuffle
-        Random rnd = new Random();
-        for (int i = aint.length - 1; i > 0; i--)
-        {
-            int index = rnd.nextInt(i + 1);
-            int a = aint[index];
-            aint[index] = aint[i];
-            aint[i] = a;
-        }
-
-        List<Integer> list = Lists.newArrayList();
-        for (int i1 = 0; i1 < 50; i1++) {
-            list.add(aint[new Random().nextInt(aint.length)]);
-        }
-        list.sort(null);
-        for (Integer integer : list) {
-            System.out.println(integer.intValue());
-        }
-
-        int result = aint[new Random().nextInt(aint.length)];
-
-
-
-        System.out.println(result);
-
+        NBTTagCompound nbt = drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
         String key = info.getKey(inItem);
-
         if(key.isEmpty()) {
             return;
         }
-        NBTTagCompound nbt = drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
-
         NBTTagCompound inner = nbt.getCompoundTag(key);
-        inner.setInteger("amount", inner.getInteger("amount") + result);
+        int current = inner.getInteger("amount");
+        if(current >= 100) {
+            return;
+        }
+        int result = MathUtils.getWeightedResult(info.getSize(inItem));
+
+        inner.setInteger("amount", MathHelper.clamp(current + result, 0, 100));
         nbt.setTag(key, inner);
 
         drive.getOrCreateSubCompound(ProjectNublar.MODID).setTag("drive_information", nbt);
@@ -62,6 +53,12 @@ public class DriveUtils {
     public interface DriveInformation {
         int getSize(ItemStack stack);
         String getKey(ItemStack stack);
+        default boolean hasInformation(ItemStack stack) {
+            return true;
+        }
+        default ItemStack getOutItem(ItemStack stack) {
+            return ItemStack.EMPTY;
+        }
     }
 
 }

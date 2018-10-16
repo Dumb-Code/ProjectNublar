@@ -23,6 +23,10 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
         return super.insertItem(slot, stack, simulate);
     }
 
+    public ItemStack insertOutputItem(int slot, @Nonnull ItemStack stack, boolean simulationOnly) {
+        return super.insertItem(slot, stack, simulationOnly);
+    }
+
     @Override
     public int getSlotLimit(int slot) {
         return this.blockEntity.slotSize(slot);

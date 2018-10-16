@@ -5,8 +5,8 @@ import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
-import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.minecraft.client.gui.GuiScreen;
@@ -26,11 +26,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     protected List<MachineRecipe<SequencingSynthesizerBlockEntity>> getAllRecipes() {
         return Lists.newArrayList(
-                new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "genetic_material"), 30,
-                        stack -> stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_GENETIC_MATERIAL.values().contains(stack.getItem())),
+                new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "drive_infomation"), 30,
+                        stack -> stack.getItem() instanceof DriveUtils.DriveInformation && ((DriveUtils.DriveInformation) stack.getItem()).hasInformation(stack))
 
-                new SequencingSynthesizerRecipe(new ResourceLocation(ProjectNublar.MODID, "filled_syringe"), 30,
-                        stack -> stack.getItem() == ItemHandler.FILLED_SYRINGE)
         );
     }
 
@@ -59,6 +57,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return new MachineModuleContainer(player, 100,
                 new MachineModuleSlot(this, 0, 120, 20),
                 new MachineModuleSlot(this, 1, 98, 30),
-                new MachineModuleSlot(this, 2, 80, 50));
+                new MachineModuleSlot(this, 2, 10, 50));
     }
 }
