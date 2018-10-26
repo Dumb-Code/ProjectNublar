@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.client.Minecraft;
@@ -30,8 +31,8 @@ public class SequencingSynthesizerGui extends GuiContainer {
     private ClampedGuiSlider secondarySlider;
     private ClampedGuiSlider thirdSlider;
 
-    private List<StringEntry> dinosaurList = Lists.newArrayList();
-    private List<StringEntry> entryList = Lists.newArrayList();
+    private List<DriveEntry> dinosaurList = Lists.newArrayList();
+    private List<DriveEntry> entryList = Lists.newArrayList();
 
     public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity) {
         super(blockEntity.createContainer(player));
@@ -50,9 +51,17 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.secondaryBox = new GuiDropdownBox(this.guiLeft, this.guiTop + 40, 90, 20, 5, () -> this.entryList);
         this.thirdBox = new GuiDropdownBox(this.guiLeft, this.guiTop + 70, 90, 20, 5, () -> this.entryList);
 
-        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 100, this.guiTop + 10, 90, 20, "", "%", 0D, 100D, 50D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 100, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 50D, false, true, d -> Math.min(d, 1D - this.initialSlider.sliderValue), this.secondaryBox);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 100, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - this.initialSlider.sliderValue - this.secondarySlider.sliderValue), this.thirdBox);
+        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 100, this.guiTop + 10, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 100, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox);
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 100, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox);
+
+//        for (DriveUtils.DriveEntry entry : DriveUtils.getAll(this.blockEntity.getHandler().getStackInSlot(0))) {
+//            DriveEntry stringEntry = new DriveEntry(entry.getKey(), entry.getName());
+//            if(entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
+//                this.dinosaurList.add(stringEntry);
+//            }
+//            this.entryList.add(stringEntry);
+//        }
 
     }
 
@@ -68,15 +77,40 @@ public class SequencingSynthesizerGui extends GuiContainer {
     }
 
     private void updateList() {
-        this.entryList.clear();
-        this.dinosaurList.clear();
+//        this.entryList.clear();
+//        this.dinosaurList.clear();
+
+
+        List<DriveEntry> removedEntries = Lists.newArrayList(this.entryList);
 
         for (DriveUtils.DriveEntry entry : DriveUtils.getAll(this.blockEntity.getHandler().getStackInSlot(0))) {
-            StringEntry stringEntry = new StringEntry(entry.getName());
-            if(entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
-                this.dinosaurList.add(stringEntry);
+            if (this.entryList.stream().noneMatch(d -> d.key.equals(entry.getKey()))) {
+                DriveEntry e = new DriveEntry(entry.getKey(), entry.getName());
+                if (entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
+                    this.dinosaurList.add(e);
+                }
+                this.entryList.add(e);
+            } else {
+                removedEntries.removeIf(d -> d.key.equals(entry.getKey()));
             }
-            this.entryList.add(stringEntry);
+
+            for (DriveEntry removed : removedEntries) {
+                if (this.initialBox.getActive() == removed) {
+                    this.initialBox.setActive(null);
+                }
+
+                if (this.secondaryBox.getActive() == removed) {
+                    this.secondaryBox.setActive(null);
+                }
+
+                if (this.thirdBox.getActive() == removed) {
+                    this.thirdBox.setActive(null);
+                }
+
+                this.entryList.remove(removed);
+                this.dinosaurList.remove(removed);
+
+            }
         }
     }
 
@@ -84,6 +118,41 @@ public class SequencingSynthesizerGui extends GuiContainer {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
+
+        int xStart = this.guiLeft;
+        int yStart = this.guiTop + 100;
+
+        int w = 190;
+        int yEnd = yStart + 15;
+
+
+        int initial = (int) (w * this.initialSlider.sliderValue);
+        int second = initial + (int) (w * this.secondarySlider.sliderValue);
+        int third = second + (int) (w * this.thirdSlider.sliderValue);
+
+        Gui.drawRect(xStart, yStart, xStart + initial, yEnd, 0xFFFF0000); //Initial
+        Gui.drawRect(xStart + initial, yStart, xStart + second, yEnd, 0xFF00FF00); //Second
+        Gui.drawRect(xStart + second, yStart, xStart + third, yEnd, 0xFF0000FF); //Third
+        Gui.drawRect(xStart + third, yStart, xStart + w, yEnd, 0xFF000000); //Leftover
+
+        if(mouseX <= xStart + 190 && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart
+                && !this.initialBox.isMouseOver(mouseX, mouseY)
+                && !this.secondaryBox.isMouseOver(mouseX, mouseY)
+                && !this.thirdBox.isMouseOver(mouseX, mouseY)) {
+            int x = mouseX - xStart;
+            String text;
+            if(x <= initial) {
+                text = this.initialBox.getActive().getSearch();
+            } else if(x <= second) {
+                text = this.secondaryBox.getActive().getSearch();
+            } else if(x <= third) {
+                text = this.thirdBox.getActive().getSearch();
+            } else {
+                text = "Not Set"; //TODO: localize
+            }
+            this.drawHoveringText(text, mouseX, mouseY);
+        }
+
 
         GuiDropdownBox mouseOver =
                 this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.open  ? this.initialBox :
@@ -107,38 +176,6 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.initialSlider.drawButton(mc, mouseX, mouseY, partialTicks);
         this.secondarySlider.drawButton(mc, mouseX, mouseY, partialTicks);
         this.thirdSlider.drawButton(mc, mouseX, mouseY, partialTicks);
-
-        int xStart = this.guiLeft;
-        int yStart = this.guiTop + 100;
-
-        int w = 190;
-        int yEnd = yStart + 15;
-
-
-        int initial = (int) (w * this.initialSlider.sliderValue);
-        int second = initial + (int) (w * this.secondarySlider.sliderValue);
-        int third = second + (int) (w * this.thirdSlider.sliderValue);
-
-        Gui.drawRect(xStart, yStart, xStart + initial, yEnd, 0xFFFF0000); //Initial
-        Gui.drawRect(xStart + initial, yStart, xStart + second, yEnd, 0xFF00FF00); //Second
-        Gui.drawRect(xStart + second, yStart, xStart + third, yEnd, 0xFF0000FF); //Third
-        Gui.drawRect(xStart + third, yStart, xStart + w, yEnd, 0xFF000000); //Leftover
-
-        if(mouseX <= xStart + 190 && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart) {
-            int x = mouseX - xStart;
-            String text;
-            if(x <= initial) {
-                text = "initial";
-            } else if(x <= second) {
-                text = "second";
-            } else if(x <= third) {
-                text = "third";
-            } else {
-                text = "void";
-            }
-            this.drawHoveringText(text, mouseX, mouseY);
-        }
-
 
         this.renderHoveredToolTip(mouseX, mouseY);
 
@@ -201,11 +238,13 @@ public class SequencingSynthesizerGui extends GuiContainer {
         }
     }
 
-    private class StringEntry implements GuiDropdownBox.SelectListEntry {
+    private class DriveEntry implements GuiDropdownBox.SelectListEntry {
 
+        private final String key;
         private final String entry;
 
-        private StringEntry(String entry) {
+        private DriveEntry(String key, String entry) {
+            this.key = key;
             this.entry = I18n.format(entry);
         }
 
@@ -225,7 +264,7 @@ public class SequencingSynthesizerGui extends GuiContainer {
         private final DoubleFunction<Double> clampFuncion;
         private final GuiDropdownBox dropdownBox;
 
-        public ClampedGuiSlider(int id, int xPos, int yPos, int width, int height, String prefix, String suf, double minVal, double maxVal, double currentVal, boolean showDec, boolean drawStr, DoubleFunction<Double> clampFuncion, GuiDropdownBox dropdownBox) {
+        ClampedGuiSlider(int id, int xPos, int yPos, int width, int height, String prefix, String suf, double minVal, double maxVal, double currentVal, boolean showDec, boolean drawStr, DoubleFunction<Double> clampFuncion, GuiDropdownBox dropdownBox) {
             super(id, xPos, yPos, width, height, prefix, suf, minVal, maxVal, currentVal, showDec, drawStr);
             this.clampFuncion = clampFuncion;
             this.dropdownBox = dropdownBox;
@@ -244,6 +283,12 @@ public class SequencingSynthesizerGui extends GuiContainer {
                 this.sliderValue = 0;
             } else {
                 this.sliderValue = this.clampFuncion.apply(this.sliderValue);
+            }
+            if(this.dropdownBox.getActive() instanceof DriveEntry) {
+                int amount = blockEntity.getHandler().getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(((DriveEntry)this.dropdownBox.getActive()).key).getInteger("amount");
+                if(this.sliderValue * 100 > amount) {
+                    this.sliderValue = amount / 100D;
+                }
             }
             super.updateSlider();
         }

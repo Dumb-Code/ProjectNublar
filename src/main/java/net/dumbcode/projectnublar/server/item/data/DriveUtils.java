@@ -29,14 +29,13 @@ public class DriveUtils {
 
         for (String s : nbt.getKeySet()) {
             NBTTagCompound tag = nbt.getCompoundTag(s);
-            out.add(new DriveEntry(tag.getString("translation_key"), tag.getInteger("amount"), DriveType.values()[tag.getInteger("drive_type") % DriveType.values().length]));
+            out.add(new DriveEntry(s, tag.getString("translation_key"), tag.getInteger("amount"), DriveType.values()[tag.getInteger("drive_type") % DriveType.values().length]));
         }
 
         return out;
     }
 
     public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
-
         if (!(inItem.getItem() instanceof DriveInformation)) {
             return;
         }
@@ -77,14 +76,20 @@ public class DriveUtils {
     }
 
     public static class DriveEntry {
+        private final String key;
         private final String name;
         private final int amount;
         private final DriveType driveType;
 
-        public DriveEntry(String name, int amount, DriveType driveType) {
+        public DriveEntry(String key, String name, int amount, DriveType driveType) {
+            this.key = key;
             this.name = name;
             this.amount = amount;
             this.driveType = driveType;
+        }
+
+        public String getKey() {
+            return key;
         }
 
         public DriveType getDriveType() {

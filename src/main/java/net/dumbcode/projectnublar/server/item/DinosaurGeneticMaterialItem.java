@@ -33,6 +33,6 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return this.getDinosaur().createNameComponent().getUnformattedText();
+        return this.getDinosaur().createNameComponent().getKey();
     }
 }
