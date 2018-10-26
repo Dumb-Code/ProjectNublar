@@ -35,7 +35,8 @@ public final class ItemHandler {
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, DefaultDriveInformation> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
+    public static final Map<Dinosaur, DinosaurGeneticMaterialItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
+    public static final Map<Dinosaur, BasicDinosaurItem>  TEST_TUBES_DNA = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
@@ -56,7 +57,8 @@ public final class ItemHandler {
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
         populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);
         populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
-        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", d -> new DefaultDriveInformation(d, d.getRegName().toString(), 25/*Change per dino?*/), tab.andThen(i -> i.setMaxStackSize(1)));
+        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, d.getRegName().toString(), 25/*Change per dino?*/), tab.andThen(i -> i.setMaxStackSize(1)));
+        populateMap(event, TEST_TUBES_DNA, "%s_test_tube", BasicDinosaurItem::new);
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
         for (Block block : ForgeRegistries.BLOCKS) {

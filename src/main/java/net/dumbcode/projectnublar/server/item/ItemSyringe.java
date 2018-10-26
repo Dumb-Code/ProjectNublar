@@ -45,6 +45,11 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
     }
 
     @Override
+    public String getTranslationKey(ItemStack stack) {
+        return "entity." + this.getKey(stack) + ".name";
+    }
+
+    @Override
     public boolean hasInformation(ItemStack stack) {
         return this.filled && stack.getOrCreateSubCompound(ProjectNublar.MODID).hasKey("ContainedType", Constants.NBT.TAG_STRING);
     }

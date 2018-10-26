@@ -10,11 +10,13 @@ import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> {
@@ -54,9 +56,15 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Override
     public Container createContainer(EntityPlayer player) {
-        return new MachineModuleContainer(player, 100,
-                new MachineModuleSlot(this, 0, 120, 20),
-                new MachineModuleSlot(this, 1, 98, 30),
-                new MachineModuleSlot(this, 2, 10, 50));
+        return new MachineModuleContainer(player, 150, 256,
+                new MachineModuleSlot(this, 0, 238, 20) {
+                    @Nullable
+                    @Override
+                    public String getSlotTexture() {
+                        return ProjectNublar.MODID + ":items/storage_drive";
+                    }
+                },
+                new MachineModuleSlot(this, 1, 47, 123),
+                new MachineModuleSlot(this, 2, 27, 123));
     }
 }

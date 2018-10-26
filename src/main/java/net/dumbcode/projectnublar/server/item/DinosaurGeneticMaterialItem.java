@@ -5,12 +5,12 @@ import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class DefaultDriveInformation extends BasicDinosaurItem implements DriveUtils.DriveInformation {
+public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements DriveUtils.DriveInformation {
 
     private final String key;
     private final int size;
 
-    public DefaultDriveInformation(Dinosaur dinosaur, String key, int size) {
+    public DinosaurGeneticMaterialItem(Dinosaur dinosaur, String key, int size) {
         super(dinosaur);
         this.key = key;
         this.size = size;
@@ -24,5 +24,15 @@ public class DefaultDriveInformation extends BasicDinosaurItem implements DriveU
     @Override
     public String getKey(ItemStack stack) {
         return this.key;
+    }
+
+    @Override
+    public DriveUtils.DriveType getDriveType(ItemStack stack) {
+        return DriveUtils.DriveType.DINOSAUR;
+    }
+
+    @Override
+    public String getTranslationKey(ItemStack stack) {
+        return this.getDinosaur().createNameComponent().getUnformattedText();
     }
 }

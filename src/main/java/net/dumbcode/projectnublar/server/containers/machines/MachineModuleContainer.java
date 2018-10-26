@@ -10,26 +10,33 @@ import net.minecraft.item.ItemStack;
 public class MachineModuleContainer extends Container {
 
     public MachineModuleContainer(EntityPlayer player, int playerOffset, MachineModuleSlot... slots) {
+        this(player, playerOffset, 176, slots);
+    }
+
+    public MachineModuleContainer(EntityPlayer player, int playerOffset, int xSize, MachineModuleSlot... slots) {
 
         for (MachineModuleSlot slot : slots) {
             this.addSlotToContainer(slot);
         }
 
         if(playerOffset >= 0) {
-            this.addPlayerSlots(player, playerOffset);
+            this.addPlayerSlots(player, playerOffset, xSize);
         }
     }
 
-    protected void addPlayerSlots(EntityPlayer player, int yOffet) {
+    protected void addPlayerSlots(EntityPlayer player, int yOffet, int xSize) {
         InventoryPlayer playerInventory = player.inventory;
+
+        int xStart = (xSize - 162) / 2;
+
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.addSlotToContainer(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, yOffet + i * 18));
+                this.addSlotToContainer(new Slot(playerInventory, j + i * 9 + 9, xStart + j * 18, yOffet + i * 18));
             }
         }
 
         for (int i = 0; i < 9; ++i) {
-            this.addSlotToContainer(new Slot(playerInventory, i, 8 + i * 18, yOffet + 58));
+            this.addSlotToContainer(new Slot(playerInventory, i, xStart + i * 18, yOffet + 58));
         }
     }
 

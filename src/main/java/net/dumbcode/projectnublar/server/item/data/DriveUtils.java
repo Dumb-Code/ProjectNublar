@@ -6,10 +6,8 @@ import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.common.asm.transformers.ItemStackTransformer;
 
 import java.util.List;
-import java.util.Random;
 
 public class DriveUtils {
 
@@ -23,6 +21,18 @@ public class DriveUtils {
             return false;
         }
         return drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(key).getInteger("amount") < 100;
+    }
+
+    public static List<DriveEntry> getAll(ItemStack drive) {
+        List<DriveEntry> out = Lists.newArrayList();
+        NBTTagCompound nbt = drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
+
+        for (String s : nbt.getKeySet()) {
+            NBTTagCompound tag = nbt.getCompoundTag(s);
+            out.add(new DriveEntry(tag.getString("translation_key"), tag.getInteger("amount"), DriveType.values()[tag.getInteger("drive_type") % DriveType.values().length]));
+        }
+
+        return out;
     }
 
     public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
@@ -43,8 +53,9 @@ public class DriveUtils {
             return;
         }
         int result = MathUtils.getWeightedResult(info.getSize(inItem));
-
         inner.setInteger("amount", MathHelper.clamp(current + result, 0, 100));
+        inner.setString("translation_key", info.getTranslationKey(inItem));
+        inner.setInteger("drive_type", info.getDriveType(inItem).ordinal());
         nbt.setTag(key, inner);
 
         drive.getOrCreateSubCompound(ProjectNublar.MODID).setTag("drive_information", nbt);
@@ -53,12 +64,45 @@ public class DriveUtils {
     public interface DriveInformation {
         int getSize(ItemStack stack);
         String getKey(ItemStack stack);
+        String getTranslationKey(ItemStack stack);
+        default DriveType getDriveType(ItemStack stack) {
+            return DriveType.OTHER;
+        }
         default boolean hasInformation(ItemStack stack) {
             return true;
         }
         default ItemStack getOutItem(ItemStack stack) {
             return ItemStack.EMPTY;
         }
+    }
+
+    public static class DriveEntry {
+        private final String name;
+        private final int amount;
+        private final DriveType driveType;
+
+        public DriveEntry(String name, int amount, DriveType driveType) {
+            this.name = name;
+            this.amount = amount;
+            this.driveType = driveType;
+        }
+
+        public DriveType getDriveType() {
+            return driveType;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public int getAmount() {
+            return this.amount;
+        }
+    }
+
+    public enum DriveType {
+        DINOSAUR,
+        OTHER
     }
 
 }
