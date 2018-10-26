@@ -11,11 +11,14 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.DoubleFunction;
 
@@ -52,17 +55,8 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.thirdBox = new GuiDropdownBox(this.guiLeft, this.guiTop + 70, 90, 20, 5, () -> this.entryList);
 
         this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 100, this.guiTop + 10, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 100, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 100, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox);
-
-//        for (DriveUtils.DriveEntry entry : DriveUtils.getAll(this.blockEntity.getHandler().getStackInSlot(0))) {
-//            DriveEntry stringEntry = new DriveEntry(entry.getKey(), entry.getName());
-//            if(entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
-//                this.dinosaurList.add(stringEntry);
-//            }
-//            this.entryList.add(stringEntry);
-//        }
-
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 100, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 100, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
     }
 
     @Override
@@ -77,41 +71,46 @@ public class SequencingSynthesizerGui extends GuiContainer {
     }
 
     private void updateList() {
-//        this.entryList.clear();
-//        this.dinosaurList.clear();
-
-
-        List<DriveEntry> removedEntries = Lists.newArrayList(this.entryList);
+        List<DriveEntry> safeEntries = Lists.newArrayList();
 
         for (DriveUtils.DriveEntry entry : DriveUtils.getAll(this.blockEntity.getHandler().getStackInSlot(0))) {
-            if (this.entryList.stream().noneMatch(d -> d.key.equals(entry.getKey()))) {
+            DriveEntry match = null;
+            for (DriveEntry driveEntry : this.entryList) {
+                if(driveEntry.key.equals(entry.getKey())) {
+                    match = driveEntry;
+                    break;
+                }
+            }
+            if (match == null) {
                 DriveEntry e = new DriveEntry(entry.getKey(), entry.getName());
                 if (entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
                     this.dinosaurList.add(e);
                 }
                 this.entryList.add(e);
+                safeEntries.add(e);
             } else {
-                removedEntries.removeIf(d -> d.key.equals(entry.getKey()));
-            }
-
-            for (DriveEntry removed : removedEntries) {
-                if (this.initialBox.getActive() == removed) {
-                    this.initialBox.setActive(null);
-                }
-
-                if (this.secondaryBox.getActive() == removed) {
-                    this.secondaryBox.setActive(null);
-                }
-
-                if (this.thirdBox.getActive() == removed) {
-                    this.thirdBox.setActive(null);
-                }
-
-                this.entryList.remove(removed);
-                this.dinosaurList.remove(removed);
-
+                safeEntries.add(match);
             }
         }
+        for (DriveEntry e : this.entryList) {
+            if(safeEntries.contains(e)) {
+                continue;
+            }
+            if (this.initialBox.getActive() == e) {
+                this.initialBox.setActive(null);
+            }
+
+            if (this.secondaryBox.getActive() == e) {
+                this.secondaryBox.setActive(null);
+            }
+
+            if (this.thirdBox.getActive() == e) {
+                this.thirdBox.setActive(null);
+            }
+
+            this.dinosaurList.remove(e);
+        }
+        this.entryList.removeIf(d -> !safeEntries.contains(d));
     }
 
     @Override
@@ -263,11 +262,13 @@ public class SequencingSynthesizerGui extends GuiContainer {
 
         private final DoubleFunction<Double> clampFuncion;
         private final GuiDropdownBox dropdownBox;
+        private final ClampedGuiSlider[] previousDropdownBoxes;
 
-        ClampedGuiSlider(int id, int xPos, int yPos, int width, int height, String prefix, String suf, double minVal, double maxVal, double currentVal, boolean showDec, boolean drawStr, DoubleFunction<Double> clampFuncion, GuiDropdownBox dropdownBox) {
+        ClampedGuiSlider(int id, int xPos, int yPos, int width, int height, String prefix, String suf, double minVal, double maxVal, double currentVal, boolean showDec, boolean drawStr, DoubleFunction<Double> clampFuncion, GuiDropdownBox dropdownBox, ClampedGuiSlider... previousDropdownBoxes) {
             super(id, xPos, yPos, width, height, prefix, suf, minVal, maxVal, currentVal, showDec, drawStr);
             this.clampFuncion = clampFuncion;
             this.dropdownBox = dropdownBox;
+            this.previousDropdownBoxes = previousDropdownBoxes;
         }
 
         @Override
@@ -286,7 +287,16 @@ public class SequencingSynthesizerGui extends GuiContainer {
             }
             if(this.dropdownBox.getActive() instanceof DriveEntry) {
                 int amount = blockEntity.getHandler().getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(((DriveEntry)this.dropdownBox.getActive()).key).getInteger("amount");
-                if(this.sliderValue * 100 > amount) {
+                for (ClampedGuiSlider prev : this.previousDropdownBoxes) {
+                    if(prev.dropdownBox.getActive() == this.dropdownBox.getActive() && prev.dropdownBox.getActive() instanceof DriveEntry) {
+                        amount -= prev.sliderValue * 100D;
+                    }
+                }
+
+                if(amount < 0) {
+                    amount = 0;
+                }
+                if(this.sliderValue * 100D > amount) {
                     this.sliderValue = amount / 100D;
                 }
             }
