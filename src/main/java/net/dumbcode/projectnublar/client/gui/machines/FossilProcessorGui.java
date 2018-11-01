@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
+import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -49,7 +50,8 @@ public class FossilProcessorGui extends GuiContainer {
         }
         GlStateManager.disableBlend();
         this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        drawTiledTAS(i + 8, j + 8 + 102F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), i + 24, j + 110, 0, 0, 16, 16, Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState()));
+        TextureAtlasSprite tas = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState()); //TODO cache
+        MachineUtils.drawTiledTexture(i + 8, j + 8 + 102F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), i + 24, j + 110, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
 
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
         this.drawTexturedModalRect(i + 8, j + 8, 176, 0, 16, 102);
@@ -61,44 +63,5 @@ public class FossilProcessorGui extends GuiContainer {
             this.drawHoveringText(this.blockEntity.getTank().getFluidAmount() + "mB / " + this.blockEntity.getTank().getCapacity() + "mB", mouseX, mouseY);
         }
 
-    }
-
-    //Tiles the TextureAtlasSprite on the y axis. TO-DO: maybe do the x axis as well?
-    public static void drawTiledTAS(float left, float top, float right, float bottom, float u, float v, int renderWidth, int renderHeight,  TextureAtlasSprite tex) {
-        if(renderWidth == 0 || renderHeight == 0) {
-            return;
-        }
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        GlStateManager.disableBlend();
-        float height = bottom - top;
-        float endFullHeight = height - (height % renderHeight);
-
-        float minU = tex.getInterpolatedU(u);
-        float maxU = tex.getInterpolatedU(u + renderWidth);
-
-        float minV = tex.getInterpolatedV(v);
-        float maxV = tex.getInterpolatedV(v + renderHeight);
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        for(int renderH = 0; renderH < endFullHeight; renderH+=renderHeight) {
-            float currentH = bottom - renderH;
-            buffer.pos(left, currentH - renderHeight, 0.0D).tex(minU, minV).endVertex();
-            buffer.pos(left, currentH, 0.0D).tex(minU, maxV).endVertex();
-            buffer.pos(right, currentH, 0.0D).tex(maxU, maxV).endVertex();
-            buffer.pos(right, currentH - renderHeight, 0.0D).tex(maxU, minV).endVertex();
-        }
-
-        float leftOver = height % renderHeight;
-        float yStart = bottom - endFullHeight;
-
-        float leftV = tex.getInterpolatedV((renderHeight - leftOver)/ (float)renderHeight * 16);
-
-        buffer.pos(left, yStart - leftOver, 0.0D).tex(minU, leftV).endVertex();
-        buffer.pos(left, yStart, 0.0D).tex(minU, maxV).endVertex();
-        buffer.pos(right, yStart, 0.0D).tex(maxU, maxV).endVertex();
-        buffer.pos(right, yStart - leftOver, 0.0D).tex(maxU, leftV).endVertex();
-
-        tessellator.draw();
     }
 }

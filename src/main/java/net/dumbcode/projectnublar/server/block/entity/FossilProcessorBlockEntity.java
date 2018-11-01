@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModule
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.recipes.FossilProcessorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
+import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -88,62 +89,19 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
-        return slot == 0 ? getWaterAmount(stack) != -1 : super.isItemValidFor(slot, stack);
+        return slot == 0 ? MachineUtils.getWaterAmount(stack) != -1 : super.isItemValidFor(slot, stack);
     }
+
+    private int layer;
 
     @Override
     protected void onSlotChanged(int slot) {
-        if(slot == 0) {
-            ItemStack stack = this.handler.getStackInSlot(slot);
-            if(stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
-                IFluidHandler fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,  null);
-                if(fluidHandler != null) {
-                    this.tank.fill(fluidHandler.drain(this.tank.getCapacity() - this.tank.getFluidAmount(), true), true);
-                }
-            } if(this.tank.getFluidAmount() < this.tank.getCapacity()) {
-                if(stack.getItem() == Items.POTIONITEM && PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER) {
-                    this.tank.fill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME / 3), true);
-                    this.handler.setStackInSlot(slot, new ItemStack(Items.GLASS_BOTTLE));
-                } else {
-                    int waterAmount = getWaterAmount(stack);
-                    if(waterAmount != -1) {
-                        FluidBucketWrapper wrapper = new FluidBucketWrapper(stack);
-                        FluidStack drained = wrapper.drain(waterAmount, true);
-                        if(drained != null) {
-                            this.tank.fill(drained, true);
-                        } else {
-                            ProjectNublar.getLogger().warn("Tried to drain item {}, but yielded no results", stack.getItem().getRegistryName());
-                        }
-                        this.handler.setStackInSlot(slot, wrapper.getContainer());
-                    }
-                }
-            }
+        if(slot == 0 && this.layer == 0) {
+            this.layer++;
+            this.handler.setStackInSlot(slot, MachineUtils.fillTank(this.handler.getStackInSlot(slot), this.tank));
+            this.layer--;
         }
         super.onSlotChanged(slot);
-    }
-
-    //returns -1 if not a water item
-    private static int getWaterAmount(ItemStack stack) {
-        if(stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
-            IFluidHandler fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,  null);
-            if(fluidHandler != null) {
-                int totalAmount = -1;
-                for (IFluidTankProperties properties : fluidHandler.getTankProperties()) {
-                    FluidStack contents = properties.getContents();
-                    if(contents != null && contents.getFluid() == FluidRegistry.WATER && contents.amount > 0 && properties.canDrainFluidType(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME))) {
-                        totalAmount += properties.getContents().amount;
-                    }
-                }
-                if(totalAmount != -1) {
-                    return totalAmount;
-                }
-            }
-        }
-        if(stack.getItem() == Items.POTIONITEM && PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER) {
-            return Fluid.BUCKET_VOLUME / 3;
-        }
-        FluidStack fluid =  new FluidBucketWrapper(stack).getFluid();
-        return fluid != null && fluid.getFluid() == FluidRegistry.WATER ? fluid.amount : -1;
     }
 
     @Override

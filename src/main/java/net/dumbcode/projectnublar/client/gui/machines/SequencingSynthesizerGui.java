@@ -50,13 +50,13 @@ public class SequencingSynthesizerGui extends GuiContainer {
     public void initGui() {
         super.initGui();
 
-        this.initialBox = new GuiDropdownBox(this.guiLeft, this.guiTop + 10, 90, 20, 5, () -> this.dinosaurList);
-        this.secondaryBox = new GuiDropdownBox(this.guiLeft, this.guiTop + 40, 90, 20, 5, () -> this.entryList);
-        this.thirdBox = new GuiDropdownBox(this.guiLeft, this.guiTop + 70, 90, 20, 5, () -> this.entryList);
+        this.initialBox = new GuiDropdownBox(this.guiLeft + 33, this.guiTop + 10, 90, 20, 5, () -> this.dinosaurList);
+        this.secondaryBox = new GuiDropdownBox(this.guiLeft + 33, this.guiTop + 40, 90, 20, 5, () -> this.entryList);
+        this.thirdBox = new GuiDropdownBox(this.guiLeft + 33, this.guiTop + 70, 90, 20, 5, () -> this.entryList);
 
-        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 100, this.guiTop + 10, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 100, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 100, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
+        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 133, this.guiTop + 10, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 133, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 133, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        int xStart = this.guiLeft;
+        int xStart = this.guiLeft + 33;
         int yStart = this.guiTop + 100;
 
         int w = 190;
