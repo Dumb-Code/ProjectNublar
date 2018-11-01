@@ -48,7 +48,7 @@ public interface EntityManager extends ICapabilityProvider {
 
     void removeEntity(Entity entity);
 
-    EntityFamily resolveFamily(EntityComponentType<?> types);
+    EntityFamily resolveFamily(EntityComponentType<?>... types);
 
     class Impl implements EntityManager {
         private final List<Entity> managedEntities = new ArrayList<>();
@@ -85,7 +85,7 @@ public interface EntityManager extends ICapabilityProvider {
         }
 
         @Override
-        public EntityFamily resolveFamily(EntityComponentType<?> types) {
+        public EntityFamily resolveFamily(EntityComponentType<?>... types) {
             List<Entity> entities = new ArrayList<>(this.managedEntities.size());
             for (Entity entity : this.managedEntities) {
                 if (((ComponentAccess) entity).matchesAll(types)) {
