@@ -5,11 +5,17 @@ import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
+import net.dumbcode.projectnublar.server.network.C14SequencingSynthesizerSelectChange;
+import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -37,11 +43,13 @@ public class SequencingSynthesizerGui extends GuiContainer {
     private List<DriveEntry> dinosaurList = Lists.newArrayList();
     private List<DriveEntry> entryList = Lists.newArrayList();
 
+    private boolean dirty;
+
     public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity) {
         super(blockEntity.createContainer(player));
         this.blockEntity = blockEntity;
-        this.xSize = 256;
-        this.ySize = 240;
+        this.xSize = 208;
+        this.ySize = 217;
         this.updateList();
 
     }
@@ -50,13 +58,31 @@ public class SequencingSynthesizerGui extends GuiContainer {
     public void initGui() {
         super.initGui();
 
-        this.initialBox = new GuiDropdownBox(this.guiLeft + 33, this.guiTop + 10, 90, 20, 5, () -> this.dinosaurList);
-        this.secondaryBox = new GuiDropdownBox(this.guiLeft + 33, this.guiTop + 40, 90, 20, 5, () -> this.entryList);
-        this.thirdBox = new GuiDropdownBox(this.guiLeft + 33, this.guiTop + 70, 90, 20, 5, () -> this.entryList);
+        this.initialBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 10, 78, 20, 5, () -> this.dinosaurList);
+        this.secondaryBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 35, 78, 20, 5, () -> this.entryList);
+        this.thirdBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 60, 78, 20, 5, () -> this.entryList);
 
-        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 133, this.guiTop + 10, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 133, this.guiTop + 40, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 133, this.guiTop + 70, 90, 20, "", "%", 0D, 100D, 0D, false, true, d -> Math.min(d, 1D - Math.min(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
+        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 10, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 35, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 60, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
+
+        for (DriveEntry driveEntry : this.dinosaurList) {
+            if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(1))) {
+                this.initialBox.setActive(driveEntry);
+                this.initialSlider.sliderValue = this.blockEntity.getSelectAmount(1);
+            }
+        }
+
+        for (DriveEntry driveEntry : this.entryList) {
+            if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(2))) {
+                this.secondaryBox.setActive(driveEntry);
+                this.secondarySlider.sliderValue = this.blockEntity.getSelectAmount(2);
+            }
+            if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(3))) {
+                this.thirdBox.setActive(driveEntry);
+                this.thirdSlider.sliderValue = this.blockEntity.getSelectAmount(3);
+            }
+        }
     }
 
     @Override
@@ -67,6 +93,11 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.initialSlider.updateSlider();
         this.secondarySlider.updateSlider();
         this.thirdSlider.updateSlider();
+
+        if(this.dirty) {
+            this.dirty = false;
+            this.sync();
+        }
 
     }
 
@@ -118,11 +149,11 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        int xStart = this.guiLeft + 33;
-        int yStart = this.guiTop + 100;
+        int xStart = this.guiLeft + 23;
+        int yStart = this.guiTop + 85;
 
-        int w = 190;
-        int yEnd = yStart + 15;
+        int w = 162;
+        int yEnd = yStart + 18;
 
 
         int initial = (int) (w * this.initialSlider.sliderValue);
@@ -134,25 +165,12 @@ public class SequencingSynthesizerGui extends GuiContainer {
         Gui.drawRect(xStart + second, yStart, xStart + third, yEnd, 0xFF0000FF); //Third
         Gui.drawRect(xStart + third, yStart, xStart + w, yEnd, 0xFF000000); //Leftover
 
-        if(mouseX <= xStart + 190 && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart
-                && !this.initialBox.isMouseOver(mouseX, mouseY)
-                && !this.secondaryBox.isMouseOver(mouseX, mouseY)
-                && !this.thirdBox.isMouseOver(mouseX, mouseY)) {
-            int x = mouseX - xStart;
-            String text;
-            if(x <= initial) {
-                text = this.initialBox.getActive().getSearch();
-            } else if(x <= second) {
-                text = this.secondaryBox.getActive().getSearch();
-            } else if(x <= third) {
-                text = this.thirdBox.getActive().getSearch();
-            } else {
-                text = "Not Set"; //TODO: localize
-            }
-            this.drawHoveringText(text, mouseX, mouseY);
-        }
 
-
+        Gui.drawRect(xStart, yStart, xStart + w, yStart + 1, -1);
+        Gui.drawRect(xStart, yEnd, xStart + w, yEnd - 1, -1);
+        Gui.drawRect(xStart, yStart, xStart + 1, yEnd, -1);
+        Gui.drawRect(xStart + w, yStart, xStart + w - 1, yEnd, -1);
+        
         GuiDropdownBox mouseOver =
                 this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.open  ? this.initialBox :
                         this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.open  ? this.secondaryBox :
@@ -175,6 +193,24 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.initialSlider.drawButton(mc, mouseX, mouseY, partialTicks);
         this.secondarySlider.drawButton(mc, mouseX, mouseY, partialTicks);
         this.thirdSlider.drawButton(mc, mouseX, mouseY, partialTicks);
+
+        if(mouseX <= xStart + 190 && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart
+                && !this.initialBox.isMouseOver(mouseX, mouseY)
+                && !this.secondaryBox.isMouseOver(mouseX, mouseY)
+                && !this.thirdBox.isMouseOver(mouseX, mouseY)) {
+            int x = mouseX - xStart;
+            String text = "Not Set";
+            if(x != 0) {
+                if(x <= initial) {
+                    text = this.initialBox.getActive().getSearch();
+                } else if(x <= second) {
+                    text = this.secondaryBox.getActive().getSearch();
+                } else if(x <= third) {
+                    text = this.thirdBox.getActive().getSearch();
+                }
+            }
+            this.drawHoveringText(text, mouseX, mouseY);
+        }
 
         this.renderHoveredToolTip(mouseX, mouseY);
 
@@ -230,10 +266,37 @@ public class SequencingSynthesizerGui extends GuiContainer {
 
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/sequencing_synthesizer.png"));
+        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+
         ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
         Minecraft.getMinecraft().renderEngine.bindTexture(slotLocation);
         for(Slot slot : this.inventorySlots.inventorySlots) {
             this.drawTexturedModalRect(this.guiLeft + slot.xPos - 1, this.guiTop + slot.yPos - 1, 7, 17, 18, 18);
+        }
+
+        GlStateManager.disableBlend();
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        TextureAtlasSprite tas = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState()); //TODO cache
+        MachineUtils.drawTiledTexture(this.guiLeft + 5, this.guiTop + 5 + 102F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 21, this.guiTop + 107, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
+
+        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
+        this.drawTexturedModalRect(this.guiLeft + 5, this.guiTop + 5, 176, 0, 16, 102);
+
+    }
+
+    private void sync() {
+        //TODO: only sync necessary stuff
+        if(this.initialBox.getActive() != null) {
+            ProjectNublar.NETWORK.sendToServer(new C14SequencingSynthesizerSelectChange(this.blockEntity.getPos(), 1, ((DriveEntry)this.initialBox.getActive()).getKey(), this.initialSlider.sliderValue));
+        }
+        if(this.secondaryBox.getActive() != null) {
+            ProjectNublar.NETWORK.sendToServer(new C14SequencingSynthesizerSelectChange(this.blockEntity.getPos(), 2, ((DriveEntry)this.secondaryBox.getActive()).getKey(), this.secondarySlider.sliderValue));
+        }
+        if(this.thirdBox.getActive() != null) {
+            ProjectNublar.NETWORK.sendToServer(new C14SequencingSynthesizerSelectChange(this.blockEntity.getPos(), 3, ((DriveEntry)this.thirdBox.getActive()).getKey(), this.thirdSlider.sliderValue));
         }
     }
 
@@ -250,11 +313,21 @@ public class SequencingSynthesizerGui extends GuiContainer {
         @Override
         public void draw(int x, int y) {
             Minecraft.getMinecraft().fontRenderer.drawString(this.entry, x + 2, y + 5, -1);
-
         }
+
+        public String getKey() {
+            return this.key;
+        }
+
+
         @Override
         public String getSearch() {
             return this.entry;
+        }
+
+        @Override
+        public void onClicked(int relMouseX, int relMouseY) {
+            SequencingSynthesizerGui.this.dirty = true;
         }
     }
 
@@ -301,6 +374,7 @@ public class SequencingSynthesizerGui extends GuiContainer {
                 }
             }
             super.updateSlider();
+            SequencingSynthesizerGui.this.dirty = true;
         }
     }
 }

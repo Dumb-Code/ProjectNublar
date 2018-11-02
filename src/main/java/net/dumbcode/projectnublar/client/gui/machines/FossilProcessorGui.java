@@ -39,9 +39,7 @@ public class FossilProcessorGui extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-        int i = (this.width - this.xSize) / 2;
-        int j = (this.height - this.ySize) / 2;
-        this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);
+        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
 
         ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
         Minecraft.getMinecraft().renderEngine.bindTexture(slotLocation);
@@ -51,13 +49,13 @@ public class FossilProcessorGui extends GuiContainer {
         GlStateManager.disableBlend();
         this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         TextureAtlasSprite tas = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState()); //TODO cache
-        MachineUtils.drawTiledTexture(i + 8, j + 8 + 102F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), i + 24, j + 110, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
+        MachineUtils.drawTiledTexture(this.guiLeft + 8, this.guiTop + 8 + 102F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 24, this.guiTop + 110, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
 
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-        this.drawTexturedModalRect(i + 8, j + 8, 176, 0, 16, 102);
+        this.drawTexturedModalRect(this.guiLeft + 8, this.guiTop + 8, 176, 0, 16, 102);
 
-        int mX = mouseX - i;
-        int mY = mouseY - j;
+        int mX = mouseX - this.guiLeft;
+        int mY = mouseY - this.guiTop;
 
         if(mX > 8 && mX < 24 && mY > 8 && mY < 110) {
             this.drawHoveringText(this.blockEntity.getTank().getFluidAmount() + "mB / " + this.blockEntity.getTank().getCapacity() + "mB", mouseX, mouseY);
