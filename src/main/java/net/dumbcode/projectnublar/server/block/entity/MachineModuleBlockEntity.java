@@ -212,14 +212,19 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                     if(process.getCurrentRecipe() != null) {
                         return process.getCurrentRecipe().acceptsInputSlot(this.asB, i, stack, process);
                     } else {
+                        MachineRecipe<B> foundRecipe = null;
+                        int totalFound = 0;
                         for (MachineRecipe<B> recipe : this.recipes) {
                             if(recipe.acceptsInputSlot(this.asB, i, stack, process)) {
-                                process.setCurrentRecipe(recipe); //thonk
-                                return true;
+                                totalFound++;
+                                foundRecipe = recipe;
                             }
                         }
+                        if(totalFound == 1) {
+                            process.setCurrentRecipe(foundRecipe);
+                        }
+                        return foundRecipe != null;
                     }
-                    return false;
                 }
             }
         }
