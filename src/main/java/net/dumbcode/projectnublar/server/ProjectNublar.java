@@ -95,6 +95,7 @@ public class ProjectNublar
         NETWORK.registerMessage(C13VehicleInputStateUpdated.Handler.class, C13VehicleInputStateUpdated.class, 13, Side.SERVER);
         NETWORK.registerMessage(C14SequencingSynthesizerSelectChange.Handler.class, C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
         NETWORK.registerMessage(S15SyncSequencingSynthesizerSelectChange.Handler.class, S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
+        NETWORK.registerMessage(C16DisplayTabbedGui.Handler.class, C16DisplayTabbedGui.class, 16, Side.SERVER);
 
     }
 

@@ -13,7 +13,8 @@ import javax.annotation.Nullable;
 
 public class GuiHandler implements IGuiHandler {
 
-    public static final int SKELETAL_BUILDER_ID = 1;
+    //All IDS should be negative. This is because the tab system takes up all of the positive numbers. Todo: maybe switch this around?
+    public static final int SKELETAL_BUILDER_ID = -1;
 
     @Nullable
     @Override
@@ -21,7 +22,7 @@ public class GuiHandler implements IGuiHandler {
         BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
         TileEntity te = world.getTileEntity(pos);
         if(te instanceof MachineModuleBlockEntity) {
-            return ((MachineModuleBlockEntity)te).createContainer(player);
+            return ((MachineModuleBlockEntity)te).createContainer(player, ID);
         }
         return null;
     }
@@ -40,7 +41,7 @@ public class GuiHandler implements IGuiHandler {
             }
         }
         if(te instanceof MachineModuleBlockEntity) {
-            return ((MachineModuleBlockEntity)te).createScreen(player);
+            return ((MachineModuleBlockEntity)te).createScreen(player, ID);
         }
         return null;
     }

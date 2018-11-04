@@ -12,8 +12,8 @@ public class DrillExtractorGui extends GuiContainer {
 
     private final DrillExtractorBlockEntity blockEntity;
 
-    public DrillExtractorGui(EntityPlayer player, DrillExtractorBlockEntity blockEntity) {
-        super(blockEntity.createContainer(player));
+    public DrillExtractorGui(EntityPlayer player, DrillExtractorBlockEntity blockEntity, int tab) {
+        super(blockEntity.createContainer(player, tab));
         this.blockEntity = blockEntity;
     }
 

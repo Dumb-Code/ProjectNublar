@@ -45,13 +45,13 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player) {
-        return new DrillExtractorGui(player, this);
+    public GuiScreen createScreen(EntityPlayer player, int tab) {
+        return new DrillExtractorGui(player, this, tab);
     }
 
     @Override
-    public Container createContainer(EntityPlayer player) {
-        return new MachineModuleContainer(player, 100,
+    public Container createContainer(EntityPlayer player, int tab) {
+        return new MachineModuleContainer(player, 100, 176,
                 new MachineModuleSlot(this, 0, 77, 12), //input
                 new MachineModuleSlot(this, 1, 96, 62), //test tube 1
                 new MachineModuleSlot(this, 2, 114, 62), //test tube 2

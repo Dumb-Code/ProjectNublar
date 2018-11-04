@@ -5,18 +5,15 @@ import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.recipes.FossilProcessorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.init.PotionTypes;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
@@ -25,9 +22,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
-import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -127,13 +121,13 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player) {
-        return new FossilProcessorGui(player, this);
+    public GuiScreen createScreen(EntityPlayer player, int tab) {
+        return new FossilProcessorGui(player, this, tab);
     }
 
     @Override
-    public Container createContainer(EntityPlayer player) {
-        return new MachineModuleContainer(player, 138,
+    public Container createContainer(EntityPlayer player, int tab) {
+        return new MachineModuleContainer(player, 138, 176,
                 new MachineModuleSlot(this, 0, 8, 116), //water
                 new MachineModuleSlot(this, 1, 100, 50), //fossil
                 new MachineModuleSlot(this, 2, 150, 50), //test tub

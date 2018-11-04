@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.containers.machines;
 
+import lombok.NonNull;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -7,14 +8,15 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+import java.util.function.IntPredicate;
+
 public class MachineModuleContainer extends Container {
 
-    public MachineModuleContainer(EntityPlayer player, int playerOffset, MachineModuleSlot... slots) {
-        this(player, playerOffset, 176, slots);
-    }
+    private IntPredicate predicate = i -> true;
+
 
     public MachineModuleContainer(EntityPlayer player, int playerOffset, int xSize, MachineModuleSlot... slots) {
-
+        System.out.println(slots.length);
         for (MachineModuleSlot slot : slots) {
             this.addSlotToContainer(slot);
         }
@@ -22,6 +24,10 @@ public class MachineModuleContainer extends Container {
         if(playerOffset >= 0) {
             this.addPlayerSlots(player, playerOffset, xSize);
         }
+    }
+
+    public void setPredicate(@NonNull IntPredicate predicate) {
+        this.predicate = predicate;
     }
 
     protected void addPlayerSlots(EntityPlayer player, int yOffet, int xSize) {
@@ -60,8 +66,20 @@ public class MachineModuleContainer extends Container {
                 if (!this.mergeItemStack(current, otherSlots, this.inventorySlots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(current, 0, otherSlots, false)) {
-                return ItemStack.EMPTY;
+            } else {
+                boolean flag = false;
+                for (int i = 0; i < otherSlots; i++) {
+                    if(this.predicate.test(i)) {
+                        if(current.isEmpty()) {
+                            break;
+                        }
+                        flag |= this.mergeItemStack(current, i, i + 1, false);
+
+                    }
+                }
+                if(!flag) {
+                    return ItemStack.EMPTY;
+                }
             }
 
             if (current.getCount() == 0) {

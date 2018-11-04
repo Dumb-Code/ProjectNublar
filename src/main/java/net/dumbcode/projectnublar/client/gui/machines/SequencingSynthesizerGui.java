@@ -4,11 +4,15 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
+import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.network.C14SequencingSynthesizerSelectChange;
+import net.dumbcode.projectnublar.server.network.C16DisplayTabbedGui;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -17,14 +21,11 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.DoubleFunction;
 
@@ -45,13 +46,14 @@ public class SequencingSynthesizerGui extends GuiContainer {
 
     private boolean dirty;
 
-    public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity) {
-        super(blockEntity.createContainer(player));
+    private GuiButton changeTab;
+
+    public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, int tab) {
+        super(blockEntity.createContainer(player, tab));
         this.blockEntity = blockEntity;
         this.xSize = 208;
         this.ySize = 217;
         this.updateList();
-
     }
 
     @Override
@@ -65,6 +67,8 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 10, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
         this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 35, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
         this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 60, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
+
+        this.changeTab = this.addButton(new GuiButton(0, this.guiLeft + this.xSize - 30, this.height / 2 - 10, 20, 20, ">"));
 
         for (DriveEntry driveEntry : this.dinosaurList) {
             if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(1))) {
@@ -170,7 +174,7 @@ public class SequencingSynthesizerGui extends GuiContainer {
         Gui.drawRect(xStart, yEnd, xStart + w, yEnd - 1, -1);
         Gui.drawRect(xStart, yStart, xStart + 1, yEnd, -1);
         Gui.drawRect(xStart + w, yStart, xStart + w - 1, yEnd, -1);
-        
+
         GuiDropdownBox mouseOver =
                 this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.open  ? this.initialBox :
                         this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.open  ? this.secondaryBox :
@@ -218,6 +222,13 @@ public class SequencingSynthesizerGui extends GuiContainer {
     }
 
     @Override
+    protected void actionPerformed(GuiButton button) throws IOException {
+        if(button == this.changeTab) {
+            ProjectNublar.NETWORK.sendToServer(new C16DisplayTabbedGui(this.blockEntity.getPos(), 1));
+        }
+    }
+
+    @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
 
@@ -252,7 +263,6 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.initialSlider.mousePressed(mc, mouseX, mouseY);
         this.secondarySlider.mousePressed(mc, mouseX, mouseY);
         this.thirdSlider.mousePressed(mc, mouseX, mouseY);
-
         super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
@@ -273,18 +283,10 @@ public class SequencingSynthesizerGui extends GuiContainer {
         ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
         Minecraft.getMinecraft().renderEngine.bindTexture(slotLocation);
         for(Slot slot : this.inventorySlots.inventorySlots) {
-            this.drawTexturedModalRect(this.guiLeft + slot.xPos - 1, this.guiTop + slot.yPos - 1, 7, 17, 18, 18);
+            if(slot.isEnabled()) {
+                this.drawTexturedModalRect(this.guiLeft + slot.xPos - 1, this.guiTop + slot.yPos - 1, 7, 17, 18, 18);
+            }
         }
-
-        GlStateManager.disableBlend();
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        TextureAtlasSprite tas = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState()); //TODO cache
-        MachineUtils.drawTiledTexture(this.guiLeft + 5, this.guiTop + 5 + 102F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 21, this.guiTop + 107, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
-
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-        this.drawTexturedModalRect(this.guiLeft + 5, this.guiTop + 5, 176, 0, 16, 102);
-
     }
 
     private void sync() {

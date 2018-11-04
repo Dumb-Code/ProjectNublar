@@ -21,8 +21,8 @@ public class FossilProcessorGui extends GuiContainer {
 
     private final FossilProcessorBlockEntity blockEntity;
 
-    public FossilProcessorGui(EntityPlayer player, FossilProcessorBlockEntity blockEntity) {
-        super(blockEntity.createContainer(player));
+    public FossilProcessorGui(EntityPlayer player, FossilProcessorBlockEntity blockEntity, int tab) {
+        super(blockEntity.createContainer(player, tab));
         this.xSize = 176;
         this.ySize = 220;
         this.blockEntity = blockEntity;

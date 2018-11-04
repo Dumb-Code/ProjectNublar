@@ -95,7 +95,7 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
                 }
             }
             if(valid) {
-                playerIn.openGui(ProjectNublar.INSTANCE, -1/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                playerIn.openGui(ProjectNublar.INSTANCE, 0/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
             }
         }
         return true;

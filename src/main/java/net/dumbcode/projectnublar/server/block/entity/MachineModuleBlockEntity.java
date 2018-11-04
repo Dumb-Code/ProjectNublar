@@ -231,10 +231,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return false; //Slot index was not an input. Log error?
     }
 
+    //tab - used to split the same gui into diffrent tabs. Not used for grouping diffrent guis together with tabs
     @SideOnly(Side.CLIENT)
-    public abstract GuiScreen createScreen(EntityPlayer player);
+    public abstract GuiScreen createScreen(EntityPlayer player, int tab);
 
-    public abstract Container createContainer(EntityPlayer player);
+    public abstract Container createContainer(EntityPlayer player, int tab);
 
     @Getter
     @Setter

@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -9,8 +10,11 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
 
     private final MachineModuleBlockEntity<B> blockEntity;
 
+    private final int decidedSize;
+
     public MachineModuleItemStackHandler(MachineModuleBlockEntity<B> blockEntity, int size) {
         super(size);
+        this.decidedSize = size;
         this.blockEntity = blockEntity;
     }
 
@@ -43,5 +47,21 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
         this.blockEntity.onSlotChanged(slot);
         this.blockEntity.markDirty();
         super.onContentsChanged(slot);
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt) {
+        super.deserializeNBT(nbt);
+        if(this.stacks.size() != this.decidedSize) {
+            if(this.stacks.size() < this.decidedSize) {
+                while(this.stacks.size() != this.decidedSize) {
+                    this.stacks.add(ItemStack.EMPTY);
+                }
+            } else {
+                while(this.stacks.size() != this.decidedSize) {
+                    this.stacks.remove(this.stacks.size() - 1);
+                }
+            }
+        }
     }
 }
