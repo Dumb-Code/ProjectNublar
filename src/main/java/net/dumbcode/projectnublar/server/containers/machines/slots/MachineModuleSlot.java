@@ -17,6 +17,6 @@ public class MachineModuleSlot extends SlotItemHandler {
 
     @Override
     public boolean isItemValid(@Nonnull ItemStack stack) {
-        return this.blockEntity.isItemValidFor(this.slotNumber, stack);
+        return this.blockEntity.isItemValidFor(this.getSlotIndex(), stack);
     }
 }
