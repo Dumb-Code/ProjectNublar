@@ -16,7 +16,6 @@ public class MachineModuleContainer extends Container {
 
 
     public MachineModuleContainer(EntityPlayer player, int playerOffset, int xSize, MachineModuleSlot... slots) {
-        System.out.println(slots.length);
         for (MachineModuleSlot slot : slots) {
             this.addSlotToContainer(slot);
         }

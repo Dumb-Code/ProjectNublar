@@ -28,8 +28,9 @@ public final class ItemHandler {
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
     public static Item STORAGE_DRIVE = new DriveItem();
-    public static Item EMPTY_SYRINGE = new ItemSyringe(false);
-    public static Item FILLED_SYRINGE = new ItemSyringe(true);
+    public static Item EMPTY_SYRINGE = new ItemSyringe(ItemSyringe.Type.EMPTY);
+    public static Item DNA_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_DNA);
+    public static Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
 
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
@@ -37,6 +38,7 @@ public final class ItemHandler {
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurGeneticMaterialItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
     public static final Map<Dinosaur, BasicDinosaurItem>  TEST_TUBES_DNA = new HashMap<>();
+    public static final Map<Dinosaur, BasicDinosaurItem> DINOSAUR_EGG_ITEM = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
@@ -49,7 +51,9 @@ public final class ItemHandler {
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(TAB),
                 STORAGE_DRIVE.setRegistryName("storage_drive").setUnlocalizedName("storage_drive").setCreativeTab(TAB).setMaxStackSize(1),
                 EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB),
-                FILLED_SYRINGE.setRegistryName("filled_syringe").setUnlocalizedName("filled_syringe").setCreativeTab(TAB)
+                DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setUnlocalizedName("dna_filled_syringe").setCreativeTab(TAB),
+                EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setUnlocalizedName("embryo_filled_syringe").setCreativeTab(TAB)
+
         );
 
         Function<Item, Item> tab = item -> item.setCreativeTab(TAB);
@@ -59,8 +63,11 @@ public final class ItemHandler {
         populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
         populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, d.getRegName().toString(), 25/*Change per dino?*/), tab.andThen(i -> i.setMaxStackSize(1)));
         populateMap(event, TEST_TUBES_DNA, "%s_test_tube", BasicDinosaurItem::new);
+        populateMap(event, DINOSAUR_EGG_ITEM, "%s_egg", DinosaurEggItem::new);
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
+
+
         for (Block block : ForgeRegistries.BLOCKS) {
             if(block instanceof IItemBlock) {
                 event.getRegistry().register(((IItemBlock)block).createItem()

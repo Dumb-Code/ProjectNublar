@@ -97,14 +97,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Override
     public void update() {
         for (MachineProcess<B> process : this.processes) {
-            if(this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accpets(this.asB, process))) {
+            if(this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
                 if(process.isProcessing() || this.searchForRecipes(process)) {
                     if(process.isFinished()) {
                         MachineRecipe<B> recipe = process.getCurrentRecipe();
                         if(recipe != null) {
                             recipe.onRecipeFinished(this.asB, process);
                             process.setTime(0);
-                            if(!recipe.accpets(this.asB, process)) {
+                            if(!recipe.accepts(this.asB, process)) {
                                 process.setProcessing(false);
                                 process.setCurrentRecipe(null);
                                 this.searchForRecipes(process);
@@ -137,7 +137,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public boolean searchForRecipes(MachineProcess<B> process) {
         for (MachineRecipe<B> recipe : this.recipes) {
-            if(recipe.accpets(this.asB, process) && this.canProcess(process)) {
+            if(recipe.accepts(this.asB, process) && this.canProcess(process)) {
                 process.setProcessing(true);
                 process.setCurrentRecipe(recipe);
                 process.setTotalTime(recipe.getRecipeTime(this.asB, process));

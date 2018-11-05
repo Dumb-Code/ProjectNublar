@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -24,6 +25,7 @@ public class BlockHandler {
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, DrillExtractorBlockEntity::new);
     public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, SequencingSynthesizerBlockEntity::new);
+    public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, EggPrinterBlockEntity::new);
 
     public static final Map<Dinosaur, FossilBlock> FOSSIlS = new HashMap<>();
 
@@ -34,7 +36,8 @@ public class BlockHandler {
                 SKELETAL_BUILDER.setRegistryName("skeletal_builder").setUnlocalizedName("skeletal_builder"),
                 FOSSIL_PROCESSOR.setUnlocalizedName("fossil_processor").setRegistryName("fossil_processor"),
                 DRILL_EXTRACTOR.setUnlocalizedName("drill_extractor").setRegistryName("drill_extractor"),
-                SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer")
+                SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer"),
+                EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer")
         );
 
 

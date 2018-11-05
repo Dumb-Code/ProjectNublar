@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import lombok.Getter;
+import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -29,6 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -56,9 +59,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     public static final double TOTAL_AMOUNT = 16D;
 
-    private double sugarAmount;
-    private double boneAmount;
-    private double plantAmount;
+    @Getter @Setter private double sugarAmount;
+    @Getter @Setter private double boneAmount;
+    @Getter @Setter private double plantAmount;
 
     private int consumeTimer;
 
@@ -186,6 +189,20 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public void update() {
         super.update();
 
+        NBTTagCompound testNbt = this.handler.getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
+        if((!this.selectOneKey.isEmpty() && !testNbt.hasKey(this.selectOneKey, Constants.NBT.TAG_COMPOUND)) || this.selectOneAmount == 0 != this.selectOneKey.isEmpty()) {
+            this.selectOneKey = "";
+            this.selectOneAmount = 0D;
+        }
+        if((!this.selectTwoKey.isEmpty() && !testNbt.hasKey(this.selectTwoKey, Constants.NBT.TAG_COMPOUND)) || this.selectTwoAmount == 0 != this.selectTwoKey.isEmpty()) {
+            this.selectTwoKey = "";
+            this.selectTwoAmount = 0D;
+        }
+        if((!this.selectThreeKey.isEmpty() && !testNbt.hasKey(this.selectThreeKey, Constants.NBT.TAG_COMPOUND)) || this.selectThreeAmount == 0 != this.selectThreeKey.isEmpty()) {
+            this.selectThreeKey = "";
+            this.selectThreeAmount = 0D;
+        }
+
         if(this.sugarAmount < TOTAL_AMOUNT) {
             this.sugarAmount = Math.min(TOTAL_AMOUNT, this.sugarAmount + getSugarMatter(this.handler.getStackInSlot(2).splitStack(1)));
         }
@@ -222,7 +239,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         ItemStack in = this.handler.getStackInSlot(5);
         if(in.getItem() instanceof DriveUtils.DriveInformation && this.handler.getStackInSlot(0).getItem() == ItemHandler.STORAGE_DRIVE && DriveUtils.canAdd(this.handler.getStackInSlot(0), in)) {
             ItemStack out = ((DriveUtils.DriveInformation) in.getItem()).getOutItem(in);
-            return out.isEmpty() || this.handler.insertOutputItem(5, out, true).isEmpty();
+            return out.isEmpty() || this.handler.insertOutputItem(6, out, true).isEmpty();
         }
         return false;
     }
@@ -290,17 +307,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         );
     }
 
-    public double getSugarAmount() {
-        return sugarAmount;
-    }
-
-    public double getPlantAmount() {
-        return plantAmount;
-    }
-
-    public double getBoneAmount() {
-        return boneAmount;
-    }
 
     public double getPlantMatter(ItemStack stack) {
         if(stack.getItem() == Items.AIR) {

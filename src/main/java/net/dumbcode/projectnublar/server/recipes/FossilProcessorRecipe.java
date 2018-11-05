@@ -25,7 +25,7 @@ public class FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlock
     }
 
     @Override
-    public boolean accpets(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean accepts(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         ItemStackHandler handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
         return this.inputTest.test(inSlot) && handler.insertItem(process.getOutputSlots()[0], this.outputCreator.apply(inSlot), true).isEmpty();

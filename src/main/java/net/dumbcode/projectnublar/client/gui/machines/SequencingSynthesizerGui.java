@@ -65,8 +65,8 @@ public class SequencingSynthesizerGui extends GuiContainer {
         this.thirdBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 60, 78, 20, 5, () -> this.entryList);
 
         this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 10, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 35, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D)), this.secondaryBox, this.initialSlider);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 60, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue), this.thirdBox, this.secondarySlider, this.initialSlider);
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 35, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(this.secondaryBox.getActive() != null && !this.dinosaurList.contains(this.secondaryBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D))), this.secondaryBox, this.initialSlider);
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 60, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(this.thirdBox.getActive() != null && !this.dinosaurList.contains(this.thirdBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue)), this.thirdBox, this.secondarySlider, this.initialSlider);
 
         this.changeTab = this.addButton(new GuiButton(0, this.guiLeft + this.xSize - 30, this.height / 2 - 10, 20, 20, ">"));
 

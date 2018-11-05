@@ -25,7 +25,7 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
     }
 
     @Override
-    public boolean accpets(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean accepts(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         ItemStackHandler handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
         if(this.inputPredicate.test(inSlot)) {

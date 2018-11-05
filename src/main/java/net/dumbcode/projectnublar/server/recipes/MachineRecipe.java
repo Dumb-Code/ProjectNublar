@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 public interface MachineRecipe<B extends MachineModuleBlockEntity> {
-    boolean accpets(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
+    boolean accepts(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
     int getRecipeTime(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
     void onRecipeFinished(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
 

@@ -26,11 +26,11 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     private final ResourceLocation registryName = new ResourceLocation(ProjectNublar.MODID, "dna_creation");
 
     @Override
-    public boolean accpets(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean accepts(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
         ItemStack testTube = handler.getStackInSlot(process.getInputSlots()[0]);
 
-        if(blockEntity.getTank().getFluidAmount() >= Fluid.BUCKET_VOLUME / 6 && testTube.getItem() == ItemHandler.EMPTY_TEST_TUBE) {
+        if(blockEntity.getTank().getFluidAmount() >= Fluid.BUCKET_VOLUME / 6 && blockEntity.getPlantAmount() >= 1 && blockEntity.getBoneAmount() >= 1 && blockEntity.getSugarAmount() >= 1 && testTube.getItem() == ItemHandler.EMPTY_TEST_TUBE) {
             NBTTagCompound nbt = handler.getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
 
             Map<String, Double> amountMap = Maps.newHashMap();
@@ -65,6 +65,11 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
         blockEntity.getTank().drainInternal(Fluid.BUCKET_VOLUME / 6, true);
 
         handler.insertOutputItem(process.getOutputSlots()[0], this.createStack(blockEntity, false), false);
+
+        blockEntity.setBoneAmount(0);
+        blockEntity.setPlantAmount(0);
+        blockEntity.setSugarAmount(0);
+
     }
 
     @Override
