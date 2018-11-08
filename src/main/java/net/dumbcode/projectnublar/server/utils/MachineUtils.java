@@ -1,13 +1,26 @@
 package net.dumbcode.projectnublar.server.utils;
 
+import lombok.experimental.UtilityClass;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockBush;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockVine;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.PotionTypes;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -20,6 +33,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
+@UtilityClass
 public class MachineUtils {
 
     //Returns -1 if there is no water amount
@@ -76,6 +90,56 @@ public class MachineUtils {
             }
         }
         return stack;
+    }
+
+    public static double getPlantMatter(ItemStack stack, World world, BlockPos pos) {
+        if(stack.getItem() == Items.AIR) {
+            return 0;
+        }
+        Block block = Block.getBlockFromItem(stack.getItem());
+        if(block instanceof BlockBush) {
+            try {
+                IBlockState state = block.getDefaultState();
+                if(stack.getItem() instanceof ItemBlock) {
+                    state = block.getStateFromMeta(stack.getItem().getMetadata(stack.getItemDamage()));
+                }
+                AxisAlignedBB aabb = block.getSelectedBoundingBox(state, world, pos);
+                return (aabb.maxX - aabb.minX) * (aabb.maxY - aabb.minY) * (aabb.maxZ - aabb.minZ);
+            } catch (Exception e) {
+                return 2;
+            }
+        } else if(block instanceof BlockLeaves) {
+            return 4;
+        } else if(block instanceof BlockVine) {
+            return 2;
+        }
+        return 0;
+    }
+
+    public static double getBoneMatter(ItemStack stack) {
+        if(stack.getItem() == Items.AIR) {
+            return 0;
+        }
+        if(stack.getItem() == Items.BONE) {
+            return 1D;
+        } else if(stack.getItem() == Items.DYE && stack.getMetadata() == EnumDyeColor.WHITE.getDyeDamage()) {
+            return 1/3D;
+        } else if(stack.getItem() == Items.SKULL && stack.getMetadata() == 0) {
+            return 4D;
+        } else if(stack.getItem() == Item.getItemFromBlock(Blocks.BONE_BLOCK)) {
+            return 3D;
+        }
+        return 0;
+    }
+
+    public static double getSugarMatter(ItemStack stack) {
+        if(stack.getItem() == Items.AIR) {
+            return 0;
+        }
+        if(stack.getItem() == Items.SUGAR || stack.getItem() == Items.REEDS) {
+            return 1;
+        }
+        return 0;
     }
 
 

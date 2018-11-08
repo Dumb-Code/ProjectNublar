@@ -165,9 +165,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         switch (slot) {
             case 0: return stack.getItem() == ItemHandler.STORAGE_DRIVE;
             case 1: return MachineUtils.getWaterAmount(stack) != -1;
-            case 2: return getSugarMatter(stack) > 0;
-            case 3: return getBoneMatter(stack) > 0;
-            case 4: return getPlantMatter(stack) > 0;
+            case 2: return MachineUtils.getSugarMatter(stack) > 0;
+            case 3: return MachineUtils.getBoneMatter(stack) > 0;
+            case 4: return MachineUtils.getPlantMatter(stack, this.world, this.pos) > 0;
             case 5: return stack.getItem() instanceof DriveUtils.DriveInformation && ((DriveUtils.DriveInformation) stack.getItem()).hasInformation(stack);
         }
         return super.isItemValidFor(slot, stack);
@@ -204,13 +204,13 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         }
 
         if(this.sugarAmount < TOTAL_AMOUNT) {
-            this.sugarAmount = Math.min(TOTAL_AMOUNT, this.sugarAmount + getSugarMatter(this.handler.getStackInSlot(2).splitStack(1)));
+            this.sugarAmount = Math.min(TOTAL_AMOUNT, this.sugarAmount + MachineUtils.getSugarMatter(this.handler.getStackInSlot(2).splitStack(1)));
         }
         if(this.boneAmount < TOTAL_AMOUNT) {
-            this.boneAmount = Math.min(TOTAL_AMOUNT, this.boneAmount + getBoneMatter(this.handler.getStackInSlot(3).splitStack(1)));
+            this.boneAmount = Math.min(TOTAL_AMOUNT, this.boneAmount + MachineUtils.getBoneMatter(this.handler.getStackInSlot(3).splitStack(1)));
         }
         if(this.plantAmount < TOTAL_AMOUNT) {
-            this.plantAmount = Math.min(TOTAL_AMOUNT, this.plantAmount + getPlantMatter(this.handler.getStackInSlot(4).splitStack(1)));
+            this.plantAmount = Math.min(TOTAL_AMOUNT, this.plantAmount + MachineUtils.getPlantMatter(this.handler.getStackInSlot(4).splitStack(1), this.world, this.pos));
         }
 
         if(this.consumeTimer != 0) {
@@ -305,56 +305,5 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 input? new MachineModuleSlot(this, 3, 113, 110) : new MachineModuleSlot(this, 7, 118, 110),
                 input? new MachineModuleSlot(this, 4, 151, 110) : new MachineModuleSlot(this, 8, 167, 110)
         );
-    }
-
-
-    public double getPlantMatter(ItemStack stack) {
-        if(stack.getItem() == Items.AIR) {
-            return 0;
-        }
-        Block block = Block.getBlockFromItem(stack.getItem());
-        if(block instanceof BlockBush) {
-            try {
-                IBlockState state = block.getDefaultState();
-                if(stack.getItem() instanceof ItemBlock) {
-                    state = block.getStateFromMeta(stack.getItem().getMetadata(stack.getItemDamage()));
-                }
-                AxisAlignedBB aabb = block.getSelectedBoundingBox(state, this.world, this.pos);
-                return (aabb.maxX - aabb.minX) * (aabb.maxY - aabb.minY) * (aabb.maxZ - aabb.minZ);
-            } catch (Exception e) {
-                return 2;
-            }
-        } else if(block instanceof BlockLeaves) {
-            return 4;
-        } else if(block instanceof BlockVine) {
-            return 2;
-        }
-        return 0;
-    }
-
-    public double getBoneMatter(ItemStack stack) {
-        if(stack.getItem() == Items.AIR) {
-            return 0;
-        }
-        if(stack.getItem() == Items.BONE) {
-            return 1D;
-        } else if(stack.getItem() == Items.DYE && stack.getMetadata() == EnumDyeColor.WHITE.getDyeDamage()) {
-            return 1/3D;
-        } else if(stack.getItem() == Items.SKULL && stack.getMetadata() == 0) {
-            return 4D;
-        } else if(stack.getItem() == Item.getItemFromBlock(Blocks.BONE_BLOCK)) {
-            return 3D;
-        }
-        return 0;
-    }
-
-    public double getSugarMatter(ItemStack stack) {
-        if(stack.getItem() == Items.AIR) {
-            return 0;
-        }
-        if(stack.getItem() == Items.SUGAR || stack.getItem() == Items.REEDS) {
-            return 1;
-        }
-        return 0;
     }
 }

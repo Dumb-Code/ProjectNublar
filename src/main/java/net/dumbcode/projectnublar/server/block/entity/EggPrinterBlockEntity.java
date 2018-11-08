@@ -6,9 +6,11 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.EggPrinterRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
+import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 

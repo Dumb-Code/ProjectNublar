@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
+import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -38,7 +39,8 @@ public final class ItemHandler {
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurGeneticMaterialItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
     public static final Map<Dinosaur, BasicDinosaurItem>  TEST_TUBES_DNA = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem> DINOSAUR_EGG_ITEM = new HashMap<>();
+    public static final Map<Dinosaur, DinosaurTooltipItem> DINOSAUR_UNINCUBATED_EGG = new HashMap<>();
+    public static final Map<Dinosaur, BasicDinosaurItem> DINOSAUR_INCUBATED_EGG = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
 
@@ -63,7 +65,8 @@ public final class ItemHandler {
         populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
         populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, d.getRegName().toString(), 25/*Change per dino?*/), tab.andThen(i -> i.setMaxStackSize(1)));
         populateMap(event, TEST_TUBES_DNA, "%s_test_tube", BasicDinosaurItem::new);
-        populateMap(event, DINOSAUR_EGG_ITEM, "%s_egg", DinosaurEggItem::new);
+        populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(stack.getOrCreateSubCompound(ProjectNublar.MODID).getInteger("AmountDone") + "%")));
+        populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getSkeletalInformation().getIndividualBones(), FossilItem::new, "fossil_%s_%s");
 

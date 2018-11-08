@@ -31,7 +31,7 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     private ItemStack createStack(ItemStack dna) {
         ItemStack out = ItemStack.EMPTY;
         if(dna.getItem() instanceof DinosaurProvider) {
-            out = new ItemStack(ItemHandler.DINOSAUR_EGG_ITEM.get(((DinosaurProvider) dna.getItem()).getDinosaur()));
+            out = new ItemStack(ItemHandler.DINOSAUR_UNINCUBATED_EGG.get(((DinosaurProvider) dna.getItem()).getDinosaur()));
             out.getOrCreateSubCompound(ProjectNublar.MODID).setTag("dna_info", dna.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("dna_info").copy());
         }
         return out;
