@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.EggPrinterGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.EggPrinterRecipe;
@@ -38,8 +39,8 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player, int tab) {
-        return new EggPrinterGui(player, this, tab);
+    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+        return new EggPrinterGui(player, this, info, tab);
     }
 
     @Override

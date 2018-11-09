@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -8,12 +10,12 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 
-public class DrillExtractorGui extends GuiContainer {
+public class DrillExtractorGui extends TabbedGui {
 
     private final DrillExtractorBlockEntity blockEntity;
 
-    public DrillExtractorGui(EntityPlayer player, DrillExtractorBlockEntity blockEntity, int tab) {
-        super(blockEntity.createContainer(player, tab));
+    public DrillExtractorGui(EntityPlayer player, DrillExtractorBlockEntity blockEntity, TabListInformation info, int tab) {
+        super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
     }
 

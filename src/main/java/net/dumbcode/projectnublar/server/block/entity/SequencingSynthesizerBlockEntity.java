@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -13,23 +14,12 @@ import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockBush;
-import net.minecraft.block.BlockLeaves;
-import net.minecraft.block.BlockVine;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.Fluid;
@@ -285,8 +275,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player, int tab) {
-        return tab != 0 ? new SequencingSynthesizerInputsGui(player, this, tab) : new SequencingSynthesizerGui(player, this, tab);
+    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+        return tab != 0 ? new SequencingSynthesizerInputsGui(player, this, info, tab) : new SequencingSynthesizerGui(player, this, info, tab);
     }
 
     @Override

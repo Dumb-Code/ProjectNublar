@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -21,13 +23,13 @@ import net.minecraft.util.ResourceLocation;
 import java.io.IOException;
 import java.util.List;
 
-public class SequencingSynthesizerInputsGui extends GuiContainer {
+public class SequencingSynthesizerInputsGui extends TabbedGui {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
     private GuiButton changeTab;
 
-    public SequencingSynthesizerInputsGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, int tab) {
-        super(blockEntity.createContainer(player, tab));
+    public SequencingSynthesizerInputsGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, TabListInformation info, int tab) {
+        super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
         this.xSize = 208;
         this.ySize = 217;

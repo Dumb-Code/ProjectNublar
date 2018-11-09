@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -29,7 +31,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.DoubleFunction;
 
-public class SequencingSynthesizerGui extends GuiContainer {
+public class SequencingSynthesizerGui extends TabbedGui {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
@@ -48,8 +50,8 @@ public class SequencingSynthesizerGui extends GuiContainer {
 
     private GuiButton changeTab;
 
-    public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, int tab) {
-        super(blockEntity.createContainer(player, tab));
+    public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, TabListInformation info, int tab) {
+        super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
         this.xSize = 208;
         this.ySize = 217;

@@ -76,24 +76,25 @@ public class ProjectNublar
     }
 
     private void registerPackets() {
-        NETWORK.registerMessage(C0MoveSelectedSkeletalPart.Handler.class, C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
-        NETWORK.registerMessage(S1UpdateSkeletalBuilder.Handler.class, S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
-        NETWORK.registerMessage(C2SkeletalMovement.Handler.class, C2SkeletalMovement.class, 2, Side.SERVER);
-        NETWORK.registerMessage(S3HistoryRecord.Handler.class, S3HistoryRecord.class, 3, Side.CLIENT);
-        NETWORK.registerMessage(C4MoveInHistory.Handler.class, C4MoveInHistory.class, 4, Side.SERVER);
-        NETWORK.registerMessage(S5UpdateHistoryIndex.Handler.class, S5UpdateHistoryIndex.class, 5, Side.CLIENT);
-        NETWORK.registerMessage(C6ResetPose.Handler.class, C6ResetPose.class, 6, Side.SERVER);
-        NETWORK.registerMessage(S7FullPoseChange.Handler.class, S7FullPoseChange.class, 7, Side.CLIENT);
-        NETWORK.registerMessage(C8FullPoseChange.Handler.class, C8FullPoseChange.class, 8, Side.SERVER);
-        NETWORK.registerMessage(C9ChangeGlobalRotation.Handler.class, C9ChangeGlobalRotation.class, 9, Side.SERVER);
-        NETWORK.registerMessage(S10ChangeGlobalRotation.Handler.class, S10ChangeGlobalRotation.class, 10, Side.CLIENT);
-        NETWORK.registerMessage(C11ChangePoleFacing.Handler.class, C11ChangePoleFacing.class, 11, Side.SERVER);
-        NETWORK.registerMessage(S12ChangePoleFacing.Handler.class, S12ChangePoleFacing.class, 12, Side.CLIENT);
-        NETWORK.registerMessage(C13VehicleInputStateUpdated.Handler.class, C13VehicleInputStateUpdated.class, 13, Side.SERVER);
-        NETWORK.registerMessage(C14SequencingSynthesizerSelectChange.Handler.class, C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
-        NETWORK.registerMessage(S15SyncSequencingSynthesizerSelectChange.Handler.class, S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
-        NETWORK.registerMessage(C16DisplayTabbedGui.Handler.class, C16DisplayTabbedGui.class, 16, Side.SERVER);
-
+        NETWORK.registerMessage(new C0MoveSelectedSkeletalPart.Handler(), C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
+        NETWORK.registerMessage(new S1UpdateSkeletalBuilder.Handler(), S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
+        NETWORK.registerMessage(new C2SkeletalMovement.Handler(), C2SkeletalMovement.class, 2, Side.SERVER);
+        NETWORK.registerMessage(new S3HistoryRecord.Handler(), S3HistoryRecord.class, 3, Side.CLIENT);
+        NETWORK.registerMessage(new C4MoveInHistory.Handler(), C4MoveInHistory.class, 4, Side.SERVER);
+        NETWORK.registerMessage(new S5UpdateHistoryIndex.Handler(), S5UpdateHistoryIndex.class, 5, Side.CLIENT);
+        NETWORK.registerMessage(new C6ResetPose.Handler(), C6ResetPose.class, 6, Side.SERVER);
+        NETWORK.registerMessage(new S7FullPoseChange.Handler(), S7FullPoseChange.class, 7, Side.CLIENT);
+        NETWORK.registerMessage(new C8FullPoseChange.Handler(), C8FullPoseChange.class, 8, Side.SERVER);
+        NETWORK.registerMessage(new C9ChangeGlobalRotation.Handler(), C9ChangeGlobalRotation.class, 9, Side.SERVER);
+        NETWORK.registerMessage(new S10ChangeGlobalRotation.Handler(), S10ChangeGlobalRotation.class, 10, Side.CLIENT);
+        NETWORK.registerMessage(new C11ChangePoleFacing.Handler(), C11ChangePoleFacing.class, 11, Side.SERVER);
+        NETWORK.registerMessage(new S12ChangePoleFacing.Handler(), S12ChangePoleFacing.class, 12, Side.CLIENT);
+        NETWORK.registerMessage(new C13VehicleInputStateUpdated.Handler(), C13VehicleInputStateUpdated.class, 13, Side.SERVER);
+        NETWORK.registerMessage(new C14SequencingSynthesizerSelectChange.Handler(), C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
+        NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
+        NETWORK.registerMessage(new C16DisplayTabbedGui.Handler(), C16DisplayTabbedGui.class, 16, Side.SERVER);
+        NETWORK.registerMessage(new C17TabbedGuiClicked.Handler(), C17TabbedGuiClicked.class, 17, Side.SERVER);
+        NETWORK.registerMessage(new S18MachinePositionDirty.Handler(), S18MachinePositionDirty.class, 18, Side.CLIENT);
     }
 
     @EventHandler

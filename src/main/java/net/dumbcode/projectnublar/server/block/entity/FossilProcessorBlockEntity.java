@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -121,8 +122,8 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player, int tab) {
-        return new FossilProcessorGui(player, this, tab);
+    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+        return new FossilProcessorGui(player, this, info, tab);
     }
 
     @Override

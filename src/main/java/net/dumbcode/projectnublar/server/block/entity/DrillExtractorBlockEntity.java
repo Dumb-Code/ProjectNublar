@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.DrillExtractorGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -45,8 +46,8 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player, int tab) {
-        return new DrillExtractorGui(player, this, tab);
+    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+        return new DrillExtractorGui(player, this, info, tab);
     }
 
     @Override

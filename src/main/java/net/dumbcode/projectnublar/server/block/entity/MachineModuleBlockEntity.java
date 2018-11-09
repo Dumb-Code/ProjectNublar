@@ -3,13 +3,17 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.network.C17TabbedGuiClicked;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
@@ -40,6 +44,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     private final MachineModuleItemStackWrapper outputWrapper;
 
     @Getter @Setter private int stateID;
+
+    public boolean positionDirty;
 
     public MachineModuleBlockEntity(){
         this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots);
@@ -231,9 +237,49 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return false; //Slot index was not an input. Log error?
     }
 
+
+    public TabListInformation createInfo() {
+        return new TabListInformation(this::createTabList);
+    }
+
+    private List<TabbedGui.Tab> createTabList() {
+        List<TabbedGui.Tab> tabs = Lists.newArrayList();
+        for (MachineModuleBlockEntity blockEntity : this.getSurroundings(Lists.newArrayList())) {
+            blockEntity.addTabs(tabs);
+        }
+        return tabs;
+    }
+
+    private List<MachineModuleBlockEntity> getSurroundings(List<MachineModuleBlockEntity> list) {
+        list.add(this);
+        for (EnumFacing facing : EnumFacing.values()) {
+            TileEntity te = world.getTileEntity(this.pos.offset(facing));
+            if(te instanceof MachineModuleBlockEntity && !list.contains(te)) {
+                ((MachineModuleBlockEntity) te).getSurroundings(list);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        this.positionDirty = true;
+    }
+
+    @Override
+    public void validate() {
+        super.validate();
+        this.positionDirty = true;
+    }
+
+    protected void addTabs(List<TabbedGui.Tab> tabList) {
+        tabList.add(new DefaultTab());
+    }
+
     //tab - used to split the same gui into diffrent tabs. Not used for grouping diffrent guis together with tabs
     @SideOnly(Side.CLIENT)
-    public abstract GuiScreen createScreen(EntityPlayer player, int tab);
+    public abstract GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab);
 
     public abstract Container createContainer(EntityPlayer player, int tab);
 
@@ -276,6 +322,22 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         ProcessInterruptAction(Consumer<MachineProcess> processConsumer) {
             this.processConsumer = processConsumer;
+        }
+    }
+
+    protected class DefaultTab extends TabbedGui.Tab {
+        @Override
+        public boolean isDirty() {
+            if(MachineModuleBlockEntity.this.positionDirty) {
+                MachineModuleBlockEntity.this.positionDirty = false;
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onClicked() {
+            ProjectNublar.NETWORK.sendToServer(new C17TabbedGuiClicked(MachineModuleBlockEntity.this.pos));
         }
     }
 }

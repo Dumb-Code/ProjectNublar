@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
@@ -17,12 +19,12 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-public class FossilProcessorGui extends GuiContainer {
+public class FossilProcessorGui extends TabbedGui {
 
     private final FossilProcessorBlockEntity blockEntity;
 
-    public FossilProcessorGui(EntityPlayer player, FossilProcessorBlockEntity blockEntity, int tab) {
-        super(blockEntity.createContainer(player, tab));
+    public FossilProcessorGui(EntityPlayer player, FossilProcessorBlockEntity blockEntity, TabListInformation info, int tab) {
+        super(blockEntity.createContainer(player, tab), info);
         this.xSize = 176;
         this.ySize = 220;
         this.blockEntity = blockEntity;

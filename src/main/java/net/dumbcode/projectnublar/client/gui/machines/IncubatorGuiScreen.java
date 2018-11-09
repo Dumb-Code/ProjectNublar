@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.minecraft.client.Minecraft;
@@ -8,12 +10,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 
-public class IncubatorGuiScreen extends GuiContainer {
+public class IncubatorGuiScreen extends TabbedGui {
 
     private final IncubatorBlockEntity blockEntity;
 
-    public IncubatorGuiScreen(EntityPlayer player, IncubatorBlockEntity blockEntity, int tab) {
-        super(blockEntity.createContainer(player, tab));
+    public IncubatorGuiScreen(EntityPlayer player, IncubatorBlockEntity blockEntity, TabListInformation info, int tab) {
+        super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
     }
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.IncubatorRecipe;
@@ -83,8 +84,8 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
-    public GuiScreen createScreen(EntityPlayer player, int tab) {
-        return new IncubatorGuiScreen(player, this, tab);
+    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+        return new IncubatorGuiScreen(player, this, info, tab);
     }
 
     @Override

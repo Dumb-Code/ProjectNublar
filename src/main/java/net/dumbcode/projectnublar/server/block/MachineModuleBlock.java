@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.network.S18MachinePositionDirty;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -64,6 +65,12 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
             state = state.withProperty(this.propertyMap.get(this.values[i]), (id & (int) Math.pow(2, i)) != 0);
         }
         return state;
+    }
+
+    @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+        ProjectNublar.NETWORK.sendToDimension(new S18MachinePositionDirty(pos), worldIn.provider.getDimension());
     }
 
     @Override

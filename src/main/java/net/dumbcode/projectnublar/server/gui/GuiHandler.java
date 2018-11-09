@@ -1,8 +1,11 @@
 package net.dumbcode.projectnublar.server.gui;
 
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
+import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -41,7 +44,13 @@ public class GuiHandler implements IGuiHandler {
             }
         }
         if(te instanceof MachineModuleBlockEntity) {
-            return ((MachineModuleBlockEntity)te).createScreen(player, ID);
+            TabListInformation info;
+            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGui) {
+                info = ((TabbedGui) Minecraft.getMinecraft().currentScreen).getInfo();
+            } else {
+                info = ((MachineModuleBlockEntity) te).createInfo();
+            }
+            return ((MachineModuleBlockEntity)te).createScreen(player, info, ID);
         }
         return null;
     }
