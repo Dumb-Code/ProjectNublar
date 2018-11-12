@@ -9,15 +9,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class S18MachinePositionDirty implements IMessage {
+public class S17MachinePositionDirty implements IMessage {
 
     private BlockPos pos;
 
     @SuppressWarnings("unused")
-    public S18MachinePositionDirty() {
+    public S17MachinePositionDirty() {
     }
 
-    public S18MachinePositionDirty(BlockPos pos) {
+    public S17MachinePositionDirty(BlockPos pos) {
         this.pos = pos;
     }
 
@@ -31,10 +31,10 @@ public class S18MachinePositionDirty implements IMessage {
         buf.writeLong(this.pos.toLong());
     }
 
-    public static class Handler extends WorldModificationsMessageHandler<S18MachinePositionDirty, IMessage> {
+    public static class Handler extends WorldModificationsMessageHandler<S17MachinePositionDirty, IMessage> {
 
         @Override
-        protected void handleMessage(S18MachinePositionDirty message, MessageContext ctx, World world, EntityPlayer player) {
+        protected void handleMessage(S17MachinePositionDirty message, MessageContext ctx, World world, EntityPlayer player) {
             TileEntity te = world.getTileEntity(message.pos);
             if(te instanceof MachineModuleBlockEntity) {
                 ((MachineModuleBlockEntity) te).positionDirty = true;

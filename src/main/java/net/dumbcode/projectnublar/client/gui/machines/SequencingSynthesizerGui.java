@@ -48,13 +48,11 @@ public class SequencingSynthesizerGui extends TabbedGui {
 
     private boolean dirty;
 
-    private GuiButton changeTab;
-
     public SequencingSynthesizerGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, TabListInformation info, int tab) {
         super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
         this.xSize = 208;
-        this.ySize = 217;
+        this.ySize =  192;
         this.updateList();
     }
 
@@ -62,15 +60,13 @@ public class SequencingSynthesizerGui extends TabbedGui {
     public void initGui() {
         super.initGui();
 
-        this.initialBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 10, 78, 20, 5, () -> this.dinosaurList);
-        this.secondaryBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 35, 78, 20, 5, () -> this.entryList);
-        this.thirdBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 60, 78, 20, 5, () -> this.entryList);
+        this.initialBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 4, 78, 20, 5, () -> this.dinosaurList);
+        this.secondaryBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 27, 78, 20, 5, () -> this.entryList);
+        this.thirdBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 49, 78, 20, 5, () -> this.entryList);
 
-        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 10, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 35, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(this.secondaryBox.getActive() != null && !this.dinosaurList.contains(this.secondaryBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D))), this.secondaryBox, this.initialSlider);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 60, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(this.thirdBox.getActive() != null && !this.dinosaurList.contains(this.thirdBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue)), this.thirdBox, this.secondarySlider, this.initialSlider);
-
-        this.changeTab = this.addButton(new GuiButton(0, this.guiLeft + this.xSize - 30, this.height / 2 - 10, 20, 20, ">"));
+        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 4, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 27, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(this.secondaryBox.getActive() != null && !this.dinosaurList.contains(this.secondaryBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D))), this.secondaryBox, this.initialSlider);
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 49, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(this.thirdBox.getActive() != null && !this.dinosaurList.contains(this.thirdBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue)), this.thirdBox, this.secondarySlider, this.initialSlider);
 
         for (DriveEntry driveEntry : this.dinosaurList) {
             if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(1))) {
@@ -92,6 +88,11 @@ public class SequencingSynthesizerGui extends TabbedGui {
     }
 
     @Override
+    protected int getOffset() {
+        return 15;
+    }
+
+    @Override
     public void updateScreen() {
         super.updateScreen();
         this.updateList();
@@ -104,7 +105,6 @@ public class SequencingSynthesizerGui extends TabbedGui {
             this.dirty = false;
             this.sync();
         }
-
     }
 
     private void updateList() {
@@ -156,10 +156,10 @@ public class SequencingSynthesizerGui extends TabbedGui {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         int xStart = this.guiLeft + 23;
-        int yStart = this.guiTop + 85;
+        int yStart = this.guiTop + 71;
 
         int w = 162;
-        int yEnd = yStart + 18;
+        int yEnd = yStart + 16;
 
 
         int initial = (int) (w * this.initialSlider.sliderValue);
@@ -200,7 +200,7 @@ public class SequencingSynthesizerGui extends TabbedGui {
         this.secondarySlider.drawButton(mc, mouseX, mouseY, partialTicks);
         this.thirdSlider.drawButton(mc, mouseX, mouseY, partialTicks);
 
-        if(mouseX <= xStart + 190 && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart
+        if(mouseX <= xStart + w && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart
                 && !this.initialBox.isMouseOver(mouseX, mouseY)
                 && !this.secondaryBox.isMouseOver(mouseX, mouseY)
                 && !this.thirdBox.isMouseOver(mouseX, mouseY)) {
@@ -219,15 +219,6 @@ public class SequencingSynthesizerGui extends TabbedGui {
         }
 
         this.renderHoveredToolTip(mouseX, mouseY);
-
-
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        if(button == this.changeTab) {
-            ProjectNublar.NETWORK.sendToServer(new C16DisplayTabbedGui(this.blockEntity.getPos(), 1));
-        }
     }
 
     @Override

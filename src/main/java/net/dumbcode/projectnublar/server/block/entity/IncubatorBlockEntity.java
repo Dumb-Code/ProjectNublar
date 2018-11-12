@@ -90,12 +90,13 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        MachineModuleSlot[] slots = new MachineModuleSlot[7];
-        slots[0] =  new MachineModuleSlot(this, 0, 79, 40);
-        float radius = 50;
-        for (int i = 0; i < 6; i++) {
-            slots[i + 1] = new MachineModuleSlot(this, i + 1, 79 + (int) (radius * Math.cos(i * 1.0472D)), 40 + (int) (radius * Math.sin(i * 1.0472D)));
-        }
-        return new MachineModuleContainer(player, 112, 176, slots);
+        return new MachineModuleContainer(player, 83, 176,
+                new MachineModuleSlot(this, 0, 79, 35),
+                new MachineModuleSlot(this, 1, 108, 34),
+                new MachineModuleSlot(this, 2, 92, 59),
+                new MachineModuleSlot(this, 2, 63, 59),
+                new MachineModuleSlot(this, 4, 49, 34),
+                new MachineModuleSlot(this, 5, 64, 9),
+                new MachineModuleSlot(this, 6, 93, 9));
     }
 }

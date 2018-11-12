@@ -93,8 +93,7 @@ public class ProjectNublar
         NETWORK.registerMessage(new C14SequencingSynthesizerSelectChange.Handler(), C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
         NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
         NETWORK.registerMessage(new C16DisplayTabbedGui.Handler(), C16DisplayTabbedGui.class, 16, Side.SERVER);
-        NETWORK.registerMessage(new C17TabbedGuiClicked.Handler(), C17TabbedGuiClicked.class, 17, Side.SERVER);
-        NETWORK.registerMessage(new S18MachinePositionDirty.Handler(), S18MachinePositionDirty.class, 18, Side.CLIENT);
+        NETWORK.registerMessage(new S17MachinePositionDirty.Handler(), S17MachinePositionDirty.class, 17, Side.CLIENT);
     }
 
     @EventHandler

@@ -6,8 +6,9 @@ import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.C17TabbedGuiClicked;
+import net.dumbcode.projectnublar.server.network.C16DisplayTabbedGui;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -274,7 +275,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     protected void addTabs(List<TabbedGui.Tab> tabList) {
-        tabList.add(new DefaultTab());
+        tabList.add(new DefaultTab(0));
     }
 
     //tab - used to split the same gui into diffrent tabs. Not used for grouping diffrent guis together with tabs
@@ -326,6 +327,13 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     protected class DefaultTab extends TabbedGui.Tab {
+
+        private final int tab;
+
+        public DefaultTab(int tab) {
+            this.tab = tab;
+        }
+
         @Override
         public boolean isDirty() {
             if(MachineModuleBlockEntity.this.positionDirty) {
@@ -337,7 +345,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         @Override
         public void onClicked() {
-            ProjectNublar.NETWORK.sendToServer(new C17TabbedGuiClicked(MachineModuleBlockEntity.this.pos));
+            TabListInformation info;
+            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGui) {
+                info = ((TabbedGui) Minecraft.getMinecraft().currentScreen).getInfo();
+            } else {
+                info = MachineModuleBlockEntity.this.createInfo();
+            }
+            Minecraft.getMinecraft().displayGuiScreen(MachineModuleBlockEntity.this.createScreen(Minecraft.getMinecraft().player, info, this.tab));
+            ProjectNublar.NETWORK.sendToServer(new C16DisplayTabbedGui(MachineModuleBlockEntity.this.pos, this.tab));
         }
     }
 }

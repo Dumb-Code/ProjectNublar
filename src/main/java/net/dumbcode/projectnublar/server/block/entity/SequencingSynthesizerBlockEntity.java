@@ -6,6 +6,7 @@ import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -280,20 +281,39 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
+    protected void addTabs(List<TabbedGui.Tab> tabList) {
+        tabList.add(new DefaultTab(0));
+        tabList.add(new DefaultTab(1));
+    }
+
+    @Override
     public Container createContainer(EntityPlayer player, int tab) {
         boolean input = tab != 0;
-        return new MachineModuleContainer(player, 136, 208,
-                new MachineModuleSlot(this, 0, 187, 5) {
-                    @Nullable
-                    @Override
-                    public String getSlotTexture() {
-                        return ProjectNublar.MODID + ":items/storage_drive";
-                    }
-                },
-                input? new MachineModuleSlot(this, 1, 37, 110) :  new MachineModuleSlot(this, 5, 60, 110),
-                input? new MachineModuleSlot(this, 2, 75, 110) : new MachineModuleSlot(this, 6, 40, 110),
-                input? new MachineModuleSlot(this, 3, 113, 110) : new MachineModuleSlot(this, 7, 118, 110),
-                input? new MachineModuleSlot(this, 4, 151, 110) : new MachineModuleSlot(this, 8, 167, 110)
-        );
+        return input ?
+                new MachineModuleContainer(player, 83, 176,
+                        new MachineModuleSlot(this, 0, 78, 6) {
+                            @Nullable
+                            @Override
+                            public String getSlotTexture() {
+                                return ProjectNublar.MODID + ":items/storage_drive";
+                            }
+                        },
+                        new MachineModuleSlot(this, 1, 21, 58),
+                        new MachineModuleSlot(this, 2, 59, 58),
+                        new MachineModuleSlot(this, 3, 97, 58),
+                        new MachineModuleSlot(this, 4, 135, 58)
+                ) :
+                new MachineModuleContainer(player, 110, 208,
+                        new MachineModuleSlot(this, 0, 187, 5) {
+                            @Nullable
+                            @Override
+                            public String getSlotTexture() {
+                                return ProjectNublar.MODID + ":items/storage_drive";
+                            }
+                        },
+                        new MachineModuleSlot(this, 5, 60, 90),
+                        new MachineModuleSlot(this, 6, 40, 90),
+                        new MachineModuleSlot(this, 7, 118, 90),
+                        new MachineModuleSlot(this, 8, 167, 90));
     }
 }

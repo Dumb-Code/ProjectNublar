@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.recipes.FossilProcessorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
@@ -84,7 +85,12 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
-        return slot == 0 ? MachineUtils.getWaterAmount(stack) != -1 : super.isItemValidFor(slot, stack);
+        switch (slot) {
+            case 0: return MachineUtils.getWaterAmount(stack) != -1;
+            case 2: return stack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
+            case 3: return stack.getItem() == ItemHandler.FILTER;
+        }
+        return super.isItemValidFor(slot, stack);
     }
 
     private int layer;
@@ -128,11 +134,11 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 138, 176,
-                new MachineModuleSlot(this, 0, 8, 116), //water
-                new MachineModuleSlot(this, 1, 100, 50), //fossil
-                new MachineModuleSlot(this, 2, 150, 50), //test tub
-                new MachineModuleSlot(this, 3, 100, 100), //Filter
-                new MachineModuleSlot(this, 4, 150, 100)); //output
+        return new MachineModuleContainer(player, 83, 176,
+                new MachineModuleSlot(this, 0, 8, 61), //water
+                new MachineModuleSlot(this, 1, 67, 12), //fossil
+                new MachineModuleSlot(this, 2, 67, 52), //test tub
+                new MachineModuleSlot(this, 3, 67, 32), //Filter
+                new MachineModuleSlot(this, 4, 126, 32)); //output
     }
 }

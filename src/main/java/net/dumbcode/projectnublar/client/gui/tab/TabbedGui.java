@@ -15,6 +15,17 @@ public abstract class TabbedGui extends GuiContainer {
     }
 
     @Override
+    public void initGui() {
+        super.initGui();
+        this.info.configurePageSelect();
+        this.guiTop += this.getOffset();
+    }
+
+    protected int getOffset() {
+        return 10;
+    }
+
+    @Override
     public void updateScreen() {
         super.updateScreen();
         this.info.update();

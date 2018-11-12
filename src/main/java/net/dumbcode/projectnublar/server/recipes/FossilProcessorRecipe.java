@@ -52,12 +52,7 @@ public class FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlock
 
     @Override
     public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
-        switch (slotIndex) {
-            case 1: return this.inputTest.test(testStack);
-            case 2: return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
-            case 3: return testStack.getItem() == ItemHandler.FILTER;
-        }
-        return false;
+        return slotIndex == 1 && this.inputTest.test(testStack);
     }
 
     @Override
