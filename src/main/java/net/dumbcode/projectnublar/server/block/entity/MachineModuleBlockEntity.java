@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C16DisplayTabbedGui;
+import net.dumbcode.projectnublar.server.network.C18OpenContainer;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -352,7 +353,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 info = MachineModuleBlockEntity.this.createInfo();
             }
             Minecraft.getMinecraft().displayGuiScreen(MachineModuleBlockEntity.this.createScreen(Minecraft.getMinecraft().player, info, this.tab));
-            ProjectNublar.NETWORK.sendToServer(new C16DisplayTabbedGui(MachineModuleBlockEntity.this.pos, this.tab));
+            ProjectNublar.NETWORK.sendToServer(new C18OpenContainer(this.tab, MachineModuleBlockEntity.this.pos));
         }
     }
 }

@@ -51,7 +51,7 @@ public class TabListInformation {
 
             for (int i = 0; i < fitAmount && i + this.pageOffset < CACHE.size(); i++) {
                 int xStart = offset + (TAB_WIDTH + TAB_PADDING) * i;
-                boolean selected = this.selectedIndex - this.pageOffset == i;
+                boolean selected = this.selectedIndex == i + this.pageOffset;
                 int tabExtension = selected ? 5 : 1;
                 GlStateManager.color(1f, 1f, 1f, 1f);
                 GlStateManager.disableLighting();
@@ -89,7 +89,7 @@ public class TabListInformation {
 
                 for (int i = 0; i < fitAmount && i + this.pageOffset < CACHE.size(); i++) {
                     int xStart = offset + (TAB_WIDTH + TAB_PADDING) * i;
-                    int tabExtension = this.selectedIndex == i ? 5 : 1;
+                    int tabExtension = this.selectedIndex == i + this.pageOffset ? 5 : 1;
                     if(mouseY > cont.getGuiTop() - TAB_HEIGHT && mouseY < cont.getGuiTop() + tabExtension && mouseX > xStart && mouseX < xStart + TAB_WIDTH) {
                         this.selectedIndex = this.pageOffset + i;
                         CACHE.get(i + this.pageOffset).onClicked();
@@ -121,7 +121,7 @@ public class TabListInformation {
             GuiContainer cont = (GuiContainer) gui;
             int nextSize = 20;
             int fitAmount = (cont.getXSize() - nextSize - nextSize - TAB_PADDING) / (TAB_WIDTH + TAB_PADDING);
-            this.pageOffset = this.selectedIndex - this.selectedIndex % fitAmount;
+            this.pageOffset = this.selectedIndex / fitAmount * fitAmount;
         }
     }
 
