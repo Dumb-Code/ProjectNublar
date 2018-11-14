@@ -91,8 +91,8 @@ public class TabListInformation {
                     int xStart = offset + (TAB_WIDTH + TAB_PADDING) * i;
                     int tabExtension = this.selectedIndex == i ? 5 : 1;
                     if(mouseY > cont.getGuiTop() - TAB_HEIGHT && mouseY < cont.getGuiTop() + tabExtension && mouseX > xStart && mouseX < xStart + TAB_WIDTH) {
-                        CACHE.get(i + this.pageOffset).onClicked();
                         this.selectedIndex = this.pageOffset + i;
+                        CACHE.get(i + this.pageOffset).onClicked();
                         break;
                     }
                 }
