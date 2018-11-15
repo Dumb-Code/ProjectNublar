@@ -52,12 +52,12 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 100, 176,
+        return new MachineModuleContainer(player, 84, 176,
                 new MachineModuleSlot(this, 0, 77, 12), //input
-                new MachineModuleSlot(this, 1, 96, 62), //test tube 1
-                new MachineModuleSlot(this, 2, 114, 62), //test tube 2
-                new MachineModuleSlot(this, 3, 132, 62), //test tube 3
-                new MachineModuleSlot(this, 4, 150, 62) //test tube 4
+                new MachineModuleSlot(this, 1, 50, 62), //test tube 1
+                new MachineModuleSlot(this, 2, 68, 62), //test tube 2
+                new MachineModuleSlot(this, 3, 86, 62), //test tube 3
+                new MachineModuleSlot(this, 4, 104, 62) //test tube 4
         );
     }
 }

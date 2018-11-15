@@ -7,11 +7,9 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.EggPrinterRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
-import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
@@ -45,12 +43,12 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 88, 176,
-                new MachineModuleSlot(this, 0, 50, 50),
-                new MachineModuleSlot(this, 1, 108, 50),
-                new MachineModuleSlot(this, 2, 153, 50),
-                new MachineModuleSlot(this, 3, 153, 24),
-                new MachineModuleSlot(this, 4, 108, 32)
+        return new MachineModuleContainer(player, 84, 176,
+                new MachineModuleSlot(this, 0, 29, 15),
+                new MachineModuleSlot(this, 1, 29, 33),
+                new MachineModuleSlot(this, 2, 29, 51),
+                new MachineModuleSlot(this, 3, 129, 24),
+                new MachineModuleSlot(this, 4, 129, 42)
         );
     }
 }

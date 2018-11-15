@@ -73,8 +73,6 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
         );
     }
 
-
-
     @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
         if(slot == 0) {
@@ -90,13 +88,13 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 83, 176,
-                new MachineModuleSlot(this, 0, 79, 35),
-                new MachineModuleSlot(this, 1, 108, 34),
-                new MachineModuleSlot(this, 2, 92, 59),
-                new MachineModuleSlot(this, 2, 63, 59),
-                new MachineModuleSlot(this, 4, 49, 34),
-                new MachineModuleSlot(this, 5, 64, 9),
-                new MachineModuleSlot(this, 6, 93, 9));
+        return new MachineModuleContainer(player, 84, 176,
+                new MachineModuleSlot(this, 0, 80, 35),
+                new MachineModuleSlot(this, 1, 109, 34),
+                new MachineModuleSlot(this, 2, 93, 59),
+                new MachineModuleSlot(this, 2, 64, 59),
+                new MachineModuleSlot(this, 4, 50, 34),
+                new MachineModuleSlot(this, 5, 65, 9),
+                new MachineModuleSlot(this, 6, 94, 9));
     }
 }

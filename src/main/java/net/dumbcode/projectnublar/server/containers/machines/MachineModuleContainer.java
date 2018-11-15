@@ -32,7 +32,7 @@ public class MachineModuleContainer extends Container {
     protected void addPlayerSlots(EntityPlayer player, int yOffet, int xSize) {
         InventoryPlayer playerInventory = player.inventory;
 
-        int xStart = (xSize - 162) / 2;
+        int xStart = (xSize - 162) / 2 + 1;
 
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
