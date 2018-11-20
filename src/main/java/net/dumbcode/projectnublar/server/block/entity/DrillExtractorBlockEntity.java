@@ -26,10 +26,7 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     @Override
     protected List<MachineRecipe<DrillExtractorBlockEntity>> getAllRecipes() {
         return Lists.newArrayList(
-                new DrillExtractorRecipe(new ResourceLocation("test"),
-                        stack -> stack.getItem() == ItemHandler.AMBER,
-                        stack -> new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom())),
-                        20)
+                DrillExtractorRecipe.INSTANCE
         );
     }
 

@@ -31,6 +31,7 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
 @UtilityClass
@@ -129,6 +130,11 @@ public class MachineUtils {
         } else if(stack.getItem() == Item.getItemFromBlock(Blocks.BONE_BLOCK)) {
             return 3D;
         }
+        for (ItemStack itemStack : OreDictionary.getOres("bone")) {
+            if(itemStack.getItem() == stack.getItem() && (stack.getMetadata() == OreDictionary.WILDCARD_VALUE || itemStack.getMetadata() == OreDictionary.WILDCARD_VALUE || itemStack.getMetadata() == stack.getMetadata())) {
+                return 1D;
+            }
+        }
         return 0;
     }
 
@@ -136,7 +142,7 @@ public class MachineUtils {
         if(stack.getItem() == Items.AIR) {
             return 0;
         }
-        if(stack.getItem() == Items.SUGAR || stack.getItem() == Items.REEDS) {
+        if(stack.getItem() == Items.SUGAR) {
             return 1;
         }
         return 0;

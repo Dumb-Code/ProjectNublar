@@ -1,7 +1,9 @@
 package net.dumbcode.projectnublar.server.recipes;
 
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -10,25 +12,14 @@ import net.minecraftforge.items.ItemStackHandler;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEntity> {
-
-    private final ResourceLocation registryName;
-    private final Predicate<ItemStack> inputPredicate;
-    private final Function<ItemStack, ItemStack> outputStack;
-    private final int recipeTime;
-
-    public DrillExtractorRecipe(ResourceLocation registryName, Predicate<ItemStack> inputPredicate, Function<ItemStack, ItemStack> outputStack, int recipeTime) {
-        this.registryName = registryName;
-        this.inputPredicate = inputPredicate;
-        this.outputStack = outputStack;
-        this.recipeTime = recipeTime;
-    }
+public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEntity> {
+    INSTANCE;
 
     @Override
     public boolean accepts(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         ItemStackHandler handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
-        if(this.inputPredicate.test(inSlot)) {
+        if(inSlot.getItem() == ItemHandler.AMBER) {
             for (int i = 0; i < process.getOutputSlots().length; i++) {
                 if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE) {
                     return true;
@@ -40,7 +31,7 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
 
     @Override
     public int getRecipeTime(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return this.recipeTime;
+        return 20;
     }
 
     @Override
@@ -49,7 +40,7 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
         for (int i : process.getOutputSlots()) {
             if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE) {
-                ItemStack stack = this.outputStack.apply(inSlot);
+                ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom()));
                 if(!blockEntity.getWorld().isRemote) {
                     handler.setStackInSlot(i, stack);
                     inSlot.shrink(1);
@@ -62,7 +53,7 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
     @Override
     public boolean acceptsInputSlot(DrillExtractorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
         switch (slotIndex) {
-            case 0: return this.inputPredicate.test(testStack);
+            case 0: return testStack.getItem() == ItemHandler.AMBER;
             case 1:
             case 2:
             case 3:
@@ -74,6 +65,6 @@ public class DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEn
 
     @Override
     public ResourceLocation getRegistryName() {
-        return this.registryName;
+        return new ResourceLocation(ProjectNublar.MODID, "amber_genetic_material");
     }
 }

@@ -107,10 +107,9 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     protected List<MachineRecipe<FossilProcessorBlockEntity>> getAllRecipes() {
-        return Lists.newArrayList(new FossilProcessorRecipe(
-                new ResourceLocation(ProjectNublar.MODID, "test"),
-                stack -> stack.getItem() == Items.COOKIE,
-                stack -> new ItemStack(Items.FLINT), 20));
+        return Lists.newArrayList(
+                FossilProcessorRecipe.INSTANCE
+        );
     }
 
     public FluidTank getTank() {
