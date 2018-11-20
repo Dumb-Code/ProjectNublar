@@ -134,7 +134,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 83, 176,
+        return new MachineModuleContainer(player, 84, 176,
                 new MachineModuleSlot(this, 0, 8, 61), //water
                 new MachineModuleSlot(this, 1, 67, 12), //fossil
                 new MachineModuleSlot(this, 2, 67, 52), //test tub

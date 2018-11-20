@@ -290,7 +290,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public Container createContainer(EntityPlayer player, int tab) {
         boolean input = tab != 0;
         return input ?
-                new MachineModuleContainer(player, 83, 176,
+                new MachineModuleContainer(player, 84, 176,
                         new MachineModuleSlot(this, 0, 78, 6) {
                             @Nullable
                             @Override
