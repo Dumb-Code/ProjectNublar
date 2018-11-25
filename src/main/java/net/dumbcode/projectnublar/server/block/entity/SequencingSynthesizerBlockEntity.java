@@ -148,7 +148,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Override
     protected List<MachineProcess<SequencingSynthesizerBlockEntity>> createProcessList() {
-        return Lists.newArrayList(new MachineProcess<>(new int[]{7}, new int[]{8}));
+        return Lists.newArrayList(new MachineProcess<>(this, new int[]{7}, new int[]{8}));
     }
 
     @Override
@@ -316,4 +316,31 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                         new MachineModuleSlot(this, 7, 118, 90),
                         new MachineModuleSlot(this, 8, 167, 90));
     }
+
+    // TODO: Change for balance, values are just for testing
+    @Override
+    public int getBaseEnergyProduction() {
+        return 0;
+    }
+
+    @Override
+    public int getBaseEnergyConsumption() {
+        return 1;
+    }
+
+    @Override
+    public int getEnergyCapacity() {
+        return 1000;
+    }
+
+    @Override
+    public int getEnergyMaxTransferSpeed() {
+        return 50;
+    }
+
+    @Override
+    public int getEnergyMaxExtractSpeed() {
+        return 50;
+    }
+
 }

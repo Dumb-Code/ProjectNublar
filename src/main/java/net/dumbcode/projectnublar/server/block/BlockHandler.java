@@ -24,6 +24,7 @@ public class BlockHandler {
     public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, SequencingSynthesizerBlockEntity::new);
     public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, EggPrinterBlockEntity::new);
     public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, IncubatorBlockEntity::new);
+    public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, CoalGeneratorBlockEntity::new);
 
     public static final Map<Dinosaur, FossilBlock> FOSSIlS = new HashMap<>();
 
@@ -36,7 +37,8 @@ public class BlockHandler {
                 DRILL_EXTRACTOR.setUnlocalizedName("drill_extractor").setRegistryName("drill_extractor"),
                 SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer"),
                 EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer"),
-                INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator")
+                INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator"),
+                COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator")
         );
 
 

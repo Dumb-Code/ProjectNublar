@@ -32,7 +32,7 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     @Override
     protected List<MachineProcess<EggPrinterBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(new int[]{0, 1, 2}, new int[]{3, 4})
+                new MachineProcess<>(this, new int[]{0, 1, 2}, new int[]{3, 4})
         );
     }
 
@@ -50,5 +50,31 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
                 new MachineModuleSlot(this, 3, 129, 24),
                 new MachineModuleSlot(this, 4, 129, 42)
         );
+    }
+
+    // TODO: Change for balance, values are just for testing
+    @Override
+    public int getBaseEnergyProduction() {
+        return 0;
+    }
+
+    @Override
+    public int getBaseEnergyConsumption() {
+        return 1;
+    }
+
+    @Override
+    public int getEnergyCapacity() {
+        return 1000;
+    }
+
+    @Override
+    public int getEnergyMaxTransferSpeed() {
+        return 50;
+    }
+
+    @Override
+    public int getEnergyMaxExtractSpeed() {
+        return 50;
     }
 }

@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.recipes;
 
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
@@ -115,5 +116,16 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     @Override
     public ResourceLocation getRegistryName() {
         return this.registryName;
+    }
+
+    // TODO: test values, change for balance
+    @Override
+    public int getCurrentConsumptionPerTick(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 20;
+    }
+
+    @Override
+    public int getCurrentProductionPerTick(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 0;
     }
 }

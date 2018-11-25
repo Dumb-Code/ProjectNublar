@@ -38,7 +38,7 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     @Override
     protected List<MachineProcess<DrillExtractorBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(new int[]{0}, new int[]{1, 2, 3, 4})
+                new MachineProcess<>(this, new int[]{0}, new int[]{1, 2, 3, 4})
         );
     }
 
@@ -56,5 +56,31 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
                 new MachineModuleSlot(this, 3, 86, 62), //test tube 3
                 new MachineModuleSlot(this, 4, 104, 62) //test tube 4
         );
+    }
+
+    // TODO: Change for balance, values are just for testing
+    @Override
+    public int getBaseEnergyProduction() {
+        return 0;
+    }
+
+    @Override
+    public int getBaseEnergyConsumption() {
+        return 1;
+    }
+
+    @Override
+    public int getEnergyCapacity() {
+        return 1000;
+    }
+
+    @Override
+    public int getEnergyMaxTransferSpeed() {
+        return 50;
+    }
+
+    @Override
+    public int getEnergyMaxExtractSpeed() {
+        return 50;
     }
 }

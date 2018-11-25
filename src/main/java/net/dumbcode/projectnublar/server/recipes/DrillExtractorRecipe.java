@@ -67,4 +67,17 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     public ResourceLocation getRegistryName() {
         return new ResourceLocation(ProjectNublar.MODID, "amber_genetic_material");
     }
+
+    // TODO: test values, change for balance
+    @Override
+    public int getCurrentConsumptionPerTick(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 20;
+    }
+
+    @Override
+    public int getCurrentProductionPerTick(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 0;
+    }
+
+
 }

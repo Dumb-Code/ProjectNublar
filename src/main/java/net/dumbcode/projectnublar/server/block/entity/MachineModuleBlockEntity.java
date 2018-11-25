@@ -6,7 +6,6 @@ import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.C16DisplayTabbedGui;
 import net.dumbcode.projectnublar.server.network.C18OpenContainer;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.Minecraft;
@@ -21,6 +20,9 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -30,6 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -49,7 +52,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public boolean positionDirty;
 
-    public MachineModuleBlockEntity(){
+    @Getter
+    private EnergyStorage energy;
+
+    public MachineModuleBlockEntity() {
+        this.energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed());
         this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots);
         this.outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots);
     }
@@ -84,6 +91,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             nbt.setBoolean("Processing", process.processing); //Is this really needed?
             compound.setTag("Process_" + i, nbt);
         }
+        NBTTagCompound energyNBT = new NBTTagCompound();
+        energyNBT.setInteger("Amount", energy.getEnergyStored());
+        compound.setTag("Energy", energyNBT);
         return super.writeToNBT(compound);
     }
 
@@ -100,11 +110,21 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             process.setCurrentRecipe(nbt.hasKey("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
             process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
         }
+
+        NBTTagCompound energyNBT = compound.getCompoundTag("Energy");
+        energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInteger("Amount"));
     }
 
     @Override
     public void update() {
+        updateEnergyNetwork();
+        if(energy.extractEnergy(getBaseEnergyConsumption(), false) < getBaseEnergyConsumption())
+            return;
         for (MachineProcess<B> process : this.processes) {
+            if( ! canProvideEnergyForProcess(process)) {
+                this.getInterruptAction(process).processConsumer.accept(process);
+                continue;
+            }
             if(this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
                 if(process.isProcessing() || this.searchForRecipes(process)) {
                     if(process.isFinished()) {
@@ -121,6 +141,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                             ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
                         }
                     } else {
+                        energy.extractEnergy(process.getCurrentConsumptionPerTick(), false); // consume energy for process
+                        energy.receiveEnergy(process.getCurrentProductionPerTick(), false);
                         process.tick();
                     }
                     this.markDirty();
@@ -128,6 +150,72 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             } else if(process.isProcessing()) {
                 this.getInterruptAction(process).processConsumer.accept(process);
             }
+        }
+    }
+
+    private boolean canProvideEnergyForProcess(MachineProcess<B> process) {
+        int amountToProvide = process.getCurrentConsumptionPerTick();
+        return energy.extractEnergy(amountToProvide, true) >= amountToProvide;
+    }
+
+    /**
+     * How much does this machine produce right now ? (in RF/FE per tick)
+     * @return
+     */
+    public abstract int getBaseEnergyProduction();
+
+    /**
+     * How much energy this machine consumes by itself (in RF/FE per tick) ? (not accounting for processes)
+     */
+    public abstract int getBaseEnergyConsumption();
+
+    public abstract int getEnergyCapacity();
+
+    /**
+     * in RF/FE per tick
+     */
+    public abstract int getEnergyMaxTransferSpeed();
+
+    /**
+     * in RF/FE per tick
+     */
+    public abstract int getEnergyMaxExtractSpeed();
+
+    public int getEnergyToSendToNeighbor(IEnergyStorage storage, int neighborCount) {
+        return getEnergyMaxExtractSpeed()/neighborCount;
+    }
+
+    private List<IEnergyStorage> getEnergyNeighbors() {
+        List<IEnergyStorage> result = new LinkedList<>();
+        for(EnumFacing facing : EnumFacing.values()) {
+            TileEntity te = world.getTileEntity(pos.offset(facing));
+            if(te != null && te.hasCapability(CapabilityEnergy.ENERGY, facing.getOpposite())) {
+                result.add(te.getCapability(CapabilityEnergy.ENERGY, facing.getOpposite()));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Send energy to neighbors that accept it
+     */
+    private void updateEnergyNetwork() {
+        energy.receiveEnergy(getBaseEnergyProduction(), false); // produce & store energy if able
+        List<IEnergyStorage> neighboringEnergyInterfaces = getEnergyNeighbors();
+        int neighborCount = neighboringEnergyInterfaces.size();
+        for(IEnergyStorage neighbor : neighboringEnergyInterfaces) {
+            // Send some part of your energy to the neighbor
+            int energyToSend = getEnergyToSendToNeighbor(neighbor, neighborCount);
+            int maxEnergyAbleToSend = energy.extractEnergy(energyToSend, true);
+            int maxEnergyAbleToReceive = neighbor.receiveEnergy(maxEnergyAbleToSend, true);
+            neighbor.receiveEnergy(maxEnergyAbleToReceive, false);
+            energy.extractEnergy(maxEnergyAbleToReceive, false);
+
+            // Extract as much energy as possible from that neighbor
+            int maxExtractable = neighbor.extractEnergy(Integer.MAX_VALUE, true);
+            int maxReceivable = energy.receiveEnergy(maxExtractable, true);
+            // actual transfer
+            energy.receiveEnergy(neighbor.extractEnergy(maxReceivable, false), false);
         }
     }
 
@@ -169,7 +257,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
     {
-        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || capability == CapabilityEnergy.ENERGY
+                || super.hasCapability(capability, facing);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,6 +272,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             } else {
                 return (T) this.inputWrapper;
             }
+        }
+        if(capability == CapabilityEnergy.ENERGY) {
+            return (T) energy;
         }
         return super.getCapability(capability, facing);
     }
@@ -256,8 +348,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         list.add(this);
         for (EnumFacing facing : EnumFacing.values()) {
             TileEntity te = world.getTileEntity(this.pos.offset(facing));
-            if(te instanceof MachineModuleBlockEntity && !list.contains(te)) {
-                ((MachineModuleBlockEntity) te).getSurroundings(list);
+            if (te instanceof MachineModuleBlockEntity && !list.contains(te)) {
+                ((MachineModuleBlockEntity)te).getSurroundings(list);
             }
         }
         return list;
@@ -292,6 +384,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         final int[] outputSlots;
 
         final int[] allSlots;
+        private final MachineModuleBlockEntity<B> machine;
 
         int time;
         int totalTime;
@@ -299,11 +392,28 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         MachineRecipe<B> currentRecipe;
         boolean processing;
 
-        public MachineProcess(int[] inputSlots, int[] outputSlots) {
+        public MachineProcess(MachineModuleBlockEntity<B> machine, int[] inputSlots, int[] outputSlots) {
             this.inputSlots = inputSlots;
             this.outputSlots = outputSlots;
+            this.machine = machine;
 
             this.allSlots = ArrayUtils.addAll(this.inputSlots, this.outputSlots);
+        }
+
+        public int getCurrentConsumptionPerTick() {
+            if(isFinished())
+                return 0;
+            if(currentRecipe != null)
+                return currentRecipe.getCurrentConsumptionPerTick(machine.asB, this);
+            return 0;
+        }
+
+        public int getCurrentProductionPerTick() {
+            if(isFinished())
+                return 0;
+            if(currentRecipe != null)
+                return currentRecipe.getCurrentProductionPerTick(machine.asB, this);
+            return 0;
         }
 
         public void tick() {

@@ -123,7 +123,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     protected List<MachineProcess<FossilProcessorBlockEntity>> createProcessList() {
-        return Lists.newArrayList(new MachineProcess<>(new int[]{1}, new int[]{4}));
+        return Lists.newArrayList(new MachineProcess<>(this, new int[]{1}, new int[]{4}));
     }
 
     @Override
@@ -140,4 +140,31 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
                 new MachineModuleSlot(this, 3, 67, 32), //Filter
                 new MachineModuleSlot(this, 4, 126, 32)); //output
     }
+
+    // TODO: Change for balance, values are just for testing
+    @Override
+    public int getBaseEnergyProduction() {
+        return 0;
+    }
+
+    @Override
+    public int getBaseEnergyConsumption() {
+        return 1;
+    }
+
+    @Override
+    public int getEnergyCapacity() {
+        return 1000;
+    }
+
+    @Override
+    public int getEnergyMaxTransferSpeed() {
+        return 50;
+    }
+
+    @Override
+    public int getEnergyMaxExtractSpeed() {
+        return 50;
+    }
+
 }

@@ -107,6 +107,7 @@ public class ProjectNublar
         GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
         GameRegistry.registerTileEntity(EggPrinterBlockEntity.class, new ResourceLocation(MODID, "egg_printer"));
         GameRegistry.registerTileEntity(IncubatorBlockEntity.class, new ResourceLocation(MODID, "incubator"));
+        GameRegistry.registerTileEntity(CoalGeneratorBlockEntity.class, new ResourceLocation(MODID, "coal_generator"));
 
         for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();

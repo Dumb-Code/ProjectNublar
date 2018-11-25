@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.recipes;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
@@ -54,5 +55,16 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public ResourceLocation getRegistryName() {
         return new ResourceLocation(ProjectNublar.MODID, "");
+    }
+
+    // TODO: test values, change for balance
+    @Override
+    public int getCurrentConsumptionPerTick(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 20;
+    }
+
+    @Override
+    public int getCurrentProductionPerTick(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 0;
     }
 }

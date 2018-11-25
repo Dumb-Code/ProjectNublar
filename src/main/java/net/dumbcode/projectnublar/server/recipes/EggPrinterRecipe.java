@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.recipes;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
@@ -71,5 +72,16 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     @Override
     public ResourceLocation getRegistryName() {
         return new ResourceLocation(ProjectNublar.MODID, "egg_printing");
+    }
+
+    // TODO: test values, change for balance
+    @Override
+    public int getCurrentConsumptionPerTick(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 20;
+    }
+
+    @Override
+    public int getCurrentProductionPerTick(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 0;
     }
 }

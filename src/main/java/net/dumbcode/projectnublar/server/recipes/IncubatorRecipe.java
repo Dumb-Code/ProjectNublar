@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.recipes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
 import net.dumbcode.projectnublar.server.item.DinosaurProvider;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -53,5 +54,16 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     @Override
     public ResourceLocation getRegistryName() {
         return new ResourceLocation("incubation");
+    }
+
+    // TODO: test values, change for balance
+    @Override
+    public int getCurrentConsumptionPerTick(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 20;
+    }
+
+    @Override
+    public int getCurrentProductionPerTick(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        return 0;
     }
 }

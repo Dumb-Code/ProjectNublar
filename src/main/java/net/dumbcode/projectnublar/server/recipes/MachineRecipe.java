@@ -12,4 +12,8 @@ public interface MachineRecipe<B extends MachineModuleBlockEntity> {
     boolean acceptsInputSlot(B blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process);
 
     ResourceLocation getRegistryName();
+
+    // energy stuff
+    int getCurrentConsumptionPerTick(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
+    int getCurrentProductionPerTick(B blockEntity, MachineModuleBlockEntity.MachineProcess process);
 }

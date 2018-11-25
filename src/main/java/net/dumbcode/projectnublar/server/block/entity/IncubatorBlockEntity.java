@@ -64,12 +64,12 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     @Override
     protected List<MachineProcess<IncubatorBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(new int[]{1}, new int[]{1}),
-                new MachineProcess<>(new int[]{2}, new int[]{2}),
-                new MachineProcess<>(new int[]{3}, new int[]{3}),
-                new MachineProcess<>(new int[]{4}, new int[]{4}),
-                new MachineProcess<>(new int[]{5}, new int[]{5}),
-                new MachineProcess<>(new int[]{6}, new int[]{6})
+                new MachineProcess<>(this, new int[]{1}, new int[]{1}),
+                new MachineProcess<>(this, new int[]{2}, new int[]{2}),
+                new MachineProcess<>(this, new int[]{3}, new int[]{3}),
+                new MachineProcess<>(this, new int[]{4}, new int[]{4}),
+                new MachineProcess<>(this, new int[]{5}, new int[]{5}),
+                new MachineProcess<>(this, new int[]{6}, new int[]{6})
         );
     }
 
@@ -97,4 +97,31 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
                 new MachineModuleSlot(this, 5, 65, 9),
                 new MachineModuleSlot(this, 6, 94, 9));
     }
+
+    // TODO: Change for balance, values are just for testing
+    @Override
+    public int getBaseEnergyProduction() {
+        return 0;
+    }
+
+    @Override
+    public int getBaseEnergyConsumption() {
+        return 1;
+    }
+
+    @Override
+    public int getEnergyCapacity() {
+        return 1000;
+    }
+
+    @Override
+    public int getEnergyMaxTransferSpeed() {
+        return 50;
+    }
+
+    @Override
+    public int getEnergyMaxExtractSpeed() {
+        return 50;
+    }
+
 }
