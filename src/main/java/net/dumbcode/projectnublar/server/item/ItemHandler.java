@@ -28,7 +28,7 @@ public final class ItemHandler {
     public static Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
     public static Item FILTER = new Item();
     public static Item AMBER = new Item();
-    public static Item STORAGE_DRIVE = new DriveItem();
+    public static Item HARD_DRIVE = new DriveItem();
     public static Item EMPTY_SYRINGE = new ItemSyringe(ItemSyringe.Type.EMPTY);
     public static Item DNA_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_DNA);
     public static Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
@@ -51,7 +51,7 @@ public final class ItemHandler {
                 EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(TAB),
                 FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(TAB),
                 AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(TAB),
-                STORAGE_DRIVE.setRegistryName("storage_drive").setUnlocalizedName("storage_drive").setCreativeTab(TAB).setMaxStackSize(1),
+                HARD_DRIVE.setRegistryName("hard_drive").setUnlocalizedName("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
                 EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB),
                 DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setUnlocalizedName("dna_filled_syringe").setCreativeTab(TAB),
                 EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setUnlocalizedName("embryo_filled_syringe").setCreativeTab(TAB)

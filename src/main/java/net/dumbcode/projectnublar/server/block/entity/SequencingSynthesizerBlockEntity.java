@@ -154,7 +154,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
         switch (slot) {
-            case 0: return stack.getItem() == ItemHandler.STORAGE_DRIVE;
+            case 0: return stack.getItem() == ItemHandler.HARD_DRIVE;
             case 1: return MachineUtils.getWaterAmount(stack) != -1;
             case 2: return MachineUtils.getSugarMatter(stack) > 0;
             case 3: return MachineUtils.getBoneMatter(stack) > 0;
@@ -228,7 +228,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     private boolean canConsume() {
         ItemStack in = this.handler.getStackInSlot(5);
-        if(in.getItem() instanceof DriveUtils.DriveInformation && this.handler.getStackInSlot(0).getItem() == ItemHandler.STORAGE_DRIVE && DriveUtils.canAdd(this.handler.getStackInSlot(0), in)) {
+        if(in.getItem() instanceof DriveUtils.DriveInformation && this.handler.getStackInSlot(0).getItem() == ItemHandler.HARD_DRIVE && DriveUtils.canAdd(this.handler.getStackInSlot(0), in)) {
             ItemStack out = ((DriveUtils.DriveInformation) in.getItem()).getOutItem(in);
             return out.isEmpty() || this.handler.insertOutputItem(6, out, true).isEmpty();
         }
@@ -295,7 +295,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                             @Nullable
                             @Override
                             public String getSlotTexture() {
-                                return ProjectNublar.MODID + ":items/storage_drive";
+                                return ProjectNublar.MODID + ":items/hard_drive";
                             }
                         },
                         new MachineModuleSlot(this, 1, 21, 58),
@@ -308,7 +308,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                             @Nullable
                             @Override
                             public String getSlotTexture() {
-                                return ProjectNublar.MODID + ":items/storage_drive";
+                                return ProjectNublar.MODID + ":items/hard_drive";
                             }
                         },
                         new MachineModuleSlot(this, 5, 60, 90),
