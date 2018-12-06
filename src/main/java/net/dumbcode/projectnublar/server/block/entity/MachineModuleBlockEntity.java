@@ -136,6 +136,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                                 process.setProcessing(false);
                                 process.setCurrentRecipe(null);
                                 this.searchForRecipes(process);
+                            } else {
+                                recipe.onRecipeStarted(asB(), process);
                             }
                         } else {
                             ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
@@ -234,8 +236,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public boolean searchForRecipes(MachineProcess<B> process) {
         for (MachineRecipe<B> recipe : this.recipes) {
             if(recipe.accepts(this.asB, process) && this.canProcess(process)) {
-                process.setProcessing(true);
                 process.setCurrentRecipe(recipe);
+                if(!process.isProcessing()) {
+                    recipe.onRecipeStarted(asB(), process);
+                }
+                process.setProcessing(true);
                 process.setTotalTime(recipe.getRecipeTime(this.asB, process));
                 this.markDirty();
                 return true;

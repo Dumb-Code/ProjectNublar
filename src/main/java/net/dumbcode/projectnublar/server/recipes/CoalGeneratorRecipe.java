@@ -24,9 +24,15 @@ public enum CoalGeneratorRecipe implements MachineRecipe<CoalGeneratorBlockEntit
 
     @Override
     public void onRecipeFinished(CoalGeneratorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        ;
+    }
+
+    @Override
+    public void onRecipeStarted(CoalGeneratorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         ItemStack inSlot = blockEntity.getHandler().getStackInSlot(process.getInputSlots()[0]);
         inSlot.shrink(1);
     }
+
 
     @Override
     public boolean acceptsInputSlot(CoalGeneratorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
