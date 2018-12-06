@@ -28,7 +28,9 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Locale;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -54,7 +56,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     }
 
     public String getFormattedName() {
-        return this.getRegName().toString().toLowerCase().replace(":", "_");
+        return (this.getRegName().getResourceDomain().equals(ProjectNublar.MODID) ? this.getRegName().getResourcePath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
     }
 
     public DinosaurEntity createEntity(World world) {
@@ -110,5 +112,13 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             object.add("entity_properties", context.serialize(dino.entityProperties));
             return object;
         }
+    }
+
+    public static Dinosaur getRandom() {
+        Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection();
+        Random rnd = new Random();
+        int i = rnd.nextInt(from.size());
+        return from.toArray(new Dinosaur[0])[i];
+
     }
 }

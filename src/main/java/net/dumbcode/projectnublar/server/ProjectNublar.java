@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.client.render.entity.DummyRenderer;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
@@ -15,6 +14,7 @@ import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.component.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
+import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -48,7 +48,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -99,12 +98,7 @@ public class ProjectNublar {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
-        NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-        RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, manager -> new AnimatableRenderer<>(manager, entity -> entity.getDinosaur().getModelContainer(), entity -> {
-            Dinosaur dinosaur = entity.getDinosaur();
-            return dinosaur.getTextureLocation(entity);
-        }));
-        RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, DummyRenderer::new);
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler.INSTANCE);
         registerPackets();
 
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
@@ -113,27 +107,41 @@ public class ProjectNublar {
     }
 
     private void registerPackets() {
-        NETWORK.registerMessage(C0MoveSelectedSkeletalPart.Handler.class, C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
-        NETWORK.registerMessage(S1UpdateSkeletalBuilder.Handler.class, S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
-        NETWORK.registerMessage(C2SkeletalMovement.Handler.class, C2SkeletalMovement.class, 2, Side.SERVER);
-        NETWORK.registerMessage(S3HistoryRecord.Handler.class, S3HistoryRecord.class, 3, Side.CLIENT);
-        NETWORK.registerMessage(C4MoveInHistory.Handler.class, C4MoveInHistory.class, 4, Side.SERVER);
-        NETWORK.registerMessage(S5UpdateHistoryIndex.Handler.class, S5UpdateHistoryIndex.class, 5, Side.CLIENT);
-        NETWORK.registerMessage(C6ResetPose.Handler.class, C6ResetPose.class, 6, Side.SERVER);
-        NETWORK.registerMessage(S7FullPoseChange.Handler.class, S7FullPoseChange.class, 7, Side.CLIENT);
-        NETWORK.registerMessage(C8FullPoseChange.Handler.class, C8FullPoseChange.class, 8, Side.SERVER);
-        NETWORK.registerMessage(C9ChangeGlobalRotation.Handler.class, C9ChangeGlobalRotation.class, 9, Side.SERVER);
-        NETWORK.registerMessage(S10ChangeGlobalRotation.Handler.class, S10ChangeGlobalRotation.class, 10, Side.CLIENT);
-        NETWORK.registerMessage(C11ChangePoleFacing.Handler.class, C11ChangePoleFacing.class, 11, Side.SERVER);
-        NETWORK.registerMessage(S12ChangePoleFacing.Handler.class, S12ChangePoleFacing.class, 12, Side.CLIENT);
-        NETWORK.registerMessage(C13VehicleInputStateUpdated.Handler.class, C13VehicleInputStateUpdated.class, 13, Side.SERVER);
+        NETWORK.registerMessage(new C0MoveSelectedSkeletalPart.Handler(), C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
+        NETWORK.registerMessage(new S1UpdateSkeletalBuilder.Handler(), S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
+        NETWORK.registerMessage(new C2SkeletalMovement.Handler(), C2SkeletalMovement.class, 2, Side.SERVER);
+        NETWORK.registerMessage(new S3HistoryRecord.Handler(), S3HistoryRecord.class, 3, Side.CLIENT);
+        NETWORK.registerMessage(new C4MoveInHistory.Handler(), C4MoveInHistory.class, 4, Side.SERVER);
+        NETWORK.registerMessage(new S5UpdateHistoryIndex.Handler(), S5UpdateHistoryIndex.class, 5, Side.CLIENT);
+        NETWORK.registerMessage(new C6ResetPose.Handler(), C6ResetPose.class, 6, Side.SERVER);
+        NETWORK.registerMessage(new S7FullPoseChange.Handler(), S7FullPoseChange.class, 7, Side.CLIENT);
+        NETWORK.registerMessage(new C8FullPoseChange.Handler(), C8FullPoseChange.class, 8, Side.SERVER);
+        NETWORK.registerMessage(new C9ChangeGlobalRotation.Handler(), C9ChangeGlobalRotation.class, 9, Side.SERVER);
+        NETWORK.registerMessage(new S10ChangeGlobalRotation.Handler(), S10ChangeGlobalRotation.class, 10, Side.CLIENT);
+        NETWORK.registerMessage(new C11ChangePoleFacing.Handler(), C11ChangePoleFacing.class, 11, Side.SERVER);
+        NETWORK.registerMessage(new S12ChangePoleFacing.Handler(), S12ChangePoleFacing.class, 12, Side.CLIENT);
+        NETWORK.registerMessage(new C13VehicleInputStateUpdated.Handler(), C13VehicleInputStateUpdated.class, 13, Side.SERVER);
+        NETWORK.registerMessage(new C14SequencingSynthesizerSelectChange.Handler(), C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
+        NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
+        NETWORK.registerMessage(new C16DisplayTabbedGui.Handler(), C16DisplayTabbedGui.class, 16, Side.SERVER);
+        NETWORK.registerMessage(new S17MachinePositionDirty.Handler(), S17MachinePositionDirty.class, 17, Side.CLIENT);
+        NETWORK.registerMessage(new C18OpenContainer.Handler(), C18OpenContainer.class, 18, Side.SERVER);
+        NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
+
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
-        GameRegistry.registerTileEntity(MachineModuleBlockEntity.class, new ResourceLocation(MODID, "machine_module"));
-        for (Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
+      
+        GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
+        GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
+        GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
+        GameRegistry.registerTileEntity(EggPrinterBlockEntity.class, new ResourceLocation(MODID, "egg_printer"));
+        GameRegistry.registerTileEntity(IncubatorBlockEntity.class, new ResourceLocation(MODID, "incubator"));
+        GameRegistry.registerTileEntity(CoalGeneratorBlockEntity.class, new ResourceLocation(MODID, "coal_generator"));
+
+        for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();
             ItemDinosaurMeat referenceRawMeat = entry.getValue();
             ItemDinosaurMeat referenceCookedMeat = ItemHandler.COOKED_MEAT_ITEMS.get(dino);

@@ -1,7 +1,9 @@
 package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Maps;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.network.S17MachinePositionDirty;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -21,19 +23,25 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializable> extends Block implements IItemBlock{
 
     private final I[] values; //Not needed
     private final Map<I, PropertyBool> propertyMap = Maps.newHashMap();
+    private final Supplier<? extends MachineModuleBlockEntity> machineSupplier;
+    private final BlockStateContainer blockState;
 
-    public MachineModuleBlock(I[] values) {
+    public MachineModuleBlock(I[] values, Supplier<? extends MachineModuleBlockEntity> machineSupplier) {
         super(Material.IRON);
         this.values = values;
+        this.machineSupplier = machineSupplier;
+
         for (I value : this.values) {
             this.propertyMap.put(value, PropertyBool.create(value.getName()));
         }
-        this.blockState = this.createBlockState(); //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
+
+        this.blockState = new BlockStateContainer(this, this.propertyMap.values().toArray(new IProperty[0])); //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
         IBlockState baseState = this.blockState.getBaseState();
         for (I value : this.values) {
             baseState = baseState.withProperty(this.propertyMap.get(value), false);
@@ -60,25 +68,44 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
     }
 
     @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+        ProjectNublar.NETWORK.sendToDimension(new S17MachinePositionDirty(pos), worldIn.provider.getDimension());
+    }
+
+    @Override
+    public BlockStateContainer getBlockState() {
+        return this.blockState;
+    }
+
+    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         ItemStack stack = playerIn.getHeldItem(hand);
         if(tileEntity instanceof MachineModuleBlockEntity) {
             MachineModuleBlockEntity blockEntity = (MachineModuleBlockEntity) tileEntity;
             int stateID = blockEntity.getStateID();
+            boolean valid = true;
             for (int i = 0; i < this.values.length; i++) {
                 int mask = (int) Math.pow(2, i);
-                if((stateID & mask) == 0 && this.values[i].test(stack)) {
-                    blockEntity.setStateID(stateID | mask);
-                    stack.shrink(1);
-                    if(worldIn.isRemote) {
-                        worldIn.markBlockRangeForRenderUpdate(pos, pos);
+                if((stateID & mask) == 0) {
+//                    valid = false;
+                    if(this.values[i].test(stack)) {
+                        blockEntity.setStateID(stateID | mask);
+                        stack.shrink(1);
+                        if(worldIn.isRemote) {
+                            worldIn.markBlockRangeForRenderUpdate(pos, pos);
+                        }
+                        blockEntity.markDirty();
+                        break;
                     }
-                    break;
                 }
             }
+            if(valid) {
+                playerIn.openGui(ProjectNublar.INSTANCE, 0/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            }
         }
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        return true;
     }
 
     @Override
@@ -98,19 +125,11 @@ public class MachineModuleBlock<I extends Predicate<ItemStack> & IStringSerializ
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        return new MachineModuleBlockEntity();
+        return this.machineSupplier.get();
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
         return 0;
-    }
-
-    @Override
-    protected BlockStateContainer createBlockState() {
-        if(this.propertyMap == null) { //This is called during <init>, meaning that the map isnt set. I have to reset all the values in this blocks init, after this has been set
-            return new BlockStateContainer(this);
-        }
-        return new BlockStateContainer(this, this.propertyMap.values().toArray(new IProperty[0]));
     }
 }

@@ -64,13 +64,13 @@ for compareBit in comareFiles:
                     setOut = True
 
                 if mainRot[0] != otherRot[0]:
-                    out += "," + newline + "\"rotation_x\": " + str(otherPos[0])
+                    out += "," + newline + "\"rotation_x\": " + str(otherRot[0])
                     setOut = True
                 if mainRot[1] != otherRot[1]:
-                    out += "," + newline + "\"rotation_y\": " + str(otherPos[1])
+                    out += "," + newline + "\"rotation_y\": " + str(otherRot[1])
                     setOut = True
                 if mainRot[2] != otherRot[2]:
-                    out += "," + newline + "\"rotation_z\": " + str(otherPos[2])
+                    out += "," + newline + "\"rotation_z\": " + str(otherRot[2])
                     setOut = True
 
                 out += "\n},"

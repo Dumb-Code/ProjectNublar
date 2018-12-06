@@ -46,7 +46,7 @@ dependencies {
     runtime "mezz.jei:jei_1.12.2:4.9.1.187"
     compile "net.ilexiconn:llibrary:1.7.15-1.12.2"
     compile 'org.projectlombok:lombok:1.18.0'
-    compile "dumb-library:dumblibrary-1.12.2:0.1.4:dev"
+    compile "dumb-library:dumblibrary-1.12.2:0.1.7:dev"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -86,11 +86,5 @@ processResources {
     // copy everything else except the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
-    }
-}
-
-jar {
-    manifest {
-        attributes 'FMLAT': 'projectnublar_at.cfg'
     }
 }

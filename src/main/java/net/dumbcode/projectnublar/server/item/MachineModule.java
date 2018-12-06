@@ -11,10 +11,7 @@ import java.util.function.Supplier;
 public class MachineModule implements Predicate<ItemStack>, IStringSerializable {
 
     public static final MachineModule[] TEST_MACHINES = {
-            new MachineModule("test1",() -> Items.APPLE),
-            new MachineModule("test2",() -> Items.GUNPOWDER),
-            new MachineModule("test3",() -> Items.GUNPOWDER)
-
+            new MachineModule("test1",() -> Items.APPLE)
     };
 
     private final Predicate<ItemStack> itemPredicate;
