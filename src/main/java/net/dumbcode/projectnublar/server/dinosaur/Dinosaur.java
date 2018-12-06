@@ -1,13 +1,24 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.dinosaur.data.*;
+import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInfomation;
+import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
+import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
+import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
+import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -49,7 +60,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     }
 
     public DinosaurEntity createEntity(World world) {
-        return this.getEntityProperties().getEntityCreateFunction().apply(world).setDinosaur(this);
+        DinosaurEntity entity = this.getEntityProperties().getEntityCreateFunction().apply(world);
+        entity.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = this;
+        return entity;
     }
 
     @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings
@@ -62,7 +75,8 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
-        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (entity.isMale() ? "male" : "female") + "_" + entity.getGrowthStage().name().toLowerCase(Locale.ROOT) + ".png");
+        boolean male = entity.getOrExcept(EntityComponentTypes.GENDER).male;
+        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (male ? "male" : "female") + "_" + entity.getGrowthStage().name().toLowerCase(Locale.ROOT) + ".png");
     }
 
     public TextComponentTranslation createNameComponent() {

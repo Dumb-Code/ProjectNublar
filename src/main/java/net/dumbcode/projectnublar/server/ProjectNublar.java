@@ -7,11 +7,16 @@ import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
+import net.dumbcode.projectnublar.server.entity.EntityManager;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
+import net.dumbcode.projectnublar.server.entity.component.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
+import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
+import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -21,6 +26,9 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -44,13 +52,16 @@ import java.util.Map;
 
 @Mod.EventBusSubscriber
 @Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION)
-public class ProjectNublar
-{
+public class ProjectNublar {
     public static final String MODID = "projectnublar";
     public static final String NAME = "Project Nublar";
     public static final String VERSION = "0.0.1";
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
+    public static IForgeRegistry<EntityComponentType<?>> COMPONENT_REGISTRY;
+
+    @CapabilityInject(EntityManager.class)
+    public static final Capability<EntityManager> ENTITY_MANAGER = InjectedUtils.injected();
 
     private static Logger logger;
 
@@ -73,6 +84,8 @@ public class ProjectNublar
         registerPackets();
 
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
+
+        CapabilityManager.INSTANCE.register(EntityManager.class, new VoidStorage<>(), EntityManager.Impl::new);
     }
 
     private void registerPackets() {
@@ -102,6 +115,7 @@ public class ProjectNublar
     @EventHandler
     public void init(FMLInitializationEvent event) {
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
+      
         GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
         GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
         GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
@@ -113,8 +127,9 @@ public class ProjectNublar
             Dinosaur dino = entry.getKey();
             ItemDinosaurMeat referenceRawMeat = entry.getValue();
             ItemDinosaurMeat referenceCookedMeat = ItemHandler.COOKED_MEAT_ITEMS.get(dino);
-            if(referenceCookedMeat == null)
+            if (referenceCookedMeat == null) {
                 continue;
+            }
 
             // handle all items linked to the most specific name
             NonNullList<ItemStack> rawMeats = OreDictionary.getOres(referenceRawMeat.getMostSpecificOreName());
@@ -129,10 +144,11 @@ public class ProjectNublar
         JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
         DINOSAUR_REGISTRY.getValuesCollection().forEach(dino -> {
-            File jsonFile = new File("./mods/projectnublar/debug/"+dino.getRegName().getResourcePath()+".json");
-            if(!jsonFile.getParentFile().exists())
+            File jsonFile = new File("./mods/projectnublar/debug/" + dino.getRegName().getResourcePath() + ".json");
+            if (!jsonFile.getParentFile().exists()) {
                 jsonFile.getParentFile().mkdirs();
-            try(FileWriter writer = new FileWriter(jsonFile)) {
+            }
+            try (FileWriter writer = new FileWriter(jsonFile)) {
                 gson.toJson(dino, writer);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -141,11 +157,17 @@ public class ProjectNublar
     }
 
     @SubscribeEvent
-    public static void createRegisteries(RegistryEvent.NewRegistry event) {
+    public static void createRegistries(RegistryEvent.NewRegistry event) {
+        COMPONENT_REGISTRY = new RegistryBuilder<EntityComponentType<?>>()
+                .setType(EntityComponentType.getWildcardType())
+                .setName(new ResourceLocation(ProjectNublar.MODID, "component"))
+                .create();
+        MinecraftForge.EVENT_BUS.post(new RegisterComponentsEvent(COMPONENT_REGISTRY));
+
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
                 .setType(Dinosaur.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
-                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID,"missing"))
+                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .create();
         registerJsonDinosaurs();
