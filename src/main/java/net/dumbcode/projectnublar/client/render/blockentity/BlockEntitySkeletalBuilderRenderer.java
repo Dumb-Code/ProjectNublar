@@ -59,19 +59,19 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         EnumFacing poleFacing = pole.getFacing();
 
         GlStateManager.enableLighting();
-        Vector3f rotation = new Vector3f();
+        Vector3f rotVec = new Vector3f();
         float angle = 90F;
         switch (facing.getAxis()) { //There gotta be a better way than this
             case X:
-                rotation = new Vector3f(0, 0, 1);
+                rotVec = new Vector3f(0, 0, 1);
                 angle = facing == EnumFacing.WEST ? 90F : 270F;
                 break;
             case Y:
-                rotation = new Vector3f(1, 0, 0);
+                rotVec = new Vector3f(1, 0, 0);
                 angle = facing == EnumFacing.UP ? 0 : 180F;
                 break;
             case Z:
-                rotation = new Vector3f(1, 0, 0);
+                rotVec = new Vector3f(1, 0, 0);
                 angle = facing == EnumFacing.SOUTH ? 90F : 270F;
                 break;
         }
@@ -83,16 +83,16 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         Vec3i facingRot = facing.getDirectionVec();
         translateMatrix.set(new Vector3d(te.getPos().getX() + facingRot.getX(), te.getPos().getY() + facingRot.getY(), te.getPos().getZ() + facingRot.getZ()));
 
-        GlStateManager.rotate(angle, rotation.x, rotation.y, rotation.z);
-        if(rotation.x != 0) {
+        GlStateManager.rotate(angle, rotVec.x, rotVec.y, rotVec.z);
+        if(rotVec.x != 0) {
             facingMatrix.rotX(angle / 180F * Math.PI);
-        } else if(rotation.y != 0) {
+        } else if(rotVec.y != 0) {
             facingMatrix.rotY(angle / 180F * Math.PI);
-        } else if(rotation.z != 0) {
+        } else if(rotVec.z != 0) {
             facingMatrix.rotZ(angle / 180F * Math.PI);
         }
 
-        float teRot = te.getSkeletalProperties().getRotation();
+        float teRot = te.getSkeletalProperties().getRotation() % 360F;
 
         GlStateManager.rotate(teRot, 0, 1, 0);
         rotateMatrix.rotY(teRot / 180D * PI);
@@ -175,8 +175,8 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
                     AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
                             new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
-                            .offset(rendererPos.x+0.5F,rendererPos.y+0.5F,rendererPos.z+0.5F)
-                            .grow(halfBaseWidth);
+                                    .offset(rendererPos.x+0.5F,rendererPos.y+0.5F,rendererPos.z+0.5F)
+                                    .grow(halfBaseWidth);
 
                     double cubeEndPos = -1;
                     for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F - halfBaseWidth, rendererPos.z + 0.5F - halfBaseWidth), new BlockPos(rendererPos.x + 0.5F + halfBaseWidth, rendererPos.y + 0.5F + halfBaseWidth, rendererPos.z + 0.5F + halfBaseWidth))) {
@@ -205,25 +205,44 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     Tessellator tes = Tessellator.getInstance();
                     BufferBuilder buff = tes.getBuffer();
                     this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
-                    float globalRotation = poleFacing.getAxis() == EnumFacing.Axis.Y ? -poleFacing.getAxisDirection().getOffset() * te.getSkeletalProperties().getRotation() : 0;
-                    AdvancedModelRenderer reference = cube;
-                    while(reference != null) {
-                        double axisRotation;
-                        switch (poleFacing.getAxis()) {
-                            case X: axisRotation = reference.rotateAngleX; break;
-                            case Y: axisRotation = reference.rotateAngleY; break;
-                            case Z: axisRotation = reference.rotateAngleZ; break;
-                            default: throw new IllegalArgumentException("Unacceptable facingdir " + facing.getAxis());
-                        }
-                        globalRotation += poleFacing.getAxisDirection().getOffset() * Math.toDegrees(axisRotation);
-                        reference = reference.getParent();
+
+
+                    EnumFacing rotP = poleFacing.getOpposite();
+                    if(poleFacing.getAxis() == facing.getAxis()) {
+                        rotP = poleFacing == facing ? EnumFacing.DOWN : EnumFacing.UP;
                     }
+
+                    float rotation;
+
+                    if(poleFacing.getAxis() != facing.getAxis()) { //Interpolate between the 2 axis
+                        EnumFacing from = rotP;
+                        EnumFacing to = rotP.rotateY().getOpposite();
+
+                        if(teRot >= 270) {
+                            from = rotP.rotateY();
+                            to = rotP;
+                        } else if(teRot >= 180) {
+                            from = rotP.getOpposite();
+                            to = rotP.rotateY();
+                        }  else if(teRot >= 90) {
+                            from = rotP.rotateY().getOpposite();
+                            to = rotP.getOpposite();
+                        }
+
+                        float fromRot = this.getRotation(from, facing, cube, teRot);
+                        float toRot = this.getRotation(to, facing, cube, teRot);
+
+                        rotation = fromRot + (toRot - fromRot) * (teRot % 90F) / 90F;
+                    } else {
+                        rotation = this.getRotation(rotP, facing, cube, teRot);
+                    }
+
                     switch (poleFacing.getAxis()) {
                         case X: GlStateManager.rotate(poleFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1); break;
                         case Y: GlStateManager.rotate(poleFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0); break;
                         case Z: GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0); break;
                     }
-                    GlStateManager.rotate(globalRotation, 0, 1, 0);
+                    GlStateManager.rotate(rotation, 0, 1, 0);
                     GlStateManager.translate(-halfPoleWidth, 0, -halfPoleWidth);
 
                     double renderPosition;
@@ -336,6 +355,26 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         tes.draw();
         GlStateManager.popMatrix();
+    }
+
+    private float getRotation(EnumFacing poleFacing, EnumFacing teFacing, AdvancedModelRenderer cube, float rot) {
+        float rotation = 0;
+        if(poleFacing.getAxis() == EnumFacing.Axis.Y) {
+            rotation = rot * poleFacing.getAxisDirection().getOffset() * teFacing.getAxisDirection().getOffset();
+        }
+        AdvancedModelRenderer reference = cube;
+        while(reference != null) {
+            double axisRotation;
+            switch (poleFacing.getAxis()) {
+                case X: axisRotation = reference.rotateAngleX; break;
+                case Y: axisRotation = reference.rotateAngleY; break;
+                case Z: axisRotation = reference.rotateAngleZ; break;
+                default: throw new IllegalArgumentException("Unacceptable facingdir " + teFacing.getAxis());
+            }
+            rotation += teFacing.getAxisDirection().getOffset() * poleFacing.getAxisDirection().getOffset() * Math.toDegrees(axisRotation);
+            reference = reference.getParent();
+        }
+        return rotation;
     }
 
     @Override
