@@ -20,10 +20,10 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
 
     public ComposableCreatureEntity(World world) {
         super(world);
+        this.attachComponentAI();
     }
 
-    @Override
-    protected void initEntityAI() {
+    protected void attachComponentAI() {
         super.initEntityAI();
         for (EntityComponent component : this.components.values()) {
             if (component instanceof AiComponent) {
