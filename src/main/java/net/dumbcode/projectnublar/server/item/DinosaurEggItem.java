@@ -19,9 +19,7 @@ public class DinosaurEggItem extends BasicDinosaurItem {
     public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if(!worldIn.isRemote) {
             DinosaurEntity entity = this.getDinosaur().createEntity(worldIn);
-
-            entity.setMale(player.getRNG().nextBoolean());
-
+            
             entity.setLocationAndAngles(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
             entity.rotationYawHead = entity.rotationYaw;
             entity.renderYawOffset = entity.rotationYaw;
