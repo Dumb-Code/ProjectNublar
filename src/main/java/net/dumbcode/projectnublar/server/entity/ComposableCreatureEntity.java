@@ -20,6 +20,7 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
 
     public ComposableCreatureEntity(World world) {
         super(world);
+        this.attachComponents();
         this.attachComponentAI();
     }
 
