@@ -130,11 +130,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         double poleWidth = 1/16F;
         double baseWidth = 6/16F;
-        double baseHeight = 6/16F;
+        double baseHeight = 1/16F;
 
-        double notchWidth = 3/16F;
-        double notchHeight = 3/16F;
-
+        double notchWidth = 4/16F;
+        double notchHeight = 2/16F;
 
         float textureWidth = 32F;
         float textureHeight = 16F;
