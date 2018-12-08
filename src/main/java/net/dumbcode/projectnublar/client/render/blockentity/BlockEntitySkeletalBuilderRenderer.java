@@ -135,9 +135,6 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         double notchWidth = 3/16F;
         double notchHeight = 3/16F;
 
-        double halfPoleWidth = poleWidth/2F;
-        double halfBaseWidth = baseWidth/2F;
-        double halfNotchWidth = notchWidth/2F;
 
         float textureWidth = 32F;
         float textureHeight = 16F;
@@ -176,10 +173,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
                             new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
                                     .offset(rendererPos.x+0.5F,rendererPos.y+0.5F,rendererPos.z+0.5F)
-                                    .grow(halfBaseWidth);
+                                    .grow(baseWidth/2F);
 
                     double cubeEndPos = -1;
-                    for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - halfBaseWidth, rendererPos.y + 0.5F - halfBaseWidth, rendererPos.z + 0.5F - halfBaseWidth), new BlockPos(rendererPos.x + 0.5F + halfBaseWidth, rendererPos.y + 0.5F + halfBaseWidth, rendererPos.z + 0.5F + halfBaseWidth))) {
+                    for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - baseWidth/2F, rendererPos.y + 0.5F - baseWidth/2F, rendererPos.z + 0.5F - baseWidth/2F), new BlockPos(rendererPos.x + 0.5F + baseWidth/2F, rendererPos.y + 0.5F + baseWidth/2F, rendererPos.z + 0.5F + baseWidth/2F))) {
                         List<AxisAlignedBB> aabbList = Lists.newArrayList();
                         int counter = 0;
                         while (aabbList.isEmpty() && counter <= 100) {
@@ -243,7 +240,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                         case Z: GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0); break;
                     }
                     GlStateManager.rotate(rotation, 0, 1, 0);
-                    GlStateManager.translate(-halfPoleWidth, 0, -halfPoleWidth);
+                    GlStateManager.translate(-poleWidth/2F, 0, -poleWidth/2F);
 
                     double renderPosition;
                     switch (poleFacing.getAxis()) {
