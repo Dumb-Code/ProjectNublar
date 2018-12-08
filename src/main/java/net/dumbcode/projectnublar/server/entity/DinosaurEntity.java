@@ -28,7 +28,6 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
 
     public DinosaurEntity(World worldIn) {
         super(worldIn);
-        this.isMale = worldIn.rand.nextBoolean();
     }
 
     @Override
