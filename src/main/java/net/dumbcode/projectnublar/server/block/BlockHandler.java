@@ -19,6 +19,8 @@ import java.util.function.Function;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class BlockHandler {
     public static final SkeletalBuilderBlock SKELETAL_BUILDER = new SkeletalBuilderBlock();
+    public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
+
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, DrillExtractorBlockEntity::new);
     public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, SequencingSynthesizerBlockEntity::new);
@@ -38,7 +40,9 @@ public class BlockHandler {
                 SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer"),
                 EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer"),
                 INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator"),
-                COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator")
+                COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator"),
+                ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence")
+
         );
 
 
