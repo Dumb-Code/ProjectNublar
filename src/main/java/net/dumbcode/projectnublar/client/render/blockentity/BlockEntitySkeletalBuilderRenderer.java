@@ -135,7 +135,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         double notchWidth = 4/16F;
         double notchHeight = 2/16F;
 
-        float textureWidth = 32F;
+        float textureWidth = 8F;
         float textureHeight = 16F;
 
         if(te.getModel() != null) {
@@ -276,7 +276,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     GlStateManager.translate(poleWidth / 2F, poleLength, poleWidth / 2F);
                     this.renderCube(baseWidth, baseHeight, textureWidth, textureHeight, 1, 0);
                     GlStateManager.translate(0, baseHeight, 0);
-                    this.renderCube(notchWidth, notchHeight, textureWidth, textureHeight, 19, 0);
+                    this.renderCube(notchWidth, notchHeight, textureWidth, textureHeight, 1, 6);
                     GlStateManager.popMatrix();
                 }
             }
@@ -298,51 +298,34 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         double uFrom = uOffset/textureWidth;
         double vFrom = vOffset/textureHeight;
         double uTo = uFrom+width*16F/textureWidth;
-        double vTo = vFrom+height*16F/textureHeight;
+        double vTo = vFrom+width*16F/textureHeight;
 
         buff.pos(0, height, 0).tex(uFrom, vFrom).normal(0, 1, 0).endVertex();
         buff.pos(0, height, width).tex(uFrom, vTo).normal(0, 1, 0).endVertex();
         buff.pos(width, height, width).tex(uTo, vTo).normal(0, 1, 0).endVertex();
         buff.pos(width, height, 0).tex(uTo, vFrom).normal(0, 1, 0).endVertex();
 
-        vTo += height*16F/textureHeight;
-        vFrom += height*16F/textureHeight;
-
         buff.pos(width, 0, 0).tex(uFrom, vFrom).normal(0, -1, 0).endVertex();
         buff.pos(width, 0, width).tex(uFrom, vTo).normal(0, -1, 0).endVertex();
         buff.pos(0, 0, width).tex(uTo, vTo).normal(0, -1, 0).endVertex();
         buff.pos(0, 0, 0).tex(uTo, vFrom).normal(0, -1, 0).endVertex();
 
-        uFrom += width*16F/textureWidth;
-        uTo += width*16F/textureWidth;
-        vTo -= height*16F/textureHeight;
-        vFrom -= height*16F/textureHeight;
+        vTo = vFrom+height*16F/textureHeight;
 
         buff.pos(width, height, 0).tex(uFrom, vFrom).normal(0, 0, -1).endVertex();
         buff.pos(width, 0, 0).tex(uFrom, vTo).normal(0, 0, -1).endVertex();
         buff.pos(0, 0, 0).tex(uTo, vTo).normal(0, 0, -1).endVertex();
         buff.pos(0, height, 0).tex(uTo, vFrom).normal(0, 0, -1).endVertex();
 
-        vTo += height*16F/textureHeight;
-        vFrom += height*16F/textureHeight;
-
         buff.pos(width, height, width).tex(uFrom, vFrom).normal(1, 0, 0).endVertex();
         buff.pos(width, 0, width).tex(uFrom, vTo).normal(1, 0, 0).endVertex();
         buff.pos(width, 0, 0).tex(uTo, vTo).normal(1, 0, 0).endVertex();
         buff.pos(width, height, 0).tex(uTo, vFrom).normal(1, 0, 0).endVertex();
 
-        uFrom += width*16F/textureWidth;
-        uTo += width*16F/textureWidth;
-        vTo -= height*16F/textureHeight;
-        vFrom -= height*16F/textureHeight;
-
         buff.pos(0, height, width).tex(uFrom, vFrom).normal(0, 0, 1).endVertex();
         buff.pos(0, 0, width).tex(uFrom, vTo).normal(0, 0, 1).endVertex();
         buff.pos(width, 0, width).tex(uTo, vTo).normal(0, 0, 1).endVertex();
         buff.pos(width, height, width).tex(uTo, vFrom).normal(0, 0, 1).endVertex();
-
-        vTo += height*16F/textureHeight;
-        vFrom += height*16F/textureHeight;
 
         buff.pos(0, height, 0).tex(uFrom, vFrom).normal(-1, 0, 0).endVertex();
         buff.pos(0, 0, 0).tex(uFrom, vTo).normal(-1, 0, 0).endVertex();
