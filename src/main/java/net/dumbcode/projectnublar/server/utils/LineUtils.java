@@ -43,47 +43,61 @@ public class LineUtils {
     }
 
 
-    public static List<Vec2i> bresenhamYCoords(double x0, double x1, double y0, double y1) {
-        if(x1 < x0) {
-            double temp = x0;
-            x0 = x1;
-            x1 = temp;
+    //http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
+    public static List<Vec2i> raytraceZX(double x0, double x1, double y0, double y1) {
 
-            temp = y0;
-            y0 = y1;
-            y1 = temp;
+        List<Vec2i> vecs = Lists.newArrayList();
+
+        double dx = Math.abs(x1 - x0);
+        double dy = Math.abs(y1 - y0);
+
+        int x = MathHelper.floor(x0);
+        int y = MathHelper.floor(y0);
+
+        int n = 1;
+        int xIncline;
+        int yIncline;
+        double error;
+
+        if (dx == 0) {
+            xIncline = 0;
+            error = Double.POSITIVE_INFINITY;
+        } else if (x1 > x0) {
+            xIncline = 1;
+            n += MathHelper.floor(x1) - x;
+            error = (Math.floor(x0) + 1 - x0) * dy;
+        } else {
+            xIncline = -1;
+            n += x - MathHelper.floor(x1);
+            error = (x0 - Math.floor(x0)) * dy;
         }
 
-        double xoffStart = Math.ceil(x0) - x0;
-        double yoffStart = Math.ceil(y0) - y0;
+        if (dy == 0) {
+            yIncline = 0;
+            error -= Double.POSITIVE_INFINITY;
+        } else if (y1 > y0) {
+            yIncline = 1;
+            n += MathHelper.floor(y1) - y;
+            error -= (Math.floor(y0) + 1 - y0) * dx;
+        } else {
+            yIncline = -1;
+            n += y - MathHelper.floor(y1);
+            error -= (y0 - Math.floor(y0)) * dx;
+        }
 
-        double dx = x1 - x0;
-        double dy = y1 - y0;
-
-        if(Math.abs(dx) < 1) { //Don't divide by less than 1
-            List<Vec2i> out = Lists.newArrayList();
-            for (int y = MathHelper.floor(y0); y != MathHelper.ceil(y1); y += Math.signum(dy)) {
-                out.add(new Vec2i(MathHelper.floor(x0), y));
+        while (n > 0) {
+            vecs.add(new Vec2i(x, y));
+            if (error > 0) {
+                y += yIncline;
+                error -= dx;
+            } else {
+                x += xIncline;
+                error += dy;
             }
-            return out;
+            n--;
         }
 
-        double deltaerror = dy / dx;
-        double y = Math.floor(y0);
-
-        double error = xoffStart * deltaerror + yoffStart;
-
-        List<Vec2i> out = Lists.newArrayList();
-        for (int x = MathHelper.floor(x0); x < x1; x ++) {
-            while(Math.abs(error) > 1) {
-                out.add(new Vec2i(x, (int)y));
-                y += Math.signum(dy);
-                error -= Math.signum(error);
-            }
-            error += deltaerror;
-            out.add(new Vec2i(x, (int)(y)));
-        }
-        return out;
+        return vecs;
     }
 
 
@@ -92,7 +106,7 @@ public class LineUtils {
         Vector3d from = new Vector3d(fromPos.getX()+0.5, fromPos.getY()+0.5, fromPos.getZ()+0.5);
         Vector3d to = new Vector3d(toPos.getX()+0.5, toPos.getY()+0.5, toPos.getZ()+0.5);
         double yrange = (from.getY() - to.getY()) / Math.sqrt((to.x-from.x)*(to.x-from.x) + (to.z-from.z)*(to.z-from.z));
-        for (Vec2i vec : bresenhamYCoords(to.getX(), from.getX(), to.getZ(), from.getZ())) {
+        for (Vec2i vec : raytraceZX(to.getX(), from.getX(), to.getZ(), from.getZ())) {
             double squarepos = Math.sqrt((vec.x - to.getX())*(vec.x - to.getX()) + (vec.z - to.getZ())*(vec.z - to.getZ()));
             BlockPos position = new BlockPos(vec.x, to.getY() + yrange * squarepos, vec.z);
             if(predicate == null || predicate.test(position)) {
