@@ -4,11 +4,13 @@ import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationPass;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFencePoleRenderer;
+import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFenceRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.client.render.dinosaur.objects.MovementAnimationPass;
 import net.dumbcode.projectnublar.client.render.entity.DummyRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -44,6 +46,7 @@ public class DinosaurModelHandler {
     public static void onModelsBaked(ModelBakeEvent event) {
         ClientRegistry.bindTileEntitySpecialRenderer(SkeletalBuilderBlockEntity.class, new BlockEntitySkeletalBuilderRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFencePole.class, new BlockEntityElectricFencePoleRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFence.class, new BlockEntityElectricFenceRenderer());
 
     }
 

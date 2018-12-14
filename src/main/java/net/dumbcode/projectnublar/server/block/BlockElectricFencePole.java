@@ -38,7 +38,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
             NBTTagCompound nbt = stack.getOrCreateSubCompound(ProjectNublar.MODID);
             if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
                 BlockPos other = BlockPos.fromLong(nbt.getLong("fence_position"));
-                if(worldIn.getBlockState(other).getBlock() == this && !other.equals(pos) && other.getY() == pos.getY()) {
+                if(worldIn.getBlockState(other).getBlock() == this && !other.equals(pos)) {
                     TileEntity te = worldIn.getTileEntity(pos);
                     if(te instanceof BlockEntityElectricFencePole) {
                         ((BlockEntityElectricFencePole) te).fenceConnections.add(other);
@@ -47,15 +47,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                     if(otherte instanceof BlockEntityElectricFencePole) {
                         ((BlockEntityElectricFencePole) otherte).fenceConnections.add(pos);
                     }
-
-                    Set<BlockPos> validPositions = Sets.newHashSet();
-                    for (Vec2i vec : LineUtils.bresenhamYCoords(other.getX(), pos.getX(), other.getZ(), pos.getZ())) {
-                        BlockPos position = new BlockPos(vec.x, pos.getY(), vec.z);
-                        if(!position.equals(pos) && !position.equals(other) && worldIn.isAirBlock(position)) {
-                            validPositions.add(position);
-                        }
-                    }
-                    for (BlockPos position : validPositions) {
+                    for (BlockPos position : LineUtils.getBlocksInbetween(pos, other, position -> !position.equals(pos) && !position.equals(other) && worldIn.isAirBlock(position))) {
                         worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
                         TileEntity fencete = worldIn.getTileEntity(position);
                         if(fencete instanceof BlockEntityElectricFence) {

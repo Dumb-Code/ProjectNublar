@@ -61,7 +61,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     @Override
     public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.INVISIBLE;
+        return EnumBlockRenderType.MODEL;
     }
 
     @Nullable
