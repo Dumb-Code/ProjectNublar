@@ -1,11 +1,9 @@
 package net.dumbcode.projectnublar.server.block;
 
-import com.google.common.collect.Sets;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
-import net.dumbcode.projectnublar.server.utils.Vec2i;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -18,13 +16,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
 public class BlockElectricFencePole extends Block implements IItemBlock {
     public BlockElectricFencePole() {
@@ -47,11 +42,16 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                     if(otherte instanceof BlockEntityElectricFencePole) {
                         ((BlockEntityElectricFencePole) otherte).fenceConnections.add(pos);
                     }
-                    for (BlockPos position : LineUtils.getBlocksInbetween(pos, other, position -> !position.equals(pos) && !position.equals(other) && worldIn.isAirBlock(position))) {
-                        worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
-                        TileEntity fencete = worldIn.getTileEntity(position);
-                        if(fencete instanceof BlockEntityElectricFence) {
-                            ((BlockEntityElectricFence) fencete).fenceConnections.add(Pair.of(pos, other));
+                    for (BlockPos normalPos : LineUtils.getBlocksInbetween(pos, other, position -> !position.equals(pos) && !position.equals(other))) {
+                        for (int i = 0; i < 3; i++) {
+                            BlockPos position = normalPos.up(i);
+                            if(worldIn.isAirBlock(position)) {
+                                worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
+                            }
+                            TileEntity fencete = worldIn.getTileEntity(position);
+                            if(fencete instanceof BlockEntityElectricFence) {
+                                ((BlockEntityElectricFence) fencete).fenceConnections.add(new BlockEntityElectricFence.Connection(pos.up(i), other.up(i)));
+                            }
                         }
                     }
 

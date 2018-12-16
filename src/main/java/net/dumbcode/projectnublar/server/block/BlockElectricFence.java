@@ -51,7 +51,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
-        return true;
+        return false;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     @Override
     public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.MODEL;
+        return EnumBlockRenderType.INVISIBLE;
     }
 
     @Nullable

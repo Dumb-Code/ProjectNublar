@@ -103,8 +103,8 @@ public class LineUtils {
 
     public static Set<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, @Nullable Predicate<BlockPos> predicate) {
         Set<BlockPos> set = Sets.newHashSet();
-        Vector3d from = new Vector3d(fromPos.getX()+0.5, fromPos.getY()+0.5, fromPos.getZ()+0.5);
-        Vector3d to = new Vector3d(toPos.getX()+0.5, toPos.getY()+0.5, toPos.getZ()+0.5);
+        Vector3d from = new Vector3d(fromPos.getX()+0.5, fromPos.getY(), fromPos.getZ()+0.5);
+        Vector3d to = new Vector3d(toPos.getX()+0.5, toPos.getY(), toPos.getZ()+0.5);
         double yrange = (from.getY() - to.getY()) / Math.sqrt((to.x-from.x)*(to.x-from.x) + (to.z-from.z)*(to.z-from.z));
         for (Vec2i vec : raytraceZX(to.getX(), from.getX(), to.getZ(), from.getZ())) {
             double squarepos = Math.sqrt((vec.x - to.getX())*(vec.x - to.getX()) + (vec.z - to.getZ())*(vec.z - to.getZ()));

@@ -5,13 +5,14 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.Set;
 
 public class BlockEntityElectricFencePole extends SimpleBlockEntity {
-    public Set<BlockPos> fenceConnections = Sets.newHashSet();
+    public Set<BlockPos> fenceConnections = Sets.newHashSet(); //TODO: change to connection class
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
@@ -33,5 +34,10 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity {
                 this.fenceConnections.add(BlockPos.fromLong(((NBTTagLong) base).getLong()));
             }
         }
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        return INFINITE_EXTENT_AABB; //TODO:change this
     }
 }
