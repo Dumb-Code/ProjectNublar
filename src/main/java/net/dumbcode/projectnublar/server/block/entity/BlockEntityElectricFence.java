@@ -15,7 +15,7 @@ import javax.vecmath.Vector3d;
 import java.util.List;
 import java.util.Set;
 
-public class BlockEntityElectricFence extends SimpleBlockEntity implements ITickable {
+public class BlockEntityElectricFence extends SimpleBlockEntity {
     public Set<Connection> fenceConnections = Sets.newHashSet();
 
     @Override
@@ -71,9 +71,8 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements ITick
     }
 
     @Override
-    public void update() {
-//        this.world.setBlockState(this.pos, Blocks.AIR.getDefaultState());
-
+    public double getMaxRenderDistanceSquared() {
+        return Double.MAX_VALUE;
     }
 
     @Getter

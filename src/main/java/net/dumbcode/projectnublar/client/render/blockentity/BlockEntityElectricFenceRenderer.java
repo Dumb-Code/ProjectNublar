@@ -80,7 +80,9 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
                 double u = rand.nextInt(16) / 16F;
                 double v = rand.nextInt(16) / 16F;
-                
+
+                //TODO: make corners perpendicular to top. Youll have to redo the logic behind [c]
+
                 //Chunks of code are in U-D-N-E-S-W order
                 buff.pos(c[0], ytop+halfthick, c[1]).tex(u, v).normal(0, 1, 0).endVertex();
                 buff.pos(c[2], ybot+halfthick, c[3]).tex(u, len+v).normal(0, 1, 0).endVertex();
@@ -99,8 +101,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 v = rand.nextInt(16) / 16F;
 
                 buff.pos(c[0], ytop+halfthick, c[1]).tex(u+tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(c[0], ytop-halfthick, c[1]).tex(u, halfthick+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(c[2], ybot-halfthick, c[3]).tex(u, len+halfthick+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                buff.pos(c[0], ytop-halfthick, c[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                buff.pos(c[2], ybot-halfthick, c[3]).tex(u, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                 buff.pos(c[2], ybot+halfthick, c[3]).tex(u+tw, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
 
                 u = rand.nextInt(16) / 16F;
@@ -115,8 +117,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 v = rand.nextInt(16) / 16F;
 
                 buff.pos(c[4], ybot+halfthick, c[5]).tex(u+tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(c[4], ybot-halfthick, c[5]).tex(u, -halfthick+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(c[6], ytop-halfthick, c[7]).tex(u, len-halfthick+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                buff.pos(c[4], ybot-halfthick, c[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                buff.pos(c[6], ytop-halfthick, c[7]).tex(u, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                 buff.pos(c[6], ytop+halfthick, c[7]).tex(u+tw, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
 
                 u = rand.nextInt(16) / 16F;
@@ -137,5 +139,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
     private double distance(BlockPos from, double x, double z) {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
+    }
+
+    @Override
+    public boolean isGlobalRenderer(BlockEntityElectricFence te) {
+        return true;
     }
 }
