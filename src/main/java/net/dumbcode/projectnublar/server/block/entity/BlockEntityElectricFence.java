@@ -59,7 +59,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements ITick
 
                 for (int i = 0; i < amount; i++) {
                     int next = i + 1;
-                    out.add(new AxisAlignedBB(x * i, -0.5F, z * i, x * next, 0.5F, z * next).offset(intercects[0] - this.pos.getX(), yrange * this.distance(bottom, intercects[0]+x*i, intercects[2]+z*i) - this.pos.getY() + bottom.getY()+1, intercects[2] - this.pos.getZ()));
+                    out.add(new AxisAlignedBB(x * i, 0F, z * i, x * next, 1F, z * next).offset(intercects[0] - this.pos.getX(), yrange * this.distance(bottom, intercects[0]+x*i, intercects[2]+z*i) - this.pos.getY() + bottom.getY(), intercects[2] - this.pos.getZ()));
                 }
             }
         }
