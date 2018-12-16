@@ -99,16 +99,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             }
         }
         buff.setTranslation(0,0,0);
-
         GlStateManager.popMatrix();
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(x - tePos.getX(), y - tePos.getY(), z - tePos.getZ());
-//        for (AxisAlignedBB bb : te.createBoundingBox()) {
-//            RenderGlobal.drawSelectionBoundingBox(bb.offset(tePos), 1f, 1f, 1f, 1f);
-//        }
-
-        GlStateManager.popMatrix();
-
     }
 
     private double distance(BlockPos from, double x, double z) {
