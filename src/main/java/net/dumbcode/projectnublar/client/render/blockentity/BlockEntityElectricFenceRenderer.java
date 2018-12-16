@@ -23,7 +23,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.pushMatrix();
 
         BlockPos tePos = te.getPos();
-        GlStateManager.translate(x-tePos.getX(), y+0.5F, z-tePos.getZ());
+        GlStateManager.translate(x, y+0.5F, z);
 
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
@@ -34,8 +34,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             BlockPos to = connection.getMax();
             BlockPos from = connection.getMin();
 
-            double yrange = (to.getY() - from.getY()) / Math.sqrt((to.getX()-from.getX())*(to.getX()-from.getX()) + (to.getZ()-from.getZ())*(to.getZ()-from.getZ()));
-            double[] in = LineUtils.liangBarskyIntersect(tePos.getX(), tePos.getX() + 1, tePos.getZ(), tePos.getZ() + 1, from.getX()+0.5F, to.getX()+0.5F, from.getZ()+0.5F, to.getZ()+0.5F);
+            double yrange = (to.getY() - from.getY()) / this.distance(from, to.getX()+0.5F, to.getZ()+0.5F);
+            double[] in = LineUtils.liangBarskyIntersect(tePos, from, to);
             if(in != null) {
                 double halfthick = 2/16F;
                 double tangrad = in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
@@ -58,9 +58,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                         c[0], -halfthick, c[1],
                         c[2], -halfthick, c[3]
                 );
-                double ytop = yrange * this.distance(from, in[0], in[2]);
-                double ybot = yrange * this.distance(from, in[1], in[3]);
+                double ytop = yrange * this.distance(from, in[0], in[2]) - tePos.getY() + from.getY();
+                double ybot = yrange * this.distance(from, in[1], in[3]) - tePos.getY() + from.getY();
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_NORMAL);
+                buff.setTranslation(-tePos.getX(), 0, -tePos.getZ());
 
                 //Chunks of code are in U-D-N-E-S-W order
                 buff.pos(c[0], ytop+halfthick, c[1]).normal(0, 1, 0).endVertex();
@@ -97,12 +98,14 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 Tessellator.getInstance().draw();
             }
         }
+        buff.setTranslation(0,0,0);
+
         GlStateManager.popMatrix();
         GlStateManager.pushMatrix();
         GlStateManager.translate(x - tePos.getX(), y - tePos.getY(), z - tePos.getZ());
-        for (AxisAlignedBB bb : te.createBoundingBox()) {
-            RenderGlobal.drawSelectionBoundingBox(bb.offset(tePos), 1f, 1f, 1f, 1f);
-        }
+//        for (AxisAlignedBB bb : te.createBoundingBox()) {
+//            RenderGlobal.drawSelectionBoundingBox(bb.offset(tePos), 1f, 1f, 1f, 1f);
+//        }
 
         GlStateManager.popMatrix();
 

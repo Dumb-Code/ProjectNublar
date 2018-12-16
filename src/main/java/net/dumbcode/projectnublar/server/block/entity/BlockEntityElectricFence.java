@@ -46,14 +46,11 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements ITick
     public List<AxisAlignedBB> createBoundingBox() {
         List<AxisAlignedBB> out = Lists.newArrayList();
         for (Connection connections : this.fenceConnections) {
-            Vector3d from = new Vector3d(connections.getFrom().getX() + 0.5, connections.getFrom().getY(), connections.getFrom().getZ() + 0.5);
-            Vector3d to = new Vector3d(connections.getTo().getX() + 0.5, connections.getTo().getY(), connections.getTo().getZ() + 0.5);
+            BlockPos top = connections.getMax();
+            BlockPos bottom = connections.getMin();
 
-            Vector3d top = from.getY() > to.getY() ? from : to;
-            Vector3d bottom = from.getY() <= to.getY() ? from : to;
-
-            double yrange = (top.getY() - bottom.getY()) / Math.sqrt((top.x-bottom.x)*(top.x-bottom.x) + (top.z-bottom.z)*(top.z-bottom.z));
-            double[] intercects = LineUtils.liangBarskyIntersect(this.pos.getX(), this.pos.getX() + 1, this.pos.getZ(), this.pos.getZ() + 1, from.getX(), to.getX(), from.getZ(), to.getZ());
+            double yrange = (top.getY() - bottom.getY()) / Math.sqrt((top.getX()-bottom.getX())*(top.getX()-bottom.getX()) + (top.getX()-bottom.getX())*(top.getX()-bottom.getX()));
+            double[] intercects = LineUtils.liangBarskyIntersect(this.pos, connections.getFrom(), connections.getTo());
             if(intercects != null) {
                 double amount = 16;
 
@@ -62,15 +59,15 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements ITick
 
                 for (int i = 0; i < amount; i++) {
                     int next = i + 1;
-                    out.add(new AxisAlignedBB(x * i, 0, z * i, x * next, 1F, z * next).offset(intercects[0] - this.pos.getX(), yrange * this.distance(bottom, intercects[0]+x*i, intercects[2]+z*i) - this.pos.getY() + bottom.getY(), intercects[2] - this.pos.getZ()));
+                    out.add(new AxisAlignedBB(x * i, -0.5F, z * i, x * next, 0.5F, z * next).offset(intercects[0] - this.pos.getX(), yrange * this.distance(bottom, intercects[0]+x*i, intercects[2]+z*i) - this.pos.getY() + bottom.getY(), intercects[2] - this.pos.getZ()));
                 }
             }
         }
         return out;
     }
     
-    private double distance(Vector3d vec, double x, double z) {
-        return Math.sqrt((vec.x-x)*(vec.x-x) + (vec.z-z)*(vec.z-z));
+    private double distance(BlockPos pos, double x, double z) {
+        return Math.sqrt((pos.getX()+0.5F-x)*(pos.getX()+0.5F-x) + (pos.getZ()+0.5F-z)*(pos.getZ()+0.5F-z));
     }
 
     @Override
