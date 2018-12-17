@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
+import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
@@ -50,7 +51,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                             }
                             TileEntity fencete = worldIn.getTileEntity(position);
                             if(fencete instanceof BlockEntityElectricFence) {
-                                ((BlockEntityElectricFence) fencete).fenceConnections.add(new BlockEntityElectricFence.Connection(pos.up(i), other.up(i)));
+                                ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(pos.up(i), other.up(i), position));
                             }
                         }
                     }

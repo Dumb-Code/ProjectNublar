@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
+import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.client.Minecraft;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -27,7 +29,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.pushMatrix();
 
         BlockPos tePos = te.getPos();
-        GlStateManager.translate(x, y+0.5F, z);
+        GlStateManager.translate(x, y, z);
 
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
@@ -37,100 +39,87 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
 
-        double halfthick = 1/16F;
         int texSize = 16;
-        double tw = (32*halfthick)/texSize;
 
-        for (BlockEntityElectricFence.Connection connection : te.fenceConnections) {
-            Random rand = new Random(tePos.toLong());
+        for (Connection connection : te.fenceConnections) {
+            for (int i = 0; i < 2; i++) {
+                Connection.Cache cache = i == 0 ? connection.getRenderCacheLow() : connection.getRenderCacheHigh();
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(0, 0.5F*i+0.25F, 0);
 
-            BlockPos to = connection.getMax();
-            BlockPos from = connection.getMin();
+                if(cache != null) {
 
-            double yrange = (to.getY() - from.getY()) / this.distance(from, to.getX()+0.5F, to.getZ()+0.5F);
-            double[] in = LineUtils.liangBarskyIntersect(tePos, from, to);
-            if(in != null) {
-                double tangrad = in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
-                double xcomp = halfthick * Math.sin(tangrad);
-                double zcomp = halfthick * Math.cos(tangrad);
-                double[] c = new double[] { //TODO: cache this on the Connection class
-                        in[0] - xcomp, in[2] - zcomp,
-                        in[1] - xcomp, in[3] - zcomp,
-                        in[1] + xcomp, in[3] + zcomp,
-                        in[0] + xcomp, in[2] + zcomp
-                };
-                Vector3f xNorm = MathUtils.calcualeNormalF(
-                        c[2], halfthick, c[3],
-                        c[2], -halfthick, c[3],
-                        c[4], -halfthick, c[5]
-                );
+                    double[] ct = cache.getCt();
+                    double[] cb = cache.getCb();
 
-                Vector3f zNorm = MathUtils.calcualeNormalF(
-                        c[0], halfthick, c[1],
-                        c[0], -halfthick, c[1],
-                        c[2], -halfthick, c[3]
-                );
-                double ytop = yrange * this.distance(from, in[0], in[2]) - tePos.getY() + from.getY();
-                double ybot = yrange * this.distance(from, in[1], in[3]) - tePos.getY() + from.getY();
-                double len = Math.sqrt(Math.pow(c[0] == c[2] ? c[1]-c[3] : c[0]-c[2], 2) + (ytop-ybot)*(ytop-ybot));
+                    Vector3f xNorm = cache.getXNorm();
+                    Vector3f zNorm = cache.getZNorm();
 
+                    double len = cache.getLen();
+                    double ytop = cache.getYtop();
+                    double ybot = cache.getYbot();
 
-                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                buff.setTranslation(-tePos.getX(), 0, -tePos.getZ());
+                    double yThick = cache.getYThick();
 
-                double u = rand.nextInt(16) / 16F;
-                double v = rand.nextInt(16) / 16F;
+                    double tw = (16*cache.getFullThick())/texSize;
 
-                //TODO: make corners perpendicular to top. Youll have to redo the logic behind [c]
+                    Random rand = new Random(tePos.toLong());
 
-                //Chunks of code are in U-D-N-E-S-W order
-                buff.pos(c[0], ytop+halfthick, c[1]).tex(u, v).normal(0, 1, 0).endVertex();
-                buff.pos(c[2], ybot+halfthick, c[3]).tex(u, len+v).normal(0, 1, 0).endVertex();
-                buff.pos(c[4], ybot+halfthick, c[5]).tex(u+tw, len+v).normal(0, 1, 0).endVertex();
-                buff.pos(c[6], ytop+halfthick, c[7]).tex(u+tw, v).normal(0, 1, 0).endVertex();
+                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+                    buff.setTranslation(-tePos.getX(), 0, -tePos.getZ());
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    double u = rand.nextInt(16) / 16F;
+                    double v = rand.nextInt(16) / 16F;
 
-                buff.pos(c[2], ybot-halfthick, c[3]).tex(u, v).normal(0, -1, 0).endVertex();
-                buff.pos(c[0], ytop-halfthick, c[1]).tex(u, len+v).normal(0, -1, 0).endVertex();
-                buff.pos(c[6], ytop-halfthick, c[7]).tex(u+tw, len+v).normal(0, -1, 0).endVertex();
-                buff.pos(c[4], ybot-halfthick, c[5]).tex(u+tw, v).normal(0, -1, 0).endVertex();
+                    //Chunks of code are in U-D-N-E-S-W order
+                    buff.pos(ct[0], ytop+yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
+                    buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, len+v).normal(0, 1, 0).endVertex();
+                    buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, len+v).normal(0, 1, 0).endVertex();
+                    buff.pos(ct[6], ytop+yThick, ct[7]).tex(u+tw, v).normal(0, 1, 0).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-                buff.pos(c[0], ytop+halfthick, c[1]).tex(u+tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(c[0], ytop-halfthick, c[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(c[2], ybot-halfthick, c[3]).tex(u, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(c[2], ybot+halfthick, c[3]).tex(u+tw, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
+                    buff.pos(cb[0], ytop-yThick, cb[1]).tex(u, len+v).normal(0, -1, 0).endVertex();
+                    buff.pos(cb[6], ytop-yThick, cb[7]).tex(u+tw, len+v).normal(0, -1, 0).endVertex();
+                    buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, v).normal(0, -1, 0).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-                buff.pos(c[6], ytop+halfthick, c[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(c[6], ytop-halfthick, c[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(c[0], ytop-halfthick, c[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(c[0], ytop+halfthick, c[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(cb[0], ytop-yThick, cb[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(ct[2], ybot+yThick, ct[3]).tex(u+tw, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-                buff.pos(c[4], ybot+halfthick, c[5]).tex(u+tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(c[4], ybot-halfthick, c[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(c[6], ytop-halfthick, c[7]).tex(u, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(c[6], ytop+halfthick, c[7]).tex(u+tw, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-                buff.pos(c[2], ybot+halfthick, c[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(c[2], ybot-halfthick, c[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(c[4], ybot-halfthick, c[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(c[4], ybot+halfthick, c[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(cb[4], ybot-yThick, cb[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(ct[6], ytop+yThick, ct[7]).tex(u+tw, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
 
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-                Tessellator.getInstance().draw();
+                    buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+
+                    Tessellator.getInstance().draw();
+                }
+                GlStateManager.popMatrix();
             }
         }
         buff.setTranslation(0,0,0);
