@@ -1,5 +1,5 @@
 {
   "variants": {
-    "normal": { "model": "projectnublar:electric_fence_pole.tbl" }
+    "type=base" : { "model": "projectnublar:electric_fence_pole.tbl" }
   }
 }

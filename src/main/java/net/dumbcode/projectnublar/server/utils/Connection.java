@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.server.utils;
 
 import lombok.Getter;
 import lombok.Value;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 
 import javax.vecmath.Vector3f;
@@ -25,6 +27,16 @@ public class Connection {
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
     }
 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        nbt.setLong("from", this.getFrom().toLong());
+        nbt.setLong("to", this.getTo().toLong());
+        return nbt;
+    }
+
+    public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
+        return new Connection(BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), tileEntity.getPos());
+    }
+
 
     public BlockPos getMin() {
         return this.compared < 0 ? this.to : this.from;
@@ -44,7 +56,7 @@ public class Connection {
 
     private Cache getOrGenCache(Cache cache, double off) {
         if(cache != null) {
-            return cache;
+//            return cache;
         }
         double halfthick = 1/32F;
 

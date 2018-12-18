@@ -16,7 +16,14 @@ public class LineUtils {
         RayTraceResult result = new AxisAlignedBB(position).calculateIntercept(from, to);
         RayTraceResult reverseResult = new AxisAlignedBB(position).calculateIntercept(to, from);
         if(result != null && reverseResult != null) {
-            return new double[]{result.hitVec.x, reverseResult.hitVec.x, result.hitVec.z, reverseResult.hitVec.z, result.hitVec.y, reverseResult.hitVec.y};
+            Vec3d normal = result.hitVec;
+            Vec3d reverse = reverseResult.hitVec;
+            if(position.equals(new BlockPos(from))) {
+                normal = from;
+            } else if(position.equals(new BlockPos(to))) {
+                reverse = to;
+            }
+            return new double[]{normal.x, reverse.x, normal.z, reverse.z, normal.y, reverse.y};
         }
         return null;
     }

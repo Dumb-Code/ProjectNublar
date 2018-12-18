@@ -12,6 +12,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -41,11 +43,14 @@ public class BlockElectricFence extends Block implements IItemBlock {
             double maxY = Double.MIN_VALUE;
             double maxZ = Double.MIN_VALUE;
 
+            boolean set = false;
 
             for (Connection connection : ((BlockEntityElectricFence) te).fenceConnections) {
                 for (int i = 0; i < 2; i++) {
                     double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), 0.25+0.5*i);
                     if(in != null) {
+                        set = true;
+
                         minX = Math.min(minX, in[0]);
                         maxX = Math.max(maxX, in[1]);
 
@@ -57,7 +62,9 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     }
                 }
             }
-            return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ).grow(1/16F);
+            if(set) {
+                return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ).grow(1/16F);
+            }
         }
         return super.getSelectedBoundingBox(state, worldIn, pos);
     }
@@ -72,6 +79,12 @@ public class BlockElectricFence extends Block implements IItemBlock {
             return;
         }
         super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, isActualState);
+    }
+
+    @Nullable
+    @Override
+    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+        return this.rayTrace(pos, start, end, this.getSelectedBoundingBox(blockState, worldIn, pos).offset(-pos.getX(), -pos.getY(), -pos.getZ()));
     }
 
     @Override

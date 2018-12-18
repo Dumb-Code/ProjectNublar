@@ -20,11 +20,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity {
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         NBTTagList nbt = new NBTTagList();
         for (Connection connection : this.fenceConnections) {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setLong("from", connection.getFrom().toLong());
-            tag.setLong("to", connection.getTo().toLong());
-
-            nbt.appendTag(tag);
+            nbt.appendTag(connection.writeToNBT(new NBTTagCompound()));
         }
         compound.setTag("connections", nbt);
         return super.writeToNBT(compound);
@@ -36,8 +32,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity {
         this.fenceConnections.clear();
         NBTTagList nbt = compound.getTagList("connections", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < nbt.tagCount(); i++) {
-            NBTTagCompound tag = nbt.getCompoundTagAt(i);
-            this.fenceConnections.add(new Connection(BlockPos.fromLong(tag.getLong("from")), BlockPos.fromLong(tag.getLong("to")), this.pos));
+            this.fenceConnections.add(Connection.fromNBT(nbt.getCompoundTagAt(i), this));
         }
     }
 
