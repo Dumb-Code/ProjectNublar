@@ -53,7 +53,7 @@ public class Connection {
 
         double posdist = this.distance(from, to.getX()+0.5F, to.getZ()+0.5F);
         double yrange = (to.getY() - from.getY()) / posdist;
-        double[] in = LineUtils.liangBarskyIntersect(this.position, from, to, off);
+        double[] in = LineUtils.intersect(this.position, from, to, off);
         if(in != null) {
             double tangrad = in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
             double xcomp = halfthick * Math.sin(tangrad);

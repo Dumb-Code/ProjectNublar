@@ -48,7 +48,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity {
             BlockPos bottom = connections.getMin();
 
             double yrange = (top.getY() - bottom.getY()) / Math.sqrt((top.getX()-bottom.getX())*(top.getX()-bottom.getX()) + (top.getZ()-bottom.getZ())*(top.getZ()-bottom.getZ()));
-            double[] intersect = LineUtils.liangBarskyIntersect(this.pos, connections.getFrom(), connections.getTo(), 0.5F);
+            double[] intersect = LineUtils.intersect(this.pos, connections.getFrom(), connections.getTo(), 0.5F);
             if(intersect != null) {
                 double amount = 16;
 

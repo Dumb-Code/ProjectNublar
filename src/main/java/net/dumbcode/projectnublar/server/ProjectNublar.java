@@ -19,6 +19,8 @@ import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
+import net.ilexiconn.llibrary.LLibrary;
+import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -87,6 +89,8 @@ public class ProjectNublar {
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
 
         CapabilityManager.INSTANCE.register(EntityManager.class, new VoidStorage<>(), EntityManager.Impl::new);
+
+        TabulaModelHandler.INSTANCE.addDomain(MODID);
     }
 
     private void registerPackets() {

@@ -24,7 +24,6 @@ public class ModelHandler {
     @SubscribeEvent
     public static void onModelRead(ModelRegistryEvent event) {
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE);
-
         reg(TEST_TUBES_GENETIC_MATERIAL);
     }
 

@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class LineUtils {
-    //Returns {x, x1, y, y1} Maybe swap x1 and y around ?
-    public static double[] liangBarskyIntersect(BlockPos position, BlockPos fromPos, BlockPos toPos, double yoff) {
+    //Returns {x, x1, z, z1, y, y1} Maybe swap around ?
+    public static double[] intersect(BlockPos position, BlockPos fromPos, BlockPos toPos, double yoff) {
         Vec3d from = new Vec3d(fromPos).addVector(0.5, yoff, 0.5);
         Vec3d to = new Vec3d(toPos).addVector(0.5, yoff, 0.5);
         RayTraceResult result = new AxisAlignedBB(position).calculateIntercept(from, to);
         RayTraceResult reverseResult = new AxisAlignedBB(position).calculateIntercept(to, from);
         if(result != null && reverseResult != null) {
-            return new double[]{result.hitVec.x, reverseResult.hitVec.x, result.hitVec.z, reverseResult.hitVec.z};
+            return new double[]{result.hitVec.x, reverseResult.hitVec.x, result.hitVec.z, reverseResult.hitVec.z, result.hitVec.y, reverseResult.hitVec.y};
         }
         return null;
     }
