@@ -53,8 +53,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
             if (te.fenceConnections.size() == 1) {
                 Connection connection = te.fenceConnections.get(0);
                 double[] in = connection.getRenderCacheLow().getIn();
-                double tangrad = in[1] == in[0] ? Math.PI / 2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
-                rotation = (float) Math.toDegrees(tangrad);
+                rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
             } else if (te.fenceConnections.size() > 0) {
                 Connection connection1 = te.fenceConnections.get(0);
                 Connection connection2 = te.fenceConnections.get(1);
