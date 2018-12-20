@@ -60,7 +60,7 @@ public class Connection {
 
     private Cache getOrGenCache(Cache cache, int index) {
         if(cache != null) {
-//            return cache;
+            return cache;
         }
         double halfthick = this.type.getCableWidth() / 2F;
 
@@ -102,7 +102,7 @@ public class Connection {
                     cb[0], ytop-yThick, cb[1],
                     cb[2], ybot-yThick, cb[3]
             );
-            return new Cache(ct, cb, in, xNorm, zNorm, ybot, ytop, len, yThick, halfthick*2);
+            return new Cache(ct, cb, in, xNorm, zNorm, ybot, ytop, len, Math.sqrt((in[1]-in[0])*(in[1]-in[0]) + (in[3]-in[2])*(in[3]-in[2])), yThick, halfthick*2);
         }
         return null;
     }
@@ -111,5 +111,5 @@ public class Connection {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    @Value public class Cache { double[] ct, cb, in; Vector3f xNorm, zNorm; double ybot, ytop, len, yThick, fullThick; }
+    @Value public class Cache { double[] ct, cb, in; Vector3f xNorm, zNorm; double ybot, ytop, len, xzlen, yThick, fullThick; }
 }
