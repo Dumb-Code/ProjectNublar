@@ -61,10 +61,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             buff.pos(xend, -h+yend, zend).endVertex();
             buff.pos(xend, yend, zend).endVertex();
 
-            buff.pos(xend, 0, zend).endVertex();
-            buff.pos(xend, -h, zend).endVertex();
-            buff.pos(0, -h+yend, 0).endVertex();
-            buff.pos(0, yend, 0).endVertex();
+            buff.pos(xend, h/2, zend).endVertex();
+            buff.pos(xend, -h/2, zend).endVertex();
+            buff.pos(0, -h/2-yend, 0).endVertex();
+            buff.pos(0, -yend+h/2, 0).endVertex();
 
             Tessellator.getInstance().draw();
             GlStateManager.popMatrix();
