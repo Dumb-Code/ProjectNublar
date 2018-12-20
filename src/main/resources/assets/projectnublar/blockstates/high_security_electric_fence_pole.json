@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "type=base" : { "model": "projectnublar:high_security_electric_fence_pole.tbl" }
+  }
+}

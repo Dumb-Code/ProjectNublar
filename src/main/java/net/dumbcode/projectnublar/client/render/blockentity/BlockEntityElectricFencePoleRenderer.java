@@ -4,19 +4,20 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Blocks;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLSync;
 
 public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFencePole> {
 
@@ -26,33 +27,35 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
         GlStateManager.translate(x, y, z);
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
+        GlStateManager.enableLighting();
         GlStateManager.color(1f, 1f, 1f, 1f);
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
         for (Connection connection : te.fenceConnections) {
             BlockEntityElectricFenceRenderer.renderConnection(connection);
         }
+        GlStateManager.disableLighting();
         Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
         BlockPos pos = te.getPos();
         IBlockState state = te.getWorld().getBlockState(pos);
+        Block block = state.getBlock();
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
-        if (state.getValue(BlockElectricFencePole.TYPE_PROPERTY) == BlockElectricFencePole.Type.BASE) {
-            if (te.renderList == -1) {
-                GlStateManager.glNewList(te.renderList = GlStateManager.glGenLists(1), GL11.GL_COMPILE);
-                GlStateManager.disableLighting();
+        if (block instanceof BlockElectricFencePole && state.getValue(BlockElectricFencePole.TYPE_PROPERTY) == BlockElectricFencePole.Type.BASE) {
+            if (te.vbo == null) {
+                te.vbo = new VertexBuffer(DefaultVertexFormats.BLOCK);
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
                 buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
                 Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelRenderer().renderModel(te.getWorld(),
                         Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(state), state, pos, Tessellator.getInstance().getBuffer(), false);
-                Tessellator.getInstance().draw();
-                GlStateManager.glEndList();
+                buff.finishDrawing();
+                buff.reset();
+                te.vbo.bufferData(buff.getByteBuffer());
             }
 
             GlStateManager.pushMatrix();
             float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
             if (te.fenceConnections.size() == 1) {
                 Connection connection = te.fenceConnections.get(0);
-                double[] in = connection.getRenderCacheLow().getIn();
+                double[] in = connection.getCache(0).getIn();
                 double tangrad = in[1] == in[0] ? Math.PI / 2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
                 rotation = (float) Math.toDegrees(tangrad);
             } else if (te.fenceConnections.size() > 0) {
@@ -66,19 +69,47 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
 
                 rotation = (float) Math.toDegrees(Math.atan2(dist.getX(), dist.getZ())) - 90F;
             }
+            rotation += ((BlockElectricFencePole) block).getType().getRotationOffset() + 90F;
             if(te.rotatedAround) {
                 rotation += 180;
             }
             GlStateManager.translate(0.5F, 0.5F, 0.5F);
             GlStateManager.rotate(rotation, 0, 1, 0);
             GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-            GlStateManager.callList(te.renderList);
+            te.vbo.bindBuffer();
+
+            int stride = DefaultVertexFormats.BLOCK.getNextOffset();
+
+            GlStateManager.glVertexPointer(3, GL11.GL_FLOAT, stride, 0);
+            GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+
+            GlStateManager.glColorPointer(4, GL11.GL_UNSIGNED_BYTE, stride, Float.BYTES * 3);
+            GlStateManager.glEnableClientState(GL11.GL_COLOR_ARRAY);
+
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+            GlStateManager.glTexCoordPointer(2, GL11.GL_FLOAT, stride, Float.BYTES * 3 + 4);
+            GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit + 1);
+            GlStateManager.glTexCoordPointer(2, GL11.GL_SHORT, stride, Float.BYTES * 5 + 4);
+
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+
+            te.vbo.drawArrays(7);
+            te.vbo.unbindBuffer();
+
+            GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+            GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.lightmapTexUnit);
+            GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+            GlStateManager.glDisableClientState(GL11.GL_COLOR_ARRAY);
+
             GlStateManager.popMatrix();
 
         }
         buff.setTranslation(0, 0, 0);
-        GlStateManager.enableLighting();
-
         GlStateManager.popMatrix();
     }
 

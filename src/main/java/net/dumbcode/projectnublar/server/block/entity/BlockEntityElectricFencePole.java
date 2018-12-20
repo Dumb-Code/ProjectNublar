@@ -3,10 +3,13 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 import java.util.Set;
@@ -14,7 +17,8 @@ import java.util.Set;
 public class BlockEntityElectricFencePole extends SimpleBlockEntity {
     public List<Connection> fenceConnections = Lists.newArrayList();
 
-    public int renderList = -1;
+    @SideOnly(Side.CLIENT)
+    public VertexBuffer vbo;
     public boolean rotatedAround = false;
 
     @Override

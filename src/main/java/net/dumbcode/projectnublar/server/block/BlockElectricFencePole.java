@@ -1,9 +1,11 @@
 package net.dumbcode.projectnublar.server.block;
 
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
@@ -22,20 +24,19 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
 public class BlockElectricFencePole extends Block implements IItemBlock {
-
+    @Getter
+    private final ConnectionType type;
     public static final PropertyEnum<Type> TYPE_PROPERTY = PropertyEnum.create("type", Type.class);
-    public BlockElectricFencePole() {
+    public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
+        this.type = type;
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(TYPE_PROPERTY, Type.BASE));
     }
 
@@ -61,9 +62,11 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
        if(state.getValue(TYPE_PROPERTY) == Type.BASE) {
-           for (int i = 1; i < 3; i++) {
-               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(TYPE_PROPERTY, Type.values()[i]));
+           for (int i = 1; i < this.type.getHeight()-1; i++) {
+               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(TYPE_PROPERTY, Type.DUMMY_CENTER));
            }
+           worldIn.setBlockState(pos.up(this.type.getHeight()-1), this.getDefaultState().withProperty(TYPE_PROPERTY, Type.DUMMY_TOP));
+
        }
     }
 
@@ -83,18 +86,18 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                 if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
                     BlockPos other = BlockPos.fromLong(nbt.getLong("fence_position"));
                     if(worldIn.getBlockState(other).getBlock() == this && !other.equals(pos)) {
-                        List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, position -> !position.equals(pos) && !position.equals(other));
-                        for (int i = 0; i < 3; i++) {
+                        List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, this.type);
+                        for (int i = 0; i < this.type.getHeight(); i++) {
                             BlockPos pos1 = pos.up(i);
                             BlockPos other1 = other.up(i);
                             TileEntity te = worldIn.getTileEntity(pos1);
                             if(te instanceof BlockEntityElectricFencePole) {
-                                ((BlockEntityElectricFencePole) te).fenceConnections.add(new Connection(pos1, other1, pos1, false));
+                                ((BlockEntityElectricFencePole) te).fenceConnections.add(new Connection(this.type, pos1, other1, pos1, false));
                             }
                             worldIn.notifyBlockUpdate(pos1, worldIn.getBlockState(pos1), worldIn.getBlockState(pos1), 3);
                             TileEntity otherte = worldIn.getTileEntity(other1);
                             if(otherte instanceof BlockEntityElectricFencePole) {
-                                ((BlockEntityElectricFencePole) otherte).fenceConnections.add(new Connection(pos1, other1, other1, false));
+                                ((BlockEntityElectricFencePole) otherte).fenceConnections.add(new Connection(this.type, pos1, other1, other1, false));
                             }
                             worldIn.notifyBlockUpdate(other1, worldIn.getBlockState(other1), worldIn.getBlockState(other1), 3);
                             for (BlockPos normalPos : positions) {
@@ -104,7 +107,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                                 }
                                 TileEntity fencete = worldIn.getTileEntity(position);
                                 if(fencete instanceof BlockEntityElectricFence) {
-                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(pos1, other1, position, i == 1 && worldIn.rand.nextFloat() < 0.05F));
+                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(this.type, pos1, other1, position, i == 1 && worldIn.rand.nextFloat() < 1.05F));
                                     worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
 
                                 }

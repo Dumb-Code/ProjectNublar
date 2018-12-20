@@ -51,7 +51,10 @@ public class ClientWorldListener implements IWorldEventListener {
                 for (int z = z1-1; z <= z1+1; z++) {
                     TileEntity te = this.world.getTileEntity(new BlockPos(x, y, z));
                     if(te instanceof BlockEntityElectricFencePole) {
-                        ((BlockEntityElectricFencePole) te).renderList = -1;
+                        if(((BlockEntityElectricFencePole) te).vbo != null) {
+                            ((BlockEntityElectricFencePole) te).vbo.deleteGlBuffers();
+                        }
+                        ((BlockEntityElectricFencePole) te).vbo = null;
                     }
                 }
             }

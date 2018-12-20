@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.MachineModule;
+import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -19,7 +20,8 @@ import java.util.function.Function;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class BlockHandler {
     public static final SkeletalBuilderBlock SKELETAL_BUILDER = new SkeletalBuilderBlock();
-    public static final BlockElectricFencePole ELECTRIC_FENCE_POLE = new BlockElectricFencePole();
+    public static final BlockElectricFencePole LIGHT_STEEL_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.LIGHT_STEEL);
+    public static final BlockElectricFencePole HIGH_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.HIGH_SECURITY);
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
 
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
@@ -42,7 +44,8 @@ public class BlockHandler {
                 EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer"),
                 INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator"),
                 COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator"),
-                ELECTRIC_FENCE_POLE.setRegistryName("electric_fence_pole").setUnlocalizedName("electric_fence_pole"),
+                LIGHT_STEEL_ELECTRIC_FENCE_POLE.setRegistryName("light_steel_electric_fence_pole").setUnlocalizedName("light_steel_electric_fence_pole"),
+                HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole"),
                 ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence")
         );
 

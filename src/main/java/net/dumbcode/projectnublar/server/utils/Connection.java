@@ -10,6 +10,7 @@ import javax.vecmath.Vector3f;
 
 @Getter
 public class Connection {
+    private final ConnectionType type;
     private final BlockPos from;
     private final BlockPos to;
     private final BlockPos position;
@@ -18,19 +19,22 @@ public class Connection {
 
     private final int compared;
 
-    private Cache renderCacheLow;
-    private Cache renderCacheHigh;
+    private Cache[] rendercache;
 
-    public Connection(BlockPos from, BlockPos to, BlockPos position, boolean hasSign) {
+    public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos position, boolean hasSign) {
+        this.type = type;
         this.from = from;
         this.to = to;
         this.position = position;
         this.hasSign = hasSign;
 
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
+
+        this.rendercache = new Cache[this.type.getOffsets().length];
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        nbt.setInteger("type", this.type.ordinal());
         nbt.setLong("from", this.getFrom().toLong());
         nbt.setLong("to", this.getTo().toLong());
         nbt.setBoolean("sign", this.hasSign);
@@ -38,7 +42,7 @@ public class Connection {
     }
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        return new Connection(BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), tileEntity.getPos(), nbt.getBoolean("sign"));
+        return new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), tileEntity.getPos(), nbt.getBoolean("sign"));
     }
 
 
@@ -50,26 +54,22 @@ public class Connection {
         return this.compared >= 0 ? this.to : this.from;
     }
 
-    public Cache getRenderCacheLow() {
-        return this.renderCacheLow = this.getOrGenCache(this.renderCacheLow, 0.25F);
+    public Cache getCache(int index) {
+        return this.rendercache[index] = this.getOrGenCache(this.rendercache[index], index);
     }
 
-    public Cache getRenderCacheHigh() {
-        return this.renderCacheHigh = this.getOrGenCache(this.renderCacheHigh, 0.75F);
-    }
-
-    private Cache getOrGenCache(Cache cache, double off) {
+    private Cache getOrGenCache(Cache cache, int index) {
         if(cache != null) {
 //            return cache;
         }
-        double halfthick = 1/64F;
+        double halfthick = this.type.getCableWidth() / 2F;
 
         BlockPos to = this.getMax();
         BlockPos from = this.getMin();
 
         double posdist = this.distance(from, to.getX()+0.5F, to.getZ()+0.5F);
         double yrange = (to.getY() - from.getY()) / posdist;
-        double[] in = LineUtils.intersect(this.position, from, to, off);
+        double[] in = LineUtils.intersect(this.position, from, to, this.type.getOffsets()[index]);
         if(in != null) {
             double tangrad = in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
             double xcomp = halfthick * Math.sin(tangrad);

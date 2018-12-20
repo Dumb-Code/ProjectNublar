@@ -6,21 +6,22 @@ import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import java.util.Random;
+
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D;
 
 public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFence> {
     @Override
@@ -29,6 +30,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.translate(x, y, z);
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
+        GlStateManager.enableLighting();
         GlStateManager.color(1f,1f,1f,1f);
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
         for (Connection connection : te.fenceConnections) {
@@ -38,37 +40,40 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
     }
 
     public static void renderVoltSign(Connection connection) {
-        Connection.Cache cache =  connection.getRenderCacheLow();
-        int texsize = 16;
+        Connection.Cache cache =  connection.getCache(0);
+        double ts = 16;
 
-        double w = 1;
+        double hw = 0.5F;
         double h = 0.5F;
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
 
+        int currentBound = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+
+        Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/voltage_warning.png"));
         if(cache != null) {
             GlStateManager.pushMatrix();
             double[] in = cache.getIn();
             GlStateManager.translate(-connection.getPosition().getX()+in[0], 0-connection.getPosition().getY()+in[4]+0.5F, -connection.getPosition().getZ()+in[2]);
+            float angle = (float) Math.toDegrees(Math.atan((in[5]-in[4]) / cache.getLen()));
+            GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3]-in[2]) / (in[1]-in[0]))), 0, -1, 0);
+            for (int i = 0; i < 2; i++) {
+                GlStateManager.pushMatrix();
+                GlStateManager.rotate(180*i, 0, 1, 0);
+                GlStateManager.rotate(angle, -1, 0, 0);
+                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 
-            double len = cache.getLen();
-            double xend = (in[1] - in[0]) / len * w;
-            double yend = (in[5] - in[4]) / len;
-            double zend = (in[3] - in[2]) / len * w;
-            buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+                buff.pos(-hw, 0, -0).tex(0, (h*16)/ts).endVertex();
+                buff.pos(-hw, h, -0).tex(0, 0).endVertex();
+                buff.pos(hw, h, 0).tex((hw*32)/ts, 0).endVertex();
+                buff.pos(hw, 0, 0).tex((hw*32)/ts, (h*16)/ts).endVertex();
 
-            buff.pos(0, 0, 0).endVertex();
-            buff.pos(0, -h, 0).endVertex();
-            buff.pos(xend, -h+yend, zend).endVertex();
-            buff.pos(xend, yend, zend).endVertex();
-
-            buff.pos(xend, h/2, zend).endVertex();
-            buff.pos(xend, -h/2, zend).endVertex();
-            buff.pos(0, -h/2-yend, 0).endVertex();
-            buff.pos(0, -yend+h/2, 0).endVertex();
-
-            Tessellator.getInstance().draw();
+                Tessellator.getInstance().draw();
+                GlStateManager.popMatrix();
+            }
             GlStateManager.popMatrix();
         }
+
+        GlStateManager.bindTexture(currentBound);
     }
 
     public static void renderConnection(Connection connection) {
@@ -77,10 +82,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         if(connection.isHasSign()) {
             renderVoltSign(connection);
         }
-        for (int i = 0; i < 2; i++) {
-            Connection.Cache cache = i == 0 ? connection.getRenderCacheLow() : connection.getRenderCacheHigh();
+        for (int i = 0; i < connection.getType().getOffsets().length; i++) {
+            Connection.Cache cache = connection.getCache(i);
             GlStateManager.pushMatrix();
-            GlStateManager.translate(-connection.getPosition().getX(), 0.5F*i+0.25F, -connection.getPosition().getZ());
+            GlStateManager.translate(-connection.getPosition().getX(), connection.getType().getOffsets()[i], -connection.getPosition().getZ());
 
             if(cache != null) {
 

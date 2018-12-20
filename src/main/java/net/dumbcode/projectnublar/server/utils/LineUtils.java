@@ -27,11 +27,11 @@ public class LineUtils {
         }
         return null;
     }
-    public static List<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, @Nullable Predicate<BlockPos> predicate) {
+    public static List<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, ConnectionType type) {
         List<BlockPos> set = Lists.newArrayList();
-        for (int t = 0; t < 2; t++) {
-            Vec3d from = new Vec3d(fromPos.getX() + 0.5, fromPos.getY() + 0.25 + 0.5*t, fromPos.getZ() + 0.5);
-            Vec3d to = new Vec3d(toPos.getX() + 0.5, toPos.getY() + 0.25 + 0.5*t, toPos.getZ() + 0.5);
+        for (int t = 0; t < type.getOffsets().length; t++) {
+            Vec3d from = new Vec3d(fromPos.getX() + 0.5, fromPos.getY() + type.getOffsets()[t], fromPos.getZ() + 0.5);
+            Vec3d to = new Vec3d(toPos.getX() + 0.5, toPos.getY() + type.getOffsets()[t], toPos.getZ() + 0.5);
 
             if (!Double.isNaN(from.x) && !Double.isNaN(from.y) && !Double.isNaN(from.z)) {
                 if (!Double.isNaN(to.x) && !Double.isNaN(to.y) && !Double.isNaN(to.z)) {
@@ -41,15 +41,8 @@ public class LineUtils {
                     int l = MathHelper.floor(from.x);
                     int i1 = MathHelper.floor(from.y);
                     int j1 = MathHelper.floor(from.z);
-                    BlockPos blockpos = new BlockPos(l, i1, j1);
-                    if (predicate == null || predicate.test(blockpos)) {
-                        set.add(blockpos);
-                    }
-                    blockpos = new BlockPos(i, j, k);
-                    if (predicate == null || predicate.test(blockpos)) {
-                        set.add(blockpos);
-                    }
-
+                    set.add(new BlockPos(l, i1, j1));
+                    set.add(new BlockPos(i, j, k));
                     int k1 = 200;
 
                     while (k1-- >= 0) {
@@ -139,10 +132,7 @@ public class LineUtils {
                         l = MathHelper.floor(from.x) - (enumfacing == EnumFacing.EAST ? 1 : 0);
                         i1 = MathHelper.floor(from.y) - (enumfacing == EnumFacing.UP ? 1 : 0);
                         j1 = MathHelper.floor(from.z) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
-                        blockpos = new BlockPos(l, i1, j1);
-                        if (predicate == null || predicate.test(blockpos)) {
-                            set.add(blockpos);
-                        }
+                        set.add(new BlockPos(l, i1, j1));
                     }
                 }
             }

@@ -39,15 +39,15 @@ public class BlockElectricFence extends Block implements IItemBlock {
             double minY = Double.MAX_VALUE;
             double minZ = Double.MAX_VALUE;
 
-            double maxX = Double.MIN_VALUE;
-            double maxY = Double.MIN_VALUE;
-            double maxZ = Double.MIN_VALUE;
+            double maxX = -Double.MAX_VALUE;
+            double maxY = -Double.MAX_VALUE;
+            double maxZ = -Double.MAX_VALUE;
 
             boolean set = false;
 
             for (Connection connection : ((BlockEntityElectricFence) te).fenceConnections) {
-                for (int i = 0; i < 2; i++) {
-                    double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), 0.25+0.5*i);
+                for (int i = 0; i < connection.getType().getOffsets().length; i++) {
+                    double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), connection.getType().getOffsets()[i]);
                     if(in != null) {
                         set = true;
 
