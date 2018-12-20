@@ -37,13 +37,50 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.popMatrix();
     }
 
+    public static void renderVoltSign(Connection connection) {
+        Connection.Cache cache =  connection.getRenderCacheLow();
+        int texsize = 16;
+
+        double w = 1;
+        double h = 0.5F;
+        BufferBuilder buff = Tessellator.getInstance().getBuffer();
+
+        if(cache != null) {
+            GlStateManager.pushMatrix();
+            double[] in = cache.getIn();
+            GlStateManager.translate(-connection.getPosition().getX()+in[0], 0-connection.getPosition().getY()+in[4]+0.5F, -connection.getPosition().getZ()+in[2]);
+
+            double len = cache.getLen();
+            double xend = (in[1] - in[0]) / len * w;
+            double yend = (in[5] - in[4]) / len;
+            double zend = (in[3] - in[2]) / len * w;
+            buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+
+            buff.pos(0, 0, 0).endVertex();
+            buff.pos(0, -h, 0).endVertex();
+            buff.pos(xend, -h+yend, zend).endVertex();
+            buff.pos(xend, yend, zend).endVertex();
+
+            buff.pos(xend, 0, zend).endVertex();
+            buff.pos(xend, -h, zend).endVertex();
+            buff.pos(0, -h+yend, 0).endVertex();
+            buff.pos(0, yend, 0).endVertex();
+
+            Tessellator.getInstance().draw();
+            GlStateManager.popMatrix();
+        }
+    }
+
     public static void renderConnection(Connection connection) {
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         int texSize = 16;
+        if(connection.isHasSign()) {
+            renderVoltSign(connection);
+        }
         for (int i = 0; i < 2; i++) {
             Connection.Cache cache = i == 0 ? connection.getRenderCacheLow() : connection.getRenderCacheHigh();
             GlStateManager.pushMatrix();
-            GlStateManager.translate(0, 0.5F*i+0.25F, 0);
+            GlStateManager.translate(-connection.getPosition().getX(), 0.5F*i+0.25F, -connection.getPosition().getZ());
 
             if(cache != null) {
 
@@ -64,8 +101,6 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 Random rand = new Random(connection.getPosition().toLong());
 
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                buff.setTranslation(-connection.getPosition().getX(), 0, -connection.getPosition().getZ());
-
                 double u = rand.nextInt(16) / 16F;
                 double v = rand.nextInt(16) / 16F;
 

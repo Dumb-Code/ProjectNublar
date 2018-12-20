@@ -14,15 +14,18 @@ public class Connection {
     private final BlockPos to;
     private final BlockPos position;
 
+    private final boolean hasSign;
+
     private final int compared;
 
     private Cache renderCacheLow;
     private Cache renderCacheHigh;
 
-    public Connection(BlockPos from, BlockPos to, BlockPos position) {
+    public Connection(BlockPos from, BlockPos to, BlockPos position, boolean hasSign) {
         this.from = from;
         this.to = to;
         this.position = position;
+        this.hasSign = hasSign;
 
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
     }
@@ -30,11 +33,12 @@ public class Connection {
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setLong("from", this.getFrom().toLong());
         nbt.setLong("to", this.getTo().toLong());
+        nbt.setBoolean("sign", this.hasSign);
         return nbt;
     }
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        return new Connection(BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), tileEntity.getPos());
+        return new Connection(BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), tileEntity.getPos(), nbt.getBoolean("sign"));
     }
 
 
@@ -58,7 +62,7 @@ public class Connection {
         if(cache != null) {
 //            return cache;
         }
-        double halfthick = 1/32F;
+        double halfthick = 1/64F;
 
         BlockPos to = this.getMax();
         BlockPos from = this.getMin();
@@ -98,7 +102,7 @@ public class Connection {
                     cb[0], ytop-yThick, cb[1],
                     cb[2], ybot-yThick, cb[3]
             );
-            return new Cache(ct, cb, xNorm, zNorm, ybot, ytop, len, yThick, halfthick*2);
+            return new Cache(ct, cb, in, xNorm, zNorm, ybot, ytop, len, yThick, halfthick*2);
         }
         return null;
     }
@@ -107,5 +111,5 @@ public class Connection {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    @Value public class Cache { double[] ct, cb; Vector3f xNorm, zNorm; double ybot, ytop, len, yThick, fullThick; }
+    @Value public class Cache { double[] ct, cb, in; Vector3f xNorm, zNorm; double ybot, ytop, len, yThick, fullThick; }
 }

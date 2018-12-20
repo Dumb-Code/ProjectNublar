@@ -22,11 +22,13 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class BlockElectricFencePole extends Block implements IItemBlock {
@@ -70,7 +72,13 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         Type type = state.getValue(TYPE_PROPERTY);
         if(type == Type.BASE) {
             ItemStack stack = playerIn.getHeldItem(hand);
-            if(stack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) { //Move to item class ?
+            if(stack.isEmpty()) {
+                TileEntity te = worldIn.getTileEntity(pos);
+                if(te instanceof BlockEntityElectricFencePole) {
+                    ((BlockEntityElectricFencePole) te).rotatedAround = !((BlockEntityElectricFencePole) te).rotatedAround;
+                    return true;
+                }
+            } else if(stack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) { //Move to item class ?
                 NBTTagCompound nbt = stack.getOrCreateSubCompound(ProjectNublar.MODID);
                 if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
                     BlockPos other = BlockPos.fromLong(nbt.getLong("fence_position"));
@@ -81,12 +89,14 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                             BlockPos other1 = other.up(i);
                             TileEntity te = worldIn.getTileEntity(pos1);
                             if(te instanceof BlockEntityElectricFencePole) {
-                                ((BlockEntityElectricFencePole) te).fenceConnections.add(new Connection(pos1, other1, pos1));
+                                ((BlockEntityElectricFencePole) te).fenceConnections.add(new Connection(pos1, other1, pos1, false));
                             }
+                            worldIn.notifyBlockUpdate(pos1, worldIn.getBlockState(pos1), worldIn.getBlockState(pos1), 3);
                             TileEntity otherte = worldIn.getTileEntity(other1);
                             if(otherte instanceof BlockEntityElectricFencePole) {
-                                ((BlockEntityElectricFencePole) otherte).fenceConnections.add(new Connection(pos1, other1, other1));
+                                ((BlockEntityElectricFencePole) otherte).fenceConnections.add(new Connection(pos1, other1, other1, false));
                             }
+                            worldIn.notifyBlockUpdate(other1, worldIn.getBlockState(other1), worldIn.getBlockState(other1), 3);
                             for (BlockPos normalPos : positions) {
                                 BlockPos position = normalPos.up(i);
                                 if(worldIn.isAirBlock(position) || worldIn.getBlockState(position).getBlock().isReplaceable(worldIn, position)) {
@@ -94,7 +104,9 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                                 }
                                 TileEntity fencete = worldIn.getTileEntity(position);
                                 if(fencete instanceof BlockEntityElectricFence) {
-                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(pos1, other1, position));
+                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(pos1, other1, position, i == 1 && worldIn.rand.nextFloat() < 0.05F));
+                                    worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
+
                                 }
                             }
                         }
@@ -128,7 +140,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     }
 
     public EnumBlockRenderType getRenderType(IBlockState state) {
-        return state.getValue(TYPE_PROPERTY) == Type.BASE ? EnumBlockRenderType.MODEL : EnumBlockRenderType.INVISIBLE;
+        return EnumBlockRenderType.INVISIBLE;
     }
 
 
