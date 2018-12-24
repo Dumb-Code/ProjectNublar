@@ -44,9 +44,9 @@ public class BlockHandler {
                 EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer"),
                 INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator"),
                 COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator"),
-                LIGHT_STEEL_ELECTRIC_FENCE_POLE.setRegistryName("light_steel_electric_fence_pole").setUnlocalizedName("light_steel_electric_fence_pole"),
-                HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole"),
-                ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence")
+                LIGHT_STEEL_ELECTRIC_FENCE_POLE.setRegistryName("light_steel_electric_fence_pole").setUnlocalizedName("light_steel_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
+                HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
+                ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB)
         );
 
 
