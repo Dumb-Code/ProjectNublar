@@ -107,7 +107,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                                 }
                                 TileEntity fencete = worldIn.getTileEntity(position);
                                 if(fencete instanceof BlockEntityElectricFence) {
-                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(this.type, pos1, other1, position, i == 1 && worldIn.rand.nextFloat() < 1.05F));
+                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(this.type, pos1, other1, position, i == 1 && worldIn.rand.nextFloat() < 0.1F));
                                     worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
 
                                 }
