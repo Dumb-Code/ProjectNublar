@@ -24,6 +24,8 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -127,6 +129,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
         return new FossilProcessorGui(player, this, info, tab);
     }

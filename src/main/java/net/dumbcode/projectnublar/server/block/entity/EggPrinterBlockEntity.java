@@ -10,6 +10,8 @@ import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
@@ -37,6 +39,7 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
         return new EggPrinterGui(player, this, info, tab);
     }

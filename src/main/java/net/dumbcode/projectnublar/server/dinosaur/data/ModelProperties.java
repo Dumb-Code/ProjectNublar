@@ -7,6 +7,9 @@ import lombok.Data;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.dumblibrary.server.entity.GrowthStage;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -16,7 +19,14 @@ import java.util.Map;
 public class ModelProperties {
     private List<GrowthStage> modelGrowthStages = Lists.newArrayList(GrowthStage.ADULT);
     private Map<GrowthStage, String> mainModelMap = Maps.newEnumMap(GrowthStage.class);
-    private ModelContainer.AnimatorFactory entityAnimatorSupplier = DinosaurAnimator::new;
+    @SideOnly(Side.CLIENT)
+    private ModelContainer.AnimatorFactory entityAnimatorSupplier;
+
+    public ModelProperties() {
+        if(FMLCommonHandler.instance().getSide().isClient()) {
+            this.entityAnimatorSupplier = DinosaurAnimator::new; //Thinking lvl 400
+        }
+    }
 
     public void copyFrom(ModelProperties other) {
         modelGrowthStages.clear();

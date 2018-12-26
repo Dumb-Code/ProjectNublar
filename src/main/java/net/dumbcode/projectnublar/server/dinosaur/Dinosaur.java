@@ -24,6 +24,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
@@ -44,7 +46,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final SkeletalInformation skeletalInformation = new SkeletalInformation();
     private final DinosaurInfomation dinosaurInfomation = new DinosaurInfomation();
 
+    @SideOnly(Side.CLIENT)
     private ModelContainer modelContainer;
+    @SideOnly(Side.CLIENT)
     private ModelContainer noAnimationModelContainer;
 
     public Dinosaur() {

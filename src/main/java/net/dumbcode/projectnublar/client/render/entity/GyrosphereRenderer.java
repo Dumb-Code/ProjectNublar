@@ -13,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
@@ -22,7 +23,7 @@ import org.lwjgl.util.vector.Quaternion;
  * Minecraft's blending order is fucked up. If this were to be an entity renderer,
  * either the vehicle would use translucent textures, or it wouldn't look good
  */
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
+@Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class GyrosphereRenderer {
 
     private static int sphereID = -1;

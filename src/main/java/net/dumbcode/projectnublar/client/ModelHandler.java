@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -8,6 +9,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Map;
 import java.util.Objects;
@@ -18,11 +20,12 @@ import static net.dumbcode.projectnublar.server.item.ItemHandler.*;
 //  ModelLoaderRegistry#registerLoader
 //  register a custom model loader in order to have the same model have different dinosaur symbols
 @SuppressWarnings("unused")
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
+@Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class ModelHandler {
 
     @SubscribeEvent
-    public static void onModelRead(ModelRegistryEvent event) {
+    public static void onModelReady(ModelRegistryEvent event) {
+        TabulaModelHandler.INSTANCE.addDomain(ProjectNublar.MODID);
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE);
         reg(TEST_TUBES_GENETIC_MATERIAL);
     }

@@ -28,6 +28,8 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -276,6 +278,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
         return tab != 0 ? new SequencingSynthesizerInputsGui(player, this, info, tab) : new SequencingSynthesizerGui(player, this, info, tab);
     }

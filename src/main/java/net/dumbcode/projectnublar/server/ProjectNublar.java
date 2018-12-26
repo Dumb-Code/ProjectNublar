@@ -89,8 +89,6 @@ public class ProjectNublar {
         GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
 
         CapabilityManager.INSTANCE.register(EntityManager.class, new VoidStorage<>(), EntityManager.Impl::new);
-
-        TabulaModelHandler.INSTANCE.addDomain(MODID);
     }
 
     private void registerPackets() {

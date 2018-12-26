@@ -14,6 +14,8 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.vecmath.Vector3f;
@@ -28,6 +30,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
     private Dinosaur dinosaur = Dinosaur.MISSING;
+    @SideOnly(Side.CLIENT)
     private TabulaModel model;
     private Map<String, Vector3f> poseData = new HashMap<>();
 

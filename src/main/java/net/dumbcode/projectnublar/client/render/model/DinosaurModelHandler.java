@@ -23,8 +23,9 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
+@Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class DinosaurModelHandler {
 
     @SubscribeEvent

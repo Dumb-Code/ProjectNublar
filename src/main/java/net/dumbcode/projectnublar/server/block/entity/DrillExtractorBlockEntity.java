@@ -14,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
         return new DrillExtractorGui(player, this, info, tab);
     }

@@ -15,6 +15,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
@@ -82,6 +84,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
         return new IncubatorGuiScreen(player, this, info, tab);
     }
