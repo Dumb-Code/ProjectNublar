@@ -23,7 +23,6 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
@@ -33,17 +32,17 @@ import java.util.List;
 public class BlockElectricFencePole extends Block implements IItemBlock {
     @Getter
     private final ConnectionType type;
-    public static final PropertyInteger TYPE_PROPERTY = PropertyInteger.create("type", 0, 15);
+    public static final PropertyInteger INDEX_PROPERTY = PropertyInteger.create("index", 0, 15);
 
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
         this.type = type;
-        this.setDefaultState(this.getBlockState().getBaseState().withProperty(TYPE_PROPERTY, 0));
+        this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0));
     }
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, TYPE_PROPERTY);
+        return new BlockStateContainer(this, INDEX_PROPERTY);
     }
 
     @Override
@@ -57,14 +56,14 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
-        return this.getDefaultState().withProperty(TYPE_PROPERTY, 0);
+        return this.getDefaultState().withProperty(INDEX_PROPERTY, 0);
     }
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-       if(state.getValue(TYPE_PROPERTY) == 0) {
+       if(state.getValue(INDEX_PROPERTY) == 0) {
            for (int i = 1; i < this.type.getHeight(); i++) {
-               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(TYPE_PROPERTY, i));
+               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(INDEX_PROPERTY, i));
            }
 
        }
@@ -72,7 +71,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        int index = state.getValue(TYPE_PROPERTY);
+        int index = state.getValue(INDEX_PROPERTY);
         if(index == 0) {
             ItemStack stack = playerIn.getHeldItem(hand);
             if(stack.isEmpty()) {
@@ -134,11 +133,11 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         super.breakBlock(worldIn, pos, state);
         if(!destroying) {
             destroying = true;
-            int index = state.getValue(TYPE_PROPERTY);
-            for (int i = 0; i < index; i++) {
-                worldIn.setBlockToAir(pos.down(i));
+            int index = state.getValue(INDEX_PROPERTY);
+            for (int i = 1; i < index+1; i++) {
+                worldIn.setBlockToAir(pos.down(i)); //TODO: verify?
             }
-            for (int i = index+1; i < this.type.getHeight(); i++) {
+            for (int i = 1; i < this.type.getHeight()-index; i++) {
                 worldIn.setBlockToAir(pos.up(i));
             }
             destroying = false;
@@ -167,12 +166,12 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(TYPE_PROPERTY, meta);
+        return this.getDefaultState().withProperty(INDEX_PROPERTY, meta);
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        return state.getValue(TYPE_PROPERTY);
+        return state.getValue(INDEX_PROPERTY);
     }
 
     @Override

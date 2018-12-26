@@ -39,7 +39,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
         IBlockState state = te.getWorld().getBlockState(pos);
         Block block = state.getBlock();
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
-        if (block instanceof BlockElectricFencePole && state.getValue(BlockElectricFencePole.TYPE_PROPERTY) == 0) {
+        if (block instanceof BlockElectricFencePole && state.getValue(BlockElectricFencePole.INDEX_PROPERTY) == 0) {
             if (te.vbo == null) {
                 te.vbo = new VertexBuffer(DefaultVertexFormats.BLOCK);
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);

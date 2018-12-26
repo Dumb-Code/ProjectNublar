@@ -1,8 +1,10 @@
 package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static net.dumbcode.projectnublar.server.item.ItemHandler.*;
+import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 
 //TODO:
 //  ModelLoaderRegistry#registerLoader
@@ -26,6 +29,11 @@ public class ModelHandler {
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
         TabulaModelHandler.INSTANCE.addDomain(ProjectNublar.MODID);
+
+        ModelLoader.setCustomStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE, (new StateMap.Builder().ignore(BlockElectricFencePole.INDEX_PROPERTY)).build());
+        ModelLoader.setCustomStateMapper(LIGHT_STEEL_ELECTRIC_FENCE_POLE, (new StateMap.Builder().ignore(BlockElectricFencePole.INDEX_PROPERTY)).build());
+
+
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE);
         reg(TEST_TUBES_GENETIC_MATERIAL);
     }
