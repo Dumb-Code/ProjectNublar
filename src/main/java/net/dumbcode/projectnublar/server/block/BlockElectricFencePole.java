@@ -134,7 +134,11 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     {
         super.onBlockDestroyedByPlayer(worldIn, pos, state);
         for(int i = 0; i < this.type.getHeight(); i++)
-            worldIn.setBlockToAir(pos.add(0, i, 0));
+        {
+            BlockPos temp = pos.add(0, i, 0);
+            if(worldIn.getBlockState(temp).getBlock() instanceof BlockElectricFencePole)
+                worldIn.setBlockToAir(temp);
+        }
     }
 
     @Override
@@ -142,7 +146,11 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     {
         super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
         for(int i = 0; i < this.type.getHeight(); i++)
-            worldIn.setBlockToAir(pos.add(0, i, 0));
+        {
+            BlockPos temp = pos.add(0, i, 0);
+            if(worldIn.getBlockState(temp).getBlock() instanceof BlockElectricFencePole)
+                worldIn.setBlockToAir(temp);
+        }
     }
 
     @Override
