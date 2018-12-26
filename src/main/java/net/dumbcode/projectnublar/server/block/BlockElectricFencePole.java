@@ -24,6 +24,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
@@ -34,6 +35,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     @Getter
     private final ConnectionType type;
     public static final PropertyEnum<Type> TYPE_PROPERTY = PropertyEnum.create("type", Type.class);
+
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
         this.type = type;
@@ -125,6 +127,22 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
             return this.onBlockActivated(worldIn, pos.down(type.ordinal()), worldIn.getBlockState(pos.down(type.ordinal())), playerIn, hand, facing, hitX, hitY, hitZ);
         }
         return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+    }
+
+    @Override
+    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.onBlockDestroyedByPlayer(worldIn, pos, state);
+        for(int i = 0; i < this.type.getHeight(); i++)
+            worldIn.setBlockToAir(pos.add(0, i, 0));
+    }
+
+    @Override
+    public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
+    {
+        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
+        for(int i = 0; i < this.type.getHeight(); i++)
+            worldIn.setBlockToAir(pos.add(0, i, 0));
     }
 
     @Override

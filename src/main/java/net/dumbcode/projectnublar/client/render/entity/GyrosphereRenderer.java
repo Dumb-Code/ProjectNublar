@@ -19,8 +19,8 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
 /**
- * Minecrafts blending order is fucked up. If this were to be an entity renderer,
- * the either the vehicle would use translucent textures, or it woulnt look good
+ * Minecraft's blending order is fucked up. If this were to be an entity renderer,
+ * either the vehicle would use translucent textures, or it wouldn't look good
  */
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class GyrosphereRenderer {
