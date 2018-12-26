@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -22,7 +22,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
@@ -34,12 +33,12 @@ import java.util.List;
 public class BlockElectricFencePole extends Block implements IItemBlock {
     @Getter
     private final ConnectionType type;
-    public static final PropertyEnum<Type> TYPE_PROPERTY = PropertyEnum.create("type", Type.class);
+    public static final PropertyInteger TYPE_PROPERTY = PropertyInteger.create("type", 0, 15);
 
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
         this.type = type;
-        this.setDefaultState(this.getBlockState().getBaseState().withProperty(TYPE_PROPERTY, Type.BASE));
+        this.setDefaultState(this.getBlockState().getBaseState().withProperty(TYPE_PROPERTY, 0));
     }
 
     @Override
@@ -58,24 +57,23 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
-        return this.getDefaultState().withProperty(TYPE_PROPERTY, Type.BASE);
+        return this.getDefaultState().withProperty(TYPE_PROPERTY, 0);
     }
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-       if(state.getValue(TYPE_PROPERTY) == Type.BASE) {
-           for (int i = 1; i < this.type.getHeight()-1; i++) {
-               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(TYPE_PROPERTY, Type.DUMMY_CENTER));
+       if(state.getValue(TYPE_PROPERTY) == 0) {
+           for (int i = 1; i < this.type.getHeight(); i++) {
+               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(TYPE_PROPERTY, i));
            }
-           worldIn.setBlockState(pos.up(this.type.getHeight()-1), this.getDefaultState().withProperty(TYPE_PROPERTY, Type.DUMMY_TOP));
 
        }
     }
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        Type type = state.getValue(TYPE_PROPERTY);
-        if(type == Type.BASE) {
+        int index = state.getValue(TYPE_PROPERTY);
+        if(index == 0) {
             ItemStack stack = playerIn.getHeldItem(hand);
             if(stack.isEmpty()) {
                 TileEntity te = worldIn.getTileEntity(pos);
@@ -123,33 +121,27 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                 }
                 return true;
             }
-        } else {
-            return this.onBlockActivated(worldIn, pos.down(type.ordinal()), worldIn.getBlockState(pos.down(type.ordinal())), playerIn, hand, facing, hitX, hitY, hitZ);
+        } else if (worldIn.getBlockState(pos.down(index)).getBlock() == this) {
+            return this.onBlockActivated(worldIn, pos.down(index), worldIn.getBlockState(pos.down(index)), playerIn, hand, facing, hitX, hitY, hitZ);
         }
         return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
     }
 
-    @Override
-    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
-    {
-        super.onBlockDestroyedByPlayer(worldIn, pos, state);
-        for(int i = 0; i < this.type.getHeight(); i++)
-        {
-            BlockPos temp = pos.add(0, i, 0);
-            if(worldIn.getBlockState(temp).getBlock() instanceof BlockElectricFencePole)
-                worldIn.setBlockToAir(temp);
-        }
-    }
+    private static boolean destroying = false;
 
     @Override
-    public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
-    {
-        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
-        for(int i = 0; i < this.type.getHeight(); i++)
-        {
-            BlockPos temp = pos.add(0, i, 0);
-            if(worldIn.getBlockState(temp).getBlock() instanceof BlockElectricFencePole)
-                worldIn.setBlockToAir(temp);
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        super.breakBlock(worldIn, pos, state);
+        if(!destroying) {
+            destroying = true;
+            int index = state.getValue(TYPE_PROPERTY);
+            for (int i = 0; i < index; i++) {
+                worldIn.setBlockToAir(pos.down(i));
+            }
+            for (int i = index+1; i < this.type.getHeight(); i++) {
+                worldIn.setBlockToAir(pos.up(i));
+            }
+            destroying = false;
         }
     }
 
@@ -175,12 +167,12 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(TYPE_PROPERTY, Type.values()[meta % Type.values().length]);
+        return this.getDefaultState().withProperty(TYPE_PROPERTY, meta);
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        return state.getValue(TYPE_PROPERTY).ordinal();
+        return state.getValue(TYPE_PROPERTY);
     }
 
     @Override
@@ -192,14 +184,5 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
         return new BlockEntityElectricFencePole();
-    }
-
-    public enum Type implements IStringSerializable {
-        BASE, DUMMY_CENTER, DUMMY_TOP;
-
-        @Override
-        public String getName() {
-            return this.name().toLowerCase();
-        }
     }
 }
