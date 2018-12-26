@@ -44,7 +44,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         double ts = 16;
 
         double hw = 0.5F;
-        double h = 0.5F;
+        double h = 17F/32F;
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
 
         int currentBound = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
@@ -54,7 +54,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             GlStateManager.pushMatrix();
             double[] in = cache.getIn();
             GlStateManager.translate(-connection.getPosition().getX()+in[0], 0-connection.getPosition().getY()+in[4]+0.5F, -connection.getPosition().getZ()+in[2]);
-            float angle = (float) Math.toDegrees(Math.atan((in[5]-in[4]) / cache.getXzlen()));
+            float angle = (float) Math.toDegrees(Math.abs(Math.atan((in[5]-in[4]) / cache.getXzlen())));
             GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3]-in[2]) / (in[1]-in[0]))), 0, -1, 0);
             for (int i = 0; i < 2; i++) {
                 GlStateManager.pushMatrix();
