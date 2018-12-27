@@ -13,6 +13,10 @@ public class Connection {
     private final ConnectionType type;
     private final BlockPos from;
     private final BlockPos to;
+
+    private final BlockPos previous;
+    private final BlockPos next;
+
     private final BlockPos position;
 
     private final boolean hasSign;
@@ -21,10 +25,12 @@ public class Connection {
 
     private Cache[] rendercache;
 
-    public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos position, boolean hasSign) {
+    public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position, boolean hasSign) {
         this.type = type;
         this.from = from;
         this.to = to;
+        this.previous = previous;
+        this.next = next;
         this.position = position;
         this.hasSign = hasSign;
 
@@ -42,7 +48,7 @@ public class Connection {
     }
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        return new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), tileEntity.getPos(), nbt.getBoolean("sign"));
+        return new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos(), nbt.getBoolean("sign"));
     }
 
 

@@ -1,11 +1,13 @@
 package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class LineUtils {
@@ -28,7 +30,7 @@ public class LineUtils {
         return null;
     }
     public static List<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, ConnectionType type) {
-        List<BlockPos> set = Lists.newArrayList();
+        Set<BlockPos> set = Sets.newHashSet();
         for (int t = 0; t < type.getOffsets().length; t++) {
             Vec3d from = new Vec3d(fromPos.getX() + 0.5, fromPos.getY() + type.getOffsets()[t], fromPos.getZ() + 0.5);
             Vec3d to = new Vec3d(toPos.getX() + 0.5, toPos.getY() + type.getOffsets()[t], toPos.getZ() + 0.5);
@@ -138,7 +140,7 @@ public class LineUtils {
             }
         }
         
-        return set;
+        return Lists.newArrayList(set);
     }
 
 }

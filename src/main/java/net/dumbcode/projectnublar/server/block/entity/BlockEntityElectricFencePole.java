@@ -14,8 +14,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 import java.util.Set;
 
-public class BlockEntityElectricFencePole extends SimpleBlockEntity {
-    public List<Connection> fenceConnections = Lists.newArrayList();
+public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity {
+    public Set<Connection> fenceConnections = Sets.newHashSet();
 
     @SideOnly(Side.CLIENT)
     public VertexBuffer vbo;
@@ -46,5 +46,10 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity {
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
         return INFINITE_EXTENT_AABB; //TODO:change this
+    }
+
+    @Override
+    public void addConnection(Connection connection) {
+        this.fenceConnections.add(connection);
     }
 }

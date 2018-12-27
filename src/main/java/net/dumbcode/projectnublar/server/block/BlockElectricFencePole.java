@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
+import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -89,24 +90,14 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                         for (int i = 0; i < this.type.getHeight(); i++) {
                             BlockPos pos1 = pos.up(i);
                             BlockPos other1 = other.up(i);
-                            TileEntity te = worldIn.getTileEntity(pos1);
-                            if(te instanceof BlockEntityElectricFencePole) {
-                                ((BlockEntityElectricFencePole) te).fenceConnections.add(new Connection(this.type, pos1, other1, pos1, false));
-                            }
-                            worldIn.notifyBlockUpdate(pos1, worldIn.getBlockState(pos1), worldIn.getBlockState(pos1), 3);
-                            TileEntity otherte = worldIn.getTileEntity(other1);
-                            if(otherte instanceof BlockEntityElectricFencePole) {
-                                ((BlockEntityElectricFencePole) otherte).fenceConnections.add(new Connection(this.type, pos1, other1, other1, false));
-                            }
-                            worldIn.notifyBlockUpdate(other1, worldIn.getBlockState(other1), worldIn.getBlockState(other1), 3);
-                            for (BlockPos normalPos : positions) {
-                                BlockPos position = normalPos.up(i);
+                            for (int i1 = 0; i1 < positions.size(); i1++) {
+                                BlockPos position = positions.get(i1).up(i);
                                 if(worldIn.isAirBlock(position) || worldIn.getBlockState(position).getBlock().isReplaceable(worldIn, position)) {
                                     worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
                                 }
                                 TileEntity fencete = worldIn.getTileEntity(position);
-                                if(fencete instanceof BlockEntityElectricFence) {
-                                    ((BlockEntityElectricFence) fencete).fenceConnections.add(new Connection(this.type, pos1, other1, position, i == 1 && worldIn.rand.nextFloat() < 0.1F));
+                                if(fencete instanceof ConnectableBlockEntity) {
+                                    ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, pos1, other1, positions.get(Math.max(i1-1, 0)).up(i), positions.get(Math.min(i1+1, positions.size()-1)).up(i), position, i == 1 && worldIn.rand.nextFloat() < 0.1F));
                                     worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
 
                                 }

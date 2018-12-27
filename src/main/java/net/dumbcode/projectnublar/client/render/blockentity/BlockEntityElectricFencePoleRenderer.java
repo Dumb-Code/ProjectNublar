@@ -19,6 +19,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Iterator;
+
 public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFencePole> {
 
     @Override
@@ -51,22 +53,29 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
                 te.vbo.bufferData(buff.getByteBuffer());
             }
 
+
             GlStateManager.pushMatrix();
             float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
-            if (te.fenceConnections.size() == 1) {
-                Connection connection = te.fenceConnections.get(0);
-                double[] in = connection.getCache(0).getIn();
-                rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
-            } else if (te.fenceConnections.size() > 0) {
-                Connection connection1 = te.fenceConnections.get(0);
-                Connection connection2 = te.fenceConnections.get(1);
+            if(!te.fenceConnections.isEmpty()) {
+                Iterator<Connection> iter = te.fenceConnections.iterator();
+                if (te.fenceConnections.size() == 1) {
+                    Connection connection = iter.next();
+                    double[] in = connection.getCache(0).getIn();
+                    rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+                } else {
+                    Connection connection1 = iter.next();
+                    Connection connection2 = iter.next();
 
-                BlockPos other1 = connection1.getPosition().equals(connection1.getFrom()) ? connection1.getTo() : connection1.getFrom();
-                BlockPos other2 = connection2.getPosition().equals(connection2.getFrom()) ? connection2.getTo() : connection2.getFrom();
+                    BlockPos other1 = connection1.getPosition().equals(connection1.getFrom()) ? connection1.getTo() : connection1.getFrom();
+                    BlockPos other2 = connection2.getPosition().equals(connection2.getFrom()) ? connection2.getTo() : connection2.getFrom();
 
-                BlockPos dist = other1.subtract(other2);
+                    BlockPos dist = other1.subtract(other2);
 
-                rotation = (float) Math.toDegrees(Math.atan2(dist.getX(), dist.getZ())) - 90F;
+                    rotation = (float) Math.toDegrees(Math.atan2(dist.getX(), dist.getZ())) - 90F;
+
+                    //TODO: this is fuckin wrong. You need to get the angle then add half of it it onto the smallest atan of the two
+                    //Copy the logic for the fence size 1 part and get the smallest one of the connection. Use that.
+                }
             }
             rotation += ((BlockElectricFencePole) block).getType().getRotationOffset() + 90F;
             if(te.rotatedAround) {

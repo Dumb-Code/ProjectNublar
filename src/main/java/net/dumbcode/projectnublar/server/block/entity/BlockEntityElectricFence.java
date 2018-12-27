@@ -13,7 +13,7 @@ import net.minecraftforge.common.util.Constants;
 import java.util.List;
 import java.util.Set;
 
-public class BlockEntityElectricFence extends SimpleBlockEntity {
+public class BlockEntityElectricFence extends SimpleBlockEntity implements ConnectableBlockEntity {
     public Set<Connection> fenceConnections = Sets.newHashSet();
 
     @Override
@@ -68,4 +68,8 @@ public class BlockEntityElectricFence extends SimpleBlockEntity {
         return Double.MAX_VALUE;
     }
 
+    @Override
+    public void addConnection(Connection connection) {
+        this.fenceConnections.add(connection);
+    }
 }
