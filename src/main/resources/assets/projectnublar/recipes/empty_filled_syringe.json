@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "empty_filled_syringe",
+  "ingredients": [
+    [
+      {
+        "item": "projectnublar:dna_filled_syringe"
+      },
+      {
+        "item": "projectnublar:embryo_filled_syringe"
+      }
+    ]
+  ],
+  "result": {
+    "item": "projectnublar:empty_syringe"
+  }
+}

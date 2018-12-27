@@ -33,25 +33,27 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     @Override
     public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-        ItemStack out;
-        if((entity instanceof EntityChicken || entity instanceof EntityParrot) && ((EntityAnimal) entity).isInLove()) {
-            out = new ItemStack(ItemHandler.EMBRYO_FILLED_SYRINGE);
-            out.getOrCreateSubCompound(ProjectNublar.MODID).setString("ContainedType", Objects.requireNonNull(EntityList.getEntityString(entity)));
-        } else {
-            out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE);
-            NBTTagCompound nbt = out.getOrCreateSubCompound(ProjectNublar.MODID);
-            String s = EntityList.getEntityString(entity);
-            if(s == null) {
-                s = "generic";//Shouldn't happen, but its how vanilla handles it
+        if(!this.type.filled) {
+            ItemStack out;
+            if((entity instanceof EntityChicken || entity instanceof EntityParrot) && ((EntityAnimal) entity).isInLove()) {
+                out = new ItemStack(ItemHandler.EMBRYO_FILLED_SYRINGE);
+                out.getOrCreateSubCompound(ProjectNublar.MODID).setString("ContainedType", Objects.requireNonNull(EntityList.getEntityString(entity)));
+            } else {
+                out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE);
+                NBTTagCompound nbt = out.getOrCreateSubCompound(ProjectNublar.MODID);
+                String s = EntityList.getEntityString(entity);
+                if(s == null) {
+                    s = "generic";//Shouldn't happen, but its how vanilla handles it
+                }
+                nbt.setString("ContainedType", s);
+                nbt.setInteger("ContainedSize", MathUtils.getWeightedResult(50));// TODO: 16/10/2018 make a better number generator
             }
-            nbt.setString("ContainedType", s);
-            nbt.setInteger("ContainedSize", MathUtils.getWeightedResult(50));// TODO: 16/10/2018 make a better number generator
-        }
-        stack.shrink(1);
-        if(stack.isEmpty()) {
-            player.setHeldItem(EnumHand.MAIN_HAND, out);
-        } else {
-            MachineUtils.giveToInventory(player, out);
+            stack.shrink(1);
+            if(stack.isEmpty()) {
+                player.setHeldItem(EnumHand.MAIN_HAND, out);
+            } else {
+                MachineUtils.giveToInventory(player, out);
+            }
         }
         return false;
     }
