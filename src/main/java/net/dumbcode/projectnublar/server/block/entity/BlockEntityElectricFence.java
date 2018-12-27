@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BlockEntityElectricFence extends SimpleBlockEntity implements ConnectableBlockEntity {
-    public Set<Connection> fenceConnections = Sets.newHashSet();
+    public Set<Connection> fenceConnections = Sets.newLinkedHashSet();
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {

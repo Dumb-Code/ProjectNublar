@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity {
-    public Set<Connection> fenceConnections = Sets.newHashSet();
+    public Set<Connection> fenceConnections = Sets.newLinkedHashSet();
 
     @SideOnly(Side.CLIENT)
     public VertexBuffer vbo;

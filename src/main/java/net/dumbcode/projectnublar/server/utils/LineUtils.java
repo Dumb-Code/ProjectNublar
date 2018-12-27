@@ -30,7 +30,7 @@ public class LineUtils {
         return null;
     }
     public static List<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, ConnectionType type) {
-        Set<BlockPos> set = Sets.newHashSet();
+        Set<BlockPos> set = Sets.newLinkedHashSet();
         for (int t = 0; t < type.getOffsets().length; t++) {
             Vec3d from = new Vec3d(fromPos.getX() + 0.5, fromPos.getY() + type.getOffsets()[t], fromPos.getZ() + 0.5);
             Vec3d to = new Vec3d(toPos.getX() + 0.5, toPos.getY() + type.getOffsets()[t], toPos.getZ() + 0.5);
