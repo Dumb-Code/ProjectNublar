@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -66,15 +67,21 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
                     Connection connection1 = iter.next();
                     Connection connection2 = iter.next();
 
-                    BlockPos other1 = connection1.getPosition().equals(connection1.getFrom()) ? connection1.getTo() : connection1.getFrom();
-                    BlockPos other2 = connection2.getPosition().equals(connection2.getFrom()) ? connection2.getTo() : connection2.getFrom();
+                    double[] in1 = connection1.getCache(0).getIn();
+                    double[] in2 = connection2.getCache(0).getIn();
 
-                    BlockPos dist = other1.subtract(other2);
+                    double angle1 = Math.atan((in1[2] - in1[3]) / (in1[1] - in1[0]));
+                    if(in1[1] < in1[0] == connection1.getPosition().equals(connection1.getMin())) {
+                        angle1 += Math.PI;
+                    }
 
-                    rotation = (float) Math.toDegrees(Math.atan2(dist.getX(), dist.getZ())) - 90F;
+                    double angle2 = Math.atan((in2[2] - in2[3]) / (in2[1] - in2[0]));
+                    if(in2[1] < in2[0] == connection2.getPosition().equals(connection2.getMin())) {
+                        angle2 += Math.PI;
+                    }
 
-                    //TODO: this is fuckin wrong. You need to get the angle then add half of it it onto the smallest atan of the two
-                    //Copy the logic for the fence size 1 part and get the smallest one of the connection. Use that.
+                    rotation = (float) Math.toDegrees(angle1 + (angle2-angle1)/2D) + 90F;
+
                 }
             }
             rotation += ((BlockElectricFencePole) block).getType().getRotationOffset() + 90F;
