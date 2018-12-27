@@ -10,14 +10,20 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.command.CommandResultStats;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.PotionTypes;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -217,6 +223,29 @@ public class MachineUtils {
         }
 
         tessellator.draw();
+    }
+
+    //Gives the player an item without the fake item
+    //Copied from jeis CommandUtilServer
+    public static void giveToInventory(EntityPlayer player, ItemStack itemStack) {
+        int count = itemStack.getCount();
+        boolean addedToInventory = player.inventory.addItemStackToInventory(itemStack);
+
+        if (addedToInventory) {
+            player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRNG().nextFloat() - player.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.inventoryContainer.detectAndSendChanges();
+        }
+
+        if (addedToInventory && itemStack.isEmpty()) {
+            player.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, count);
+        } else {
+            player.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, count - itemStack.getCount());
+            EntityItem entityitem = player.dropItem(itemStack, false);
+            if (entityitem != null) {
+                entityitem.setNoPickupDelay();
+                entityitem.setOwner(player.getName());
+            }
+        }
     }
 
 }
