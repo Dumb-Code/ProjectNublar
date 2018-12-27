@@ -78,6 +78,11 @@ public class ProjectNublar {
         public ItemStack getTabIconItem() {
             return new ItemStack(ItemBlock.getItemFromBlock(Blocks.DEADBUSH)); //TODO: custom item
         }
+
+        @Override
+        public boolean hasSearchBar() {
+            return true;
+        }
     };
 
     @EventHandler

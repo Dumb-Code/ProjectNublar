@@ -37,13 +37,13 @@ public class BlockHandler {
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
         event.getRegistry().registerAll(
-                SKELETAL_BUILDER.setRegistryName("skeletal_builder").setUnlocalizedName("skeletal_builder"),
-                FOSSIL_PROCESSOR.setUnlocalizedName("fossil_processor").setRegistryName("fossil_processor"),
-                DRILL_EXTRACTOR.setUnlocalizedName("drill_extractor").setRegistryName("drill_extractor"),
-                SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer"),
-                EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer"),
-                INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator"),
-                COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator"),
+                SKELETAL_BUILDER.setRegistryName("skeletal_builder").setUnlocalizedName("skeletal_builder").setCreativeTab(ProjectNublar.TAB),
+                FOSSIL_PROCESSOR.setUnlocalizedName("fossil_processor").setRegistryName("fossil_processor").setCreativeTab(ProjectNublar.TAB),
+                DRILL_EXTRACTOR.setUnlocalizedName("drill_extractor").setRegistryName("drill_extractor").setCreativeTab(ProjectNublar.TAB),
+                SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer").setCreativeTab(ProjectNublar.TAB),
+                EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer").setCreativeTab(ProjectNublar.TAB),
+                INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator").setCreativeTab(ProjectNublar.TAB),
+                COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator").setCreativeTab(ProjectNublar.TAB),
                 LIGHT_STEEL_ELECTRIC_FENCE_POLE.setRegistryName("light_steel_electric_fence_pole").setUnlocalizedName("light_steel_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
                 HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
                 ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB)
