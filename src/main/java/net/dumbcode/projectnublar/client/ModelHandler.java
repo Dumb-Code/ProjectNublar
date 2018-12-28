@@ -2,13 +2,22 @@ package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.StateMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -16,8 +25,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.Map;
 import java.util.Objects;
 
+import static net.dumbcode.projectnublar.server.block.BlockHandler.HIGH_SECURITY_ELECTRIC_FENCE_POLE;
+import static net.dumbcode.projectnublar.server.block.BlockHandler.LIGHT_STEEL_ELECTRIC_FENCE_POLE;
 import static net.dumbcode.projectnublar.server.item.ItemHandler.*;
-import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 
 //TODO:
 //  ModelLoaderRegistry#registerLoader
@@ -25,6 +35,19 @@ import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class ModelHandler {
+
+    public static IBakedModel LIGHT_STEEL;
+    public static IBakedModel HIGH_SECURITY;
+
+    @SubscribeEvent
+    public static void onTextureStitched(TextureStitchEvent event) {
+        try {
+            LIGHT_STEEL = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/light_steel_electric_fence_pole.tbl"), event, DefaultVertexFormats.BLOCK));
+            HIGH_SECURITY = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/high_security_electric_fence_pole.tbl"), event, DefaultVertexFormats.BLOCK));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
@@ -56,6 +79,19 @@ public class ModelHandler {
 
     private static void reg(Item item, ResourceLocation location) {
         ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(location, "inventory"));
+    }
+
+    public static IBakedModel getModel(ResourceLocation resourceLocation, TextureStitchEvent event, VertexFormat format) throws Exception {
+        return ModelLoaderRegistry.getModel(resourceLocation).bake(TRSRTransformation.identity(), format, event.getMap()::registerSprite);
+    }
+
+    private static IBakedModel disableAO(IBakedModel model) {
+        return new BakedModelWrapper<IBakedModel>(model) {
+            @Override
+            public boolean isAmbientOcclusion() {
+                return false;
+            }
+        };
     }
 
 }

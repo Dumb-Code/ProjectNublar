@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
+import net.dumbcode.projectnublar.client.ModelHandler;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
@@ -12,6 +13,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -48,8 +50,17 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
                 te.vbo = new VertexBuffer(DefaultVertexFormats.BLOCK);
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
                 buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
-                Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelRenderer().renderModel(te.getWorld(),
-                        Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(state), state, pos, Tessellator.getInstance().getBuffer(), false);
+                IBakedModel model;
+                switch (((BlockElectricFencePole) block).getType()) {
+                    case HIGH_SECURITY:
+                        model = ModelHandler.HIGH_SECURITY;
+                        break;
+                    case LIGHT_STEEL:
+                    default:
+                        model = ModelHandler.LIGHT_STEEL;
+                        break;
+                }
+                Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelRenderer().renderModel(te.getWorld(), model, state, pos, Tessellator.getInstance().getBuffer(), false);
                 buff.finishDrawing();
                 buff.reset();
                 te.vbo.bufferData(buff.getByteBuffer());
