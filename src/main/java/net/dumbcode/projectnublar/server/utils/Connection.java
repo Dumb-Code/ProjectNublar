@@ -31,6 +31,7 @@ public class Connection {
     private final BlockPos position;
     private final int compared;
     private Cache[] rendercache;
+    private final boolean[] indexs;
 
     public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
         this.type = type;
@@ -43,6 +44,11 @@ public class Connection {
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
 
         this.rendercache = new Cache[this.type.getOffsets().length];
+
+        this.indexs = new boolean[type.getOffsets().length];
+        for (int i = 0; i < type.getOffsets().length; i++) {
+            this.indexs[i] = true;
+        }
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -52,6 +58,12 @@ public class Connection {
         for (int i = 0; i < this.type.getOffsets().length; i++) {
             nbt.setBoolean("sign_" + i, this.signMap.getOrDefault(i, false));
         }
+        NBTTagCompound ind = new NBTTagCompound();
+        ind.setInteger("size", this.indexs.length);
+        for (int i = 0; i < this.indexs.length; i++) {
+            ind.setBoolean(String.valueOf(i), this.indexs[i]);
+        }
+        nbt.setTag("indexes", ind);
         return nbt;
     }
 
@@ -59,6 +71,11 @@ public class Connection {
         Connection connection =  new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos());
         for (int i = 0; i < connection.type.getOffsets().length; i++) {
             connection.getSignMap().put(i, nbt.getBoolean("sign_" + i));
+        }
+        NBTTagCompound ind = nbt.getCompoundTag("indexes");
+        int size = ind.getInteger("size");
+        for (int i = 0; i < size; i++) {
+            connection.indexs[i] = ind.getBoolean(String.valueOf(i));
         }
         return connection;
     }
@@ -70,6 +87,10 @@ public class Connection {
 
     public BlockPos getMax() {
         return this.compared >= 0 ? this.to : this.from;
+    }
+
+    public void breakIndex(int index) {
+        this.indexs[index] = false;
     }
 
     public Cache getCache(int index) {

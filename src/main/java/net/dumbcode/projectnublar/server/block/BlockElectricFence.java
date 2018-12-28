@@ -106,6 +106,24 @@ public class BlockElectricFence extends Block implements IItemBlock {
         }
     }
 
+    @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        RayTraceResult result = ForgeHooks.rayTraceEyes(player, 7);
+        if(result != null && result.hitInfo instanceof Chunk) {
+            ((Chunk) result.hitInfo).connection.breakIndex(((Chunk) result.hitInfo).connectionID);
+            TileEntity te = world.getTileEntity(pos);
+            if(te != null) {
+                te.markDirty();
+            }
+            for (boolean b : ((Chunk) result.hitInfo).connection.getIndexs()) {
+                if(b) {
+                    return false;
+                }
+            }
+        }
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+
     @Nullable
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
@@ -150,12 +168,14 @@ public class BlockElectricFence extends Block implements IItemBlock {
         if(tileEntity instanceof BlockEntityElectricFence) {
             for (Connection connection : ((BlockEntityElectricFence) tileEntity).fenceConnections) {
                 for (int i = 0; i < connection.getType().getOffsets().length; i++) {
-                    double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), connection.getType().getOffsets()[i]);
-                    if(connection.getCache(i) == null) continue;
-                    double w = connection.getCache(i).getFullThick();
-                    if(in != null) {
+                    if(connection.getIndexs()[i]) {
+                        double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), connection.getType().getOffsets()[i]);
+                        if(connection.getCache(i) == null) continue;
+                        double w = connection.getCache(i).getFullThick();
+                        if(in != null) {
 //                        set.add(new Chunk(new AxisAlignedBB(in[0], in[4], in[2], in[1], in[5], in[3]).grow(0, connection.getCache(i).getFullThick()/2D+0.005, 0), connection, i));
-                        set.add(new Chunk(new AxisAlignedBB(0,-w,-w, -connection.getCache(i).getFullLen(), w, w), connection, i));
+                            set.add(new Chunk(new AxisAlignedBB(0,-w,-w, -connection.getCache(i).getFullLen(), w, w), connection, i));
+                        }
                     }
                 }
             }
@@ -183,18 +203,20 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
             for (Connection connection : ((BlockEntityElectricFence) te).fenceConnections) {
                 for (int i = 0; i < connection.getType().getOffsets().length; i++) {
-                    double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), connection.getType().getOffsets()[i]);
-                    if(in != null) {
-                        set = true;
+                    if(connection.getIndexs()[i]) {
+                        double[] in = LineUtils.intersect(pos, connection.getFrom(), connection.getTo(), connection.getType().getOffsets()[i]);
+                        if(in != null) {
+                            set = true;
 
-                        minX = Math.min(minX, in[0]);
-                        maxX = Math.max(maxX, in[1]);
+                            minX = Math.min(minX, in[0]);
+                            maxX = Math.max(maxX, in[1]);
 
-                        minZ = Math.min(minZ, in[2]);
-                        maxZ = Math.max(maxZ, in[3]);
+                            minZ = Math.min(minZ, in[2]);
+                            maxZ = Math.max(maxZ, in[3]);
 
-                        minY = Math.min(minY, in[4]);
-                        maxY = Math.max(maxY, in[5]);
+                            minY = Math.min(minY, in[4]);
+                            maxY = Math.max(maxY, in[5]);
+                        }
                     }
                 }
             }

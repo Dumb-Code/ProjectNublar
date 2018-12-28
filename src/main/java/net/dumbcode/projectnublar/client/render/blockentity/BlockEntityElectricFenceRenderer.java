@@ -73,57 +73,58 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         int texSize = 16;
         for (int i = 0; i < connection.getType().getOffsets().length; i++) {
-            if(connection.getSignMap().getOrDefault(i, false)) {
-                renderVoltSign(connection, i);
-            }
+            if(connection.getIndexs()[i]) {
+                if (connection.getSignMap().getOrDefault(i, false)) {
+                    renderVoltSign(connection, i);
+                }
 
-            Connection.Cache cache = connection.getCache(i);
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(-connection.getPosition().getX(), connection.getType().getOffsets()[i], -connection.getPosition().getZ());
+                Connection.Cache cache = connection.getCache(i);
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(-connection.getPosition().getX(), connection.getType().getOffsets()[i], -connection.getPosition().getZ());
 
-            if(cache != null) {
+                if (cache != null) {
 
-                double[] ct = cache.getCt();
-                double[] cb = cache.getCb();
+                    double[] ct = cache.getCt();
+                    double[] cb = cache.getCb();
 
-                Vector3f xNorm = cache.getXNorm();
-                Vector3f zNorm = cache.getZNorm();
+                    Vector3f xNorm = cache.getXNorm();
+                    Vector3f zNorm = cache.getZNorm();
 
-                double len = cache.getTexLen();
-                double ytop = cache.getYtop();
-                double ybot = cache.getYbot();
+                    double len = cache.getTexLen();
+                    double ytop = cache.getYtop();
+                    double ybot = cache.getYbot();
 
-                double yThick = cache.getYThick();
+                    double yThick = cache.getYThick();
 
-                double tw = (16*cache.getFullThick())/texSize;
+                    double tw = (16 * cache.getFullThick()) / texSize;
 
-                Random rand = new Random(connection.getPosition().toLong());
+                    Random rand = new Random(connection.getPosition().toLong());
 
-                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                double u = 5;//rand.nextInt(16) / 16F;
-                double v = 5;//rand.nextInt(16) / 16F;
+                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+                    double u = 5;//rand.nextInt(16) / 16F;
+                    double v = 5;//rand.nextInt(16) / 16F;
 
-                //Chunks of code are in U-D-N-E-S-W order
-                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
-                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, len+v).normal(0, 1, 0).endVertex();
-                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, len+v).normal(0, 1, 0).endVertex();
-                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u+tw, v).normal(0, 1, 0).endVertex();
-
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
-
-                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
-                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u, len+v).normal(0, -1, 0).endVertex();
-                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u+tw, len+v).normal(0, -1, 0).endVertex();
-                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, v).normal(0, -1, 0).endVertex();
+                    //Chunks of code are in U-D-N-E-S-W order
+                    buff.pos(ct[0], ytop + yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
+                    buff.pos(ct[2], ybot + yThick, ct[3]).tex(u, len + v).normal(0, 1, 0).endVertex();
+                    buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + tw, len + v).normal(0, 1, 0).endVertex();
+                    buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + tw, v).normal(0, 1, 0).endVertex();
 
 //                u = rand.nextInt(16) / 16F;
 //                v = rand.nextInt(16) / 16F;
 
-                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u+tw, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
+                    buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, len + v).normal(0, -1, 0).endVertex();
+                    buff.pos(cb[6], ytop - yThick, cb[7]).tex(u + tw, len + v).normal(0, -1, 0).endVertex();
+                    buff.pos(cb[4], ybot - yThick, cb[5]).tex(u + tw, v).normal(0, -1, 0).endVertex();
+
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
+
+                    buff.pos(ct[0], ytop + yThick, ct[1]).tex(u + tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                    buff.pos(ct[2], ybot + yThick, ct[3]).tex(u + tw, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
 
 //                u = rand.nextInt(16) / 16F;
 //                v = rand.nextInt(16) / 16F;
@@ -136,10 +137,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 //                u = rand.nextInt(16) / 16F;
 //                v = rand.nextInt(16) / 16F;
 
-                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u+tw, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(cb[4], ybot - yThick, cb[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(cb[6], ytop - yThick, cb[7]).tex(u, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + tw, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
 
 //                u = rand.nextInt(16) / 16F;
 //                v = rand.nextInt(16) / 16F;
@@ -149,9 +150,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 //                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
 //                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
 
-                Tessellator.getInstance().draw();
+                    Tessellator.getInstance().draw();
+                }
+                GlStateManager.popMatrix();
             }
-            GlStateManager.popMatrix();
         }
         buff.setTranslation(0,0,0);
     }
