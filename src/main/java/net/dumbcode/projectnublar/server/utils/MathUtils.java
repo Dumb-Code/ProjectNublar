@@ -47,4 +47,12 @@ public class MathUtils {
         Vec3d vec = calculateNormal(x1, y1, z1, x2, y2, z2, x3, y3, z3);
         return new Vector3f((float)vec.x, (float)vec.y, (float)vec.z);
     }
+
+    public static double horizontalDegree(double x, double z, boolean forward) {
+        double angle = Math.atan(z / x);
+        if(x < 0 == forward) {
+            angle += Math.PI;
+        }
+        return angle * 180 / Math.PI;
+    }
 }

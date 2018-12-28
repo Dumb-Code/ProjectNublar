@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.block;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
@@ -26,6 +25,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -97,7 +97,8 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                                 }
                                 TileEntity fencete = worldIn.getTileEntity(position);
                                 if(fencete instanceof ConnectableBlockEntity) {
-                                    ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, pos1, other1, positions.get(Math.max(i1-1, 0)).up(i), positions.get(Math.min(i1+1, positions.size()-1)).up(i), position, i == 1 && worldIn.rand.nextFloat() < 0.1F));
+                                    ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, pos1, other1, positions.get(Math.max(i1-1, 0)).up(i), positions.get(Math.min(i1+1, positions.size()-1)).up(i), position));
+                                    fencete.markDirty();
                                     worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
 
                                 }

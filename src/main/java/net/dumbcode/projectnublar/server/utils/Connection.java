@@ -1,38 +1,44 @@
 package net.dumbcode.projectnublar.server.utils;
 
+import com.google.common.collect.Maps;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
+import lombok.experimental.Accessors;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 
 import javax.vecmath.Vector3f;
 
-@Getter
-public class Connection {
-    private final ConnectionType type;
-    private final BlockPos from;
-    private final BlockPos to;
+import java.util.Map;
 
-    private final BlockPos previous;
-    private final BlockPos next;
+import static lombok.EqualsAndHashCode.Include;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Connection {
+    @Include private final ConnectionType type;
+    @Include private final BlockPos from;
+    @Include private final BlockPos to;
+
+    @Include private final BlockPos previous;
+    @Include private final BlockPos next;
+
+    @Include private Map<Integer, Boolean> signMap = Maps.newHashMap();
 
     private final BlockPos position;
-
-    private final boolean hasSign;
-
     private final int compared;
-
     private Cache[] rendercache;
 
-    public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position, boolean hasSign) {
+    public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
         this.type = type;
         this.from = from;
         this.to = to;
         this.previous = previous;
         this.next = next;
         this.position = position;
-        this.hasSign = hasSign;
 
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
 
@@ -43,12 +49,18 @@ public class Connection {
         nbt.setInteger("type", this.type.ordinal());
         nbt.setLong("from", this.getFrom().toLong());
         nbt.setLong("to", this.getTo().toLong());
-        nbt.setBoolean("sign", this.hasSign);
+        for (int i = 0; i < this.type.getOffsets().length; i++) {
+            nbt.setBoolean("sign_" + i, this.signMap.getOrDefault(i, false));
+        }
         return nbt;
     }
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        return new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos(), nbt.getBoolean("sign"));
+        Connection connection =  new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos());
+        for (int i = 0; i < connection.type.getOffsets().length; i++) {
+            connection.getSignMap().put(i, nbt.getBoolean("sign_" + i));
+        }
+        return connection;
     }
 
 
@@ -108,7 +120,8 @@ public class Connection {
                     cb[0], ytop-yThick, cb[1],
                     cb[2], ybot-yThick, cb[3]
             );
-            return new Cache(ct, cb, in, xNorm, zNorm, ybot, ytop, len, Math.sqrt((in[1]-in[0])*(in[1]-in[0]) + (in[3]-in[2])*(in[3]-in[2])), yThick, halfthick*2);
+            double sqxz = (in[1]-in[0])*(in[1]-in[0]) + (in[3]-in[2])*(in[3]-in[2]);
+            return new Cache(ct, cb, in, xNorm, zNorm, ybot, ytop, len, Math.sqrt(sqxz), Math.sqrt(sqxz + (in[5]-in[4])*(in[5]-in[4])), yThick, halfthick*2);
         }
         return null;
     }
@@ -117,5 +130,5 @@ public class Connection {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    @Value public class Cache { double[] ct, cb, in; Vector3f xNorm, zNorm; double ybot, ytop, len, xzlen, yThick, fullThick; }
+    @Value public class Cache { double[] ct, cb, in; Vector3f xNorm, zNorm; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; }
 }

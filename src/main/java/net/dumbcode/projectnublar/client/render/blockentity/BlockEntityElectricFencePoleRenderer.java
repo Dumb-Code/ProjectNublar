@@ -37,6 +37,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
             BlockEntityElectricFenceRenderer.renderConnection(connection);
         }
         GlStateManager.disableLighting();
+        GlStateManager.enableAlpha();
         Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         BlockPos pos = te.getPos();
         IBlockState state = te.getWorld().getBlockState(pos);
@@ -70,17 +71,10 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
                     double[] in1 = connection1.getCache(0).getIn();
                     double[] in2 = connection2.getCache(0).getIn();
 
-                    double angle1 = Math.atan((in1[2] - in1[3]) / (in1[1] - in1[0]));
-                    if(in1[1] < in1[0] == connection1.getPosition().equals(connection1.getMin())) {
-                        angle1 += Math.PI;
-                    }
+                    double angle1 = MathUtils.horizontalDegree(in1[1] - in1[0], in1[2] - in1[3], connection1.getPosition().equals(connection1.getMin()));
+                    double angle2 = MathUtils.horizontalDegree(in2[1] - in2[0], in2[2] - in2[3], connection2.getPosition().equals(connection2.getMin()));
 
-                    double angle2 = Math.atan((in2[2] - in2[3]) / (in2[1] - in2[0]));
-                    if(in2[1] < in2[0] == connection2.getPosition().equals(connection2.getMin())) {
-                        angle2 += Math.PI;
-                    }
-
-                    rotation = (float) Math.toDegrees(angle1 + (angle2-angle1)/2D) + 90F;
+                    rotation = (float) (angle1 + (angle2-angle1)/2D) + 90F;
 
                 }
             }

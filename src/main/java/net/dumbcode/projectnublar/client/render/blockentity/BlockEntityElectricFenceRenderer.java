@@ -3,25 +3,17 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.utils.Connection;
-import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 
-import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import java.util.Random;
-
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D;
 
 public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFence> {
     @Override
@@ -39,8 +31,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.popMatrix();
     }
 
-    public static void renderVoltSign(Connection connection) {
-        Connection.Cache cache =  connection.getCache(0);
+    public static void renderVoltSign(Connection connection, int index) {
+        Connection.Cache cache =  connection.getCache(index);
         double ts = 16;
 
         double hw = 0.5F;
@@ -53,23 +45,24 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         if(cache != null) {
             GlStateManager.pushMatrix();
             double[] in = cache.getIn();
-            GlStateManager.translate(-connection.getPosition().getX()+in[0], 0-connection.getPosition().getY()+in[4]+0.5F, -connection.getPosition().getZ()+in[2]);
-            float angle = (float) Math.toDegrees(Math.atan((in[5]-in[4]) / cache.getXzlen()));
+            GlStateManager.translate(-connection.getPosition().getX()+in[0], -connection.getPosition().getY()+in[4]-h-cache.getFullThick()/2D, -connection.getPosition().getZ()+in[2]);
+            double angle = -MathUtils.horizontalDegree(in[5]-in[4], cache.getXZlen(), true) + 90F;
             GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3]-in[2]) / (in[1]-in[0]))), 0, -1, 0);
             for (int i = 0; i < 2; i++) {
                 GlStateManager.pushMatrix();
                 GlStateManager.rotate(180*i, 0, 1, 0);
-                GlStateManager.rotate(angle, 0, 0, connection.getCompared());
+                GlStateManager.rotate((float) angle * (i==1?-1:1), 0, 0, connection.getCompared());
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 
-                buff.pos(-hw, 0, -0).tex(0, (h*16)/ts).endVertex();
-                buff.pos(-hw, h, -0).tex(0, 0).endVertex();
-                buff.pos(hw, h, 0).tex((hw*32)/ts, 0).endVertex();
-                buff.pos(hw, 0, 0).tex((hw*32)/ts, (h*16)/ts).endVertex();
+                buff.pos(-hw, 0, 0).tex((hw*32)/ts, (h*16)/ts).endVertex();
+                buff.pos(-hw, h, 0).tex((hw*32)/ts, 0).endVertex();
+                buff.pos(hw, h, 0).tex(0, 0).endVertex();
+                buff.pos(hw, 0, 0).tex(0, (h*16)/ts).endVertex();
 
                 Tessellator.getInstance().draw();
                 GlStateManager.popMatrix();
             }
+
             GlStateManager.popMatrix();
         }
 
@@ -79,10 +72,11 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
     public static void renderConnection(Connection connection) {
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         int texSize = 16;
-        if(connection.isHasSign()) {
-            renderVoltSign(connection);
-        }
         for (int i = 0; i < connection.getType().getOffsets().length; i++) {
+            if(connection.getSignMap().getOrDefault(i, false)) {
+                renderVoltSign(connection, i);
+            }
+
             Connection.Cache cache = connection.getCache(i);
             GlStateManager.pushMatrix();
             GlStateManager.translate(-connection.getPosition().getX(), connection.getType().getOffsets()[i], -connection.getPosition().getZ());
@@ -95,7 +89,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 Vector3f xNorm = cache.getXNorm();
                 Vector3f zNorm = cache.getZNorm();
 
-                double len = cache.getLen();
+                double len = cache.getTexLen();
                 double ytop = cache.getYtop();
                 double ybot = cache.getYbot();
 
@@ -106,8 +100,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 Random rand = new Random(connection.getPosition().toLong());
 
                 buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                double u = rand.nextInt(16) / 16F;
-                double v = rand.nextInt(16) / 16F;
+                double u = 5;//rand.nextInt(16) / 16F;
+                double v = 5;//rand.nextInt(16) / 16F;
 
                 //Chunks of code are in U-D-N-E-S-W order
                 buff.pos(ct[0], ytop+yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
@@ -115,45 +109,45 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, len+v).normal(0, 1, 0).endVertex();
                 buff.pos(ct[6], ytop+yThick, ct[7]).tex(u+tw, v).normal(0, 1, 0).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
 
                 buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
                 buff.pos(cb[0], ytop-yThick, cb[1]).tex(u, len+v).normal(0, -1, 0).endVertex();
                 buff.pos(cb[6], ytop-yThick, cb[7]).tex(u+tw, len+v).normal(0, -1, 0).endVertex();
                 buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, v).normal(0, -1, 0).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
 
                 buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                 buff.pos(cb[0], ytop-yThick, cb[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                 buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                 buff.pos(ct[2], ybot+yThick, ct[3]).tex(u+tw, len+v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
 
-                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
 
                 buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                 buff.pos(cb[4], ybot-yThick, cb[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                 buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                 buff.pos(ct[6], ytop+yThick, ct[7]).tex(u+tw, len+v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
 
-                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
 
                 Tessellator.getInstance().draw();
             }
@@ -164,6 +158,6 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
     @Override
     public boolean isGlobalRenderer(BlockEntityElectricFence te) {
-        return true;
+        return false;
     }
 }

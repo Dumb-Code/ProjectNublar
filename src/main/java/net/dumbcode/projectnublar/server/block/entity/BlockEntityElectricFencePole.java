@@ -1,8 +1,10 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.dumbcode.projectnublar.server.utils.ConnectionType;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -11,7 +13,6 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
 import java.util.Set;
 
 public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity {
@@ -45,7 +46,13 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
 
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
-        return INFINITE_EXTENT_AABB; //TODO:change this
+        Block block = this.world.getBlockState(this.pos).getBlock();
+        return (block instanceof BlockElectricFencePole && this.world.getBlockState(this.pos).getValue(BlockElectricFencePole.INDEX_PROPERTY) == 0 ? new AxisAlignedBB(this.pos, this.pos.up(block instanceof BlockElectricFencePole ? ((BlockElectricFencePole)block).getType().getHeight() : 0)) : super.getRenderBoundingBox()).grow(1);
+    }
+
+    @Override
+    public double getMaxRenderDistanceSquared() {
+        return Double.MAX_VALUE;
     }
 
     @Override

@@ -2,8 +2,10 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
+import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -37,22 +39,24 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     }
 
     public List<AxisAlignedBB> createBoundingBox() {
+        Block block = this.world.getBlockState(this.pos).getBlock();
         List<AxisAlignedBB> out = Lists.newArrayList();
-        for (Connection connections : this.fenceConnections) {
-            BlockPos top = connections.getMax();
-            BlockPos bottom = connections.getMin();
+        if(block instanceof BlockElectricFence) {
+            for (Connection connections : this.fenceConnections) {
+                for (int off = 0; off < connections.getType().getOffsets().length; off++) {
+                    double[] intersect = LineUtils.intersect(this.pos, connections.getFrom(), connections.getTo(), connections.getType().getOffsets()[off]);
+                    if(intersect != null) {
+                        double amount = 16;
 
-            double yrange = (top.getY() - bottom.getY()) / Math.sqrt((top.getX()-bottom.getX())*(top.getX()-bottom.getX()) + (top.getZ()-bottom.getZ())*(top.getZ()-bottom.getZ()));
-            double[] intersect = LineUtils.intersect(this.pos, connections.getFrom(), connections.getTo(), 0.5F);
-            if(intersect != null) {
-                double amount = 16;
+                        double x = (intersect[1] - intersect[0]) / amount;
+                        double y = (intersect[5] - intersect[4]) / amount;
+                        double z = (intersect[3] - intersect[2]) / amount;
 
-                double x = (intersect[1] - intersect[0]) / amount;
-                double z = (intersect[3] - intersect[2]) / amount;
-
-                for (int i = 0; i < amount; i++) {
-                    int next = i + 1;
-                    out.add(new AxisAlignedBB(x * i, 0F, z * i, x * next, 1F, z * next).offset(intersect[0] - this.pos.getX(), yrange * this.distance(bottom, intersect[0]+x*i, intersect[2]+z*i) - this.pos.getY() + bottom.getY(), intersect[2] - this.pos.getZ()));
+                        for (int i = 0; i < amount; i++) {
+                            int next = i + 1;
+                            out.add(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - this.pos.getX(), intersect[4] - this.pos.getY(), intersect[2] - this.pos.getZ()).grow(0, connections.getCache(off).getFullThick()/2D, 0));
+                        }
+                    }
                 }
             }
         }
@@ -65,7 +69,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
 
     @Override
     public double getMaxRenderDistanceSquared() {
-        return Double.MAX_VALUE;
+        return 2048*2048;
     }
 
     @Override
