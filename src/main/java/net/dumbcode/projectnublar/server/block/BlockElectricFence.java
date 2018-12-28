@@ -88,8 +88,8 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     GlStateManager.translate(-d3, -d4, -d5);
 
                     GlStateManager.translate(in[0], in[4], in[2]);
-                    GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[5] - in[4]) / cache.getXZlen())), Math.signum(in[1] - in[0]) == Math.signum(in[3] - in[2]) ? 1 : -1, 0, 0);
                     GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3] - in[2]) / (in[1] - in[0]))), 0, -1, 0);
+                    GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[5] - in[4]) / cache.getXZlen())), 0, 0, Math.signum(in[1] - in[0]) == Math.signum(in[3] - in[2]) ? -1 : 1);
 
                     RenderGlobal.drawSelectionBoundingBox(aabb.grow(0.003), 0,0,0,0.4F);
 
@@ -109,6 +109,8 @@ public class BlockElectricFence extends Block implements IItemBlock {
     @Nullable
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+        double hitDist = Double.MAX_VALUE;
+        RayTraceResult resultOut = null;
         for (Chunk chunk : this.getOutlines(worldIn, pos)) {
 
             Connection.Cache cache = chunk.getConnection().getCache(chunk.connectionID);
@@ -117,26 +119,29 @@ public class BlockElectricFence extends Block implements IItemBlock {
             Matrix4d rotymat = new Matrix4d();
             rotymat.rotY(Math.atan((in[3] - in[2]) / (in[1] - in[0])));
 
-            Matrix4d rotxmat = new Matrix4d();
-            rotxmat.rotX(Math.atan((in[5] - in[4]) / cache.getXZlen()) * (Math.signum(in[1] - in[0]) == Math.signum(in[3] - in[2]) ? -1 : 1));
+            Matrix4d rotzmat = new Matrix4d();
+            rotzmat.rotZ(Math.atan((in[5] - in[4]) / cache.getXZlen()) * (Math.signum(in[1] - in[0]) == Math.signum(in[3] - in[2]) ? 1 : -1));
 
             Vector3d startvec = new Vector3d(start.x - in[0], start.y - in[4], start.z - in[2]);
             Vector3d endvec = new Vector3d(end.x - in[0], end.y - in[4], end.z - in[2]);
 
-            rotxmat.transform(startvec);
             rotymat.transform(startvec);
+            rotzmat.transform(startvec);
 
-            rotxmat.transform(endvec);
             rotymat.transform(endvec);
+            rotzmat.transform(endvec);
 
             RayTraceResult result = this.rayTrace(pos, new Vec3d(startvec.x, startvec.y, startvec.z), new Vec3d(endvec.x, endvec.y, endvec.z), chunk.aabb.offset(-pos.getX(), -pos.getY(), -pos.getZ()));
             if(result != null) {
-                result.hitInfo = chunk;
-                return result;
+                double dist = result.hitVec.squareDistanceTo(start);
+                if(dist < hitDist) {
+                    result.hitInfo = chunk;
+                    resultOut = result;
+                    hitDist = dist;
+                }
             }
-
         }
-        return null;
+        return resultOut;
     }
 
     private Set<Chunk> getOutlines(World world, BlockPos pos) {
