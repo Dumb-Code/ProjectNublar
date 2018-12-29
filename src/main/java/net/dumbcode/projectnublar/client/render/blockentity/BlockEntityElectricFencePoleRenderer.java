@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePo
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
+import net.dumbcode.projectnublar.server.utils.RenderUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -28,7 +29,7 @@ import java.util.Iterator;
 public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFencePole> {
 
 
-    public static final boolean useVbo = false;
+    public static final boolean useVbo = true;
 
     public BlockEntityElectricFencePoleRenderer() {
 
@@ -125,26 +126,14 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
             if(useVbo) {
                 type.vbo.bindBuffer();
 
-                int stride = DefaultVertexFormats.POSITION_TEX_NORMAL.getNextOffset();
-
-                GlStateManager.glVertexPointer(3, GL11.GL_FLOAT, stride, 0);
-                GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-
-                OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-                GlStateManager.glTexCoordPointer(2, GL11.GL_FLOAT, stride, Float.BYTES * 3);
-                GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-
-                GlStateManager.glTexCoordPointer(3, GL11.GL_BYTE, stride, Float.BYTES * 5);
-                GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
+                RenderUtils.setupPointers(DefaultVertexFormats.POSITION_TEX_NORMAL);
 
                 RenderHelper.enableStandardItemLighting();
 
                 type.vbo.drawArrays(GL11.GL_QUADS);
                 type.vbo.unbindBuffer();
 
-                GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-                GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-                GlStateManager.glDisableClientState(GL11.GL_NORMAL_ARRAY);
+                RenderUtils.disableStates(DefaultVertexFormats.POSITION_TEX_NORMAL);
             } else {
                 GlStateManager.callList(type.listID);
             }
