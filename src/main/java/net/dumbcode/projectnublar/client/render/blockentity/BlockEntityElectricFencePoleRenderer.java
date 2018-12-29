@@ -68,6 +68,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
                     int[] o = Arrays.copyOf(quad.getVertexData(), quad.getVertexData().length);
                     buff.addVertexData(o);
                 }
+                Tessellator.getInstance().draw();
                 GlStateManager.glEndList();
 //                buff.finishDrawing();
 //                buff.reset();
