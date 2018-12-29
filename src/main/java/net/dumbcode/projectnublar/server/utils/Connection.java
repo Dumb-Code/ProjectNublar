@@ -64,6 +64,8 @@ public class Connection {
             ind.setBoolean(String.valueOf(i), this.indexs[i]);
         }
         nbt.setTag("indexes", ind);
+        nbt.setLong("previous", this.previous.toLong());
+        nbt.setLong("next", this.next.toLong());
         return nbt;
     }
 

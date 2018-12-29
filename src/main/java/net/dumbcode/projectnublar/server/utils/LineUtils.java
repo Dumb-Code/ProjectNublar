@@ -134,7 +134,11 @@ public class LineUtils {
                         l = MathHelper.floor(from.x) - (enumfacing == EnumFacing.EAST ? 1 : 0);
                         i1 = MathHelper.floor(from.y) - (enumfacing == EnumFacing.UP ? 1 : 0);
                         j1 = MathHelper.floor(from.z) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
-                        set.add(new BlockPos(l, i1, j1));
+                        BlockPos pos = new BlockPos(l, i1, j1);
+                        double[] in = intersect(pos, fromPos, toPos, type.getOffsets()[t]); //Surly a better way to do it
+                        if(in[0] != in[1] || in[2] != in[3] || in[4] != in[5]) {
+                            set.add(pos);
+                        }
                     }
                 }
             }

@@ -20,6 +20,8 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
 
     @SideOnly(Side.CLIENT)
     public VertexBuffer vbo;
+    @SideOnly(Side.CLIENT)
+    public int listID = -1;
     public boolean rotatedAround = false;
 
     @Override
@@ -58,5 +60,10 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
     @Override
     public void addConnection(Connection connection) {
         this.fenceConnections.add(connection);
+    }
+
+    @Override
+    public Set<Connection> getConnections() {
+        return this.fenceConnections;
     }
 }

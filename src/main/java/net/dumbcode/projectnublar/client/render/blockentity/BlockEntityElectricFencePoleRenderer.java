@@ -9,10 +9,8 @@ import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -22,6 +20,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFencePole> {
@@ -29,16 +28,20 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
     @Override
     public void render(BlockEntityElectricFencePole te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         GlStateManager.pushMatrix();
+//        RenderHelper.enableStandardItemLighting();
         GlStateManager.translate(x, y, z);
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
         GlStateManager.enableLighting();
+
         GlStateManager.color(1f, 1f, 1f, 1f);
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
         for (Connection connection : te.fenceConnections) {
             BlockEntityElectricFenceRenderer.renderConnection(connection);
         }
-        GlStateManager.disableLighting();
+        RenderHelper.enableStandardItemLighting();
+        GlStateManager.enableLighting();
+        GlStateManager.color(1f,1f,1f,1f);
         GlStateManager.enableAlpha();
         Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         BlockPos pos = te.getPos();
@@ -46,9 +49,10 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
         Block block = state.getBlock();
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         if (block instanceof BlockElectricFencePole && state.getValue(BlockElectricFencePole.INDEX_PROPERTY) == 0) {
-            if (te.vbo == null) {
-                te.vbo = new VertexBuffer(DefaultVertexFormats.BLOCK);
-                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+            if(/*te.vbo == null*/ te.listID == -1) {
+//                te.vbo = new VertexBuffer(DefaultVertexFormats.POSITION_TEX_NORMAL);
+                GlStateManager.glNewList(te.listID = GlStateManager.glGenLists(1), GL11.GL_COMPILE);
+                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
                 buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
                 IBakedModel model;
                 switch (((BlockElectricFencePole) block).getType()) {
@@ -60,12 +64,15 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
                         model = ModelHandler.LIGHT_STEEL;
                         break;
                 }
-                Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelRenderer().renderModel(te.getWorld(), model, state, pos, Tessellator.getInstance().getBuffer(), false);
-                buff.finishDrawing();
-                buff.reset();
-                te.vbo.bufferData(buff.getByteBuffer());
+                for (BakedQuad quad : model.getQuads(state, null, 0L)) {
+                    int[] o = Arrays.copyOf(quad.getVertexData(), quad.getVertexData().length);
+                    buff.addVertexData(o);
+                }
+                GlStateManager.glEndList();
+//                buff.finishDrawing();
+//                buff.reset();
+//                te.vbo.bufferData(buff.getByteBuffer());
             }
-
 
             GlStateManager.pushMatrix();
             float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
@@ -89,6 +96,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
 
                 }
             }
+
             rotation += ((BlockElectricFencePole) block).getType().getRotationOffset() + 90F;
             if(te.rotatedAround) {
                 rotation += 180;
@@ -96,35 +104,32 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
             GlStateManager.translate(0.5F, 0.5F, 0.5F);
             GlStateManager.rotate(rotation, 0, 1, 0);
             GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-            te.vbo.bindBuffer();
 
-            int stride = DefaultVertexFormats.BLOCK.getNextOffset();
+            GlStateManager.callList(te.listID);
 
-            GlStateManager.glVertexPointer(3, GL11.GL_FLOAT, stride, 0);
-            GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+//            te.vbo.bindBuffer();
+//
+//            int stride = DefaultVertexFormats.POSITION_TEX_NORMAL.getNextOffset();
+//
+//            GlStateManager.glVertexPointer(3, GL11.GL_FLOAT, stride, 0);
+//            GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+//
+//            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+//            GlStateManager.glTexCoordPointer(2, GL11.GL_FLOAT, stride, Float.BYTES * 3);
+//            GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+//
+//            GlStateManager.glTexCoordPointer(3, GL11.GL_BYTE, stride, Float.BYTES * 5);
+//            GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
+//
+//            RenderHelper.enableStandardItemLighting();
+//
+//            te.vbo.drawArrays(GL11.GL_QUADS);
+//            te.vbo.unbindBuffer();
+//
+//            GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+//            GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+//            GlStateManager.glDisableClientState(GL11.GL_NORMAL_ARRAY);
 
-            GlStateManager.glColorPointer(4, GL11.GL_UNSIGNED_BYTE, stride, Float.BYTES * 3);
-            GlStateManager.glEnableClientState(GL11.GL_COLOR_ARRAY);
-
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-            GlStateManager.glTexCoordPointer(2, GL11.GL_FLOAT, stride, Float.BYTES * 3 + 4);
-            GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit + 1);
-            GlStateManager.glTexCoordPointer(2, GL11.GL_SHORT, stride, Float.BYTES * 5 + 4);
-
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-
-            te.vbo.drawArrays(7);
-            te.vbo.unbindBuffer();
-
-            GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-            GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.lightmapTexUnit);
-            GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-            GlStateManager.glDisableClientState(GL11.GL_COLOR_ARRAY);
 
             GlStateManager.popMatrix();
 

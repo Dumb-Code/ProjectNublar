@@ -56,6 +56,8 @@ public class ClientWorldListener implements IWorldEventListener {
                             ((BlockEntityElectricFencePole) te).vbo.deleteGlBuffers();
                         }
                         ((BlockEntityElectricFencePole) te).vbo = null;
+                        ((BlockEntityElectricFencePole) te).listID = -1;
+
                     }
                 }
             }

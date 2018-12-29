@@ -86,12 +86,12 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(-d3, -d4, -d5);
-
                     GlStateManager.translate(in[0], in[4], in[2]);
-                    GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3] - in[2]) / (in[1] - in[0]))), 0, -1, 0);
-                    GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[5] - in[4]) / cache.getXZlen())), 0, 0, Math.signum(in[1] - in[0]) == Math.signum(in[3] - in[2]) ? -1 : 1);
 
-                    RenderGlobal.drawSelectionBoundingBox(aabb.grow(0.003), 0,0,0,0.4F);
+                    GlStateManager.rotate(in[1] == in[0] ? 270 : (float) Math.toDegrees(Math.atan((in[3] - in[2]) / (in[1] - in[0]))), 0, -1, 0);
+                    GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[5] - in[4]) / cache.getXZlen())), 0, 0, -1);
+
+                    RenderGlobal.drawSelectionBoundingBox(aabb, 0,0,0,0.4F);
 
                     GlStateManager.popMatrix();
 
@@ -135,10 +135,10 @@ public class BlockElectricFence extends Block implements IItemBlock {
             double[] in = cache.getIn();
 
             Matrix4d rotymat = new Matrix4d();
-            rotymat.rotY(Math.atan((in[3] - in[2]) / (in[1] - in[0])));
+            rotymat.rotY(in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0])));
 
             Matrix4d rotzmat = new Matrix4d();
-            rotzmat.rotZ(Math.atan((in[5] - in[4]) / cache.getXZlen()) * (Math.signum(in[1] - in[0]) == Math.signum(in[3] - in[2]) ? 1 : -1));
+            rotzmat.rotZ(Math.atan((in[5] - in[4]) / cache.getXZlen()) * 1);
 
             Vector3d startvec = new Vector3d(start.x - in[0], start.y - in[4], start.z - in[2]);
             Vector3d endvec = new Vector3d(end.x - in[0], end.y - in[4], end.z - in[2]);
@@ -151,7 +151,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
             RayTraceResult result = this.rayTrace(pos, new Vec3d(startvec.x, startvec.y, startvec.z), new Vec3d(endvec.x, endvec.y, endvec.z), chunk.aabb.offset(-pos.getX(), -pos.getY(), -pos.getZ()));
             if(result != null) {
-                double dist = result.hitVec.squareDistanceTo(start);
+                double dist = result.hitVec.squareDistanceTo(startvec.x, startvec.y, startvec.z);
                 if(dist < hitDist) {
                     result.hitInfo = chunk;
                     resultOut = result;

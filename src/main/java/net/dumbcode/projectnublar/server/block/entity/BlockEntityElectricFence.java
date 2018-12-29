@@ -62,9 +62,10 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
         }
         return out;
     }
-    
-    private double distance(BlockPos pos, double x, double z) {
-        return Math.sqrt((pos.getX()+0.5F-x)*(pos.getX()+0.5F-x) + (pos.getZ()+0.5F-z)*(pos.getZ()+0.5F-z));
+
+    @Override
+    public boolean hasFastRenderer() {
+        return false;
     }
 
     @Override
@@ -76,4 +77,10 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     public void addConnection(Connection connection) {
         this.fenceConnections.add(connection);
     }
+
+    @Override
+    public Set<Connection> getConnections() {
+        return this.fenceConnections;
+    }
+
 }

@@ -5,11 +5,13 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.GL11;
 
 import javax.vecmath.Vector3f;
@@ -22,7 +24,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.translate(x, y, z);
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
-        GlStateManager.enableLighting();
+        RenderHelper.enableStandardItemLighting();
         GlStateManager.color(1f,1f,1f,1f);
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
         for (Connection connection : te.fenceConnections) {
@@ -38,10 +40,11 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         double hw = 0.5F;
         double h = 17F/32F;
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
-
+        buff.setTranslation(0,0,0);
         int currentBound = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/voltage_warning.png"));
+
         if(cache != null) {
             GlStateManager.pushMatrix();
             double[] in = cache.getIn();
@@ -79,8 +82,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 }
 
                 Connection.Cache cache = connection.getCache(i);
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(-connection.getPosition().getX(), connection.getType().getOffsets()[i], -connection.getPosition().getZ());
+                buff.setTranslation(-connection.getPosition().getX(), connection.getType().getOffsets()[i], -connection.getPosition().getZ());
 
                 if (cache != null) {
 
@@ -90,7 +92,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                     Vector3f xNorm = cache.getXNorm();
                     Vector3f zNorm = cache.getZNorm();
 
-                    double len = cache.getTexLen();
+                    double len = cache.getTexLen()*2D;
                     double ytop = cache.getYtop();
                     double ybot = cache.getYbot();
 
@@ -101,8 +103,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                     Random rand = new Random(connection.getPosition().toLong());
 
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                    double u = 5;//rand.nextInt(16) / 16F;
-                    double v = 5;//rand.nextInt(16) / 16F;
+                    double u = rand.nextInt(16) / 16F;
+                    double v = rand.nextInt(16) / 16F;
 
                     //Chunks of code are in U-D-N-E-S-W order
                     buff.pos(ct[0], ytop + yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
@@ -110,49 +112,48 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                     buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + tw, len + v).normal(0, 1, 0).endVertex();
                     buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + tw, v).normal(0, 1, 0).endVertex();
 
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
                     buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
                     buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, len + v).normal(0, -1, 0).endVertex();
                     buff.pos(cb[6], ytop - yThick, cb[7]).tex(u + tw, len + v).normal(0, -1, 0).endVertex();
                     buff.pos(cb[4], ybot - yThick, cb[5]).tex(u + tw, v).normal(0, -1, 0).endVertex();
 
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
                     buff.pos(ct[0], ytop + yThick, ct[1]).tex(u + tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                     buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                     buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
                     buff.pos(ct[2], ybot + yThick, ct[3]).tex(u + tw, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
 
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-//                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                    buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
 
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
                     buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                     buff.pos(cb[4], ybot - yThick, cb[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                     buff.pos(cb[6], ytop - yThick, cb[7]).tex(u, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
                     buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + tw, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
 
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
+                    u = rand.nextInt(16) / 16F;
+                    v = rand.nextInt(16) / 16F;
 
-//                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
 
                     Tessellator.getInstance().draw();
                 }
-                GlStateManager.popMatrix();
             }
         }
         buff.setTranslation(0,0,0);
