@@ -1,6 +1,9 @@
 package net.dumbcode.projectnublar.server.utils;
 
 import lombok.Getter;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Getter
 public enum ConnectionType {
@@ -10,6 +13,13 @@ public enum ConnectionType {
     private final int height;
     private final float cableWidth;
     private final float rotationOffset;
+
+
+    @SideOnly(Side.CLIENT)
+    public int listID;
+    @SideOnly(Side.CLIENT)
+    public VertexBuffer vbo;
+
     ConnectionType(int amount, int height, float cableWidth, float defaultRotation) {
         this.offsets = new double[amount];
         this.height = height;

@@ -18,10 +18,6 @@ import java.util.Set;
 public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity {
     public Set<Connection> fenceConnections = Sets.newLinkedHashSet();
 
-    @SideOnly(Side.CLIENT)
-    public VertexBuffer vbo;
-    @SideOnly(Side.CLIENT)
-    public int listID = -1;
     public boolean rotatedAround = false;
 
     @Override
