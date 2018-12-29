@@ -45,10 +45,12 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/voltage_warning.png"));
 
+        GlStateManager.disableLighting();
+
         if(cache != null) {
             GlStateManager.pushMatrix();
             double[] in = cache.getIn();
-            GlStateManager.translate(-connection.getPosition().getX()+in[0], -connection.getPosition().getY()+in[4]-h-cache.getFullThick()/2D, -connection.getPosition().getZ()+in[2]);
+            GlStateManager.translate(-connection.getPosition().getX()+(in[0]+in[1])/2D, -connection.getPosition().getY()+(in[4]+in[5])/2D-h-cache.getFullThick()/2D, -connection.getPosition().getZ()+(in[2]+in[3])/2D);
             double angle = -MathUtils.horizontalDegree(in[5]-in[4], cache.getXZlen(), true) + 90F;
             GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3]-in[2]) / (in[1]-in[0]))), 0, -1, 0);
             for (int i = 0; i < 2; i++) {
@@ -68,6 +70,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
             GlStateManager.popMatrix();
         }
+        GlStateManager.enableLighting();
 
         GlStateManager.bindTexture(currentBound);
     }

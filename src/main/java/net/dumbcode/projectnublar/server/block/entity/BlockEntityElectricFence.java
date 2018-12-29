@@ -70,7 +70,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
 
     @Override
     public double getMaxRenderDistanceSquared() {
-        return 2048*2048;
+        return 100*100;
     }
 
     @Override

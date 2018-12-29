@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePo
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.EntityManagerListener;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -34,10 +35,7 @@ public class ClientWorldListener implements IWorldEventListener {
 
     @Override
     public void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
-//        TileEntity te = this.world.getTileEntity(pos);
-//        if(te instanceof BlockEntityElectricFencePole) {
-//            ((BlockEntityElectricFencePole) te).renderList = -1;
-//        }
+
     }
 
     @Override
@@ -52,11 +50,15 @@ public class ClientWorldListener implements IWorldEventListener {
                 for (int z = z1-1; z <= z1+1; z++) {
                     TileEntity te = this.world.getTileEntity(new BlockPos(x, y, z));
                     if(te instanceof BlockEntityElectricFencePole) {
-                        if(((BlockEntityElectricFencePole) te).vbo != null) {
-                            ((BlockEntityElectricFencePole) te).vbo.deleteGlBuffers();
+                        BlockEntityElectricFencePole pole = (BlockEntityElectricFencePole) te;
+                        if(pole.vbo != null) {
+                            pole.vbo.deleteGlBuffers();
                         }
-                        ((BlockEntityElectricFencePole) te).vbo = null;
-                        ((BlockEntityElectricFencePole) te).listID = -1;
+                        if(pole.listID != -1) {
+                            GlStateManager.glDeleteLists(pole.listID, 1);
+                        }
+                        pole.vbo = null;
+                        pole.listID = -1;
 
                     }
                 }
