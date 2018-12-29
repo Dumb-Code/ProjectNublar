@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePo
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
-import net.dumbcode.projectnublar.server.utils.RenderUtils;
+import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -23,7 +23,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFencePole> {
@@ -84,14 +83,13 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
         GlStateManager.enableLighting();
         GlStateManager.color(1f,1f,1f,1f);
         GlStateManager.enableAlpha();
-        Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         BlockPos pos = te.getPos();
         IBlockState state = te.getWorld().getBlockState(pos);
         Block block = state.getBlock();
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         if (block instanceof BlockElectricFencePole && state.getValue(BlockElectricFencePole.INDEX_PROPERTY) == 0) {
             ConnectionType type = ((BlockElectricFencePole) block).getType();
-
+            Minecraft.getMinecraft().renderEngine.bindTexture(type.getTexture());
             GlStateManager.pushMatrix();
             float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
             if(!te.fenceConnections.isEmpty()) {

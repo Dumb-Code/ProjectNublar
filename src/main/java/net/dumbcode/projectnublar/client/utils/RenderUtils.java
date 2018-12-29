@@ -1,4 +1,4 @@
-package net.dumbcode.projectnublar.server.utils;
+package net.dumbcode.projectnublar.client.utils;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

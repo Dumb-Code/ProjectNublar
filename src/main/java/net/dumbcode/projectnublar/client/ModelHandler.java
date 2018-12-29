@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client;
 
+import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -87,7 +88,7 @@ public class ModelHandler {
     }
 
     public static IBakedModel getModel(ResourceLocation resourceLocation, TextureStitchEvent event, VertexFormat format) throws Exception {
-        return ModelLoaderRegistry.getModel(resourceLocation).bake(TRSRTransformation.identity(), format, event.getMap()::registerSprite);
+        return ModelLoaderRegistry.getModel(resourceLocation).bake(TRSRTransformation.identity(), format, FullAtlasSprite::new);
     }
 
     private static IBakedModel disableAO(IBakedModel model) {

@@ -11,6 +11,7 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -160,6 +161,11 @@ public class BlockElectricFence extends Block implements IItemBlock {
             }
         }
         return resultOut;
+    }
+
+    @Override
+    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager) {
+        return super.addDestroyEffects(world, pos, manager);
     }
 
     private Set<Chunk> getOutlines(World world, BlockPos pos) {

@@ -1,7 +1,9 @@
 package net.dumbcode.projectnublar.server.utils;
 
 import lombok.Getter;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -13,7 +15,7 @@ public enum ConnectionType {
     private final int height;
     private final float cableWidth;
     private final float rotationOffset;
-
+    private final ResourceLocation texture;
 
     @SideOnly(Side.CLIENT)
     public int listID;
@@ -25,6 +27,8 @@ public enum ConnectionType {
         this.height = height;
         this.cableWidth = cableWidth;
         this.rotationOffset = defaultRotation;
+        this.texture = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/" + this.name().toLowerCase() + "_electric_fence_pole.png");
+
         double off = 1D / (amount * 2);
         for (int i = 0; i < amount; i++) {
             this.offsets[i] = (i*2 + 1) * off;
