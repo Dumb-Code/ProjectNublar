@@ -25,7 +25,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -62,12 +61,12 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-       if(state.getValue(INDEX_PROPERTY) == 0) {
-           for (int i = 1; i < this.type.getHeight(); i++) {
-               worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(INDEX_PROPERTY, i));
-           }
+        if(state.getValue(INDEX_PROPERTY) == 0) {
+            for (int i = 1; i < this.type.getHeight(); i++) {
+                worldIn.setBlockState(pos.up(i), this.getDefaultState().withProperty(INDEX_PROPERTY, i));
+            }
 
-       }
+        }
     }
 
     @Override
@@ -86,21 +85,23 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                 if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
                     BlockPos other = BlockPos.fromLong(nbt.getLong("fence_position"));
                     if(worldIn.getBlockState(other).getBlock() == this && !other.equals(pos)) {
-                        List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, this.type);
-                        for (int i = 0; i < this.type.getHeight(); i++) {
-                            BlockPos pos1 = pos.up(i);
-                            BlockPos other1 = other.up(i);
-                            for (int i1 = 0; i1 < positions.size(); i1++) {
-                                BlockPos position = positions.get(i1).up(i);
-                                if(worldIn.isAirBlock(position) || worldIn.getBlockState(position).getBlock().isReplaceable(worldIn, position)) {
-                                    worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
-                                }
-                                TileEntity fencete = worldIn.getTileEntity(position);
-                                if(fencete instanceof ConnectableBlockEntity) {
-                                    ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, pos1, other1, positions.get(Math.max(i1-1, 0)).up(i), positions.get(Math.min(i1+1, positions.size()-1)).up(i), position));
-                                    fencete.markDirty();
-                                    worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
+                        for (double offset : this.type.getOffsets()) {
+                            List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, offset);
+                            for (int i = 0; i < this.type.getHeight(); i++) {
+                                BlockPos pos1 = pos.up(i);
+                                BlockPos other1 = other.up(i);
+                                for (int i1 = 0; i1 < positions.size(); i1++) {
+                                    BlockPos position = positions.get(i1).up(i);
+                                    if (worldIn.isAirBlock(position) || worldIn.getBlockState(position).getBlock().isReplaceable(worldIn, position)) {
+                                        worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
+                                    }
+                                    TileEntity fencete = worldIn.getTileEntity(position);
+                                    if (fencete instanceof ConnectableBlockEntity) {
+                                        ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.max(i1 - 1, 0)).up(i), positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), position));
+                                        fencete.markDirty();
+                                        worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
 
+                                    }
                                 }
                             }
                         }

@@ -19,8 +19,8 @@ public class DebugUtil {
         GlStateManager.enableCull();
 
         RayTraceResult target = event.getTarget();
-        BlockElectricFence.Chunk chunk = (BlockElectricFence.Chunk) target.hitInfo;
-        Connection.Cache cache = chunk.getConnection().getCache(chunk.getConnectionID());
+        BlockElectricFence.HitChunk chunk = (BlockElectricFence.HitChunk) target.hitInfo;
+        Connection.Cache cache = chunk.getConnection().getCache();
         double[] in = cache.getIn();
         AxisAlignedBB aabb = chunk.getAabb();
 

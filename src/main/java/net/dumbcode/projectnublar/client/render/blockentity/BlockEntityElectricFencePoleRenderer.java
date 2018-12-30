@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
+import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.ModelHandler;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
@@ -24,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFencePole> {
 
@@ -93,17 +95,32 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
             GlStateManager.pushMatrix();
             float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
             if(!te.fenceConnections.isEmpty()) {
-                Iterator<Connection> iter = te.fenceConnections.iterator();
-                if (te.fenceConnections.size() == 1) {
-                    Connection connection = iter.next();
-                    double[] in = connection.getCache(0).getIn();
+
+                List<Connection> differingConnections = Lists.newArrayList();
+                for (Connection connection : te.fenceConnections) {
+                    boolean has = false;
+                    for (Connection dc : differingConnections) {
+                        if(connection.getFrom().equals(dc.getFrom()) && connection.getTo().equals(dc.getTo())) {
+                            has = true;
+                            break;
+                        }
+                    }
+                    if(!has) {
+                        differingConnections.add(connection);
+                    }
+                }
+
+                if (differingConnections.size() == 1) {
+                    Connection connection = differingConnections.get(0);
+                    double[] in = connection.getCache().getIn();
                     rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
                 } else {
-                    Connection connection1 = iter.next();
-                    Connection connection2 = iter.next();
 
-                    double[] in1 = connection1.getCache(0).getIn();
-                    double[] in2 = connection2.getCache(0).getIn();
+                    Connection connection1 = differingConnections.get(0);
+                    Connection connection2 = differingConnections.get(1);
+
+                    double[] in1 = connection1.getCache().getIn();
+                    double[] in2 = connection2.getCache().getIn();
 
                     double angle1 = MathUtils.horizontalDegree(in1[1] - in1[0], in1[2] - in1[3], connection1.getPosition().equals(connection1.getMin()));
                     double angle2 = MathUtils.horizontalDegree(in2[1] - in2[0], in2[2] - in2[3], connection2.getPosition().equals(connection2.getMin()));

@@ -1,18 +1,14 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import com.google.common.collect.Maps;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
-import lombok.experimental.Accessors;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 
 import javax.vecmath.Vector3f;
-
-import java.util.Map;
 
 import static lombok.EqualsAndHashCode.Include;
 
@@ -20,21 +16,24 @@ import static lombok.EqualsAndHashCode.Include;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Connection {
     @Include private final ConnectionType type;
+    @Include private final double offset;
     @Include private final BlockPos from;
     @Include private final BlockPos to;
 
     @Include private final BlockPos previous;
     @Include private final BlockPos next;
 
-    @Include private Map<Integer, Boolean> signMap = Maps.newHashMap();
+    @Setter @Include boolean sign;
 
     private final BlockPos position;
     private final int compared;
-    private Cache[] rendercache;
-    private final boolean[] indexs;
 
-    public Connection(ConnectionType type, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
+    private Cache rendercache;
+    @Setter private boolean broken;
+
+    public Connection(ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
         this.type = type;
+        this.offset = offset;
         this.from = from;
         this.to = to;
         this.previous = previous;
@@ -42,46 +41,29 @@ public class Connection {
         this.position = position;
 
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
-
-        this.rendercache = new Cache[this.type.getOffsets().length];
-
-        this.indexs = new boolean[type.getOffsets().length];
-        for (int i = 0; i < type.getOffsets().length; i++) {
-            this.indexs[i] = true;
-        }
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setInteger("type", this.type.ordinal());
+        nbt.setDouble("offset", this.offset);
         nbt.setLong("from", this.getFrom().toLong());
         nbt.setLong("to", this.getTo().toLong());
-        for (int i = 0; i < this.type.getOffsets().length; i++) {
-            nbt.setBoolean("sign_" + i, this.signMap.getOrDefault(i, false));
-        }
-        NBTTagCompound ind = new NBTTagCompound();
-        ind.setInteger("size", this.indexs.length);
-        for (int i = 0; i < this.indexs.length; i++) {
-            ind.setBoolean(String.valueOf(i), this.indexs[i]);
-        }
-        nbt.setTag("indexes", ind);
+        nbt.setBoolean("sign", this.sign);
         nbt.setLong("previous", this.previous.toLong());
         nbt.setLong("next", this.next.toLong());
+        nbt.setBoolean("broken", this.broken);
         return nbt;
     }
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        Connection connection =  new Connection(ConnectionType.getType(nbt.getInteger("type")), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos());
-        for (int i = 0; i < connection.type.getOffsets().length; i++) {
-            connection.getSignMap().put(i, nbt.getBoolean("sign_" + i));
-        }
-        NBTTagCompound ind = nbt.getCompoundTag("indexes");
-        int size = ind.getInteger("size");
-        for (int i = 0; i < size; i++) {
-            connection.indexs[i] = ind.getBoolean(String.valueOf(i));
-        }
-        return connection;
+        Connection c = new Connection(ConnectionType.getType(nbt.getInteger("type")), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos());
+        c.setBroken(nbt.getBoolean("broken"));
+        return c;
     }
 
+    public boolean lazyEquals(Connection con) {
+        return this.getFrom().equals(con.getFrom()) && this.getTo().equals(con.getTo()) && this.offset == con.offset;
+    }
 
     public BlockPos getMin() {
         return this.compared < 0 ? this.to : this.from;
@@ -91,19 +73,13 @@ public class Connection {
         return this.compared >= 0 ? this.to : this.from;
     }
 
-    public void breakIndex(int index) {
-        this.indexs[index] = false;
+
+
+    public Cache getCache() {
+        return this.rendercache = this.getOrGenCache(this.rendercache);
     }
 
-    public void placeIndex(int index) {
-        this.indexs[index] = true;
-    }
-
-    public Cache getCache(int index) {
-        return this.rendercache[index] = this.getOrGenCache(this.rendercache[index], index);
-    }
-
-    private Cache getOrGenCache(Cache cache, int index) {
+    private Cache getOrGenCache(Cache cache) {
         if(cache != null) {
             return cache;
         }
@@ -114,7 +90,7 @@ public class Connection {
 
         double posdist = this.distance(from, to.getX()+0.5F, to.getZ()+0.5F);
         double yrange = (to.getY() - from.getY()) / posdist;
-        double[] in = LineUtils.intersect(this.position, from, to, this.type.getOffsets()[index]);
+        double[] in = LineUtils.intersect(this.position, from, to, this.offset);
         if(in != null) {
             double tangrad = in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
             double xcomp = halfthick * Math.sin(tangrad);

@@ -43,19 +43,18 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
         List<AxisAlignedBB> out = Lists.newArrayList();
         if(block instanceof BlockElectricFence) {
             for (Connection connections : this.fenceConnections) {
-                for (int off = 0; off < connections.getType().getOffsets().length; off++) {
-                    double[] intersect = LineUtils.intersect(this.pos, connections.getFrom(), connections.getTo(), connections.getType().getOffsets()[off]);
-                    if(intersect != null) {
-                        double amount = 16;
+                Connection.Cache cache = connections.getCache();
+                if(cache != null) {
+                    double[] intersect = cache.getIn();
+                    double amount = 16;
 
-                        double x = (intersect[1] - intersect[0]) / amount;
-                        double y = (intersect[5] - intersect[4]) / amount;
-                        double z = (intersect[3] - intersect[2]) / amount;
+                    double x = (intersect[1] - intersect[0]) / amount;
+                    double y = (intersect[5] - intersect[4]) / amount;
+                    double z = (intersect[3] - intersect[2]) / amount;
 
-                        for (int i = 0; i < amount; i++) {
-                            int next = i + 1;
-                            out.add(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - this.pos.getX(), intersect[4] - this.pos.getY(), intersect[2] - this.pos.getZ()).grow(0, connections.getCache(off).getFullThick()/2D, 0));
-                        }
+                    for (int i = 0; i < amount; i++) {
+                        int next = i + 1;
+                        out.add(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - this.pos.getX(), intersect[4] - this.pos.getY(), intersect[2] - this.pos.getZ()).grow(0, connections.getCache().getFullThick()/2D, 0));
                     }
                 }
             }
