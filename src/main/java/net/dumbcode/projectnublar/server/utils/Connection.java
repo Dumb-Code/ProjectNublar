@@ -95,6 +95,10 @@ public class Connection {
         this.indexs[index] = false;
     }
 
+    public void placeIndex(int index) {
+        this.indexs[index] = true;
+    }
+
     public Cache getCache(int index) {
         return this.rendercache[index] = this.getOrGenCache(this.rendercache[index], index);
     }
