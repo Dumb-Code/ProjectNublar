@@ -4,9 +4,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
+import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import javax.vecmath.Vector3f;
 
@@ -17,8 +19,10 @@ import static lombok.EqualsAndHashCode.Include;
 public class Connection {
     @Include private final ConnectionType type;
     @Include private final double offset;
-    @Include private final BlockPos from;
-    @Include private final BlockPos to;
+    //Used to help compare Connections
+    @Include private final int toFromHash;
+    private final BlockPos from;
+    private final BlockPos to;
 
     @Include private final BlockPos previous;
     @Include private final BlockPos next;
@@ -41,6 +45,9 @@ public class Connection {
         this.position = position;
 
         this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
+
+        this.toFromHash = (this.compared < 0 ? this.from : this.to).hashCode() + (this.compared < 0 ? this.to : this.from).hashCode() * 31;
+
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -73,7 +80,19 @@ public class Connection {
         return this.compared >= 0 ? this.to : this.from;
     }
 
-
+    public boolean brokenSide(World world, BlockPos otherPos) {
+        TileEntity te = world.getTileEntity(otherPos);
+        if(te instanceof ConnectableBlockEntity) {
+            ConnectableBlockEntity fe = (ConnectableBlockEntity) te;
+            for (Connection fenceConnection : fe.getConnections()) {
+                if(this.lazyEquals(fenceConnection) && fenceConnection.isBroken()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
 
     public Cache getCache() {
         return this.rendercache = this.getOrGenCache(this.rendercache);
@@ -112,7 +131,7 @@ public class Connection {
             double ytop = yrange * this.distance(from, in[0], in[2]) - this.position.getY() + from.getY();
             double ybot = yrange * this.distance(from, in[1], in[3]) - this.position.getY() + from.getY();
             double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot));
-            double yThick = halfthick *  Math.cos(tangrady);
+            double yThick = halfthick * Math.cos(tangrady);
             Vector3f xNorm = MathUtils.calcualeNormalF(
                     ct[2], ybot+yThick, ct[3],
                     cb[2], ybot-yThick, cb[3],

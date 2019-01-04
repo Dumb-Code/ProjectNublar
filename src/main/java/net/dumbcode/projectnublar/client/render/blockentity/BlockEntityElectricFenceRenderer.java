@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
+import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.utils.Connection;
@@ -12,8 +13,11 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import java.util.Random;
 
@@ -24,7 +28,6 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.translate(x, y, z);
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();
-        RenderHelper.enableStandardItemLighting();
         GlStateManager.color(1f,1f,1f,1f);
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
         for (Connection connection : te.fenceConnections) {
@@ -77,6 +80,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
     }
 
     public static void renderConnection(Connection connection) {
+        World world = Minecraft.getMinecraft().world;
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         int texSize = 16;
         if(!connection.isBroken()) {
@@ -101,61 +105,239 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
                 double yThick = cache.getYThick();
 
-                double tw = (16 * cache.getFullThick()) / texSize;
+                double td = (16 * cache.getFullThick()) / texSize;
+                double th = (16 * cache.getFullThick()) / texSize;
 
-                Random rand = new Random(connection.getPosition().toLong());
 
-                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                double u = rand.nextInt(16) / 16F;
-                double v = rand.nextInt(16) / 16F;
+                boolean pb = connection.brokenSide(world, connection.getPrevious());
+                boolean nb = connection.brokenSide(world, connection.getNext());
+                Random rand = new Random(connection.getPosition().toLong() + (long)(connection.getOffset() * 1000));
 
-                //Chunks of code are in U-D-N-E-S-W order
-                buff.pos(ct[0], ytop + yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
-                buff.pos(ct[2], ybot + yThick, ct[3]).tex(u, len + v).normal(0, 1, 0).endVertex();
-                buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + tw, len + v).normal(0, 1, 0).endVertex();
-                buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + tw, v).normal(0, 1, 0).endVertex();
+                if(pb || nb) {
+                    double[] cent = new double[] {
+                            (ct[0] + ct[2])/2D,
+                            (ct[1] + ct[3])/2D,
+                            (ct[4] + ct[6])/2D,
+                            (ct[5] + ct[7])/2D
+                    };
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    double[] cenb = new double[] {
+                            (cb[0] + cb[2])/2D,
+                            (cb[1] + cb[3])/2D,
+                            (cb[4] + cb[6])/2D,
+                            (cb[5] + cb[7])/2D
+                    };
 
-                buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
-                buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, len + v).normal(0, -1, 0).endVertex();
-                buff.pos(cb[6], ytop - yThick, cb[7]).tex(u + tw, len + v).normal(0, -1, 0).endVertex();
-                buff.pos(cb[4], ybot - yThick, cb[5]).tex(u + tw, v).normal(0, -1, 0).endVertex();
+                    boolean reversed = connection.getCompared() < 0;
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    if(pb == reversed) {
+                        ct = new double[]{
+                                ct[0], ct[1],
+                                cent[0], cent[1],
+                                cent[2], cent[3],
+                                ct[6], ct[7]
+                        };
 
-                buff.pos(ct[0], ytop + yThick, ct[1]).tex(u + tw, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-                buff.pos(ct[2], ybot + yThick, ct[3]).tex(u + tw, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+                        cb = new double[] {
+                                cb[0], cb[1],
+                                cenb[0], cenb[1],
+                                cenb[2], cenb[3],
+                                cb[6], cb[7]
+                        };
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                        ybot = ybot + (ytop - ybot) / 2D;
+                    }
+                    if(nb == reversed) {
+                        ct = new double[]{
+                                cent[0], cent[1],
+                                ct[2], ct[3],
+                                ct[4], ct[5],
+                                cent[2], cent[3],
+                        };
 
-                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+tw, tw+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+tw, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+                        cb = new double[] {
+                                cenb[0], cenb[1],
+                                cb[2], cb[3],
+                                cb[4], cb[5],
+                                cenb[2], cenb[3],
+                        };
+                        ytop = ybot + (ytop - ybot) / 2D;
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    }
+                    len /= 2D;
 
-                buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + tw, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(cb[4], ybot - yThick, cb[5]).tex(u, +v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(cb[6], ytop - yThick, cb[7]).tex(u, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-                buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + tw, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+                    double[] in = cache.getIn();
+                    Vector3d point = new Vector3d(cache.getFullLen()/2, 0, 0);
 
-                u = rand.nextInt(16) / 16F;
-                v = rand.nextInt(16) / 16F;
+                    Matrix4d rot = new Matrix4d();
 
-                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+tw, tw+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+tw, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+                    rot.rotZ(Math.atan((in[4] - in[5]) / cache.getXZlen()));
+                    rot.transform(point);
 
-                Tessellator.getInstance().draw();
+                    rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+                    rot.transform(point);
+
+                    rot.rotZ((rand.nextFloat()-0.5) * Math.PI/3F);
+                    rot.transform(point);
+
+                    rot.rotY((rand.nextFloat()-0.5F) * Math.PI/2F);
+                    rot.transform(point);
+
+                    if(pb == reversed) {
+                        RenderUtils.drawSpacedCube(
+                                ct[2], ybot + yThick, ct[3],
+                                ct[2] - point.x, ybot + yThick - point.y, ct[3] - point.z,
+                                ct[4] - point.x, ybot + yThick - point.y, ct[5] - point.z,
+                                ct[4], ybot + yThick, ct[5],
+
+                                cb[2], ybot - yThick, cb[3],
+                                cb[2] - point.x, ybot - yThick - point.y, cb[3] - point.z,
+                                cb[4] - point.x, ybot - yThick - point.y, cb[5] - point.z,
+                                cb[4], ybot - yThick, cb[5],
+
+                                0, 0,
+                                0, 0,
+                                0, 0,
+                                0, 0,
+                                0, 0,
+                                0, 0,
+
+                                len, th, td
+                        );
+
+                    }
+
+                    //To prevent the line just being straight if both edges are broken, we need to redo the end point
+                    if(pb && nb) {
+                        point = new Vector3d(cache.getFullLen()/2, 0, 0);
+
+                        rot.rotZ(Math.atan((in[4] - in[5]) / cache.getXZlen()));
+                        rot.transform(point);
+
+                        rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+                        rot.transform(point);
+
+                        rot.rotZ((rand.nextFloat()-0.5) * Math.PI/3F);
+                        rot.transform(point);
+
+                        rot.rotY((rand.nextFloat()-0.5F) * Math.PI/2F);
+                        rot.transform(point);
+                    }
+
+                    if (nb == reversed) {
+                        RenderUtils.drawSpacedCube(
+                                ct[0] + point.x, ytop + yThick + point.y, ct[1] + point.z,
+                                ct[0], ytop + yThick, ct[1],
+                                ct[6], ytop + yThick, ct[7],
+                                ct[6] + point.x, ytop + yThick + point.y, ct[7] + point.z,
+
+                                cb[0] + point.x, ytop - yThick + point.y, cb[1] + point.z,
+                                cb[0], ytop - yThick, cb[1],
+                                cb[6], ytop - yThick, cb[7],
+                                cb[6] + point.x, ytop - yThick + point.y, cb[7] + point.z,
+
+                                0,0,
+                                0,0,
+                                0,0,
+                                0,0,
+                                0,0,
+                                0,0,
+
+                                len,th,td
+                        );
+
+                        //buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+                        //                        buff.pos(ct[0], ytop + yThick, ct[1]).color(1f, 1f,1f,1f).endVertex();
+                        //                        buff.pos(ct[0] + point.x, ytop + yThick + point.y, ct[1] + point.z).color(1f, 1f, 1f, 1f).endVertex();
+                        //
+                        //                        buff.pos(ct[6], ytop + yThick, ct[7]).color(1f, 1f,1f,1f).endVertex();
+                        //                        buff.pos(ct[6] + point.x, ytop + yThick + point.y, ct[7] + point.z).color(1f, 1f, 1f, 1f).endVertex();
+                        //
+                        //                        buff.pos(cb[0], ytop - yThick, cb[1]).color(1f, 1f,1f,1f).endVertex();
+                        //                        buff.pos(cb[0] + point.x, ytop - yThick + point.y, cb[1] + point.z).color(1f, 1f, 1f, 1f).endVertex();
+                        //
+                        //                        buff.pos(cb[6], ytop - yThick, cb[7]).color(1f, 1f,1f,1f).endVertex();
+                        //                        buff.pos(cb[6] + point.x, ytop - yThick + point.y, cb[7] + point.z).color(1f, 1f, 1f, 1f).endVertex();
+                        //                        Tessellator.getInstance().draw();
+
+                    }
+
+                }
+
+                RenderUtils.drawSpacedCube(
+                        ct[0], ytop + yThick, ct[1],
+                        ct[2], ybot + yThick, ct[3],
+                        ct[4], ybot + yThick, ct[5],
+                        ct[6], ytop + yThick, ct[7],
+
+                        cb[0], ytop - yThick, cb[1],
+                        cb[2], ybot - yThick, cb[3],
+                        cb[4], ybot - yThick, cb[5],
+                        cb[6], ytop - yThick, cb[7],
+
+                        0,0,
+                        0,0,
+                        0,0,
+                        0,0,
+                        0,0,
+                        0,0,
+
+                        len,th,td
+                );
+
+
+//                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+//                double u = rand.nextInt(16) / 16F;
+//                double v = rand.nextInt(16) / 16F;
+//
+//
+//                //Chunks of code are in U-D-N-S-E-W order
+//                buff.pos(ct[0], ytop + yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
+//                buff.pos(ct[2], ybot + yThick, ct[3]).tex(u, len + v).normal(0, 1, 0).endVertex();
+//                buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + td, len + v).normal(0, 1, 0).endVertex();
+//                buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + td, v).normal(0, 1, 0).endVertex();
+//
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
+//
+//                buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
+//                buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, len + v).normal(0, -1, 0).endVertex();
+//                buff.pos(cb[6], ytop - yThick, cb[7]).tex(u + td, len + v).normal(0, -1, 0).endVertex();
+//                buff.pos(cb[4], ybot - yThick, cb[5]).tex(u + td, v).normal(0, -1, 0).endVertex();
+//
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
+//
+//                buff.pos(ct[0], ytop + yThick, ct[1]).tex(u , v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+//                buff.pos(cb[0], ytop - yThick, cb[1]).tex(u+ th, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+//                buff.pos(cb[2], ybot - yThick, cb[3]).tex(u + th, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+//                buff.pos(ct[2], ybot + yThick, ct[3]).tex(u, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
+//
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
+//
+//                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, th+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+td, th+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+td, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
+//
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
+//
+//                buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + th, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+//                buff.pos(cb[4], ybot - yThick, cb[5]).tex(u, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+//                buff.pos(cb[6], ytop - yThick, cb[7]).tex(u, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+//                buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + th, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+//
+//                u = rand.nextInt(16) / 16F;
+//                v = rand.nextInt(16) / 16F;
+//
+//                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, th+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+td, th+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+td, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
+//
+//                Tessellator.getInstance().draw();
             }
         }
         buff.setTranslation(0,0,0);

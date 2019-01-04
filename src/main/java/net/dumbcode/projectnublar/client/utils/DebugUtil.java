@@ -67,36 +67,9 @@ public class DebugUtil {
 
 
         //Draw a cubeoid of the transformed collision box
-        Vector3d s = new Vector3d(aabb.minX, aabb.minY, aabb.minZ);
-        Vector3d e = new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ);
         RenderHelper.enableStandardItemLighting();
         GlStateManager.color(1,1,1,1);
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_NORMAL);
-        buff.pos(s.x, e.y, s.z).normal(0, 1, 0).endVertex();
-        buff.pos(s.x, e.y, e.z).normal(0, 1, 0).endVertex();
-        buff.pos(e.x, e.y, e.z).normal(0, 1, 0).endVertex();
-        buff.pos(e.x, e.y, s.z).normal(0, 1, 0).endVertex();
-        buff.pos(s.x, s.y, e.z).normal(0, -1, 0).endVertex();
-        buff.pos(s.x, s.y, s.z).normal(0, -1, 0).endVertex();
-        buff.pos(e.x, s.y, s.z).normal(0, -1, 0).endVertex();
-        buff.pos(e.x, s.y, e.z).normal(0, -1, 0).endVertex();
-        buff.pos(e.x, e.y, e.z).normal(1, 0, 0).endVertex();
-        buff.pos(e.x, s.y, e.z).normal(1, 0, 0).endVertex();
-        buff.pos(e.x, s.y, s.z).normal(1, 0, 0).endVertex();
-        buff.pos(e.x, e.y, s.z).normal(1, 0, 0).endVertex();
-        buff.pos(s.x, s.y, e.z).normal(-1, 0, 0).endVertex();
-        buff.pos(s.x, e.y, e.z).normal(-1, 0, 0).endVertex();
-        buff.pos(s.x, e.y, s.z).normal(-1, 0, 0).endVertex();
-        buff.pos(s.x, s.y, s.z).normal(-1, 0, 0).endVertex();
-        buff.pos(s.x, e.y, e.z).normal(0, 0, 1).endVertex();
-        buff.pos(s.x, s.y, e.z).normal(0, 0, 1).endVertex();
-        buff.pos(e.x, s.y, e.z).normal(0, 0, 1).endVertex();
-        buff.pos(e.x, e.y, e.z).normal(0, 0, 1).endVertex();
-        buff.pos(s.x, s.y, s.z).normal(0, 0, -1).endVertex();
-        buff.pos(s.x, e.y, s.z).normal(0, 0, -1).endVertex();
-        buff.pos(e.x, e.y, s.z).normal(0, 0, -1).endVertex();
-        buff.pos(e.x, s.y, s.z).normal(0, 0, -1).endVertex();
-        Tessellator.getInstance().draw();
+        RenderUtils.drawCubeoid(new Vec3d(aabb.minX, aabb.minY, aabb.minZ), new Vec3d(aabb.maxX, aabb.maxY, aabb.maxZ));
         GlStateManager.disableLighting();
         RenderGlobal.drawSelectionBoundingBox(aabb, 1,0,0,1F);
     }
