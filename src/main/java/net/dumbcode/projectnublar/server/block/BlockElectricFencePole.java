@@ -23,6 +23,7 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
@@ -128,13 +129,18 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
             destroying = true;
             int index = state.getValue(INDEX_PROPERTY);
             for (int i = 1; i < index+1; i++) {
-                worldIn.setBlockToAir(pos.down(i)); //TODO: verify?
+                worldIn.setBlockToAir(pos.down(i)); //TODO: verify if our block?
             }
             for (int i = 1; i < this.type.getHeight()-index; i++) {
                 worldIn.setBlockToAir(pos.up(i));
             }
             destroying = false;
         }
+    }
+
+    @Override
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? 8 : 0;
     }
 
     @Override
