@@ -34,6 +34,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
@@ -67,6 +68,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
     }
 
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public static void onDrawBlock(DrawBlockHighlightEvent event) {
         if(event.getSubID() == 0) {
             RayTraceResult target = event.getTarget();
