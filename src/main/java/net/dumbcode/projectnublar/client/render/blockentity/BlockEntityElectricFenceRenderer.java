@@ -99,7 +99,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 Vector3f xNorm = cache.getXNorm();
                 Vector3f zNorm = cache.getZNorm();
 
-                double len = cache.getTexLen()*2D;
+                double len = cache.getTexLen();
                 double ytop = cache.getYtop();
                 double ybot = cache.getYbot();
 
@@ -195,12 +195,12 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                                 cb[4] - point.x, ybot - yThick - point.y, cb[5] - point.z,
                                 cb[4], ybot - yThick, cb[5],
 
-                                0, 0,
-                                0, 0,
-                                0, 0,
-                                0, 0,
-                                0, 0,
-                                0, 0,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
 
                                 len, th, td
                         );
@@ -236,12 +236,12 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                                 cb[6], ytop - yThick, cb[7],
                                 cb[6] + point.x, ytop - yThick + point.y, cb[7] + point.z,
 
-                                0,0,
-                                0,0,
-                                0,0,
-                                0,0,
-                                0,0,
-                                0,0,
+                                rand.nextInt(16)/16D, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
 
                                 len,th,td
                         );
@@ -275,12 +275,12 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                         cb[4], ybot - yThick, cb[5],
                         cb[6], ytop - yThick, cb[7],
 
-                        0,0,
-                        0,0,
-                        0,0,
-                        0,0,
-                        0,0,
-                        0,0,
+                        rand.nextInt(16)/16D, rand.nextInt(16)/16F,
+                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
 
                         len,th,td
                 );

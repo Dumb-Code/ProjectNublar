@@ -130,7 +130,7 @@ public class Connection {
             };
             double ytop = yrange * this.distance(from, in[0], in[2]) - this.position.getY() + from.getY();
             double ybot = yrange * this.distance(from, in[1], in[3]) - this.position.getY() + from.getY();
-            double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot));
+            double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot)) / (halfthick*32F);
             double yThick = halfthick * Math.cos(tangrady);
             Vector3f xNorm = MathUtils.calcualeNormalF(
                     ct[2], ybot+yThick, ct[3],
