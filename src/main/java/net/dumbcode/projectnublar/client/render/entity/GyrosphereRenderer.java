@@ -7,6 +7,8 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
@@ -19,14 +21,19 @@ import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
+import javax.annotation.Nullable;
+
 /**
  * Minecraft's blending order is fucked up. If this were to be an entity renderer,
  * either the vehicle would use translucent textures, or it wouldn't look good
  */
-@Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
-public class GyrosphereRenderer {
+public class GyrosphereRenderer extends Render<GyrosphereVehicle> {
 
     private static int sphereID = -1;
+
+    public GyrosphereRenderer(RenderManager renderManager) {
+        super(renderManager);
+    }
 
     private static int getSphereID() {
         if(sphereID == -1) {
@@ -44,59 +51,19 @@ public class GyrosphereRenderer {
         return sphereID;
     }
 
-    @SubscribeEvent
-    public static void worldRenderLast(RenderWorldLastEvent event) {
-        float partialTicks = event.getPartialTicks();
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
-        double doubleX = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
-        double doubleY = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
-        double doubleZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
-
+    @Override
+    public void doRender(GyrosphereVehicle entity, double x, double y, double z, float entityYaw, float partialTicks) {
+        super.doRender(entity, x, y, z, entityYaw, partialTicks);
         GlStateManager.pushMatrix();
-        GlStateManager.enableLighting();
-        RenderHelper.enableStandardItemLighting();
-        GlStateManager.shadeModel(7425);
-        GlStateManager.depthMask(true);
-        GlStateManager.enableBlend();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.translate(x, y, z);
+        GlStateManager.translate(0, entity.height / 2, 0);
 
-        GlStateManager.translate(-doubleX, -doubleY, -doubleZ);
-        Minecraft.getMinecraft().getRenderManager().setRenderPosition(TileEntityRendererDispatcher.staticPlayerX, TileEntityRendererDispatcher.staticPlayerY, TileEntityRendererDispatcher.staticPlayerZ);
-        Minecraft.getMinecraft().entityRenderer.enableLightmap();
+        GlStateManager.rotate(slerp(entity.prevRotation, entity.rotation, partialTicks));
+
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png"));
-
-        for (Entity e : player.world.loadedEntityList) {
-            if(e.getClass() == GyrosphereVehicle.class) {
-                GyrosphereVehicle entity = (GyrosphereVehicle) e;
-                GlStateManager.pushMatrix();
-
-                double entityX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-                double entityY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-                double entityZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-                int i = entity.getBrightnessForRender();
-                if (entity.isBurning()) {
-                    i = 15728880;
-                }
-                int j = i % 65536;
-                int k = i / 65536;
-                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-                GlStateManager.translate(entityX, entityY, entityZ);
-                GlStateManager.translate(0, entity.height / 2, 0);
-
-
-                Quaternion pre = entity.prevRotation;
-                Quaternion cur = entity.rotation;
-
-                GlStateManager.rotate(slerp(pre, cur, partialTicks));
-
-                GlStateManager.scale(entity.width/2F,entity.width/2F,entity.width/2F);
-                GlStateManager.callList(getSphereID());
-                GlStateManager.popMatrix();
-            }
-        }
+        GlStateManager.scale(entity.width/2F,entity.width/2F,entity.width/2F);
+        GlStateManager.callList(getSphereID());
         GlStateManager.popMatrix();
-        Minecraft.getMinecraft().entityRenderer.disableLightmap();
     }
 
     //Adapted from https://github.com/JOML-CI/JOML/blob/master/src/org/joml/Quaternionf.java
@@ -121,5 +88,11 @@ public class GyrosphereRenderer {
         dest.z = scale0 * current.z + scale1 * target.z;
         dest.w = scale0 * current.w + scale1 * target.w;
         return dest;
+    }
+
+    @Nullable
+    @Override
+    protected ResourceLocation getEntityTexture(GyrosphereVehicle entity) {
+        return new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png");
     }
 }
