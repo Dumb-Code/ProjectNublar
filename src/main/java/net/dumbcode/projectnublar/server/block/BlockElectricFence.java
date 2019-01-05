@@ -366,7 +366,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
         TileEntity te = worldIn.getTileEntity(pos);
         if(te instanceof ConnectableBlockEntity) {
             ConnectableBlockEntity be = (ConnectableBlockEntity) te;
-            if(result != null) {
+            if(result != null && result.hitInfo instanceof HitChunk) {
                 HitChunk chunk = (HitChunk) result.hitInfo;
                 Connection con = chunk.connection;
                 double off = chunk.connection.getFrom().getY() + chunk.connection.getOffset();
