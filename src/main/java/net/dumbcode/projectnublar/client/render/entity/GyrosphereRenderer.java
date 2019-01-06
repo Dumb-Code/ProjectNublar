@@ -23,10 +23,6 @@ import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
 
-/**
- * Minecraft's blending order is fucked up. If this were to be an entity renderer,
- * either the vehicle would use translucent textures, or it wouldn't look good
- */
 public class GyrosphereRenderer extends Render<GyrosphereVehicle> {
 
     private static int sphereID = -1;
