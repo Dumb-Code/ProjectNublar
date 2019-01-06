@@ -9,15 +9,18 @@ import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -25,6 +28,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -40,6 +44,7 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
@@ -60,9 +65,41 @@ public class BlockElectricFence extends Block implements IItemBlock {
     @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         World world = event.getWorld();
-        if(event.getFace() != null) {
-            TileEntity tile = world.getTileEntity(event.getPos().offset(event.getFace()));
-
+        EnumFacing side = event.getFace();
+        if(side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+            TileEntity tile = world.getTileEntity(event.getPos().offset(side));
+            if(tile instanceof ConnectableBlockEntity) {
+                ConnectableBlockEntity cb = (ConnectableBlockEntity) tile;
+                if(side.getAxis() == EnumFacing.Axis.Y) {
+                    double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
+                    Connection ref = null;
+                    for (Connection connection : cb.getConnections()) {
+                        if(connection.isBroken()) {
+                            Connection.Cache cache = connection.getCache();
+                            double[] in = cache.getIn();
+                            double yin = (in[4] + in[5]) / 2D;
+                            if (side == EnumFacing.DOWN == yin > yRef) {
+                                yRef = yin;
+                                ref = connection;
+                            }
+                        }
+                    }
+                    if(ref != null) {
+                        ref.setBroken(false);
+                        event.setCanceled(true);
+                        placeEffect(event.getEntityPlayer(), event.getHand(), event.getWorld(), event.getPos());
+                    }
+                } else {
+                    for (Connection connection : cb.getConnections()) {
+                        if(connection.isBroken()) {
+                            connection.setBroken(false);
+                            event.setCanceled(true);
+                            placeEffect(event.getEntityPlayer(), event.getHand(), event.getWorld(), event.getPos());
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
     }
@@ -191,17 +228,13 @@ public class BlockElectricFence extends Block implements IItemBlock {
     }
 
     public void placeBlockOnSide(World worldIn, RayTraceResult result, BlockPos pos, EnumFacing side) {
-
         TileEntity te = worldIn.getTileEntity(pos);
         if(te instanceof BlockEntityElectricFence) {
             BlockEntityElectricFence be = (BlockEntityElectricFence) te;
 
             Set<Connection> newConnections = Sets.newLinkedHashSet();
-
             double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
             Connection ref = null;
-
-
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
@@ -218,17 +251,13 @@ public class BlockElectricFence extends Block implements IItemBlock {
                                         if (positions.get(i).equals(pos)) {
                                             Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.max(i - 1, 0)), positions.get(Math.min(i + 1, positions.size() - 1)), pos);
                                             Connection.Cache cache = con.getCache();
-                                            if (cache == null) { //Shouldn't happen, but if for whatever reason the cache cannot be generated then just add the fence on
-                                                be.addConnection(con);
-                                            } else {
-                                                double[] in = cache.getIn();
-                                                double yin = (in[4] + in[5]) / 2D;
-                                                if (side == EnumFacing.DOWN == yin > yRef) {
-                                                    yRef = yin;
-                                                    ref = con;
-                                                }
-                                                newConnections.add(con);
+                                            double[] in = cache.getIn();
+                                            double yin = (in[4] + in[5]) / 2D;
+                                            if (side == EnumFacing.DOWN == yin > yRef) {
+                                                yRef = yin;
+                                                ref = con;
                                             }
+                                            newConnections.add(con);
                                             break;
                                         }
                                     }
@@ -238,6 +267,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     }
                 }
             }
+
             if(result != null && result.hitInfo instanceof HitChunk) {
                 HitChunk hc = (HitChunk) result.hitInfo;
                 EnumFacing face = hc.dir;
@@ -270,6 +300,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
             if(te instanceof ConnectableBlockEntity) {
                 for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
                     if(!connection.isBroken()) {
+                        breakEffect(world, pos);
                         return false;
                     }
                 }
@@ -297,9 +328,6 @@ public class BlockElectricFence extends Block implements IItemBlock {
         if(tileEntity instanceof BlockEntityElectricFence) {
             for (Connection connection : ((BlockEntityElectricFence) tileEntity).fenceConnections) {
                 if(!connection.isBroken()) {
-                    if(connection.getCache() == null) {
-                        continue;
-                    }
                     double w = connection.getCache().getFullThick();
                     set.add(new ChunkedInfo(new AxisAlignedBB(0,-w,-w, -connection.getCache().getFullLen(), w, w), connection));
 
@@ -326,19 +354,17 @@ public class BlockElectricFence extends Block implements IItemBlock {
             for (Connection connection : ((BlockEntityElectricFence) te).fenceConnections) {
                 if(!connection.isBroken()) {
                     Connection.Cache cache = connection.getCache();
-                    if(cache != null) {
-                        double[] in = cache.getIn();
-                        set = true;
+                    double[] in = cache.getIn();
+                    set = true;
 
-                        minX = Math.min(minX, in[0]);
-                        maxX = Math.max(maxX, in[1]);
+                    minX = Math.min(minX, in[0]);
+                    maxX = Math.max(maxX, in[1]);
 
-                        minZ = Math.min(minZ, in[2]);
-                        maxZ = Math.max(maxZ, in[3]);
+                    minZ = Math.min(minZ, in[2]);
+                    maxZ = Math.max(maxZ, in[3]);
 
-                        minY = Math.min(minY, in[4]);
-                        maxY = Math.max(maxY, in[5]);
-                    }
+                    minY = Math.min(minY, in[4]);
+                    maxY = Math.max(maxY, in[5]);
                 }
             }
             if(set) {
@@ -390,6 +416,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     if(ref != null && ref.isBroken()) {
                         ref.setBroken(false);
                         te.markDirty();
+                        placeEffect(playerIn, hand, worldIn, pos);
                         return true;
                     }
                 } else if(chunk.dir.getAxis() == EnumFacing.Axis.X) {
@@ -399,6 +426,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
                         for (Connection connection : ((ConnectableBlockEntity) nextTe).getConnections()) {
                             if(connection.lazyEquals(chunk.connection)) {
                                 connection.setBroken(false);
+                                placeEffect(playerIn, hand, worldIn, pos);
                                 nextTe.markDirty();
                                 return true;
                             }
@@ -447,11 +475,21 @@ public class BlockElectricFence extends Block implements IItemBlock {
         return new BlockEntityElectricFence();
     }
 
-    @Value
-    public class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir;}
+    public static void placeEffect(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos) {
+        if(player != null) {
+            player.swingArm(hand);
+        }
+        SoundType soundType = BlockHandler.ELECTRIC_FENCE.blockSoundType;
+        worldIn.playSound(null, pos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+    }
 
-    @Value
-    public class ChunkedInfo {AxisAlignedBB aabb; Connection connection;}
+    public static void breakEffect(World worldIn, BlockPos pos) {
+        worldIn.playEvent(2001, pos, Block.getStateId(worldIn.getBlockState(pos)));
+    }
+
+    @Value public class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir;}
+
+    @Value public class ChunkedInfo {AxisAlignedBB aabb; Connection connection;}
 
 
     @Override
@@ -468,6 +506,16 @@ public class BlockElectricFence extends Block implements IItemBlock {
         @Override
         public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
             RayTraceResult result = ForgeHooks.rayTraceEyes(player, 7);
+            if(result != null && result.hitInfo instanceof HitChunk) {
+                HitChunk chunk = (HitChunk) result.hitInfo;
+                EnumFacing dir = chunk.dir;
+                //Make sure that if its placed on the east/west side (the ends of the cables) to place the block on the previous/next positions
+                if(dir == EnumFacing.EAST) {
+                    pos = chunk.connection.getPrevious();
+                } else if(dir == EnumFacing.WEST) {
+                    pos = chunk.connection.getNext();
+                }
+            }
             boolean out = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
             if(world.getBlockState(pos).getBlock() == this.block) {
                 BlockElectricFence.this.placeBlockOnSide(world, result, pos, side);
