@@ -96,8 +96,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 double[] ct = cache.getCt();
                 double[] cb = cache.getCb();
 
-                Vector3f xNorm = cache.getXNorm();
-                Vector3f zNorm = cache.getZNorm();
+                double[] uvs = cache.getUvs();
 
                 double len = cache.getTexLen();
                 double ytop = cache.getYtop();
@@ -114,76 +113,17 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                 Random rand = new Random(connection.getPosition().toLong() + (long)(connection.getOffset() * 1000));
 
                 if(pb || nb) {
-                    double[] cent = new double[] {
-                            (ct[0] + ct[2])/2D,
-                            (ct[1] + ct[3])/2D,
-                            (ct[4] + ct[6])/2D,
-                            (ct[5] + ct[7])/2D
-                    };
-
-                    double[] cenb = new double[] {
-                            (cb[0] + cb[2])/2D,
-                            (cb[1] + cb[3])/2D,
-                            (cb[4] + cb[6])/2D,
-                            (cb[5] + cb[7])/2D
-                    };
-
                     boolean reversed = connection.getCompared() < 0;
-
-                    if(pb == reversed) {
-                        ct = new double[]{
-                                ct[0], ct[1],
-                                cent[0], cent[1],
-                                cent[2], cent[3],
-                                ct[6], ct[7]
-                        };
-
-                        cb = new double[] {
-                                cb[0], cb[1],
-                                cenb[0], cenb[1],
-                                cenb[2], cenb[3],
-                                cb[6], cb[7]
-                        };
-
-                        ybot = ybot + (ytop - ybot) / 2D;
-                    }
-                    if(nb == reversed) {
-                        ct = new double[]{
-                                cent[0], cent[1],
-                                ct[2], ct[3],
-                                ct[4], ct[5],
-                                cent[2], cent[3],
-                        };
-
-                        cb = new double[] {
-                                cenb[0], cenb[1],
-                                cb[2], cb[3],
-                                cb[4], cb[5],
-                                cenb[2], cenb[3],
-                        };
-                        ytop = ybot + (ytop - ybot) / 2D;
-
-                    }
                     len /= 2D;
 
-                    double[] in = cache.getIn();
-                    Vector3d point = new Vector3d(cache.getFullLen()/2, 0, 0);
-
-                    Matrix4d rot = new Matrix4d();
-
-                    rot.rotZ(Math.atan((in[4] - in[5]) / cache.getXZlen()));
-                    rot.transform(point);
-
-                    rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
-                    rot.transform(point);
-
-                    rot.rotZ((rand.nextFloat()-0.5) * Math.PI/3F);
-                    rot.transform(point);
-
-                    rot.rotY((rand.nextFloat()-0.5F) * Math.PI/2F);
-                    rot.transform(point);
-
                     if(pb == reversed) {
+                        ct = cache.getPrev().getCt();
+                        cb = cache.getPrev().getCb();
+                        ybot = ybot + (ytop - ybot) / 2D;
+
+                        Vector3d point = cache.getPrev().getPoint();
+                        double[] puvs = cache.getPrev().getUvs();
+
                         RenderUtils.drawSpacedCube(
                                 ct[2], ybot + yThick, ct[3],
                                 ct[2] - point.x, ybot + yThick - point.y, ct[3] - point.z,
@@ -195,36 +135,25 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                                 cb[4] - point.x, ybot - yThick - point.y, cb[5] - point.z,
                                 cb[4], ybot - yThick, cb[5],
 
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                puvs[0], puvs[1],
+                                puvs[2], puvs[3],
+                                puvs[4], puvs[5],
+                                puvs[6], puvs[7],
+                                puvs[8], puvs[9],
+                                puvs[10], puvs[11],
 
                                 len, th, td
                         );
 
                     }
+                    if(nb == reversed) {
+                        ct = cache.getNext().getCt();
+                        cb = cache.getNext().getCb();
+                        ytop = ybot + (ytop - ybot) / 2D;
 
-                    //To prevent the line just being straight if both edges are broken, we need to redo the end point
-                    if(pb && nb) {
-                        point = new Vector3d(cache.getFullLen()/2, 0, 0);
+                        Vector3d point = cache.getNext().getPoint();
+                        double[] nuvs = cache.getNext().getUvs();
 
-                        rot.rotZ(Math.atan((in[4] - in[5]) / cache.getXZlen()));
-                        rot.transform(point);
-
-                        rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
-                        rot.transform(point);
-
-                        rot.rotZ((rand.nextFloat()-0.5) * Math.PI/3F);
-                        rot.transform(point);
-
-                        rot.rotY((rand.nextFloat()-0.5F) * Math.PI/2F);
-                        rot.transform(point);
-                    }
-
-                    if (nb == reversed) {
                         RenderUtils.drawSpacedCube(
                                 ct[0] + point.x, ytop + yThick + point.y, ct[1] + point.z,
                                 ct[0], ytop + yThick, ct[1],
@@ -236,108 +165,40 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                                 cb[6], ytop - yThick, cb[7],
                                 cb[6] + point.x, ytop - yThick + point.y, cb[7] + point.z,
 
-                                rand.nextInt(16)/16D, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                                rand.nextInt(16)/16F, rand.nextInt(16)/16F,
+                                nuvs[0], nuvs[1],
+                                nuvs[2], nuvs[3],
+                                nuvs[4], nuvs[5],
+                                nuvs[6], nuvs[7],
+                                nuvs[8], nuvs[9],
+                                nuvs[10], nuvs[11],
 
                                 len,th,td
                         );
 
-                        //buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-                        //                        buff.pos(ct[0], ytop + yThick, ct[1]).color(1f, 1f,1f,1f).endVertex();
-                        //                        buff.pos(ct[0] + point.x, ytop + yThick + point.y, ct[1] + point.z).color(1f, 1f, 1f, 1f).endVertex();
-                        //
-                        //                        buff.pos(ct[6], ytop + yThick, ct[7]).color(1f, 1f,1f,1f).endVertex();
-                        //                        buff.pos(ct[6] + point.x, ytop + yThick + point.y, ct[7] + point.z).color(1f, 1f, 1f, 1f).endVertex();
-                        //
-                        //                        buff.pos(cb[0], ytop - yThick, cb[1]).color(1f, 1f,1f,1f).endVertex();
-                        //                        buff.pos(cb[0] + point.x, ytop - yThick + point.y, cb[1] + point.z).color(1f, 1f, 1f, 1f).endVertex();
-                        //
-                        //                        buff.pos(cb[6], ytop - yThick, cb[7]).color(1f, 1f,1f,1f).endVertex();
-                        //                        buff.pos(cb[6] + point.x, ytop - yThick + point.y, cb[7] + point.z).color(1f, 1f, 1f, 1f).endVertex();
-                        //                        Tessellator.getInstance().draw();
-
                     }
-
                 }
+                if(!pb || !nb) {
+                    RenderUtils.drawSpacedCube(
+                            ct[0], ytop + yThick, ct[1],
+                            ct[2], ybot + yThick, ct[3],
+                            ct[4], ybot + yThick, ct[5],
+                            ct[6], ytop + yThick, ct[7],
 
-                RenderUtils.drawSpacedCube(
-                        ct[0], ytop + yThick, ct[1],
-                        ct[2], ybot + yThick, ct[3],
-                        ct[4], ybot + yThick, ct[5],
-                        ct[6], ytop + yThick, ct[7],
+                            cb[0], ytop - yThick, cb[1],
+                            cb[2], ybot - yThick, cb[3],
+                            cb[4], ybot - yThick, cb[5],
+                            cb[6], ytop - yThick, cb[7],
 
-                        cb[0], ytop - yThick, cb[1],
-                        cb[2], ybot - yThick, cb[3],
-                        cb[4], ybot - yThick, cb[5],
-                        cb[6], ytop - yThick, cb[7],
+                            uvs[0], uvs[1],
+                            uvs[2], uvs[3],
+                            uvs[4], uvs[5],
+                            uvs[6], uvs[7],
+                            uvs[8], uvs[9],
+                            uvs[10], uvs[11],
 
-                        rand.nextInt(16)/16D, rand.nextInt(16)/16F,
-                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-                        rand.nextInt(16)/16F, rand.nextInt(16)/16F,
-
-                        len,th,td
-                );
-
-
-//                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-//                double u = rand.nextInt(16) / 16F;
-//                double v = rand.nextInt(16) / 16F;
-//
-//
-//                //Chunks of code are in U-D-N-S-E-W order
-//                buff.pos(ct[0], ytop + yThick, ct[1]).tex(u, v).normal(0, 1, 0).endVertex();
-//                buff.pos(ct[2], ybot + yThick, ct[3]).tex(u, len + v).normal(0, 1, 0).endVertex();
-//                buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + td, len + v).normal(0, 1, 0).endVertex();
-//                buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + td, v).normal(0, 1, 0).endVertex();
-//
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
-//
-//                buff.pos(cb[2], ybot - yThick, cb[3]).tex(u, v).normal(0, -1, 0).endVertex();
-//                buff.pos(cb[0], ytop - yThick, cb[1]).tex(u, len + v).normal(0, -1, 0).endVertex();
-//                buff.pos(cb[6], ytop - yThick, cb[7]).tex(u + td, len + v).normal(0, -1, 0).endVertex();
-//                buff.pos(cb[4], ybot - yThick, cb[5]).tex(u + td, v).normal(0, -1, 0).endVertex();
-//
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
-//
-//                buff.pos(ct[0], ytop + yThick, ct[1]).tex(u , v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-//                buff.pos(cb[0], ytop - yThick, cb[1]).tex(u+ th, v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-//                buff.pos(cb[2], ybot - yThick, cb[3]).tex(u + th, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-//                buff.pos(ct[2], ybot + yThick, ct[3]).tex(u, len + v).normal(zNorm.x, zNorm.y, zNorm.z).endVertex();
-//
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
-//
-//                buff.pos(ct[6], ytop+yThick, ct[7]).tex(u, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//                buff.pos(cb[6], ytop-yThick, cb[7]).tex(u, th+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//                buff.pos(cb[0], ytop-yThick, cb[1]).tex(u+td, th+v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//                buff.pos(ct[0], ytop+yThick, ct[1]).tex(u+td, v).normal(-xNorm.x, -xNorm.y, -xNorm.z).endVertex();
-//
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
-//
-//                buff.pos(ct[4], ybot + yThick, ct[5]).tex(u + th, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-//                buff.pos(cb[4], ybot - yThick, cb[5]).tex(u, v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-//                buff.pos(cb[6], ytop - yThick, cb[7]).tex(u, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-//                buff.pos(ct[6], ytop + yThick, ct[7]).tex(u + th, len + v).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
-//
-//                u = rand.nextInt(16) / 16F;
-//                v = rand.nextInt(16) / 16F;
-//
-//                buff.pos(ct[2], ybot+yThick, ct[3]).tex(u, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//                buff.pos(cb[2], ybot-yThick, cb[3]).tex(u, th+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//                buff.pos(cb[4], ybot-yThick, cb[5]).tex(u+td, th+v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//                buff.pos(ct[4], ybot+yThick, ct[5]).tex(u+td, v).normal(xNorm.x, xNorm.y, xNorm.z).endVertex();
-//
-//                Tessellator.getInstance().draw();
+                            len,th,td
+                    );
+                }
             }
         }
         buff.setTranslation(0,0,0);

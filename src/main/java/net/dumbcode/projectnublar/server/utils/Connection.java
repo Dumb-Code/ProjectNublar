@@ -1,21 +1,25 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Value;
+import lombok.*;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
+
+import java.util.Random;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import static lombok.EqualsAndHashCode.Include;
 
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Connection {
     @Include private final ConnectionType type;
     @Include private final double offset;
@@ -110,6 +114,7 @@ public class Connection {
         double posdist = this.distance(from, to.getX()+0.5F, to.getZ()+0.5F);
         double yrange = (to.getY() - from.getY()) / posdist;
         double[] in = LineUtils.intersect(this.position, from, to, this.offset);
+        Random rand = new Random(this.getPosition().toLong() + (long)(this.getOffset() * 1000));
         if(in != null) {
             double tangrad = in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0]));
             double xcomp = halfthick * Math.sin(tangrad);
@@ -128,23 +133,33 @@ public class Connection {
                     in[1] + xcomp - yxzcomp*zcomp, in[3] + zcomp + yxzcomp*xcomp,
                     in[0] + xcomp - yxzcomp*zcomp, in[2] + zcomp + yxzcomp*xcomp
             };
+            double[] cent = new double[] {
+                    (ct[0] + ct[2])/2D,
+                    (ct[1] + ct[3])/2D,
+                    (ct[4] + ct[6])/2D,
+                    (ct[5] + ct[7])/2D
+            };
+
+            double[] cenb = new double[] {
+                    (cb[0] + cb[2])/2D,
+                    (cb[1] + cb[3])/2D,
+                    (cb[4] + cb[6])/2D,
+                    (cb[5] + cb[7])/2D
+            };
             double ytop = yrange * this.distance(from, in[0], in[2]) - this.position.getY() + from.getY();
             double ybot = yrange * this.distance(from, in[1], in[3]) - this.position.getY() + from.getY();
             double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot)) / (halfthick*32F);
             double yThick = halfthick * Math.cos(tangrady);
-            Vector3f xNorm = MathUtils.calcualeNormalF(
-                    ct[2], ybot+yThick, ct[3],
-                    cb[2], ybot-yThick, cb[3],
-                    cb[4], ybot-yThick, cb[5]
-            );
-            Vector3f zNorm = MathUtils.calcualeNormalF( //outwards
-                    ct[0], ytop+yThick, ct[1],
-                    cb[0], ytop-yThick, cb[1],
-                    cb[2], ybot-yThick, cb[3]
-            );
             double sqxz = (in[1]-in[0])*(in[1]-in[0]) + (in[3]-in[2])*(in[3]-in[2]);
-            return new Cache(ct, cb, in, xNorm, zNorm, ybot, ytop, len, Math.sqrt(sqxz), Math.sqrt(sqxz + (in[5]-in[4])*(in[5]-in[4])), yThick, halfthick*2);
+
+            double fullLen = Math.sqrt(sqxz + (in[5]-in[4])*(in[5]-in[4]));
+
+            BreakCache prevB = this.genCache(in, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, fullLen, Math.sqrt(sqxz), rand);
+            BreakCache nextB = this.genCache(in, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, fullLen, Math.sqrt(sqxz), rand);
+
+            return new Cache(ct, cb, in, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), prevB, nextB, ybot, ytop, len, Math.sqrt(sqxz), fullLen, yThick, halfthick*2);
         }
+//        throw new IllegalStateException("Error generating cache, Connection did not was not intersected: " + this);
         return null;
     }
 
@@ -152,5 +167,21 @@ public class Connection {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    @Value public class Cache { double[] ct, cb, in; Vector3f xNorm, zNorm; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; }
+    private BreakCache genCache(double[] in, double[] ct, double[] cb, double fullLen, double xzlen, Random rand) {
+        Vector3d point = new Vector3d(fullLen/2, 0, 0);
+        Matrix4d rot = new Matrix4d();
+        rot.rotZ(Math.atan((in[4] - in[5]) / xzlen));
+        rot.transform(point);
+        rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+        rot.transform(point);
+        rot.rotZ((rand.nextFloat()-0.5) * Math.PI/2F);
+        rot.transform(point);
+        rot.rotY((rand.nextFloat()-0.5F) * Math.PI/2F);
+        rot.transform(point);
+        return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point);
+    }
+
+    @Value public class Cache { double[] ct, cb, in, uvs; BreakCache prev, next; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; }
+
+    @Value public class BreakCache { double[] ct, cb, uvs; Vector3d point;}
 }
