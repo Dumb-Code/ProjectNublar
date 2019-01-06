@@ -28,10 +28,10 @@ public class Connection {
     private final BlockPos from;
     private final BlockPos to;
 
-    @Include private final BlockPos previous;
-    @Include private final BlockPos next;
+    private final BlockPos previous;
+    private final BlockPos next;
 
-    @Setter @Include boolean sign;
+    @Setter boolean sign;
 
     private final BlockPos position;
     private final int compared;
