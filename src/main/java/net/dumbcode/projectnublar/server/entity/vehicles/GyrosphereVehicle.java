@@ -47,6 +47,11 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     }
 
     @Override
+    public boolean canBePushed() {
+        return true;
+    }
+
+    @Override
     public boolean canBeCollidedWith() {
         if(this.world.isRemote) {
             return !this.isPlayerIn();
@@ -62,8 +67,9 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     @Override
     protected void applyMovement() {
         Entity driver = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0); //Move to controlling passanger
-        if(driver != null)
-        this.rotationYaw = driver.rotationYaw;
+        if(driver != null) {
+            this.rotationYaw = driver.rotationYaw;
+        }
 
         float velX = this.getIntInput(DefaultInput.LEFT) - this.getIntInput(DefaultInput.RIGHT);
         float velZ = this.getIntInput(DefaultInput.FORWARD) - this.getIntInput(DefaultInput.BACKWARDS);
