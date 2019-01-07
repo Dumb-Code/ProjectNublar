@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class SkeletalHistory {
 
-    public static final String RESET_NAME = "$$RESET_NAME$$";
+    public static final String RESET_NAME = "@@RESET_NAME@@";
     private final SkeletalBuilderBlockEntity builder;
     @Getter
     @Setter
