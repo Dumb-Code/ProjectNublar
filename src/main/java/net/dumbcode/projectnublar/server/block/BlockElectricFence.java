@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.client.utils.DebugUtil;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
@@ -45,6 +46,7 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
@@ -156,6 +158,42 @@ public class BlockElectricFence extends Block implements IItemBlock {
                 }
             }
         }
+    }
+
+    @Override
+    public void randomDisplayTick(IBlockState stateIn, World world, BlockPos pos, Random rand) {
+        TileEntity te = world.getTileEntity(pos);
+        if(te instanceof ConnectableBlockEntity) {
+            for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
+                if(connection.isBroken()) {
+                    continue;
+                 }
+                Vector3d center = connection.getCache().getCenter();
+
+                boolean pb = connection.brokenSide(world, connection.getPrevious());
+                boolean nb = connection.brokenSide(world, connection.getNext());
+
+                if(connection.getCompared() > 0) {
+                    boolean ref = pb;
+                    pb = nb;
+                    nb = ref;
+                }
+
+                if(nb || pb) {
+                    if(pb) {
+                        Vector3d point = connection.getCache().getPrev().getPoint();
+                        ProjectNublar.spawnParticles(ParticleType.SPARKS, world, center.x-point.x, center.y-point.y, center.z-point.z, 0,0,0);
+                    }
+
+                    if(nb) {
+                        Vector3d point = connection.getCache().getNext().getPoint();
+                        ProjectNublar.spawnParticles(ParticleType.SPARKS, world, center.x+point.x, center.y+point.y, center.z+point.z, 0,0,0);
+                    }
+
+                }
+            }
+        }
+        super.randomDisplayTick(stateIn, world, pos, rand);
     }
 
     @Nullable

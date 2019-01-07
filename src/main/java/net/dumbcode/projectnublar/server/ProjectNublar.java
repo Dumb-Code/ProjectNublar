@@ -15,12 +15,12 @@ import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
+import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
-import net.ilexiconn.llibrary.LLibrary;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -28,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -43,6 +44,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -98,6 +100,19 @@ public class ProjectNublar {
         CapabilityManager.INSTANCE.register(EntityManager.class, new VoidStorage<>(), EntityManager.Impl::new);
     }
 
+    public static void spawnParticles(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int... data) {
+        if(world.isRemote) {
+            spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
+        } else {
+            //Spawn particles packet
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    private static void spawnParticle0(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int... data) {
+        Minecraft.getMinecraft().effectRenderer.addEffect(type.getParticleSupplier().get().createParticle(world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data));
+    }
+
     private void registerPackets() {
         NETWORK.registerMessage(new C0MoveSelectedSkeletalPart.Handler(), C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
         NETWORK.registerMessage(new S1UpdateSkeletalBuilder.Handler(), S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
@@ -119,7 +134,6 @@ public class ProjectNublar {
         NETWORK.registerMessage(new S17MachinePositionDirty.Handler(), S17MachinePositionDirty.class, 17, Side.CLIENT);
         NETWORK.registerMessage(new C18OpenContainer.Handler(), C18OpenContainer.class, 18, Side.SERVER);
         NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
-
     }
 
     @EventHandler

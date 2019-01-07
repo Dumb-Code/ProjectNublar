@@ -110,13 +110,16 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
                 boolean pb = connection.brokenSide(world, connection.getPrevious());
                 boolean nb = connection.brokenSide(world, connection.getNext());
-                Random rand = new Random(connection.getPosition().toLong() + (long)(connection.getOffset() * 1000));
 
                 if(pb || nb) {
-                    boolean reversed = connection.getCompared() < 0;
+                    if(connection.getCompared() > 0) {
+                        boolean ref = pb;
+                        pb = nb;
+                        nb = ref;
+                    }
                     len /= 2D;
 
-                    if(pb == reversed) {
+                    if(pb) {
                         ct = cache.getPrev().getCt();
                         cb = cache.getPrev().getCb();
                         ybot = ybot + (ytop - ybot) / 2D;
@@ -146,7 +149,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
                         );
 
                     }
-                    if(nb == reversed) {
+                    if(nb) {
                         ct = cache.getNext().getCt();
                         cb = cache.getNext().getCb();
                         ytop = ybot + (ytop - ybot) / 2D;

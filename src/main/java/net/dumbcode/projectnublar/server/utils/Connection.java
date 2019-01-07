@@ -157,7 +157,7 @@ public class Connection {
             BreakCache prevB = this.genCache(in, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, fullLen, Math.sqrt(sqxz), rand);
             BreakCache nextB = this.genCache(in, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, fullLen, Math.sqrt(sqxz), rand);
 
-            return new Cache(ct, cb, in, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), prevB, nextB, ybot, ytop, len, Math.sqrt(sqxz), fullLen, yThick, halfthick*2);
+            return new Cache(ct, cb, in, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), new Vector3d((in[0]+in[1])/2, (in[4]+in[5])/2, (in[2]+in[3])/2), prevB, nextB, ybot, ytop, len, Math.sqrt(sqxz), fullLen, yThick, halfthick*2);
         }
 //        throw new IllegalStateException("Error generating cache, Connection did not was not intersected: " + this);
         return null;
@@ -181,7 +181,7 @@ public class Connection {
         return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point);
     }
 
-    @Value public class Cache { double[] ct, cb, in, uvs; BreakCache prev, next; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; }
+    @Value public class Cache { double[] ct, cb, in, uvs; Vector3d center; BreakCache prev, next; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; }
 
     @Value public class BreakCache { double[] ct, cb, uvs; Vector3d point;}
 }
