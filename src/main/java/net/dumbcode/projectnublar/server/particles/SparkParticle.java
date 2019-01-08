@@ -18,9 +18,9 @@ public class SparkParticle extends Particle {
     public SparkParticle(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int[] ints) {
         super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
         Random rand = worldIn.rand;
-        this.motionX = xSpeedIn * 0.05 + (rand.nextFloat() * 2 - 1) * 0.02;
-        this.motionY = ySpeedIn * 0.05 + (rand.nextFloat() * 2 - 1) * 0.02;
-        this.motionZ = zSpeedIn * 0.05 + (rand.nextFloat() * 2 - 1) * 0.02;
+        this.motionX = xSpeedIn * 0.075 + (rand.nextFloat() * 2 - 1) * 0.02;
+        this.motionY = ySpeedIn * 0.075 + (rand.nextFloat() * 2 - 1) * 0.02;
+        this.motionZ = zSpeedIn * 0.075 + (rand.nextFloat() * 2 - 1) * 0.02;
         this.particleGravity = 0.75F;
         this.particleAge /= 4;
         this.particleTextureIndexX = 0;
@@ -39,7 +39,6 @@ public class SparkParticle extends Particle {
     public void onUpdate() {
         super.onUpdate();
         this.particleTextureIndexX = (int)(this.particleAge / (float)this.particleMaxAge * 16F);
-
     }
 
     @Override
