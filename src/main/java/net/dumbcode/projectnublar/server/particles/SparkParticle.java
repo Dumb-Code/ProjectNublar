@@ -23,11 +23,11 @@ public class SparkParticle extends Particle {
         this.motionZ = zSpeedIn * 0.05 + (rand.nextFloat() * 2 - 1) * 0.02;
         this.particleGravity = 0.75F;
         this.particleAge /= 4;
-        this.particleTextureIndexX = rand.nextInt(16);
+        this.particleTextureIndexX = 0;
         this.particleTextureIndexY = 0;
         this.particleScale = 0.25F;
     }
-    
+
     @Override
     public void move(double x, double y, double z) {
         BlockElectricFence.collidable = false;
@@ -38,7 +38,7 @@ public class SparkParticle extends Particle {
     @Override
     public void onUpdate() {
         super.onUpdate();
-        this.particleTextureIndexX++;
+        this.particleTextureIndexX = (int)(this.particleAge / (float)this.particleMaxAge * 16F);
 
     }
 
