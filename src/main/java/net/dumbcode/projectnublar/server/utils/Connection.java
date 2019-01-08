@@ -102,6 +102,10 @@ public class Connection {
         return this.rendercache = this.getOrGenCache(this.rendercache);
     }
 
+    public void invalidateCache() {
+        this.rendercache = null;
+    }
+
     private Cache getOrGenCache(Cache cache) {
         if(cache != null) {
             return cache;
@@ -174,9 +178,9 @@ public class Connection {
         rot.transform(point);
         rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
         rot.transform(point);
-        rot.rotZ((rand.nextFloat()-0.5) * Math.PI/2F);
+        rot.rotZ((rand.nextFloat()-0.5F) * Math.PI/2F);
         rot.transform(point);
-        rot.rotY((rand.nextFloat()-0.5F) * Math.PI/2F);
+        rot.rotY((rand.nextFloat()-0.5F) * Math.PI/3F);
         rot.transform(point);
         return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point);
     }

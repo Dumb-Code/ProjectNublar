@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
@@ -39,6 +40,11 @@ public class SparkParticle extends Particle {
     public void onUpdate() {
         super.onUpdate();
         this.particleTextureIndexX = (int)(this.particleAge / (float)this.particleMaxAge * 16F);
+    }
+
+    @Override
+    public int getBrightnessForRender(float p_189214_1_) {
+        return 0xF000F0;
     }
 
     @Override

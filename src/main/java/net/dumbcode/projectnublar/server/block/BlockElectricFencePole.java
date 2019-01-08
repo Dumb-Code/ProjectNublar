@@ -140,7 +140,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? 8 : 0;
+        return state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? 4 : 0;
     }
 
     @Override
