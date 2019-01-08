@@ -100,9 +100,11 @@ public class ProjectNublar {
         CapabilityManager.INSTANCE.register(EntityManager.class, new VoidStorage<>(), EntityManager.Impl::new);
     }
 
-    public static void spawnParticles(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int... data) {
+    public static void spawnParticles(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int amount, int... data) {
         if(world.isRemote) {
-            spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
+            for (int i = 0; i < amount; i++) {
+                spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
+            }
         } else {
             //Spawn particles packet
         }

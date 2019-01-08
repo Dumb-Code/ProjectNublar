@@ -43,6 +43,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +54,9 @@ import java.util.Set;
 public class BlockElectricFence extends Block implements IItemBlock {
 
     public static final boolean DEBUG = false;
+
+    //Set this at your own will, just remember to set it back to true after collection
+    public static boolean collidable = true;
 
     public BlockElectricFence() {
         super(Material.IRON, MapColor.IRON);
@@ -179,21 +183,29 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     nb = ref;
                 }
 
+                float chance = 0.1F;
+
                 if(nb || pb) {
-                    if(pb) {
-                        Vector3d point = connection.getCache().getPrev().getPoint();
-                        ProjectNublar.spawnParticles(ParticleType.SPARKS, world, center.x-point.x, center.y-point.y, center.z-point.z, 0,0,0);
+                    if(pb && rand.nextFloat() < chance) {
+                        Vector3d point = new Vector3d();
+                        point.sub(connection.getCache().getPrev().getPoint());
+                        spawnParticles(world, point, center);
                     }
 
-                    if(nb) {
-                        Vector3d point = connection.getCache().getNext().getPoint();
-                        ProjectNublar.spawnParticles(ParticleType.SPARKS, world, center.x+point.x, center.y+point.y, center.z+point.z, 0,0,0);
+                    if(nb && rand.nextFloat() < chance) {
+                        spawnParticles(world, connection.getCache().getNext().getPoint(), center);
                     }
 
                 }
             }
         }
         super.randomDisplayTick(stateIn, world, pos, rand);
+    }
+
+    private void spawnParticles(World world,Vector3d point, Vector3d center) {
+        Vector3d norm = new Vector3d();
+        norm.normalize(point);
+        ProjectNublar.spawnParticles(ParticleType.SPARKS, world, center.x+point.x, center.y+point.y, center.z+point.z, norm.x,norm.y,norm.z, 8);
     }
 
     @Nullable
@@ -414,12 +426,14 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
-        TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof BlockEntityElectricFence) {
-            for (AxisAlignedBB bb : ((BlockEntityElectricFence) te).createBoundingBox()) {
-                addCollisionBoxToList(pos, entityBox, collidingBoxes, bb);
+        if(collidable) {
+            TileEntity te = worldIn.getTileEntity(pos);
+            if(te instanceof BlockEntityElectricFence) {
+                for (AxisAlignedBB bb : ((BlockEntityElectricFence) te).createBoundingBox()) {
+                    addCollisionBoxToList(pos, entityBox, collidingBoxes, bb);
+                }
+                return;
             }
-            return;
         }
         super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, isActualState);
     }
