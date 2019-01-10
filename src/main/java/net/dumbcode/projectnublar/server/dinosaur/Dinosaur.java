@@ -49,9 +49,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final DinosaurInfomation dinosaurInfomation = new DinosaurInfomation();
 
     @SideOnly(Side.CLIENT)
-    private ModelContainer<ModelStage> modelContainer;
+    private ModelContainer<DinosaurEntity, ModelStage> modelContainer;
     @SideOnly(Side.CLIENT)
-    private ModelContainer<ModelStage> noAnimationModelContainer;
+    private ModelContainer<DinosaurEntity, ModelStage> noAnimationModelContainer;
     private DinosaurEntitySystemInfo systemInfo;
 
     public Dinosaur() {

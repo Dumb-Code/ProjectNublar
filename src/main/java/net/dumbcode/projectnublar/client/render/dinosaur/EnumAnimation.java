@@ -49,7 +49,7 @@ public enum EnumAnimation {
     public static Animation fromName(String name) {
         EnumAnimation animation = IDLE;
         for (EnumAnimation animations : values()) {
-            if(animations.name().equalsIgnoreCase(name)) {
+            if (animations.name().equalsIgnoreCase(name)) {
                 animation = animations;
             }
         }

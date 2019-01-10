@@ -1,8 +1,11 @@
 package net.dumbcode.projectnublar.server.entity;
 
 import lombok.NonNull;
+import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.network.S0SyncAnimation;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
+import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.ilexiconn.llibrary.server.animation.AnimationHandler;
@@ -61,7 +64,15 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
 
     @Override
     public void setAnimation(Animation animation) {
-        this.animation = animation; //TODO: sync with clients
+        this.animation = animation;
+        if(!this.world.isRemote) {
+            DumbLibrary.NETWORK.sendToDimension(new S0SyncAnimation(this, animation), this.world.provider.getDimension());
+        }
+    }
+
+    @Override
+    public DinosaurEntitySystemInfo getInfo() {
+        return this.getDinosaur().getSystemInfo();
     }
 
 

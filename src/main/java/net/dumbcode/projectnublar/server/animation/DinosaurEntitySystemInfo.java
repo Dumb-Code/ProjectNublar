@@ -9,6 +9,7 @@ import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
@@ -74,7 +75,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     }
 
     @Override
-    public ModelContainer<ModelStage> getModelContainer(DinosaurEntity entity) {
+    public ModelContainer<DinosaurEntity, ModelStage> getModelContainer(DinosaurEntity entity) {
         return entity.getDinosaur().getModelContainer();
     }
 
@@ -85,6 +86,11 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
 
     @Override
     public ResourceLocation getTexture(DinosaurEntity entity) {
-        return null;
+        return new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/tyrannosaurus_male_adult.png");
+    }
+
+    @Override
+    public ResourceLocation identifier() {
+        return new ResourceLocation(ProjectNublar.MODID, this.dinosaur.getFormattedName() + "_info");
     }
 }
