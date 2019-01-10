@@ -2,20 +2,18 @@ package net.dumbcode.projectnublar.client.render.model;
 
 import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationPass;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFencePoleRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFenceRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
-import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
-import net.dumbcode.projectnublar.client.render.dinosaur.objects.MovementAnimationPass;
-import net.dumbcode.projectnublar.client.render.entity.DummyRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -32,12 +30,7 @@ public class DinosaurModelHandler {
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()) {
-            dinosaur.setModelContainer(new ModelContainer(dinosaur.getRegName(),
-                    dinosaur.getModelProperties().getModelGrowthStages(), dinosaur.getModelProperties().getMainModelMap(),
-                    EnumAnimation.getNames(), dinosaur.getModelProperties().getEntityAnimatorSupplier(),
-                    EnumAnimation::fromName, EnumAnimation.IDLE.get(),
-                    EnumAnimation::getAnimation,
-                    AnimationPass::new, MovementAnimationPass::new));
+            dinosaur.setModelContainer(new ModelContainer<>(dinosaur.getRegName(), new DinosaurEntitySystemInfo(dinosaur)));
         }
 
         RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, DinosaurRenderer::new);
@@ -52,10 +45,10 @@ public class DinosaurModelHandler {
 
     }
 
-    private static class DinosaurRenderer extends AnimatableRenderer<DinosaurEntity> {
+    private static class DinosaurRenderer extends AnimatableRenderer<DinosaurEntity, ModelStage> {
 
         DinosaurRenderer(RenderManager renderManagerIn) {
-            super(renderManagerIn, entity -> entity.getDinosaur().getModelContainer(), entity -> entity.getDinosaur().getTextureLocation(entity));
+            super(renderManagerIn, entity -> entity.getDinosaur().getSystemInfo());
         }
     }
 }

@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
 import lombok.val;
-import net.dumbcode.dumblibrary.server.entity.GrowthStage;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInfomation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
@@ -12,7 +12,7 @@ public class Tyrannosaurus extends Dinosaur {
 
     public Tyrannosaurus() {
         val map = getModelProperties().getMainModelMap();
-        map.put(GrowthStage.ADULT, "tyrannosaurus_adult_idle");
+        map.put(ModelStage.ADULT, "tyrannosaurus_adult_idle");
 
         getItemProperties()
                 .setCookedMeatHealAmount(10)

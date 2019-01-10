@@ -12,12 +12,14 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInfomation;
 import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
 import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.ResourceLocation;
@@ -47,9 +49,10 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final DinosaurInfomation dinosaurInfomation = new DinosaurInfomation();
 
     @SideOnly(Side.CLIENT)
-    private ModelContainer modelContainer;
+    private ModelContainer<ModelStage> modelContainer;
     @SideOnly(Side.CLIENT)
-    private ModelContainer noAnimationModelContainer;
+    private ModelContainer<ModelStage> noAnimationModelContainer;
+    private DinosaurEntitySystemInfo systemInfo;
 
     public Dinosaur() {
 
@@ -80,7 +83,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
         boolean male = entity.getOrExcept(EntityComponentTypes.GENDER).male;
-        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (male ? "male" : "female") + "_" + entity.getGrowthStage().name().toLowerCase(Locale.ROOT) + ".png");
+        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (male ? "male" : "female") + "_" + entity.getModelStage().name().toLowerCase(Locale.ROOT) + ".png");
     }
 
     public TextComponentTranslation createNameComponent() {

@@ -2,27 +2,25 @@ package net.dumbcode.projectnublar.client.render.animator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.client.animation.AnimationInfo;
 import net.dumbcode.dumblibrary.client.animation.PoseHandler;
 import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
-import net.ilexiconn.llibrary.server.animation.Animation;
 import net.minecraft.client.model.ModelRenderer;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
-public class DinosaurAnimator extends EntityAnimator<DinosaurEntity> {
+public class DinosaurAnimator extends EntityAnimator<DinosaurEntity, ModelStage> {
 
     private boolean rescalingEnabled = true;
 
-    public DinosaurAnimator(PoseHandler poseHandler, Animation defaultAnimation, Function<Animation, AnimationInfo> animationInfoGetter, PoseHandler.AnimationPassesFactory... factories) {
-        super(poseHandler, defaultAnimation, animationInfoGetter, factories);
+    public DinosaurAnimator(PoseHandler<DinosaurEntity, ModelStage> poseHandler) {
+        super(poseHandler);
     }
 
     @Override

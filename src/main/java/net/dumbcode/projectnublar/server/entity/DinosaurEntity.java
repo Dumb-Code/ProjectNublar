@@ -1,11 +1,10 @@
 package net.dumbcode.projectnublar.server.entity;
 
 import lombok.NonNull;
-import net.dumbcode.dumblibrary.server.entity.GrowthStage;
+import net.dumbcode.dumblibrary.client.animation.objects.Animation;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.ilexiconn.llibrary.server.animation.Animation;
 import net.ilexiconn.llibrary.server.animation.AnimationHandler;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -56,38 +55,18 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
     }
 
     @Override
-    public int getAnimationTick() {
-        return this.animationTick;
-    }
-
-    @Override
-    public void setAnimationTick(int tick) {
-        this.animationTick = tick;
-    }
-
-    @Override
     public Animation getAnimation() {
         return animation;
     }
 
     @Override
-    public void setAnimation(@NonNull Animation newAnimation) {
-        Animation oldAnimation = this.animation;
-
-        this.animation = newAnimation;
-
-        if (oldAnimation != newAnimation) {
-            this.animationTick = 0;
-
-            Dinosaur dinosaur = this.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur;
-            this.animationLength = (int) dinosaur.getModelContainer().getPoseHandler().getAnimationLength(this.animation, this.getGrowthStage());
-
-            AnimationHandler.INSTANCE.sendAnimationMessage(this, newAnimation);
-        }
+    public void setAnimation(Animation animation) {
+        this.animation = animation; //TODO: sync with clients
     }
 
-    public GrowthStage getGrowthStage() { //TODO
-        return GrowthStage.ADULT;
+
+    public ModelStage getModelStage() { //TODO
+        return ModelStage.ADULT;
     }
 
     public Dinosaur getDinosaur() {
@@ -101,10 +80,5 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
         }
         player.swingArm(hand);
         return true;
-    }
-
-    @Override
-    public Animation[] getAnimations() {
-        return EnumAnimation.getAnimations();
     }
 }

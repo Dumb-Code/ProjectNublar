@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.*;
 import lombok.Data;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
-import net.dumbcode.dumblibrary.server.entity.GrowthStage;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -17,16 +17,11 @@ import java.util.Map;
 
 @Data
 public class ModelProperties {
-    private List<GrowthStage> modelGrowthStages = Lists.newArrayList(GrowthStage.ADULT);
-    private Map<GrowthStage, String> mainModelMap = Maps.newEnumMap(GrowthStage.class);
+    private List<ModelStage> modelGrowthStages = Lists.newArrayList(ModelStage.ADULT);
+    private Map<ModelStage, String> mainModelMap = Maps.newEnumMap(ModelStage.class);
     @SideOnly(Side.CLIENT)
-    private ModelContainer.AnimatorFactory entityAnimatorSupplier;
+    private float entityAnimatorSupplier;
 
-    public ModelProperties() {
-        if(FMLCommonHandler.instance().getSide().isClient()) {
-            this.entityAnimatorSupplier = DinosaurAnimator::new; //Thinking lvl 400
-        }
-    }
 
     public void copyFrom(ModelProperties other) {
         modelGrowthStages.clear();
@@ -45,13 +40,13 @@ public class ModelProperties {
             JsonArray growthStages = object.getAsJsonArray("growth_stages");
             for(JsonElement elem : growthStages) {
                 String stageName = elem.getAsString().toUpperCase();
-                GrowthStage stage = GrowthStage.valueOf(stageName);
+                ModelStage stage = ModelStage.valueOf(stageName);
                 result.modelGrowthStages.add(stage);
             }
             JsonObject modelMap = object.getAsJsonObject("model_map");
             for(Map.Entry<String, JsonElement> entry : modelMap.entrySet()) {
                 String stageName = entry.getKey().toUpperCase();
-                GrowthStage stage = GrowthStage.valueOf(stageName);
+                ModelStage stage = ModelStage.valueOf(stageName);
                 String model = entry.getValue().getAsString();
                 result.mainModelMap.put(stage, model);
             }
@@ -67,7 +62,7 @@ public class ModelProperties {
 
             JsonObject modelMap = new JsonObject();
 
-            for(Map.Entry<GrowthStage, String> entry : properties.mainModelMap.entrySet()) {
+            for(Map.Entry<ModelStage, String> entry : properties.mainModelMap.entrySet()) {
                 modelMap.addProperty(entry.getKey().name().toLowerCase(), entry.getValue());
             }
             object.add("model_map", modelMap);

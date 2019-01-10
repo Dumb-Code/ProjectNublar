@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.dumbcode.dumblibrary.server.entity.GrowthStage;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
@@ -113,7 +113,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
 
     public void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
-        this.model = dinosaur.getModelContainer().getModelMap().get(GrowthStage.ADULT);
+        this.model = dinosaur.getModelContainer().getModelMap().get(ModelStage.ADULT);
         resetPoseDataToDefaultPose();
         this.reassureSize();
     }
