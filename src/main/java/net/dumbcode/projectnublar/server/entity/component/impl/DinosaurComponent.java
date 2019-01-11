@@ -13,13 +13,13 @@ public class DinosaurComponent implements EntityComponent {
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setString("identifier", this.dinosaur.getRegName().toString());
+        compound.setString("dinosaur", this.dinosaur.getRegName().toString());
         return compound;
     }
 
     @Override
     public void deserialize(NBTTagCompound compound) {
-        ResourceLocation identifier = new ResourceLocation(compound.getString("identifier"));
+        ResourceLocation identifier = new ResourceLocation(compound.getString("dinosaur"));
         if (ProjectNublar.DINOSAUR_REGISTRY.containsKey(identifier)) {
             this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier);
         } else {
