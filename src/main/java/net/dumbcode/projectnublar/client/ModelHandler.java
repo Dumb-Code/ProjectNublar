@@ -1,9 +1,9 @@
 package net.dumbcode.projectnublar.client;
 
+import net.dumbcode.projectnublar.client.commandmodel.ModelCommandLoader;
 import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
-import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -13,8 +13,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
@@ -58,6 +56,7 @@ public class ModelHandler {
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
         TabulaModelHandler.INSTANCE.addDomain(ProjectNublar.MODID);
+        ModelLoaderRegistry.registerLoader(ModelCommandLoader.INSTANCE);
 
         ModelLoader.setCustomStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE, (new StateMap.Builder().ignore(BlockElectricFencePole.INDEX_PROPERTY)).build());
         ModelLoader.setCustomStateMapper(LIGHT_STEEL_ELECTRIC_FENCE_POLE, (new StateMap.Builder().ignore(BlockElectricFencePole.INDEX_PROPERTY)).build());

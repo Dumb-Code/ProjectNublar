@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.entity.component;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
+import net.dumbcode.projectnublar.server.registry.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;

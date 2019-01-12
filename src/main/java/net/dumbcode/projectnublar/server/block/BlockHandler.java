@@ -49,7 +49,6 @@ public class BlockHandler {
                 ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB)
         );
 
-
         populateMap(event, FOSSIlS, "%s_fossil", FossilBlock::new);
     }
 

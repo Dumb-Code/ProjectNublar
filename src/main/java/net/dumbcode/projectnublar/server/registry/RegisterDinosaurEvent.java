@@ -1,4 +1,4 @@
-package net.dumbcode.projectnublar.server;
+package net.dumbcode.projectnublar.server.registry;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;

@@ -3,19 +3,21 @@ package net.dumbcode.projectnublar.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
-import net.dumbcode.projectnublar.server.entity.component.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
+import net.dumbcode.projectnublar.server.plants.Plant;
+import net.dumbcode.projectnublar.server.registry.RegisterComponentsEvent;
+import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
+import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
 import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
@@ -65,6 +67,7 @@ public class ProjectNublar {
     public static final String DUMBLIBRARY_VERSION = "0.1.9";
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
+    public static IForgeRegistry<Plant> PLANT_REGISTRY;
     public static IForgeRegistry<EntityComponentType<?>> COMPONENT_REGISTRY;
 
     @CapabilityInject(EntityManager.class)
@@ -142,7 +145,7 @@ public class ProjectNublar {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
-      
+
         GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
         GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
         GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
@@ -199,8 +202,15 @@ public class ProjectNublar {
                 .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
                 .set(((key, isNetwork) -> Dinosaur.MISSING))
                 .create();
+
+        PLANT_REGISTRY = new RegistryBuilder<Plant>()
+                .setType(Plant.class)
+                .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
+                .create();
+
         registerJsonDinosaurs();
         MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
+        MinecraftForge.EVENT_BUS.post(new RegisterPlantEvent(PLANT_REGISTRY));
     }
 
     private static void registerJsonDinosaurs() {
