@@ -2,16 +2,15 @@ package net.dumbcode.projectnublar.client.commandmodel;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ilexiconn.llibrary.client.util.Matrix;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
-import javax.vecmath.*;
-import java.util.Collection;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Point3d;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -86,7 +85,7 @@ public class ModelCommandRegistry {
                 int[] data = quad.getVertexData();
                 float[][][] datum = null;
                 if(quad instanceof UnpackedBakedQuad) {
-                    datum = ObfuscationReflectionHelper.getPrivateValue(UnpackedBakedQuad.class, (UnpackedBakedQuad) quad, "unpackedData");
+                    datum = ReflectionHelper.getPrivateValue(UnpackedBakedQuad.class, (UnpackedBakedQuad) quad, "unpackedData");
                 }
                 for (int v = 0; v < 4; v++) {
                     int o = data.length / 4 * v;
@@ -120,7 +119,7 @@ public class ModelCommandRegistry {
                 int[] data = quad.getVertexData();
                 float[][][] datum = null;
                 if(quad instanceof UnpackedBakedQuad) {
-                    datum = ObfuscationReflectionHelper.getPrivateValue(UnpackedBakedQuad.class, (UnpackedBakedQuad) quad, "unpackedData");
+                    datum = ReflectionHelper.getPrivateValue(UnpackedBakedQuad.class, (UnpackedBakedQuad) quad, "unpackedData");
                 }
                 for (int v = 0; v < 4; v++) {
                     int o = data.length / 4 * v;
