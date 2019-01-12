@@ -40,7 +40,13 @@ public enum ModelCommandLoader implements ICustomModelLoader {
             throw new IllegalStateException("No match found");
         }
         ResourceLocation location = new ResourceLocation(filter.group(1));
-        IModel model = ModelLoaderRegistry.getModel(new ResourceLocation(location.getResourceDomain(), location.getResourcePath().substring("models/".length())));
+        IModel model;
+        try {
+            model = ModelLoaderRegistry.getModel(new ResourceLocation(location.getResourceDomain(), location.getResourcePath().substring("models/".length())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
 
         Matcher command = this.command.matcher(filter.group(2));
         List<CommandEntry> list = Lists.newArrayList();
@@ -83,7 +89,6 @@ public enum ModelCommandLoader implements ICustomModelLoader {
 
         @Override
         public Collection<ResourceLocation> getTextures() {
-            System.out.println(this.delegate.getTextures());
             return this.delegate.getTextures();
         }
 

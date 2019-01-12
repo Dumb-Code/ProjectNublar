@@ -43,12 +43,6 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
     }
 
     @Override
-    public AxisAlignedBB getRenderBoundingBox() {
-        Block block = this.world.getBlockState(this.pos).getBlock();
-        return (block instanceof BlockElectricFencePole && this.world.getBlockState(this.pos).getValue(BlockElectricFencePole.INDEX_PROPERTY) == 0 ? new AxisAlignedBB(this.pos, this.pos.up(block instanceof BlockElectricFencePole ? ((BlockElectricFencePole)block).getType().getHeight() : 0)) : super.getRenderBoundingBox()).grow(1);
-    }
-
-    @Override
     public double getMaxRenderDistanceSquared() {
         return Double.MAX_VALUE;
     }

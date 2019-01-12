@@ -183,7 +183,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     nb = ref;
                 }
 
-                float chance = 0.075F;
+                float chance = 0.02F;
 
                 if(nb || pb) {
                     if(pb && rand.nextFloat() < chance) {

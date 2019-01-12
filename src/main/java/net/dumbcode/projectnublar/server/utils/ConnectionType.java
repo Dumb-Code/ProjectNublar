@@ -9,12 +9,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Getter
 public enum ConnectionType {
-    LIGHT_STEEL(2, 3, 1/32F, 90F),
-    HIGH_SECURITY(1, 8, 1/16F, 0F);
+    LIGHT_STEEL(2, 3, 1/32F, 90F, 10),
+    HIGH_SECURITY(1, 8, 1/16F, 0F, 15);
     private final double[] offsets;
     private final int height;
     private final float cableWidth;
     private final float rotationOffset;
+    private final int lightLevel;
     private final ResourceLocation texture;
 
     @SideOnly(Side.CLIENT)
@@ -22,11 +23,12 @@ public enum ConnectionType {
     @SideOnly(Side.CLIENT)
     public VertexBuffer vbo;
 
-    ConnectionType(int amount, int height, float cableWidth, float defaultRotation) {
+    ConnectionType(int amount, int height, float cableWidth, float defaultRotation, int lightLevel) {
         this.offsets = new double[amount];
         this.height = height;
         this.cableWidth = cableWidth;
         this.rotationOffset = defaultRotation;
+        this.lightLevel = lightLevel;
         this.texture = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/" + this.name().toLowerCase() + "_electric_fence_pole.png");
 
         double off = 1D / (amount * 2);

@@ -44,12 +44,12 @@ public class ModelHandler {
 
     @SubscribeEvent
     public static void onTextureStitched(TextureStitchEvent event) {
-        try {
-            LIGHT_STEEL = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/light_steel_electric_fence_pole.tbl"), event, DefaultVertexFormats.POSITION_TEX_NORMAL));
-            HIGH_SECURITY = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/high_security_electric_fence_pole.tbl"), event, DefaultVertexFormats.POSITION_TEX_NORMAL));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            LIGHT_STEEL = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/light_steel_electric_fence_pole.tbl"), event, DefaultVertexFormats.POSITION_TEX_NORMAL));
+//            HIGH_SECURITY = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/high_security_electric_fence_pole.tbl"), event, DefaultVertexFormats.POSITION_TEX_NORMAL));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         FENCE_SPRITE = event.getMap().registerSprite(new ResourceLocation(ProjectNublar.MODID, "blocks/electric_fence"));
     }
 
@@ -57,10 +57,6 @@ public class ModelHandler {
     public static void onModelReady(ModelRegistryEvent event) {
         TabulaModelHandler.INSTANCE.addDomain(ProjectNublar.MODID);
         ModelLoaderRegistry.registerLoader(ModelCommandLoader.INSTANCE);
-
-        ModelLoader.setCustomStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE, (new StateMap.Builder().ignore(BlockElectricFencePole.INDEX_PROPERTY)).build());
-        ModelLoader.setCustomStateMapper(LIGHT_STEEL_ELECTRIC_FENCE_POLE, (new StateMap.Builder().ignore(BlockElectricFencePole.INDEX_PROPERTY)).build());
-
 
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE);
         reg(TEST_TUBES_GENETIC_MATERIAL);

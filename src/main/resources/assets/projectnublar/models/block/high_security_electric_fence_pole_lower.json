@@ -3,5 +3,5 @@
   "textures": {
     "layer0": "projectnublar:blocks/high_security_electric_fence_pole"
   },
-  "tabula": "projectnublar:models/block/high_security_electric_fence_pole"
+  "tabula": "projectnublar:models/block/high_security_electric_fence_pole_lower"
 }

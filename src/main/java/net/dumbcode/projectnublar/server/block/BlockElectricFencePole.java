@@ -1,30 +1,35 @@
 package net.dumbcode.projectnublar.server.block;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
-import net.dumbcode.projectnublar.server.utils.Connection;
-import net.dumbcode.projectnublar.server.utils.ConnectionType;
-import net.dumbcode.projectnublar.server.utils.LineUtils;
+import net.dumbcode.projectnublar.server.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -33,17 +38,23 @@ import java.util.List;
 public class BlockElectricFencePole extends Block implements IItemBlock {
     @Getter
     private final ConnectionType type;
-    public static final PropertyInteger INDEX_PROPERTY = PropertyInteger.create("index", 0, 15);
+    public final PropertyInteger INDEX_PROPERTY;
+    public static final PropertyRotation ROTATION_PROPERTY = PropertyRotation.create("rotation");
+
+    private final BlockStateContainer blockState;
 
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
         this.type = type;
+        INDEX_PROPERTY = PropertyInteger.create("index", 0, type.getHeight());
+        this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY);
+
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0));
     }
 
     @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, INDEX_PROPERTY);
+    public BlockStateContainer getBlockState() {
+        return this.blockState;
     }
 
     @Override
@@ -53,6 +64,60 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
             flag &= worldIn.getBlockState(pos.up(i)).getBlock().isReplaceable(worldIn, pos.up(i));
         }
         return flag;
+    }
+
+    @Override
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+        float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
+        TileEntity te = worldIn.getTileEntity(pos.down(state.getValue(INDEX_PROPERTY)));
+        if(te instanceof BlockEntityElectricFencePole) {
+            BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
+            if(!ef.fenceConnections.isEmpty()) {
+
+                List<Connection> differingConnections = Lists.newArrayList();
+                for (Connection connection : ef.fenceConnections) {
+                    boolean has = false;
+                    for (Connection dc : differingConnections) {
+                        if(connection.getFrom().equals(dc.getFrom()) && connection.getTo().equals(dc.getTo())) {
+                            has = true;
+                            break;
+                        }
+                    }
+                    if(!has) {
+                        differingConnections.add(connection);
+                    }
+                }
+
+                if (differingConnections.size() == 1) {
+                    Connection connection = differingConnections.get(0);
+                    double[] in = connection.getCache().getIn();
+                    rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+                } else {
+
+                    Connection connection1 = differingConnections.get(0);
+                    Connection connection2 = differingConnections.get(1);
+
+                    double[] in1 = connection1.getCache().getIn();
+                    double[] in2 = connection2.getCache().getIn();
+
+                    double angle1 = MathUtils.horizontalDegree(in1[1] - in1[0], in1[2] - in1[3], connection1.getPosition().equals(connection1.getMin()));
+                    double angle2 = MathUtils.horizontalDegree(in2[1] - in2[0], in2[2] - in2[3], connection2.getPosition().equals(connection2.getMin()));
+
+                    rotation = (float) (angle1 + (angle2-angle1)/2D) + 90F;
+
+                }
+            }
+
+            rotation += this.getType().getRotationOffset() + 90F;
+            if(ef.rotatedAround) {
+                rotation += 180;
+            }
+        }
+//        rotation = -rotation;
+        while(rotation < 0) {
+            rotation += 360;
+        }
+        return super.getActualState(state.withProperty(ROTATION_PROPERTY, MathHelper.floor(rotation % 360)), worldIn, pos);
     }
 
     @Override
@@ -79,6 +144,11 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                 TileEntity te = worldIn.getTileEntity(pos);
                 if(te instanceof BlockEntityElectricFencePole) {
                     ((BlockEntityElectricFencePole) te).rotatedAround = !((BlockEntityElectricFencePole) te).rotatedAround;
+                    te.markDirty();
+                    for (int y = 0; y < this.type.getHeight(); y++) {
+                        IBlockState blockState = worldIn.getBlockState(pos.up(y));
+                        worldIn.notifyBlockUpdate(pos.up(y), blockState, blockState, 3);
+                    }
                     return true;
                 }
             } else if(stack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) { //Move to item class ?
@@ -140,7 +210,12 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? 4 : 0;
+        return state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? this.type.getLightLevel() : 0;
+    }
+
+    @Override
+    public int getLightOpacity(IBlockState state) {
+        return super.getLightOpacity(state);
     }
 
     @Override
@@ -158,14 +233,14 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         return false;
     }
 
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.INVISIBLE;
-    }
-
-
     @Override
     public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(INDEX_PROPERTY, meta);
+    }
+
+    @Override
+    public BlockRenderLayer getBlockLayer() {
+        return BlockRenderLayer.CUTOUT;
     }
 
     @Override

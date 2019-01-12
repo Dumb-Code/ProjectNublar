@@ -1,17 +1,20 @@
 package net.dumbcode.projectnublar.client.commandmodel;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.ilexiconn.llibrary.client.util.Matrix;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
+import javax.vecmath.*;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,8 +41,15 @@ public class ModelCommandRegistry {
 
     static {
 
-        EnumFacing[] allNull = new EnumFacing[EnumFacing.values().length+1];
-        System.arraycopy(EnumFacing.values(), 0, allNull, 0, EnumFacing.values().length);
+        //Move to function ?
+        Function<IBakedModel, Iterable<BakedQuad>> modelToQuads = model -> {
+            Set<BakedQuad> quadSet = Sets.newLinkedHashSet(model.getQuads(Blocks.STONE.getDefaultState(), null, 0L));
+            for (EnumFacing facing : EnumFacing.values()) {
+                quadSet.addAll(model.getQuads(Blocks.STONE.getDefaultState(), facing, 0L));
+            }
+            return quadSet;
+        };
+
         Pattern norPat = Pattern.compile("(\\d*\\.?\\d*),(\\d*\\.?\\d*),(\\d*\\.?\\d*)@(\\d*\\.?\\d*),(\\d*\\.?\\d*),(\\d*\\.?\\d*)");
 
         register("rotate", (model, args) -> {
@@ -71,16 +81,25 @@ public class ModelCommandRegistry {
             mat.mul(m);
 
 
-            for (EnumFacing facing : allNull) {
-                for (BakedQuad quad : model.getQuads(Blocks.STONE.getDefaultState(), facing, 0L)) {
-                    int[] data = quad.getVertexData();
-                    for (int v = 0; v < 4; v++) {
-                        int o = data.length / 4 * v;
-                        Vector3d pos = new Vector3d(Float.intBitsToFloat(data[o])-ds[3], Float.intBitsToFloat(data[o+1])-ds[4], Float.intBitsToFloat(data[o+2])-ds[5]);
-                        mat.transform(pos);
-                        data[o] = Float.floatToRawIntBits((float) (pos.x+ds[3]));
-                        data[o+1] = Float.floatToRawIntBits((float) (pos.y+ds[4]));
-                        data[o+2] = Float.floatToRawIntBits((float) (pos.z+ds[5]));
+            //TODO: i am assuming that POSITION comes first in the vertex format. maybe fix this?
+            for (BakedQuad quad : modelToQuads.apply(model)) {
+                int[] data = quad.getVertexData();
+                float[][][] datum = null;
+                if(quad instanceof UnpackedBakedQuad) {
+                    datum = ObfuscationReflectionHelper.getPrivateValue(UnpackedBakedQuad.class, (UnpackedBakedQuad) quad, "unpackedData");
+                }
+                for (int v = 0; v < 4; v++) {
+                    int o = data.length / 4 * v;
+                    Point3d pos = new Point3d(Float.intBitsToFloat(data[o])-ds[3], Float.intBitsToFloat(data[o+1])-ds[4], Float.intBitsToFloat(data[o+2])-ds[5]);
+                    mat.transform(pos);
+                    data[o] =   Float.floatToRawIntBits((float) (pos.x+ds[3]));
+                    data[o+1] = Float.floatToRawIntBits((float) (pos.y+ds[4]));
+                    data[o+2] = Float.floatToRawIntBits((float) (pos.z+ds[5]));
+
+                    if(datum != null) {
+                        datum[v][0][0] = (float) (pos.x+ds[3]);
+                        datum[v][0][1] = (float) (pos.y+ds[4]);
+                        datum[v][0][2] = (float) (pos.z+ds[5]);
                     }
                 }
             }
@@ -97,21 +116,30 @@ public class ModelCommandRegistry {
             for (int i = 0; i < 6; i++) {
                 ds[i] = Double.valueOf(matcher.group(i+1));
             }
+            for (BakedQuad quad : modelToQuads.apply(model)) {
+                int[] data = quad.getVertexData();
+                float[][][] datum = null;
+                if(quad instanceof UnpackedBakedQuad) {
+                    datum = ObfuscationReflectionHelper.getPrivateValue(UnpackedBakedQuad.class, (UnpackedBakedQuad) quad, "unpackedData");
+                }
+                for (int v = 0; v < 4; v++) {
+                    int o = data.length / 4 * v;
+                    float x = (float) ((Float.intBitsToFloat(data[o  ])-ds[3])*ds[0]+ds[3]);
+                    float y = (float) ((Float.intBitsToFloat(data[o+1])-ds[4])*ds[1]+ds[4]);
+                    float z = (float) ((Float.intBitsToFloat(data[o+2])-ds[5])*ds[2]+ds[5]);
+                    data[o  ] = Float.floatToRawIntBits(x);
+                    data[o+1] = Float.floatToRawIntBits(y);
+                    data[o+2] = Float.floatToRawIntBits(z);
 
-            for (EnumFacing facing : allNull) {
-                for (BakedQuad quad : model.getQuads(Blocks.STONE.getDefaultState(), facing, 0L)) {
-                    int[] data = quad.getVertexData();
-                    for (int v = 0; v < 4; v++) {
-                        int o = data.length / 4 * v;
-                        data[o  ] = Float.floatToRawIntBits((float) ((Float.intBitsToFloat(data[o  ])-ds[3])*ds[0]+ds[3]));
-                        data[o+1] = Float.floatToRawIntBits((float) ((Float.intBitsToFloat(data[o+1])-ds[4])*ds[1]+ds[4]));
-                        data[o+2] = Float.floatToRawIntBits((float) ((Float.intBitsToFloat(data[o+2])-ds[5])*ds[2]+ds[5]));
+                    if(datum != null) {
+                        datum[v][0][0] = x;
+                        datum[v][0][1] = y;
+                        datum[v][0][2] = z;
                     }
                 }
             }
 
         });
-
     }
 
 }
