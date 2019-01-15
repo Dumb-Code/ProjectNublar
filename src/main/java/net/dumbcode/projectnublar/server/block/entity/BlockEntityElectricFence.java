@@ -2,14 +2,13 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.dumbcode.projectnublar.server.utils.Connection;
-import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.List;
@@ -38,12 +37,12 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
         }
     }
 
-    public List<AxisAlignedBB> createBoundingBox() {
+    public List<ConnectionAxisAlignedBB> createBoundingBox() {
         Block block = this.world.getBlockState(this.pos).getBlock();
-        List<AxisAlignedBB> out = Lists.newArrayList();
+        List<ConnectionAxisAlignedBB> out = Lists.newArrayList();
         if(block instanceof BlockElectricFence) {
-            for (Connection connections : this.fenceConnections) {
-                Connection.Cache cache = connections.getCache();
+            for (Connection connection : this.fenceConnections) {
+                Connection.Cache cache = connection.getCache();
                 if(cache != null) {
                     double[] intersect = cache.getIn();
                     double amount = 16;
@@ -54,7 +53,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
 
                     for (int i = 0; i < amount; i++) {
                         int next = i + 1;
-                        out.add(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - this.pos.getX(), intersect[4] - this.pos.getY(), intersect[2] - this.pos.getZ()).grow(0, connections.getCache().getFullThick()/2D, 0));
+                        out.add(new ConnectionAxisAlignedBB(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - this.pos.getX(), intersect[4] - this.pos.getY(), intersect[2] - this.pos.getZ()).grow(0, connection.getCache().getFullThick()/2D, 0), connection));
                     }
                 }
             }
@@ -80,6 +79,17 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     @Override
     public Set<Connection> getConnections() {
         return this.fenceConnections;
+    }
+
+    @Getter
+    public class ConnectionAxisAlignedBB extends AxisAlignedBB {
+
+        private final Connection connection;
+
+        public ConnectionAxisAlignedBB(AxisAlignedBB aabb, Connection connection) {
+            super(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
+            this.connection = connection;
+        }
     }
 
 }
