@@ -5,7 +5,6 @@ import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
@@ -31,9 +30,9 @@ public class SparkParticle extends Particle {
 
     @Override
     public void move(double x, double y, double z) {
-        BlockElectricFence.collidable = false;
+        BlockElectricFence.collidableClient = false;
         super.move(x, y, z);
-        BlockElectricFence.collidable = true;
+        BlockElectricFence.collidableClient = true;
     }
 
     @Override

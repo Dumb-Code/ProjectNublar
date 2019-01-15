@@ -15,13 +15,11 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -43,10 +41,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -56,7 +52,8 @@ public class BlockElectricFence extends Block implements IItemBlock {
     public static final boolean DEBUG = false;
 
     //Set this at your own will, just remember to set it back to true after collection
-    public static boolean collidable = true;
+    public static boolean collidableClient = true;
+    public static boolean collidableServer = true;
 
     public BlockElectricFence() {
         super(Material.IRON, MapColor.IRON);
@@ -426,7 +423,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
-        if(collidable) {
+        if(worldIn.isRemote ? collidableClient : collidableServer) {
             TileEntity te = worldIn.getTileEntity(pos);
             if(te instanceof BlockEntityElectricFence) {
                 for (AxisAlignedBB bb : ((BlockEntityElectricFence) te).createBoundingBox()) {
