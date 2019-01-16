@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
@@ -11,6 +12,7 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -32,6 +34,8 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
     private Dinosaur dinosaur = Dinosaur.MISSING;
     @SideOnly(Side.CLIENT)
     private TabulaModel model;
+    @SideOnly(Side.CLIENT)
+    private SkeletonBuilderScene scene;
     private Map<String, Vector3f> poseData = new HashMap<>();
 
     @Getter(lazy = true)

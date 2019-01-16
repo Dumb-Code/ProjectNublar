@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.block;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.Value;
 import net.dumbcode.projectnublar.client.utils.DebugUtil;
@@ -19,6 +20,7 @@ import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -42,6 +44,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -104,7 +107,54 @@ public class BlockElectricFence extends Block implements IItemBlock {
                 }
             }
         }
+    }
 
+    @Override
+    public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity) {
+        TileEntity te = world.getTileEntity(pos);
+        AxisAlignedBB entityBox = entity.getCollisionBoundingBox();
+        if (entityBox == null) {
+            entityBox = entity.getEntityBoundingBox();
+        }
+        if (te instanceof BlockEntityElectricFence) {
+            entityBox = entityBox.grow(0.1D);
+            BlockEntityElectricFence cb = (BlockEntityElectricFence) te;
+            for (BlockEntityElectricFence.ConnectionAxisAlignedBB box : cb.createBoundingBox()) {
+                if (entityBox.intersects(box.offset(pos))) {
+                    if(box.getConnection().isPowered(world)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
+        TileEntity te = worldIn.getTileEntity(pos);
+        AxisAlignedBB entityBox = entityIn.getCollisionBoundingBox();
+        if(entityBox == null) {
+            entityBox = entityIn.getEntityBoundingBox();
+        }
+        if(te instanceof BlockEntityElectricFence) {
+            entityBox = entityBox.grow(0.1D);
+            BlockEntityElectricFence cb = (BlockEntityElectricFence) te;
+            for (BlockEntityElectricFence.ConnectionAxisAlignedBB box : cb.createBoundingBox()) {
+                if (entityBox.intersects(box.offset(pos)) && box.getConnection().isPowered(worldIn)) {
+
+                    Vector3d vec = new Vector3d((entityBox.maxX+entityBox.minX)/2, (entityBox.maxY+entityBox.minY)/2, (entityBox.maxZ+entityBox.minZ)/2);
+                    vec.sub(box.getConnection().getCache().getCenter());
+                    vec.normalize();
+
+                    entityIn.motionX = vec.x;
+                    entityIn.motionY = vec.y;
+                    entityIn.motionZ = vec.z;
+
+                    break;
+                }
+            }
+        }
     }
 
     @SubscribeEvent

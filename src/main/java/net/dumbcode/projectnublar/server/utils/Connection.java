@@ -1,16 +1,21 @@
 package net.dumbcode.projectnublar.server.utils;
 
+import com.google.common.collect.Lists;
 import lombok.*;
+import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -96,6 +101,38 @@ public class Connection {
             return false;
         }
         return true;
+    }
+
+    public boolean isPowered(IBlockAccess world) {
+        for (BlockPos pos : LineUtils.getBlocksInbetween(this.from, this.to, this.offset)) { //TODO: cache ?
+            TileEntity te = world.getTileEntity(pos);
+            if(te instanceof ConnectableBlockEntity) {
+                boolean has = false;
+                for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
+                    if(connection.lazyEquals(this)) {
+                        if(connection.isBroken()) {
+                            return false;
+                        }
+                        has = true;
+                        break;
+                    }
+                }
+                if(!has) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        for(BlockPos pos : Lists.newArrayList(this.from, this.to)) {
+            TileEntity te = world.getTileEntity(pos);
+            if(te instanceof BlockEntityElectricFencePole && te.hasCapability(CapabilityEnergy.ENERGY, null) && Objects.requireNonNull(te.getCapability(CapabilityEnergy.ENERGY, null)).getEnergyStored() > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public Cache getCache() {
