@@ -55,6 +55,9 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             double[] in = cache.getIn();
             GlStateManager.translate(-connection.getPosition().getX()+(in[0]+in[1])/2D, -connection.getPosition().getY()+(in[4]+in[5])/2D, -connection.getPosition().getZ()+(in[2]+in[3])/2D);
             double angle = -MathUtils.horizontalDegree(connection.getCompared() < 0 ? in[5]-in[4] : in[4]-in[5], cache.getXZlen(), true) + 90F;
+            if(in[0] == in[1]) {
+                angle = -angle;
+            }
             GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3]-in[2]) / (in[1]-in[0]))), 0, -1, 0);
             for (int i = 0; i < 2; i++) {
                 GlStateManager.pushMatrix();
