@@ -57,25 +57,30 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         GlStateManager.translate(x + 0.5, y + 0.5, z + 0.5);
 
-        SkeletonBuilderScene scene = te.getScene();
-        if(scene == null) {
-            te.setScene(scene = new SkeletonBuilderScene(te));
-        }
-        scene.update(getWorld().getTotalWorldTime(), partialTicks);
-        GlStateManager.disableAlpha();
-        scene.getFramebuffer().bindFramebufferTexture();
+        GlStateManager.pushMatrix();
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        buff.pos(0, 0, 0).tex(0, 0).endVertex();
-        buff.pos(0, 0, 1).tex(0, 1).endVertex();
-        buff.pos(2, 0, 1).tex(1, 1).endVertex();
-        buff.pos(2, 0, 0).tex(1, 0).endVertex();
-        Tessellator.getInstance().draw();
+        if(false) {//TODO: remove
+            SkeletonBuilderScene scene = te.getScene();
+            if(scene == null) {
+                te.setScene(scene = new SkeletonBuilderScene(te));
+            }
+            scene.update(getWorld().getTotalWorldTime(), partialTicks);
+            GlStateManager.disableAlpha();
+            scene.getFramebuffer().bindFramebufferTexture();
+            buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+            buff.pos(0, 0, 0).tex(0, 0).endVertex();
+            buff.pos(0, 0, 1).tex(0, 1).endVertex();
+            buff.pos(2, 0, 1).tex(1, 1).endVertex();
+            buff.pos(2, 0, 0).tex(1, 0).endVertex();
+            Tessellator.getInstance().draw();
+
+
+            RenderHelper.enableStandardItemLighting();
+
+        }
 
         PoleFacing pole = te.getSkeletalProperties().getPoleFacing();
         EnumFacing poleFacing = pole.getFacing();
-
-        RenderHelper.enableStandardItemLighting();
         GlStateManager.enableAlpha();
 
         Vector3f rotVec = new Vector3f();
@@ -116,30 +121,34 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.rotate(teRot, 0, 1, 0);
         rotateMatrix.rotY(teRot / 180D * PI);
 
-        GlStateManager.translate(0f, 1f, 0f);
+        GlStateManager.translate(0, -0.5F, 0);
+        GlStateManager.scale(1.5, 1.5, 1.5);
+        GlStateManager.translate(0f, 1.5f, 0f);
         GlStateManager.rotate(180f, 0f, 0f, 1f);
 
         mc.getTextureManager().bindTexture(te.getDinosaur().getTextureLocation(te.getDinosaurEntity()));
 
         Map<String, Vector3f> poseData = te.getPoseData();
 
+        GlStateManager.disableCull();
 
         if(te.getModel() != null) {
             for(ModelRenderer box : te.getModel().boxList) {
                 Vector3f rotations = poseData.get(box.boxName);
-                if(rotations != null) {
+                if(rotations != null && rotations.lengthSquared() > 0) {
                     box.rotateAngleX = rotations.x;
                     box.rotateAngleY = rotations.y;
                     box.rotateAngleZ = rotations.z;
                 }
             }
-            DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
-            animator.setRotationAngles(te.getModel(), te.getDinosaurEntity(), 0f, 0f, 100, 0f, 0f, 1f/16f);
+
+            //Skip the resetting of the pose, allowing for our angles to work
+//            DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
+//            animator.setRotationAngles(te.getModel(), te.getDinosaurEntity(), 0f, 0f, 100, 0f, 0f, 1f/16f);
             MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
         }
         GlStateManager.popMatrix();
 
-        GlStateManager.pushMatrix();
         if(pole != PoleFacing.NONE) {
             List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
             World world = te.getWorld();
@@ -180,9 +189,11 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                         Vec3d partOrigin = cube.getModelPos(cube, new Vec3d(endPoint.x, endPoint.y, endPoint.z));
                         partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
 
-                        Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y, partOrigin.z);
+                        Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
+                        rendererPos.scale(1.5D);
                         rotateMatrix.transform(rendererPos);
                         facingMatrix.transform(rendererPos);
+                        rendererPos.y -= 1.5;
                         translateMatrix.transform(rendererPos);
 
                         AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;

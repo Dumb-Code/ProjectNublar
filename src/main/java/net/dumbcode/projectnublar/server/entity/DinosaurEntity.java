@@ -77,7 +77,7 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
 
 
     public ModelStage getModelStage() { //TODO
-        return ModelStage.ADULT;
+        return ModelStage.SKELETON;
     }
 
     public Dinosaur getDinosaur() {

@@ -641,7 +641,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
         // render rotation ring
         if(selectedPart != null) {
-            renderRotationRing();
+//            renderRotationRing();
         }
     }
 
@@ -715,7 +715,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private void renderModel() {
         setModelToPose();
         mc.getTextureManager().bindTexture(builder.getDinosaur().getTextureLocation(builder.getDinosaurEntity()));
-        animator.setRotationAngles(model, builder.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
+//        animator.setRotationAngles(model, builder.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
         MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
     }
 

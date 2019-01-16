@@ -13,6 +13,7 @@ public class Tyrannosaurus extends Dinosaur {
     public Tyrannosaurus() {
         val map = getModelProperties().getMainModelMap();
         map.put(ModelStage.ADULT, "tyrannosaurus_adult_idle");
+        map.put(ModelStage.SKELETON, "tyrannosaurus_skeleton_idle");
 
         getItemProperties()
                 .setCookedMeatHealAmount(10)

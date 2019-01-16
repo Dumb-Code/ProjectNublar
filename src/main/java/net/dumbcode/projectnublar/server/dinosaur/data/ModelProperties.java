@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Data
 public class ModelProperties {
-    private List<ModelStage> modelGrowthStages = Lists.newArrayList(ModelStage.ADULT);
+    private List<ModelStage> modelGrowthStages = Lists.newArrayList(ModelStage.ADULT, ModelStage.SKELETON);
     private Map<ModelStage, String> mainModelMap = Maps.newEnumMap(ModelStage.class);
     @SideOnly(Side.CLIENT)
     private float entityAnimatorSupplier;

@@ -86,7 +86,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
 
     @Override
     public ResourceLocation getTexture(DinosaurEntity entity) {
-        return new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/tyrannosaurus_male_adult.png");
+        return new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png");
     }
 
     @Override

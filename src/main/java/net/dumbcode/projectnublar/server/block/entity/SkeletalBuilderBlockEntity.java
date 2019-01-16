@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
@@ -22,7 +24,9 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
@@ -117,7 +121,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
 
     public void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
-        this.model = dinosaur.getModelContainer().getModelMap().get(ModelStage.ADULT);
+        this.model = dinosaur.getModelContainer().getModelMap().get(ModelStage.SKELETON);
         resetPoseDataToDefaultPose();
         this.reassureSize();
     }
