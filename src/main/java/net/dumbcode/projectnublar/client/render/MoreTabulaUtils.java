@@ -7,6 +7,7 @@ import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import org.lwjgl.opengl.GL14;
 
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class MoreTabulaUtils {
     }
 
     public static void renderModelWithoutChangingPose(TabulaModel model, float scale) {
+        GL14.glBlendColor(1F, 1F, 1F, 1f);
+
         GlStateManager.pushMatrix();
         double[] modelScale = ReflectionHelper.getPrivateValue(TabulaModel.class, model, "scale");
         List<AdvancedModelRenderer> rootBoxes = ReflectionHelper.getPrivateValue(TabulaModel.class, model, "rootBoxes");
