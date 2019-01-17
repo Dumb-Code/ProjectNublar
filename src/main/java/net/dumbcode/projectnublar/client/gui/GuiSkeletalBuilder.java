@@ -576,7 +576,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         super.mouseReleased(mouseX, mouseY, button);
         if(button == 0 && movedPart) {
             movedPart = false;
-            ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STOPPING));
+            if(selectedPart != null)
+                ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STOPPING));
         } else if(button == 0) {
             currentSelectedRing = RotationAxis.NONE;
         }

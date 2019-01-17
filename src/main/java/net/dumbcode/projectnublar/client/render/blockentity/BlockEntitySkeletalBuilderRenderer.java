@@ -47,6 +47,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
     private Minecraft mc = Minecraft.getMinecraft();
     @Override
     public void render(SkeletalBuilderBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+
+        double scale = 2.5;
+
         IBlockState state = te.getWorld().getBlockState(te.getPos());
         if(state.getBlock() != BlockHandler.SKELETAL_BUILDER) { //Can sometimes happen when loading in a save. Not sure why, but it happens
             return;
@@ -122,7 +125,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         rotateMatrix.rotY(teRot / 180D * PI);
 
         GlStateManager.translate(0, -0.5F, 0);
-        GlStateManager.scale(1.5, 1.5, 1.5);
+        GlStateManager.scale(scale,scale,scale);
         GlStateManager.translate(0f, 1.5f, 0f);
         GlStateManager.rotate(180f, 0f, 0f, 1f);
 
@@ -135,7 +138,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         if(te.getModel() != null) {
             for(ModelRenderer box : te.getModel().boxList) {
                 Vector3f rotations = poseData.get(box.boxName);
-                if(rotations != null && rotations.lengthSquared() > 0) {
+                if(rotations != null) {
                     box.rotateAngleX = rotations.x;
                     box.rotateAngleY = rotations.y;
                     box.rotateAngleZ = rotations.z;
@@ -148,6 +151,8 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
         }
         GlStateManager.popMatrix();
+
+        GlStateManager.enableCull();
 
         if(pole != PoleFacing.NONE) {
             List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
@@ -190,7 +195,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                         partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
 
                         Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
-                        rendererPos.scale(1.5D);
+                        rendererPos.scale(scale);
                         rotateMatrix.transform(rendererPos);
                         facingMatrix.transform(rendererPos);
                         rendererPos.y -= 1.5;
