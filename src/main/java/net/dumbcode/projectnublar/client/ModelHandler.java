@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.client.commandmodel.ModelCommandLoader;
 import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -26,8 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.Map;
 import java.util.Objects;
 
-import static net.dumbcode.projectnublar.server.block.BlockHandler.HIGH_SECURITY_ELECTRIC_FENCE_POLE;
-import static net.dumbcode.projectnublar.server.block.BlockHandler.LIGHT_STEEL_ELECTRIC_FENCE_POLE;
+import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 import static net.dumbcode.projectnublar.server.item.ItemHandler.*;
 
 //TODO:
@@ -58,7 +58,8 @@ public class ModelHandler {
         TabulaModelHandler.INSTANCE.addDomain(ProjectNublar.MODID);
         ModelLoaderRegistry.registerLoader(ModelCommandLoader.INSTANCE);
 
-        reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE);
+        reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE, Item.getItemFromBlock(HIGH_SECURITY_ELECTRIC_FENCE_POLE),
+                Item.getItemFromBlock(LIGHT_STEEL_ELECTRIC_FENCE_POLE), Item.getItemFromBlock(ELECTRIC_FENCE));
         reg(TEST_TUBES_GENETIC_MATERIAL);
     }
 

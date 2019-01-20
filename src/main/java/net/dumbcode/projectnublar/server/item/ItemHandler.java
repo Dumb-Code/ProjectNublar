@@ -2,15 +2,18 @@ package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.block.Block;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -21,6 +24,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.TAB;
+import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
