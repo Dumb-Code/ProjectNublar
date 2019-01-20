@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.dumbcode.dumblibrary.client.model.InfoTabulaModel;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
@@ -10,6 +11,10 @@ import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilderBlock;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.block.state.IBlockState;
@@ -40,8 +45,7 @@ import javax.vecmath.Vector3f;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.signum;
+import static java.lang.Math.*;
 
 public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<SkeletalBuilderBlockEntity> {
     private Minecraft mc = Minecraft.getMinecraft();
@@ -135,8 +139,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         GlStateManager.disableCull();
 
-        if(te.getModel() != null) {
-            for(ModelRenderer box : te.getModel().boxList) {
+        TabulaModel model = te.getModel();
+        
+        if(model != null) {
+            for(ModelRenderer box : model.boxList) {
                 Vector3f rotations = poseData.get(box.boxName);
                 if(rotations != null) {
                     box.rotateAngleX = rotations.x;
@@ -145,10 +151,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 }
             }
 
-            //Skip the resetting of the pose, allowing for our angles to work
-//            DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
-//            animator.setRotationAngles(te.getModel(), te.getDinosaurEntity(), 0f, 0f, 100, 0f, 0f, 1f/16f);
-            MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f/16f);
+            setVisability(te.getDinosaurEntity(), model);
+            MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
+            resetVisability(model);
+
         }
         GlStateManager.popMatrix();
 
@@ -168,11 +174,11 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             float textureWidth = 8F;
             float textureHeight = 16F;
 
-            if (te.getModel() != null) {
+            if (model != null) {
                 for (String anchoredPart : anchoredParts) {
-                    AdvancedModelRenderer cube = te.getModel().getCube(anchoredPart);
+                    AdvancedModelRenderer cube = model.getCube(anchoredPart);
                     if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
-                        InfoTabulaModel infoModel = (InfoTabulaModel) te.getModel();
+                        InfoTabulaModel infoModel = (InfoTabulaModel) model;
                         int[] dimensions = infoModel.getDimension(cube);
                         ModelBox box = ObfuscationReflectionHelper.<List<ModelBox>, ModelRenderer>getPrivateValue(ModelRenderer.class, cube, "cubeList", "field_78804" + "_l").get(0); //TODO: remove this god awful method of getting the offsets
 
@@ -327,6 +333,62 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             }
         }
         GlStateManager.popMatrix();
+    }
+
+    private static void setVisability(DinosaurEntity entity, TabulaModel tabulaModel) {
+        Dinosaur dinosaur = entity.getDinosaur();
+        Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
+        List<String> modelList = Lists.newArrayList();
+        for (String s : dinosaur.getSkeletalInformation().getIndividualBones()) {
+            modelList.addAll(dinosaur.getSkeletalInformation().getBoneToModelMap().get(s));
+        }
+        SkeletalBuilderCompoent compoent = entity.getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
+        if(compoent != null) {
+            int id = compoent.modelIndex % (modelList.size() + 1);
+            List<ModelRenderer> nonHiddenCubes = Lists.newArrayList();
+            if(id != 0) {
+                String currentState = modelList.get(id - 1);
+                List<String> activeStates = Lists.newArrayList();
+                for (int i = 0; i < modelList.size(); i++) {
+                    String model = modelList.get(i);
+                    modelChildMap.put(model, MoreTabulaUtils.getAllChildren(tabulaModel.getCube(model), modelList));
+                    if(i <= modelList.indexOf(currentState)) {
+                        activeStates.add(model);
+                    }
+                }
+                for (String activeState : activeStates) {
+                    nonHiddenCubes.addAll(modelChildMap.get(activeState));
+                }
+                for (ModelRenderer modelRenderer : tabulaModel.boxList) {
+                    AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+                    if(nonHiddenCubes.contains(modelRenderer)) {
+                        box.scaleX = 1;
+                        box.scaleY = 1;
+                        box.scaleZ = 1;
+                    } else {
+                        box.scaleX = 0;
+                        box.scaleY = 0;
+                        box.scaleZ = 0;
+                    }
+                }
+            } else {
+                for (ModelRenderer modelRenderer : tabulaModel.boxList) {
+                    AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+                    box.scaleX = 1;
+                    box.scaleY = 1;
+                    box.scaleZ = 1;
+                }
+            }
+        }
+    }
+
+    private static void resetVisability(TabulaModel tabulaModel) {
+        for (ModelRenderer modelRenderer : tabulaModel.boxList) {
+            AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
+            box.scaleX = 1;
+            box.scaleY = 1;
+            box.scaleZ = 1;
+        }
     }
 
     private void renderCube(double width, double height, float textureWidth, float textureHeight, int uOffset, int vOffset) {

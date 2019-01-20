@@ -25,50 +25,7 @@ public class DinosaurAnimator extends EntityAnimator<DinosaurEntity, ModelStage>
 
     @Override
     protected void performAnimations(TabulaModel parModel, DinosaurEntity entity, float limbSwing, float limbSwingAmount, float ticks, float rotationYaw, float rotationPitch, float scale) {
-        if(!rescalingEnabled) {
-            return;
-        }
-        Dinosaur dinosaur = entity.getDinosaur();
-        Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
-        List<String> modelList = Lists.newArrayList();
-        for (String s : dinosaur.getSkeletalInformation().getIndividualBones()) {
-            modelList.addAll(dinosaur.getSkeletalInformation().getBoneToModelMap().get(s));
-        }
-        int id = entity.modelIndex % (modelList.size() + 1);
-        List<ModelRenderer> nonHiddenCubes = Lists.newArrayList();
-        if(id != 0) {
-            String currentState = modelList.get(id - 1);
-            List<String> activeStates = Lists.newArrayList();
-            for (int i = 0; i < modelList.size(); i++) {
-                String model = modelList.get(i);
-                modelChildMap.put(model, MoreTabulaUtils.getAllChildren(parModel.getCube(model), modelList));
-                if(i <= modelList.indexOf(currentState)) {
-                    activeStates.add(model);
-                }
-            }
-            for (String activeState : activeStates) {
-                nonHiddenCubes.addAll(modelChildMap.get(activeState));
-            }
-            for (ModelRenderer modelRenderer : parModel.boxList) {
-                AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-                if(nonHiddenCubes.contains(modelRenderer)) {
-                    box.scaleX = 1;
-                    box.scaleY = 1;
-                    box.scaleZ = 1;
-                } else {
-                    box.scaleX = 0;
-                    box.scaleY = 0;
-                    box.scaleZ = 0;
-                }
-            }
-        } else {
-            for (ModelRenderer modelRenderer : parModel.boxList) {
-                AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-                box.scaleX = 1;
-                box.scaleY = 1;
-                box.scaleZ = 1;
-            }
-        }
+
         super.performAnimations(parModel, entity, limbSwing, limbSwingAmount, ticks, rotationYaw, rotationPitch, scale);
     }
 

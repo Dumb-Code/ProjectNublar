@@ -68,7 +68,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        float rotation = 90F; //Expensive calls ahead. Maybe try and cache them?
+        float rotation = 0F; //Expensive calls ahead. Maybe try and cache them?
         TileEntity te = worldIn.getTileEntity(pos.down(state.getValue(INDEX_PROPERTY)));
         if(te instanceof BlockEntityElectricFencePole) {
             BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
@@ -91,9 +91,8 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                 if (differingConnections.size() == 1) {
                     Connection connection = differingConnections.get(0);
                     double[] in = connection.getCache().getIn();
-                    rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+                    rotation = (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0]))) + 90F;
                 } else {
-
                     Connection connection1 = differingConnections.get(0);
                     Connection connection2 = differingConnections.get(1);
 
@@ -103,8 +102,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                     double angle1 = MathUtils.horizontalDegree(in1[1] - in1[0], in1[2] - in1[3], connection1.getPosition().equals(connection1.getMin()));
                     double angle2 = MathUtils.horizontalDegree(in2[1] - in2[0], in2[2] - in2[3], connection2.getPosition().equals(connection2.getMin()));
 
-                    rotation = (float) (angle1 + (angle2-angle1)/2D) + 90F;
-
+                    rotation = (float) (angle1 + (angle2-angle1)/2D);
                 }
             }
 

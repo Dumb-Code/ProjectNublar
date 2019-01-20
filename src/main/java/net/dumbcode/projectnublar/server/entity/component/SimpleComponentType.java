@@ -1,14 +1,20 @@
 package net.dumbcode.projectnublar.server.entity.component;
 
 import com.google.common.base.Preconditions;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 public class SimpleComponentType<T extends EntityComponent> implements EntityComponentType<T> {
-    private final Supplier<T> constructor;
-    private final ResourceLocation identifier;
+    @ToString.Exclude private final Supplier<T> constructor;
+    @EqualsAndHashCode.Include private final ResourceLocation identifier;
     private final Class<T> type;
 
     private SimpleComponentType(Supplier<T> constructor, ResourceLocation identifier, Class<T> type) {
@@ -74,8 +80,18 @@ public class SimpleComponentType<T extends EntityComponent> implements EntityCom
         }
 
         public EntityComponentType<T> build() {
-            Preconditions.checkNotNull(this.constructor, "Component constructor must be set");
             Preconditions.checkNotNull(this.identifier, "Component identifier must be set");
+            if(this.constructor == null) {
+                ProjectNublar.getLogger().warn("No constructor set, trying to set to empty constructor of type " + this.type.getName());
+                Constructor<T> constructor = ReflectionHelper.findConstructor(this.type);
+                this.constructor = () -> {
+                    try {
+                        return constructor.newInstance();
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        throw new IllegalStateException("Unable to construct component of class " + this.type.getName() + ", with component type " + this.identifier, e);
+                    }
+                };
+            }
             return new SimpleComponentType<>(this.constructor, this.identifier, this.type);
         }
     }

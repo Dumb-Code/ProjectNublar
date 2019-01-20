@@ -26,8 +26,6 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
     private int animationTick;
     private int animationLength;
 
-    public int modelIndex; //Not final name
-
     public DinosaurEntity(World worldIn) {
         super(worldIn);
     }
@@ -75,7 +73,6 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
         return this.getDinosaur().getSystemInfo();
     }
 
-
     public ModelStage getModelStage() { //TODO
         return ModelStage.SKELETON;
     }
@@ -84,12 +81,5 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
         return this.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur;
     }
 
-    @Override
-    protected boolean processInteract(EntityPlayer player, EnumHand hand) {
-        if (player.world.isRemote) {
-            modelIndex++;
-        }
-        player.swingArm(hand);
-        return true;
-    }
+
 }

@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.entity.component;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
 import net.dumbcode.projectnublar.server.registry.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.minecraft.util.ResourceLocation;
@@ -16,6 +17,8 @@ public class EntityComponentTypes {
     public static final EntityComponentType<DinosaurComponent> DINOSAUR = InjectedUtils.injected();
     public static final EntityComponentType<GenderComponent> GENDER = InjectedUtils.injected();
 
+    public static final EntityComponentType<SkeletalBuilderCompoent> SKELETAL_BUILDER = InjectedUtils.injected();
+
     @SubscribeEvent
     public static void onRegisterComponents(RegisterComponentsEvent event) {
         event.getRegistry().registerAll(
@@ -26,7 +29,11 @@ public class EntityComponentTypes {
                 SimpleComponentType.builder(GenderComponent.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "gender"))
                         .withConstructor(GenderComponent::new)
-                        .build()
+                        .build(),
+                SimpleComponentType.builder(SkeletalBuilderCompoent.class)
+                    .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
+                    .withConstructor(SkeletalBuilderCompoent::new)
+                    .build()
         );
     }
 }

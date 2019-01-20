@@ -11,6 +11,8 @@ import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHi
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.model.ModelRenderer;
@@ -36,8 +38,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
     private Dinosaur dinosaur = Dinosaur.MISSING;
-    @SideOnly(Side.CLIENT)
-    private TabulaModel model;
     @SideOnly(Side.CLIENT)
     private SkeletonBuilderScene scene;
     private Map<String, Vector3f> poseData = new HashMap<>();
@@ -65,7 +65,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
 
         // save pose data
         nbt.setTag("Pose", writePoseToNBT(poseData));
-        nbt.setInteger("ModelIndex", getDinosaurEntity().modelIndex);
         nbt.setTag("SkeletalProperties", this.skeletalProperties.serialize(new NBTTagCompound()));
         return super.writeToNBT(nbt);
     }
@@ -93,7 +92,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
         poseData.putAll(readPoseFromNBT(pose));
         this.reassureSize();
         this.history.readFromNBT(nbt.getCompoundTag("History"));
-        getDinosaurEntity().modelIndex = nbt.getInteger("ModelIndex");
         this.skeletalProperties.deserialize(nbt.getCompoundTag("SkeletalProperties"));
         super.readFromNBT(nbt);
     }
@@ -121,13 +119,17 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
 
     public void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
-        this.model = dinosaur.getModelContainer().getModelMap().get(ModelStage.SKELETON);
+        this.getDinosaurEntity().getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = dinosaur;
         resetPoseDataToDefaultPose();
         this.reassureSize();
     }
 
     public TabulaModel getModel() {
-        return model;
+        if(this.dinosaur == Dinosaur.MISSING) {
+            return null;
+        }
+        DinosaurEntity de = this.getDinosaurEntity();
+        return de.getDinosaur().getModelContainer().getModelMap().get(de.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage);
     }
 
     public ItemStackHandler getBoneHandler() {
@@ -136,7 +138,8 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
 
     private DinosaurEntity createEntity() {
         DinosaurEntity entity = this.dinosaur.createEntity(this.world);
-        //Initilize stuff
+        entity.attachComponent(EntityComponentTypes.SKELETAL_BUILDER);
+        entity.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
         return entity;
     }
 
@@ -155,15 +158,13 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity {
 
     public void resetPose() {
         history.recordPoseReset();
-        model.resetToDefaultPose();
         resetPoseDataToDefaultPose();
         ProjectNublar.NETWORK.sendToAll(new S7FullPoseChange(this, getPoseData()));
     }
 
     public void resetPoseDataToDefaultPose() {
         poseData.clear();
-        model.resetToDefaultPose();
-        for(ModelRenderer box : model.boxList) {
+        for(ModelRenderer box : this.getModel().boxList) { //TODO: need a better way of handeling the model
             Vector3f rotations = new Vector3f(box.rotateAngleX, box.rotateAngleY, box.rotateAngleZ);
             poseData.put(box.boxName, rotations);
         }
