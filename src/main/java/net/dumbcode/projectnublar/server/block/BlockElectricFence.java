@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.client.utils.DebugUtil;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -25,16 +26,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -598,8 +598,33 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     public class FenceItemBlock extends ItemBlock {
 
+        public static final int FOLD = 3; //TODO: have this as a value used for placing the fences, so then it reflects how far the fences can actually go
+
         public FenceItemBlock() {
             super(BlockElectricFence.this);
+            this.addPropertyOverride(new ResourceLocation(ProjectNublar.MODID, "distance"), (stack, worldIn, entityIn) -> {
+                if(entityIn instanceof EntityPlayer) {
+                    EntityPlayer player = (EntityPlayer) entityIn;
+                    NBTTagCompound nbt = entityIn.getHeldItemMainhand().getOrCreateSubCompound(ProjectNublar.MODID);
+                    if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
+                        double dist = player.getPositionVector().distanceTo(new Vec3d(BlockPos.fromLong(nbt.getLong("fence_position"))));
+                        for (ItemStack itemStack : player.inventory.mainInventory) {
+                            if(itemStack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+                                if(itemStack == stack) {
+                                    if(dist <= FOLD*stack.getCount()) {
+                                        return (float) dist / (FOLD*stack.getCount());
+                                    } else {
+                                        return 1F;
+                                    }
+                                }
+                                dist -= FOLD*stack.getCount();
+                            }
+                        }
+                    }
+                }
+
+                return 0F;
+            });
         }
 
         @Override

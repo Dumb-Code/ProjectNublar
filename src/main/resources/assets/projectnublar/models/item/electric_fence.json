@@ -1,6 +1,20 @@
 {
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "projectnublar:items/electric_fence"
-  }
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "projectnublar:items/spool_00"
+    },
+    "overrides": [
+        { "predicate": { "projectnublar:distance": 0.000 }, "model": "projectnublar:item/electric_fence_00" },
+        { "predicate": { "projectnublar:distance": 0.083 }, "model": "projectnublar:item/electric_fence_01" },
+        { "predicate": { "projectnublar:distance": 0.166 }, "model": "projectnublar:item/electric_fence_02" },
+        { "predicate": { "projectnublar:distance": 0.250 }, "model": "projectnublar:item/electric_fence_03" },
+        { "predicate": { "projectnublar:distance": 0.333 }, "model": "projectnublar:item/electric_fence_04" },
+        { "predicate": { "projectnublar:distance": 0.416 }, "model": "projectnublar:item/electric_fence_05" },
+        { "predicate": { "projectnublar:distance": 0.500 }, "model": "projectnublar:item/electric_fence_06" },
+        { "predicate": { "projectnublar:distance": 0.583 }, "model": "projectnublar:item/electric_fence_07" },
+        { "predicate": { "projectnublar:distance": 0.666 }, "model": "projectnublar:item/electric_fence_08" },
+        { "predicate": { "projectnublar:distance": 0.750 }, "model": "projectnublar:item/electric_fence_09" },
+        { "predicate": { "projectnublar:distance": 0.833 }, "model": "projectnublar:item/electric_fence_10" },
+        { "predicate": { "projectnublar:distance": 0.916 }, "model": "projectnublar:item/electric_fence_11" }
+    ]
 }
