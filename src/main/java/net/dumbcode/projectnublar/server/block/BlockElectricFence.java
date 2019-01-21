@@ -598,7 +598,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     public class FenceItemBlock extends ItemBlock {
 
-        public static final int FOLD = 3; //TODO: have this as a value used for placing the fences, so then it reflects how far the fences can actually go
+        public static final int FOLD = 5;
 
         public FenceItemBlock() {
             super(BlockElectricFence.this);
