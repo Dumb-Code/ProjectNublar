@@ -18,11 +18,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 // TODO: EntityPNAnimatable would be a component instead of interface
-public class DinosaurEntity extends ComposableCreatureEntity implements EntityPNAnimatable {
+public class DinosaurEntity extends ComposableCreatureEntity implements EntityPNAnimatable<ModelStage> {
 
     private static final DataParameter<Boolean> WATCHER_IS_RUNNING = EntityDataManager.createKey(DinosaurEntity.class, DataSerializers.BOOLEAN);
 
-    private Animation animation = EnumAnimation.IDLE.get();
+    private Animation<ModelStage> animation = EnumAnimation.IDLE.get();
     private int animationTick;
     private int animationLength;
 
@@ -56,12 +56,12 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
     }
 
     @Override
-    public Animation getAnimation() {
-        return animation;
+    public Animation<ModelStage> getAnimation() {
+        return this.animation;
     }
 
     @Override
-    public void setAnimation(Animation animation) {
+    public void setAnimation(Animation<ModelStage> animation) {
         this.animation = animation;
         if(!this.world.isRemote) {
             DumbLibrary.NETWORK.sendToDimension(new S0SyncAnimation(this, animation), this.world.provider.getDimension());
@@ -74,7 +74,7 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
     }
 
     public ModelStage getModelStage() { //TODO
-        return ModelStage.SKELETON;
+        return ModelStage.ADULT;
     }
 
     public Dinosaur getDinosaur() {

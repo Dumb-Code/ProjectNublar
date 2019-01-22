@@ -2,8 +2,9 @@ package net.dumbcode.projectnublar.server.entity;
 
 import net.dumbcode.dumblibrary.client.animation.objects.AnimatedEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.IStringSerializable;
 
-public interface EntityPNAnimatable extends AnimatedEntity {
+public interface EntityPNAnimatable<N extends IStringSerializable> extends AnimatedEntity<N> {
     default boolean isMoving() {
         Entity entity = (Entity)this;
         float deltaX = (float) (entity.posX - entity.prevPosX);

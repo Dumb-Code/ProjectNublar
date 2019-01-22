@@ -15,6 +15,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -49,6 +50,12 @@ public class DinosaurModelHandler {
 
         DinosaurRenderer(RenderManager renderManagerIn) {
             super(renderManagerIn, entity -> entity.getDinosaur().getSystemInfo());
+        }
+
+        @Override
+        protected void preRenderCallback(DinosaurEntity entitylivingbaseIn, float partialTickTime) {
+            GlStateManager.scale(2.5,2.5,2.5);
+            super.preRenderCallback(entitylivingbaseIn, partialTickTime);
         }
     }
 }

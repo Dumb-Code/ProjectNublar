@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.client.animation.objects.Animation;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
+import net.dumbcode.projectnublar.client.animation.MovementLayer;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -58,20 +59,21 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     }
 
     @Override
-    public Animation getAnimation(String animation) {
+    public Animation<ModelStage> getAnimation(String animation) {
         return EnumAnimation.fromName(animation);
     }
 
     @Override
-    public Animation defaultAnimation() {
+    public Animation<ModelStage> defaultAnimation() {
         return EnumAnimation.IDLE.get();
     }
 
     @Override
-    public PoseHandler.AnimationLayerFactory[] createFactories() {
-        return new PoseHandler.AnimationLayerFactory[]{
-                AnimationLayer::new
-        };
+    public List<PoseHandler.AnimationLayerFactory<DinosaurEntity, ModelStage>> createFactories() {
+        return Lists.newArrayList(
+                AnimationLayer::new,
+                MovementLayer::new
+        );
     }
 
     @Override
@@ -86,7 +88,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
 
     @Override
     public ResourceLocation getTexture(DinosaurEntity entity) {
-        return new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png");
+        return entity.getDinosaur().getTextureLocation(entity);
     }
 
     @Override

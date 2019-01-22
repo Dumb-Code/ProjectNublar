@@ -6,6 +6,40 @@
         "pose": "tyrannosaurus_adult_idle",
         "time": 10
       }
+    ],
+    "walking": [
+      {
+        "pose": "tyrannosaurus_adult_walking_1",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_2",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_3",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_4",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_5",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_6",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_7",
+        "time": 5
+      },
+      {
+        "pose": "tyrannosaurus_adult_walking_8",
+        "time": 5
+      }
     ]
   }
 }
