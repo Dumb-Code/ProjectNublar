@@ -29,7 +29,7 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
         for (EntityComponent component : this.components.values()) {
             if (component instanceof AiComponent) {
                 AiComponent aiComponent = (AiComponent) component;
-                aiComponent.apply(this.tasks);
+                aiComponent.apply(this.tasks, this);
             }
         }
     }

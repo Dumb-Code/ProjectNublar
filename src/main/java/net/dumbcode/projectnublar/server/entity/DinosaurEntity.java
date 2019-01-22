@@ -34,6 +34,7 @@ public class DinosaurEntity extends ComposableCreatureEntity implements EntityPN
     protected void attachComponents() {
         this.attachComponent(EntityComponentTypes.DINOSAUR);
         this.attachComponent(EntityComponentTypes.GENDER);
+        this.attachComponent(EntityComponentTypes.WANDER);
     }
 
     @Override
