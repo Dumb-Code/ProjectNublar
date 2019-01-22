@@ -1,13 +1,11 @@
 package net.dumbcode.projectnublar.server.block;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.Value;
 import net.dumbcode.projectnublar.client.utils.DebugUtil;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -34,17 +32,18 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -53,6 +52,9 @@ import java.util.Set;
 public class BlockElectricFence extends Block implements IItemBlock {
 
     public static final boolean DEBUG = false;
+
+    public static final int ITEM_FOLD = 20;
+
 
     //Set this at your own will, just remember to set it back to true after collection
     public static boolean collidableClient = true;
@@ -111,23 +113,29 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     @Override
     public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity) {
+        if(!ForgeModContainer.fullBoundingBoxLadders) { //TODO: add a config to not do this yeah
+            ForgeModContainer.fullBoundingBoxLadders = true;
+        }
         TileEntity te = world.getTileEntity(pos);
         AxisAlignedBB entityBox = entity.getCollisionBoundingBox();
         if (entityBox == null) {
             entityBox = entity.getEntityBoundingBox();
         }
+        boolean intersect = false;
         if (te instanceof BlockEntityElectricFence) {
-            entityBox = entityBox.grow(0.1D);
+            AxisAlignedBB enityxzbox = entityBox.grow(0.025D, 0, 0.025D);
             BlockEntityElectricFence cb = (BlockEntityElectricFence) te;
-            for (BlockEntityElectricFence.ConnectionAxisAlignedBB box : cb.createBoundingBox()) {
-                if (entityBox.intersects(box.offset(pos))) {
-                    if(box.getConnection().isPowered(world)) {
+            for (BlockEntityElectricFence.ConnectionAxisAlignedBB boxIn : cb.createBoundingBox()) {
+                AxisAlignedBB box = boxIn.offset(pos);
+                if (enityxzbox.intersects(box) && (!entityBox.grow(0, 0.025D, 0).intersects(box) || !entityBox.grow(0, -0.025D, 0).intersects(box))) {
+                    intersect = true;
+                    if(boxIn.getConnection().isPowered(world)) {
                         return false;
                     }
                 }
             }
         }
-        return true;
+        return intersect;
     }
 
     @Override
@@ -329,41 +337,10 @@ public class BlockElectricFence extends Block implements IItemBlock {
         if(te instanceof BlockEntityElectricFence) {
             BlockEntityElectricFence be = (BlockEntityElectricFence) te;
 
-            Set<Connection> newConnections = Sets.newLinkedHashSet();
-            double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
-            Connection ref = null;
-            for (int x = -1; x <= 1; x++) {
-                for (int y = -1; y <= 1; y++) {
-                    for (int z = -1; z <= 1; z++) {
-                        if (x == 0 && y == 0 && z == 0) {
-                            continue;
-                        }
-                        TileEntity tileentity = worldIn.getTileEntity(pos.add(x, y, z));
-                        if (tileentity instanceof ConnectableBlockEntity) {
-                            ConnectableBlockEntity cbe = (ConnectableBlockEntity) tileentity;
-                            for (Connection connection : cbe.getConnections()) {
-                                if (connection.getNext().equals(pos) || connection.getPrevious().equals(pos)) {
-                                    List<BlockPos> positions = LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset());
-                                    for (int i = 0; i < positions.size(); i++) {
-                                        if (positions.get(i).equals(pos)) {
-                                            Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.max(i - 1, 0)), positions.get(Math.min(i + 1, positions.size() - 1)), pos);
-                                            Connection.Cache cache = con.getCache();
-                                            double[] in = cache.getIn();
-                                            double yin = (in[4] + in[5]) / 2D;
-                                            if (side == EnumFacing.DOWN == yin > yRef) {
-                                                yRef = yin;
-                                                ref = con;
-                                            }
-                                            newConnections.add(con);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            Pair<Set<Connection>, Connection> pairResult = generateConnections(worldIn, pos, side);
+
+            Set<Connection> newConnections = pairResult.getLeft();
+            Connection ref = pairResult.getRight();
 
             if(result != null && result.hitInfo instanceof HitChunk) {
                 HitChunk hc = (HitChunk) result.hitInfo;
@@ -521,6 +498,13 @@ public class BlockElectricFence extends Block implements IItemBlock {
                 } else if(chunk.dir.getAxis() == EnumFacing.Axis.X) {
                     BlockPos nextPos = chunk.dir == EnumFacing.WEST == chunk.connection.getCompared() < 0 ? con.getPrevious() : con.getNext();
                     TileEntity nextTe = worldIn.getTileEntity(nextPos);
+                    if(!(nextTe instanceof ConnectableBlockEntity)) {
+                        if(worldIn.getBlockState(nextPos).getBlock().isReplaceable(worldIn, nextPos)) {
+                            worldIn.setBlockState(nextPos, this.getDefaultState());
+                            nextTe = worldIn.getTileEntity(nextPos);
+                            generateConnections(worldIn, nextPos, null);
+                        }
+                    }
                     if(nextTe instanceof ConnectableBlockEntity) {
                         for (Connection connection : ((ConnectableBlockEntity) nextTe).getConnections()) {
                             if(connection.lazyEquals(chunk.connection)) {
@@ -577,6 +561,9 @@ public class BlockElectricFence extends Block implements IItemBlock {
     public static void placeEffect(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos) {
         if(player != null) {
             player.swingArm(hand);
+            if(!player.isCreative()) {
+                player.getHeldItem(hand).shrink(1);
+            }
         }
         SoundType soundType = BlockHandler.ELECTRIC_FENCE.blockSoundType;
         worldIn.playSound(null, pos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
@@ -598,26 +585,33 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
     public class FenceItemBlock extends ItemBlock {
 
-        public static final int FOLD = 5;
-
         public FenceItemBlock() {
             super(BlockElectricFence.this);
             this.addPropertyOverride(new ResourceLocation(ProjectNublar.MODID, "distance"), (stack, worldIn, entityIn) -> {
                 if(entityIn instanceof EntityPlayer) {
                     EntityPlayer player = (EntityPlayer) entityIn;
-                    NBTTagCompound nbt = entityIn.getHeldItemMainhand().getOrCreateSubCompound(ProjectNublar.MODID);
-                    if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
-                        double dist = player.getPositionVector().distanceTo(new Vec3d(BlockPos.fromLong(nbt.getLong("fence_position"))));
-                        for (ItemStack itemStack : player.inventory.mainInventory) {
-                            if(itemStack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
-                                if(itemStack == stack) {
-                                    if(dist <= FOLD*stack.getCount()) {
-                                        return (float) dist / (FOLD*stack.getCount());
-                                    } else {
-                                        return 1F;
+                    ItemStack istack = entityIn.getHeldItemMainhand();
+                    if (istack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+                        NBTTagCompound nbt = istack.getOrCreateSubCompound(ProjectNublar.MODID);
+                        if (nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
+                            BlockPos pos = BlockPos.fromLong(nbt.getLong("fence_position"));
+                            Block block = entityIn.world.getBlockState(pos).getBlock();
+                            int multiplier = 1;
+                            if(block instanceof BlockElectricFencePole) {
+                                multiplier = ((BlockElectricFencePole) block).getType().getHeight();
+                            }
+                            double dist = player.getPositionVector().distanceTo(new Vec3d(pos)) * multiplier;
+                            for (ItemStack itemStack : player.inventory.mainInventory) {
+                                if (itemStack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+                                    if (itemStack == stack) {
+                                        if (dist <= ITEM_FOLD * stack.getCount()) {
+                                            return (float) dist / (ITEM_FOLD * stack.getCount());
+                                        } else {
+                                            return 1F;
+                                        }
                                     }
+                                    dist -= ITEM_FOLD * stack.getCount();
                                 }
-                                dist -= FOLD*stack.getCount();
                             }
                         }
                     }
@@ -646,6 +640,45 @@ public class BlockElectricFence extends Block implements IItemBlock {
             }
             return out;
         }
+    }
+
+    public static Pair<Set<Connection>, Connection> generateConnections(World worldIn, BlockPos pos, @Nullable EnumFacing side) {
+        Set<Connection> newConnections = Sets.newLinkedHashSet();
+        double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
+        Connection ref = null;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (x == 0 && y == 0 && z == 0) {
+                        continue;
+                    }
+                    TileEntity tileentity = worldIn.getTileEntity(pos.add(x, y, z));
+                    if (tileentity instanceof ConnectableBlockEntity) {
+                        ConnectableBlockEntity cbe = (ConnectableBlockEntity) tileentity;
+                        for (Connection connection : cbe.getConnections()) {
+                            if (connection.getNext().equals(pos) || connection.getPrevious().equals(pos)) {
+                                List<BlockPos> positions = LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset());
+                                for (int i = 0; i < positions.size(); i++) {
+                                    if (positions.get(i).equals(pos)) {
+                                        Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.max(i - 1, 0)), positions.get(Math.min(i + 1, positions.size() - 1)), pos);
+                                        Connection.Cache cache = con.getCache();
+                                        double[] in = cache.getIn();
+                                        double yin = (in[4] + in[5]) / 2D;
+                                        if (side == EnumFacing.DOWN == yin > yRef) {
+                                            yRef = yin;
+                                            ref = con;
+                                        }
+                                        newConnections.add(con);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return Pair.of(newConnections, ref);
     }
 
 }

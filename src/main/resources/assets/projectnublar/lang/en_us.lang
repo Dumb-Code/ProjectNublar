@@ -36,3 +36,4 @@ projectnublar.dino.tyrannosaurus.name=Tyrannosaurus
 projectnublar.dino.missing.name=<!Missing Dinosaur!>
 
 projectnublar.fences.length.toolong=%sm is too long. The max distance is %sm
+projectnublar.fences.length.notenough=Not enough cable. Need a total of %s cable. (You have %s)

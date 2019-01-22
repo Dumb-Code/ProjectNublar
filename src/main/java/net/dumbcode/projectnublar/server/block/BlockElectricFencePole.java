@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.block;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.*;
@@ -13,8 +12,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -22,7 +19,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -30,8 +26,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,7 +41,6 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     private final BlockStateContainer blockState;
 
     public static final int LIMIT = 15; //TODO config
-
 
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
@@ -162,27 +157,64 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                             playerIn.sendStatusMessage(new TextComponentTranslation("projectnublar.fences.length.toolong", Math.round(dist), LIMIT), true);
                         }
                     } else if(worldIn.getBlockState(other).getBlock() == this && !other.equals(pos)) {
-                        for (double offset : this.type.getOffsets()) {
-                            List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, offset);
-                            for (int i = 0; i < this.type.getHeight(); i++) {
-                                BlockPos pos1 = pos.up(i);
-                                BlockPos other1 = other.up(i);
-                                for (int i1 = 0; i1 < positions.size(); i1++) {
-                                    BlockPos position = positions.get(i1).up(i);
-                                    if (worldIn.isAirBlock(position) || worldIn.getBlockState(position).getBlock().isReplaceable(worldIn, position)) {
-                                        worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
-                                    }
-                                    TileEntity fencete = worldIn.getTileEntity(position);
-                                    if (fencete instanceof ConnectableBlockEntity) {
-                                        ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.max(i1 - 1, 0)).up(i), positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), position));
-                                        fencete.markDirty();
-                                        worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
+                        int itemMax;
+                        int itemAmount = itemMax = MathHelper.ceil(dist / BlockElectricFence.ITEM_FOLD*this.type.getHeight());
+                        int total = 0;
+                        boolean full = false;
+                        List<Pair<ItemStack, Integer>> stacksFound = Lists.newArrayList();
 
+                        if (itemAmount <= stack.getCount()) {
+                            total += itemAmount;
+                            stacksFound.add(Pair.of(stack, itemAmount));
+                            full = true;
+                        } else {
+                            total += stack.getCount();
+                            stacksFound.add(Pair.of(stack, stack.getCount()));
+                        }
+                        itemAmount -= stack.getCount();
+
+                        for (ItemStack itemStack : playerIn.inventory.mainInventory) {
+                            if (itemStack != stack && itemStack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+                                if (itemAmount <= itemStack.getCount()) {
+                                    total += itemAmount;
+                                    stacksFound.add(Pair.of(itemStack, itemAmount));
+                                    full = true;
+                                    break;
+                                } else {
+                                    total += itemStack.getCount();
+                                    stacksFound.add(Pair.of(itemStack, itemStack.getCount()));
+                                }
+                                itemAmount -= itemStack.getCount();
+                            }
+                        }
+                        if(!full) {
+                            if(!worldIn.isRemote) {
+                                playerIn.sendStatusMessage(new TextComponentTranslation("projectnublar.fences.length.notenough", itemMax, total), true);
+                            }
+                        } else {
+                            if(!playerIn.isCreative()) {
+                                stacksFound.forEach(p -> p.getLeft().shrink(p.getRight()));
+                            }
+                            for (double offset : this.type.getOffsets()) {
+                                List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, offset);
+                                for (int i = 0; i < this.type.getHeight(); i++) {
+                                    BlockPos pos1 = pos.up(i);
+                                    BlockPos other1 = other.up(i);
+                                    for (int i1 = 0; i1 < positions.size(); i1++) {
+                                        BlockPos position = positions.get(i1).up(i);
+                                        if (worldIn.isAirBlock(position) || worldIn.getBlockState(position).getBlock().isReplaceable(worldIn, position)) {
+                                            worldIn.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
+                                        }
+                                        TileEntity fencete = worldIn.getTileEntity(position);
+                                        if (fencete instanceof ConnectableBlockEntity) {
+                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.max(i1 - 1, 0)).up(i), positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), position));
+                                            fencete.markDirty();
+                                            worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
+                                        }
                                     }
                                 }
                             }
                         }
-
                     }
                     nbt.removeTag("fence_position");
                 } else {
