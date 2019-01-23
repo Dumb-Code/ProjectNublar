@@ -12,6 +12,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class SimpleComponentType<T extends EntityComponent> implements EntityComponentType<T> {
     @ToString.Exclude private final Supplier<T> constructor;
     @EqualsAndHashCode.Include private final ResourceLocation identifier;
@@ -45,20 +47,6 @@ public class SimpleComponentType<T extends EntityComponent> implements EntityCom
         return this.type;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof EntityComponentType && ((EntityComponentType) obj).getIdentifier().equals(this.identifier);
-    }
-
-    @Override
-    public int hashCode() {
-        return this.identifier.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "SimpleComponentType{identifier=" + this.identifier + ", type=" + this.type + "}";
-    }
 
     public static class Builder<T extends EntityComponent> {
         private final Class<T> type;

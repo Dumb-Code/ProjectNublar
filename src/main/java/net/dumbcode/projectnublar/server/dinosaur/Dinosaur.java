@@ -21,6 +21,8 @@ import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -34,6 +36,7 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 
 @Getter
@@ -82,8 +85,12 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
-        boolean male = entity.getOrExcept(EntityComponentTypes.GENDER).male;
-        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (male ? "male" : "female") + "_" + entity.getModelStage().name().toLowerCase(Locale.ROOT) + ".png");
+        boolean male = true;
+        GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
+        if(gcomp != null) {
+            male = gcomp.male;
+        }
+        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (male ? "male" : "female") + "_" + entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName() + ".png");
     }
 
     public TextComponentTranslation createNameComponent() {

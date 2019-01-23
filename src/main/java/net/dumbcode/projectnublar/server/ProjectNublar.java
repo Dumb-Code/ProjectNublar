@@ -9,6 +9,8 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
+import net.dumbcode.projectnublar.server.entity.system.RegisterSystemsEvent;
+import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -224,6 +226,11 @@ public class ProjectNublar {
     public static void register(RegisterDinosaurEvent event) {
         event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:missing")); // TODO: custom class?
         event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
+    }
+
+    @SubscribeEvent
+    public static void register(RegisterSystemsEvent event) {
+        event.registerSystem(AgeSystem.INSTANCE);
     }
 
     public static Logger getLogger() {

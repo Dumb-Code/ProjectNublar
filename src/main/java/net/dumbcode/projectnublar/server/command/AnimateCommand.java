@@ -3,6 +3,8 @@ package net.dumbcode.projectnublar.server.command;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -30,7 +32,10 @@ public class AnimateCommand extends CommandBase {
         EnumAnimation animation = EnumAnimation.valueOf(args[0].toUpperCase(Locale.ROOT));
         for (Entity entity : sender.getEntityWorld().loadedEntityList) {
             if(entity instanceof DinosaurEntity) {
-                ((DinosaurEntity)entity).setAnimation(animation.get());
+                AnimationComponent comp = ((DinosaurEntity) entity).getOrNull(EntityComponentTypes.ANIMATION);
+                if (comp != null) {
+                    comp.setAnimation((DinosaurEntity) entity, animation.get());
+                }
             }
         }
     }

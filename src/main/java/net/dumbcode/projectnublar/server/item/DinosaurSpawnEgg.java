@@ -106,8 +106,7 @@ public class DinosaurSpawnEgg extends Item implements DinosaurProvider {
             default: male = player.getRNG().nextBoolean(); break;
         }
 
-        GenderComponent gender = entity.getOrExcept(EntityComponentTypes.GENDER);
-        gender.male = male;
+        entity.get(EntityComponentTypes.GENDER).ifPresent(comp -> comp.male = male);
 
         entity.setPosition(x, y, z);
         entity.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(world.rand.nextFloat() * 360.0F), 0.0F);

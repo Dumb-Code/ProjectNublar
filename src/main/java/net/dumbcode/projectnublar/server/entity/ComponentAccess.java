@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public interface ComponentAccess {
     @Nullable
@@ -12,6 +13,11 @@ public interface ComponentAccess {
 
     @Nonnull
     <T extends EntityComponent> T getOrExcept(EntityComponentType<T> type);
+
+    @Nonnull
+    default <T extends EntityComponent> Optional<T> get(EntityComponentType<T> type) {
+        return Optional.ofNullable(this.getOrNull(type));
+    }
 
     default boolean contains(EntityComponentType<?> type) {
         return this.getOrNull(type) != null;

@@ -14,11 +14,16 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage, DinosaurEntity> {
     private final Dinosaur dinosaur;
@@ -76,6 +81,21 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
         );
     }
 
+    @Nonnull
+    @Override
+    public Animation<ModelStage> getAnimation(DinosaurEntity entity) {
+        AnimationComponent comp = entity.getOrNull(EntityComponentTypes.ANIMATION);
+        return comp == null ? this.defaultAnimation() : comp.animation;
+    }
+
+    @Override
+    public void setAnimation(DinosaurEntity entity, @Nonnull Animation<ModelStage> animation) {
+        AnimationComponent comp = entity.getOrNull(EntityComponentTypes.ANIMATION);
+        if (comp != null) {
+            comp.animation = animation;
+        }
+    }
+
     @Override
     public ModelContainer<DinosaurEntity, ModelStage> getModelContainer(DinosaurEntity entity) {
         return entity.getDinosaur().getModelContainer();
@@ -83,7 +103,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
 
     @Override
     public ModelStage getStageFromEntity(DinosaurEntity entity) {
-        return entity.getModelStage();
+        return entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT);
     }
 
     @Override
