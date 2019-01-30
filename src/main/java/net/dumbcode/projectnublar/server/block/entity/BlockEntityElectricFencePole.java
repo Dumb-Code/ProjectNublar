@@ -35,9 +35,7 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
     public boolean rotatedAround = false;
 
     private MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
-
-    private boolean powered;
-
+    
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         NBTTagList nbt = new NBTTagList();

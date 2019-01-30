@@ -49,7 +49,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         INDEX_PROPERTY = PropertyInteger.create("index", 0, type.getHeight());
         this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY, POWERED_PROPERTY);
 
-        this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0));
+        this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0).withProperty(POWERED_PROPERTY, false));
     }
 
     @Override
