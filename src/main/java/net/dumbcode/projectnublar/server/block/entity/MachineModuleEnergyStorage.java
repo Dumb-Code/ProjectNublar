@@ -22,4 +22,12 @@ public class MachineModuleEnergyStorage extends EnergyStorage {
     public void extractRaw(int amount) {
         this.energy -= Math.min(this.energy, amount);
     }
+
+    public int getMaxReceive() {
+        return this.maxReceive;
+    }
+
+    public int getMaxExtract() {
+        return this.maxExtract;
+    }
 }

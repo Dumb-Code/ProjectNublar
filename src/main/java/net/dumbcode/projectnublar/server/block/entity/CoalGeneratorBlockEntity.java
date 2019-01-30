@@ -38,7 +38,7 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
 
     @Override
     public int getEnergyMaxExtractSpeed() {
-        return 100;
+        return 200;
     }
 
     @Override

@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "layer0": "projectnublar:blocks/light_steel_electric_fence_pole_unpowered"
+  },
+  "tabula": "projectnublar:models/block/light_steel_electric_fence_pole_upper"
+}

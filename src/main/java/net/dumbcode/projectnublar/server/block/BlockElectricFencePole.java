@@ -9,6 +9,7 @@ import net.dumbcode.projectnublar.server.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -37,16 +38,16 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     private final ConnectionType type;
     public final PropertyInteger INDEX_PROPERTY;
     public static final PropertyRotation ROTATION_PROPERTY = PropertyRotation.create("rotation");
-
+    public static final PropertyBool POWERED_PROPERTY = PropertyBool.create("powered");
     private final BlockStateContainer blockState;
 
-    public static final int LIMIT = 15; //TODO config
+    public static final int LIMIT = 15;
 
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
         this.type = type;
         INDEX_PROPERTY = PropertyInteger.create("index", 0, type.getHeight());
-        this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY);
+        this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY, POWERED_PROPERTY);
 
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0));
     }
@@ -71,6 +72,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         TileEntity te = worldIn.getTileEntity(pos.down(state.getValue(INDEX_PROPERTY)));
         if(te instanceof BlockEntityElectricFencePole) {
             BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
+            state = state.withProperty(POWERED_PROPERTY, ef.powered);
             if(!ef.fenceConnections.isEmpty()) {
 
                 List<Connection> differingConnections = Lists.newArrayList();

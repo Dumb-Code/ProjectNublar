@@ -214,10 +214,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             energy.extractEnergy(maxEnergyAbleToReceive, false);
 
             // Extract as much energy as possible from that neighbor
-            int maxExtractable = neighbor.extractEnergy(Integer.MAX_VALUE, true);
-            int maxReceivable = energy.receiveEnergy(maxExtractable, true);
-            // actual transfer
-            energy.receiveEnergy(neighbor.extractEnergy(maxReceivable, false), false);
+//            int maxExtractable = neighbor.extractEnergy(Integer.MAX_VALUE, true);
+//            int maxReceivable = energy.receiveEnergy(maxExtractable, true);
+//           //  actual transfer
+//            energy.receiveEnergy(neighbor.extractEnergy(maxReceivable, false), false);
         }
     }
 
