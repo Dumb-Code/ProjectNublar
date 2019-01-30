@@ -85,12 +85,12 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
-        boolean male = true;
         GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
+        String name = entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName();
         if(gcomp != null) {
-            male = gcomp.male;
+            return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
         }
-        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (male ? "male" : "female") + "_" + entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName() + ".png");
+        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
     }
 
     public TextComponentTranslation createNameComponent() {
