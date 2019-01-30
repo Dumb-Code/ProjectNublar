@@ -14,6 +14,8 @@ public class DinosaurEntity extends ComposableCreatureEntity {
     protected void attachComponents() {
         this.attachComponent(EntityComponentTypes.DINOSAUR);
         this.attachComponent(EntityComponentTypes.GENDER);
+        this.attachComponent(EntityComponentTypes.AGE);
+        this.attachComponent(EntityComponentTypes.HERD);
         this.attachComponent(EntityComponentTypes.WANDER_AI);
         this.attachComponent(EntityComponentTypes.ANIMATION);
     }

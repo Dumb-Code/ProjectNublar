@@ -15,6 +15,7 @@ public class EntityComponentTypes {
     public static final EntityComponentType<DinosaurComponent> DINOSAUR = InjectedUtils.injected();
     public static final EntityComponentType<GenderComponent> GENDER = InjectedUtils.injected();
     public static final EntityComponentType<AgeComponent> AGE = InjectedUtils.injected();
+    public static final EntityComponentType<HerdComponent> HERD = InjectedUtils.injected();
 
     public static final EntityComponentType<WanderComponent> WANDER_AI = InjectedUtils.injected();
 
@@ -36,6 +37,10 @@ public class EntityComponentTypes {
                 SimpleComponentType.builder(AgeComponent.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "age"))
                         .withConstructor(AgeComponent::new)
+                        .build(),
+                SimpleComponentType.builder(HerdComponent.class)
+                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "herd"))
+                        .withConstructor(HerdComponent::new)
                         .build(),
                 SimpleComponentType.builder(WanderComponent.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "wander_ai"))
