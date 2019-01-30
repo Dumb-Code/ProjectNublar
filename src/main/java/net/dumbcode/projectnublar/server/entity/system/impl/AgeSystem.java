@@ -32,7 +32,7 @@ public enum AgeSystem implements EntitySystem {
 
             int ageoff = 0;
             for (int j = 0; j < ModelStage.values().length; j++) {
-                ModelStage stage = ModelStage.values()[i];
+                ModelStage stage = ModelStage.values()[j];
                 int ticks = ageTickMap.get(stage);
                 if(ageoff < age.ageInTicks && ageoff + ticks >= age.ageInTicks) {
                     age.stage = stage;
