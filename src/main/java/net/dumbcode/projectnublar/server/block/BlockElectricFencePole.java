@@ -72,7 +72,6 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         TileEntity te = worldIn.getTileEntity(pos.down(state.getValue(INDEX_PROPERTY)));
         if(te instanceof BlockEntityElectricFencePole) {
             BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
-            state = state.withProperty(POWERED_PROPERTY, ef.powered);
             if(!ef.fenceConnections.isEmpty()) {
 
                 List<Connection> differingConnections = Lists.newArrayList();
@@ -250,7 +249,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
 
     @Override
     public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? this.type.getLightLevel() : 0;
+        return state.getValue(POWERED_PROPERTY) && state.getValue(INDEX_PROPERTY) == this.type.getHeight()-1 ? this.type.getLightLevel() : 0;
     }
 
     @Override

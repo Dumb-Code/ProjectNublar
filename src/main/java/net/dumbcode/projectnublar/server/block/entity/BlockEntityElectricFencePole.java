@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
@@ -15,6 +16,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -32,9 +34,9 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
 
     public boolean rotatedAround = false;
 
-    private MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(3000, 700, 400);
+    private MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
 
-    public boolean powered;
+    private boolean powered;
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
@@ -44,8 +46,6 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
         }
         compound.setTag("connections", nbt);
         compound.setBoolean("rotated", this.rotatedAround);
-
-        compound.setBoolean("powered", this.powered);
 
         NBTTagCompound energyNBT = new NBTTagCompound();
         energyNBT.setInteger("Amount", this.energy.getEnergyStored());
@@ -58,7 +58,6 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.rotatedAround = compound.getBoolean("rotated");
-        this.powered = compound.getBoolean("powered");
         this.fenceConnections.clear();
         NBTTagList nbt = compound.getTagList("connections", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < nbt.tagCount(); i++) {
@@ -67,7 +66,7 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
 
 
         NBTTagCompound energyNBT = compound.getCompoundTag("Energy");
-        this.energy = new MachineModuleEnergyStorage(3000, 700, 250, energyNBT.getInteger("Amount"));
+        this.energy = new MachineModuleEnergyStorage(350, 350, 250, energyNBT.getInteger("Amount"));
     }
 
     @Override
@@ -118,19 +117,24 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
     public void update() {
         boolean powered = this.energy.getEnergyStored() > 0;
         boolean update = false;
-        if(this.powered != powered) {
+        if(this.world.getBlockState(this.pos).getValue(BlockElectricFencePole.POWERED_PROPERTY) != powered) {
             update = true;
         }
-        this.powered = powered;
 
 
         this.energy.extractRaw(10);
         IBlockState state = this.world.getBlockState(this.pos);
         if(state.getBlock() instanceof BlockElectricFencePole && state.getValue(((BlockElectricFencePole) state.getBlock()).INDEX_PROPERTY) == 0) {
             if(update) {
-                this.world.markBlockRangeForRenderUpdate(this.pos, this.pos.up(((BlockElectricFencePole) state.getBlock()).getType().getHeight()));
+                for (int y = 0; y < ((BlockElectricFencePole) state.getBlock()).getType().getHeight(); y++) {
+                    BlockPos pos = this.pos.up(y);
+                    IBlockState s =this.world.getBlockState(pos);
+                    if(s.getBlock() == state.getBlock()) { //When placing the blocks can be air
+                        this.world.setBlockState(pos, s.withProperty(BlockElectricFencePole.POWERED_PROPERTY, powered));
+                    }
+                }
             }
-            if(this.energy.getEnergyStored() > 600) {
+            if(this.energy.getEnergyStored() > 300) {
                 Set<IEnergyStorage> storages = Sets.newLinkedHashSet();
                 for (Connection connection : this.fenceConnections) {
                     TileEntity te = this.world.getTileEntity(connection.getPosition().equals(connection.getFrom()) ? connection.getTo() : connection.getFrom());
@@ -147,5 +151,10 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
                 }
             }
         }
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
+        return oldState.getBlock() != newSate.getBlock();
     }
 }
