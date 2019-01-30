@@ -155,8 +155,30 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     vec.sub(box.getConnection().getCache().getCenter());
                     vec.normalize();
 
+                    Vec3d center = box.offset(pos).getCenter();
+                    Vec3d other = entityBox.getCenter();
+                    int times = 3;
+                    for (int i = 0; i < times; i++) {
+                        for (int i1 = 0; i1 < 5; i1++) {
+                            ProjectNublar.spawnParticles(ParticleType.SPARKS, worldIn,
+                                    center.x + (other.x - center.x) * worldIn.rand.nextGaussian() * 0.5F,
+                                    center.y + (other.y - center.y) * worldIn.rand.nextGaussian() * 0.5F,
+                                    center.z + (other.z - center.z) * worldIn.rand.nextGaussian() * 0.5F,
+
+
+                                    worldIn.rand.nextGaussian() * 1.5F,
+                                    worldIn.rand.nextGaussian() * 1.5F,
+                                    worldIn.rand.nextGaussian() * 1.5F, 3);
+                        }
+                    }
+
+
+                    if(!entityIn.onGround) {
+                        vec.scale(0.4D);
+                    }
+
                     entityIn.motionX = vec.x;
-                    entityIn.motionY = vec.y;
+                    entityIn.motionY = vec.y * 0.3D;
                     entityIn.motionZ = vec.z;
 
                     break;
