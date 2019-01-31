@@ -60,6 +60,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     public DinosaurEntity createEntity(World world) {
         DinosaurEntity entity = this.getEntityProperties().getEntityCreateFunction().apply(world);
         entity.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = this;
+        entity.get(EntityComponentTypes.METABOLISM).ifPresent(a -> a.initializeValues(this.getEntityProperties()));
         return entity;
     }
 
