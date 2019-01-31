@@ -111,7 +111,7 @@ public class ProjectNublar {
                 spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
             }
         } else {
-            //Spawn particles packet
+            NETWORK.sendToDimension(new S21SpawnParticle(type, xPos, yPos, zPos, xMotion, yMotion, zMotion, amount, data), world.provider.getDimension());
         }
     }
 
@@ -142,6 +142,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C18OpenContainer.Handler(), C18OpenContainer.class, 18, Side.SERVER);
         NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
         NETWORK.registerMessage(new S20RegenCache.Handler(), S20RegenCache.class, 20, Side.CLIENT);
+        NETWORK.registerMessage(new S21SpawnParticle.Handler(), S21SpawnParticle.class, 21, Side.CLIENT);
     }
 
     @EventHandler

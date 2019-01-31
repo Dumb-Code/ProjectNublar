@@ -157,6 +157,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                         if(!worldIn.isRemote) {
                             playerIn.sendStatusMessage(new TextComponentTranslation("projectnublar.fences.length.toolong", Math.round(dist), LIMIT), true);
                         }
+                        nbt.setLong("fence_position", pos.toLong());
                     } else if(worldIn.getBlockState(other).getBlock() == this && !other.equals(pos)) {
                         int itemMax;
                         int itemAmount = itemMax = MathHelper.ceil(dist / BlockElectricFence.ITEM_FOLD*this.type.getHeight());
@@ -216,8 +217,10 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
                                 }
                             }
                         }
+                        nbt.setLong("fence_position", pos.toLong());
+                    } else {
+                        nbt.removeTag("fence_position");
                     }
-                    nbt.removeTag("fence_position");
                 } else {
                     nbt.setLong("fence_position", pos.toLong());
                 }

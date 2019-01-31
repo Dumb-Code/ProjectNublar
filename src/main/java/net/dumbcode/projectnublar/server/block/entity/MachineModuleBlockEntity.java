@@ -30,10 +30,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -205,6 +202,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         energy.receiveEnergy(getBaseEnergyProduction(), false); // produce & store energy if able
         List<IEnergyStorage> neighboringEnergyInterfaces = getEnergyNeighbors();
         int neighborCount = neighboringEnergyInterfaces.size();
+        neighboringEnergyInterfaces.sort(Comparator.comparing(IEnergyStorage::getEnergyStored));
         for(IEnergyStorage neighbor : neighboringEnergyInterfaces) {
             // Send some part of your energy to the neighbor
             int energyToSend = getEnergyToSendToNeighbor(neighbor, neighborCount);

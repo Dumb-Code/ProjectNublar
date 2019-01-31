@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.client.utils.DebugUtil;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -145,7 +146,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
         if(entityBox == null) {
             entityBox = entityIn.getEntityBoundingBox();
         }
-        if(te instanceof BlockEntityElectricFence) {
+        if(te instanceof BlockEntityElectricFence && entityIn instanceof EntityLivingBase) {
             entityBox = entityBox.grow(0.1D);
             BlockEntityElectricFence cb = (BlockEntityElectricFence) te;
             for (BlockEntityElectricFence.ConnectionAxisAlignedBB box : cb.createBoundingBox()) {
@@ -157,18 +158,23 @@ public class BlockElectricFence extends Block implements IItemBlock {
 
                     Vec3d center = box.offset(pos).getCenter();
                     Vec3d other = entityBox.getCenter();
-                    int times = 3;
-                    for (int i = 0; i < times; i++) {
-                        for (int i1 = 0; i1 < 5; i1++) {
-                            ProjectNublar.spawnParticles(ParticleType.SPARKS, worldIn,
-                                    center.x + (other.x - center.x) * worldIn.rand.nextGaussian() * 0.5F,
-                                    center.y + (other.y - center.y) * worldIn.rand.nextGaussian() * 0.5F,
-                                    center.z + (other.z - center.z) * worldIn.rand.nextGaussian() * 0.5F,
+                    if(!worldIn.isRemote) {
+
+                        entityIn.attackEntityFrom(DamageSourceHandler.FENCE_ELECTRIC, 1F);
+
+                        int times = 3;
+                        for (int i = 0; i < times; i++) {
+                            for (int i1 = 0; i1 < 5; i1++) {
+                                ProjectNublar.spawnParticles(ParticleType.SPARKS, worldIn,
+                                        center.x + (other.x - center.x) * worldIn.rand.nextGaussian() * 0.5F,
+                                        center.y + (other.y - center.y) * worldIn.rand.nextGaussian() * 0.5F,
+                                        center.z + (other.z - center.z) * worldIn.rand.nextGaussian() * 0.5F,
 
 
-                                    worldIn.rand.nextGaussian() * 1.5F,
-                                    worldIn.rand.nextGaussian() * 1.5F,
-                                    worldIn.rand.nextGaussian() * 1.5F, 3);
+                                        worldIn.rand.nextGaussian() * 1.5F,
+                                        worldIn.rand.nextGaussian() * 1.5F,
+                                        worldIn.rand.nextGaussian() * 1.5F, 3);
+                            }
                         }
                     }
 
