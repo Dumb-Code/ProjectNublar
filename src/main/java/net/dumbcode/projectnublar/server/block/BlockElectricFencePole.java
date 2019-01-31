@@ -46,7 +46,7 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
     public BlockElectricFencePole(ConnectionType type) {
         super(Material.IRON, MapColor.IRON);
         this.type = type;
-        INDEX_PROPERTY = PropertyInteger.create("index", 0, type.getHeight());
+        INDEX_PROPERTY = PropertyInteger.create("index", 0, type.getHeight() - 1);
         this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY, POWERED_PROPERTY);
 
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0).withProperty(POWERED_PROPERTY, false));
