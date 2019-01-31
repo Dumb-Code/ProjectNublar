@@ -83,6 +83,11 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
     }
 
     @Override
+    public boolean removedByFenceRemovers() {
+        return false;
+    }
+
+    @Override
     public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
         if(capability == CapabilityEnergy.ENERGY) {
             IBlockState state = this.world.getBlockState(this.pos);

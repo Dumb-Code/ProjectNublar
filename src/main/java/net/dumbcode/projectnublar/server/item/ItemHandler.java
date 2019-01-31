@@ -36,7 +36,8 @@ public final class ItemHandler {
     public static Item EMPTY_SYRINGE = new ItemSyringe(ItemSyringe.Type.EMPTY);
     public static Item DNA_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_DNA);
     public static Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
-
+    public static Item FENCE_REMOVER = new ItemFenceRemover();
+    public static Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -58,7 +59,9 @@ public final class ItemHandler {
                 HARD_DRIVE.setRegistryName("hard_drive").setUnlocalizedName("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
                 EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB),
                 DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setUnlocalizedName("dna_filled_syringe").setCreativeTab(TAB),
-                EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setUnlocalizedName("embryo_filled_syringe").setCreativeTab(TAB)
+                EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setUnlocalizedName("embryo_filled_syringe").setCreativeTab(TAB),
+                FENCE_REMOVER.setRegistryName("fence_remover").setUnlocalizedName("fence_remover").setCreativeTab(TAB),
+                CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setUnlocalizedName("creative_fence_remover").setCreativeTab(TAB)
 
         );
 
