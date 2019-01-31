@@ -8,4 +8,8 @@ public interface ConnectableBlockEntity {
     void addConnection(Connection connection);
 
     Set<Connection> getConnections();
+
+    default boolean removedByFenceRemovers() {
+        return true;
+    }
 }
