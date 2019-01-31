@@ -8,6 +8,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
 
     public DinosaurEntity(World worldIn) {
         super(worldIn);
+        this.getOrExcept(EntityComponentTypes.METABOLISM).initializeValues(this.getDinosaur().getEntityProperties());
     }
 
     @Override
@@ -18,6 +19,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
         this.attachComponent(EntityComponentTypes.HERD);
         this.attachComponent(EntityComponentTypes.WANDER_AI);
         this.attachComponent(EntityComponentTypes.ANIMATION);
+        this.attachComponent(EntityComponentTypes.METABOLISM);
     }
 
     //Helper method

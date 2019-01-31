@@ -52,5 +52,10 @@
       ]
     }
   },
-  "entity_properties": {}
+  "entity_properties": {
+    "max_food": 5000,
+    "max_water": 5000,
+    "water_rate": 1,
+    "food_rate": 1
+  }
 }

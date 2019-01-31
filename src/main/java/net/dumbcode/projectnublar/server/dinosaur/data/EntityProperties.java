@@ -14,9 +14,16 @@ import java.util.function.Function;
 
 @Data
 public class EntityProperties {
-    private Function<World, DinosaurEntity> entityCreateFunction = DinosaurEntity::new;
 
+    private Function<World, DinosaurEntity> entityCreateFunction = DinosaurEntity::new;
     private Map<ModelStage, Integer> tickStageMap = Maps.newEnumMap(ModelStage.class);
+
+    // Max Food and water that the entity can have.
+    private int maxFood;
+    private int maxWater;
+    // Rate that the food and water decrease every second
+    private int waterRate;
+    private int foodRate;
 
     public EntityProperties() {
         for (ModelStage value : ModelStage.values()) {
@@ -45,6 +52,10 @@ public class EntityProperties {
                     }
                 }
             }
+            result.maxFood = obj.get("max_food").getAsInt();
+            result.maxWater = obj.get("max_water").getAsInt();
+            result.waterRate = obj.get("water_rate").getAsInt();
+            result.foodRate = obj.get("food_rate").getAsInt();
 
             return result;
         }

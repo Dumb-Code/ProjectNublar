@@ -1,23 +1,13 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
-import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInfomation;
-import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
-import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
-import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
-import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
+import net.dumbcode.projectnublar.server.dinosaur.data.*;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
@@ -35,8 +25,6 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.Random;
 
 @Getter
@@ -49,7 +37,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final ItemProperties itemProperties = new ItemProperties();
     private final EntityProperties entityProperties = new EntityProperties();
     private final SkeletalInformation skeletalInformation = new SkeletalInformation();
-    private final DinosaurInfomation dinosaurInfomation = new DinosaurInfomation();
+    private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
 
     @SideOnly(Side.CLIENT)
     private ModelContainer<DinosaurEntity, ModelStage> modelContainer;
