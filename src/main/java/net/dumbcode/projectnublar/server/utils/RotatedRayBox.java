@@ -3,8 +3,8 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Value;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.dumbcode.projectnublar.client.utils.RenderUtils;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -18,8 +18,6 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 @Getter
 public class RotatedRayBox {
@@ -69,7 +67,7 @@ public class RotatedRayBox {
             result = new RayTraceResult(new Vec3d(hitvec.x, hitvec.y, hitvec.z), EnumFacing.getFacingFromVector((float) sidevec.x, (float) sidevec.y, (float) sidevec.z));
             result.hitInfo = dist;
 
-            return new Result(this, result, hitDir, startIn, endIn, hit, dist);
+            return new Result(this, result, hitDir, start, end, startIn, endIn, hit, dist);
         }
         return null;
     }
@@ -136,12 +134,49 @@ public class RotatedRayBox {
 
     @Value
     public class Result {
-        RotatedRayBox parent;
+        private final RotatedRayBox parent;
         private final RayTraceResult result;
         private final EnumFacing hitDir;
+        private final Vector3d startRotated;
+        private final Vector3d endRotated;
         private final Vec3d start;
         private final Vec3d end;
         private final Vec3d hitRotated;
         private final double distance;
+
+        public void debugRender() {
+
+            GlStateManager.depthMask(true);
+
+            BufferBuilder buff = Tessellator.getInstance().getBuffer();
+
+            //Draw a line from the where the players eyes are, and where theyre looking in transformed space
+            buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+            buff.pos(this.startRotated.x, this.startRotated.y, this.startRotated.z).color(1f, 0, 0, 1).endVertex();
+            buff.pos(this.endRotated.x, this.endRotated.y, this.endRotated.z).color(0f, 1f, 0f, 1f).endVertex();
+            Tessellator.getInstance().draw();
+
+            //Draw a light blue line where the vector is hit in transformed space
+            buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+            buff.pos(this.hitRotated.x, this.hitRotated.y, this.hitRotated.z).color(0f, 1f, 1, 1F).endVertex();
+            buff.pos(this.hitRotated.x, this.hitRotated.y+0.25, this.hitRotated.z).color(0f, 1f, 1f, 1F).endVertex();
+            Tessellator.getInstance().draw();
+
+            //Draw a yellow line where the vector is hit in real space (should be right in front of the mouse)
+            buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+            buff.pos(result.hitVec.x, result.hitVec.y, result.hitVec.z).color(1f, 1f, 0, 1F).endVertex();
+            buff.pos(result.hitVec.x, result.hitVec.y+0.25, result.hitVec.z).color(1f, 1f, 0f, 1F).endVertex();
+            Tessellator.getInstance().draw();
+
+
+            //Draw a cubeoid of the transformed collision box
+            RenderHelper.enableStandardItemLighting();
+            GlStateManager.color(1,1,1,1);
+            AxisAlignedBB aabb = this.parent.box;
+            RenderUtils.drawCubeoid(new Vec3d(aabb.minX, aabb.minY, aabb.minZ), new Vec3d(aabb.maxX, aabb.maxY, aabb.maxZ));
+            GlStateManager.disableLighting();
+            RenderGlobal.drawSelectionBoundingBox(aabb, 1,0,0,1F);
+
+        }
     }
 }

@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.block;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.Value;
-import net.dumbcode.projectnublar.client.utils.DebugUtil;
 import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
@@ -20,7 +20,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -45,7 +44,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.List;
 import java.util.Random;
@@ -228,7 +226,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     GlStateManager.translate(in[0], in[4], in[2]);
 
                     if(DEBUG) {
-                        DebugUtil.renderFenceCollision(event);
+                        chunk.getResult().debugRender();
                     }
 
                     boolean pb = connection.brokenSide(world, connection.getPrevious());
@@ -337,50 +335,52 @@ public class BlockElectricFence extends Block implements IItemBlock {
             return this.rayTrace(pos, start, end, FULL_BLOCK_AABB);
         }
         for (ChunkedInfo chunk : set) {
-            Connection.Cache cache = chunk.getConnection().getCache();
-//            double[] in = cache.getIn();
-//
-//            double yang = in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0]));
-//            Matrix4d rotymat = new Matrix4d();
-//            rotymat.rotY(yang);
-//            Matrix4d invertroty = new Matrix4d();
-//            invertroty.rotY(-yang);
-//
-//            double zang = Math.atan((in[5] - in[4]) / cache.getXZlen());
-//            Matrix4d rotzmat = new Matrix4d();
-//            rotzmat.rotZ(zang);
-//            Matrix4d invertrotz = new Matrix4d();
-//            invertrotz.rotZ(-zang);
-//
-//            Vector3d startvec = new Vector3d(start.x - in[0], start.y - in[4], start.z - in[2]);
-//            Vector3d endvec = new Vector3d(end.x - in[0], end.y - in[4], end.z - in[2]);
-//
-//
-//            rotymat.transform(startvec);
-//            rotzmat.transform(startvec);
-//
-//            rotymat.transform(endvec);
-//            rotzmat.transform(endvec);
-//
-//            Vec3d sv = new Vec3d(startvec.x, startvec.y, startvec.z);
-//            Vec3d ev = new Vec3d(endvec.x, endvec.y, endvec.z);
-//
-//            Vec3d diff = sv.subtract(ev);
-//
-//            //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
-//            sv = sv.addVector(diff.x*100, diff.y*100, diff.z*100);
-//            ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
+            Connection connection = chunk.getConnection();
+            Connection.Cache cache = connection.getCache();
+            boolean pb = connection.brokenSide(worldIn, connection.getPrevious());
+            boolean nb = connection.brokenSide(worldIn, connection.getNext());
+
+            if(connection.getCompared() > 0) {
+                boolean ref = pb;
+                pb = nb;
+                nb = ref;
+            }
 
 
-            RotatedRayBox.Result result = cache.getRayBox().rayTrace(start, end);
+            List<RotatedRayBox.Result> results = Lists.newArrayList();
+            if(nb || pb) {
 
-            if(result != null) {
-                double dist = result.getDistance();
-                if(dist < hitDist) {
-                    resultOut = new RayTraceResult(result.getResult().hitVec, result.getResult().sideHit, pos);
-                    resultOut.hitInfo = new HitChunk(chunk.aabb, chunk.connection, result.getHitDir(), result);
 
-                    hitDist = dist;
+                if(nb) {
+                    results.add(cache.getNext().getRayBox().rayTrace(start, end));
+                    if(!pb) {
+                        results.add(cache.getNext().getFixedBox().rayTrace(start, end));
+                    }
+                }
+
+                if(pb) {
+                    results.add(cache.getPrev().getRayBox().rayTrace(start, end));
+                    if(!nb) {
+                        results.add(cache.getPrev().getFixedBox().rayTrace(start, end));
+                    }
+                }
+
+            } else {
+                results.add(cache.getRayBox().rayTrace(start, end));
+            }
+
+            if(!results.isEmpty()) {
+                for (RotatedRayBox.Result result : results) {
+                    if(result == null) {
+                        continue;
+                    }
+                    double dist = result.getDistance();
+                    if(dist < hitDist) {
+                        resultOut = new RayTraceResult(result.getResult().hitVec, result.getResult().sideHit, pos);
+                        resultOut.hitInfo = new HitChunk(chunk.aabb, chunk.connection, result.getHitDir(), result);
+
+                        hitDist = dist;
+                    }
                 }
             }
         }
@@ -628,7 +628,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
         worldIn.playEvent(2001, pos, Block.getStateId(worldIn.getBlockState(pos)));
     }
 
-    @Value public class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir; RotatedRayBox.Result boxResult;}
+    @Value public class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir; RotatedRayBox.Result result;}
 
     @Value public class ChunkedInfo {AxisAlignedBB aabb; Connection connection;}
 
