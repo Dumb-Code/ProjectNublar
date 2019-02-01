@@ -8,10 +8,13 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.FMLLog;
 import org.lwjgl.opengl.GL11;
+import scala.Int;
 
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 public class RenderUtils {
@@ -131,5 +134,40 @@ public class RenderUtils {
         buff.pos(dlbx, dlby, dlbz).tex(lu+th, lv+tw).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
         buff.pos(ulbx, ulby, ulbz).tex(lu, lv+tw).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
         Tessellator.getInstance().draw();
+    }
+
+    public static void renderBoxLines(Vector3d[] points, EnumFacing... blocked) { //todo: color params
+        render(points, blocked, 0b100, 0b101, 0b111, 0b110);
+        render(points, blocked, 0b000, 0b001, 0b011, 0b010);
+        render(points, blocked, 0b011, 0b111);
+        render(points, blocked, 0b110, 0b010);
+        render(points, blocked, 0b001, 0b101);
+        render(points, blocked, 0b100, 0b000);
+    }
+
+    public static void render(Vector3d[] points, EnumFacing[] blocked, int... ints) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buff = tessellator.getBuffer();
+        buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+        over:
+        for (int i = 0; i < ints.length; i++) {
+            int nextID = (i + 1) % ints.length;
+            if(ints.length == 2 && i == 1) {
+                break;
+            }
+            Vector3d vec = points[ints[i]];
+            Vector3d next = points[ints[nextID]];
+            for (EnumFacing face : blocked) {
+                int bit = face.getAxis().ordinal();
+                int shifted = (ints[i]>>bit)&1;
+                if(shifted == ((ints[nextID]>>bit)&1) && shifted == face.getAxisDirection().ordinal()) {
+                    continue over;
+                }
+            }
+            buff.pos(vec.x, vec.y, vec.z).color(0f, 0f, 0f,0.4f).endVertex();
+            buff.pos(next.x, next.y, next.z).color(0f, 0f, 0f,0.4f).endVertex();
+
+        }
+        tessellator.draw();
     }
 }

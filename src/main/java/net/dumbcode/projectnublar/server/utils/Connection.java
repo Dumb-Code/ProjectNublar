@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePo
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -187,6 +188,9 @@ public class Connection {
                     (cb[4] + cb[6])/2D,
                     (cb[5] + cb[7])/2D
             };
+
+
+
             double ytop = yrange * this.distance(from, in[0], in[2]) - this.position.getY() + from.getY();
             double ybot = yrange * this.distance(from, in[1], in[3]) - this.position.getY() + from.getY();
             double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot)) / (halfthick*32F);
@@ -195,10 +199,16 @@ public class Connection {
 
             double fullLen = Math.sqrt(sqxz + (in[5]-in[4])*(in[5]-in[4]));
 
-            BreakCache prevB = this.genCache(in, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, fullLen, Math.sqrt(sqxz), rand);
-            BreakCache nextB = this.genCache(in, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, fullLen, Math.sqrt(sqxz), rand);
+            BreakCache prevB = this.genCache(in, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, fullLen, Math.sqrt(sqxz), halfthick, rand);
+            BreakCache nextB = this.genCache(in, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, fullLen, Math.sqrt(sqxz), halfthick, rand);
 
-            return new Cache(ct, cb, in, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), new Vector3d((in[0]+in[1])/2, (in[4]+in[5])/2, (in[2]+in[3])/2), prevB, nextB, ybot, ytop, len, Math.sqrt(sqxz), fullLen, yThick, halfthick*2);
+            RotatedRayBox box = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, -fullLen, halfthick * 2, halfthick * 2))
+                    .origin(in[0], in[4], in[2])
+                    .rotate(Math.atan((in[5] - in[4]) / Math.sqrt(sqxz)), 0, 0, 1)
+                    .rotate(in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0])), 0, 1, 0)
+                    .build();
+
+            return new Cache(ct, cb, in, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), new Vector3d((in[0]+in[1])/2, (in[4]+in[5])/2, (in[2]+in[3])/2), prevB, nextB, ybot, ytop, len, Math.sqrt(sqxz), fullLen, yThick, halfthick*2, box);
         }
 //        throw new IllegalStateException("Error generating cache, Connection did not was not intersected: " + this);
         return null;
@@ -208,21 +218,20 @@ public class Connection {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    private BreakCache genCache(double[] in, double[] ct, double[] cb, double fullLen, double xzlen, Random rand) {
+    private BreakCache genCache(double[] in, double[] ct, double[] cb, double fullLen, double xzlen, double halfthick, Random rand) {
         Vector3d point = new Vector3d(fullLen/2, 0, 0);
-        Matrix4d rot = new Matrix4d();
-        rot.rotZ(Math.atan((in[4] - in[5]) / xzlen));
-        rot.transform(point);
-        rot.rotY(in[1] == in[0] ? Math.PI/2D : Math.atan((in[2] - in[3]) / (in[1] - in[0])));
-        rot.transform(point);
-        rot.rotZ((rand.nextFloat()-0.5F) * Math.PI/2F);
-        rot.transform(point);
-        rot.rotY((rand.nextFloat()-0.5F) * Math.PI/3F);
-        rot.transform(point);
-        return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point);
+        RotatedRayBox box = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, -fullLen/2, halfthick * 2, halfthick * 2))
+                .rotate(Math.atan((in[5] - in[4]) / xzlen), 0, 0, 1)
+                .rotate(in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0])), 0, 1, 0)
+
+                .rotate((rand.nextFloat()-0.5F) * Math.PI/2F, 0, 0, 1)
+                .rotate((rand.nextFloat()-0.5F) * Math.PI/2F, 0, 1, 0)
+                .build();
+        box.getBackwards().transform(point);
+        return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point, box);
     }
 
-    @Value public class Cache { double[] ct, cb, in, uvs; Vector3d center; BreakCache prev, next; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; }
+    @Value public class Cache { double[] ct, cb, in, uvs; Vector3d center; BreakCache prev, next; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; RotatedRayBox rayBox; }
 
-    @Value public class BreakCache { double[] ct, cb, uvs; Vector3d point;}
+    @Value public class BreakCache { double[] ct, cb, uvs; Vector3d point; RotatedRayBox rayBox;}
 }

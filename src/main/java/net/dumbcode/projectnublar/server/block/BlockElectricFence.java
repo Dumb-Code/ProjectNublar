@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import com.google.common.collect.Sets;
 import lombok.Value;
 import net.dumbcode.projectnublar.client.utils.DebugUtil;
+import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
@@ -10,6 +11,7 @@ import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
+import net.dumbcode.projectnublar.server.utils.RotatedRayBox;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
@@ -211,16 +213,15 @@ public class BlockElectricFence extends Block implements IItemBlock {
                     double d5 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
 
                     GlStateManager.enableBlend();
+                    GlStateManager.enableAlpha();
                     GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                     GlStateManager.glLineWidth(2.0F);
                     GlStateManager.disableTexture2D();
                     GlStateManager.depthMask(false);
 
                     Connection.Cache cache = chunk.connection.getCache();
+                    Connection connection = chunk.connection;
                     double[] in = cache.getIn();
-
-
-                    AxisAlignedBB aabb = chunk.aabb;
 
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(-d3, -d4, -d5);
@@ -230,10 +231,45 @@ public class BlockElectricFence extends Block implements IItemBlock {
                         DebugUtil.renderFenceCollision(event);
                     }
 
-                    GlStateManager.rotate(in[1] == in[0] ? 270 : (float) Math.toDegrees(Math.atan((in[3] - in[2]) / (in[1] - in[0]))), 0, -1, 0);
-                    GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[5] - in[4]) / cache.getXZlen())), 0, 0, -1);
+                    boolean pb = connection.brokenSide(world, connection.getPrevious());
+                    boolean nb = connection.brokenSide(world, connection.getNext());
 
-                    RenderGlobal.drawSelectionBoundingBox(aabb, 0,0,0,0.4F);
+                    if(connection.getCompared() > 0) {
+                        boolean ref = pb;
+                        pb = nb;
+                        nb = ref;
+                    }
+
+                    if(nb || pb) {
+                        Vec3d center = chunk.aabb.getCenter();
+                        double ycent = (chunk.aabb.maxY - chunk.aabb.minY) / 2;
+                        double zcent = (chunk.aabb.maxZ - chunk.aabb.minZ) / 2;
+
+                        if(nb) {
+                            Vector3d[] bases = cache.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
+                            for (int i = 0; i < 4; i++) {
+                                bases[i + 4].add(cache.getNext().getPoint());
+                            }
+                            RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
+                        }
+                        if(pb) {
+                            Vector3d[] bases = cache.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
+                            for (int i = 0; i < 4; i++) {
+                                bases[i + 4].sub(cache.getPrev().getPoint());
+                            }
+                            RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
+                        }
+                        if(nb != pb) {
+                            if(nb) {
+                                RenderUtils.renderBoxLines(cache.getRayBox().points(new AxisAlignedBB(chunk.aabb.minX, chunk.aabb.minY, chunk.aabb.minZ, center.x, center.y + ycent, center.z + zcent)), EnumFacing.NORTH);
+                            } else {
+                                RenderUtils.renderBoxLines(cache.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, chunk.aabb.maxX, chunk.aabb.maxY, chunk.aabb.maxZ)), EnumFacing.SOUTH);
+                            }
+                        }
+                    } else {
+                        RenderUtils.renderBoxLines(cache.getRayBox().points());
+                    }
+
 
                     GlStateManager.popMatrix();
 
@@ -301,57 +337,48 @@ public class BlockElectricFence extends Block implements IItemBlock {
             return this.rayTrace(pos, start, end, FULL_BLOCK_AABB);
         }
         for (ChunkedInfo chunk : set) {
-
             Connection.Cache cache = chunk.getConnection().getCache();
-            double[] in = cache.getIn();
+//            double[] in = cache.getIn();
+//
+//            double yang = in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0]));
+//            Matrix4d rotymat = new Matrix4d();
+//            rotymat.rotY(yang);
+//            Matrix4d invertroty = new Matrix4d();
+//            invertroty.rotY(-yang);
+//
+//            double zang = Math.atan((in[5] - in[4]) / cache.getXZlen());
+//            Matrix4d rotzmat = new Matrix4d();
+//            rotzmat.rotZ(zang);
+//            Matrix4d invertrotz = new Matrix4d();
+//            invertrotz.rotZ(-zang);
+//
+//            Vector3d startvec = new Vector3d(start.x - in[0], start.y - in[4], start.z - in[2]);
+//            Vector3d endvec = new Vector3d(end.x - in[0], end.y - in[4], end.z - in[2]);
+//
+//
+//            rotymat.transform(startvec);
+//            rotzmat.transform(startvec);
+//
+//            rotymat.transform(endvec);
+//            rotzmat.transform(endvec);
+//
+//            Vec3d sv = new Vec3d(startvec.x, startvec.y, startvec.z);
+//            Vec3d ev = new Vec3d(endvec.x, endvec.y, endvec.z);
+//
+//            Vec3d diff = sv.subtract(ev);
+//
+//            //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
+//            sv = sv.addVector(diff.x*100, diff.y*100, diff.z*100);
+//            ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
 
-            double yang = in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0]));
-            Matrix4d rotymat = new Matrix4d();
-            rotymat.rotY(yang);
-            Matrix4d invertroty = new Matrix4d();
-            invertroty.rotY(-yang);
 
-            double zang = Math.atan((in[5] - in[4]) / cache.getXZlen());
-            Matrix4d rotzmat = new Matrix4d();
-            rotzmat.rotZ(zang);
-            Matrix4d invertrotz = new Matrix4d();
-            invertrotz.rotZ(-zang);
+            RotatedRayBox.Result result = cache.getRayBox().rayTrace(start, end);
 
-            Vector3d startvec = new Vector3d(start.x - in[0], start.y - in[4], start.z - in[2]);
-            Vector3d endvec = new Vector3d(end.x - in[0], end.y - in[4], end.z - in[2]);
-
-
-            rotymat.transform(startvec);
-            rotzmat.transform(startvec);
-
-            rotymat.transform(endvec);
-            rotzmat.transform(endvec);
-
-            Vec3d sv = new Vec3d(startvec.x, startvec.y, startvec.z);
-            Vec3d ev = new Vec3d(endvec.x, endvec.y, endvec.z);
-
-            Vec3d diff = sv.subtract(ev);
-
-            //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
-            sv = sv.addVector(diff.x*100, diff.y*100, diff.z*100);
-            ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
-
-            RayTraceResult result = this.rayTrace(BlockPos.ORIGIN, sv, ev, chunk.aabb);
-            if(result != null ) {
-                double dist = result.hitVec.squareDistanceTo(startvec.x, startvec.y, startvec.z);
-
+            if(result != null) {
+                double dist = result.getDistance();
                 if(dist < hitDist) {
-                    Vector3d hitvec = new Vector3d(result.hitVec.x, result.hitVec.y, result.hitVec.z);
-                    invertrotz.transform(hitvec);
-                    invertroty.transform(hitvec);
-
-                    Vec3i vec = result.sideHit.getDirectionVec();
-                    Vector3d sidevec = new Vector3d(vec.getX(), vec.getY(), vec.getZ());
-                    invertrotz.transform(sidevec);
-                    invertroty.transform(sidevec);
-
-                    resultOut = new RayTraceResult(new Vec3d(hitvec.x, hitvec.y, hitvec.z), EnumFacing.getFacingFromVector((float) sidevec.x, (float) sidevec.y, (float) sidevec.z), pos);
-                    resultOut.hitInfo = new HitChunk(chunk.aabb, chunk.connection, result.sideHit);
+                    resultOut = new RayTraceResult(result.getResult().hitVec, result.getResult().sideHit, pos);
+                    resultOut.hitInfo = new HitChunk(chunk.aabb, chunk.connection, result.getHitDir(), result);
 
                     hitDist = dist;
                 }
@@ -601,7 +628,7 @@ public class BlockElectricFence extends Block implements IItemBlock {
         worldIn.playEvent(2001, pos, Block.getStateId(worldIn.getBlockState(pos)));
     }
 
-    @Value public class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir;}
+    @Value public class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir; RotatedRayBox.Result boxResult;}
 
     @Value public class ChunkedInfo {AxisAlignedBB aabb; Connection connection;}
 
