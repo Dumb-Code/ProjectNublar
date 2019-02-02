@@ -1,9 +1,8 @@
 package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Sets;
-import net.dumbcode.projectnublar.server.block.BlockElectricFence;
+import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
-import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -26,8 +25,8 @@ public class CreativeFenceRemovers extends Item {
     @Override
     public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         RayTraceResult result = ForgeHooks.rayTraceEyes(player, 7);
-        if(result != null && result.hitInfo instanceof BlockElectricFence.HitChunk) {
-            Connection c = ((BlockElectricFence.HitChunk) result.hitInfo).getConnection();
+        if(result != null && result.hitInfo instanceof BlockConnectableBase.HitChunk) {
+            Connection c = ((BlockConnectableBase.HitChunk) result.hitInfo).getConnection();
             BlockPos origin = c.getFrom();
             IBlockState baseState = worldIn.getBlockState(origin);
             if(!(baseState.getBlock() instanceof BlockElectricFencePole)) {

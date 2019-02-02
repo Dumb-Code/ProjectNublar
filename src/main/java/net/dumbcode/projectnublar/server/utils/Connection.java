@@ -227,12 +227,10 @@ public class Connection {
                 .rotate(Math.atan((in[5] - in[4]) / xzlen), 0, 0, 1)
                 .rotate(in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0])), 0, 1, 0)
                 .build();
-        RotatedRayBox rotatedRayBox = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, -fullLen/2, halfthick * 2, halfthick * 2))
-                .origin(prev?center.x:in[0], prev?center.y:in[4], prev?center.z:in[2])
-                .rotate(Math.atan((in[5] - in[4]) / xzlen), 0, 0, 1)
-                .rotate(in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0])), 0, 1, 0)
-                .rotate((rand.nextFloat()-0.5F) * Math.PI/2D, 0, 0, 1)
-                .rotate((rand.nextFloat()-0.5F) * Math.PI/2D, 0, 1, 0)
+        RotatedRayBox rotatedRayBox = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, (prev ? -1 : 1) * fullLen/2, halfthick * 2, halfthick * 2))
+                .origin(center.x, center.y, center.z)
+                .rotate(Math.atan((in[5] - in[4]) / xzlen) + (rand.nextFloat()-0.5F) * Math.PI/2D, 0, 0, 1)
+                .rotate((in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0]))) + (rand.nextFloat()-0.5F) * Math.PI/2D, 0, 1, 0)
                 .build();
         rotatedRayBox.getBackwards().transform(point);
         return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point, box, rotatedRayBox);

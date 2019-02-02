@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.particles;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.BlockElectricFence;
+import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -30,9 +30,9 @@ public class SparkParticle extends Particle {
 
     @Override
     public void move(double x, double y, double z) {
-        BlockElectricFence.collidableClient = false;
+        BlockConnectableBase.collidableClient = false;
         super.move(x, y, z);
-        BlockElectricFence.collidableClient = true;
+        BlockConnectableBase.collidableClient = true;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
-import net.dumbcode.projectnublar.server.block.BlockElectricFence;
+import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -20,8 +20,8 @@ public class ItemFenceRemover extends Item {
     @Override
     public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         RayTraceResult result = ForgeHooks.rayTraceEyes(player, 7);
-        if(result != null && result.hitInfo instanceof BlockElectricFence.HitChunk) {
-            Connection connection = ((BlockElectricFence.HitChunk) result.hitInfo).getConnection();
+        if(result != null && result.hitInfo instanceof BlockConnectableBase.HitChunk) {
+            Connection connection = ((BlockConnectableBase.HitChunk) result.hitInfo).getConnection();
             for (BlockPos blockPos : LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset())) {
                 TileEntity te = worldIn.getTileEntity(blockPos);
                 if(te instanceof ConnectableBlockEntity) {

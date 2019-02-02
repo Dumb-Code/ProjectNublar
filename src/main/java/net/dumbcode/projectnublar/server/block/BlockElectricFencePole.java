@@ -13,6 +13,7 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -22,8 +23,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -33,7 +33,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BlockElectricFencePole extends Block implements IItemBlock {
+public class BlockElectricFencePole extends BlockConnectableBase implements IItemBlock {
     @Getter
     private final ConnectionType type;
     public final PropertyInteger INDEX_PROPERTY;
@@ -50,6 +50,43 @@ public class BlockElectricFencePole extends Block implements IItemBlock {
         this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY, POWERED_PROPERTY);
 
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(INDEX_PROPERTY, 0).withProperty(POWERED_PROPERTY, false));
+    }
+
+    @Override
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
+        addCollisionBoxToList(pos, entityBox, collidingBoxes, state.getBoundingBox (worldIn, pos));
+        super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, isActualState);
+    }
+
+    @Nullable
+    @Override
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
+        return blockState.getBoundingBox(worldIn, pos);
+    }
+
+    @Override
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos) {
+        return state.getBoundingBox(worldIn, pos).offset(pos);
+    }
+
+    @Override
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+        double rotation = state.getActualState(source, pos).getValue(ROTATION_PROPERTY) / 180D * Math.PI;
+        float radius = 6/16F;//todo ct
+        float t = 2/16F;
+        double x = Math.sin(rotation) * radius;
+        double z = Math.cos(rotation) * radius;
+        return new AxisAlignedBB(x-t, 0, z-t, x+t, 1, z+t).offset(0.5, 0, 0.5);
+    }
+
+    @Nullable
+    @Override
+    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+        RayTraceResult trace = this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos));
+        if(trace != null) {
+            return trace;
+        }
+        return super.collisionRayTrace(blockState, worldIn, pos, start, end);
     }
 
     @Override
