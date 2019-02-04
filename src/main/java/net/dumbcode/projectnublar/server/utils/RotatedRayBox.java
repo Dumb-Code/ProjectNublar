@@ -64,6 +64,8 @@ public class RotatedRayBox {
             Vector3d sidevec = new Vector3d(vec.getX(), vec.getY(), vec.getZ());
             this.backwards.transform(sidevec);
 
+
+
             result = new RayTraceResult(new Vec3d(hitvec.x, hitvec.y, hitvec.z), EnumFacing.getFacingFromVector((float) sidevec.x, (float) sidevec.y, (float) sidevec.z));
             result.hitInfo = dist;
 
@@ -146,6 +148,9 @@ public class RotatedRayBox {
 
         public void debugRender() {
 
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(this.parent.origin.x, this.parent.origin.y, this.parent.origin.z);
+            GlStateManager.shadeModel(GL11.GL_SMOOTH);
             GlStateManager.depthMask(true);
 
             BufferBuilder buff = Tessellator.getInstance().getBuffer();
@@ -185,6 +190,8 @@ public class RotatedRayBox {
             RenderUtils.drawCubeoid(new Vec3d(aabb.minX, aabb.minY, aabb.minZ), new Vec3d(aabb.maxX, aabb.maxY, aabb.maxZ));
             GlStateManager.disableLighting();
             RenderGlobal.drawSelectionBoundingBox(aabb, 1,0,0,1F);
+
+            GlStateManager.popMatrix();
 
         }
     }

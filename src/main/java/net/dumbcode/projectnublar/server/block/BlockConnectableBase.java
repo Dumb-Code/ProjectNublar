@@ -51,7 +51,7 @@ import java.util.Set;
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class BlockConnectableBase extends Block {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     //Set this at your own will, just remember to set it back to true after collection
     public static boolean collidableClient = true;
@@ -187,11 +187,12 @@ public class BlockConnectableBase extends Block {
 
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(-d3, -d4, -d5);
-                    GlStateManager.translate(in[0], in[4], in[2]);
 
                     if(DEBUG) {
                         chunk.getResult().debugRender();
                     }
+
+                    GlStateManager.translate(in[0], in[4], in[2]);
 
                     boolean pb = connection.brokenSide(world, connection.getPrevious());
                     boolean nb = connection.brokenSide(world, connection.getNext());
