@@ -51,7 +51,7 @@ import java.util.Set;
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class BlockConnectableBase extends Block {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     //Set this at your own will, just remember to set it back to true after collection
     public static boolean collidableClient = true;

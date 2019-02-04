@@ -71,11 +71,10 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
 
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        double rotation = state.getActualState(source, pos).getValue(ROTATION_PROPERTY) / 180D * Math.PI;
-        float radius = 6/16F;//todo ct
-        float t = 2/16F;
-        double x = Math.sin(rotation) * radius;
-        double z = Math.cos(rotation) * radius;
+        double rotation = (state.getActualState(source, pos).getValue(ROTATION_PROPERTY) + (90 - this.type.getRotationOffset())) / 180D * Math.PI;
+        float t = this.type.getHalfSize();
+        double x = Math.sin(rotation) * this.type.getRadius();
+        double z = Math.cos(rotation) * this.type.getRadius();
         return new AxisAlignedBB(x-t, 0, z-t, x+t, 1, z+t).offset(0.5, 0, 0.5);
     }
 

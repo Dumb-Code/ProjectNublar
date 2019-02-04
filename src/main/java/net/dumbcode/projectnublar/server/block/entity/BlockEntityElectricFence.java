@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.Set;
@@ -38,7 +39,12 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
 
     @Override
     public double getMaxRenderDistanceSquared() {
-        return 100*100;
+        return Double.MAX_VALUE;
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        return new AxisAlignedBB(this.pos.add(-1, -1, -1), this.pos.add(1, 1, 1));
     }
 
     @Override
