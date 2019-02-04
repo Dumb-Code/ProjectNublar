@@ -170,7 +170,10 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
             }
             boolean out = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
             if(world.getBlockState(pos).getBlock() == this.block) {
-                BlockElectricFence.this.placeBlockOnSide(world, result, pos, side);
+                TileEntity te = world.getTileEntity(pos);
+                if (te instanceof ConnectableBlockEntity && result != null && (result.hitInfo instanceof HitChunk || result.hitInfo == null)) {
+                    generateConnections(world, pos, (ConnectableBlockEntity) te, (HitChunk) result.hitInfo, side);
+                }
             }
             return out;
         }

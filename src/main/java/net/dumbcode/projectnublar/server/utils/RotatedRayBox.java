@@ -150,10 +150,19 @@ public class RotatedRayBox {
 
             BufferBuilder buff = Tessellator.getInstance().getBuffer();
 
+            Vec3d sv = new Vec3d(this.startRotated.x, this.startRotated.y, this.startRotated.z);
+            Vec3d ev = new Vec3d(this.endRotated.x, this.endRotated.y, this.endRotated.z);
+
+            Vec3d diff = sv.subtract(ev);
+
+            //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
+            sv = sv.addVector(diff.x*100, diff.y*100, diff.z*100);
+            ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
+
             //Draw a line from the where the players eyes are, and where theyre looking in transformed space
             buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-            buff.pos(this.startRotated.x, this.startRotated.y, this.startRotated.z).color(1f, 0, 0, 1).endVertex();
-            buff.pos(this.endRotated.x, this.endRotated.y, this.endRotated.z).color(0f, 1f, 0f, 1f).endVertex();
+            buff.pos(sv.x, sv.y, sv.z).color(1f, 0, 0, 1).endVertex();
+            buff.pos(ev.x, ev.y, ev.z).color(0f, 1f, 0f, 1f).endVertex();
             Tessellator.getInstance().draw();
 
             //Draw a light blue line where the vector is hit in transformed space

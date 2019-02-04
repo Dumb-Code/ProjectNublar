@@ -306,19 +306,17 @@ public class BlockConnectableBase extends Block {
 
             List<RotatedRayBox.Result> results = Lists.newArrayList();
             if(nb || pb) {
-
-
                 if(nb) {
-                    results.add(cache.getNext().getRayBox().rayTrace(start, end));
+                    results.add(cache.getNext().getRotated().rayTrace(start, end));
                     if(!pb) {
-                        results.add(cache.getNext().getFixedBox().rayTrace(start, end));
+                        results.add(cache.getNext().getFixed().rayTrace(start, end));
                     }
                 }
 
                 if(pb) {
-                    results.add(cache.getPrev().getRayBox().rayTrace(start, end));
+                    results.add(cache.getPrev().getRotated().rayTrace(start, end));
                     if(!nb) {
-                        results.add(cache.getPrev().getFixedBox().rayTrace(start, end));
+                        results.add(cache.getPrev().getFixed().rayTrace(start, end));
                     }
                 }
 
@@ -469,7 +467,10 @@ public class BlockConnectableBase extends Block {
                         if(worldIn.getBlockState(nextPos).getBlock().isReplaceable(worldIn, nextPos)) {
                             worldIn.setBlockState(nextPos, this.getDefaultState());
                             nextTe = worldIn.getTileEntity(nextPos);
-                            generateConnections(worldIn, nextPos, null);
+                            if(nextTe instanceof ConnectableBlockEntity && generateConnections(worldIn, nextPos, (ConnectableBlockEntity) nextTe, chunk, null)) {
+                                placeEffect(playerIn, hand, worldIn, pos);
+                            }
+
                         }
                     }
                     if(nextTe instanceof ConnectableBlockEntity) {
@@ -494,7 +495,7 @@ public class BlockConnectableBase extends Block {
         return true;
     }
 
-    public static Pair<Set<Connection>, Connection> generateConnections(World worldIn, BlockPos pos, @Nullable EnumFacing side) {
+    public static boolean generateConnections(World worldIn, BlockPos pos, ConnectableBlockEntity be, @Nullable HitChunk chunk, @Nullable EnumFacing side) {
         Set<Connection> newConnections = Sets.newLinkedHashSet();
         double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
         Connection ref = null;
@@ -530,7 +531,29 @@ public class BlockConnectableBase extends Block {
                 }
             }
         }
-        return Pair.of(newConnections, ref);
+
+        if(chunk != null) {
+            EnumFacing face = chunk.getDir();
+            if(chunk.getConnection().getCompared() < 0) {
+                face = face.getOpposite();
+            }
+            if(face.getAxis() == EnumFacing.Axis.X) {
+                for (Connection connection : newConnections) {
+                    if(chunk.getConnection().lazyEquals(connection)) {
+                        ref = connection;
+                    }
+                }
+            }
+
+        }
+        for (Connection connection : newConnections) {
+            connection.setBroken(!connection.lazyEquals(ref));
+            be.addConnection(connection);
+        }
+        if(be instanceof TileEntity) {
+            ((TileEntity)be).markDirty();
+        }
+        return ref != null;
     }
 
     @Nullable
@@ -579,41 +602,6 @@ public class BlockConnectableBase extends Block {
             }
         }
     }
-
-
-    public void placeBlockOnSide(World worldIn, RayTraceResult result, BlockPos pos, EnumFacing side) {
-        TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof ConnectableBlockEntity) {
-            ConnectableBlockEntity be = (ConnectableBlockEntity) te;
-
-            Pair<Set<Connection>, Connection> pairResult = generateConnections(worldIn, pos, side);
-
-            Set<Connection> newConnections = pairResult.getLeft();
-            Connection ref = pairResult.getRight();
-
-            if(result != null && result.hitInfo instanceof BlockConnectableBase.HitChunk) {
-                BlockConnectableBase.HitChunk hc = (BlockConnectableBase.HitChunk) result.hitInfo;
-                EnumFacing face = hc.getDir();
-                if(hc.getConnection().getCompared() < 0) {
-                    face = face.getOpposite();
-                }
-                if(face.getAxis() == EnumFacing.Axis.X) {
-                    for (Connection connection : newConnections) {
-                        if(hc.getConnection().lazyEquals(connection)) {
-                            ref = connection;
-                        }
-                    }
-                }
-            }
-            for (Connection connection : newConnections) {
-                connection.setBroken(!connection.lazyEquals(ref));
-                be.addConnection(connection);
-            }
-            te.markDirty();
-
-        }
-    }
-
 
     @Value
     public static class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir; RotatedRayBox.Result result;}

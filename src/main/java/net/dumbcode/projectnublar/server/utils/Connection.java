@@ -200,8 +200,8 @@ public class Connection {
 
             double fullLen = Math.sqrt(sqxz + (in[5]-in[4])*(in[5]-in[4]));
 
-            BreakCache prevB = this.genCache(true, in, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, fullLen, Math.sqrt(sqxz), halfthick, rand);
-            BreakCache nextB = this.genCache(false, in, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, fullLen, Math.sqrt(sqxz), halfthick, rand);
+            BreakCache prevB = this.genCache(false, in, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, fullLen, Math.sqrt(sqxz), halfthick, rand);
+            BreakCache nextB = this.genCache(true, in, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, fullLen, Math.sqrt(sqxz), halfthick, rand);
 
             RotatedRayBox box = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, -fullLen, halfthick * 2, halfthick * 2))
                     .origin(in[0], in[4], in[2])
@@ -219,24 +219,27 @@ public class Connection {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    private BreakCache genCache(boolean prev, double[] in, double[] ct, double[] cb, double fullLen, double xzlen, double halfthick, Random rand) {
+    private BreakCache genCache(boolean next, double[] in, double[] ct, double[] cb, double fullLen, double xzlen, double halfthick, Random rand) {
         Vector3d point = new Vector3d(fullLen/2, 0, 0);
         Vector3d center = new Vector3d((in[0]+in[1])/2, (in[4]+in[5])/2, (in[2]+in[3])/2);
-        RotatedRayBox box = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, -fullLen/2, halfthick * 2, halfthick * 2))
-                .origin(prev?in[0]:center.x, prev?in[4]:center.y, prev?in[2]:center.z)
+        double angleY = (rand.nextFloat()-0.5F) * Math.PI/3F;
+        double angleZ = (rand.nextFloat()-0.5F) * Math.PI/3F;
+        RotatedRayBox fixed = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, -fullLen/2, halfthick * 2, halfthick * 2))
+                .origin(next?center.x:in[0], next?center.y:in[4], next?center.z:in[2])
                 .rotate(Math.atan((in[5] - in[4]) / xzlen), 0, 0, 1)
                 .rotate(in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0])), 0, 1, 0)
                 .build();
-        RotatedRayBox rotatedRayBox = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, (prev ? -1 : 1) * fullLen/2, halfthick * 2, halfthick * 2))
+        RotatedRayBox rotated = new RotatedRayBox.Builder(new AxisAlignedBB(0, -halfthick * 2, -halfthick * 2, (next ? 1 : -1) * fullLen/2, halfthick * 2, halfthick * 2))
                 .origin(center.x, center.y, center.z)
-                .rotate(Math.atan((in[5] - in[4]) / xzlen) + (rand.nextFloat()-0.5F) * Math.PI/2D, 0, 0, 1)
-                .rotate((in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0]))) + (rand.nextFloat()-0.5F) * Math.PI/2D, 0, 1, 0)
+                .rotate((in[1] == in[0] ? Math.PI*1.5D : Math.atan((in[3] - in[2]) / (in[1] - in[0]))) + angleY, 0, 1, 0)
+                .rotate(Math.atan((in[5] - in[4]) / xzlen) + angleZ, 0, 0, 1)
                 .build();
-        rotatedRayBox.getBackwards().transform(point);
-        return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point, box, rotatedRayBox);
+
+        rotated.getBackwards().transform(point);
+        return new BreakCache(ct, cb, IntStream.range(0, 24).mapToDouble(i -> rand.nextInt(16)/16F).toArray(), point, fixed, rotated);
     }
 
     @Value public class Cache { double[] ct, cb, in, uvs; Vector3d center; BreakCache prev, next; double ybot, ytop, texLen, XZlen, fullLen, yThick, fullThick; RotatedRayBox rayBox; }
 
-    @Value public class BreakCache { double[] ct, cb, uvs; Vector3d point; RotatedRayBox rayBox, fixedBox;}
+    @Value public class BreakCache { double[] ct, cb, uvs; Vector3d point; RotatedRayBox fixed, rotated;}
 }
