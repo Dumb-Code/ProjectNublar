@@ -20,7 +20,7 @@ import java.util.function.Function;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class BlockHandler {
     public static final SkeletalBuilderBlock SKELETAL_BUILDER = new SkeletalBuilderBlock();
-    public static final BlockElectricFencePole LIGHT_STEEL_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.LIGHT_STEEL);
+    public static final BlockElectricFencePole LIGHT_STEEL_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.LOW_SECURITY);
     public static final BlockElectricFencePole HIGH_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.HIGH_SECURITY);
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
 
@@ -44,7 +44,7 @@ public class BlockHandler {
                 EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer").setCreativeTab(ProjectNublar.TAB),
                 INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator").setCreativeTab(ProjectNublar.TAB),
                 COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator").setCreativeTab(ProjectNublar.TAB),
-                LIGHT_STEEL_ELECTRIC_FENCE_POLE.setRegistryName("light_steel_electric_fence_pole").setUnlocalizedName("light_steel_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
+                LIGHT_STEEL_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setUnlocalizedName("low_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
                 HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
                 ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB)
         );

@@ -195,12 +195,6 @@ public class BlockConnectableBase extends Block {
                     boolean pb = connection.brokenSide(world, connection.getPrevious());
                     boolean nb = connection.brokenSide(world, connection.getNext());
 
-                    if(connection.getCompared() > 0) {
-                        boolean ref = pb;
-                        pb = nb;
-                        nb = ref;
-                    }
-
                     if(nb || pb) {
                         Vec3d center = chunk.getAabb().getCenter();
                         double ycent = (chunk.getAabb().maxY - chunk.getAabb().minY) / 2;
@@ -293,13 +287,6 @@ public class BlockConnectableBase extends Block {
             Connection connection = chunk.getConnection();
             boolean pb = connection.brokenSide(worldIn, connection.getPrevious());
             boolean nb = connection.brokenSide(worldIn, connection.getNext());
-
-            if(connection.getCompared() > 0) {
-                boolean ref = pb;
-                pb = nb;
-                nb = ref;
-            }
-
 
             List<RotatedRayBox.Result> results = Lists.newArrayList();
             if(nb || pb) {
@@ -455,7 +442,7 @@ public class BlockConnectableBase extends Block {
                         return true;
                     }
                 } else if(chunk.getDir().getAxis() == EnumFacing.Axis.X) {
-                    BlockPos nextPos = chunk.getDir() == EnumFacing.WEST == chunk.getConnection().getCompared() < 0 ? con.getPrevious() : con.getNext();
+                    BlockPos nextPos = chunk.getDir() == EnumFacing.WEST  ? con.getPrevious() : con.getNext();
                     TileEntity nextTe = worldIn.getTileEntity(nextPos);
                     if(!(nextTe instanceof ConnectableBlockEntity)) {
                         if(worldIn.getBlockState(nextPos).getBlock().isReplaceable(worldIn, nextPos)) {
@@ -527,9 +514,6 @@ public class BlockConnectableBase extends Block {
 
         if(chunk != null) {
             EnumFacing face = chunk.getDir();
-            if(chunk.getConnection().getCompared() < 0) {
-                face = face.getOpposite();
-            }
             if(face.getAxis() == EnumFacing.Axis.X) {
                 for (Connection connection : newConnections) {
                     if(chunk.getConnection().lazyEquals(connection)) {

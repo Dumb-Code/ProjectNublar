@@ -50,12 +50,6 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
                 boolean pb = connection.brokenSide(world, connection.getPrevious());
                 boolean nb = connection.brokenSide(world, connection.getNext());
 
-                if(connection.getCompared() > 0) {
-                    boolean ref = pb;
-                    pb = nb;
-                    nb = ref;
-                }
-
                 float chance = 0.02F;
 
                 if(nb || pb) {

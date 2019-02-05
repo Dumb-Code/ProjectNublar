@@ -9,8 +9,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Getter
 public enum ConnectionType {
-    LIGHT_STEEL(2, 3, 6/16F, 1/32F, 90F, 1/8F, 10),
-    HIGH_SECURITY(1, 8, 1/2F, 1/16F, 0F, 2/8F, 15);
+    LOW_SECURITY(2, 3, 6/16F, 0.75F, 90F, 1/8F, 10),
+    HIGH_SECURITY(1, 8, 1/2F, 2F, 0F, 2/8F, 15);
     private final double[] offsets;
     private final int height;
     private final float radius;
@@ -29,7 +29,7 @@ public enum ConnectionType {
         this.offsets = new double[amount];
         this.height = height;
         this.radius = radius;
-        this.cableWidth = cableWidth;
+        this.cableWidth = cableWidth / 32F; //cableWidth is actually halfCableWidth, the 16 comes from the texturemap size
         this.rotationOffset = defaultRotation;
         this.halfSize = halfSize;
         this.lightLevel = lightLevel;

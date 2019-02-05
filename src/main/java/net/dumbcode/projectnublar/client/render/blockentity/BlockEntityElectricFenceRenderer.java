@@ -54,8 +54,8 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         for (int i = 0; i < 2; i++) {
             GlStateManager.pushMatrix();
             GlStateManager.rotate(180*i, 0, 1, 0);
-            GlStateManager.rotate((float) angle * (i==1?-1:1), 0, 0, connection.getCompared());
-            GlStateManager.translate(0, -h-connection.getType().getCableWidth(), 0);
+            GlStateManager.rotate((float) angle * (i==1?-1:1), 0, 0, 1);
+            GlStateManager.translate(0, -h-connection.getType().getCableWidth()/2F, 0);
             buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 
             buff.pos(-hw, 0, 0).tex((hw*32)/ts, (h*16)/ts).endVertex();
@@ -88,11 +88,6 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             boolean pb = connection.brokenSide(world, connection.getPrevious());
             boolean nb = connection.brokenSide(world, connection.getNext());
 
-            if(connection.getCompared() > 0) {
-                boolean ref = pb;
-                pb = nb;
-                nb = ref;
-            }
             if(nb) {
                 buff.addVertexData(cache.getNextRotated());
                 if(!pb) {
