@@ -45,7 +45,7 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
                 if(connection.isBroken()) {
                     continue;
                  }
-                Vector3d center = connection.getCache().getCenter();
+                Vector3d center = connection.getCenter();
 
                 boolean pb = connection.brokenSide(world, connection.getPrevious());
                 boolean nb = connection.brokenSide(world, connection.getNext());
@@ -61,12 +61,12 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
                 if(nb || pb) {
                     if(pb && rand.nextFloat() < chance) {
                         Vector3d point = new Vector3d();
-                        point.sub(connection.getCache().getPrev().getPoint());
+                        point.sub(connection.getPrevCache().getPoint());
                         spawnParticles(world, point, center);
                     }
 
                     if(nb && rand.nextFloat() < chance) {
-                        spawnParticles(world, connection.getCache().getNext().getPoint(), center);
+                        spawnParticles(world, connection.getNextCache().getPoint(), center);
                     }
 
                 }

@@ -41,7 +41,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
@@ -117,7 +116,7 @@ public class BlockConnectableBase extends Block {
                 if (entityBox.intersects(box.offset(pos)) && box.getConnection().isPowered(worldIn)) {
 
                     Vector3d vec = new Vector3d((entityBox.maxX+entityBox.minX)/2, (entityBox.maxY+entityBox.minY)/2, (entityBox.maxZ+entityBox.minZ)/2);
-                    vec.sub(box.getConnection().getCache().getCenter());
+                    vec.sub(box.getConnection().getCenter());
                     vec.normalize();
 
                     Vec3d center = box.offset(pos).getCenter();
@@ -181,9 +180,8 @@ public class BlockConnectableBase extends Block {
                     GlStateManager.disableTexture2D();
                     GlStateManager.depthMask(false);
 
-                    Connection.Cache cache = chunk.getConnection().getCache();
                     Connection connection = chunk.getConnection();
-                    double[] in = cache.getIn();
+                    double[] in = connection.getIn();
 
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(-d3, -d4, -d5);
@@ -209,28 +207,28 @@ public class BlockConnectableBase extends Block {
                         double zcent = (chunk.getAabb().maxZ - chunk.getAabb().minZ) / 2;
 
                         if(nb) {
-                            Vector3d[] bases = cache.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
+                            Vector3d[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
                             for (int i = 0; i < 4; i++) {
-                                bases[i + 4].add(cache.getNext().getPoint());
+                                bases[i + 4].add(connection.getNextCache().getPoint());
                             }
                             RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
                         }
                         if(pb) {
-                            Vector3d[] bases = cache.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
+                            Vector3d[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
                             for (int i = 0; i < 4; i++) {
-                                bases[i + 4].sub(cache.getPrev().getPoint());
+                                bases[i + 4].sub(connection.getPrevCache().getPoint());
                             }
                             RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
                         }
                         if(nb != pb) {
                             if(nb) {
-                                RenderUtils.renderBoxLines(cache.getRayBox().points(new AxisAlignedBB(chunk.getAabb().minX, chunk.getAabb().minY, chunk.getAabb().minZ, center.x, center.y + ycent, center.z + zcent)), EnumFacing.NORTH);
+                                RenderUtils.renderBoxLines(connection.getRayBox().points(new AxisAlignedBB(chunk.getAabb().minX, chunk.getAabb().minY, chunk.getAabb().minZ, center.x, center.y + ycent, center.z + zcent)), EnumFacing.NORTH);
                             } else {
-                                RenderUtils.renderBoxLines(cache.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, chunk.getAabb().maxX, chunk.getAabb().maxY, chunk.getAabb().maxZ)), EnumFacing.SOUTH);
+                                RenderUtils.renderBoxLines(connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, chunk.getAabb().maxX, chunk.getAabb().maxY, chunk.getAabb().maxZ)), EnumFacing.SOUTH);
                             }
                         }
                     } else {
-                        RenderUtils.renderBoxLines(cache.getRayBox().points());
+                        RenderUtils.renderBoxLines(connection.getRayBox().points());
                     }
 
 
@@ -262,8 +260,7 @@ public class BlockConnectableBase extends Block {
 
             for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
                 if(!connection.isBroken()) {
-                    Connection.Cache cache = connection.getCache();
-                    double[] in = cache.getIn();
+                    double[] in = connection.getIn();
                     set = true;
 
                     minX = Math.min(minX, in[0]);
@@ -294,7 +291,6 @@ public class BlockConnectableBase extends Block {
         }
         for (BlockConnectableBase.ChunkedInfo chunk : set) {
             Connection connection = chunk.getConnection();
-            Connection.Cache cache = connection.getCache();
             boolean pb = connection.brokenSide(worldIn, connection.getPrevious());
             boolean nb = connection.brokenSide(worldIn, connection.getNext());
 
@@ -308,21 +304,21 @@ public class BlockConnectableBase extends Block {
             List<RotatedRayBox.Result> results = Lists.newArrayList();
             if(nb || pb) {
                 if(nb) {
-                    results.add(cache.getNext().getRotated().rayTrace(start, end));
+                    results.add(connection.getNextCache().getRotatedBox().rayTrace(start, end));
                     if(!pb) {
-                        results.add(cache.getNext().getFixed().rayTrace(start, end));
+                        results.add(connection.getNextCache().getFixedBox().rayTrace(start, end));
                     }
                 }
 
                 if(pb) {
-                    results.add(cache.getPrev().getRotated().rayTrace(start, end));
+                    results.add(connection.getPrevCache().getRotatedBox().rayTrace(start, end));
                     if(!nb) {
-                        results.add(cache.getPrev().getFixed().rayTrace(start, end));
+                        results.add(connection.getPrevCache().getFixedBox().rayTrace(start, end));
                     }
                 }
 
             } else {
-                results.add(cache.getRayBox().rayTrace(start, end));
+                results.add(connection.getRayBox().rayTrace(start, end));
             }
 
             if(!results.isEmpty()) {
@@ -350,8 +346,8 @@ public class BlockConnectableBase extends Block {
         if(tileEntity instanceof ConnectableBlockEntity) {
             for (Connection connection : ((ConnectableBlockEntity) tileEntity).getConnections()) {
                 if(!connection.isBroken()) {
-                    double w = connection.getCache().getFullThick();
-                    set.add(new ChunkedInfo(new AxisAlignedBB(0,-w,-w, -connection.getCache().getFullLen(), w, w), connection));
+                    double w = connection.getType().getCableWidth();
+                    set.add(new ChunkedInfo(new AxisAlignedBB(0,-w,-w, -connection.getFullLen(), w, w), connection));
 
                 }
             }
@@ -362,19 +358,16 @@ public class BlockConnectableBase extends Block {
     public List<ConnectionAxisAlignedBB> createBoundingBox(Set<Connection> fenceConnections, BlockPos pos) {
         List<ConnectionAxisAlignedBB> out = Lists.newArrayList();
         for (Connection connection : fenceConnections) {
-            Connection.Cache cache = connection.getCache();
-            if(cache != null) {
-                double[] intersect = cache.getIn();
-                double amount = 16;
+            double[] intersect = connection.getIn();
+            double amount = 16;
 
-                double x = (intersect[1] - intersect[0]) / amount;
-                double y = (intersect[5] - intersect[4]) / amount;
-                double z = (intersect[3] - intersect[2]) / amount;
+            double x = (intersect[1] - intersect[0]) / amount;
+            double y = (intersect[5] - intersect[4]) / amount;
+            double z = (intersect[3] - intersect[2]) / amount;
 
-                for (int i = 0; i < amount; i++) {
-                    int next = i + 1;
-                    out.add(new ConnectionAxisAlignedBB(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - pos.getX(), intersect[4] - pos.getY(), intersect[2] - pos.getZ()).grow(0, connection.getCache().getFullThick()/2D, 0), connection));
-                }
+            for (int i = 0; i < amount; i++) {
+                int next = i + 1;
+                out.add(new ConnectionAxisAlignedBB(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - pos.getX(), intersect[4] - pos.getY(), intersect[2] - pos.getZ()).grow(0,  connection.getType().getCableWidth()/2D, 0), connection));
             }
         }
         return out;
@@ -514,9 +507,8 @@ public class BlockConnectableBase extends Block {
                                 List<BlockPos> positions = LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset());
                                 for (int i = 0; i < positions.size(); i++) {
                                     if (positions.get(i).equals(pos)) {
-                                        Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.max(i - 1, 0)), positions.get(Math.min(i + 1, positions.size() - 1)), pos);
-                                        Connection.Cache cache = con.getCache();
-                                        double[] in = cache.getIn();
+                                        Connection con = new Connection(worldIn, connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.max(i - 1, 0)), positions.get(Math.min(i + 1, positions.size() - 1)), pos);
+                                        double[] in = con.getIn();
                                         double yin = (in[4] + in[5]) / 2D;
                                         if (side == EnumFacing.DOWN == yin > yRef) {
                                             yRef = yin;
@@ -576,8 +568,7 @@ public class BlockConnectableBase extends Block {
                     Connection ref = null;
                     for (Connection connection : cb.getConnections()) {
                         if(connection.isBroken()) {
-                            Connection.Cache cache = connection.getCache();
-                            double[] in = cache.getIn();
+                            double[] in = connection.getIn();
                             double yin = (in[4] + in[5]) / 2D;
                             if (side == EnumFacing.DOWN == yin > yRef) {
                                 yRef = yin;

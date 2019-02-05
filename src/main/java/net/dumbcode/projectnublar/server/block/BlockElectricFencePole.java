@@ -126,14 +126,14 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
 
                 if (differingConnections.size() == 1) {
                     Connection connection = differingConnections.get(0);
-                    double[] in = connection.getCache().getIn();
+                    double[] in = connection.getIn();
                     rotation += (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0]))) + 90F;
                 } else {
                     Connection connection1 = differingConnections.get(0);
                     Connection connection2 = differingConnections.get(1);
 
-                    double[] in1 = connection1.getCache().getIn();
-                    double[] in2 = connection2.getCache().getIn();
+                    double[] in1 = connection1.getIn();
+                    double[] in2 = connection2.getIn();
 
                     double angle1 = MathUtils.horizontalDegree(in1[1] - in1[0], in1[2] - in1[3], connection1.getPosition().equals(connection1.getMin()));
                     double angle2 = MathUtils.horizontalDegree(in2[1] - in2[0], in2[2] - in2[3], connection2.getPosition().equals(connection2.getMin()));
@@ -245,7 +245,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                                         }
                                         TileEntity fencete = worldIn.getTileEntity(position);
                                         if (fencete instanceof ConnectableBlockEntity) {
-                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.max(i1 - 1, 0)).up(i), positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), position));
+                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(worldIn, this.type, offset, pos1, other1, positions.get(Math.max(i1 - 1, 0)).up(i), positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), position));
                                             fencete.markDirty();
                                             worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
                                         }
