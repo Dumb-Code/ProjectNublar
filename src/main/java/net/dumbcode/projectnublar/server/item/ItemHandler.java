@@ -38,6 +38,7 @@ public final class ItemHandler {
     public static Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
     public static Item FENCE_REMOVER = new ItemFenceRemover();
     public static Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
+    public static Item ARTIFICIAL_EGG = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -61,8 +62,8 @@ public final class ItemHandler {
                 DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setUnlocalizedName("dna_filled_syringe").setCreativeTab(TAB),
                 EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setUnlocalizedName("embryo_filled_syringe").setCreativeTab(TAB),
                 FENCE_REMOVER.setRegistryName("fence_remover").setUnlocalizedName("fence_remover").setCreativeTab(TAB),
-                CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setUnlocalizedName("creative_fence_remover").setCreativeTab(TAB)
-
+                CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setUnlocalizedName("creative_fence_remover").setCreativeTab(TAB),
+                ARTIFICIAL_EGG.setRegistryName("artificial_egg").setUnlocalizedName("artificial_egg").setCreativeTab(TAB)
         );
 
         Function<Item, Item> tab = item -> item.setCreativeTab(TAB);

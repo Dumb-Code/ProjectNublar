@@ -18,7 +18,7 @@ import java.util.List;
 public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBlockEntity> {
     @Override
     protected int getInventorySize() {
-        return 5;
+        return 4;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     @Override
     protected List<MachineProcess<EggPrinterBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(this, new int[]{0, 1, 2}, new int[]{3, 4})
+                new MachineProcess<>(this, new int[]{0, 1}, new int[]{3, 4})
         );
     }
 
@@ -47,11 +47,10 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
         return new MachineModuleContainer(player, 84, 176,
-                new MachineModuleSlot(this, 0, 29, 15),
-                new MachineModuleSlot(this, 1, 29, 33),
-                new MachineModuleSlot(this, 2, 29, 51),
-                new MachineModuleSlot(this, 3, 129, 24),
-                new MachineModuleSlot(this, 4, 129, 42)
+                new MachineModuleSlot(this, 0, 29, 24),
+                new MachineModuleSlot(this, 1, 29, 42),
+                new MachineModuleSlot(this, 2, 129, 24),
+                new MachineModuleSlot(this, 3, 129, 42)
         );
     }
 
