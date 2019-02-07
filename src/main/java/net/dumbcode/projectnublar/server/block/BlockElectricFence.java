@@ -47,8 +47,8 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
                  }
                 Vector3d center = connection.getCenter();
 
-                boolean pb = connection.brokenSide(world, connection.getPrevious());
-                boolean nb = connection.brokenSide(world, connection.getNext());
+                boolean pb = connection.brokenSide(world, false);
+                boolean nb = connection.brokenSide(world, true);
 
                 float chance = 0.02F;
 

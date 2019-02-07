@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -85,8 +86,10 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
 
 
-            boolean pb = connection.brokenSide(world, connection.getPrevious());
-            boolean nb = connection.brokenSide(world, connection.getNext());
+            boolean pb = connection.brokenSide(world, false);
+            boolean nb = connection.brokenSide(world, true);
+
+
 
             if(nb) {
                 buff.addVertexData(cache.getNextRotated());

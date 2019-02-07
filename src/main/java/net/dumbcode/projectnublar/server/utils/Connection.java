@@ -62,20 +62,26 @@ public class Connection {
         this.client = world != null && world.isRemote;
         this.type = type;
         this.offset = offset;
-        this.previous = previous;
-        this.next = next;
         this.position = position;
 
-        if((from.getX() == to.getX() ? to.getZ() - from.getZ() : from.getX() - to.getX()) < 0) {
+        if((this.compared = (from.getX() == to.getX() ? to.getZ() - from.getZ() : from.getX() - to.getX())) < 0) {
             BlockPos ref = from;
             from = to;
             to = ref;
+
+
+        } else { //Somthings gone on here where the prev/next positions are flipped. I should look into why that is but for now this works
+            BlockPos ref = previous;
+            previous = next;
+            next = ref;
         }
 
         this.from = from;
         this.to = to;
+        this.previous = previous;
+        this.next = next;
 
-        this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
+//        this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
 
         this.toFromHash = (this.compared < 0 ? this.from : this.to).hashCode() + (this.compared < 0 ? this.to : this.from).hashCode() * 31;
 
@@ -150,8 +156,8 @@ public class Connection {
         return this.compared >= 0 ? this.to : this.from;
     }
 
-    public boolean brokenSide(World world, BlockPos otherPos) {
-        TileEntity te = world.getTileEntity(otherPos);
+    public boolean brokenSide(World world, boolean next) {
+        TileEntity te = world.getTileEntity(next == this.compared < 0 ? this.next : this.previous);
         if(te instanceof ConnectableBlockEntity) {
             ConnectableBlockEntity fe = (ConnectableBlockEntity) te;
             for (Connection fenceConnection : fe.getConnections()) {

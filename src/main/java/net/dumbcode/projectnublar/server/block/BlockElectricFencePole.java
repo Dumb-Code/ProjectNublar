@@ -272,6 +272,36 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if(tileEntity instanceof BlockEntityElectricFencePole) {
+            for (Connection connection : ((BlockEntityElectricFencePole) tileEntity).getConnections()) {
+                BlockPos blockpos = connection.getFrom();
+                if(blockpos.equals(pos)) {
+                    blockpos = connection.getTo();
+                }
+                if(worldIn.getBlockState(blockpos).getBlock() != this) {
+                    for (BlockPos blockPos : LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset())) {
+                        if(blockPos.equals(connection.getTo()) || blockPos.equals(connection.getFrom())) {
+                            continue;
+                        }
+                        TileEntity te = worldIn.getTileEntity(blockPos);
+                        if(te instanceof ConnectableBlockEntity) {
+                            boolean left = false;
+                            for (Connection bitcon : ((ConnectableBlockEntity) te).getConnections()) {
+                                if(connection.lazyEquals(bitcon)) {
+                                    bitcon.setBroken(true);
+                                }
+                                left |= !bitcon.isBroken();
+                            }
+                            if(!left) {
+                                worldIn.setBlockToAir(blockPos);
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
         super.breakBlock(worldIn, pos, state);
         if(!destroying) {
             destroying = true;
