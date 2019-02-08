@@ -50,7 +50,7 @@ public class C11ChangePoleFacing implements IMessage {
             TileEntity te = player.world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                builder.getSkeletalProperties().setPoleFacing(message.newFacing);
+                //todo
                 builder.markDirty();
                 ProjectNublar.NETWORK.sendToAll(new S12ChangePoleFacing(builder, message.newFacing));
             }

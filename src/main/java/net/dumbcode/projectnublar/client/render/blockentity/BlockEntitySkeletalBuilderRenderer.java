@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import net.dumbcode.dumblibrary.client.model.InfoTabulaModel;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
-import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
+import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilderBlock;
@@ -13,7 +13,10 @@ import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
@@ -21,22 +24,18 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.Project;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -45,13 +44,56 @@ import javax.vecmath.Vector3f;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Math.*;
+import static java.lang.Math.PI;
 
 public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<SkeletalBuilderBlockEntity> {
     private Minecraft mc = Minecraft.getMinecraft();
+
+
+
+
     @Override
     public void render(SkeletalBuilderBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 
+        if(false) {
+            this.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/low_security_electric_fence_pole_powered.png"));
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableBlend();
+            GlStateManager.enableAlpha();
+            GlStateManager.color(1f, 1f, 1f, 1f);
+            RenderHelper.disableStandardItemLighting();
+            int light = te.getWorld().getCombinedLight(te.getPos(), 0);
+            int ls = light % 65536;
+            int lt = light / 65536;
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)ls, (float)lt);
+            GlStateManager.enableCull();
+
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(x, y, z);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(2.5,2.5,2.5);
+            GlStateManager.translate(0f, 1.5f, 0f);
+            GlStateManager.rotate(180f, 0f, 0f, 1f);
+
+            if(te.getDinosaur() != Dinosaur.MISSING) {
+
+                Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/male_adult.png"));
+                TabulaModelClipPlane clipPlane = new TabulaModelClipPlane(te.getDinosaur().getModelContainer().getModelMap().get(ModelStage.ADULT));
+                clipPlane.render(4-((te.getWorld().getTotalWorldTime() + partialTicks) / 30D)%6, 0xbda47e);
+
+                GlStateManager.popMatrix();
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(2.3,2.3,2.3);
+                GlStateManager.translate(0f, 1.70f, 0f);
+                GlStateManager.rotate(180f, 0f, 0f, 1f);
+                Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png"));
+                MoreTabulaUtils.renderModelWithoutChangingPose(te.getDinosaur().getModelContainer().getModelMap().get(ModelStage.SKELETON), 1/16F);
+            }
+            GlStateManager.popMatrix();
+            GlStateManager.enableTexture2D();
+            GlStateManager.popMatrix();
+            return;
+        }
         double scale = 2.5;
 
         IBlockState state = te.getWorld().getBlockState(te.getPos());
@@ -86,8 +128,6 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         }
 
-        PoleFacing pole = te.getSkeletalProperties().getPoleFacing();
-        EnumFacing poleFacing = pole.getFacing();
         GlStateManager.enableAlpha();
 
         Vector3f rotVec = new Vector3f();
@@ -123,8 +163,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             facingMatrix.rotZ(angle / 180F * Math.PI);
         }
 
-        float teRot = te.getSkeletalProperties().getRotation() % 360F;
+        float teRot = te.getSkeletalProperties().getRotation();
 
+        teRot = teRot + (te.getSkeletalProperties().getPrevRotation() - teRot) * partialTicks;
         GlStateManager.rotate(teRot, 0, 1, 0);
         rotateMatrix.rotY(teRot / 180D * PI);
 
@@ -133,14 +174,24 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.translate(0f, 1.5f, 0f);
         GlStateManager.rotate(180f, 0f, 0f, 1f);
 
-        mc.getTextureManager().bindTexture(te.getDinosaur().getTextureLocation(te.getDinosaurEntity()));
+        ResourceLocation regname = te.getDinosaur().getRegName();
+        GenderComponent gcomp = te.getDinosaurEntity().getOrNull(EntityComponentTypes.GENDER);
+        String name = te.getDinosaurEntity().get(EntityComponentTypes.SKELETAL_BUILDER).map(s -> s.stage).orElse(ModelStage.ADULT).getName();
+        ResourceLocation loc;
+        if(gcomp != null) {
+            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
+        } else {
+            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
+        }
+
+        mc.getTextureManager().bindTexture(loc);
 
         Map<String, Vector3f> poseData = te.getPoseData();
 
         GlStateManager.disableCull();
 
         TabulaModel model = te.getModel();
-        
+
         if(model != null) {
             for(ModelRenderer box : model.boxList) {
                 Vector3f rotations = poseData.get(box.boxName);
@@ -160,175 +211,176 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
         GlStateManager.enableCull();
 
-        if(pole != PoleFacing.NONE) {
-            List<String> anchoredParts = Lists.newArrayList("tail4", "tail2", "chest", "head"); //TODO: move to dinosaur class
-            World world = te.getWorld();
+        World world = te.getWorld();
 
-            double poleWidth = 1 / 16F;
-            double baseWidth = 6 / 16F;
-            double baseHeight = 1 / 16F;
+        double poleWidth = 1 / 16F;
+        double baseWidth = 6 / 16F;
+        double baseHeight = 1 / 16F;
 
-            double notchWidth = 4 / 16F;
-            double notchHeight = 2 / 16F;
+        double notchWidth = 4 / 16F;
+        double notchHeight = 2 / 16F;
 
-            float textureWidth = 8F;
-            float textureHeight = 16F;
+        float textureWidth = 8F;
+        float textureHeight = 16F;
 
-            if (model != null) {
-                for (String anchoredPart : anchoredParts) {
-                    AdvancedModelRenderer cube = model.getCube(anchoredPart);
-                    if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
-                        InfoTabulaModel infoModel = (InfoTabulaModel) model;
-                        int[] dimensions = infoModel.getDimension(cube);
-                        ModelBox box = ObfuscationReflectionHelper.<List<ModelBox>, ModelRenderer>getPrivateValue(ModelRenderer.class, cube, "cubeList", "field_78804" + "_l").get(0); //TODO: remove this god awful method of getting the offsets
+        if (model != null) {
+            for (String anchoredPart : Lists.<String>newArrayList()) {
 
-                        Point3d endPoint = new Point3d((box.posX1 + dimensions[0] / 2F) / 16F, (box.posY1 + dimensions[1] / 2F) / -16F, (box.posZ1 + dimensions[2] / 2F) / -16F);
+                PoleFacing pole = PoleFacing.NONE;//te.getSkeletalProperties().getPoleFacing();
+                EnumFacing poleFacing = pole.getFacing();
 
-                        Matrix4d boxTranslate = new Matrix4d();
-                        Matrix4d boxRotateX = new Matrix4d();
-                        Matrix4d boxRotateY = new Matrix4d();
-                        Matrix4d boxRotateZ = new Matrix4d();
-                        boxTranslate.set(new Vector3d(cube.rotationPointX / 16, -cube.rotationPointY / 16, -cube.rotationPointZ / 16));
-                        boxRotateX.rotX(cube.rotateAngleX);
-                        boxRotateY.rotY(-cube.rotateAngleY);
-                        boxRotateZ.rotZ(-cube.rotateAngleZ);
-                        boxRotateX.transform(endPoint);
-                        boxRotateY.transform(endPoint);
-                        boxRotateZ.transform(endPoint);
-                        boxTranslate.transform(endPoint);
+                AdvancedModelRenderer cube = model.getCube(anchoredPart);
+                if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
+                    InfoTabulaModel infoModel = (InfoTabulaModel) model;
+                    int[] dimensions = infoModel.getDimension(cube);
+                    ModelBox box = ObfuscationReflectionHelper.<List<ModelBox>, ModelRenderer>getPrivateValue(ModelRenderer.class, cube, "cubeList", "field_78804" + "_l").get(0); //TODO: remove this god awful method of getting the offsets
 
-                        Vec3d partOrigin = cube.getModelPos(cube, new Vec3d(endPoint.x, endPoint.y, endPoint.z));
-                        partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
+                    Point3d endPoint = new Point3d((box.posX1 + dimensions[0] / 2F) / 16F, (box.posY1 + dimensions[1] / 2F) / -16F, (box.posZ1 + dimensions[2] / 2F) / -16F);
 
-                        Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
-                        rendererPos.scale(scale);
-                        rotateMatrix.transform(rendererPos);
-                        facingMatrix.transform(rendererPos);
-                        rendererPos.y -= 1.5;
-                        translateMatrix.transform(rendererPos);
+                    Matrix4d boxTranslate = new Matrix4d();
+                    Matrix4d boxRotateX = new Matrix4d();
+                    Matrix4d boxRotateY = new Matrix4d();
+                    Matrix4d boxRotateZ = new Matrix4d();
+                    boxTranslate.set(new Vector3d(cube.rotationPointX / 16, -cube.rotationPointY / 16, -cube.rotationPointZ / 16));
+                    boxRotateX.rotX(cube.rotateAngleX);
+                    boxRotateY.rotY(-cube.rotateAngleY);
+                    boxRotateZ.rotZ(-cube.rotateAngleZ);
+                    boxRotateX.transform(endPoint);
+                    boxRotateY.transform(endPoint);
+                    boxRotateZ.transform(endPoint);
+                    boxTranslate.transform(endPoint);
 
-                        AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
-                                new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
-                                        .offset(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F)
-                                        .grow(baseWidth / 2F);
+                    Vec3d partOrigin = cube.getModelPos(cube, new Vec3d(endPoint.x, endPoint.y, endPoint.z));
+                    partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
 
-                        double cubeEndPos = -1;
-                        for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - baseWidth / 2F, rendererPos.y + 0.5F - baseWidth / 2F, rendererPos.z + 0.5F - baseWidth / 2F), new BlockPos(rendererPos.x + 0.5F + baseWidth / 2F, rendererPos.y + 0.5F + baseWidth / 2F, rendererPos.z + 0.5F + baseWidth / 2F))) {
-                            List<AxisAlignedBB> aabbList = Lists.newArrayList();
-                            int counter = 0;
-                            while (aabbList.isEmpty() && counter <= 100) {
-                                world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, bounding, aabbList, null, false);
-                                sectionPos = sectionPos.add(pole.getFacing().getDirectionVec());
-                                counter++;
+                    Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
+                    rendererPos.scale(scale);
+                    rotateMatrix.transform(rendererPos);
+                    facingMatrix.transform(rendererPos);
+                    rendererPos.y -= 1.5;
+                    translateMatrix.transform(rendererPos);
+
+                    AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
+                            new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
+                                    .offset(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F)
+                                    .grow(baseWidth / 2F);
+
+                    double cubeEndPos = -1;
+                    for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - baseWidth / 2F, rendererPos.y + 0.5F - baseWidth / 2F, rendererPos.z + 0.5F - baseWidth / 2F), new BlockPos(rendererPos.x + 0.5F + baseWidth / 2F, rendererPos.y + 0.5F + baseWidth / 2F, rendererPos.z + 0.5F + baseWidth / 2F))) {
+                        List<AxisAlignedBB> aabbList = Lists.newArrayList();
+                        int counter = 0;
+                        while (aabbList.isEmpty() && counter <= 100) {
+                            world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, bounding, aabbList, null, false);
+                            sectionPos = sectionPos.add(pole.getFacing().getDirectionVec());
+                            counter++;
+                        }
+                        if (!aabbList.isEmpty()) {
+                            for (AxisAlignedBB aabb : aabbList) {
+                                cubeEndPos = Math.max(cubeEndPos, pole.apply(aabb) - 0.5F);
                             }
-                            if (!aabbList.isEmpty()) {
-                                for (AxisAlignedBB aabb : aabbList) {
-                                    cubeEndPos = Math.max(cubeEndPos, pole.apply(aabb) - 0.5F);
-                                }
-                            }
                         }
-                        if (cubeEndPos == -1) {
-                            continue;
-                        }
-                        GlStateManager.pushMatrix();
-                        GlStateManager.translate(-te.getPos().getX() + rendererPos.x, -te.getPos().getY() + rendererPos.y, -te.getPos().getZ() + rendererPos.z);
-
-                        GlStateManager.disableAlpha();
-                        GlStateManager.disableBlend();
-                        GlStateManager.color(1f, 1f, 1f, 1f);
-                        Tessellator tes = Tessellator.getInstance();
-                        this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
-
-
-                        EnumFacing rotP = poleFacing.getOpposite();
-                        if (poleFacing.getAxis() == facing.getAxis()) {
-                            rotP = poleFacing == facing ? EnumFacing.DOWN : EnumFacing.UP;
-                        }
-
-                        float rotation;
-
-                        if (poleFacing.getAxis() != facing.getAxis()) { //Interpolate between the 2 axis
-                            EnumFacing from = rotP;
-                            EnumFacing to = rotP.rotateY().getOpposite();
-
-                            if (teRot >= 270) {
-                                from = rotP.rotateY();
-                                to = rotP;
-                            } else if (teRot >= 180) {
-                                from = rotP.getOpposite();
-                                to = rotP.rotateY();
-                            } else if (teRot >= 90) {
-                                from = rotP.rotateY().getOpposite();
-                                to = rotP.getOpposite();
-                            }
-
-                            float fromRot = this.getRotation(from, facing, cube, teRot);
-                            float toRot = this.getRotation(to, facing, cube, teRot);
-
-                            rotation = fromRot + (toRot - fromRot) * (teRot % 90F) / 90F;
-                        } else {
-                            rotation = this.getRotation(rotP, facing, cube, teRot);
-                        }
-
-                        switch (poleFacing.getAxis()) {
-                            case X:
-                                GlStateManager.rotate(poleFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1);
-                                break;
-                            case Y:
-                                GlStateManager.rotate(poleFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0);
-                                break;
-                            case Z:
-                                GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0);
-                                break;
-                        }
-                        GlStateManager.rotate(rotation, 0, 1, 0);
-                        GlStateManager.translate(-poleWidth / 2F, 0, -poleWidth / 2F);
-
-                        double renderPosition;
-                        switch (poleFacing.getAxis()) {
-                            case X:
-                                renderPosition = rendererPos.x;
-                                break;
-                            case Y:
-                                renderPosition = rendererPos.y;
-                                break;
-                            case Z:
-                                renderPosition = rendererPos.z;
-                                break;
-                            default:
-                                throw new IllegalArgumentException("Unacceptable facingdir " + facing.getAxis()); //Impossible ?
-                        }
-
-                        double poleLength = (cubeEndPos - renderPosition) * -pole.getFacing().getAxisDirection().getOffset();
-                        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                        //Render pole
-                        buff.pos(0, 0, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
-                        buff.pos(0, poleLength, poleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
-                        buff.pos(poleWidth, poleLength, poleWidth).tex(1 / textureWidth, poleLength).normal(0, 0, 1).endVertex();
-                        buff.pos(poleWidth, 0, poleWidth).tex(1 / textureWidth, 0).normal(0, 0, 1).endVertex();
-
-                        buff.pos(0, 0, 0).tex(0, 0).normal(-1, 0, 0).endVertex();
-                        buff.pos(0, poleLength, 0).tex(0, poleLength).normal(-1, 0, 0).endVertex();
-                        buff.pos(0, poleLength, poleWidth).tex(1 / textureWidth, poleLength).normal(-1, 0, 0).endVertex();
-                        buff.pos(0, 0, poleWidth).tex(1 / textureWidth, 0).normal(-1, 0, -1).endVertex();
-
-                        buff.pos(poleWidth, 0, 0).tex(0, 0).normal(0, 0, -1).endVertex();
-                        buff.pos(poleWidth, poleLength, 0).tex(0, poleLength).normal(0, 0, -1).endVertex();
-                        buff.pos(0, poleLength, 0).tex(1 / textureWidth, poleLength).normal(0, 0, -1).endVertex();
-                        buff.pos(0, 0, 0).tex(1 / textureWidth, 0).normal(0, 0, -1).endVertex();
-
-                        buff.pos(poleWidth, 0, poleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
-                        buff.pos(poleWidth, poleLength, poleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
-                        buff.pos(poleWidth, poleLength, 0).tex(1 / textureWidth, poleLength).normal(1, 0, 0).endVertex();
-                        buff.pos(poleWidth, 0, 0).tex(1 / textureWidth, 0).normal(1, 0, 0).endVertex();
-
-                        tes.draw();
-                        GlStateManager.translate(poleWidth / 2F, poleLength, poleWidth / 2F);
-                        this.renderCube(baseWidth, baseHeight, textureWidth, textureHeight, 1, 0);
-                        GlStateManager.translate(0, baseHeight, 0);
-                        this.renderCube(notchWidth, notchHeight, textureWidth, textureHeight, 1, 6);
-                        GlStateManager.popMatrix();
                     }
+                    if (cubeEndPos == -1) {
+                        continue;
+                    }
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(-te.getPos().getX() + rendererPos.x, -te.getPos().getY() + rendererPos.y, -te.getPos().getZ() + rendererPos.z);
+
+                    GlStateManager.disableAlpha();
+                    GlStateManager.disableBlend();
+                    GlStateManager.color(1f, 1f, 1f, 1f);
+                    Tessellator tes = Tessellator.getInstance();
+                    this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
+
+
+                    EnumFacing rotP = poleFacing.getOpposite();
+                    if (poleFacing.getAxis() == facing.getAxis()) {
+                        rotP = poleFacing == facing ? EnumFacing.DOWN : EnumFacing.UP;
+                    }
+
+                    float rotation;
+
+                    if (poleFacing.getAxis() != facing.getAxis()) { //Interpolate between the 2 axis
+                        EnumFacing from = rotP;
+                        EnumFacing to = rotP.rotateY().getOpposite();
+
+                        if (teRot >= 270) {
+                            from = rotP.rotateY();
+                            to = rotP;
+                        } else if (teRot >= 180) {
+                            from = rotP.getOpposite();
+                            to = rotP.rotateY();
+                        } else if (teRot >= 90) {
+                            from = rotP.rotateY().getOpposite();
+                            to = rotP.getOpposite();
+                        }
+
+                        float fromRot = this.getRotation(from, facing, cube, teRot);
+                        float toRot = this.getRotation(to, facing, cube, teRot);
+
+                        rotation = fromRot + (toRot - fromRot) * (teRot % 90F) / 90F;
+                    } else {
+                        rotation = this.getRotation(rotP, facing, cube, teRot);
+                    }
+
+                    switch (poleFacing.getAxis()) {
+                        case X:
+                            GlStateManager.rotate(poleFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1);
+                            break;
+                        case Y:
+                            GlStateManager.rotate(poleFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0);
+                            break;
+                        case Z:
+                            GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0);
+                            break;
+                    }
+                    GlStateManager.rotate(rotation, 0, 1, 0);
+                    GlStateManager.translate(-poleWidth / 2F, 0, -poleWidth / 2F);
+
+                    double renderPosition;
+                    switch (poleFacing.getAxis()) {
+                        case X:
+                            renderPosition = rendererPos.x;
+                            break;
+                        case Y:
+                            renderPosition = rendererPos.y;
+                            break;
+                        case Z:
+                            renderPosition = rendererPos.z;
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unacceptable facingdir " + facing.getAxis()); //Impossible ?
+                    }
+
+                    double poleLength = (cubeEndPos - renderPosition) * -pole.getFacing().getAxisDirection().getOffset();
+                    buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+                    //Render pole
+                    buff.pos(0, 0, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();
+                    buff.pos(0, poleLength, poleWidth).tex(0, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos(poleWidth, poleLength, poleWidth).tex(1 / textureWidth, poleLength).normal(0, 0, 1).endVertex();
+                    buff.pos(poleWidth, 0, poleWidth).tex(1 / textureWidth, 0).normal(0, 0, 1).endVertex();
+
+                    buff.pos(0, 0, 0).tex(0, 0).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, poleLength, 0).tex(0, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, poleLength, poleWidth).tex(1 / textureWidth, poleLength).normal(-1, 0, 0).endVertex();
+                    buff.pos(0, 0, poleWidth).tex(1 / textureWidth, 0).normal(-1, 0, -1).endVertex();
+
+                    buff.pos(poleWidth, 0, 0).tex(0, 0).normal(0, 0, -1).endVertex();
+                    buff.pos(poleWidth, poleLength, 0).tex(0, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos(0, poleLength, 0).tex(1 / textureWidth, poleLength).normal(0, 0, -1).endVertex();
+                    buff.pos(0, 0, 0).tex(1 / textureWidth, 0).normal(0, 0, -1).endVertex();
+
+                    buff.pos(poleWidth, 0, poleWidth).tex(0, 0).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, poleLength, poleWidth).tex(0, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, poleLength, 0).tex(1 / textureWidth, poleLength).normal(1, 0, 0).endVertex();
+                    buff.pos(poleWidth, 0, 0).tex(1 / textureWidth, 0).normal(1, 0, 0).endVertex();
+
+                    tes.draw();
+                    GlStateManager.translate(poleWidth / 2F, poleLength, poleWidth / 2F);
+                    this.renderCube(baseWidth, baseHeight, textureWidth, textureHeight, 1, 0);
+                    GlStateManager.translate(0, baseHeight, 0);
+                    this.renderCube(notchWidth, notchHeight, textureWidth, textureHeight, 1, 6);
+                    GlStateManager.popMatrix();
                 }
             }
         }

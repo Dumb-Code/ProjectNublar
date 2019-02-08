@@ -50,16 +50,16 @@ public class S12ChangePoleFacing implements IMessage {
         protected void handleMessage(S12ChangePoleFacing message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
-            if(te instanceof SkeletalBuilderBlockEntity) {
-                ((SkeletalBuilderBlockEntity)te).getSkeletalProperties().setPoleFacing(message.newFacing);
-            }
-            GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-            if(screen instanceof GuiSkeletalProperties) {
-                GuiSkeletalProperties gui = (GuiSkeletalProperties)screen;
-                if(gui.getBuilder().getPos().equals(pos)) {
-                    gui.setPoleFacing(message.newFacing);//Update the gui screen for other players
-                }
-            }
+//            if(te instanceof SkeletalBuilderBlockEntity) {
+//                ((SkeletalBuilderBlockEntity)te).getSkeletalProperties().setPoleFacing(message.newFacing);
+//            }
+//            GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+//            if(screen instanceof GuiSkeletalProperties) {
+//                GuiSkeletalProperties gui = (GuiSkeletalProperties)screen;
+//                if(gui.getBuilder().getPos().equals(pos)) {
+//                    gui.setPoleFacing(message.newFacing);//Update the gui screen for other players
+//                }
+//            }
             pos.release();
         }
     }
