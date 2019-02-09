@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
+import net.dumbcode.projectnublar.server.network.C11UpdatePoleList;
 import net.dumbcode.projectnublar.server.network.C9ChangeGlobalRotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
@@ -19,22 +20,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlider {
+public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlider, GuiPageButtonList.GuiResponder {
 
     private final GuiSkeletalBuilder parent;
     @Getter private final SkeletalBuilderBlockEntity builder;
     @Getter private final SkeletalProperties properties;
-    public final List<PoleEntry> entries = Lists.newArrayList();
+    public final List<PoleEntry> entries = Lists.newLinkedList();
 
     private GuiSlider globalRotation = new GuiSlider(0, 0, 0, 200, 20, "rotaion", "",0, 360, 0.0, true, true, this);
+    private GuiButton addButton = new GuiButton(121, 0, 0, 20, 20, "+");
     private float previousRot;
     public float scroll;
-    private PoleEntry editingPole;
+    public PoleEntry editingPole;
 
     private GuiTextField editText = new GuiTextField(5, Minecraft.getMinecraft().fontRenderer, 0, 0, 75, 20);
     private GuiButton editDirection = new GuiButtonExt(1, 0, 0, 75, 20, "");
 
     public GuiSkeletalProperties(GuiSkeletalBuilder parent, SkeletalBuilderBlockEntity builder) {
+        this.editText.setGuiResponder(this);
         this.parent = parent;
         this.builder = builder;
         this.properties = builder.getSkeletalProperties();
@@ -61,6 +64,8 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         this.globalRotation.x = (this.width-this.globalRotation.width)/2;
         this.globalRotation.y = 30 + diff;
 
+        this.addButton.x = this.width / 2 + 70;
+        this.addButton.y = 60 + diff;
 
         this.editText.x = this.width/2 - 100;
         this.editText.y = bottom + 40;
@@ -69,6 +74,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         this.editDirection.y = bottom + 40;
 
         this.addButton(this.globalRotation);
+        this.addButton(this.addButton);
 
     }
 
@@ -98,7 +104,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
 
         FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
         String poleliststr = "Pole List";  //todo: localize
-        fr.drawString(poleliststr, (this.width-fr.getStringWidth(poleliststr))/2, 80 + diff, 0xAAAAAA);
+        fr.drawString(poleliststr, (this.width-fr.getStringWidth(poleliststr))/2, 65 + diff, 0xAAAAAA);
 
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
@@ -144,8 +150,14 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
+        if(button == this.addButton) {
+            this.builder.getSkeletalProperties().getPoles().add(new SkeletalProperties.Pole("", PoleFacing.NONE));
+            this.sync();
+            this.editingPole = this.entries.get(this.entries.size()-1);
+        }
         if(button == this.editDirection && this.editingPole != null) {
             this.editingPole.pole.setFacing(this.editingPole.pole.getFacing().cycle());
+            this.sync();
         }
     }
 
@@ -165,22 +177,14 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         return super.doesGuiPauseGame();
     }
 
+    private void sync() {
+        this.updateList();
+        ProjectNublar.NETWORK.sendToServer(new C11UpdatePoleList(this.builder, this.entries.stream().map(p -> p.pole).collect(Collectors.toList())));
+    }
+
     public void updateList() {
         this.entries.clear();
-        Lists.newArrayList(
-                new SkeletalProperties.Pole("Test1", PoleFacing.EAST),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2", PoleFacing.NONE),
-                new SkeletalProperties.Pole("Test2D", PoleFacing.DOWN)
-
-        ).stream().map(PoleEntry::new).forEach(this.entries::add);
+        this.builder.getSkeletalProperties().getPoles().stream().map(PoleEntry::new).forEach(this.entries::add);
 
     }
 
@@ -232,8 +236,22 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         this.globalRotation.setValue(rot);
     }
 
-    private class PoleEntry {
-        private final SkeletalProperties.Pole pole;
+    @Override
+    public void setEntryValue(int id, boolean value) {
+    }
+
+    @Override
+    public void setEntryValue(int id, float value) {
+    }
+
+    @Override
+    public void setEntryValue(int id, String value) {
+        this.editingPole.pole.setCubeName(value);
+        this.sync();
+    }
+
+    public class PoleEntry {
+        @Getter private final SkeletalProperties.Pole pole;
 
         private final GuiButton edit = new GuiButton(-1, 0, 0, 20, 20, ""); //todo localize
         private final GuiButton delete = new GuiButton(-1, 0, 0, 20, 20, ""); //todo localize

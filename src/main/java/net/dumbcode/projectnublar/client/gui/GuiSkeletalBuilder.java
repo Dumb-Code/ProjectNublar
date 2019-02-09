@@ -9,6 +9,9 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
@@ -22,6 +25,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -715,7 +719,17 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
 
     private void renderModel() {
         setModelToPose();
-        mc.getTextureManager().bindTexture(builder.getDinosaur().getTextureLocation(builder.getDinosaurEntity()));
+
+        ResourceLocation regname = builder.getDinosaur().getRegName();
+        GenderComponent gcomp = builder.getDinosaurEntity().getOrNull(EntityComponentTypes.GENDER);
+        String name = builder.getDinosaurEntity().get(EntityComponentTypes.SKELETAL_BUILDER).map(s -> s.stage).orElse(ModelStage.ADULT).getName();
+        ResourceLocation loc;
+        if(gcomp != null) {
+            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
+        } else {
+            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
+        }
+        mc.getTextureManager().bindTexture(loc);
 //        animator.setRotationAngles(model, builder.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
         MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
     }

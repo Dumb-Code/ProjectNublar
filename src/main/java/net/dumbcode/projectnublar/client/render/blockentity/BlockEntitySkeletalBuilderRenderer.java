@@ -11,6 +11,7 @@ import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilderBlock;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
@@ -224,13 +225,13 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         float textureHeight = 16F;
 
         if (model != null) {
-            for (String anchoredPart : Lists.<String>newArrayList()) {
-
-                PoleFacing pole = PoleFacing.NONE;//te.getSkeletalProperties().getPoleFacing();
-                EnumFacing poleFacing = pole.getFacing();
+            for (SkeletalProperties.Pole pole : te.getSkeletalProperties().getPoles()) {
+                String anchoredPart = pole.getCubeName();
+                PoleFacing poleFacing = pole.getFacing();
+                EnumFacing enumFacing = poleFacing.getFacing();
 
                 AdvancedModelRenderer cube = model.getCube(anchoredPart);
-                if (cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
+                if (poleFacing != PoleFacing.NONE && cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
                     InfoTabulaModel infoModel = (InfoTabulaModel) model;
                     int[] dimensions = infoModel.getDimension(cube);
                     ModelBox box = ObfuscationReflectionHelper.<List<ModelBox>, ModelRenderer>getPrivateValue(ModelRenderer.class, cube, "cubeList", "field_78804" + "_l").get(0); //TODO: remove this god awful method of getting the offsets
@@ -261,7 +262,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     translateMatrix.transform(rendererPos);
 
                     AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
-                            new AxisAlignedBB(0, 0, 0, poleFacing.getFrontOffsetX() * 256F, poleFacing.getFrontOffsetY() * 256F, poleFacing.getFrontOffsetZ() * 256F)
+                            new AxisAlignedBB(0, 0, 0, enumFacing.getFrontOffsetX() * 256F, enumFacing.getFrontOffsetY() * 256F, enumFacing.getFrontOffsetZ() * 256F)
                                     .offset(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F)
                                     .grow(baseWidth / 2F);
 
@@ -271,12 +272,12 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                         int counter = 0;
                         while (aabbList.isEmpty() && counter <= 100) {
                             world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, bounding, aabbList, null, false);
-                            sectionPos = sectionPos.add(pole.getFacing().getDirectionVec());
+                            sectionPos = sectionPos.add(poleFacing.getFacing().getDirectionVec());
                             counter++;
                         }
                         if (!aabbList.isEmpty()) {
                             for (AxisAlignedBB aabb : aabbList) {
-                                cubeEndPos = Math.max(cubeEndPos, pole.apply(aabb) - 0.5F);
+                                cubeEndPos = Math.max(cubeEndPos, poleFacing.apply(aabb) - 0.5F);
                             }
                         }
                     }
@@ -293,14 +294,14 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
 
 
-                    EnumFacing rotP = poleFacing.getOpposite();
-                    if (poleFacing.getAxis() == facing.getAxis()) {
-                        rotP = poleFacing == facing ? EnumFacing.DOWN : EnumFacing.UP;
+                    EnumFacing rotP = enumFacing.getOpposite();
+                    if (enumFacing.getAxis() == facing.getAxis()) {
+                        rotP = enumFacing == facing ? EnumFacing.DOWN : EnumFacing.UP;
                     }
 
                     float rotation;
 
-                    if (poleFacing.getAxis() != facing.getAxis()) { //Interpolate between the 2 axis
+                    if (enumFacing.getAxis() != facing.getAxis()) { //Interpolate between the 2 axis
                         EnumFacing from = rotP;
                         EnumFacing to = rotP.rotateY().getOpposite();
 
@@ -323,22 +324,22 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                         rotation = this.getRotation(rotP, facing, cube, teRot);
                     }
 
-                    switch (poleFacing.getAxis()) {
+                    switch (enumFacing.getAxis()) {
                         case X:
-                            GlStateManager.rotate(poleFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1);
+                            GlStateManager.rotate(enumFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1);
                             break;
                         case Y:
-                            GlStateManager.rotate(poleFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0);
+                            GlStateManager.rotate(enumFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0);
                             break;
                         case Z:
-                            GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0);
+                            GlStateManager.rotate(enumFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0);
                             break;
                     }
                     GlStateManager.rotate(rotation, 0, 1, 0);
                     GlStateManager.translate(-poleWidth / 2F, 0, -poleWidth / 2F);
 
                     double renderPosition;
-                    switch (poleFacing.getAxis()) {
+                    switch (enumFacing.getAxis()) {
                         case X:
                             renderPosition = rendererPos.x;
                             break;
@@ -352,7 +353,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                             throw new IllegalArgumentException("Unacceptable facingdir " + facing.getAxis()); //Impossible ?
                     }
 
-                    double poleLength = (cubeEndPos - renderPosition) * -pole.getFacing().getAxisDirection().getOffset();
+                    double poleLength = (cubeEndPos - renderPosition) * -poleFacing.getFacing().getAxisDirection().getOffset();
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
                     //Render pole
                     buff.pos(0, 0, poleWidth).tex(0, 0).normal(0, 0, 1).endVertex();

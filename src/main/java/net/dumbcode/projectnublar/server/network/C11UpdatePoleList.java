@@ -1,30 +1,35 @@
 package net.dumbcode.projectnublar.server.network;
 
+import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class C11ChangePoleFacing implements IMessage {
+import java.util.List;
+
+public class C11UpdatePoleList implements IMessage {
 
     private int x;
     private int y;
     private int z;
-    private PoleFacing newFacing;
+    private List<SkeletalProperties.Pole> poleList = Lists.newArrayList();
 
-    public C11ChangePoleFacing() { }
+    public C11UpdatePoleList() { }
 
-    public C11ChangePoleFacing(SkeletalBuilderBlockEntity builder, PoleFacing newFacing) {
+    public C11UpdatePoleList(SkeletalBuilderBlockEntity builder, List<SkeletalProperties.Pole> poleLists) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
-        this.newFacing = newFacing;
+        this.poleList = poleLists;
     }
 
     @Override
@@ -32,7 +37,11 @@ public class C11ChangePoleFacing implements IMessage {
         x = buf.readInt();
         y = buf.readInt();
         z = buf.readInt();
-        newFacing = PoleFacing.values()[buf.readInt()];
+        poleList.clear();
+        int size = buf.readInt();
+        for (int i = 0; i < size; i++) {
+            poleList.add(new SkeletalProperties.Pole(ByteBufUtils.readUTF8String(buf), PoleFacing.values()[buf.readInt()]));
+        }
     }
 
     @Override
@@ -40,19 +49,23 @@ public class C11ChangePoleFacing implements IMessage {
         buf.writeInt(x);
         buf.writeInt(y);
         buf.writeInt(z);
-        buf.writeInt(newFacing.ordinal());
+        buf.writeInt(poleList.size());
+        for (SkeletalProperties.Pole pole : poleList) {
+            ByteBufUtils.writeUTF8String(buf, pole.getCubeName());
+            buf.writeInt(pole.getFacing().ordinal());
+        }
     }
 
-    public static class Handler extends WorldModificationsMessageHandler<C11ChangePoleFacing, IMessage> {
+    public static class Handler extends WorldModificationsMessageHandler<C11UpdatePoleList, IMessage> {
         @Override
-        protected void handleMessage(C11ChangePoleFacing message, MessageContext ctx, World world, EntityPlayer player) {
+        protected void handleMessage(C11UpdatePoleList message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = player.world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                //todo
+                builder.getSkeletalProperties().setPoles(message.poleList);
                 builder.markDirty();
-                ProjectNublar.NETWORK.sendToAll(new S12ChangePoleFacing(builder, message.newFacing));
+                ProjectNublar.NETWORK.sendToAll(new S12UpdatePoleList(builder, message.poleList));
             }
             pos.release();
         }

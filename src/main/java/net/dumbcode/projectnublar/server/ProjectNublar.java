@@ -132,8 +132,8 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C8FullPoseChange.Handler(), C8FullPoseChange.class, 8, Side.SERVER);
         NETWORK.registerMessage(new C9ChangeGlobalRotation.Handler(), C9ChangeGlobalRotation.class, 9, Side.SERVER);
         NETWORK.registerMessage(new S10ChangeGlobalRotation.Handler(), S10ChangeGlobalRotation.class, 10, Side.CLIENT);
-        NETWORK.registerMessage(new C11ChangePoleFacing.Handler(), C11ChangePoleFacing.class, 11, Side.SERVER);
-        NETWORK.registerMessage(new S12ChangePoleFacing.Handler(), S12ChangePoleFacing.class, 12, Side.CLIENT);
+        NETWORK.registerMessage(new C11UpdatePoleList.Handler(), C11UpdatePoleList.class, 11, Side.SERVER);
+        NETWORK.registerMessage(new S12UpdatePoleList.Handler(), S12UpdatePoleList.class, 12, Side.CLIENT);
         NETWORK.registerMessage(new C13VehicleInputStateUpdated.Handler(), C13VehicleInputStateUpdated.class, 13, Side.SERVER);
         NETWORK.registerMessage(new C14SequencingSynthesizerSelectChange.Handler(), C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
         NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
