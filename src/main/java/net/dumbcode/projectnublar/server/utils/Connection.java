@@ -9,6 +9,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -111,19 +113,40 @@ public class Connection {
     private SurroundingCache genCache(boolean next) {
         Vector3d point = new Vector3d(this.fullLen/2, 0, 0);
         double w = this.type.getCableWidth();
-        Vector3d center = new Vector3d((this.in[0]+this.in[1])/2, (this.in[4]+this.in[5])/2, (this.in[2]+this.in[3])/2);
         RotatedRayBox fixedBox = new RotatedRayBox.Builder(new AxisAlignedBB(0, -w, -w, -this.fullLen/2, w, w))
-                .origin(next?center.x:this.in[0], next?center.y:this.in[4], next?center.z:this.in[2])
+                .origin(next?this.center.x:this.in[0], next?this.center.y:this.in[4], next?this.center.z:this.in[2])
                 .rotate(Math.atan((this.in[5] - this.in[4]) / this.xzlen), 0, 0, 1)
                 .rotate(this.in[1] == this.in[0] ? Math.PI*1.5D : Math.atan((this.in[3] - this.in[2]) / (this.in[1] - this.in[0])), 0, 1, 0)
                 .build();
-        RotatedRayBox rotatedBox = new RotatedRayBox.Builder(new AxisAlignedBB(0, -w, -w, (next ? 1 : -1) * this.fullLen/2, w, w))
-                .origin(center.x, center.y, center.z)
-                .rotate((this.in[1] == this.in[0] ? Math.PI*1.5D : Math.atan((this.in[3] - this.in[2]) / (this.in[1] - this.in[0]))) + ((this.random.nextFloat()-0.5F) * Math.PI/3F), 0, 1, 0)
-                .rotate(Math.atan((this.in[5] - this.in[4]) / this.xzlen) + ((this.random.nextFloat()-0.5F) * Math.PI/3F), 0, 0, 1)
-                .build();
+        double yang = (this.random.nextFloat()-0.5F) * Math.PI/3F;
+        double zang = (this.random.nextFloat()-0.5F) * Math.PI/3F;
+        RotatedRayBox rotatedBox = this.genRotatedBox((next ? 1 : -1) * this.fullLen/2, yang, zang);
         rotatedBox.getBackwards().transform(point);
+        AxisAlignedBB aabb = new AxisAlignedBB(BlockPos.ORIGIN);
+        Vec3d vec3d = new Vec3d(point.x, point.y, point.z);
+        Vec3d centerVec = new Vec3d(this.center.x-this.position.getX(), this.center.y-this.position.getY(), this.center.z-this.position.getZ());
+        if(!aabb.contains(vec3d)) { //Point outside of bounding box. Cant happen for selction box reasons
+            RayTraceResult result = aabb.calculateIntercept(centerVec, vec3d);
+            if(result != null && result.hitVec != null) {
+                double dist = result.hitVec.distanceTo(centerVec) / 2; //TODO: get distance from vector to center correct
+                rotatedBox = this.genRotatedBox((next ? 1 : -1) * dist, yang, zang);
+                Vector3d newPoint = new Vector3d(dist, 0, 0);
+                rotatedBox.getBackwards().transform(newPoint);
+//                Vec3d subtracted = result.hitVec.subtract(new Vec3d(this.position));
+//                point = new Vector3d(subtracted.x, subtracted.y, subtracted.z);
+                point = newPoint;
+            }
+        }
         return new SurroundingCache(point, fixedBox, rotatedBox);
+    }
+
+    private RotatedRayBox genRotatedBox(double length, double yang, double zang) {
+        double w = this.type.getCableWidth();
+        return new RotatedRayBox.Builder(new AxisAlignedBB(0, -w, -w, length, w, w))
+                .origin(this.center.x, this.center.y, this.center.z)
+                .rotate((this.in[1] == this.in[0] ? Math.PI*1.5D : Math.atan((this.in[3] - this.in[2]) / (this.in[1] - this.in[0]))) + yang, 0, 1, 0)
+                .rotate(Math.atan((this.in[5] - this.in[4]) / this.xzlen) + zang, 0, 0, 1)
+                .build();
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
