@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Lists;
 import lombok.*;
+import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
@@ -16,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
 
 import java.util.Objects;
@@ -36,8 +38,8 @@ public class Connection {
     private final BlockPos from;
     private final BlockPos to;
 
-    private final BlockPos previous;
     private final BlockPos next;
+    private final BlockPos previous;
 
     @Setter boolean sign;
 
@@ -45,7 +47,7 @@ public class Connection {
     private final int compared;
 
     private VboCache rendercache;
-    @Setter private boolean broken;
+    @Accessors(chain = true) @Setter private boolean broken;
 
     private final double[] in;
 
@@ -60,8 +62,8 @@ public class Connection {
     private final SurroundingCache prevCache;
     private final SurroundingCache nextCache;
 
-    public Connection(World world, ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
-        this.client = world != null && world.isRemote;
+    public Connection(boolean client, ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
+        this.client = client;
         this.type = type;
         this.offset = offset;
         this.position = position;
@@ -71,17 +73,16 @@ public class Connection {
             from = to;
             to = ref;
 
-
-        } else { //Somthings gone on here where the prev/next positions are flipped. I should look into why that is but for now this works
-            BlockPos ref = previous;
+            ref = previous;
             previous = next;
             next = ref;
+
         }
 
         this.from = from;
         this.to = to;
-        this.previous = previous;
         this.next = next;
+        this.previous = previous;
 
 //        this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
 
@@ -140,6 +141,9 @@ public class Connection {
         return new SurroundingCache(point, fixedBox, rotatedBox);
     }
 
+    public Connection copy() {
+        return new Connection(this.client, this.type, this.offset, this.from, this.to, this.previous, this.next, this.position).setBroken(this.broken);
+    }
     private RotatedRayBox genRotatedBox(double length, double yang, double zang) {
         double w = this.type.getCableWidth();
         return new RotatedRayBox.Builder(new AxisAlignedBB(0, -w, -w, length, w, w))
@@ -155,16 +159,16 @@ public class Connection {
         nbt.setLong("from", this.getFrom().toLong());
         nbt.setLong("to", this.getTo().toLong());
         nbt.setBoolean("sign", this.sign);
-        nbt.setLong("previous", this.previous.toLong());
         nbt.setLong("next", this.next.toLong());
+        nbt.setLong("previous", this.previous.toLong());
         nbt.setBoolean("broken", this.broken);
         return nbt;
     }
 
+
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        Connection c = new Connection(tileEntity.getWorld(), ConnectionType.getType(nbt.getInteger("type")), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos());
-        c.setBroken(nbt.getBoolean("broken"));
-        return c;
+        @Nullable World world = tileEntity.getWorld();
+        return new Connection(world != null && world.isRemote, ConnectionType.getType(nbt.getInteger("type")), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos()).setBroken(nbt.getBoolean("broken"));
     }
 
     public boolean lazyEquals(Connection con) {
@@ -180,7 +184,7 @@ public class Connection {
     }
 
     public boolean brokenSide(World world, boolean next) {
-        TileEntity te = world.getTileEntity(next == this.compared < 0 ? this.next : this.previous);
+        TileEntity te = world.getTileEntity(next == this.compared < 0 ? this.previous : this.next);
         if(te instanceof ConnectableBlockEntity) {
             ConnectableBlockEntity fe = (ConnectableBlockEntity) te;
             for (Connection fenceConnection : fe.getConnections()) {
