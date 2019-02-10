@@ -52,7 +52,7 @@ import java.util.Map;
 
 import static net.dumbcode.projectnublar.client.gui.GuiConstants.mouseOn;
 
-public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
+public class GuiSkeletalBuilder extends GuiScreen {
 
     private final SkeletalBuilderBlockEntity builder;
     private final SkeletalProperties properties;
@@ -95,18 +95,22 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     private TextComponentTranslation selectModelPartText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.select_part");
     private TextComponentTranslation rotateCameraText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.rotate_camera");
 
+    private double prevXSlider;
+    private double prevYSlider;
+    private double prevZSlider;
+
     private GuiSlider xRotationSlider = new GuiSlider(5, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "X").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "X").getUnformattedText(),
-            -180.0, 180.0, 0.0, true, true, this);
+            -180.0, 180.0, 0.0, true, true);
     private GuiSlider yRotationSlider = new GuiSlider(6, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "Y").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Y").getUnformattedText(),
-            -180.0, 180.0, 0.0, true, true, this);
+            -180.0, 180.0, 0.0, true, true);
     private GuiSlider zRotationSlider = new GuiSlider(7, 0, 0, 200, 20,
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "Z").getUnformattedText(),
             new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Z").getUnformattedText(),
-            -180.0, 180.0, 0.0, true, true, this);
+            -180.0, 180.0, 0.0, true, true);
 
 
     private GuiButton propertiesButton = new GuiButtonExt(8, 0, 0, propertiesGui.getUnformattedText());
@@ -176,7 +180,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         } else if(button == redoButton) {
             ProjectNublar.NETWORK.sendToServer(new C4MoveInHistory(builder, +1));
         } else if(button == resetButton) {
-            ProjectNublar.NETWORK.sendToServer(new C6ResetPose(builder));
+            ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder.getPos(), SkeletalHistory.RESET_NAME, new Vector3f()));
+
         } else if(button == exportButton) {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.builder.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
         } else if(button == importButton) {
@@ -186,23 +191,20 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         }
     }
 
-    @Override
-    public void onChangeSliderValue(GuiSlider slider) {
-        if(slider == xRotationSlider || slider == yRotationSlider || slider == zRotationSlider) {
-            if(currentSelectedRing != RotationAxis.NONE)
-                return;
-            if(selectedPart == null)
-                return;
-            RotationAxis axis;
-            if(slider == xRotationSlider) {
-                axis = RotationAxis.X_AXIS;
-            } else if(slider == yRotationSlider) {
-                axis = RotationAxis.Y_AXIS;
-            } else {
-                axis = RotationAxis.Z_AXIS;
-            }
-            actualizeRotation(selectedPart, axis, (float)Math.toRadians(slider.getValue()));
+    public void sliderChanged(GuiSlider slider) {
+        if(currentSelectedRing != RotationAxis.NONE)
+            return;
+        if(selectedPart == null)
+            return;
+        RotationAxis axis;
+        if(slider == xRotationSlider) {
+            axis = RotationAxis.X_AXIS;
+        } else if(slider == yRotationSlider) {
+            axis = RotationAxis.Y_AXIS;
+        } else {
+            axis = RotationAxis.Z_AXIS;
         }
+        actualizeRotation(selectedPart, axis, (float)Math.toRadians(slider.getValue()));
     }
 
     @Override
@@ -213,8 +215,8 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         zoom += scrollDirection * zoomSpeed;
         if(zoom < zoomSpeed)
             zoom = zoomSpeed;
-        undoButton.enabled = !builder.getHistory().atHistoryBeginning();
-        redoButton.enabled = !builder.getHistory().atHistoryEnd();
+        undoButton.enabled = builder.getHistory().getHistory().canUndo();
+        redoButton.enabled = builder.getHistory().getHistory().canRedo();
 
         xRotationSlider.enabled = selectedPart != null;
         yRotationSlider.enabled = selectedPart != null;
@@ -222,6 +224,19 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         xRotationSlider.updateSlider();
         yRotationSlider.updateSlider();
         zRotationSlider.updateSlider();
+
+        if(xRotationSlider.getValue() != prevXSlider) {
+            sliderChanged(xRotationSlider);
+            prevXSlider = xRotationSlider.getValue();
+        }
+        if(yRotationSlider.getValue() != prevYSlider) {
+            sliderChanged(yRotationSlider);
+            prevYSlider = yRotationSlider.getValue();
+        }
+        if(zRotationSlider.getValue() != prevZSlider) {
+            sliderChanged(zRotationSlider);
+            prevZSlider = zRotationSlider.getValue();
+        }
     }
 
     @Override
@@ -250,7 +265,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         GlStateManager.translate(0f, 0f, 1000f);
         super.drawScreen(mouseX, mouseY, partialTicks);
         SkeletalHistory history = builder.getHistory();
-        drawCenteredString(fontRenderer, (history.getIndex()+1)+"/"+history.getHistoryLength(), width/2, height-redoButton.height-fontRenderer.FONT_HEIGHT, GuiConstants.NICE_WHITE);
+        drawCenteredString(fontRenderer, (history.getHistory().getIndex()+1)+"/"+history.getHistory().getUnindexedList().size(), width/2, height-redoButton.height-fontRenderer.FONT_HEIGHT, GuiConstants.NICE_WHITE);
         drawCenteredString(fontRenderer, titleText.getUnformattedText(), width/2, 1, GuiConstants.NICE_WHITE);
 
         int yOffset = baseYOffset;
@@ -394,7 +409,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        if(onSlidersOrButtons(mouseX, mouseY))
+        if(onSliders(mouseX, mouseY) || onSliders(mouseX, mouseY))
             return;
         if(mouseButton == 0) {
             registeredLeftClick = true;
@@ -405,8 +420,16 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        if(onSlidersOrButtons(mouseX, mouseY))
+        if(onButtons(mouseX, mouseY))
             return;
+        if(onSliders(mouseX, mouseY)) {
+            if(clickedMouseButton == 0) {
+                if(!movedPart) {
+                    movedPart = true;
+                }
+            }
+            return;
+        }
         if(clickedMouseButton == 2) {
             float dx = Mouse.getX() - lastClickPosition.x;
             float dy = Mouse.getY() - lastClickPosition.y;
@@ -424,26 +447,27 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
             dMouse.y += dy;
 
             if(!movedPart) {
-                ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STARTING));
                 movedPart = true;
             }
         }
         lastClickPosition.set(Mouse.getX(), Mouse.getY());
     }
 
-    private boolean onSlidersOrButtons(int mouseX, int mouseY) {
-        if(mouseOn(redoButton, mouseX, mouseY))
-            return true;
-        if(mouseOn(undoButton, mouseX, mouseY))
-            return true;
-        if(mouseOn(resetButton, mouseX, mouseY))
-            return true;
+    private boolean onSliders(int mouseX, int mouseY) {
         if(mouseOn(xRotationSlider, mouseX, mouseY))
             return true;
         if(mouseOn(yRotationSlider, mouseX, mouseY))
             return true;
         if(mouseOn(zRotationSlider, mouseX, mouseY))
             return true;
+        return false;
+    }
+
+    private boolean onButtons(int mouseX, int mouseY) {
+        for (GuiButton button : this.buttonList) {
+            if(button != xRotationSlider && button != yRotationSlider && button != zRotationSlider && mouseOn(button, mouseX, mouseY))
+                return true;
+        }
         return false;
     }
 
@@ -581,7 +605,7 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
         if(button == 0 && movedPart) {
             movedPart = false;
             if(selectedPart != null)
-                ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder, selectedPart.boxName, SkeletalHistory.MovementType.STOPPING));
+                ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder.getPos(), selectedPart.boxName, new Vector3f(selectedPart.rotateAngleX, selectedPart.rotateAngleY, selectedPart.rotateAngleZ)));
         } else if(button == 0) {
             currentSelectedRing = RotationAxis.NONE;
         }
@@ -742,6 +766,10 @@ public class GuiSkeletalBuilder extends GuiScreen implements GuiSlider.ISlider {
                 box.rotateAngleX = rotations.x;
                 box.rotateAngleY = rotations.y;
                 box.rotateAngleZ = rotations.z;
+            } else {
+                box.rotateAngleX = ((AdvancedModelRenderer)box).defaultRotationX;
+                box.rotateAngleY = ((AdvancedModelRenderer)box).defaultRotationY;
+                box.rotateAngleZ = ((AdvancedModelRenderer)box).defaultRotationZ;
             }
         }
     }

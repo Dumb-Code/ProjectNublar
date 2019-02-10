@@ -62,10 +62,10 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                if(!builder.getPoseData().containsKey(message.part)) {
-                    builder.getPoseData().put(message.part, new Vector3f());
+                if(!builder.getHistory().getEditingData().containsKey(message.part)) {
+                    builder.getHistory().getEditingData().put(message.part, new Vector3f());
                 }
-                Vector3f angles = builder.getPoseData().get(message.part);
+                Vector3f angles = builder.getHistory().getEditingData().get(message.part);
                 switch (message.axis) {
                     case X_AXIS:
                         angles.x = message.newAngle;

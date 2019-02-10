@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.network;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -71,11 +70,10 @@ public class C8FullPoseChange implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                builder.getPoseData().clear();
-                builder.getPoseData().putAll(message.pose);
+//                builder.getPoseData().clear();
+//                builder.getPoseData().putAll(message.pose);
                 builder.markDirty();
                 ProjectNublar.NETWORK.sendToAll(new S7FullPoseChange(builder, message.pose));
-                ProjectNublar.NETWORK.sendToAll(new S3HistoryRecord(builder, SkeletalHistory.RESET_NAME));
 
             }
             pos.release();

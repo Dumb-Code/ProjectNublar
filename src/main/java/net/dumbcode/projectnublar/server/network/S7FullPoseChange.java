@@ -69,8 +69,8 @@ public class S7FullPoseChange implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                builder.getPoseData().clear();
-                builder.getPoseData().putAll(message.pose);
+//                builder.getPoseData().clear();
+//                builder.getPoseData().putAll(message.pose);
             }
             pos.release();
         }

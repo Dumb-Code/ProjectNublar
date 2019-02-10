@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -10,20 +11,24 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.vecmath.Vector3f;
+
 public class S3HistoryRecord implements IMessage {
 
     private int x;
     private int y;
     private int z;
     private String part;
+    private Vector3f rotations;
 
     public S3HistoryRecord() { }
 
-    public S3HistoryRecord(SkeletalBuilderBlockEntity builder, String selectedPart) {
-        this.x = builder.getPos().getX();
-        this.y = builder.getPos().getY();
-        this.z = builder.getPos().getZ();
+    public S3HistoryRecord(BlockPos pos, String selectedPart, Vector3f rotations) {
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
         this.part = selectedPart;
+        this.rotations = rotations;
     }
 
     @Override
@@ -32,6 +37,7 @@ public class S3HistoryRecord implements IMessage {
         y = buf.readInt();
         z = buf.readInt();
         part = ByteBufUtils.readUTF8String(buf);
+        rotations = new Vector3f(buf.readFloat(), buf.readFloat(), buf.readFloat());
     }
 
     @Override
@@ -40,17 +46,21 @@ public class S3HistoryRecord implements IMessage {
         buf.writeInt(y);
         buf.writeInt(z);
         ByteBufUtils.writeUTF8String(buf, part);
+        buf.writeFloat(this.rotations.x);
+        buf.writeFloat(this.rotations.y);
+        buf.writeFloat(this.rotations.z);
     }
 
     public static class Handler extends WorldModificationsMessageHandler<S3HistoryRecord, IMessage> {
         @Override
-        protected void handleMessage(S3HistoryRecord message, MessageContext ctx, World world, EntityPlayer player) {
+        public void handleMessage(S3HistoryRecord message, MessageContext ctx, World world, EntityPlayer player) {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                builder.getHistory().record(message.part);
+                builder.getHistory().add(new SkeletalHistory.Record(message.part, message.rotations));
             }
+
             pos.release();
         }
     }
