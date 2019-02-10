@@ -76,11 +76,14 @@ public class S12UpdatePoleList implements IMessage {
                 if(gui.getBuilder().getPos().equals(pos)) {
                     gui.updateList();//Update the gui screen for other players
                     if(gui.editingPole != null) {
-                        for (GuiSkeletalProperties.PoleEntry entry : gui.entries) {
-                            if(entry.getPole().equals(gui.editingPole.getPole())) {
-                                gui.editingPole = entry;
-                                break;
+                        entries: {
+                            for (GuiSkeletalProperties.PoleEntry entry : gui.entries) {
+                                if(entry.getPole().equals(gui.editingPole.getPole())) {
+                                    gui.editingPole = entry;
+                                    break entries;
+                                }
                             }
+                            gui.editingPole = null;
                         }
                     }
                 }

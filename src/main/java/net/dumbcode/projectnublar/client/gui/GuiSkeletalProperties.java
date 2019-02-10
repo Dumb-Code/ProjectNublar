@@ -277,7 +277,8 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
                 editingPole = this;
                 editText.setText(this.pole.getCubeName());
             } else if(this.delete.mousePressed(mc, mouseX, mouseY)) {
-                System.out.println("delete");
+                entries.removeIf(p -> p.getPole() == this.pole);
+                sync();
             }
         }
     }
