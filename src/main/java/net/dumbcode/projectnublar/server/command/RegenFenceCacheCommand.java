@@ -38,7 +38,7 @@ public class RegenFenceCacheCommand extends CommandBase {
                     ConnectableBlockEntity ce = (ConnectableBlockEntity) te;
                     Set<Connection> newConnection = Sets.newLinkedHashSet();
                     for (Connection con : ce.getConnections()) {
-                        newConnection.add(new Connection(sender.getEntityWorld(), con.getType(), con.getOffset(), con.getFrom(), con.getTo(), con.getNext(), con.getPrevious(), con.getPosition()));
+                        newConnection.add(con.copy());
                     }
                     ce.getConnections().clear();
                     ce.getConnections().addAll(newConnection);

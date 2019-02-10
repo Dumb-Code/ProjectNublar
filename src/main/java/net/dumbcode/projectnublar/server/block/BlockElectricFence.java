@@ -22,8 +22,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
@@ -157,9 +155,9 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
                 EnumFacing dir = chunk.getDir();
                 //Make sure that if its placed on the east/west side (the ends of the cables) to place the block on the previous/next positions
                 if(dir == EnumFacing.EAST) {
-                    pos = chunk.getConnection().getPrevious();
-                } else if(dir == EnumFacing.WEST) {
                     pos = chunk.getConnection().getNext();
+                } else if(dir == EnumFacing.WEST) {
+                    pos = chunk.getConnection().getPrevious();
                 }
             }
             boolean out = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);

@@ -30,7 +30,7 @@ public class S20RegenCache implements IMessage {
                     ConnectableBlockEntity ce = (ConnectableBlockEntity) te;
                     Set<Connection> newConnection = Sets.newLinkedHashSet();
                     for (Connection con : ce.getConnections()) {
-                        newConnection.add(new Connection(world, con.getType(), con.getOffset(), con.getFrom(), con.getTo(), con.getNext(), con.getPrevious(), con.getPosition()));
+                        newConnection.add(con.copy());
                     }
                     ce.getConnections().clear();
                     ce.getConnections().addAll(newConnection);

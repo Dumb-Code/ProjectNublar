@@ -442,7 +442,7 @@ public class BlockConnectableBase extends Block {
                         return true;
                     }
                 } else if(chunk.getDir().getAxis() == EnumFacing.Axis.X) {
-                    BlockPos nextPos = chunk.getDir() == EnumFacing.WEST == chunk.connection.getCompared() < 0 ? con.getPrevious() : con.getNext();
+                    BlockPos nextPos = chunk.getDir() == EnumFacing.WEST == chunk.connection.getCompared() < 0 ? con.getNext() : con.getPrevious();
                     TileEntity nextTe = worldIn.getTileEntity(nextPos);
                     if(!(nextTe instanceof ConnectableBlockEntity)) {
                         if(worldIn.getBlockState(nextPos).getBlock().isReplaceable(worldIn, nextPos)) {
@@ -490,11 +490,11 @@ public class BlockConnectableBase extends Block {
                     if (tileentity instanceof ConnectableBlockEntity) {
                         ConnectableBlockEntity cbe = (ConnectableBlockEntity) tileentity;
                         for (Connection connection : cbe.getConnections()) {
-                            if (connection.getNext().equals(pos) || connection.getPrevious().equals(pos)) {
+                            if (connection.getPrevious().equals(pos) || connection.getNext().equals(pos)) {
                                 List<BlockPos> positions = LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset());
                                 for (int i = 0; i < positions.size(); i++) {
                                     if (positions.get(i).equals(pos)) {
-                                        Connection con = new Connection(worldIn, connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.max(i - 1, 0)), positions.get(Math.min(i + 1, positions.size() - 1)), pos);
+                                        Connection con = new Connection(worldIn.isRemote, connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.min(i + 1, positions.size() - 1)), positions.get(Math.max(i - 1, 0)), pos);
                                         double[] in = con.getIn();
                                         double yin = (in[4] + in[5]) / 2D;
                                         if (side == EnumFacing.DOWN == yin > yRef) {
