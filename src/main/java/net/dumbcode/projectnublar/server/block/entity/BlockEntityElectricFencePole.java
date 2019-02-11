@@ -51,9 +51,11 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
         this.fenceConnections.clear();
         NBTTagList nbt = compound.getTagList("connections", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < nbt.tagCount(); i++) {
-            this.fenceConnections.add(Connection.fromNBT(nbt.getCompoundTagAt(i), this));
+            Connection connection = Connection.fromNBT(nbt.getCompoundTagAt(i), this);
+            if(connection.isValid()) {
+                this.fenceConnections.add(connection);
+            }
         }
-
 
         NBTTagCompound energyNBT = compound.getCompoundTag("Energy");
         this.energy = new MachineModuleEnergyStorage(350, 350, 250, energyNBT.getInteger("Amount"));

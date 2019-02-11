@@ -50,6 +50,7 @@ public class Connection {
     @Accessors(chain = true) @Setter private boolean broken;
 
     private final double[] in;
+    private final boolean valid;
 
     private final double xzlen;
     private final double fullLen;
@@ -91,6 +92,9 @@ public class Connection {
         double[] in = LineUtils.intersect(this.position, this.from, this.to, this.offset);
         if(in == null) {
            in = new double[6]; //ew
+            this.valid = false;
+        } else {
+            this.valid = true;
         }
 
         this.random = new Random(this.getPosition().toLong() * (long)(this.getOffset() * 1000));
