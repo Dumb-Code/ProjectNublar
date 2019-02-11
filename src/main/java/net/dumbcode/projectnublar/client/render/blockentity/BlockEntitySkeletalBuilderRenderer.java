@@ -200,6 +200,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     box.rotateAngleX = rotations.x;
                     box.rotateAngleY = rotations.y;
                     box.rotateAngleZ = rotations.z;
+                } else {
+                    box.rotateAngleX = ((AdvancedModelRenderer)box).defaultRotationX;
+                    box.rotateAngleY = ((AdvancedModelRenderer)box).defaultRotationY;
+                    box.rotateAngleZ = ((AdvancedModelRenderer)box).defaultRotationZ;
                 }
             }
 

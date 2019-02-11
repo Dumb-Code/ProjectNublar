@@ -1,16 +1,12 @@
 package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.projectnublar.client.commandmodel.ModelCommandLoader;
+import net.dumbcode.projectnublar.client.render.FenceStateMapper;
 import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
-import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModelHandler;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.block.statemap.StateMap;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -37,29 +33,17 @@ import static net.dumbcode.projectnublar.server.item.ItemHandler.*;
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class ModelHandler {
 
-    public static IBakedModel LIGHT_STEEL;
-    public static IBakedModel HIGH_SECURITY;
-
-    public static TextureAtlasSprite FENCE_SPRITE;
-
-    @SubscribeEvent
-    public static void onTextureStitched(TextureStitchEvent event) {
-//        try {
-//            LIGHT_STEEL = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/light_steel_electric_fence_pole.tbl"), event, DefaultVertexFormats.POSITION_TEX_NORMAL));
-//            HIGH_SECURITY = disableAO(getModel(new ResourceLocation(ProjectNublar.MODID, "block/high_security_electric_fence_pole.tbl"), event, DefaultVertexFormats.POSITION_TEX_NORMAL));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        FENCE_SPRITE = event.getMap().registerSprite(new ResourceLocation(ProjectNublar.MODID, "blocks/electric_fence"));
-    }
-
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
+
+        ModelLoader.setCustomStateMapper(LOW_SECURITY_ELECTRIC_FENCE_POLE, new FenceStateMapper(LOW_SECURITY_ELECTRIC_FENCE_POLE));
+        ModelLoader.setCustomStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE, new FenceStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE));
+
         TabulaModelHandler.INSTANCE.addDomain(ProjectNublar.MODID);
         ModelLoaderRegistry.registerLoader(ModelCommandLoader.INSTANCE);
 
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE, Item.getItemFromBlock(HIGH_SECURITY_ELECTRIC_FENCE_POLE),
-                Item.getItemFromBlock(LIGHT_STEEL_ELECTRIC_FENCE_POLE), Item.getItemFromBlock(ELECTRIC_FENCE));
+                Item.getItemFromBlock(LOW_SECURITY_ELECTRIC_FENCE_POLE), Item.getItemFromBlock(ELECTRIC_FENCE));
         reg(TEST_TUBES_GENETIC_MATERIAL);
     }
 

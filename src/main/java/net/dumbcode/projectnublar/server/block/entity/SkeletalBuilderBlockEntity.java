@@ -1,22 +1,17 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.network.S7FullPoseChange;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
@@ -26,10 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.vecmath.Vector3f;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
@@ -41,12 +33,12 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     private Dinosaur dinosaur = Dinosaur.MISSING;
     @SideOnly(Side.CLIENT)
     private SkeletonBuilderScene scene;
-    private Map<String, Vector3f> poseData = new HashMap<>();
 
     @Getter(lazy = true)
     private final DinosaurEntity dinosaurEntity = createEntity();
 
-    private final SkeletalHistory history = new SkeletalHistory(this);
+    @Getter private final SkeletalHistory history = new SkeletalHistory();
+
 
     // Not saved to NBT, player-specific only to help with posing
 
@@ -65,23 +57,10 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
 
         // save pose data
-        nbt.setTag("Pose", writePoseToNBT(poseData));
         nbt.setTag("SkeletalProperties", this.skeletalProperties.serialize(new NBTTagCompound()));
         return super.writeToNBT(nbt);
     }
 
-    public NBTTagCompound writePoseToNBT(Map<String, Vector3f> poseData) {
-        NBTTagCompound pose = new NBTTagCompound();
-        for(String partName : poseData.keySet()) {
-            Vector3f eulerAngles = poseData.get(partName);
-            NBTTagCompound partNBT = new NBTTagCompound();
-            partNBT.setFloat("RotationX", eulerAngles.x);
-            partNBT.setFloat("RotationY", eulerAngles.y);
-            partNBT.setFloat("RotationZ", eulerAngles.z);
-            pose.setTag(partName, partNBT);
-        }
-        return pose;
-    }
 
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
@@ -89,22 +68,10 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
         // load pose data
         NBTTagCompound pose = nbt.getCompoundTag("Pose");
-        poseData.clear();
-        poseData.putAll(readPoseFromNBT(pose));
         this.reassureSize();
         this.history.readFromNBT(nbt.getCompoundTag("History"));
         this.skeletalProperties.deserialize(nbt.getCompoundTag("SkeletalProperties"));
         super.readFromNBT(nbt);
-    }
-
-    public Map<String, Vector3f> readPoseFromNBT(NBTTagCompound pose) {
-        Map<String, Vector3f> result = new HashMap<>();
-        for(String partName : pose.getKeySet()) {
-            NBTTagCompound part = pose.getCompoundTag(partName);
-            Vector3f eulerAngles = new Vector3f(part.getFloat("RotationX"), part.getFloat("RotationY"), part.getFloat("RotationZ"));
-            result.put(partName, eulerAngles);
-        }
-        return result;
     }
 
     private void reassureSize() {
@@ -121,7 +88,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     public void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
         this.getDinosaurEntity().getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = dinosaur;
-        resetPoseDataToDefaultPose();
+        this.history.clear();
         this.reassureSize();
     }
 
@@ -145,31 +112,34 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     }
 
     public Map<String, Vector3f> getPoseData() {
-        return poseData;
-    }
+        //todo caching
+        Map<String, Vector3f> map = Maps.newHashMap();
 
-    public void updateAngles(String affectedPart, Vector3f anglesToApply) {
-        if(!poseData.containsKey(affectedPart)) {
-            poseData.put(affectedPart, new Vector3f());
+        this.history.getHistory().forEach(recordList -> recordList.forEach(record -> {
+            if(record.getPart().equals(SkeletalHistory.RESET_NAME)) {
+                map.clear();
+            } else {
+                map.put(record.getPart(), new Vector3f(record.getAngle()));
+            }
+        }));
+
+        for (Map.Entry<String, SkeletalHistory.Edit> entry : this.history.getEditingData().entrySet()) {
+            Vector3f vec = map.computeIfAbsent(entry.getKey(), s -> new Vector3f());
+            SkeletalHistory.Edit edit = entry.getValue();
+            switch (edit.getAxis()) {
+                case X_AXIS:
+                    vec.x = edit.getAngle();
+                    break;
+                case Y_AXIS:
+                    vec.y = edit.getAngle();
+                    break;
+                case Z_AXIS:
+                    vec.z = edit.getAngle();
+                    break;
+            }
         }
-        Vector3f angles = poseData.get(affectedPart);
-        angles.set(anglesToApply);
-        markDirty();
-    }
 
-    public void resetPose() {
-        history.recordPoseReset();
-        resetPoseDataToDefaultPose();
-        ProjectNublar.NETWORK.sendToAll(new S7FullPoseChange(this, getPoseData()));
-    }
-
-    public void resetPoseDataToDefaultPose() {
-        poseData.clear();
-        for(ModelRenderer box : this.getModel().boxList) { //TODO: need a better way of handeling the model
-            Vector3f rotations = new Vector3f(box.rotateAngleX, box.rotateAngleY, box.rotateAngleZ);
-            poseData.put(box.boxName, rotations);
-        }
-        markDirty();
+        return map;
     }
 
     @Override
@@ -191,4 +161,5 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     public void update() {
         this.getSkeletalProperties().setPrevRotation(this.getSkeletalProperties().getRotation());
     }
+
 }

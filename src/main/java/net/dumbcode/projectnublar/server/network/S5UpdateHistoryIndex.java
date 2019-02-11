@@ -14,15 +14,15 @@ public class S5UpdateHistoryIndex implements IMessage {
     private int x;
     private int y;
     private int z;
-    private int index;
+    private int direction;
 
     public S5UpdateHistoryIndex() { }
 
-    public S5UpdateHistoryIndex(SkeletalBuilderBlockEntity builder, int index) {
-        this.x = builder.getPos().getX();
-        this.y = builder.getPos().getY();
-        this.z = builder.getPos().getZ();
-        this.index = index;
+    public S5UpdateHistoryIndex(BlockPos pos, int direction) {
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
+        this.direction = direction > 0 ? +1 : -1;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class S5UpdateHistoryIndex implements IMessage {
         x = buf.readInt();
         y = buf.readInt();
         z = buf.readInt();
-        index = buf.readInt();
+        direction = buf.readInt();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class S5UpdateHistoryIndex implements IMessage {
         buf.writeInt(x);
         buf.writeInt(y);
         buf.writeInt(z);
-        buf.writeInt(index);
+        buf.writeInt(direction);
     }
 
     public static class Handler extends WorldModificationsMessageHandler<S5UpdateHistoryIndex, IMessage> {
@@ -48,8 +48,13 @@ public class S5UpdateHistoryIndex implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                builder.getHistory().setIndex(message.index);
+                if(message.direction > 0) {
+                    builder.getHistory().redo();
+                } else if(message.direction < 0) {
+                    builder.getHistory().undo();
+                }
             }
+
             pos.release();
         }
     }

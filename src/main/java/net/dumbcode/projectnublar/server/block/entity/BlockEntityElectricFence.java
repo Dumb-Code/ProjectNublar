@@ -28,7 +28,10 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
         this.fenceConnections.clear();
         NBTTagList nbt = compound.getTagList("connections", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < nbt.tagCount(); i++) {
-            this.fenceConnections.add(Connection.fromNBT(nbt.getCompoundTagAt(i), this));
+            Connection connection = Connection.fromNBT(nbt.getCompoundTagAt(i), this);
+            if(connection.isValid()) {
+                this.fenceConnections.add(connection);
+            }
         }
     }
 

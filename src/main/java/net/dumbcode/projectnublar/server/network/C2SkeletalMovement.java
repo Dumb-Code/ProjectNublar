@@ -12,22 +12,24 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.vecmath.Vector3f;
+
 public class C2SkeletalMovement implements IMessage {
 
     private int x;
     private int y;
     private int z;
     private String part;
-    private SkeletalHistory.MovementType type;
+    private Vector3f rotations;
 
     public C2SkeletalMovement() { }
 
-    public C2SkeletalMovement(SkeletalBuilderBlockEntity builder, String selectedPart, SkeletalHistory.MovementType type) {
-        this.x = builder.getPos().getX();
-        this.y = builder.getPos().getY();
-        this.z = builder.getPos().getZ();
+    public C2SkeletalMovement(BlockPos pos, String selectedPart, Vector3f rotations) {
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
         this.part = selectedPart;
-        this.type = type;
+        this.rotations = rotations;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class C2SkeletalMovement implements IMessage {
         y = buf.readInt();
         z = buf.readInt();
         part = ByteBufUtils.readUTF8String(buf);
-        type = SkeletalHistory.MovementType.values()[buf.readInt()];
+        rotations = new Vector3f(buf.readFloat(), buf.readFloat(), buf.readFloat());
     }
 
     @Override
@@ -45,7 +47,9 @@ public class C2SkeletalMovement implements IMessage {
         buf.writeInt(y);
         buf.writeInt(z);
         ByteBufUtils.writeUTF8String(buf, part);
-        buf.writeInt(type.ordinal());
+        buf.writeFloat(this.rotations.x);
+        buf.writeFloat(this.rotations.y);
+        buf.writeFloat(this.rotations.z);
     }
 
     public static class Handler extends WorldModificationsMessageHandler<C2SkeletalMovement, IMessage> {
@@ -56,13 +60,9 @@ public class C2SkeletalMovement implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                if(message.type == SkeletalHistory.MovementType.STOPPING) {
-                    builder.getHistory().record(message.part);
-                    ProjectNublar.NETWORK.sendToAll(new S3HistoryRecord(builder, message.part));
-                } else {
-                    builder.getHistory().prepareForRecording(message.part);
-                }
+                builder.getHistory().add(new SkeletalHistory.Record(message.part, message.rotations));
             }
+            ProjectNublar.NETWORK.sendToDimension(new S3HistoryRecord(pos, message.part, message.rotations), world.provider.getDimension());
 
             pos.release();
         }

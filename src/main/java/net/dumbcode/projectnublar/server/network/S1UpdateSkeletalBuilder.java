@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
+import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -18,20 +20,18 @@ public class S1UpdateSkeletalBuilder implements IMessage {
     private int y;
     private int z;
     private String part;
-    private float rx;
-    private float ry;
-    private float rz;
+    private RotationAxis axis;
+    private float newAngle;
 
     public S1UpdateSkeletalBuilder() { }
 
-    public S1UpdateSkeletalBuilder(SkeletalBuilderBlockEntity builder, String selectedPart, Vector3f rotations) {
+    public S1UpdateSkeletalBuilder(SkeletalBuilderBlockEntity builder, String selectedPart, RotationAxis axis, float newAngle) {
         this.x = builder.getPos().getX();
         this.y = builder.getPos().getY();
         this.z = builder.getPos().getZ();
         this.part = selectedPart;
-        this.rx = rotations.x;
-        this.ry = rotations.y;
-        this.rz = rotations.z;
+        this.axis = axis;
+        this.newAngle = newAngle;
     }
 
     @Override
@@ -40,9 +40,8 @@ public class S1UpdateSkeletalBuilder implements IMessage {
         y = buf.readInt();
         z = buf.readInt();
         part = ByteBufUtils.readUTF8String(buf);
-        rx = buf.readFloat();
-        ry = buf.readFloat();
-        rz = buf.readFloat();
+        axis = RotationAxis.values()[buf.readInt()];
+        newAngle = buf.readFloat();
     }
 
     @Override
@@ -51,9 +50,8 @@ public class S1UpdateSkeletalBuilder implements IMessage {
         buf.writeInt(y);
         buf.writeInt(z);
         ByteBufUtils.writeUTF8String(buf, part);
-        buf.writeFloat(rx);
-        buf.writeFloat(ry);
-        buf.writeFloat(rz);
+        buf.writeInt(axis.ordinal());
+        buf.writeFloat(newAngle);
     }
 
     public static class Handler extends WorldModificationsMessageHandler<S1UpdateSkeletalBuilder, IMessage> {
@@ -62,14 +60,7 @@ public class S1UpdateSkeletalBuilder implements IMessage {
             BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(message.x, message.y, message.z);
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
-                SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                if(!builder.getPoseData().containsKey(message.part)) {
-                    builder.getPoseData().put(message.part, new Vector3f());
-                }
-                Vector3f angles = builder.getPoseData().get(message.part);
-                angles.x = message.rx;
-                angles.y = message.ry;
-                angles.z = message.rz;
+                ((SkeletalBuilderBlockEntity)te).getHistory().getEditingData().put(message.part, new SkeletalHistory.Edit(message.axis, message.newAngle));
             }
             pos.release();
         }

@@ -19,6 +19,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -183,14 +184,13 @@ public class BlockConnectableBase extends Block {
                     Connection connection = chunk.getConnection();
                     double[] in = connection.getIn();
 
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translate(-d3, -d4, -d5);
+                    Tessellator.getInstance().getBuffer().setTranslation(-d3, -d4, -d5);
 
                     if(DEBUG) {
                         chunk.getResult().debugRender();
                     }
 
-                    GlStateManager.translate(in[0], in[4], in[2]);
+                    Tessellator.getInstance().getBuffer().setTranslation(-d3 + in[0], -d4 + in[4], -d5 + in[2]);
 
                     boolean pb = connection.brokenSide(world, false);
                     boolean nb = connection.brokenSide(world, true);
@@ -226,7 +226,7 @@ public class BlockConnectableBase extends Block {
                     }
 
 
-                    GlStateManager.popMatrix();
+                    Tessellator.getInstance().getBuffer().setTranslation(0, 0, 0);
 
                     GlStateManager.depthMask(false);
                     GlStateManager.enableTexture2D();

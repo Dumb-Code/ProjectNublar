@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -50,8 +51,12 @@ public class C4MoveInHistory implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                int direction = message.direction > 0 ? +1 : -1;
-                builder.getHistory().moveIndex(direction);
+                if(message.direction > 0) {
+                    builder.getHistory().redo();
+                } else if(message.direction < 0) {
+                    builder.getHistory().undo();
+                }
+                ProjectNublar.NETWORK.sendToDimension(new S5UpdateHistoryIndex(pos, message.direction), world.provider.getDimension());
             }
 
             pos.release();

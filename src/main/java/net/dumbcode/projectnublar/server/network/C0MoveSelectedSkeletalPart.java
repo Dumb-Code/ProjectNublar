@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -62,23 +63,9 @@ public class C0MoveSelectedSkeletalPart implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-                if(!builder.getPoseData().containsKey(message.part)) {
-                    builder.getPoseData().put(message.part, new Vector3f());
-                }
-                Vector3f angles = builder.getPoseData().get(message.part);
-                switch (message.axis) {
-                    case X_AXIS:
-                        angles.x = message.newAngle;
-                        break;
-                    case Y_AXIS:
-                        angles.y = message.newAngle;
-                        break;
-                    case Z_AXIS:
-                        angles.z = message.newAngle;
-                        break;
-                }
+                builder.getHistory().getEditingData().put(message.part, new SkeletalHistory.Edit(message.axis, message.newAngle));
                 builder.markDirty();
-                ProjectNublar.NETWORK.sendToAll(new S1UpdateSkeletalBuilder(builder, message.part, angles));
+                ProjectNublar.NETWORK.sendToAll(new S1UpdateSkeletalBuilder(builder, message.part, message.axis, message.newAngle));
             }
 
             pos.release();
