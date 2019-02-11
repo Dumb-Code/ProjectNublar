@@ -115,15 +115,29 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         //todo caching
         Map<String, Vector3f> map = Maps.newHashMap();
 
-        this.history.getHistory().forEach(c -> {
-            if(c.getPart().equals(SkeletalHistory.RESET_NAME)) {
+        this.history.getHistory().forEach(recordList -> recordList.forEach(record -> {
+            if(record.getPart().equals(SkeletalHistory.RESET_NAME)) {
                 map.clear();
             } else {
-                map.put(c.getPart(), c.getAngle());
+                map.put(record.getPart(), new Vector3f(record.getAngle()));
             }
-        });
+        }));
 
-        map.putAll(this.history.getEditingData());
+        for (Map.Entry<String, SkeletalHistory.Edit> entry : this.history.getEditingData().entrySet()) {
+            Vector3f vec = map.computeIfAbsent(entry.getKey(), s -> new Vector3f());
+            SkeletalHistory.Edit edit = entry.getValue();
+            switch (edit.getAxis()) {
+                case X_AXIS:
+                    vec.x = edit.getAngle();
+                    break;
+                case Y_AXIS:
+                    vec.y = edit.getAngle();
+                    break;
+                case Z_AXIS:
+                    vec.z = edit.getAngle();
+                    break;
+            }
+        }
 
         return map;
     }
@@ -148,6 +162,4 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         this.getSkeletalProperties().setPrevRotation(this.getSkeletalProperties().getRotation());
     }
 
-    @Value
-    public class Record { private String part; private Vector3f newAngles; }
 }

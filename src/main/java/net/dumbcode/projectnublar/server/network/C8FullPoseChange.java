@@ -1,8 +1,10 @@
 package net.dumbcode.projectnublar.server.network;
 
+import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -13,6 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class C8FullPoseChange implements IMessage {
@@ -70,8 +73,9 @@ public class C8FullPoseChange implements IMessage {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof SkeletalBuilderBlockEntity) {
                 SkeletalBuilderBlockEntity builder = (SkeletalBuilderBlockEntity)te;
-//                builder.getPoseData().clear();
-//                builder.getPoseData().putAll(message.pose);
+                List<SkeletalHistory.Record> records = Lists.newArrayList();
+                message.pose.forEach((s, v) -> records.add(new SkeletalHistory.Record(s, v)));
+                builder.getHistory().addGroupedRecord(records);
                 builder.markDirty();
                 ProjectNublar.NETWORK.sendToAll(new S7FullPoseChange(builder, message.pose));
 

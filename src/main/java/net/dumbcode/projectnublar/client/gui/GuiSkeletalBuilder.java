@@ -316,6 +316,10 @@ public class GuiSkeletalBuilder extends GuiScreen {
                     xRotationSlider.setValue(MathHelper.wrapDegrees(Math.toDegrees(selectedPart.rotateAngleX)));
                     yRotationSlider.setValue(MathHelper.wrapDegrees(Math.toDegrees(selectedPart.rotateAngleY)));
                     zRotationSlider.setValue(MathHelper.wrapDegrees(Math.toDegrees(selectedPart.rotateAngleZ)));
+
+                    prevXSlider = xRotationSlider.getValue();
+                    prevYSlider = yRotationSlider.getValue();
+                    prevZSlider = zRotationSlider.getValue();
                 }
             } else {
                 this.currentSelectedRing = ringBelowMouse;

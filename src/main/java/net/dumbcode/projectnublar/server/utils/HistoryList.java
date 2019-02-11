@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Lists;
 
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Consumer;
 
 public class HistoryList<E> {
@@ -11,7 +10,7 @@ public class HistoryList<E> {
     private int index = -1;
 
     public boolean canUndo() {
-        return this.index > 0;
+        return this.index >= 0;
     }
 
     public boolean canRedo() {
@@ -47,8 +46,6 @@ public class HistoryList<E> {
     }
 
     public boolean add(E element) {
-        this.list.add(element);
-
         while(this.list.size() > this.index + 1) {
             this.list.remove(this.list.size() - 1);
         }
