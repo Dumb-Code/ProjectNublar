@@ -85,6 +85,10 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
         if(trace != null) {
             return trace;
         }
+        TileEntity te = worldIn.getTileEntity(pos);
+        if(te instanceof ConnectableBlockEntity && ((ConnectableBlockEntity) te).getConnections().isEmpty()) {
+            return null;
+        }
         return super.collisionRayTrace(blockState, worldIn, pos, start, end);
     }
 
