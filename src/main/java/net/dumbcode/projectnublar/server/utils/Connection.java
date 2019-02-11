@@ -88,7 +88,7 @@ public class Connection {
 
         this.toFromHash = (this.compared < 0 ? this.from : this.to).hashCode() + (this.compared < 0 ? this.to : this.from).hashCode() * 31;
 
-        double[] in = LineUtils.intersect(this.position, from, to, this.offset);
+        double[] in = LineUtils.intersect(this.position, this.from, this.to, this.offset);
         if(in == null) {
            in = new double[6]; //ew
         }

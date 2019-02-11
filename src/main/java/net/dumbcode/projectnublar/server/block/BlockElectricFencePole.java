@@ -54,7 +54,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
 
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, state.getBoundingBox (worldIn, pos));
+        addCollisionBoxToList(pos, entityBox, collidingBoxes, state.getBoundingBox(worldIn, pos));
         super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, isActualState);
     }
 
