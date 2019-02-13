@@ -5,6 +5,7 @@ import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.dumblibrary.client.animation.PoseHandler;
 import net.dumbcode.dumblibrary.client.animation.objects.Animation;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
 import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.client.animation.MovementLayer;
@@ -23,7 +24,6 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage, DinosaurEntity> {
     private final Dinosaur dinosaur;
@@ -99,6 +99,16 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     @Override
     public ModelContainer<DinosaurEntity, ModelStage> getModelContainer(DinosaurEntity entity) {
         return entity.getDinosaur().getModelContainer();
+    }
+
+    @Override
+    public AnimationRunWrapper<DinosaurEntity, ModelStage> onWrapperCreated(AnimationRunWrapper<DinosaurEntity, ModelStage> animationWrapper) {
+        DinosaurEntity entity = animationWrapper.getEntity();
+        AnimationComponent component = entity.getOrNull(EntityComponentTypes.ANIMATION);
+        if(component != null) {
+            component.animationWrapper = animationWrapper;
+        }
+        return animationWrapper;
     }
 
     @Override

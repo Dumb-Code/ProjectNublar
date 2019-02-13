@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.animation.objects.Animation;
+import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
 import net.dumbcode.dumblibrary.server.network.S0SyncAnimation;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class AnimationComponent implements EntityComponent {
 
     public Animation<ModelStage> animation = EnumAnimation.IDLE.get();
+    public AnimationRunWrapper animationWrapper = null;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {

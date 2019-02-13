@@ -9,13 +9,15 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 public class MovementLayer extends AnimationLayer<DinosaurEntity, ModelStage> {
 
 
-    public MovementLayer(DinosaurEntity entity, ModelStage stage, TabulaModel model, Function<String, AnimationRunWrapper.CubeWrapper> cuberef, AnimationSystemInfo<ModelStage, DinosaurEntity> info, boolean inertia) {
-        super(entity, stage, model, cuberef, info, inertia);
+    public MovementLayer(DinosaurEntity entity, ModelStage stage, Collection<String> cubeNames, Function<String, AnimatableCube> anicubeRef, Function<String, AnimationRunWrapper.CubeWrapper> cuberef, AnimationSystemInfo<ModelStage, DinosaurEntity> info, boolean inertia) {
+        super(entity, stage, cubeNames, anicubeRef, cuberef, info, inertia);
     }
 
     @Override
