@@ -85,14 +85,14 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     @Override
     public Animation<ModelStage> getAnimation(DinosaurEntity entity) {
         AnimationComponent comp = entity.getOrNull(EntityComponentTypes.ANIMATION);
-        return comp == null ? this.defaultAnimation() : comp.animation;
+        return comp == null ? this.defaultAnimation() : comp.getAnimation();
     }
 
     @Override
     public void setAnimation(DinosaurEntity entity, @Nonnull Animation<ModelStage> animation) {
         AnimationComponent comp = entity.getOrNull(EntityComponentTypes.ANIMATION);
         if (comp != null) {
-            comp.animation = animation;
+            comp.setAnimation(entity, animation);
         }
     }
 

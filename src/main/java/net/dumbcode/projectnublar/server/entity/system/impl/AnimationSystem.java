@@ -7,33 +7,32 @@ import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.EntityFamily;
-import net.dumbcode.projectnublar.server.entity.EntityManager;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
+import net.dumbcode.projectnublar.server.entity.*;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
+@Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public enum AnimationSystem implements EntitySystem {
     INSTANCE;
 
@@ -80,9 +79,9 @@ public enum AnimationSystem implements EntitySystem {
                 }
             }
             if(animation.animationWrapper != null) {
-                List<AnimationLayer> layers = animation.animationWrapper.getLayers();
+                List<AnimationLayer<DinosaurEntity, ModelStage>> layers = animation.animationWrapper.getLayers();
                 for (AnimationLayer layer : layers) {
-                    layer.animate(entity.ticksExisted);
+                    layer.animate(entity.ticksExisted + 1);
                 }
                 Matrix4d entityRotate = new Matrix4d();
                 entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
@@ -96,6 +95,26 @@ public enum AnimationSystem implements EntitySystem {
                     rendererPos.scale(2.5);
                     entityRotate.transform(rendererPos);
                     ProjectNublar.spawnParticles(ParticleType.SPARKS, entity.world, rendererPos.x+entity.posX, rendererPos.y+entity.posY, rendererPos.z+entity.posZ, 0, 0, 0, 8);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings("unchecked")
+    public static void onClientWorldTick(TickEvent.ClientTickEvent event) {
+        if(event.phase == TickEvent.Phase.START) {
+            World world = Minecraft.getMinecraft().world;
+            if(world != null) {
+                for (Entity entity : world.loadedEntityList) {
+                    if(entity instanceof ComponentAccess) {
+                        AnimationComponent component = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.ANIMATION);
+                        if(component != null && component.animationWrapper != null) {
+                            for (AnimationLayer layer : component.animationWrapper.getLayers()) {
+                                layer.animate(entity.ticksExisted + 1);
+                            }
+                        }
+                    }
                 }
             }
         }
