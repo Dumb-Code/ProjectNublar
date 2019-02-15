@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
-import io.netty.util.internal.ReflectionUtil;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.client.animation.objects.RenderAnimatableCube;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -12,7 +11,6 @@ import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
@@ -57,14 +55,12 @@ public enum MultipartSystem implements EntitySystem {
         List<AnimationLayer<DinosaurEntity, ModelStage>> layers = animation.animationWrapper.getLayers();
         for (AnimationLayer<DinosaurEntity, ModelStage> layer : layers) {
             for (String cubeName : layer.getCubeNames()) {
-                AnimationLayer.AnimatableCube animatableCube = layer.getAnicubeRef().apply(cubeName);
-                if(animatableCube instanceof RenderAnimatableCube) {
-                    ReflectionHelper.<AdvancedModelRenderer, RenderAnimatableCube>getPrivateValue(RenderAnimatableCube.class, (RenderAnimatableCube) animatableCube, "cube").resetToDefaultPose();
-                }
+                layer.getAnicubeRef().apply(cubeName).reset();
             }
-            layer.animate(entity.ticksExisted + 1);
         }
-
+        for (AnimationLayer<DinosaurEntity, ModelStage> layer : layers) {
+            layer.animate(entity.ticksExisted);
+        }
         Matrix4d entityRotate = new Matrix4d();
         entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
 
@@ -74,7 +70,7 @@ public enum MultipartSystem implements EntitySystem {
             cubeEntity.onUpdate();
             AnimationLayer.AnimatableCube animatableCube = function.apply(cube.getCubeName());
             if (animatableCube != null) {
-                Vec3d partOrigin = animatableCube.getModelPos(new Vec3d(animatableCube.getRotationPointX() / 16, -animatableCube.getRotationPointY() / 16, -animatableCube.getRotationPointZ() / 16));
+                Vec3d partOrigin = animatableCube.getModelPos(0.5F, 0.5F, 0.5F);
                 Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
                 rendererPos.scale(2.5);
                 entityRotate.transform(rendererPos);
