@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "0.0.16"
+version = "0.0.17"
 group = "net.dumbcode.projectnublar" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "projectnublar" //MODID
 
@@ -46,7 +46,7 @@ dependencies {
     runtime "mezz.jei:jei_1.12.2:4.9.1.187"
     compile "net.ilexiconn:llibrary:1.7.15-1.12.2"
     compile 'org.projectlombok:lombok:1.18.0'
-    compile "dumb-library:dumblibrary-1.12.2:0.2.5:dev"
+    compile "dumb-library:dumblibrary-1.12.2:0.2.6:dev"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
