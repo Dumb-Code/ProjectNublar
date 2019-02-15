@@ -22,6 +22,18 @@ public class Tyrannosaurus extends Dinosaur {
                 .setRawMeatSaturation(0.6f)
                 .setCookingExperience(1f);
 
+
+
+
+
+        val entity = getEntityProperties().getLinkedCubeMap();
+        entity.put(ModelStage.ADULT, Lists.newArrayList("tail4", "head"));
+
+
+        getEntityProperties()
+                .setWidth(10F)
+                .setHeight(5F);
+
         SkeletalInformation skeletalInformation = this.getSkeletalInformation();
         skeletalInformation.initializeMap(
                 "foot", "legLowerLeft",

@@ -12,6 +12,7 @@ import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.system.RegisterSystemsEvent;
 import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
 import net.dumbcode.projectnublar.server.entity.system.impl.AnimationSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -233,6 +234,7 @@ public class ProjectNublar {
     public static void register(RegisterSystemsEvent event) {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(AnimationSystem.INSTANCE);
+        event.registerSystem(MultipartSystem.INSTANCE);
     }
 
     public static Logger getLogger() {

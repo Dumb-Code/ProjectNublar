@@ -18,6 +18,7 @@ public class EntityComponentTypes {
     public static final EntityComponentType<HerdComponent> HERD = InjectedUtils.injected();
     public static final EntityComponentType<AdvancedAIComponent> ADVANCED_AI = InjectedUtils.injected();
     public static final EntityComponentType<MetabolismComponent> METABOLISM = InjectedUtils.injected();
+    public static final EntityComponentType<MultipartEntityComponent> MULTIPART = InjectedUtils.injected();
 
     public static final EntityComponentType<WanderComponent> WANDER_AI = InjectedUtils.injected();
 
@@ -51,6 +52,10 @@ public class EntityComponentTypes {
                 SimpleComponentType.builder(MetabolismComponent.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "metabolism"))
                         .withConstructor(MetabolismComponent::new)
+                        .build(),
+                SimpleComponentType.builder(MultipartEntityComponent.class)
+                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "multipart"))
+                        .withConstructor(MultipartEntityComponent::new)
                         .build(),
                 SimpleComponentType.builder(WanderComponent.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "wander_ai"))

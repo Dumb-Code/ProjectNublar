@@ -1,22 +1,31 @@
 package net.dumbcode.projectnublar.server.dinosaur.data;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.google.gson.*;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.world.World;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Data
+@Accessors(chain = true)
 public class EntityProperties {
 
     private Function<World, DinosaurEntity> entityCreateFunction = DinosaurEntity::new;
     private Map<ModelStage, Integer> tickStageMap = Maps.newEnumMap(ModelStage.class);
+    private Map<ModelStage, List<String>> linkedCubeMap = Maps.newEnumMap(ModelStage.class);
 
     // Max Food and water that the entity can have.
     private int maxFood;
@@ -24,6 +33,9 @@ public class EntityProperties {
     // Rate that the food and water decrease every second
     private int waterRate;
     private int foodRate;
+
+    private float width; //todo serilize
+    private float height;
 
     public EntityProperties() {
         for (ModelStage value : ModelStage.values()) {
@@ -52,6 +64,17 @@ public class EntityProperties {
                     }
                 }
             }
+            JsonElement entityMap = obj.get("entity_map");
+            if(entityMap instanceof JsonObject) {
+                JsonObject entityobj = entityMap.getAsJsonObject();
+                for (ModelStage stage : ModelStage.values()) {
+                    if(JsonUtils.isJsonArray(entityobj, stage.getName())) {
+                        result.linkedCubeMap.computeIfAbsent(stage, m -> Lists.newArrayList())
+                                .addAll(StreamSupport.stream(entityobj.getAsJsonArray(stage.getName()).spliterator(), false)
+                                        .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).collect(Collectors.toList()));
+                    }
+                }
+            }
             result.maxFood = obj.get("max_food").getAsInt();
             result.maxWater = obj.get("max_water").getAsInt();
             result.waterRate = obj.get("water_rate").getAsInt();
@@ -71,6 +94,19 @@ public class EntityProperties {
                 }
             }
             object.add("alive_map", alive);
+
+            JsonObject entity = new JsonObject();
+            for (Map.Entry<ModelStage, List<String>> entry : src.linkedCubeMap.entrySet()) {
+                List<String> value = entry.getValue();
+                if(value != null && !value.isEmpty()) {
+                    JsonArray obj = new JsonArray();
+                    for (String s : entry.getValue()) {
+                        obj.add(s);
+                    }
+                    entity.add(entry.getKey().getName(), obj);
+                }
+            }
+            object.add("entity_map", alive);
 
             return object;
         }

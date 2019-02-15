@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.minecraft.world.World;
 
+//todo: dummyify IEntityMultiPart, as to remove it from this entity
 public class DinosaurEntity extends ComposableCreatureEntity {
 
     public DinosaurEntity(World worldIn) {
@@ -19,6 +20,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
         this.attachComponent(EntityComponentTypes.WANDER_AI);
         this.attachComponent(EntityComponentTypes.ANIMATION);
         this.attachComponent(EntityComponentTypes.METABOLISM);
+        this.attachComponent(EntityComponentTypes.MULTIPART);
     }
 
     //Helper method

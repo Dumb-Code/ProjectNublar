@@ -23,6 +23,7 @@ public class BlockHandler {
     public static final BlockElectricFencePole LOW_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.LOW_SECURITY);
     public static final BlockElectricFencePole HIGH_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.HIGH_SECURITY);
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
+    public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
 
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, DrillExtractorBlockEntity::new);
@@ -46,7 +47,8 @@ public class BlockHandler {
                 COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator").setCreativeTab(ProjectNublar.TAB),
                 LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setUnlocalizedName("low_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
                 HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
-                ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB)
+                ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB),
+                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setUnlocalizedName("creative_power").setCreativeTab(ProjectNublar.TAB)
         );
 
         populateMap(event, FOSSIlS, "%s_fossil", FossilBlock::new);
