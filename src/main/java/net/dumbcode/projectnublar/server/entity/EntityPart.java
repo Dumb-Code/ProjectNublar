@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityCo
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -17,6 +18,9 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
     private int parentID = -1; //todo sync parent
     private String partName;
+    public double cubeWidth;
+    public double cubeHeight;
+    public double cubeDepth;
 
     private boolean setInParent = false;
 
@@ -70,6 +74,16 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
             }
         }
         super.onUpdate();
+    }
+
+    @Override
+    public void setPosition(double x, double y, double z) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        double width = this.cubeWidth / 2.0F;
+        double depth = this.cubeDepth / 2.0F;
+        this.setEntityBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + this.cubeHeight, z + depth));
     }
 
     @Override

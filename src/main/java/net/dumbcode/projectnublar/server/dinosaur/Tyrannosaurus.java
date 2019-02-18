@@ -27,12 +27,25 @@ public class Tyrannosaurus extends Dinosaur {
 
 
         val entity = getEntityProperties().getLinkedCubeMap();
-        entity.put(ModelStage.ADULT, Lists.newArrayList("tail4", "head"));
+        entity.put(ModelStage.ADULT, Lists.newArrayList(
+                "tail4",
+                "Tail3",
+                "tail2",
+                "tail1",
 
+                "legUpperRight",
+                "legMiddleRight",
+                "legLowerRight",
 
-        getEntityProperties()
-                .setWidth(10F)
-                .setHeight(5F);
+                "legUpperLeft",
+                "legMiddleLeft",
+                "legLowerLeft",
+
+                "hips",
+                "chest",
+                "jawUpper1",
+                "head"));
+
 
         SkeletalInformation skeletalInformation = this.getSkeletalInformation();
         skeletalInformation.initializeMap(

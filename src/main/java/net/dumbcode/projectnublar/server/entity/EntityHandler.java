@@ -39,7 +39,7 @@ public class EntityHandler {
                         .entity(EntityPart.class)
                         .factory(EntityPart::new)
                         .name(ProjectNublar.MODID + ".dummypart")
-                        .tracker(64, 5, true)
+                        .tracker(64, 10, false)
                         .id(new ResourceLocation(ProjectNublar.MODID, "dummypart"), 2)
                         .build()
         );
