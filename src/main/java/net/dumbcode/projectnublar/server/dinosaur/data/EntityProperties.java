@@ -34,9 +34,6 @@ public class EntityProperties {
     private int waterRate;
     private int foodRate;
 
-    private float width; //todo serilize
-    private float height;
-
     public EntityProperties() {
         for (ModelStage value : ModelStage.values()) {
             this.tickStageMap.put(value, value.getDefaultTickAge());
@@ -106,7 +103,7 @@ public class EntityProperties {
                     entity.add(entry.getKey().getName(), obj);
                 }
             }
-            object.add("entity_map", alive);
+            object.add("entity_map", entity);
 
             return object;
         }
