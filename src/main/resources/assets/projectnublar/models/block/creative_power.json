@@ -1,0 +1,19 @@
+{
+  "parent": "block/cube",
+  "display": {
+    "firstperson_righthand": {
+      "rotation": [ 0, 135, 0 ],
+      "translation": [ 0, 0, 0 ],
+      "scale": [ 0.40, 0.40, 0.40 ]
+    }
+  },
+  "textures": {
+    "particle": "projectnublar:blocks/coal_generator_front",
+    "down": "projectnublar:blocks/coal_generator_bottom",
+    "up": "projectnublar:blocks/coal_generator_top",
+    "north": "projectnublar:blocks/coal_generator_front",
+    "east": "projectnublar:blocks/coal_generator_left",
+    "south": "projectnublar:blocks/coal_generator_bottom",
+    "west": "projectnublar:blocks/coal_generator_right"
+  }
+}
