@@ -5,6 +5,7 @@ import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFencePoleRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFenceRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
+import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
@@ -13,6 +14,7 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePo
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.minecraft.client.renderer.GlStateManager;
@@ -36,6 +38,7 @@ public class DinosaurModelHandler {
 
         RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, DinosaurRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, GyrosphereRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityPart.class, EntityPartRenderer::new);
     }
 
     @SubscribeEvent
