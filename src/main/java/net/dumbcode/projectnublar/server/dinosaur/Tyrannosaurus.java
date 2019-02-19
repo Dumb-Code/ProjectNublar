@@ -41,6 +41,8 @@ public class Tyrannosaurus extends Dinosaur {
                 "legMiddleLeft",
                 "legLowerLeft",
 
+                "neck3",
+
                 "hips",
                 "chest",
                 "jawUpper1",

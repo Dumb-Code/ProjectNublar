@@ -61,23 +61,22 @@ public enum MultipartSystem implements EntitySystem {
         }
         Matrix4d entityRotate = new Matrix4d();
         entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
-        long l = System.nanoTime();
 
         Function<String, AnimationLayer.AnimatableCube> function = layers.get(0).getAnicubeRef(); //ew
         for (MultipartEntityComponent.LinkedEntity cube : multipart.entities) {
-            Entity cubeEntity = cube.getEntity();
+            EntityPart cubeEntity = cube.getEntity();
             AnimationLayer.AnimatableCube animatableCube = function.apply(cube.getCubeName());
-            if (animatableCube != null) {
+            if (animatableCube != null && cubeEntity.ticksExisted > 1) {
                 Point3d sp = null;
                 Point3d ep = null;
 
-                double minX = Double.MAX_VALUE;
-                double minY = Double.MAX_VALUE;
-                double minZ = Double.MAX_VALUE;
+                double minX = Integer.MAX_VALUE;
+                double minY = Integer.MAX_VALUE;
+                double minZ = Integer.MAX_VALUE;
 
-                double maxX = Double.MIN_VALUE;
-                double maxY = Double.MIN_VALUE;
-                double maxZ = Double.MIN_VALUE;
+                double maxX = Integer.MIN_VALUE;
+                double maxY = Integer.MIN_VALUE;
+                double maxZ = Integer.MIN_VALUE;
 
                 for (int i = 0; i < 8; i++) {
                     Vec3d startPoint = animatableCube.getModelPos((i >> 2)&1, (i >> 1)&1, i&1);
@@ -100,19 +99,14 @@ public enum MultipartSystem implements EntitySystem {
                     }
                 }
 
-
-
-                if(cubeEntity instanceof EntityPart) { //interface/ecs ?
-                    ((EntityPart) cubeEntity).cubeWidth = maxX - minX + 0.25F;
-                    ((EntityPart) cubeEntity).cubeHeight = maxY - minY + 0.25F;
-                    ((EntityPart) cubeEntity).cubeDepth = maxZ - minZ + 0.25F;
-                }
+                cubeEntity.cubeWidth = maxX - minX + 0.1f;
+                cubeEntity.cubeHeight = maxY - minY + 0.1f;
+                cubeEntity.cubeDepth = maxZ - minZ + 0.1f;
 
                 Objects.requireNonNull(ep);
                 Objects.requireNonNull(sp);
 
-                cubeEntity.setLocationAndAngles(sp.x + (ep.x - sp.x) / 2D + entity.posX, sp.y + (ep.y - sp.y) / 2D + entity.posY - cubeEntity.height/2, sp.z + (ep.z - sp.z) / 2D + entity.posZ, 0, 0);
-
+                cubeEntity.setPosition(sp.x + (ep.x - sp.x) / 2D + entity.posX, sp.y + (ep.y - sp.y) / 2D + entity.posY - cubeEntity.cubeHeight / 2, sp.z + (ep.z - sp.z) / 2D + entity.posZ);
             }
         }
     }
@@ -120,7 +114,7 @@ public enum MultipartSystem implements EntitySystem {
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent event) {
         World world = Minecraft.getMinecraft().world;
-        if(world != null) {
+        if(world != null && !Minecraft.getMinecraft().isGamePaused()) {
             for (Entity entity : world.loadedEntityList) {
                 if(entity instanceof EntityPart && (((EntityPart) entity).getParent() == null || ((EntityPart) entity).getParent().isDead)) {
                     entity.setDead();

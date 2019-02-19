@@ -16,7 +16,8 @@ import javax.annotation.Nullable;
 
 public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
-    private int parentID = -1; //todo sync parent
+    private int parentID = -1;
+
     private String partName;
     public double cubeWidth;
     public double cubeHeight;
@@ -83,6 +84,8 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         this.posZ = z;
         double width = this.cubeWidth / 2.0F;
         double depth = this.cubeDepth / 2.0F;
+
+        this.height = (float) this.cubeHeight;
         this.setEntityBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + this.cubeHeight, z + depth));
     }
 

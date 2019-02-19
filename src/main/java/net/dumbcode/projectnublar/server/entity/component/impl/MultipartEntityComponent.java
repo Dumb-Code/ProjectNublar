@@ -43,7 +43,7 @@ public class MultipartEntityComponent implements EntityComponent {
                 List<String> list = dinosaur.getEntityProperties().getLinkedCubeMap().getOrDefault(((ComponentAccess) entity)
                         .get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(dinosaur.getSystemInfo().defaultStage()), Lists.newArrayList());
                 for (String s : list) {
-                    Entity e = new EntityPart(entity, s);
+                    EntityPart e = new EntityPart(entity, s);
                     e.setPosition(entity.posX, entity.posY, entity.posZ);
                     entity.world.spawnEntity(e);
                     component.entities.add(new LinkedEntity(s, e));
@@ -52,5 +52,5 @@ public class MultipartEntityComponent implements EntityComponent {
         }
     }
 
-    @Value public static class LinkedEntity { String cubeName; Entity entity; }
+    @Value public static class LinkedEntity { String cubeName; EntityPart entity; }
 }

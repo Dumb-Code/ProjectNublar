@@ -31,7 +31,7 @@ public class EntityHandler {
                         .entity(GyrosphereVehicle.class)
                         .factory(GyrosphereVehicle::new)
                         .name(ProjectNublar.MODID + ".gyrosphere")
-                        .tracker(64, 5, true)
+                        .tracker(64, 10, true)
                         .id(new ResourceLocation(ProjectNublar.MODID, "gyrosphere"), 1)
                         .build(),
 
@@ -39,7 +39,7 @@ public class EntityHandler {
                         .entity(EntityPart.class)
                         .factory(EntityPart::new)
                         .name(ProjectNublar.MODID + ".dummypart")
-                        .tracker(64, 10, false)
+                        .tracker(128, 20, false)
                         .id(new ResourceLocation(ProjectNublar.MODID, "dummypart"), 2)
                         .build()
         );
