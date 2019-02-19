@@ -383,7 +383,7 @@ public class Connection {
 
     @Value public class SurroundingCache {Vector3d point; RotatedRayBox fixedBox, rotatedBox; }
 
-    @Value public class VboCache { int[] data, prevFixed, nextFixed, prevRotated, nextRotated; }
+    @Data public class VboCache { int listID; boolean dirty = true; final int[] data, prevFixed, nextFixed, prevRotated, nextRotated; }
 
     private final static class ConnectionRenderer implements RenderUtils.FaceRenderer {
 

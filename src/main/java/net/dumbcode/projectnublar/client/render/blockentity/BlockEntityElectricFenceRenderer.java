@@ -14,6 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<BlockEntityElectricFence> {
     @Override
@@ -76,40 +77,48 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
 
     public static void renderConnection(Connection connection) {
         World world = Minecraft.getMinecraft().world;
-        BufferBuilder buff = Tessellator.getInstance().getBuffer();
         if(!connection.isBroken()) {
             if (connection.isSign()) {
                 renderVoltSign(connection);
             }
             Connection.VboCache cache = connection.getCache();
 
-            buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-
-
-            boolean pb = connection.brokenSide(world, false);
-            boolean nb = connection.brokenSide(world, true);
-
-
-
-            if(nb) {
-                buff.addVertexData(cache.getNextRotated());
-                if(!pb) {
-                    buff.addVertexData(cache.getNextFixed());
+            if(cache.isDirty()) {
+                if(cache.getListID() != -1) {
+                    GlStateManager.glDeleteLists(cache.getListID(), 1);
                 }
+                int listID = GlStateManager.glGenLists(1);
+                GlStateManager.glNewList(listID, GL11.GL_COMPILE);
+
+                BufferBuilder buff = Tessellator.getInstance().getBuffer();
+
+                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+                boolean pb = connection.brokenSide(world, false);
+                boolean nb = connection.brokenSide(world, true);
+                if(nb) {
+                    buff.addVertexData(cache.getNextRotated());
+                    if(!pb) {
+                        buff.addVertexData(cache.getNextFixed());
+                    }
+                }
+                if(pb) {
+                    buff.addVertexData(cache.getPrevRotated());
+                    if(!nb) {
+                        buff.addVertexData(cache.getPrevFixed());
+                    }
+                }
+                if(!pb && !nb) {
+                    buff.addVertexData(cache.getData());
+                }
+                Tessellator.getInstance().draw();
+                cache.setListID(listID);
+                cache.setDirty(false);
+                GlStateManager.glEndList();
             }
 
-            if(pb) {
-                buff.addVertexData(cache.getPrevRotated());
-                if(!nb) {
-                    buff.addVertexData(cache.getPrevFixed());
-                }
-            }
-            if(!pb && !nb) {
-                buff.addVertexData(cache.getData());
-            }
-            Tessellator.getInstance().draw();
+
+            GlStateManager.callList(cache.getListID());
         }
-        buff.setTranslation(0,0,0);
     }
 
     @Override
