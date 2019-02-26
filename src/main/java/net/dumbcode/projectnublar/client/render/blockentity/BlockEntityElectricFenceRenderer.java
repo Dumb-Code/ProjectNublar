@@ -83,41 +83,23 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
             }
             Connection.VboCache cache = connection.getCache();
 
-            if(cache.isDirty()) {
-                if(cache.getListID() != -1) {
-                    GlStateManager.glDeleteLists(cache.getListID(), 1);
+            boolean pb = connection.brokenSide(world, false);
+            boolean nb = connection.brokenSide(world, true);
+            if(nb) {
+                GlStateManager.callList(cache.getNextRotated());
+                if(!pb) {
+                    GlStateManager.callList(cache.getNextFixed());
                 }
-                int listID = GlStateManager.glGenLists(1);
-                GlStateManager.glNewList(listID, GL11.GL_COMPILE);
-
-                BufferBuilder buff = Tessellator.getInstance().getBuffer();
-
-                buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-                boolean pb = connection.brokenSide(world, false);
-                boolean nb = connection.brokenSide(world, true);
-                if(nb) {
-                    buff.addVertexData(cache.getNextRotated());
-                    if(!pb) {
-                        buff.addVertexData(cache.getNextFixed());
-                    }
-                }
-                if(pb) {
-                    buff.addVertexData(cache.getPrevRotated());
-                    if(!nb) {
-                        buff.addVertexData(cache.getPrevFixed());
-                    }
-                }
-                if(!pb && !nb) {
-                    buff.addVertexData(cache.getData());
-                }
-                Tessellator.getInstance().draw();
-                cache.setListID(listID);
-                cache.setDirty(false);
-                GlStateManager.glEndList();
             }
-
-
-            GlStateManager.callList(cache.getListID());
+            if(pb) {
+                GlStateManager.callList(cache.getPrevRotated());
+                if(!nb) {
+                    GlStateManager.callList(cache.getPrevFixed());
+                }
+            }
+            if(!pb && !nb) {
+                GlStateManager.callList(cache.getData());
+            }
         }
     }
 

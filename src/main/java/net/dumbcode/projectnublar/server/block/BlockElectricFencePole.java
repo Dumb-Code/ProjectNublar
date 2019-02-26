@@ -249,7 +249,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                                         }
                                         TileEntity fencete = worldIn.getTileEntity(position);
                                         if (fencete instanceof ConnectableBlockEntity) {
-                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(worldIn.isRemote, this.type, offset, pos1, other1, positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), positions.get(Math.max(i1 - 1, 0)).up(i), position));
+                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), positions.get(Math.max(i1 - 1, 0)).up(i), position));
                                             fencete.markDirty();
                                             worldIn.notifyBlockUpdate(position, worldIn.getBlockState(position), worldIn.getBlockState(position), 3);
                                         }

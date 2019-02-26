@@ -6,6 +6,9 @@ import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -16,6 +19,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
@@ -29,8 +33,8 @@ import static lombok.EqualsAndHashCode.Include;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
+@Accessors(chain = true)
 public class Connection {
-    private final boolean client;
     @Include private final ConnectionType type;
     @Include private final double offset;
     //Used to help compare Connections
@@ -47,7 +51,7 @@ public class Connection {
     private final int compared;
 
     private VboCache rendercache;
-    @Accessors(chain = true) @Setter private boolean broken;
+    @Setter private boolean broken;
 
     private final double[] in;
     private final boolean valid;
@@ -63,8 +67,7 @@ public class Connection {
     private final SurroundingCache prevCache;
     private final SurroundingCache nextCache;
 
-    public Connection(boolean client, ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
-        this.client = client;
+    public Connection(ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
         this.type = type;
         this.offset = offset;
         this.position = position;
@@ -146,7 +149,7 @@ public class Connection {
     }
 
     public Connection copy() {
-        return new Connection(this.client, this.type, this.offset, this.from, this.to, this.previous, this.next, this.position).setBroken(this.broken);
+        return new Connection(this.type, this.offset, this.from, this.to, this.previous, this.next, this.position).setBroken(this.broken);
     }
     private RotatedRayBox genRotatedBox(double length, double yang, double zang) {
         double w = this.type.getCableWidth();
@@ -171,8 +174,7 @@ public class Connection {
 
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        @Nullable World world = tileEntity.getWorld();
-        return new Connection(world != null && world.isRemote, ConnectionType.getType(nbt.getInteger("type")), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos()).setBroken(nbt.getBoolean("broken"));
+        return new Connection(ConnectionType.getType(nbt.getInteger("type")), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos()).setBroken(nbt.getBoolean("broken")).setSign(nbt.getBoolean("sign"));
     }
 
     public boolean lazyEquals(Connection con) {
@@ -282,11 +284,13 @@ public class Connection {
         double ybot = yrange * this.distance(this.from, this.in[1], this.in[3]) - this.position.getY() + this.from.getY();
         double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot)) / (halfthick*32F);
         double yThick = halfthick * Math.cos(tangrady);
-        Pair<int[], int[]> prev = this.genRenderCache(false, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, yThick, len, ytop, ybot);
-        Pair<int[], int[]> next = this.genRenderCache(true,  new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, yThick, len, ytop, ybot);
+        Tessellator.getInstance().getBuffer().setTranslation(-this.position.getX(), this.offset, -this.position.getZ());
+        Pair<Integer, Integer> prev = this.genRenderCache(false, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, yThick, len, ytop, ybot);
+        Pair<Integer, Integer> next = this.genRenderCache(true,  new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, yThick, len, ytop, ybot);
         double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16)/16F).toArray();
-        int[] data = new int[144];
-        RenderUtils.buildSpacedCube(new ConnectionRenderer(data, -this.position.getX(), (float) this.offset, -this.position.getZ()),
+        int main = GlStateManager.glGenLists(1);
+        GlStateManager.glNewList(main, GL11.GL_COMPILE);
+        RenderUtils.drawSpacedCube(
                 ct[0], ytop + yThick, ct[1],
                 ct[2], ybot + yThick, ct[3],
                 ct[4], ybot + yThick, ct[5],
@@ -303,21 +307,24 @@ public class Connection {
                 uvs[10], uvs[11],
                 len,this.type.getCableWidth(),this.type.getCableWidth()
         );
-        return new VboCache(data, prev.getLeft(), next.getLeft(), prev.getRight(), next.getRight());
+        GlStateManager.glEndList();
+        Tessellator.getInstance().getBuffer().setTranslation(0, 0, 0);
+        return new VboCache(main, prev.getLeft(), next.getLeft(), prev.getRight(), next.getRight());
     }
 
     private double distance(BlockPos from, double x, double z) {
         return Math.sqrt((from.getX()+0.5F-x)*(from.getX()+0.5F-x) + (from.getZ()+0.5F-z)*(from.getZ()+0.5F-z));
     }
 
-    private Pair<int[], int[]> genRenderCache(boolean next, double[] ct, double[] cb, double yThick, double len, double ytop, double ybot) {
+    private Pair<Integer, Integer> genRenderCache(boolean next, double[] ct, double[] cb, double yThick, double len, double ytop, double ybot) {
         Vector3d point = next ? this.nextCache.point : this.prevCache.point;
         double ycenter = ybot + (ytop - ybot) / 2D;
-        int[] rotated = new int[144];
         double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16)/16F).toArray();
+        int rotated = GlStateManager.glGenLists(1);
+        GlStateManager.glNewList(rotated, GL11.GL_COMPILE);
         if(next) {
             ytop = ycenter;
-            RenderUtils.buildSpacedCube(new ConnectionRenderer(rotated, -this.position.getX(), (float) this.offset, -this.position.getZ()),
+            RenderUtils.drawSpacedCube(
                     ct[0] + point.x, ycenter + yThick + point.y, ct[1] + point.z,
                     ct[0], ycenter + yThick, ct[1],
                     ct[6], ycenter + yThick, ct[7],
@@ -338,7 +345,7 @@ public class Connection {
             );
         } else {
             ybot = ycenter;
-            RenderUtils.buildSpacedCube(new ConnectionRenderer(rotated, -this.position.getX(), (float) this.offset, -this.position.getZ()),
+            RenderUtils.drawSpacedCube(
                     ct[2], ycenter + yThick, ct[3],
                     ct[2] - point.x, ycenter + yThick - point.y, ct[3] - point.z,
                     ct[4] - point.x, ycenter + yThick - point.y, ct[5] - point.z,
@@ -358,10 +365,11 @@ public class Connection {
                     len/2, this.type.getCableWidth(), this.type.getCableWidth()
             );
         }
-
+        GlStateManager.glEndList();
         uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16)/16F).toArray();
-        int[] fixed = new int[144];
-        RenderUtils.buildSpacedCube(new ConnectionRenderer(fixed, -this.position.getX(), (float) this.offset, -this.position.getZ()),
+        int fixed = GlStateManager.glGenLists(1);
+        GlStateManager.glNewList(fixed, GL11.GL_COMPILE);
+        RenderUtils.drawSpacedCube(
                 ct[0], ytop + yThick, ct[1],
                 ct[2], ybot + yThick, ct[3],
                 ct[4], ybot + yThick, ct[5],
@@ -378,56 +386,11 @@ public class Connection {
                 uvs[10], uvs[11],
                 len/2,this.type.getCableWidth(),this.type.getCableWidth()
         );
+        GlStateManager.glEndList();
         return Pair.of(fixed, rotated);
     }
 
     @Value public class SurroundingCache {Vector3d point; RotatedRayBox fixedBox, rotatedBox; }
 
-    @Data public class VboCache { int listID; boolean dirty = true; final int[] data, prevFixed, nextFixed, prevRotated, nextRotated; }
-
-    private final static class ConnectionRenderer implements RenderUtils.FaceRenderer {
-
-        private final int[] data;
-        private final float x;
-        private final float y;
-        private final float z;
-        private int o;
-
-        private ConnectionRenderer(int[] data, float x, float y, float z) {
-            this.data = data;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        @Override
-        public RenderUtils.FaceRenderer pos(double x, double y, double z) {
-            this.data[this.o] = Float.floatToRawIntBits((float)x + this.x);
-            this.data[this.o + 1] = Float.floatToRawIntBits((float)y + this.y);
-            this.data[this.o + 2] = Float.floatToRawIntBits((float)z + this.z);
-            return this;
-        }
-
-        @Override
-        public RenderUtils.FaceRenderer tex(double u, double v) {
-            this.data[this.o + 3] = Float.floatToRawIntBits((float)u);
-            this.data[this.o + 4] = Float.floatToRawIntBits((float)v);
-            return this;
-        }
-
-        @Override
-        public RenderUtils.FaceRenderer normal(float x, float y, float z) {
-            int xn = (byte)((int)(x * 127.0F)) & 255;
-            int yn = (byte)((int)(y * 127.0F)) & 255;
-            int zn = (byte)((int)(z * 127.0F)) & 255;
-            this.data[this.o + 5] = xn | yn << 8 | zn << 16;
-            return this;
-        }
-
-        @Override
-        public RenderUtils.FaceRenderer endVertex() {
-            this.o += 6;
-            return this;
-        }
-    }
+    @Value public class VboCache { int data, prevFixed, nextFixed, prevRotated, nextRotated; }
 }

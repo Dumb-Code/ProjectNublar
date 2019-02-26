@@ -105,31 +105,6 @@ public class RenderUtils {
     public static void drawSpacedCube(double ulfx, double ulfy, double ulfz, double ulbx, double ulby, double ulbz, double urbx, double urby, double urbz, double urfx, double urfy, double urfz, double dlfx, double dlfy, double dlfz, double dlbx, double dlby, double dlbz, double drbx, double drby, double drbz, double drfx, double drfy, double drfz, double uu, double uv,double du, double dv, double lu, double lv,double ru, double rv, double fu, double fv,double bu, double bv, double tw,double th,double td) {
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
-
-        buildSpacedCube(new BufferRenderer(buff),
-                ulfx, ulfy, ulfz,
-                ulbx, ulby, ulbz,
-                urbx, urby, urbz,
-                urfx, urfy, urfz,
-
-                dlfx, dlfy, dlfz,
-                dlbx, dlby, dlbz,
-                drbx, drby, drbz,
-                drfx, drfy, drfz,
-
-                uu, uv,
-                du, dv,
-                lu, lv,
-                ru, rv,
-                fu, fv,
-                bu, bv,
-
-                tw, th, td);
-
-        Tessellator.getInstance().draw();
-    }
-
-    public static void buildSpacedCube(FaceRenderer buff, double ulfx, double ulfy, double ulfz, double ulbx, double ulby, double ulbz, double urbx, double urby, double urbz, double urfx, double urfy, double urfz, double dlfx, double dlfy, double dlfz, double dlbx, double dlby, double dlbz, double drbx, double drby, double drbz, double drfx, double drfy, double drfz, double uu, double uv,double du, double dv, double lu, double lv,double ru, double rv, double fu, double fv,double bu, double bv, double tw,double th,double td) {
         Vector3f xNorm = MathUtils.calcualeNormalF(urfx, urfy, urfz, drfx, drfy, drfz, dlfx, dlfy, dlfz);
         Vector3f yNorm = MathUtils.calcualeNormalF(ulfx, ulfy, ulfz, ulbx, ulby, ulbz, urbx, urby, urbz);
         Vector3f zNorm = MathUtils.calcualeNormalF(drfx, drfy, drfz, urfx, urfy, urfz, urbx, urby, urbz);
@@ -157,7 +132,9 @@ public class RenderUtils {
         buff.pos(dlfx, dlfy, dlfz).tex(lu+th, lv).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
         buff.pos(dlbx, dlby, dlbz).tex(lu+th, lv+tw).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
         buff.pos(ulbx, ulby, ulbz).tex(lu, lv+tw).normal(-zNorm.x, -zNorm.y, -zNorm.z).endVertex();
+        Tessellator.getInstance().draw();
     }
+
 
     public static void renderBoxLines(Vector3d[] points, EnumFacing... blocked) { //todo: color params
         render(points, blocked, 0b100, 0b101, 0b111, 0b110);
@@ -192,45 +169,5 @@ public class RenderUtils {
 
         }
         tessellator.draw();
-    }
-
-    public interface FaceRenderer {
-        FaceRenderer pos(double x, double y, double z);
-        FaceRenderer tex(double u, double v);
-        FaceRenderer normal(float x, float y, float z);
-        FaceRenderer endVertex();
-    }
-
-    public static class BufferRenderer implements FaceRenderer {
-
-        private final BufferBuilder builder;
-
-        public BufferRenderer(BufferBuilder builder) {
-            this.builder = builder;
-        }
-
-        @Override
-        public FaceRenderer pos(double x, double y, double z) {
-            this.builder.pos(x, y, z);
-            return this;
-        }
-
-        @Override
-        public FaceRenderer tex(double u, double v) {
-            this.builder.tex(u, v);
-            return this;
-        }
-
-        @Override
-        public FaceRenderer normal(float x, float y, float z) {
-            this.builder.normal(x, y, z);
-            return this;
-        }
-
-        @Override
-        public FaceRenderer endVertex() {
-            this.builder.endVertex();
-            return this;
-        }
     }
 }

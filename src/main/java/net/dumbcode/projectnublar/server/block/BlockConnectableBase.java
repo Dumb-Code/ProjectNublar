@@ -494,7 +494,7 @@ public class BlockConnectableBase extends Block {
                                 List<BlockPos> positions = LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset());
                                 for (int i = 0; i < positions.size(); i++) {
                                     if (positions.get(i).equals(pos)) {
-                                        Connection con = new Connection(worldIn.isRemote, connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.min(i + 1, positions.size() - 1)), positions.get(Math.max(i - 1, 0)), pos);
+                                        Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.min(i + 1, positions.size() - 1)), positions.get(Math.max(i - 1, 0)), pos);
                                         double[] in = con.getIn();
                                         double yin = (in[4] + in[5]) / 2D;
                                         if (side == EnumFacing.DOWN == yin > yRef) {
