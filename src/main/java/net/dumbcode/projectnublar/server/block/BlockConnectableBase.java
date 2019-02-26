@@ -210,7 +210,7 @@ public class BlockConnectableBase extends Block {
                         if(pb) {
                             Vector3d[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
                             for (int i = 0; i < 4; i++) {
-                                bases[i + 4].sub(connection.getPrevCache().getPoint());
+                                bases[i + 4].add(connection.getPrevCache().getPoint());
                             }
                             RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
                         }

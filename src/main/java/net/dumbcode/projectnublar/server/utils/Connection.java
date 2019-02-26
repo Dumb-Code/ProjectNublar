@@ -6,7 +6,6 @@ import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.client.utils.RenderUtils;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,9 +20,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
-
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -119,7 +116,7 @@ public class Connection {
     }
 
     private SurroundingCache genCache(boolean next) {
-        Vector3d point = new Vector3d(this.fullLen/2, 0, 0);
+        Vector3d point = new Vector3d((next ? 1 : -1) * this.fullLen/2, 0, 0);
         double w = this.type.getCableWidth();
         RotatedRayBox fixedBox = new RotatedRayBox.Builder(new AxisAlignedBB(0, -w, -w, -this.fullLen/2, w, w))
                 .origin(next?this.center.x:this.in[0], next?this.center.y:this.in[4], next?this.center.z:this.in[2])
@@ -130,19 +127,16 @@ public class Connection {
         double zang = (this.random.nextFloat()-0.5F) * Math.PI/3F;
         RotatedRayBox rotatedBox = this.genRotatedBox((next ? 1 : -1) * this.fullLen/2, yang, zang);
         rotatedBox.getBackwards().transform(point);
-        AxisAlignedBB aabb = new AxisAlignedBB(BlockPos.ORIGIN);
-        Vec3d vec3d = new Vec3d(point.x, point.y, point.z);
-        Vec3d centerVec = new Vec3d(this.center.x-this.position.getX(), this.center.y-this.position.getY(), this.center.z-this.position.getZ());
+        AxisAlignedBB aabb = new AxisAlignedBB(this.position);
+        Vec3d centerVec = new Vec3d(this.center.x, this.center.y, this.center.z);
+        Vec3d vec3d = new Vec3d(point.x, point.y, point.z).add(centerVec);
         if(!aabb.contains(vec3d)) { //Point outside of bounding box. Cant happen for selction box reasons
             RayTraceResult result = aabb.calculateIntercept(centerVec, vec3d);
             if(result != null && result.hitVec != null) {
-                double dist = result.hitVec.distanceTo(centerVec) / 2; //TODO: get distance from vector to center correct
-                rotatedBox = this.genRotatedBox((next ? 1 : -1) * dist, yang, zang);
-                Vector3d newPoint = new Vector3d(dist, 0, 0);
-                rotatedBox.getBackwards().transform(newPoint);
-//                Vec3d subtracted = result.hitVec.subtract(new Vec3d(this.position));
-//                point = new Vector3d(subtracted.x, subtracted.y, subtracted.z);
-                point = newPoint;
+                double dist = result.hitVec.distanceTo(centerVec) * (next ? 1 : -1) ;
+                rotatedBox = this.genRotatedBox(dist, yang, zang);
+                point = new Vector3d(dist, 0, 0);
+                rotatedBox.getBackwards().transform(point);
             }
         }
         return new SurroundingCache(point, fixedBox, rotatedBox);
@@ -237,10 +231,6 @@ public class Connection {
 
     public VboCache getCache() {
         return this.rendercache = this.getOrGenCache(this.rendercache);
-    }
-
-    public void invalidateCache() {
-        this.rendercache = null;
     }
 
     private VboCache getOrGenCache(VboCache cache) {
@@ -347,13 +337,13 @@ public class Connection {
             ybot = ycenter;
             RenderUtils.drawSpacedCube(
                     ct[2], ycenter + yThick, ct[3],
-                    ct[2] - point.x, ycenter + yThick - point.y, ct[3] - point.z,
-                    ct[4] - point.x, ycenter + yThick - point.y, ct[5] - point.z,
+                    ct[2] + point.x, ycenter + yThick + point.y, ct[3] + point.z,
+                    ct[4] + point.x, ycenter + yThick + point.y, ct[5] + point.z,
                     ct[4], ycenter + yThick, ct[5],
 
                     cb[2], ycenter - yThick, cb[3],
-                    cb[2] - point.x, ycenter - yThick - point.y, cb[3] - point.z,
-                    cb[4] - point.x, ycenter - yThick - point.y, cb[5] - point.z,
+                    cb[2] + point.x, ycenter - yThick + point.y, cb[3] + point.z,
+                    cb[4] + point.x, ycenter - yThick + point.y, cb[5] + point.z,
                     cb[4], ycenter - yThick, cb[5],
 
                     uvs[0], uvs[1],
