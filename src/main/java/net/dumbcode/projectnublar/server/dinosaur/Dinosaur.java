@@ -8,12 +8,15 @@ import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.data.*;
+import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentMap;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -25,6 +28,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Random;
 
 @Getter
@@ -59,9 +63,34 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     public DinosaurEntity createEntity(World world) {
         DinosaurEntity entity = this.getEntityProperties().getEntityCreateFunction().apply(world);
-        entity.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = this;
-        entity.get(EntityComponentTypes.METABOLISM).ifPresent(a -> a.initializeValues(this.getEntityProperties()));
+        entity.getOrExcept(EntityComponentTypes.DINOSAUR).setDinosaur(this);
         return entity;
+    }
+
+    public void setProperties(EntityComponentMap map) {
+        map.get(EntityComponentTypes.AGE).ifPresent(c -> c.tickStageMap = this.getEntityProperties().getTickStageMap());
+        map.get(EntityComponentTypes.METABOLISM).ifPresent(c -> {
+            c.food = this.getEntityProperties().getMaxFood();
+            c.water = this.getEntityProperties().getMaxWater();
+            c.foodRate = this.getEntityProperties().getFoodRate();
+            c.waterRate = this.getEntityProperties().getWaterRate();
+        });
+        map.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
+            c.modelGetter = e -> {
+                ModelStage stage = this.getSystemInfo().defaultStage();
+                AgeComponent component = ((ComponentAccess) e).getOrNull(EntityComponentTypes.AGE);
+                if(component != null) {
+                    stage = component.stage;
+                    if (!this.getSystemInfo().allAcceptedStages().contains(stage)) {
+                        stage = this.getSystemInfo().defaultStage();
+                    }
+                }
+                ResourceLocation regname = this.getRegName();
+                return new ResourceLocation(regname.getResourceDomain(), "models/entities/" + regname.getResourcePath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + this.getModelProperties().getMainModelMap().get(stage));
+            };
+            c.info = this.getSystemInfo();
+        });
+        map.get(EntityComponentTypes.HERD).ifPresent(c -> c.acceptedEntitiy = e -> e instanceof ComponentAccess && ((ComponentAccess) e).get(EntityComponentTypes.DINOSAUR).map(d -> d.getDinosaur() == this).orElse(false));
     }
 
     @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings

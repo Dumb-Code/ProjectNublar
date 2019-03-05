@@ -21,11 +21,6 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
     public ComposableCreatureEntity(World world) {
         super(world);
         this.attachComponents();
-        this.attachComponentAI();
-    }
-
-    protected void attachComponentAI() {
-        super.initEntityAI();
         for (EntityComponent component : this.components.values()) {
             if (component instanceof AiComponent) {
                 AiComponent aiComponent = (AiComponent) component;
@@ -33,6 +28,7 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
             }
         }
     }
+
 
     protected abstract void attachComponents();
 
@@ -47,13 +43,13 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
     @Nullable
     @Override
     public <T extends EntityComponent> T getOrNull(EntityComponentType<T> type) {
-        return this.components.get(type);
+        return this.components.getNullable(type);
     }
 
     @Nonnull
     @Override
     public <T extends EntityComponent> T getOrExcept(EntityComponentType<T> type) {
-        T component = this.components.get(type);
+        T component = this.components.getNullable(type);
         if (component == null) {
             throw new IllegalArgumentException("Component '" + type.getIdentifier() + "' is not present on entity");
         }

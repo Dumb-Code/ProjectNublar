@@ -1,18 +1,18 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAITasks;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class DinosaurComponent implements EntityComponent {
-    public Dinosaur dinosaur = Dinosaur.MISSING;
+    private EntityComponentMap map;
+    @Getter private Dinosaur dinosaur = Dinosaur.MISSING;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -20,15 +20,24 @@ public class DinosaurComponent implements EntityComponent {
         return compound;
     }
 
+    public void setDinosaur(Dinosaur dinosaur) {
+        (this.dinosaur = dinosaur).setProperties(this.map);
+    }
+
     @Override
     public void deserialize(NBTTagCompound compound) {
         ResourceLocation identifier = new ResourceLocation(compound.getString("dinosaur"));
         if (ProjectNublar.DINOSAUR_REGISTRY.containsKey(identifier)) {
-            this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier);
+            this.setDinosaur(ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier));
         } else {
             ProjectNublar.getLogger().warn("Parsed invalid dinosaur component '{}'", identifier);
-            this.dinosaur = Dinosaur.MISSING;
+            this.setDinosaur(Dinosaur.MISSING);
         }
+    }
+
+    @Override
+    public void onAdded(EntityComponentMap map) {
+        this.map = map;
     }
 
     @Override
@@ -38,6 +47,6 @@ public class DinosaurComponent implements EntityComponent {
 
     @Override
     public void deserialize(ByteBuf buf) {
-        this.dinosaur = ByteBufUtils.readRegistryEntry(buf, ProjectNublar.DINOSAUR_REGISTRY);
+        this.setDinosaur(ByteBufUtils.readRegistryEntry(buf, ProjectNublar.DINOSAUR_REGISTRY));
     }
 }

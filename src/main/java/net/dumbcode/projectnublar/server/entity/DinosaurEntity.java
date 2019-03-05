@@ -25,7 +25,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
 
     //Helper method
     public Dinosaur getDinosaur() {
-        return this.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur;
+        return this.getOrExcept(EntityComponentTypes.DINOSAUR).getDinosaur();
     }
 
 

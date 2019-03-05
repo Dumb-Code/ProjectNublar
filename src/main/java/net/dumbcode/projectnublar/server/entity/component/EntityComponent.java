@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.component;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 
 public interface EntityComponent {
@@ -12,5 +13,8 @@ public interface EntityComponent {
     }
 
     default void deserialize(ByteBuf buf) {
+    }
+
+    default void onAdded(EntityComponentMap map) {
     }
 }

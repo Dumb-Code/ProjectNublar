@@ -47,11 +47,9 @@ public class AdvancedAISystem implements EntitySystem
                     }
                     if (task.shouldExecute() && currentTasks.isEmpty()) {
                         currentTasks.add(task);
-                        task.execute();
                     } else if (task.shouldExecute() && !currentTasks.isEmpty()) {
                         if (currentTasks.peek().isConcurrent() && (task.isConcurrent() || task.getType().equals(AIType.ANIMATION))) {
                             currentTasks.add(task);
-                            task.execute();
                         }
                     }
                 }

@@ -12,28 +12,22 @@ import java.util.Map;
 
 public enum AgeSystem implements EntitySystem {
     INSTANCE;
-
-    private DinosaurComponent[] dinosaurs = new DinosaurComponent[0];
     private AgeComponent[] ages = new AgeComponent[0];
 
     @Override
     public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(EntityComponentTypes.DINOSAUR, EntityComponentTypes.AGE);
-        this.dinosaurs = family.populateBuffer(EntityComponentTypes.DINOSAUR);
+        EntityFamily family = manager.resolveFamily(EntityComponentTypes.AGE);
         this.ages = family.populateBuffer(EntityComponentTypes.AGE);
     }
 
     @Override
     public void update() {
-        for (int i = 0; i < this.dinosaurs.length; i++) {
-            Map<ModelStage, Integer> ageTickMap = this.dinosaurs[i].dinosaur.getEntityProperties().getTickStageMap();
+        for (int i = 0; i < this.ages.length; i++) {
             AgeComponent age = this.ages[i];
-
-
             int ageoff = 0;
             for (int j = 0; j < ModelStage.values().length; j++) {
                 ModelStage stage = ModelStage.values()[j];
-                int ticks = ageTickMap.get(stage);
+                int ticks = age.tickStageMap.get(stage);
                 if(ageoff < age.ageInTicks && ageoff + ticks >= age.ageInTicks) {
                     age.stage = stage;
                     age.percentageStage = (age.ageInTicks - ageoff) / (float)ticks;

@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
-import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -9,6 +8,9 @@ public class MetabolismComponent implements EntityComponent
 
     public int food;
     public int water;
+
+    public int foodRate;
+    public int waterRate;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound)
@@ -25,9 +27,4 @@ public class MetabolismComponent implements EntityComponent
         this.water = compound.getInteger("water");
     }
 
-    public void initializeValues(EntityProperties properties)
-    {
-        this.food = properties.getMaxFood();
-        this.water = properties.getMaxWater();
-    }
 }

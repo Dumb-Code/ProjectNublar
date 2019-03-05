@@ -87,7 +87,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public void setDinosaur(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
-        this.getDinosaurEntity().getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = dinosaur;
+        this.getDinosaurEntity().getOrExcept(EntityComponentTypes.DINOSAUR).setDinosaur(dinosaur);
         this.history.clear();
         this.reassureSize();
     }

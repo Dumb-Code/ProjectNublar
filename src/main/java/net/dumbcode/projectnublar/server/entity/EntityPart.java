@@ -16,24 +16,26 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
 
 public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
-    private int parentID = -1;
-
+    private UUID parentUUID;
     @Getter private String partName;
+
     public double cubeWidth;
     public double cubeHeight;
     public double cubeDepth;
+
+    private Entity parentCache;
 
     private boolean setInParent = false;
 
     public EntityPart(@Nonnull Entity parent, @Nonnull String partName) {
         super(parent.world);
         this.entityCollisionReduction = 0.5F;
-        this.parentID = parent.getEntityId();
+        this.parentUUID = parent.getUniqueID();
         this.partName = partName;
-        this.setInParent = true;
     }
 
     public EntityPart(World world) {
@@ -43,7 +45,15 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
     @Nullable
     public Entity getParent() {
-        return this.world.getEntityByID(this.parentID);
+        if(this.parentCache != null) {
+            return parentCache;
+        }
+        for (Entity entity : this.world.loadedEntityList) {
+            if(entity.getUniqueID().equals(this.parentUUID)) {
+                this.parentCache = entity;
+            }
+        }
+        return this.parentCache;
     }
 
     @Override
@@ -52,15 +62,14 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound) {
+        this.parentUUID = compound.getUniqueId("parent");
+        this.partName = compound.getString("partname");
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound) {
-    }
-
-    @Override
-    public boolean writeToNBTOptional(NBTTagCompound compound) {
-        return false;
+        compound.setUniqueId("parent", this.parentUUID);
+        compound.setString("partname", this.partName);
     }
 
     @Override
@@ -79,7 +88,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
             this.setInParent = parent != null;
             if(parent instanceof ComponentAccess) {
                 ((ComponentAccess) parent).get(EntityComponentTypes.MULTIPART)
-                        .ifPresent(multipartEntityComponent -> multipartEntityComponent.entities.add(new MultipartEntityComponent.LinkedEntity(this.partName, this)));
+                        .ifPresent(multipartEntityComponent -> multipartEntityComponent.entities.add(new MultipartEntityComponent.LinkedEntity(this.partName, this.getUniqueID())));
             }
         }
 
@@ -137,9 +146,10 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeBoolean(this.parentID != -1);
-        if(this.parentID != -1) {
-            buffer.writeInt(this.parentID);
+        buffer.writeBoolean(this.parentUUID != null);
+        if(this.parentUUID != null) {
+            buffer.writeLong(this.parentUUID.getMostSignificantBits());
+            buffer.writeLong(this.parentUUID.getLeastSignificantBits());
             ByteBufUtils.writeUTF8String(buffer, this.partName);
         }
     }
@@ -147,7 +157,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         if(additionalData.readBoolean()) {
-            this.parentID = additionalData.readInt();
+            this.parentUUID = new UUID(additionalData.readLong(), additionalData.readLong());
             this.partName = ByteBufUtils.readUTF8String(additionalData);
         }
     }
