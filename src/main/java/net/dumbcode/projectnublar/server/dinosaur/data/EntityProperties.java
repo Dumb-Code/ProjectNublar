@@ -34,6 +34,10 @@ public class EntityProperties {
     private int waterRate;
     private int foodRate;
 
+    private int distanceSmellFood;
+
+    private FeedingDiet diet; //todo serialize
+
     public EntityProperties() {
         for (ModelStage value : ModelStage.values()) {
             this.tickStageMap.put(value, value.getDefaultTickAge());
