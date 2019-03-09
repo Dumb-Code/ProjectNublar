@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
 import net.dumbcode.projectnublar.server.entity.EntityFamily;
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.AdvancedAIComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
 import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
@@ -28,8 +29,6 @@ public class MetabolismSystem implements EntitySystem {
                 MetabolismComponent meta = metabolism[i];
                 meta.food -= meta.foodRate;
                 meta.water -= meta.waterRate;
-
-
 
                 // TODO: Hurt the entity when it has no more food / water left.
             }

@@ -74,6 +74,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             c.water = this.getEntityProperties().getMaxWater();
             c.foodRate = this.getEntityProperties().getFoodRate();
             c.waterRate = this.getEntityProperties().getWaterRate();
+
+            c.diet = this.getEntityProperties().getDiet();
+            c.foodSmellDistance = this.getEntityProperties().getDistanceSmellFood();
         });
         map.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
             c.modelGetter = e -> {
