@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.dinosaur.data;
 
 import com.google.common.collect.Lists;
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.utils.ItemStackUtils;
@@ -11,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -121,8 +123,13 @@ public class FeedingDiet {
                 ProjectNublar.getLogger().warn("Skipping class {} as it does not exist", ((NBTTagString) base).getString());
             }
         }
-
     }
 
-
+    public FeedingDiet copy() {
+        FeedingDiet diet = new FeedingDiet();
+        diet.blocks.addAll(this.blocks);
+        diet.items.addAll(this.items);
+        diet.entities.addAll(this.entities);
+        return diet;
+    }
 }

@@ -11,9 +11,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.system.RegisterSystemsEvent;
-import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.AnimationSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -237,6 +235,8 @@ public class ProjectNublar {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(AnimationSystem.INSTANCE);
         event.registerSystem(MultipartSystem.INSTANCE);
+        event.registerSystem(MetabolismSystem.INSTANCE);
+        event.registerSystem(HerdSystem.INSTANCE);
     }
 
     public static Logger getLogger() {

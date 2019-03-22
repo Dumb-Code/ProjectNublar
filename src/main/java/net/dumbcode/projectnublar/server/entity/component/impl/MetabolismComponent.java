@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
+import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.dinosaur.data.FeedingDiet;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.entity.system.ai.FeedingAi;
@@ -15,7 +16,7 @@ public class MetabolismComponent implements AiComponent {
     public int foodRate;
     public int waterRate;
 
-    public FeedingDiet diet;
+    public FeedingDiet diet = new FeedingDiet();
     public int foodSmellDistance;
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound)
@@ -42,4 +43,14 @@ public class MetabolismComponent implements AiComponent {
             tasks.addTask(2, new FeedingAi((EntityLiving) entity, this));
         }
     }
+
+    @Override
+    public void serialize(ByteBuf buf) {
+        buf.writeInt(this.food);
+        buf.writeInt(this.water);
+
+        buf.writeInt(this.foodRate);
+        buf.writeInt(this.waterRate);
+    }
+
 }

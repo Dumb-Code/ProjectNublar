@@ -35,12 +35,12 @@ public class FeedingAi extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.metabolism.food <= 10) {
+        if (this.metabolism.food <= 10 || true) {
             if(this.process == null) {
                 World world = this.entityLiving.world;
                 //Search entities first
                 for (Entity entity : world.loadedEntityList) {
-                    if (entity.getDistanceSq(this.entityLiving) > this.metabolism.foodSmellDistance*this.metabolism.foodSmellDistance) {
+                    if (entity.getDistanceSq(this.entityLiving) < this.metabolism.foodSmellDistance*this.metabolism.foodSmellDistance) {
                         if (entity instanceof EntityItem && this.metabolism.diet.test(((EntityItem) entity).getItem())) {
                             this.process = new ItemStackProcess((EntityItem) entity);
                             break;
@@ -62,7 +62,9 @@ public class FeedingAi extends EntityAIBase {
                         this.process = new BlockStateProcess(world, results.get(0));
                     }
                 }
-                System.out.println(this.process.toString());
+                if(this.process != null) {
+                    System.out.println(this.process.toString());
+                }
             }
             if (this.process != null) {
                 return this.process.active();
@@ -71,7 +73,15 @@ public class FeedingAi extends EntityAIBase {
         return false;
     }
 
+    @Override
+    public boolean shouldContinueExecuting() {
+        return this.process != null && this.process.active();
+    }
 
+    @Override
+    public void resetTask() {
+        this.process = null;
+    }
 
     public interface FeedingProcess {
        boolean active();

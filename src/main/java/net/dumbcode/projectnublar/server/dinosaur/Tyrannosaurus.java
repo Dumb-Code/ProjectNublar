@@ -6,6 +6,8 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.BiomeDictionary;
 
 public class Tyrannosaurus extends Dinosaur {
@@ -24,7 +26,14 @@ public class Tyrannosaurus extends Dinosaur {
 
 
 
+        getEntityProperties()
+                .setDistanceSmellFood(30)
+                .getDiet()
+                    .add(new ItemStack(Items.APPLE));
 
+        getEntityProperties()
+                .setMaxFood(7500)
+                .setMaxWater(6000);
 
         val entity = getEntityProperties().getLinkedCubeMap();
         entity.put(ModelStage.ADULT, Lists.newArrayList(

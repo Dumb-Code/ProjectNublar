@@ -31,7 +31,7 @@ public class MovementLayer extends AnimationLayer<DinosaurEntity, ModelStage> {
     private boolean isMoving(DinosaurEntity entity) {
         float deltaX = (float) (entity.posX - entity.prevPosX);
         float deltaZ = (float) (entity.posZ - entity.prevPosZ);
-        return deltaX * deltaX + deltaZ * deltaZ > 0.000001F;
+        return deltaX * deltaX + deltaZ * deltaZ > 0.0001F;
     }
 
     @Override

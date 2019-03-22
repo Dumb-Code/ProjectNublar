@@ -31,12 +31,12 @@ public class EntityProperties {
     private int maxFood;
     private int maxWater;
     // Rate that the food and water decrease every second
-    private int waterRate;
-    private int foodRate;
+    private int waterRate = 1;
+    private int foodRate = 1;
 
     private int distanceSmellFood;
 
-    private FeedingDiet diet; //todo serialize
+    private FeedingDiet diet = new FeedingDiet(); //todo serialize
 
     public EntityProperties() {
         for (ModelStage value : ModelStage.values()) {

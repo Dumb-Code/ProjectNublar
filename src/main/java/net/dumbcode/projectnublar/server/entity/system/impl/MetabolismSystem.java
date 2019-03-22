@@ -11,7 +11,8 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismCompone
 import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
 import net.minecraft.entity.Entity;
 
-public class MetabolismSystem implements EntitySystem {
+public enum MetabolismSystem implements EntitySystem {
+    INSTANCE;
     private MetabolismComponent[] metabolism = new MetabolismComponent[0];
     private Entity[] entities = new Entity[0];
 

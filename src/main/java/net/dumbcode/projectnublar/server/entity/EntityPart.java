@@ -32,7 +32,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     private boolean setInParent = false;
 
     public EntityPart(@Nonnull Entity parent, @Nonnull String partName) {
-        super(parent.world);
+        this(parent.world);
         this.entityCollisionReduction = 0.5F;
         this.parentUUID = parent.getUniqueID();
         this.partName = partName;

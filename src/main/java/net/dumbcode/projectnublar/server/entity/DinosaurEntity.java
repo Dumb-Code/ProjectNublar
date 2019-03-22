@@ -23,6 +23,11 @@ public class DinosaurEntity extends ComposableCreatureEntity {
         this.attachComponent(EntityComponentTypes.MULTIPART);
     }
 
+    @Override
+    protected boolean canDespawn() {
+        return false;
+    }
+
     //Helper method
     public Dinosaur getDinosaur() {
         return this.getOrExcept(EntityComponentTypes.DINOSAUR).getDinosaur();

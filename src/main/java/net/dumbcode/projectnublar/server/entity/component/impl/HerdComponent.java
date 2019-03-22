@@ -1,10 +1,15 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
@@ -12,26 +17,27 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class HerdComponent implements EntityComponent {
+public class HerdComponent implements AiComponent {
 
-    public UUID herdUUID = new UUID(0,0);
+    public UUID herdUUID;
     public boolean leader;
-    public boolean inHerd;
+    public UUID entityUUID;
     @Nullable public HerdComponent herd;
     public List<UUID> members = Lists.newArrayList();
     public List<UUID> enemies = Lists.newArrayList();
 
     public Predicate<Entity> acceptedEntitiy;
 
+    public int tryMoveCooldown;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setUniqueId("uuid", this.herdUUID);
+        if(this.herdUUID != null) {
+            compound.setUniqueId("uuid", this.herdUUID);
+        }
         compound.setBoolean("leader", this.leader);
-        compound.setBoolean("inHerd", this.inHerd);
 
         saveList(compound.getCompoundTag("members"), this.members);
         saveList(compound.getCompoundTag("enemies"), this.enemies);
@@ -41,9 +47,12 @@ public class HerdComponent implements EntityComponent {
 
     @Override
     public void deserialize(NBTTagCompound compound) {
-        this.herdUUID = compound.getUniqueId("uuid");
+        if(compound.hasUniqueId("uuid")) {
+            this.herdUUID = compound.getUniqueId("uuid");
+        } else {
+            this.herdUUID = null;
+        }
         this.leader = compound.getBoolean("leader");
-        this.inHerd = compound.getBoolean("inHerd");
 
         loadList(compound.getCompoundTag("members"), this.members);
         loadList(compound.getCompoundTag("enemies"), this.enemies);
@@ -85,6 +94,15 @@ public class HerdComponent implements EntityComponent {
         }
         this.members.add(uniqueID);
         herd.herd = this;
-        herd.inHerd = true;
+        herd.herdUUID = this.herdUUID;
+    }
+
+    @Override
+    public void apply(EntityAITasks tasks, Entity entity) {
+        this.entityUUID = entity.getUniqueID();
+        if(entity instanceof EntityLivingBase) {
+            ((EntityLivingBase)entity).getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(120.0D);
+        }
+
     }
 }
