@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Maps;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 import javax.vecmath.Vector3f;
@@ -35,6 +36,39 @@ public class MathUtils {
             aint[i] = a;
         }
         return aint[new Random().nextInt(aint.length)];
+    }
+
+    public static int floorToZero(double value) {
+        return value > 0 ? MathHelper.floor(value) : MathHelper.ceil(value);
+    }
+
+    public static int[] binChoose(int n) {
+        n += 1;
+        int[][] cache = new int[n+1][n];
+
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j < Math.min(i, n); j++) {
+                if(j == 0 || j == i) {
+                    cache[i][j] = 1;
+                } else {
+                    cache[i][j] = cache[i-1][j-1] + cache[i-1][j];
+                }
+            }
+        }
+
+        return cache[n];
+    }
+
+    public static double binomial(double a, double b, int pow) {
+        return binomial(a, b, binChoose(pow));
+    }
+
+    public static double binomial(double a, double b, int[] n) {
+        double total = 0;
+        for (int i = 0; i < n.length; i++) {
+            total += n[i] * Math.pow(a, i) * Math.pow(b, n.length - i - 1);
+        }
+        return total;
     }
 
     private static Map<TriVec, Vec3d> NORMAL_CACHE = Maps.newHashMap();
