@@ -61,10 +61,10 @@ public class NetworkBuilder {
 
                 double theta = Math.atan2(baseoffZ - offz, baseoffX - offx) - Math.PI / 2;
 
-                double offset = (random.nextInt(5) + 5) * Math.signum(random.nextInt(2)-1);
+                double offset = (random.nextInt(5) + 5) * (random.nextBoolean()?1:-1);
 
-                int c1x = (int) (mpx + offset * Math.cos(theta)) + random.nextInt(4)-2;
-                int c1z = (int) (mpz + offset * Math.sin(theta)) + random.nextInt(4)-2;
+                int c1x = (int) (mpx + offset * Math.cos(theta) + (random.nextInt(5)+5)*(random.nextBoolean()?1:-1));
+                int c1z = (int) (mpz + offset * Math.sin(theta) + (random.nextInt(5)+5)*(random.nextBoolean()?1:-1));
 
                 double res = 0.25D / Math.sqrt((baseoffX-offx)*(baseoffX-offx) + (baseoffZ-offz)*(baseoffZ-offz));
 
