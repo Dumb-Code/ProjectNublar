@@ -17,6 +17,7 @@ import java.util.Random;
 public class NetworkBuilder {
     private final World world;
     private final BlockPos startingPosition;
+    private int test;
 
     public NetworkBuilder(World world, BlockPos startingPosition) {
         this.world = world;
@@ -26,6 +27,13 @@ public class NetworkBuilder {
     public void generate(Random random, List<BuilderNode.Entry<Structure>> aviliable) {
         BuilderNode.Entry<Structure> rootEntry = getStructure(random, getWeightedChoice(random, aviliable), Lists.newArrayList()).get(0);
         List<Pair<Integer, Integer>> placedEntries = Lists.newArrayList();
+
+        for (int x = 0; x < rootEntry.getElement().getXSize(); x++) {
+            for (int z = 0; z < rootEntry.getElement().getZSize(); z++) {
+                placedEntries.add(Pair.of(-rootEntry.getElement().getXSize()/2+x, -rootEntry.getElement().getZSize()/2+z));
+            }
+        }
+
         generateChildren(random, placedEntries, rootEntry, 0, 0);
     }
 
@@ -85,7 +93,10 @@ public class NetworkBuilder {
                     double x = MathUtils.binomial(1-inc, inc, xints);
                     double z = MathUtils.binomial(1-inc, inc, zints);
 
-                    this.world.setBlockState(this.startingPosition.add(x, 0, z).up(2), Blocks.WOOL.getDefaultState());
+                    if(placedEntries.contains(Pair.of(x, z))) {
+                        this.world.setBlockState(this.startingPosition.add(x, 0, z), Blocks.GRASS_PATH.getDefaultState());
+                    }
+
                 }
 
                 break;

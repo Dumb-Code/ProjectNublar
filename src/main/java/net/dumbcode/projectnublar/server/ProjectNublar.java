@@ -225,12 +225,6 @@ public class ProjectNublar {
     }
 
     @SubscribeEvent
-    public static void register(RegisterDinosaurEvent event) {
-        event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:missing")); // TODO: custom class?
-        event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
-    }
-
-    @SubscribeEvent
     public static void register(RegisterSystemsEvent event) {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(AnimationSystem.INSTANCE);

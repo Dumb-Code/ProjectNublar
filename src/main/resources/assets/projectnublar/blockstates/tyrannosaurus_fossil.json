@@ -1,5 +1,0 @@
-{
-  "variants": {
-    "normal": {"model": "minecraft:stone##interpolate-scale:0.5,0.5,0.5@0.5,0.5,0.5;rotate:0,45,0@0.5,0,0.5;.command"}
-  }
-}
