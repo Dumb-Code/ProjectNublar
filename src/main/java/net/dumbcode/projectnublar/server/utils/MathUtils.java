@@ -71,6 +71,20 @@ public class MathUtils {
         return total;
     }
 
+    public static double standerdDiviation(double... data) {
+        double total = 0;
+        for (double datum : data) {
+            total += datum;
+        }
+        double mean = total / data.length;
+
+        double divationTotal = 0;
+        for (double datum : data) {
+            divationTotal += datum - mean;
+        }
+        return divationTotal / data.length;
+    }
+
     private static Map<TriVec, Vec3d> NORMAL_CACHE = Maps.newHashMap();
 
     public static Vec3d calculateNormal(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {

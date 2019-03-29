@@ -1,25 +1,27 @@
 package net.dumbcode.projectnublar.server.world.structures;
 
 import lombok.Getter;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.IResourceManagerReloadListener;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+import java.util.Random;
 
 @Getter
-public class Structure {
-    private final String name;
-    private final int xSize;
-    private final int zSize;
-    private final int weight;
-    private final int children;
+public abstract class Structure implements IResourceManagerReloadListener {
 
-    public Structure(String name, int xSize, int zSize, int weight, int children) {
-        this.name = name;
-        this.xSize = xSize;
-        this.zSize = zSize;
+    private final int weight;
+
+    protected Structure(int weight) {
         this.weight = weight;
-        this.children = children;
     }
+
+    public abstract StructureInstance createInstance(World world, BlockPos pos, Random random);
+
 
     @Override
-    public String toString() {
-        return name;
+    public void onResourceManagerReload(IResourceManager resourceManager) {
     }
+
 }

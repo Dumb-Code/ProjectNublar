@@ -1,0 +1,111 @@
+{
+  "pools": [
+    {
+      "name": "reward",
+      "rolls": {
+        "min": 1,
+        "max": 4
+      },
+      "bonus_rolls": {
+        "min": 0,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "minecraft:diamond_shovel",
+          "quality": 15,
+          "functions": [
+            {
+              "function": "enchant_randomly"
+            },
+            {
+              "function": "enchant_randomly"
+            },
+            {
+              "function": "enchant_randomly"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 3,
+          "name": "minecraft:iron_shovel",
+          "quality": 2,
+          "functions": [
+            {
+              "function": "set_damage",
+              "damage": {
+                "min": 0.125,
+                "max": 0.875
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 15,
+          "name": "minecraft:stone_shovel",
+          "functions": [
+            {
+              "function": "set_damage",
+              "damage": {
+                "min": 0.125,
+                "max": 0.875
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 25,
+          "name": "minecraft:wooden_shovel",
+          "functions": [
+            {
+              "function": "set_damage",
+              "damage": {
+                "min": 0.125,
+                "max": 0.875
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "junk",
+      "rolls": 4,
+      "entries": [
+        {
+          "type": "item",
+          "weight": 25,
+          "name": "minecraft:bone",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 2,
+                "max": 7
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 15,
+          "name": "minecraft:cobblestone",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 2,
+                "max": 5
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
