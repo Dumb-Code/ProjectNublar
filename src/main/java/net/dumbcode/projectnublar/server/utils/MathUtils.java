@@ -59,11 +59,11 @@ public class MathUtils {
         return cache[n];
     }
 
-    public static double binomial(double a, double b, int pow) {
-        return binomial(a, b, binChoose(pow));
+    public static double binomialExp(double a, double b, int pow) {
+        return binomialExp(a, b, binChoose(pow));
     }
 
-    public static double binomial(double a, double b, int[] n) {
+    public static double binomialExp(double a, double b, int[] n) {
         double total = 0;
         for (int i = 0; i < n.length; i++) {
             total += n[i] * Math.pow(a, i) * Math.pow(b, n.length - i - 1);
@@ -71,12 +71,16 @@ public class MathUtils {
         return total;
     }
 
-    public static double standerdDiviation(double... data) {
+    public static double mean(double... data) {
         double total = 0;
         for (double datum : data) {
             total += datum;
         }
-        double mean = total / data.length;
+        return total / data.length;
+    }
+
+    public static double meanDeviation(double... data) {
+        double mean = mean(data);
 
         double divationTotal = 0;
         for (double datum : data) {

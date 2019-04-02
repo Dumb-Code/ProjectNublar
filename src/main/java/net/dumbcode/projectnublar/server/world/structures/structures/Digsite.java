@@ -33,10 +33,12 @@ import java.util.Set;
 public class Digsite extends Structure {
 
     private final int size;
+    private final int children;
 
-    public Digsite(int weight, int size) {
+    public Digsite(int weight, int size, int children) {
         super(weight);
         this.size = size;
+        this.children = children;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class Digsite extends Structure {
                 layercircs[circle] = new Circle(startx, startz, size, xsize, zsize, distx, distz);
             }
         }
-        return new Instance(world, pos, overallsize, circles, totalLayers, maxx-minx, maxz-minz);
+        return new Instance(world, pos, overallsize, circles, this.children, totalLayers, maxx-minx, maxz-minz);
     }
 
     @AllArgsConstructor
@@ -89,8 +91,8 @@ public class Digsite extends Structure {
         private final Circle[][] circles;
         private final int totalLayers;
 
-        public Instance(World world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, int xSize, int zSize) {
-            super(world, position, 1, xSize, zSize);
+        public Instance(World world, BlockPos position, int overallsize, Circle[][] circles, int children, int totalLayers, int xSize, int zSize) {
+            super(world, position, children, xSize, zSize);
             this.overallsize = overallsize;
             this.circles = circles;
             this.totalLayers = totalLayers;
@@ -348,7 +350,7 @@ public class Digsite extends Structure {
             if(liquids / (solids + liquids) > 0.3) { //cant be 30% water base
                 return false;
             }
-            double diviation = MathUtils.standerdDiviation(data);
+            double diviation = MathUtils.meanDeviation(data);
             return diviation <= 2;
         }
     }

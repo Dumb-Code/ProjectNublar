@@ -1,8 +1,10 @@
 package net.dumbcode.projectnublar.server.world.structures.structures.template;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.Cleanup;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.placement.TemplatePlacement;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -10,7 +12,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.*;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.ObjectIntIdentityMap;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -42,23 +44,39 @@ public class NBTTemplate
     /** size of the structure */
     private BlockPos size = BlockPos.ORIGIN;
 
+    @Nullable private final TemplatePlacement placement;
+
+    public NBTTemplate() {
+        this(null);
+    }
+
+    public NBTTemplate(@Nullable TemplatePlacement placement) {
+        this.placement = placement;
+    }
+
     public BlockPos getSize()
     {
         return this.size;
     }
 
-    public static BlockPos transformedBlockPos(PlacementSettings placementIn, BlockPos pos) {
+    public BlockPos transformedBlockPos(PlacementSettings placementIn, BlockPos pos) {
         return transformedBlockPos(pos, placementIn.getMirror(), placementIn.getRotation());
     }
 
-    public void addBlocksToWorld(World worldIn, BlockPos pos, Function<BlockPos, BlockPos> posFunc, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags)
+    public void addBlocksToWorld(World worldIn, BlockPos pos, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags)
     {
         if ((!this.blocks.isEmpty() || !placementIn.getIgnoreEntities() && !this.entities.isEmpty()) && this.size.getX() >= 1 && this.size.getY() >= 1 && this.size.getZ() >= 1)  {
             Block block = placementIn.getReplacedBlock();
             StructureBoundingBox structureboundingbox = placementIn.getBoundingBox();
 
+            Map<BlockInfo, BlockPos> mappedPositions = Maps.newHashMap();
+            for (BlockInfo blockInfo : this.blocks) {
+                BlockPos blockpos = transformedBlockPos(placementIn, blockInfo.pos);
+                mappedPositions.put(blockInfo, this.placement == null ? blockpos.add(pos) : this.placement.transpose(worldIn, blockpos.add(pos), blockpos));
+            }
+
             for (NBTTemplate.BlockInfo template$blockinfo : this.blocks) {
-                BlockPos blockpos = transformedBlockPos(placementIn, posFunc.apply(template$blockinfo.pos)).add(pos);
+                BlockPos blockpos = mappedPositions.get(template$blockinfo);
                 NBTTemplate.BlockInfo template$blockinfo1 = infoFunc.apply(blockpos, template$blockinfo);
 
                 if (template$blockinfo1 != null) {
@@ -106,7 +124,7 @@ public class NBTTemplate
             {
                 if (block == null || block != template$blockinfo2.blockState.getBlock())
                 {
-                    BlockPos blockpos1 = transformedBlockPos(placementIn, posFunc.apply(template$blockinfo2.pos)).add(pos);
+                    BlockPos blockpos1 = mappedPositions.get(template$blockinfo2);
 
                     if (structureboundingbox == null || structureboundingbox.isVecInside(blockpos1))
                     {
@@ -171,11 +189,12 @@ public class NBTTemplate
         }
     }
 
-    private static BlockPos transformedBlockPos(BlockPos pos, Mirror mirrorIn, Rotation rotationIn)
+    //todo: make rotation point
+    private BlockPos transformedBlockPos(BlockPos pos, Mirror mirrorIn, Rotation rotationIn)
     {
-        int i = pos.getX();
+        int i = pos.getX() - this.size.getX() / 2;
         int j = pos.getY();
-        int k = pos.getZ();
+        int k = pos.getZ() - this.size.getZ() / 2;
         boolean flag = true;
 
         switch (mirrorIn)
@@ -190,17 +209,24 @@ public class NBTTemplate
                 flag = false;
         }
 
+        BlockPos out;
+
         switch (rotationIn)
         {
             case COUNTERCLOCKWISE_90:
-                return new BlockPos(k, j, -i);
+                out = new BlockPos(k, j, -i);
+                break;
             case CLOCKWISE_90:
-                return new BlockPos(-k, j, i);
+                out = new BlockPos(-k, j, i);
+                break;
             case CLOCKWISE_180:
-                return new BlockPos(-i, j, -k);
+                out = new BlockPos(-i, j, -k);
+                break;
             default:
-                return flag ? new BlockPos(i, j, k) : pos;
+                out = flag ? new BlockPos(i, j, k) : pos;
         }
+
+        return out.add(this.size.getX() / 2, 0, this.size.getZ() / 2);
     }
 
     private static Vec3d transformedVec3d(Vec3d vec, Mirror mirrorIn, Rotation rotationIn)
@@ -261,7 +287,7 @@ public class NBTTemplate
         return blockpos;
     }
 
-    public static NBTTemplate readFromFile(ResourceLocation location) {
+    public static NBTTemplate readFromFile(ResourceLocation location, TemplatePlacement placement) {
         //todo cacheing
 
         NBTTagCompound compound;
@@ -273,7 +299,7 @@ public class NBTTemplate
             return new NBTTemplate();
         }
 
-        NBTTemplate template = new NBTTemplate();
+        NBTTemplate template = new NBTTemplate(placement);
 
         NBTTagList nbttaglist = compound.getTagList("size", 3);
         template.size = new BlockPos(nbttaglist.getIntAt(0), nbttaglist.getIntAt(1), nbttaglist.getIntAt(2));

@@ -9,6 +9,7 @@ import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -23,6 +24,7 @@ public class NetworkBuilder {
     private final World world;
     private final BlockPos startingPosition;
     private Set<BlockPos> pathPositions = Sets.newHashSet();
+    private List<Runnable> generations = Lists.newArrayList();
 
     public NetworkBuilder(World world, BlockPos startingPosition) {
         this.world = world;
@@ -33,32 +35,32 @@ public class NetworkBuilder {
         BuilderNode.Entry<Structure> rootEntry = getWeightedChoice(random, aviliable);
         List<Pair<Integer, Integer>> placedEntries = Lists.newArrayList();
         StructureInstance instance = rootEntry.getElement().createInstance(this.world, this.startingPosition, random);
-        generateChildren(random, placedEntries, instance, chooseChildren(random, rootEntry, instance), 0, 0);
+        prepGeneration(random, placedEntries, instance, chooseChildren(random, rootEntry, instance), 0, 0);
 
         Set<BlockPos> generatedPaths = Sets.newHashSet();
         Biome biome = this.world.getBiome(this.startingPosition);
         for (BlockPos pathPosition : this.pathPositions) {
-            if(!placedEntries.contains(Pair.of(pathPosition.getX(), pathPosition.getZ()))) {
-                for (EnumFacing horizontal : EnumFacing.HORIZONTALS) {
-                    BlockPos pos = pathPosition.offset(horizontal);
-                    if(!this.pathPositions.contains(pos) && !generatedPaths.contains(pos)) {
-                        generatedPaths.add(pos);
-                        float perc = random.nextFloat();
-                        pos = this.world.getTopSolidOrLiquidBlock(pos.add(this.startingPosition)).down();
-                        if(perc < 0.3) {
-                            this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
-                        } else if (perc < 0.6) {
-                            this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
-                        }
+            for (EnumFacing horizontal : EnumFacing.HORIZONTALS) {
+                BlockPos pos = pathPosition.offset(horizontal);
+                if(!this.pathPositions.contains(pos) && !generatedPaths.contains(pos)) {
+                    generatedPaths.add(pos);
+                    float perc = random.nextFloat();
+                    pos = this.world.getTopSolidOrLiquidBlock(pos.add(this.startingPosition)).down();
+                    if(perc < 0.3) {
+                        this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
+                    } else if (perc < 0.6) {
+                        this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
                     }
                 }
-                pathPosition = this.world.getTopSolidOrLiquidBlock(pathPosition.add(this.startingPosition)).down();
-                this.world.setBlockState(pathPosition, BlockUtils.getBiomeDependantState(Blocks.GRASS_PATH.getDefaultState(), biome));
             }
+            pathPosition = this.world.getTopSolidOrLiquidBlock(pathPosition.add(this.startingPosition)).down();
+            this.world.setBlockState(pathPosition, BlockUtils.getBiomeDependantState(Blocks.GRASS_PATH.getDefaultState(), biome));
         }
+
+        this.generations.forEach(Runnable::run);
     }
 
-    private void generateChildren(Random random, List<Pair<Integer, Integer>> placedEntries, StructureInstance instance, List<BuilderNode.Entry<Structure>> children, int baseoffX, int baseoffZ) {
+    private void prepGeneration(Random random, List<Pair<Integer, Integer>> placedEntries, StructureInstance instance, List<BuilderNode.Entry<Structure>> children, int baseoffX, int baseoffZ) {
         if(!instance.canBuild()) {
             return;
         }
@@ -71,8 +73,8 @@ public class NetworkBuilder {
                 int offx = random.nextInt(instance.getXSize()) - instance.getXSize()/2;
                 int offz = random.nextInt(instance.getZSize()) - instance.getZSize()/2;
 
-                offx += baseoffX + 15 * Math.signum(offx);
-                offz += baseoffZ + 15 * Math.signum(offz);
+                offx += baseoffX + 5 * Math.signum(offx);
+                offz += baseoffZ + 5 * Math.signum(offz);
 
                 StructureInstance childInstance = child.getElement().createInstance(this.world, this.startingPosition.add(offx, 0, offz), random);
                 if(!childInstance.canBuild()) {
@@ -80,7 +82,7 @@ public class NetworkBuilder {
                 }
                 for (int x = 0; x < childInstance.getXSize(); x++) {
                     for (int z = 0; z < childInstance.getZSize(); z++) {
-                        places.add(Pair.of(offx-childInstance.getXSize()/2+x, offz-childInstance.getZSize()/2+z));
+                        places.add(Pair.of(offx+x, offz+z));
                     }
                 }
                 for (Pair<Integer, Integer> placedEntry : placedEntries) {
@@ -91,7 +93,7 @@ public class NetworkBuilder {
                     }
                 }
 
-                generateChildren(random, placedEntries, childInstance, chooseChildren(random, child, childInstance), offx, offz);
+                prepGeneration(random, placedEntries, childInstance, chooseChildren(random, child, childInstance), offx, offz);
 
                 int mpx = (baseoffX + offx) / 2;
                 int mpz = (baseoffZ + offz) / 2;
@@ -119,8 +121,8 @@ public class NetworkBuilder {
                 }
 
                 for (double inc = 0; inc < 1D; inc += res) {
-                    double x = MathUtils.binomial(1-inc, inc, xints);
-                    double z = MathUtils.binomial(1-inc, inc, zints);
+                    double x = MathUtils.binomialExp(1-inc, inc, xints);
+                    double z = MathUtils.binomialExp(1-inc, inc, zints);
                     this.pathPositions.add(new BlockPos(x, -1, z));
                 }
 
@@ -130,26 +132,20 @@ public class NetworkBuilder {
     }
 
     private void generateEntry(StructureInstance structure, Random random, List<Pair<Integer, Integer>> placedEntries, int offX, int offZ) {
-
-        for (int x = 0; x < structure.getXSize(); x++) {
-            for (int z = 0; z < structure.getZSize(); z++) {
-                placedEntries.add(Pair.of(offX-structure.getXSize()/2+x, offZ-structure.getZSize()/2+z));
+        //2 blocks padding
+        int padding = 2;
+        for (int x = 0; x < structure.getXSize()+padding*2; x++) {
+            for (int z = 0; z < structure.getZSize()+padding*2; z++) {
+                placedEntries.add(Pair.of(offX+x-padding, offZ+z-padding));
             }
         }
+        Random constRand = new Random(random.nextLong());
+        this.generations.add(() -> structure.build(constRand));
 
-        structure.build(random);
 
-//        todo:
-//        BlockPos base = this.startingPosition.add(offX, 0, offZ).add(-structure.getXSize()/2, 0, -structure.getZSize()/2);
-//
-//        EnumDyeColor color = EnumDyeColor.values()[new Random().nextInt(EnumDyeColor.values().length)];
-//
-//        for (int x = 0; x < structure.getXSize(); x++) {
-//            for (int z = 0; z < structure.getXSize(); z++) {
-//                this.world.setBlockState(base.add(x, 0, z), Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, color));
-//            }
-//        }
+        BlockPos base = this.startingPosition.add(offX, 0, offZ).add(-structure.getXSize()/2, 0, -structure.getZSize()/2);
 
+        EnumDyeColor color = EnumDyeColor.values()[new Random().nextInt(EnumDyeColor.values().length)];
     }
 
     private List<BuilderNode.Entry<Structure>> chooseChildren(Random random, BuilderNode.Entry<Structure> entry, StructureInstance instance) {
