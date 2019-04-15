@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import lombok.Cleanup;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.utils.BlockUtils;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.placement.TemplatePlacement;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -14,6 +16,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.*;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.ObjectIntIdentityMap;
 import net.minecraft.util.ResourceLocation;
@@ -23,14 +26,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
+import net.minecraft.world.gen.structure.template.Template;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiFunction;
 
 
@@ -57,7 +58,7 @@ public class NBTTemplate
         return transformedBlockPos(pos, placementIn.getMirror(), placementIn.getRotation());
     }
 
-    public void addBlocksToWorld(World worldIn, BlockPos pos, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags) {
+    public void addBlocksToWorld(World worldIn, BlockPos pos, List<DataHandler> handlers, Random random, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags) {
         if (!this.blocks.isEmpty() || !placementIn.getIgnoreEntities() && !this.entities.isEmpty())  {
             Block block = placementIn.getReplacedBlock();
             StructureBoundingBox structureboundingbox = placementIn.getBoundingBox();
@@ -113,17 +114,34 @@ public class NBTTemplate
                 }
             }
 
-            for (NBTTemplate.BlockInfo template$blockinfo2 : this.blocks)
-            {
-                if (block == null || block != template$blockinfo2.blockState.getBlock())
+            for (NBTTemplate.BlockInfo info : this.blocks) {
+                if (block == null || block != info.blockState.getBlock())
                 {
-                    BlockPos blockpos1 = mappedPositions.get(template$blockinfo2);
+                    BlockPos blockpos1 = mappedPositions.get(info);
 
                     if (structureboundingbox == null || structureboundingbox.isVecInside(blockpos1))
                     {
-                        worldIn.notifyNeighborsRespectDebug(blockpos1, template$blockinfo2.blockState.getBlock(), false);
+                        IBlockState iblockstate = info.blockState;
 
-                        if (template$blockinfo2.tileentityData != null)
+                        if (iblockstate.getBlock() == Blocks.STRUCTURE_BLOCK && info.tileentityData != null)
+                        {
+                            TileEntityStructure.Mode tileentitystructure$mode = TileEntityStructure.Mode.valueOf(info.tileentityData.getString("mode"));
+
+                            if (tileentitystructure$mode == TileEntityStructure.Mode.DATA)
+                            {
+                                for (DataHandler handler : handlers) {
+                                    IBlockState state = handler.get(info.tileentityData.getString("metadata"), worldIn, blockpos1, random);
+                                    if(state != null) {
+                                        worldIn.setBlockState(blockpos1, state);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        worldIn.notifyNeighborsRespectDebug(blockpos1, info.blockState.getBlock(), false);
+
+                        if (info.tileentityData != null)
                         {
                             TileEntity tileentity1 = worldIn.getTileEntity(blockpos1);
 
@@ -181,6 +199,7 @@ public class NBTTemplate
             }
         }
     }
+
 
     private BlockPos transformedBlockPos(BlockPos pos, Mirror mirrorIn, Rotation rotationIn)
     {

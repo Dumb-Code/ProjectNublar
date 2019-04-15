@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -15,6 +16,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 
+import java.util.List;
 import java.util.Random;
 
 public class StructureTemplate extends Structure {
@@ -44,9 +46,12 @@ public class StructureTemplate extends Structure {
         }
 
         @Override
-        public void build(Random random) {
+        public void build(Random random, List<DataHandler> handlers) {
             Biome biome = this.world.getBiome(this.position);
-            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
+            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, handlers, random, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
+            for (DataHandler handler : handlers) {
+                handler.end(DataHandler.Scope.STRUCTURE);
+            }
         }
 
         @Override

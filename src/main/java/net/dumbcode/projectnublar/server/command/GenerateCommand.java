@@ -6,10 +6,15 @@ import net.dumbcode.projectnublar.server.world.structures.Structures;
 import net.dumbcode.projectnublar.server.world.structures.network.NetworkBuilder;
 import net.dumbcode.projectnublar.server.world.structures.structures.Digsite;
 import net.dumbcode.projectnublar.server.world.structures.structures.StructureTemplate;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityLockableLoot;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.Random;
 
@@ -26,17 +31,38 @@ public class GenerateCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        //todo: when the structure system is jsonified, the varibles i have here will be constants that are created at the start of each network
+        //todo: These constants can then be references later on
+        //Not that the constant should be a primitive, not just an integer/float
+        Random rand = new Random();
+        int color1 = rand.nextInt(16);
+        int color2 = rand.nextInt(16);
+        while (color1 == color2) {
+            color2 = rand.nextInt(16);
+        }
+        int[] colors = {color1, color2};
+
         new NetworkBuilder(sender.getEntityWorld(), sender.getPosition())
-                .generate(new Random(),
+                .addData(new DataHandler(DataHandler.Scope.BLOCK, s -> s.startsWith("chest~"),(world, pos, name, random) -> {
+                    TileEntity tileEntity = world.getTileEntity(pos.down());
+                    if(tileEntity instanceof TileEntityLockableLoot) {
+                        ((TileEntityLockableLoot) tileEntity).setLootTable(new ResourceLocation(name.substring(6)), random.nextLong());
+                    }
+                    return Blocks.AIR.getDefaultState();
+                }))
+                .addData(new DataHandler(DataHandler.Scope.STRUCTURE, s -> s.equals("projectnublar:digsite_wool_1"),
+                        (world, pos, name, random) -> Blocks.WOOL.getStateFromMeta(colors[random.nextInt(colors.length)])))
+
+                .generate(rand,
                         BuilderNode.builder(Structure.class)
                         .child(new Digsite(1, 2, 4))
                                 .child(new Digsite(3, 1, 1))
-                                .sibling(new StructureTemplate(Structures.GREENTENT_LARGE, 3, 50))
+                                .sibling(new StructureTemplate(Structures.TENT_LARGE_1, 3, 50))
                                     .child(new StructureTemplate(Structures.CRATE_LARGE, 0, 3))
                                     .sibling(new StructureTemplate(Structures.CRATE_MEDIUM, 0, 4))
                                     .sibling(new StructureTemplate(Structures.CRATE_SMALL, 0, 5))
                                     .end()
-                                .sibling(new StructureTemplate(Structures.GREENTENT_SMALL, 0, 0))
+                                .sibling(new StructureTemplate(Structures.TENT_SMALL_1, 0, 0))
 
                                 .buildToRoots());
 

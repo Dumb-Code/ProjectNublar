@@ -7,7 +7,9 @@ import net.dumbcode.projectnublar.server.utils.BuilderNode;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.EnumFacing;
@@ -19,6 +21,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class NetworkBuilder {
     private final World world;
@@ -26,9 +31,16 @@ public class NetworkBuilder {
     private Set<BlockPos> pathPositions = Sets.newHashSet();
     private List<Runnable> generations = Lists.newArrayList();
 
+    List<DataHandler> data = Lists.newArrayList();
+
     public NetworkBuilder(World world, BlockPos startingPosition) {
         this.world = world;
         this.startingPosition = world.getTopSolidOrLiquidBlock(startingPosition);
+    }
+
+    public NetworkBuilder addData(DataHandler dataHandler) {
+        this.data.add(dataHandler);
+        return this;
     }
 
     public void generate(Random random, List<BuilderNode.Entry<Structure>> aviliable) {
@@ -58,6 +70,10 @@ public class NetworkBuilder {
         }
 
         this.generations.forEach(Runnable::run);
+
+        for (DataHandler handler : this.data) {
+            handler.end(DataHandler.Scope.NETWORK);
+        }
     }
 
     private void prepGeneration(Random random, List<Pair<Integer, Integer>> placedEntries, StructureInstance instance, List<BuilderNode.Entry<Structure>> children, int baseoffX, int baseoffZ) {
@@ -140,12 +156,7 @@ public class NetworkBuilder {
             }
         }
         Random constRand = new Random(random.nextLong());
-        this.generations.add(() -> structure.build(constRand));
-
-
-        BlockPos base = this.startingPosition.add(offX, 0, offZ).add(-structure.getXSize()/2, 0, -structure.getZSize()/2);
-
-        EnumDyeColor color = EnumDyeColor.values()[new Random().nextInt(EnumDyeColor.values().length)];
+        this.generations.add(() -> structure.build(constRand, this.data));
     }
 
     private List<BuilderNode.Entry<Structure>> chooseChildren(Random random, BuilderNode.Entry<Structure> entry, StructureInstance instance) {

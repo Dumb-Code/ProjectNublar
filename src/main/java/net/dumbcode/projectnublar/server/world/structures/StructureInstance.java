@@ -1,9 +1,11 @@
 package net.dumbcode.projectnublar.server.world.structures;
 
 import lombok.Getter;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.Random;
 
 @Getter
@@ -29,5 +31,5 @@ public abstract class StructureInstance {
         return true;
     }
 
-    public abstract void build(Random random);
+    public abstract void build(Random random, List<DataHandler> handlers);
 }

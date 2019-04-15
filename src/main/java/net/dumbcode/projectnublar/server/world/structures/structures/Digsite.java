@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.world.LootTableHandler;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.state.IBlockState;
@@ -99,7 +100,7 @@ public class Digsite extends Structure {
         }
 
         @Override
-        public void build(Random random) {
+        public void build(Random random, List<DataHandler> handlers) {
             Set<BlockPos> holePositions = Sets.newHashSet();
             Set<BlockPos> fossilPositions = Sets.newHashSet();
 
