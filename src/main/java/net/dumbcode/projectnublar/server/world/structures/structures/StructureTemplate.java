@@ -98,7 +98,7 @@ public class StructureTemplate extends Structure {
             if(liquids / (solids + liquids) > 0.3) { //cant be 30% water base
                 return false;
             }
-            if(max - min > 5) {
+            if(max - min > 3) {
                 return false;
             }
             double diviation = MathUtils.meanDeviation(data);
