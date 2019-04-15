@@ -5,7 +5,9 @@ import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
+import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -27,22 +29,24 @@ public class StructureTemplate extends Structure {
         this.children = children;
     }
 
-
     @Override
     public StructureInstance createInstance(World world, BlockPos pos, Random random) {
-        return new Instance(world, pos, this.children, this.template.getSize().getX(), this.template.getSize().getZ());
+        return new Instance(world, pos, this.children, new PlacementSettings().setRotation(Rotation.values()[random.nextInt(Rotation.values().length)]));
     }
 
     private class Instance extends StructureInstance {
 
-        public Instance(World world, BlockPos position, int children, int xSize, int zSize) {
-            super(world, position, children, xSize, zSize);
+        private final PlacementSettings settings;
+
+        public Instance(World world, BlockPos position, int children, PlacementSettings settings) {
+            super(world, position, children, template.getSizeX(), template.getSizeZ());
+            this.settings = settings;
         }
 
         @Override
         public void build(Random random) {
             Biome biome = this.world.getBiome(this.position);
-            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), new PlacementSettings().setRotation(Rotation.values()[random.nextInt(Rotation.values().length)]), 2);
+            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
         }
 
         @Override
@@ -56,8 +60,11 @@ public class StructureTemplate extends Structure {
             int max = Integer.MIN_VALUE;
             int min = Integer.MAX_VALUE;
 
-            for (int x = -this.xSize/2; x < this.xSize/2; x++) {
-                for (int z = -this.zSize/2; z < this.zSize/2; z++) {
+            BlockPos minp = template.transformedBlockPos(this.settings, template.getMinimum());
+            BlockPos maxp = template.transformedBlockPos(this.settings, template.getMaximum());
+
+            for (int x = Math.min(minp.getX(), maxp.getX()); x < Math.max(minp.getX(), maxp.getX()); x++) {
+                for (int z = Math.min(minp.getZ(), maxp.getZ()); z < Math.max(minp.getZ(), maxp.getZ()); z++) {
                     BlockPos pos = this.position.add(x, 0, z);
 
                     Chunk chunk = this.world.getChunkFromBlockCoords(pos);

@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.world.structures.structures.template;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Cleanup;
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.placement.TemplatePlacement;
 import net.minecraft.block.Block;
@@ -31,41 +32,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 
 //Copied and edited from net.minecraft.world.gen.structure.template.Template
 public class NBTTemplate
 {
-    /** blocks in the structure */
-    private final List<NBTTemplate.BlockInfo> blocks = Lists.<NBTTemplate.BlockInfo>newArrayList();
-    /** entities in the structure */
-    private final List<NBTTemplate.EntityInfo> entities = Lists.<NBTTemplate.EntityInfo>newArrayList();
-    /** size of the structure */
-    private BlockPos size = BlockPos.ORIGIN;
+    private final List<NBTTemplate.BlockInfo> blocks;
+    private final List<NBTTemplate.EntityInfo> entities;
+
+    @Getter private final BlockPos minimum;
+    @Getter private final BlockPos maximum;
 
     @Nullable private final TemplatePlacement placement;
 
-    public NBTTemplate() {
-        this(null);
-    }
-
-    public NBTTemplate(@Nullable TemplatePlacement placement) {
+    public NBTTemplate(List<BlockInfo> blocks, List<EntityInfo> entities, BlockPos minimum, BlockPos maximum, @Nullable TemplatePlacement placement) {
+        this.blocks = blocks;
+        this.entities = entities;
+        this.minimum = minimum;
+        this.maximum = maximum;
         this.placement = placement;
-    }
-
-    public BlockPos getSize()
-    {
-        return this.size;
     }
 
     public BlockPos transformedBlockPos(PlacementSettings placementIn, BlockPos pos) {
         return transformedBlockPos(pos, placementIn.getMirror(), placementIn.getRotation());
     }
 
-    public void addBlocksToWorld(World worldIn, BlockPos pos, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags)
-    {
-        if ((!this.blocks.isEmpty() || !placementIn.getIgnoreEntities() && !this.entities.isEmpty()) && this.size.getX() >= 1 && this.size.getY() >= 1 && this.size.getZ() >= 1)  {
+    public void addBlocksToWorld(World worldIn, BlockPos pos, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags) {
+        if (!this.blocks.isEmpty() || !placementIn.getIgnoreEntities() && !this.entities.isEmpty())  {
             Block block = placementIn.getReplacedBlock();
             StructureBoundingBox structureboundingbox = placementIn.getBoundingBox();
 
@@ -189,12 +182,11 @@ public class NBTTemplate
         }
     }
 
-    //todo: make rotation point
     private BlockPos transformedBlockPos(BlockPos pos, Mirror mirrorIn, Rotation rotationIn)
     {
-        int i = pos.getX() - this.size.getX() / 2;
+        int i = pos.getX() - (this.maximum.getX() - this.minimum.getX()) / 2;
         int j = pos.getY();
-        int k = pos.getZ() - this.size.getZ() / 2;
+        int k = pos.getZ() - (this.maximum.getZ() - this.minimum.getZ()) / 2;
         boolean flag = true;
 
         switch (mirrorIn)
@@ -226,7 +218,19 @@ public class NBTTemplate
                 out = flag ? new BlockPos(i, j, k) : pos;
         }
 
-        return out.add(this.size.getX() / 2, 0, this.size.getZ() / 2);
+        return out.add((this.maximum.getX() - this.minimum.getX()) / 2, 0, (this.maximum.getZ() - this.minimum.getZ()) / 2);
+    }
+
+    public int getSizeX() {
+        return this.maximum.getX() - this.minimum.getX();
+    }
+
+    public int getSizeY() {
+        return this.maximum.getY() - this.minimum.getY();
+    }
+
+    public int getSizeZ() {
+        return this.maximum.getZ() - this.minimum.getZ();
     }
 
     private static Vec3d transformedVec3d(Vec3d vec, Mirror mirrorIn, Rotation rotationIn)
@@ -261,48 +265,22 @@ public class NBTTemplate
         }
     }
 
-    public static BlockPos getZeroPositionWithTransform(BlockPos p_191157_0_, Mirror p_191157_1_, Rotation p_191157_2_, int p_191157_3_, int p_191157_4_)
-    {
-        --p_191157_3_;
-        --p_191157_4_;
-        int i = p_191157_1_ == Mirror.FRONT_BACK ? p_191157_3_ : 0;
-        int j = p_191157_1_ == Mirror.LEFT_RIGHT ? p_191157_4_ : 0;
-        BlockPos blockpos = p_191157_0_;
-
-        switch (p_191157_2_)
-        {
-            case COUNTERCLOCKWISE_90:
-                blockpos = p_191157_0_.add(j, 0, p_191157_3_ - i);
-                break;
-            case CLOCKWISE_90:
-                blockpos = p_191157_0_.add(p_191157_4_ - j, 0, i);
-                break;
-            case CLOCKWISE_180:
-                blockpos = p_191157_0_.add(p_191157_3_ - i, 0, p_191157_4_ - j);
-                break;
-            case NONE:
-                blockpos = p_191157_0_.add(i, 0, j);
-        }
-
-        return blockpos;
-    }
-
     public static NBTTemplate readFromFile(ResourceLocation location, TemplatePlacement placement) {
         //todo cacheing
 
         NBTTagCompound compound;
+
+        List<BlockInfo> blocks = Lists.newArrayList();
+        List<EntityInfo> entities = Lists.newArrayList();
         try {
             @Cleanup InputStream stream = ProjectNublar.class.getResourceAsStream("/assets/" + location.getResourceDomain() + "/structures/" + location.getResourcePath() + ".nbt");
             compound = CompressedStreamTools.readCompressed(stream);
         } catch (IOException e) {
             ProjectNublar.getLogger().error("Error loading structure " + location, e);
-            return new NBTTemplate();
+            return new NBTTemplate(blocks, entities, BlockPos.ORIGIN, BlockPos.ORIGIN, null);
         }
 
-        NBTTemplate template = new NBTTemplate(placement);
 
-        NBTTagList nbttaglist = compound.getTagList("size", 3);
-        template.size = new BlockPos(nbttaglist.getIntAt(0), nbttaglist.getIntAt(1), nbttaglist.getIntAt(2));
         NBTTemplate.BasicPalette template$basicpalette = new NBTTemplate.BasicPalette();
         NBTTagList nbttaglist1 = compound.getTagList("palette", 10);
 
@@ -313,11 +291,29 @@ public class NBTTemplate
 
         NBTTagList nbttaglist3 = compound.getTagList("blocks", 10);
 
+
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        int maxZ = Integer.MIN_VALUE;
+
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int minZ = Integer.MAX_VALUE;
+
         for (int j = 0; j < nbttaglist3.tagCount(); ++j)
         {
             NBTTagCompound nbttagcompound = nbttaglist3.getCompoundTagAt(j);
             NBTTagList nbttaglist2 = nbttagcompound.getTagList("pos", 3);
             BlockPos blockpos = new BlockPos(nbttaglist2.getIntAt(0), nbttaglist2.getIntAt(1), nbttaglist2.getIntAt(2));
+
+            maxX = Math.max(maxX, blockpos.getX());
+            maxY = Math.max(maxY, blockpos.getY());
+            maxZ = Math.max(maxZ, blockpos.getZ());
+
+            minX = Math.min(minX, blockpos.getX());
+            minY = Math.min(minY, blockpos.getY());
+            minZ = Math.min(minZ, blockpos.getZ());
+
             IBlockState iblockstate = template$basicpalette.stateFor(nbttagcompound.getInteger("state"));
             NBTTagCompound nbttagcompound1;
 
@@ -330,7 +326,7 @@ public class NBTTemplate
                 nbttagcompound1 = null;
             }
 
-            template.blocks.add(new NBTTemplate.BlockInfo(blockpos, iblockstate, nbttagcompound1));
+            blocks.add(new NBTTemplate.BlockInfo(blockpos, iblockstate, nbttagcompound1));
         }
 
         NBTTagList nbttaglist4 = compound.getTagList("entities", 10);
@@ -345,10 +341,10 @@ public class NBTTemplate
             if (nbttagcompound3.hasKey("nbt"))
             {
                 NBTTagCompound nbttagcompound2 = nbttagcompound3.getCompoundTag("nbt");
-                template.entities.add(new NBTTemplate.EntityInfo(vec3d, blockpos1, nbttagcompound2));
+                entities.add(new NBTTemplate.EntityInfo(vec3d, blockpos1, nbttagcompound2));
             }
         }
-        return template;
+        return new NBTTemplate(blocks, entities, new BlockPos(minX, minY, minZ), new BlockPos(maxX, maxY, maxZ), placement);
     }
 
     static class BasicPalette implements Iterable<IBlockState> {
