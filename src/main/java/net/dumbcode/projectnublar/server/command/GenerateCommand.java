@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.world.structures.network.NetworkBuilder
 import net.dumbcode.projectnublar.server.world.structures.structures.Digsite;
 import net.dumbcode.projectnublar.server.world.structures.structures.StructureTemplate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandlers;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -43,26 +44,38 @@ public class GenerateCommand extends CommandBase {
         int[] colors = {color1, color2};
 
         new NetworkBuilder(sender.getEntityWorld(), sender.getPosition())
-                .addData(new DataHandler(DataHandler.Scope.BLOCK, s -> s.startsWith("chest~"),(world, pos, name, random) -> {
-                    TileEntity tileEntity = world.getTileEntity(pos.down());
-                    if(tileEntity instanceof TileEntityLockableLoot) {
-                        ((TileEntityLockableLoot) tileEntity).setLootTable(new ResourceLocation(name.substring(6)), random.nextLong());
-                    }
-                    return Blocks.AIR.getDefaultState();
-                }))
+                .addData(DataHandlers.LOOTTABLE)
                 .addData(new DataHandler(DataHandler.Scope.STRUCTURE, s -> s.equals("projectnublar:digsite_wool_1"),
                         (world, pos, name, random) -> Blocks.WOOL.getStateFromMeta(colors[random.nextInt(colors.length)])))
 
                 .generate(rand,
                         BuilderNode.builder(Structure.class)
-                        .child(new Digsite(1, 2, 4))
+                        .child(new Digsite(1, 2, 10))
                                 .child(new Digsite(3, 1, 1))
-                                .sibling(new StructureTemplate(Structures.TENT_LARGE_1, 3, 50))
+                                .sibling(new StructureTemplate(Structures.TENT_LARGE_1, 3, 3))
                                     .child(new StructureTemplate(Structures.CRATE_LARGE, 0, 3))
+                                    .sibling(new StructureTemplate(Structures.TENT_SMALL_1, 0, 4))
+                                        .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1))
+                                        .end()
+                                    .sibling(new StructureTemplate(Structures.TENT_SMALL_2, 0, 4))
+                                        .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1))
+                                        .end()
                                     .sibling(new StructureTemplate(Structures.CRATE_MEDIUM, 0, 4))
                                     .sibling(new StructureTemplate(Structures.CRATE_SMALL, 0, 5))
                                     .end()
-                                .sibling(new StructureTemplate(Structures.TENT_SMALL_1, 0, 0))
+                                .sibling(new StructureTemplate(Structures.TENT_SMALL_1, 1, 3))
+                                    .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1))
+                                    .sibling(new StructureTemplate(Structures.CRATE_LARGE, 0, 3))
+                                    .end()
+                                .sibling(new StructureTemplate(Structures.TENT_LARGE_2, 4, 2))
+                                    .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1))
+                                    .sibling(new StructureTemplate(Structures.CRATE_LARGE, 0, 3))
+                                    .sibling(new StructureTemplate(Structures.TENT_SMALL_1, 0, 4))
+                                        .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1))
+                                        .end()
+                                    .sibling(new StructureTemplate(Structures.TENT_SMALL_2, 0, 4))
+                                        .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1))
+                                        .end()
 
                                 .buildToRoots());
 

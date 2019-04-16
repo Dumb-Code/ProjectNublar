@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.world.structures;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -22,7 +23,11 @@ public abstract class StructureInstance {
     public StructureInstance(World world, BlockPos position, int children, int xSize, int zSize) {
         this.world = world;
         this.children = children;
-        this.position = position.add(-xSize/2, 0, -zSize/2);
+        BlockPos mut = position.add(-xSize/2, 0, -zSize/2);
+        while (mut.getY() > 0 && !world.isSideSolid(mut.down(), EnumFacing.UP)) {
+            mut = mut.down();
+        }
+        this.position = mut;
         this.xSize = xSize;
         this.zSize = zSize;
     }

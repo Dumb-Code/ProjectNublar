@@ -9,9 +9,7 @@ import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.block.BlockDirt;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,9 +19,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class NetworkBuilder {
     private final World world;
@@ -31,7 +26,7 @@ public class NetworkBuilder {
     private Set<BlockPos> pathPositions = Sets.newHashSet();
     private List<Runnable> generations = Lists.newArrayList();
 
-    List<DataHandler> data = Lists.newArrayList();
+    private List<DataHandler> data = Lists.newArrayList();
 
     public NetworkBuilder(World world, BlockPos startingPosition) {
         this.world = world;
@@ -156,6 +151,7 @@ public class NetworkBuilder {
             }
         }
         Random constRand = new Random(random.nextLong());
+        System.out.println(structure.canBuild());
         this.generations.add(() -> structure.build(constRand, this.data));
     }
 

@@ -44,7 +44,6 @@ public class Digsite extends Structure {
 
     @Override
     public StructureInstance createInstance(World world, BlockPos pos, Random random) {
-        pos = world.getTopSolidOrLiquidBlock(pos);
         int overallsize = (int) Math.abs(random.nextGaussian()) + this.size;
         int totalLayers = 2 + random.nextInt(2);
         Circle[][] circles = new Circle[totalLayers][];
@@ -93,7 +92,7 @@ public class Digsite extends Structure {
         private final int totalLayers;
 
         public Instance(World world, BlockPos position, int overallsize, Circle[][] circles, int children, int totalLayers, int xSize, int zSize) {
-            super(world, position, children, xSize, zSize);
+            super(world, position.add(xSize/2, 0, zSize/2), children, xSize, zSize);
             this.overallsize = overallsize;
             this.circles = circles;
             this.totalLayers = totalLayers;
@@ -316,12 +315,16 @@ public class Digsite extends Structure {
         }
 
         @Override
-        public boolean canBuild() {
-            double[] data = new double[this.xSize * this.zSize];
+        public boolean canBuild() { //todo: more predicates, and make the constants not so constant
+            double[] data = new double[this.xSize * this.zSize + this.xSize + this.zSize + 1];
             int pointer = 0;
 
             float liquids = 0;
             float solids = 0;
+
+            int max = Integer.MIN_VALUE;
+            int min = Integer.MAX_VALUE;
+
 
             for (int x = -this.xSize/2; x < this.xSize/2; x++) {
                 for (int z = -this.zSize/2; z < this.zSize/2; z++) {
@@ -341,6 +344,8 @@ public class Digsite extends Structure {
 
 
                     data[pointer++] = blockpos.getY();
+                    max = Math.max(max, blockpos.getY());
+                    min = Math.min(min, blockpos.getY());
                     if(this.world.getBlockState(blockpos.down()).getMaterial().isLiquid()) {
                         liquids++;
                     } else {
@@ -351,8 +356,10 @@ public class Digsite extends Structure {
             if(liquids / (solids + liquids) > 0.3) { //cant be 30% water base
                 return false;
             }
-            double diviation = MathUtils.meanDeviation(data);
-            return diviation <= 2;
+            if(max - min > 5) {
+                return false;
+            }
+            return MathUtils.meanDeviation(data) <= 2;
         }
     }
 }

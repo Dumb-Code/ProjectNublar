@@ -6,9 +6,7 @@ import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -52,11 +50,12 @@ public class StructureTemplate extends Structure {
             for (DataHandler handler : handlers) {
                 handler.end(DataHandler.Scope.STRUCTURE);
             }
+
         }
 
         @Override
         public boolean canBuild() { //todo: more predicates, and make the constants not so constant
-            double[] data = new double[this.xSize * this.zSize];
+            double[] data = new double[this.xSize * this.zSize + this.xSize + this.zSize + 1];
             int pointer = 0;
 
             float liquids = 0;
@@ -68,8 +67,8 @@ public class StructureTemplate extends Structure {
             BlockPos minp = template.transformedBlockPos(this.settings, template.getMinimum());
             BlockPos maxp = template.transformedBlockPos(this.settings, template.getMaximum());
 
-            for (int x = Math.min(minp.getX(), maxp.getX()); x < Math.max(minp.getX(), maxp.getX()); x++) {
-                for (int z = Math.min(minp.getZ(), maxp.getZ()); z < Math.max(minp.getZ(), maxp.getZ()); z++) {
+            for (int x = Math.min(minp.getX(), maxp.getX()); x <= Math.max(minp.getX(), maxp.getX()); x++) {
+                for (int z = Math.min(minp.getZ(), maxp.getZ()); z <= Math.max(minp.getZ(), maxp.getZ()); z++) {
                     BlockPos pos = this.position.add(x, 0, z);
 
                     Chunk chunk = this.world.getChunkFromBlockCoords(pos);
@@ -102,7 +101,11 @@ public class StructureTemplate extends Structure {
                 return false;
             }
             double diviation = MathUtils.meanDeviation(data);
-            return diviation <= 2;
+            if(diviation <= 2) {
+
+                return true;
+            }
+            return false;
         }
     }
 }

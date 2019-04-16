@@ -28,6 +28,7 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,14 +45,17 @@ public class NBTTemplate
     @Getter private final BlockPos minimum;
     @Getter private final BlockPos maximum;
 
-    @Nullable private final TemplatePlacement placement;
+    @Nonnull
+    private final TemplatePlacement placement;
 
     public NBTTemplate(List<BlockInfo> blocks, List<EntityInfo> entities, BlockPos minimum, BlockPos maximum, @Nullable TemplatePlacement placement) {
         this.blocks = blocks;
         this.entities = entities;
         this.minimum = minimum;
         this.maximum = maximum;
-        this.placement = placement;
+        this.placement = placement != null ? placement : new TemplatePlacement.EmptyPlacement();
+
+        this.placement.loadData(this);
     }
 
     public BlockPos transformedBlockPos(PlacementSettings placementIn, BlockPos pos) {
@@ -66,7 +70,7 @@ public class NBTTemplate
             Map<BlockInfo, BlockPos> mappedPositions = Maps.newHashMap();
             for (BlockInfo blockInfo : this.blocks) {
                 BlockPos blockpos = transformedBlockPos(placementIn, blockInfo.pos);
-                mappedPositions.put(blockInfo, this.placement == null ? blockpos.add(pos) : this.placement.transpose(worldIn, blockpos.add(pos), blockpos));
+                mappedPositions.put(blockInfo, this.placement.transpose(worldIn, blockpos.add(pos), blockpos));
             }
 
             for (NBTTemplate.BlockInfo template$blockinfo : this.blocks) {
@@ -92,11 +96,11 @@ public class NBTTemplate
                                     ((IInventory)tileentity).clear();
                                 }
 
-                                worldIn.setBlockState(blockpos, Blocks.BARRIER.getDefaultState(), 4);
+                                worldIn.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 4);
                             }
                         }
 
-                        if (worldIn.setBlockState(blockpos, iblockstate1, flags) && template$blockinfo1.tileentityData != null)
+                        if (this.placement.place(worldIn, blockpos, template$blockinfo.pos, iblockstate1, flags) && template$blockinfo1.tileentityData != null)
                         {
                             TileEntity tileentity2 = worldIn.getTileEntity(blockpos);
 

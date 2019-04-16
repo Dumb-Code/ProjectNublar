@@ -14,7 +14,7 @@ public abstract class Structure implements IResourceManagerReloadListener {
     private final int weight;
 
     protected Structure(int weight) {
-        this.weight = weight;
+        this.weight = weight <= 0 ? 1 : weight;
     }
 
     public abstract StructureInstance createInstance(World world, BlockPos pos, Random random);
