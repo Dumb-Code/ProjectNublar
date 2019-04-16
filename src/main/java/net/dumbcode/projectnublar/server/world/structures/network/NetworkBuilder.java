@@ -151,7 +151,6 @@ public class NetworkBuilder {
             }
         }
         Random constRand = new Random(random.nextLong());
-        System.out.println(structure.canBuild());
         this.generations.add(() -> structure.build(constRand, this.data));
     }
 

@@ -24,6 +24,7 @@ public abstract class StructureInstance {
         this.world = world;
         this.children = children;
         BlockPos mut = position.add(-xSize/2, 0, -zSize/2);
+        mut = new BlockPos(mut.getX(), 257, mut.getZ());
         while (mut.getY() > 0 && !world.isSideSolid(mut.down(), EnumFacing.UP)) {
             mut = mut.down();
         }
