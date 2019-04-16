@@ -19,13 +19,6 @@
                 "min": 2,
                 "max": 8
               }
-            },
-            {
-              "function": "set_data",
-              "data": {
-                "min": 0,
-                "max": 7
-              }
             }
           ]
         },
