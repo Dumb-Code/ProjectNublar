@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.world.structures.structures.template.placement;
 
+import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -12,7 +13,7 @@ public class PushdownPlacement implements TemplatePlacement {
     }
 
     @Override
-    public BlockPos transpose(World world, BlockPos worldPosition, BlockPos relativePosition) {
+    public BlockPos transpose(World world, StructureInstance instance, BlockPos worldPosition, BlockPos relativePosition) {
         return world.getTopSolidOrLiquidBlock(worldPosition).up(relativePosition.getY() - this.levelY);
     }
 }

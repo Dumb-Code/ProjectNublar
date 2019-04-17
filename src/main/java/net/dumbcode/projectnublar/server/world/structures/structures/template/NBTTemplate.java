@@ -6,6 +6,8 @@ import lombok.Cleanup;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
+import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
+import net.dumbcode.projectnublar.server.world.structures.structures.StructureTemplate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.placement.TemplatePlacement;
 import net.minecraft.block.Block;
@@ -62,7 +64,7 @@ public class NBTTemplate
         return transformedBlockPos(pos, placementIn.getMirror(), placementIn.getRotation());
     }
 
-    public void addBlocksToWorld(World worldIn, BlockPos pos, List<DataHandler> handlers, Random random, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags) {
+    public void addBlocksToWorld(World worldIn, BlockPos pos, StructureInstance instance, List<DataHandler> handlers, Random random, BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc, PlacementSettings placementIn, int flags) {
         if (!this.blocks.isEmpty() || !placementIn.getIgnoreEntities() && !this.entities.isEmpty())  {
             Block block = placementIn.getReplacedBlock();
             StructureBoundingBox structureboundingbox = placementIn.getBoundingBox();
@@ -70,7 +72,7 @@ public class NBTTemplate
             Map<BlockInfo, BlockPos> mappedPositions = Maps.newHashMap();
             for (BlockInfo blockInfo : this.blocks) {
                 BlockPos blockpos = transformedBlockPos(placementIn, blockInfo.pos);
-                mappedPositions.put(blockInfo, this.placement.transpose(worldIn, blockpos.add(pos), blockpos));
+                mappedPositions.put(blockInfo, this.placement.transpose(worldIn, instance, blockpos.add(pos), blockpos));
             }
 
             for (NBTTemplate.BlockInfo template$blockinfo : this.blocks) {
@@ -100,7 +102,7 @@ public class NBTTemplate
                             }
                         }
 
-                        if (this.placement.place(worldIn, blockpos, template$blockinfo.pos, iblockstate1, flags) && template$blockinfo1.tileentityData != null)
+                        if (this.placement.place(worldIn, instance, blockpos, template$blockinfo.pos, iblockstate1, flags) && template$blockinfo1.tileentityData != null)
                         {
                             TileEntity tileentity2 = worldIn.getTileEntity(blockpos);
 

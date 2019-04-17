@@ -6,6 +6,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.*;
 import net.minecraftforge.common.BiomeDictionary;
@@ -120,6 +122,13 @@ public class BlockUtils {
 
 
         return state;
+    }
+
+    public static BlockPos getTopSolid(World world, BlockPos pos){
+        while (pos.getY() > 0 && !world.isSideSolid(pos.down(), EnumFacing.UP)) {
+            pos = pos.down();
+        }
+        return pos;
     }
 
 }

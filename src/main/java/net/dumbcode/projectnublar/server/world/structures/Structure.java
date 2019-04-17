@@ -6,6 +6,7 @@ import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 
 @Getter
@@ -19,6 +20,10 @@ public abstract class Structure implements IResourceManagerReloadListener {
 
     public abstract StructureInstance createInstance(World world, BlockPos pos, Random random);
 
+    @Nullable
+    public BlockPos attemptSize() {
+        return null;
+    }
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {

@@ -14,6 +14,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
@@ -34,6 +35,12 @@ public class StructureTemplate extends Structure {
         return new Instance(world, pos, this.children, new PlacementSettings().setRotation(Rotation.values()[random.nextInt(Rotation.values().length)]));
     }
 
+    @Nullable
+    @Override
+    public BlockPos attemptSize() {
+        return this.template.getMaximum().subtract(this.template.getMinimum());
+    }
+
     private class Instance extends StructureInstance {
 
         private final PlacementSettings settings;
@@ -46,11 +53,10 @@ public class StructureTemplate extends Structure {
         @Override
         public void build(Random random, List<DataHandler> handlers) {
             Biome biome = this.world.getBiome(this.position);
-            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, handlers, random, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
+            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, this, handlers, random, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
             for (DataHandler handler : handlers) {
                 handler.end(DataHandler.Scope.STRUCTURE);
             }
-
         }
 
         @Override
@@ -97,15 +103,11 @@ public class StructureTemplate extends Structure {
             if(liquids / (solids + liquids) > 0.3) { //cant be 30% water base
                 return false;
             }
-            if(max - min > 3) {
+            if(max - min > 5) {
                 return false;
             }
             double diviation = MathUtils.meanDeviation(data);
-            if(diviation <= 2) {
-
-                return true;
-            }
-            return false;
+            return diviation <= 2;
         }
     }
 }

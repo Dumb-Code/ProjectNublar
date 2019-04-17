@@ -81,13 +81,24 @@ public class NetworkBuilder {
             outer:
             for (int tries = 0; tries < 100; tries++) {
 
-                int offx = random.nextInt(instance.getXSize()) - instance.getXSize()/2;
-                int offz = random.nextInt(instance.getZSize()) - instance.getZSize()/2;
+                int offx = instance.getXSize()/2;
+                int offz = instance.getZSize()/2;
 
-                offx += baseoffX + 5 * Math.signum(offx);
-                offz += baseoffZ + 5 * Math.signum(offz);
+                BlockPos attemptSize = child.getElement().attemptSize();
+
+                if(attemptSize != null) {
+                    offx += attemptSize.getX() / 2;
+                    offz += attemptSize.getZ() / 2;
+                }
+
+                offx += baseoffX + 5;
+                offz += baseoffZ + 5;
+
+                offx *= random.nextBoolean()?1:-1;
+                offz *= random.nextBoolean()?1:-1;
 
                 StructureInstance childInstance = child.getElement().createInstance(this.world, this.startingPosition.add(offx, 0, offz), random);
+
                 if(!childInstance.canBuild()) {
                     continue;
                 }
