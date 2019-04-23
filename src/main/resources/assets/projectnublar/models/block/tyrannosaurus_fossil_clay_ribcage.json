@@ -1,0 +1,10 @@
+{
+  "parent": "projectnublar:block/fossil",
+  "textures": {
+    "particle": "blocks/hardened_clay",
+    "bottom": "blocks/hardened_clay",
+    "top": "blocks/hardened_clay",
+    "side": "blocks/hardened_clay",
+    "overlay": "projectnublar:blocks/tyrannosaurus_fossil_ribcage"
+  }
+}

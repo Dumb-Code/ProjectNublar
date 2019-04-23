@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "normal": [
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_leg" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_leg_mirrored" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_leg", "y": 180 },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_leg_mirrored", "y": 180 },
+
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_ribcage" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_ribcage_mirrored" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_ribcage", "y": 180 },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_ribcage_mirrored", "y": 180 },
+
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_skull" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_skull_mirrored" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_skull", "y": 180 },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_skull_mirrored", "y": 180 },
+
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_tail" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_tail_mirrored" },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_tail", "y": 180 },
+      { "model": "projectnublar:tyrannosaurus_fossil_stone_tail_mirrored", "y": 180 }
+    ]
+  }
+}

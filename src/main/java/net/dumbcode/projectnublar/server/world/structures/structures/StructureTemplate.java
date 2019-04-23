@@ -53,7 +53,7 @@ public class StructureTemplate extends Structure {
         @Override
         public void build(Random random, List<DataHandler> handlers) {
             Biome biome = this.world.getBiome(this.position);
-            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position, this, handlers, random, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
+            StructureTemplate.this.template.addBlocksToWorld(this.world, this.position.add(-this.xSize/4, 0, -this.zSize/4), this, handlers, random, (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData), this.settings, 2);
             for (DataHandler handler : handlers) {
                 handler.end(DataHandler.Scope.STRUCTURE);
             }

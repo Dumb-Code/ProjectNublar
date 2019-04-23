@@ -56,7 +56,7 @@ public class GenerateCommand extends CommandBase {
                                     .sibling(new StructureTemplate(Structures.CRATE_MEDIUM, 0, 2))
                                     .sibling(new StructureTemplate(Structures.CRATE_LARGE, 0, 1))
                                     .end()
-                                .sibling(new Digsite(2, 1, 1))
+                                .sibling(new Digsite(3, 2, 0))
                                 .sibling(new StructureTemplate(Structures.TENT_LARGE_1, 3, 4))
                                     .child(new StructureTemplate(Structures.CRATE_LARGE, 0, 3))
                                     .sibling(new StructureTemplate(Structures.TENT_SMALL_1, 0, 4))

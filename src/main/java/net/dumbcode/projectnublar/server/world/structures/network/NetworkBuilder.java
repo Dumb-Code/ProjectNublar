@@ -81,29 +81,30 @@ public class NetworkBuilder {
             outer:
             for (int tries = 0; tries < 100; tries++) {
 
-                int offx = instance.getXSize()/2;
-                int offz = instance.getZSize()/2;
+                int offx = instance.getXSize() * 3/4;
+                int offz = instance.getZSize() * 3/4;
 
                 BlockPos attemptSize = child.getElement().attemptSize();
 
                 if(attemptSize != null) {
-                    offx += attemptSize.getX() / 2;
-                    offz += attemptSize.getZ() / 2;
+                    offx += attemptSize.getX() * 3/4;
+                    offz += attemptSize.getZ() * 3/4;
+                } else {
+                    offx *= 2;
+                    offz *= 2;
                 }
-
-                offx += baseoffX + 5;
-                offz += baseoffZ + 5;
 
                 offx *= random.nextBoolean()?1:-1;
                 offz *= random.nextBoolean()?1:-1;
 
+                offx += baseoffX;
+                offz += baseoffZ;
+
+
                 StructureInstance childInstance = child.getElement().createInstance(this.world, this.startingPosition.add(offx, 0, offz), random);
 
-                if(!childInstance.canBuild()) {
-                    continue;
-                }
-                for (int x = 0; x < childInstance.getXSize(); x++) {
-                    for (int z = 0; z < childInstance.getZSize(); z++) {
+                for (int x = -childInstance.getXSize()/2; x < childInstance.getXSize()/2; x++) {
+                    for (int z = -childInstance.getZSize()/2; z < childInstance.getZSize()/2; z++) {
                         places.add(Pair.of(offx+x, offz+z));
                     }
                 }
@@ -113,6 +114,10 @@ public class NetworkBuilder {
                             continue outer;
                         }
                     }
+                }
+
+                if(!childInstance.canBuild()) {
+                    return;
                 }
 
                 prepGeneration(random, placedEntries, childInstance, chooseChildren(random, child, childInstance), offx, offz);
@@ -156,9 +161,10 @@ public class NetworkBuilder {
     private void generateEntry(StructureInstance structure, Random random, List<Pair<Integer, Integer>> placedEntries, int offX, int offZ) {
         //2 blocks padding
         int padding = 2;
-        for (int x = 0; x < structure.getXSize()+padding*2; x++) {
-            for (int z = 0; z < structure.getZSize()+padding*2; z++) {
-                placedEntries.add(Pair.of(offX+x-padding, offZ+z-padding));
+        //todo: have this as a function on the structure, as to make it more dynamic
+        for (int x = -structure.getXSize()/2-padding; x < structure.getXSize()/2+padding; x++) {
+            for (int z = -structure.getZSize()/2-padding; z < structure.getZSize()/2+padding; z++) {
+                placedEntries.add(Pair.of(offX+x, offZ+z));
             }
         }
         Random constRand = new Random(random.nextLong());

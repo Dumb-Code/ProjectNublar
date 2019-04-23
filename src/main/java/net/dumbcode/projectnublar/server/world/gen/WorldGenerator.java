@@ -3,8 +3,8 @@ package net.dumbcode.projectnublar.server.world.gen;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -43,7 +43,7 @@ public enum  WorldGenerator implements IWorldGenerator {
                 for (BiomeDictionary.Type type : BiomeDictionary.getTypes(biome)) {
                     if(dinosaur.getDinosaurInfomation().getBiomeTypes().contains(type)) {
                         int posY = dinosaur.getDinosaurInfomation().getPeriod().getYLevel(random);
-                        new WorldGenMinable(BlockHandler.FOSSIlS.get(dinosaur).getDefaultState(), 5).generate(world, random, new BlockPos(posX, posY, posZ));
+                        new WorldGenMinable(FossilBlock.FossilType.guess(world.getBlockState(new BlockPos(posX, posY, posZ)), dinosaur), 5).generate(world, random, new BlockPos(posX, posY, posZ));
                         break dinosaurList;
                     }
                 }

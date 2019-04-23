@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.utils.MathUtils;
@@ -57,7 +58,7 @@ public class Digsite extends Structure {
         for (int layer = 0; layer < totalLayers; layer++) {
             float xsize = random.nextFloat() + 0.5F; //Between 0.5 and 1.5;
             float zsize = random.nextFloat() + 0.5F;;
-            int size = (int) ((layer * 1.5F) + overallsize + 1);
+            int size = ((layer) + overallsize + 1);
             int numcircles = random.nextInt(2) + 5;
             Circle[] layercircs = circles[layer] = new Circle[numcircles];
             for (int circle = 0; circle < numcircles; circle++) {
@@ -70,15 +71,15 @@ public class Digsite extends Structure {
                 double distx = Math.sqrt((size*size)/xsize);
                 double distz = Math.sqrt((size*size)/zsize);
 
-                minx = Math.min(minx, startx-MathHelper.floor(distx));
-                minz = Math.min(minz, startz-MathHelper.floor(distz));
+                minx = Math.min(minx, -MathHelper.floor(distx));
+                minz = Math.min(minz, -MathHelper.floor(distz));
 
-                maxx = Math.max(maxx, startx+MathHelper.ceil(distx));
-                maxz = Math.max(maxz, startz+MathHelper.ceil(distz));
-
+                maxx = Math.max(maxx, MathHelper.ceil(distx));
+                maxz = Math.max(maxz, MathHelper.ceil(distz));
                 layercircs[circle] = new Circle(startx, startz, size, xsize, zsize, distx, distz);
             }
         }
+
         return new Instance(world, pos, overallsize, circles, this.children, totalLayers, maxx-minx, maxz-minz);
     }
 
@@ -159,11 +160,7 @@ public class Digsite extends Structure {
 
             for (BlockPos pos : fossilPositions) {
                 if(!this.world.getBlockState(pos).getBlock().isReplaceable(this.world, pos)) {
-                    if(random.nextFloat() <  0.25) {
-                        this.world.setBlockState(pos, Blocks.COAL_BLOCK.getDefaultState());
-                    } else {
-                        this.world.setBlockState(pos, BlockHandler.FOSSIlS.get(DinosaurHandler.TYRANNOSAURUS).getDefaultState());
-                    }
+                    this.world.setBlockState(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), DinosaurHandler.TYRANNOSAURUS));
                 }
             }
 

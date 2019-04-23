@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.block;
 
+import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -32,7 +33,7 @@ public class BlockHandler {
     public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, IncubatorBlockEntity::new);
     public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, CoalGeneratorBlockEntity::new);
 
-    public static final Map<Dinosaur, FossilBlock> FOSSIlS = new HashMap<>();
+    public static final Map<FossilBlock.FossilType, Map<Dinosaur, FossilBlock>> FOSSIL = new HashMap<>();
 
 
     @SubscribeEvent
@@ -51,7 +52,12 @@ public class BlockHandler {
                 CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setUnlocalizedName("creative_power").setCreativeTab(ProjectNublar.TAB)
         );
 
-        populateMap(event, FOSSIlS, "%s_fossil", FossilBlock::new);
+        for (FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
+            Map<Dinosaur, FossilBlock> map = Maps.newHashMap();
+            FOSSIL.put(value, map);
+            populateMap(event, map, "%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value));
+
+        }
     }
 
     private static <T extends Block> void populateMap(RegistryEvent.Register<Block> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier) {

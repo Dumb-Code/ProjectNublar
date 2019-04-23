@@ -1,0 +1,11 @@
+{
+  "todo:":"make it so the overlay isnt facing the same way",
+  "variants": {
+    "normal": [
+      { "model": "projectnublar:tyrannosaurus_fossil_sandstone_leg" },
+      { "model": "projectnublar:tyrannosaurus_fossil_sandstone_ribcage" },
+      { "model": "projectnublar:tyrannosaurus_fossil_sandstone_skull" },
+      { "model": "projectnublar:tyrannosaurus_fossil_sandstone_tail" }
+    ]
+  }
+}
