@@ -40,7 +40,9 @@ public enum HerdSystem implements EntitySystem {
             HerdComponent herd = this.herds[i];
 
             if(herd.herdUUID == null) {
-                for (Entity foundEntity : entity.world.getEntitiesInAABBexcluding(entity, new AxisAlignedBB(entity.getPosition()).grow(50, 50, 50), e -> e instanceof ComponentAccess && herd.acceptedEntitiy.test(e))) {
+                for (Entity foundEntity : entity.world.getEntitiesInAABBexcluding(entity, new AxisAlignedBB(entity.getPosition()).grow(50, 50, 50), e -> e instanceof ComponentAccess
+                        && ((ComponentAccess) e).get(EntityComponentTypes.HERD).map(c -> c.herdTypeID.equals(herd.herdTypeID)).orElse(false))) {
+
                     ComponentAccess ca = (ComponentAccess) foundEntity;
                     HerdComponent foundHerd = ca.getOrNull(EntityComponentTypes.HERD);
                     if(foundHerd != null && foundHerd.herd != null) {

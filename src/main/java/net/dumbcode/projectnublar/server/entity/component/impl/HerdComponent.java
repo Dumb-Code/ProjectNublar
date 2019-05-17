@@ -2,8 +2,12 @@ package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentStorage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -11,6 +15,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -28,7 +33,7 @@ public class HerdComponent implements AiComponent {
     public List<UUID> members = Lists.newArrayList();
     public List<UUID> enemies = Lists.newArrayList();
 
-    public Predicate<Entity> acceptedEntitiy;
+    public ResourceLocation herdTypeID;
 
     public int tryMoveCooldown;
 
@@ -41,6 +46,8 @@ public class HerdComponent implements AiComponent {
 
         saveList(compound.getCompoundTag("members"), this.members);
         saveList(compound.getCompoundTag("enemies"), this.enemies);
+
+        compound.setString("herd_type_id", this.herdTypeID.toString());
 
         return compound;
     }
@@ -56,6 +63,8 @@ public class HerdComponent implements AiComponent {
 
         loadList(compound.getCompoundTag("members"), this.members);
         loadList(compound.getCompoundTag("enemies"), this.enemies);
+
+        this.herdTypeID = new ResourceLocation(compound.getString("herd_type_id"));
     }
 
     public List<Entity> getMembers(World world) {
@@ -104,5 +113,29 @@ public class HerdComponent implements AiComponent {
             ((EntityLivingBase)entity).getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(120.0D);
         }
 
+    }
+
+    @Accessors(chain = true)
+    @Setter
+    public static class Storage implements EntityComponentStorage<HerdComponent> {
+
+        private ResourceLocation herdTypeID; //Used to check if entities are compatible with other herds ect.
+
+        @Override
+        public HerdComponent construct() {
+            HerdComponent component = new HerdComponent();
+            component.herdTypeID = this.herdTypeID;
+            return component;
+        }
+
+        @Override
+        public void readJson(JsonObject json) {
+            this.herdTypeID = new ResourceLocation(json.get("herd_type_id").getAsString());
+        }
+
+        @Override
+        public void writeJson(JsonObject json) {
+            json.addProperty("herd_type_id", this.herdTypeID.toString());
+        }
     }
 }

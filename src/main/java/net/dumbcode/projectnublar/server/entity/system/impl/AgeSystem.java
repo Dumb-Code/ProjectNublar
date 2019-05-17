@@ -27,14 +27,14 @@ public enum AgeSystem implements EntitySystem {
             int ageoff = 0;
             for (int j = 0; j < ModelStage.values().length; j++) {
                 ModelStage stage = ModelStage.values()[j];
-                int ticks = age.tickStageMap.get(stage);
+                int ticks = age.tickStageMap.computeIfAbsent(stage, s -> 36000); //Default at 30 minutes
                 if(ageoff < age.ageInTicks && ageoff + ticks >= age.ageInTicks) {
                     age.stage = stage;
                     age.percentageStage = (age.ageInTicks - ageoff) / (float)ticks;
                     break;
                 }
-                ageoff += ticks;
             }
+            ageoff += age.tickStageMap.get(age.stage);
 
         }
     }

@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -14,17 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class EntityComponentMap extends LinkedHashMap<EntityComponentType<?>, EntityComponent> {
-
-    @Override
-    public EntityComponent put(EntityComponentType<?> key, EntityComponent value) {
-        value.onAdded(this);
-        return super.put(key, value);
-    }
+public class EntityComponentMap extends LinkedHashMap<EntityComponentType<?, ?>, EntityComponent> {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T extends EntityComponent> T getNullable(EntityComponentType<T> type) {
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> T getNullable(EntityComponentType<T, S> type) {
         EntityComponent component = super.get(type);
         if (component != null) {
             return (T) component;
@@ -33,7 +28,7 @@ public class EntityComponentMap extends LinkedHashMap<EntityComponentType<?>, En
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends EntityComponent> Optional<T> get(EntityComponentType<T> type) {
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> Optional<T> get(EntityComponentType<T, S> type) {
         EntityComponent component = super.get(type);
         if (component != null) {
             return Optional.of((T) component);
@@ -42,7 +37,7 @@ public class EntityComponentMap extends LinkedHashMap<EntityComponentType<?>, En
     }
 
     public NBTTagList serialize(NBTTagList list) {
-        for (Map.Entry<EntityComponentType<?>, EntityComponent> entry : this.entrySet()) {
+        for (Map.Entry<EntityComponentType<?, ?>, EntityComponent> entry : this.entrySet()) {
             NBTTagCompound componentTag = entry.getValue().serialize(new NBTTagCompound());
             componentTag.setString("identifier", entry.getKey().getIdentifier().toString());
             list.appendTag(componentTag);
@@ -57,9 +52,9 @@ public class EntityComponentMap extends LinkedHashMap<EntityComponentType<?>, En
         for (int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound componentTag = list.getCompoundTagAt(i);
             ResourceLocation identifier = new ResourceLocation(componentTag.getString("identifier"));
-            EntityComponentType<?> componentType = ProjectNublar.COMPONENT_REGISTRY.getValue(identifier);
+            EntityComponentType<?, ?> componentType = ProjectNublar.COMPONENT_REGISTRY.getValue(identifier);
             if (componentType != null) {
-                EntityComponent component = componentType.construct();
+                EntityComponent component = componentType.constructEmpty();
                 this.put(componentType, component);
                 components.add(Pair.of(component, componentTag));
             } else {
@@ -73,14 +68,21 @@ public class EntityComponentMap extends LinkedHashMap<EntityComponentType<?>, En
     }
 
     public void serialize(ByteBuf buf) {
-        for (EntityComponent component : this.values()) {
-            component.serialize(buf);
+        buf.writeShort(this.size());
+        for (Map.Entry<EntityComponentType<?, ?>, EntityComponent> entry : this.entrySet()) {
+            ByteBufUtils.writeRegistryEntry(buf, entry.getKey());
+            entry.getValue().serialize(buf);
         }
     }
 
     public void deserialize(ByteBuf buf) {
-        for (EntityComponent component : this.values()) {
+        this.clear();
+        short size = buf.readShort();
+        for (int i = 0; i < size; i++) {
+            EntityComponentType<?, ?> type = ByteBufUtils.readRegistryEntry(buf, ProjectNublar.COMPONENT_REGISTRY);
+            EntityComponent component = type.constructEmpty();
             component.deserialize(buf);
+            this.put(type, component);
         }
     }
 }

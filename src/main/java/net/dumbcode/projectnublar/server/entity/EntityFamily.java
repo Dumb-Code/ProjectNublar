@@ -17,12 +17,12 @@ public class EntityFamily {
         return this.matchedEntities;
     }
 
-    public <T extends EntityComponent> T[] populateBuffer(EntityComponentType<T> type) {
+    public <T extends EntityComponent> T[] populateBuffer(EntityComponentType<T, ?> type) {
         return this.populateBuffer(type, null);
     }
 
         @SuppressWarnings("unchecked")
-    public <T extends EntityComponent> T[] populateBuffer(EntityComponentType<T> type, T[] buffer) {
+    public <T extends EntityComponent> T[] populateBuffer(EntityComponentType<T, ?> type, T[] buffer) {
         Entity[] matched = this.matchedEntities;
         if (buffer == null || buffer.length != matched.length) {
             buffer = (T[]) Array.newInstance(type.getType(), matched.length);

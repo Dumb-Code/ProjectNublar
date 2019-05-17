@@ -14,7 +14,4 @@ public interface EntityComponent {
 
     default void deserialize(ByteBuf buf) {
     }
-
-    default void onAdded(EntityComponentMap map) {
-    }
 }

@@ -7,9 +7,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 public class RegisterComponentsEvent extends Event {
     @Getter
-    private final IForgeRegistry<EntityComponentType<?>> registry;
+    private final IForgeRegistry<EntityComponentType<?, ?>> registry;
 
-    public RegisterComponentsEvent(IForgeRegistry<EntityComponentType<?>> registry) {
+    public RegisterComponentsEvent(IForgeRegistry<EntityComponentType<?, ?>> registry) {
         this.registry = registry;
     }
 }

@@ -1,8 +1,10 @@
 package net.dumbcode.projectnublar.server.entity;
 
 import io.netty.buffer.ByteBuf;
+import lombok.NonNull;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentMap;
+import net.dumbcode.projectnublar.server.entity.component.EntityComponentStorage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.entity.component.impl.AiComponent;
 import net.minecraft.entity.EntityCreature;
@@ -15,40 +17,43 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class ComposableCreatureEntity extends EntityCreature implements ComponentAccess, IEntityAdditionalSpawnData {
+public abstract class ComposableCreatureEntity extends EntityCreature implements ComponentWriteAccess, IEntityAdditionalSpawnData {
     private final EntityComponentMap components = new EntityComponentMap();
 
     public ComposableCreatureEntity(World world) {
         super(world);
-        this.attachComponents();
-        for (EntityComponent component : this.components.values()) {
-            if (component instanceof AiComponent) {
-                AiComponent aiComponent = (AiComponent) component;
-                aiComponent.apply(this.tasks, this);
+        if(!this.world.isRemote) {
+            this.attachComponents();
+            for (EntityComponent component : this.components.values()) {
+                if (component instanceof AiComponent) {
+                    AiComponent aiComponent = (AiComponent) component;
+                    aiComponent.apply(this.tasks, this);
+                }
             }
         }
     }
 
 
-    protected abstract void attachComponents();
-
-    public <T extends EntityComponent> void attachComponent(EntityComponentType<T> type, T component) {
-        this.components.put(type, component);
+    protected void attachComponents() {
     }
 
-    public <T extends EntityComponent> void attachComponent(EntityComponentType<T> type) {
-        this.components.put(type, type.construct());
+    @Override
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> void attachComponent(EntityComponentType<T, S> type, T component) {
+        if(component == null) {
+            throw new NullPointerException("Component on type " + type.getIdentifier() + " is null.");
+        }
+        this.components.put(type, component);
     }
 
     @Nullable
     @Override
-    public <T extends EntityComponent> T getOrNull(EntityComponentType<T> type) {
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> T getOrNull(EntityComponentType<T, S> type) {
         return this.components.getNullable(type);
     }
 
     @Nonnull
     @Override
-    public <T extends EntityComponent> T getOrExcept(EntityComponentType<T> type) {
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> T getOrExcept(EntityComponentType<T, S> type) {
         T component = this.components.getNullable(type);
         if (component == null) {
             throw new IllegalArgumentException("Component '" + type.getIdentifier() + "' is not present on entity");
@@ -57,7 +62,7 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
     }
 
     @Override
-    public boolean contains(EntityComponentType<?> type) {
+    public boolean contains(EntityComponentType<?, ?> type) {
         return this.components.containsKey(type);
     }
 

@@ -52,6 +52,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.Logger;
 
@@ -71,7 +72,7 @@ public class ProjectNublar {
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;
-    public static IForgeRegistry<EntityComponentType<?>> COMPONENT_REGISTRY;
+    public static IForgeRegistry<EntityComponentType<?, ?>> COMPONENT_REGISTRY;
 
     @CapabilityInject(EntityManager.class)
     public static final Capability<EntityManager> ENTITY_MANAGER = InjectedUtils.injected();
@@ -97,6 +98,16 @@ public class ProjectNublar {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        ObjectHolderRegistry.INSTANCE.applyObjectHolders(); //Not sure about this. It seems costly. But its needed to make sure the components are injected
+        MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
+        MinecraftForge.EVENT_BUS.post(new RegisterPlantEvent(PLANT_REGISTRY));
+
+        registerJsonDinosaurs();
+
+        for (Dinosaur dinosaur : DINOSAUR_REGISTRY) {
+            dinosaur.attachDefaultComponents();
+        }
+
         logger = event.getModLog();
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler.INSTANCE);
         registerPackets();
@@ -194,7 +205,7 @@ public class ProjectNublar {
 
     @SubscribeEvent
     public static void createRegistries(RegistryEvent.NewRegistry event) {
-        COMPONENT_REGISTRY = new RegistryBuilder<EntityComponentType<?>>()
+        COMPONENT_REGISTRY = new RegistryBuilder<EntityComponentType<?, ?>>()
                 .setType(EntityComponentType.getWildcardType())
                 .setName(new ResourceLocation(ProjectNublar.MODID, "component"))
                 .create();
@@ -211,10 +222,6 @@ public class ProjectNublar {
                 .setType(Plant.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
                 .create();
-
-        registerJsonDinosaurs();
-        MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
-        MinecraftForge.EVENT_BUS.post(new RegisterPlantEvent(PLANT_REGISTRY));
     }
 
     private static void registerJsonDinosaurs() {

@@ -6,9 +6,12 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface EntityComponentType<T extends EntityComponent> extends IForgeRegistryEntry<EntityComponentType<?>> {
+public interface EntityComponentType<T extends EntityComponent, S extends EntityComponentStorage<T>> extends IForgeRegistryEntry<EntityComponentType<?, ?>> {
     @Nonnull
-    T construct();
+    T constructEmpty();
+
+    @Nonnull
+    S constructStorage();
 
     @Nonnull
     ResourceLocation getIdentifier();
@@ -17,12 +20,12 @@ public interface EntityComponentType<T extends EntityComponent> extends IForgeRe
     Class<? extends T> getType();
 
     @Override
-    default Class<EntityComponentType<?>> getRegistryType() {
+    default Class<EntityComponentType<?,?>> getRegistryType() {
         return getWildcardType();
     }
 
     @Override
-    default EntityComponentType<?> setRegistryName(ResourceLocation name) {
+    default EntityComponentType<?, ?> setRegistryName(ResourceLocation name) {
         throw new UnsupportedOperationException();
     }
 
@@ -33,7 +36,7 @@ public interface EntityComponentType<T extends EntityComponent> extends IForgeRe
     }
 
     @SuppressWarnings("unchecked")
-    static Class<EntityComponentType<?>> getWildcardType() {
-        return (Class<EntityComponentType<?>>) (Class<?>) EntityComponentType.class;
+    static Class<EntityComponentType<?, ?>> getWildcardType() {
+        return (Class<EntityComponentType<?, ?>>) (Class<?>) EntityComponentType.class;
     }
 }

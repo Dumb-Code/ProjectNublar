@@ -1,10 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.system.ai;
 
 import lombok.ToString;
-import net.dumbcode.dumblibrary.server.ai.AIType;
-import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.dinosaur.data.EntityProperties;
-import net.dumbcode.projectnublar.server.dinosaur.data.FeedingDiet;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
 import net.dumbcode.projectnublar.server.utils.BlockStateWorker;
 import net.minecraft.block.state.IBlockState;

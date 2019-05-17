@@ -4,14 +4,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import scala.util.parsing.json.JSONObject$;
 
 import java.lang.reflect.Type;
 import java.util.*;
 
 @Data
+//Todo: move whole class to a Storage on the Skeletal Builder
 public class SkeletalInformation {
     private List<String> individualBones = Lists.newArrayList();
     private List<String> boneListed = Lists.newArrayList();

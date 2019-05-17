@@ -33,7 +33,7 @@ public class DinosaurModelHandler {
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection()) {
-            dinosaur.setModelContainer(new ModelContainer<>(dinosaur.getRegName(), new DinosaurEntitySystemInfo(dinosaur)));
+            dinosaur.setModelContainer(new ModelContainer<>(dinosaur.getRegName(), dinosaur.getSystemInfo()));
         }
 
         RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, DinosaurRenderer::new);

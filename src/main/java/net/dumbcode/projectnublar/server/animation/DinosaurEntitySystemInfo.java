@@ -30,7 +30,6 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
 
     public DinosaurEntitySystemInfo(Dinosaur dinosaur) {
         this.dinosaur = dinosaur;
-        this.dinosaur.setSystemInfo(this);
     }
 
     @Override

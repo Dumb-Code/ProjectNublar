@@ -11,8 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class DinosaurComponent implements EntityComponent {
-    private EntityComponentMap map;
-    @Getter private Dinosaur dinosaur = Dinosaur.MISSING;
+    public Dinosaur dinosaur = Dinosaur.MISSING;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -20,24 +19,15 @@ public class DinosaurComponent implements EntityComponent {
         return compound;
     }
 
-    public void setDinosaur(Dinosaur dinosaur) {
-        (this.dinosaur = dinosaur).setProperties(this.map);
-    }
-
     @Override
     public void deserialize(NBTTagCompound compound) {
         ResourceLocation identifier = new ResourceLocation(compound.getString("dinosaur"));
         if (ProjectNublar.DINOSAUR_REGISTRY.containsKey(identifier)) {
-            this.setDinosaur(ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier));
+            this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier);
         } else {
             ProjectNublar.getLogger().warn("Parsed invalid dinosaur component '{}'", identifier);
-            this.setDinosaur(Dinosaur.MISSING);
+            this.dinosaur = Dinosaur.MISSING;
         }
-    }
-
-    @Override
-    public void onAdded(EntityComponentMap map) {
-        this.map = map;
     }
 
     @Override
@@ -47,6 +37,6 @@ public class DinosaurComponent implements EntityComponent {
 
     @Override
     public void deserialize(ByteBuf buf) {
-        this.setDinosaur(ByteBufUtils.readRegistryEntry(buf, ProjectNublar.DINOSAUR_REGISTRY));
+        this.dinosaur = ByteBufUtils.readRegistryEntry(buf, ProjectNublar.DINOSAUR_REGISTRY);
     }
 }
