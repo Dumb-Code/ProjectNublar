@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
@@ -54,11 +53,11 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                 FossilItem item = (FossilItem)stack.getItem();
                 Dinosaur dinosaur = item.getDinosaur();
                 String varient = item.getVarient();
-                if(skeletalBuilder.getDinosaur() == Dinosaur.MISSING) {
+                if(!skeletalBuilder.getDinosaur().isPresent()) {
                     skeletalBuilder.setDinosaur(dinosaur);
                 }
-                if(dinosaur == skeletalBuilder.getDinosaur()) {
-                    SkeletalBuilderCompoent component = skeletalBuilder.getDinosaurEntity().getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
+                if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
+                    SkeletalBuilderCompoent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
                     List<String> boneList = dinosaur.getSkeletalInformation().getBoneListed();
                     if(component != null && component.modelIndex < boneList.size()) {
                         if(varient.equals(boneList.get(component.modelIndex))) {
@@ -67,10 +66,10 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                     }
                 }
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
-                if(skeletalBuilder.getDinosaur() == Dinosaur.MISSING) {
-                    playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);
-                } else {
+                if (skeletalBuilder.getDinosaur().isPresent()) {
                     playerIn.openGui(ProjectNublar.INSTANCE, GuiHandler.SKELETAL_BUILDER_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                } else {
+                    playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);
                 }
             }
         }

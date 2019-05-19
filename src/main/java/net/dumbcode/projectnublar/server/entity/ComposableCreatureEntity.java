@@ -22,15 +22,7 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
 
     public ComposableCreatureEntity(World world) {
         super(world);
-        if(!this.world.isRemote) {
-            this.attachComponents();
-            for (EntityComponent component : this.components.values()) {
-                if (component instanceof AiComponent) {
-                    AiComponent aiComponent = (AiComponent) component;
-                    aiComponent.apply(this.tasks, this);
-                }
-            }
-        }
+        this.attachComponents();
     }
 
 
@@ -39,6 +31,10 @@ public abstract class ComposableCreatureEntity extends EntityCreature implements
 
     @Override
     public <T extends EntityComponent, S extends EntityComponentStorage<T>> void attachComponent(EntityComponentType<T, S> type, T component) {
+        if (component instanceof AiComponent) {
+            AiComponent aiComponent = (AiComponent) component;
+            aiComponent.apply(this.tasks, this);
+        }
         if(component == null) {
             throw new NullPointerException("Component on type " + type.getIdentifier() + " is null.");
         }

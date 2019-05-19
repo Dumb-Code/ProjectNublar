@@ -2,16 +2,19 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.Value;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
@@ -22,6 +25,7 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.vecmath.Vector3f;
 import java.util.Map;
+import java.util.Optional;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
@@ -30,12 +34,10 @@ import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITickable {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
-    private Dinosaur dinosaur = Dinosaur.MISSING;
     @SideOnly(Side.CLIENT)
     private SkeletonBuilderScene scene;
 
-    @Getter(lazy = true)
-    private final DinosaurEntity dinosaurEntity = createEntity();
+    private Optional<DinosaurEntity> dinosaurEntity = Optional.empty();
 
     @Getter private final SkeletalHistory history = new SkeletalHistory();
 
@@ -52,7 +54,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        nbt.setString("Dinosaur", this.dinosaur.getRegName().toString());
+        this.dinosaurEntity.ifPresent(d -> nbt.setString("Dinosaur", d.getDinosaur().getRegName().toString()));
         nbt.setTag("Inventory", this.boneHandler.serializeNBT());
         nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
 
@@ -67,7 +69,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         setDinosaur(DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
         // load pose data
-        NBTTagCompound pose = nbt.getCompoundTag("Pose");
         this.reassureSize();
         this.history.readFromNBT(nbt.getCompoundTag("History"));
         this.skeletalProperties.deserialize(nbt.getCompoundTag("SkeletalProperties"));
@@ -75,28 +76,41 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     }
 
     private void reassureSize() {
-        int size = this.dinosaur.getSkeletalInformation().getBoneListed().size();
-        if(size != this.boneHandler.getSlots()) {
-            this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
-        }
+        this.getDinosaur().ifPresent(dinosaur -> {
+            int size = dinosaur.getSkeletalInformation().getBoneListed().size();
+            if(size != this.boneHandler.getSlots()) {
+                this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
+            }
+        });
     }
 
-    public Dinosaur getDinosaur() {
-        return dinosaur;
+
+    public Optional<Dinosaur> getDinosaur() {
+        return this.dinosaurEntity.map(DinosaurEntity::getDinosaur);
+    }
+
+    public ResourceLocation getTexture() {
+        Optional<Dinosaur> dinosaur = this.getDinosaur();
+        return (dinosaur.isPresent() && this.dinosaurEntity.isPresent()) ? dinosaur.get().getTextureLocation(this.dinosaurEntity.get()) : TextureMap.LOCATION_MISSING_TEXTURE;
     }
 
     public void setDinosaur(Dinosaur dinosaur) {
-        this.dinosaur = dinosaur;
-        this.getDinosaurEntity().getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = dinosaur;
+        if(dinosaur != null) {
+            DinosaurEntity entity = dinosaur.createEntity(this.world);
+            entity.attachComponent(EntityComponentTypes.SKELETAL_BUILDER);
+            entity.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
+            entity.get(EntityComponentTypes.AGE).ifPresent(age -> age.stage = ModelStage.SKELETON);
+            this.dinosaurEntity = Optional.of(entity);
+        }
         this.history.clear();
         this.reassureSize();
     }
 
     public TabulaModel getModel() {
-        if(this.dinosaur == Dinosaur.MISSING) {
+        if(!this.dinosaurEntity.isPresent()) {
             return null;
         }
-        DinosaurEntity de = this.getDinosaurEntity();
+        DinosaurEntity de = this.dinosaurEntity.get();
         return de.getDinosaur().getModelContainer().getModelMap().get(de.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage);
     }
 
@@ -104,12 +118,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         return boneHandler;
     }
 
-    private DinosaurEntity createEntity() {
-        DinosaurEntity entity = this.dinosaur.createEntity(this.world);
-        entity.attachComponent(EntityComponentTypes.SKELETAL_BUILDER);
-        entity.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
-        return entity;
-    }
 
     public Map<String, Vector3f> getPoseData() {
         //todo caching
@@ -161,5 +169,4 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     public void update() {
         this.getSkeletalProperties().setPrevRotation(this.getSkeletalProperties().getRotation());
     }
-
 }

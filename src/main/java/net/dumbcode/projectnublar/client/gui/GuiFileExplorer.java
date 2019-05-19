@@ -225,7 +225,7 @@ public class GuiFileExplorer extends GuiScreen {
     private static final Map<String, ResourceLocation> IMAGE_CACHE = Maps.newHashMap();
 
     public static BufferedImage getIcon(File file) throws FileNotFoundException {
-        Image icon = ShellFolder.getShellFolder(file).getIcon(true);
+        Image icon = ShellFolder.getShellFolder(file).getIcon(true); //Test usability on other os
         BufferedImage im = new BufferedImage(icon.getWidth(null), icon.getHeight(null), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = im.createGraphics();
         g.drawImage(icon, 0, 0, null);

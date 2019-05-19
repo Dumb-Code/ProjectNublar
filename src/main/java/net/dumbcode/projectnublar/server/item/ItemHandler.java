@@ -112,17 +112,15 @@ public final class ItemHandler {
     private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier, @Nullable Function<Item, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
 
-            if(dinosaur != Dinosaur.MISSING) {
-                T item = supplier.apply(dinosaur);
-                String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
-                item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-                item.setUnlocalizedName(name);
-                if(initializer != null) {
-                    item = runInitilizer(item, initializer);
-                }
-                itemMap.put(dinosaur, item);
-                event.getRegistry().register(item);
+            T item = supplier.apply(dinosaur);
+            String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
+            item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
+            item.setUnlocalizedName(name);
+            if(initializer != null) {
+                item = runInitilizer(item, initializer);
             }
+            itemMap.put(dinosaur, item);
+            event.getRegistry().register(item);
         }
     }
 
@@ -132,18 +130,16 @@ public final class ItemHandler {
 
     private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
-            if(dinosaur != Dinosaur.MISSING) {
-                for (S s : getterFunction.apply(dinosaur)) {
-                    T item = creationFunc.apply(dinosaur, s);
-                    String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
-                    item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-                    item.setUnlocalizedName(name);
-                    if(initializer != null) {
-                        item = runInitilizer(item, initializer);
-                    }
-                    itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
-                    event.getRegistry().register(item);
+            for (S s : getterFunction.apply(dinosaur)) {
+                T item = creationFunc.apply(dinosaur, s);
+                String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
+                item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
+                item.setUnlocalizedName(name);
+                if(initializer != null) {
+                    item = runInitilizer(item, initializer);
                 }
+                itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
+                event.getRegistry().register(item);
             }
         }
     }

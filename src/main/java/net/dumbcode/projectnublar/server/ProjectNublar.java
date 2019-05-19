@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
 import net.dumbcode.projectnublar.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
@@ -215,7 +216,7 @@ public class ProjectNublar {
                 .setType(Dinosaur.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
                 .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
-                .set(((key, isNetwork) -> Dinosaur.MISSING))
+                .set(((key, isNetwork) -> DinosaurHandler.TYRANNOSAURUS))
                 .create();
 
         PLANT_REGISTRY = new RegistryBuilder<Plant>()

@@ -9,10 +9,12 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
-import net.dumbcode.projectnublar.server.network.*;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
+import net.dumbcode.projectnublar.server.network.C2SkeletalMovement;
+import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
+import net.dumbcode.projectnublar.server.network.C8FullPoseChange;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
@@ -25,7 +27,6 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -120,12 +121,16 @@ public class GuiSkeletalBuilder extends GuiScreen {
         this.properties = builder.getSkeletalProperties();
         this.model = builder.getModel(); // TODO: child models? -> Selectable
         this.animator = ReflectionHelper.getPrivateValue(TabulaModel.class, this.model, "tabulaAnimator");
-        TextComponentTranslation dinosaurNameComponent = builder.getDinosaur().createNameComponent();
+        TextComponentTranslation dinosaurNameComponent = this.getDinosaur().createNameComponent();
         this.titleText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.title", dinosaurNameComponent.getUnformattedText());
         this.rotationRingModel = TabulaUtils.getModel(GuiConstants.ROTATION_RING_LOCATION);
         this.cameraPitch = builder.getCameraPitch();
         this.cameraYaw = builder.getCameraYaw();
         this.zoom = builder.getCameraZoom();
+    }
+
+    private Dinosaur getDinosaur() {
+        return builder.getDinosaur().orElse(DinosaurHandler.TYRANNOSAURUS);
     }
 
     @Override
@@ -183,7 +188,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
             ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder.getPos(), SkeletalHistory.RESET_NAME, new Vector3f()));
 
         } else if(button == exportButton) {
-            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.builder.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
+            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
         } else if(button == importButton) {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Import", file -> ProjectNublar.NETWORK.sendToServer(new C8FullPoseChange(this.builder, SkeletalBuilderFileHandler.deserilize(file).getPoseData())))); //TODO: localize
         } else if(button == propertiesButton) {
@@ -748,17 +753,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private void renderModel() {
         setModelToPose();
 
-        ResourceLocation regname = builder.getDinosaur().getRegName();
-        GenderComponent gcomp = builder.getDinosaurEntity().getOrNull(EntityComponentTypes.GENDER);
-        String name = builder.getDinosaurEntity().get(EntityComponentTypes.SKELETAL_BUILDER).map(s -> s.stage).orElse(ModelStage.ADULT).getName();
-        ResourceLocation loc;
-        if(gcomp != null) {
-            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
-        } else {
-            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
-        }
-        mc.getTextureManager().bindTexture(loc);
-//        animator.setRotationAngles(model, builder.getDinosaurEntity(), 0f, 0f, 0f, 0f, 0f, 1f/16f);
+        mc.getTextureManager().bindTexture(builder.getTexture());
         MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
     }
 

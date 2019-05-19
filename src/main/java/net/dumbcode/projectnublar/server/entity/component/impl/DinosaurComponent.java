@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentMap;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,7 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class DinosaurComponent implements EntityComponent {
-    public Dinosaur dinosaur = Dinosaur.MISSING;
+    public Dinosaur dinosaur = DinosaurHandler.TYRANNOSAURUS;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -26,7 +27,7 @@ public class DinosaurComponent implements EntityComponent {
             this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier);
         } else {
             ProjectNublar.getLogger().warn("Parsed invalid dinosaur component '{}'", identifier);
-            this.dinosaur = Dinosaur.MISSING;
+            this.dinosaur = DinosaurHandler.TYRANNOSAURUS;
         }
     }
 

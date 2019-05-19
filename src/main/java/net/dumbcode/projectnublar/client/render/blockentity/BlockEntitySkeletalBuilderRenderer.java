@@ -16,7 +16,6 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
@@ -56,6 +55,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
     @Override
     public void render(SkeletalBuilderBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 
+        if(!te.getDinosaurEntity().isPresent()) {
+            return;
+        }
+
         if(false) {
             this.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/low_security_electric_fence_pole_powered.png"));
             GlStateManager.enableTexture2D();
@@ -76,20 +79,20 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             GlStateManager.translate(0f, 1.5f, 0f);
             GlStateManager.rotate(180f, 0f, 0f, 1f);
 
-            if(te.getDinosaur() != Dinosaur.MISSING) {
+            Dinosaur dinosaur = te.getDinosaur().get();
 
-                Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/male_adult.png"));
-                TabulaModelClipPlane clipPlane = new TabulaModelClipPlane(te.getDinosaur().getModelContainer().getModelMap().get(ModelStage.ADULT));
-                clipPlane.render(4-((te.getWorld().getTotalWorldTime() + partialTicks) / 30D)%6, 0xbda47e);
+            Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/male_adult.png"));
+            TabulaModelClipPlane clipPlane = new TabulaModelClipPlane(dinosaur.getModelContainer().getModelMap().get(ModelStage.ADULT));
+            clipPlane.render(4-((te.getWorld().getTotalWorldTime() + partialTicks) / 30D)%6, 0xbda47e);
 
-                GlStateManager.popMatrix();
-                GlStateManager.pushMatrix();
-                GlStateManager.scale(2.3,2.3,2.3);
-                GlStateManager.translate(0f, 1.70f, 0f);
-                GlStateManager.rotate(180f, 0f, 0f, 1f);
-                Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png"));
-                MoreTabulaUtils.renderModelWithoutChangingPose(te.getDinosaur().getModelContainer().getModelMap().get(ModelStage.SKELETON), 1/16F);
-            }
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(2.3,2.3,2.3);
+            GlStateManager.translate(0f, 1.70f, 0f);
+            GlStateManager.rotate(180f, 0f, 0f, 1f);
+            Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png"));
+            MoreTabulaUtils.renderModelWithoutChangingPose(dinosaur.getModelContainer().getModelMap().get(ModelStage.SKELETON), 1/16F);
+
             GlStateManager.popMatrix();
             GlStateManager.enableTexture2D();
             GlStateManager.popMatrix();
@@ -175,17 +178,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.translate(0f, 1.5f, 0f);
         GlStateManager.rotate(180f, 0f, 0f, 1f);
 
-        ResourceLocation regname = te.getDinosaur().getRegName();
-        GenderComponent gcomp = te.getDinosaurEntity().getOrNull(EntityComponentTypes.GENDER);
-        String name = te.getDinosaurEntity().get(EntityComponentTypes.SKELETAL_BUILDER).map(s -> s.stage).orElse(ModelStage.ADULT).getName();
-        ResourceLocation loc;
-        if(gcomp != null) {
-            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
-        } else {
-            loc = new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
-        }
-
-        mc.getTextureManager().bindTexture(loc);
+        mc.getTextureManager().bindTexture(te.getTexture());
 
         Map<String, Vector3f> poseData = te.getPoseData();
 
@@ -207,7 +200,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 }
             }
 
-            setVisability(te.getDinosaurEntity(), model);
+            setVisability(te.getDinosaurEntity().get(), model);
             MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
             resetVisability(model);
 

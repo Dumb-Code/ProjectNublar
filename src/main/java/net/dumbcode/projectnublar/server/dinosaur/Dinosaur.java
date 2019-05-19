@@ -34,8 +34,6 @@ import java.util.Random;
 @Getter
 @Setter
 public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
-    @GameRegistry.ObjectHolder(ProjectNublar.MODID + ":missing")
-    public static Dinosaur MISSING = null;
 
     private final ModelProperties modelProperties = new ModelProperties();
     private final ItemProperties itemProperties = new ItemProperties();

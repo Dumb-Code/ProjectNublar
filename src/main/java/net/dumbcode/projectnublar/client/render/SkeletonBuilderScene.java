@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.client.render;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
-import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.Minecraft;
@@ -16,7 +15,6 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.glu.Project;
 
 import javax.vecmath.Vector3f;
@@ -35,6 +33,7 @@ public class SkeletonBuilderScene {
     }
 
     public void update(long time, float partialTicks) {
+
         this.framebuffer.bindFramebuffer(true);
 
         this.setup();
@@ -61,21 +60,24 @@ public class SkeletonBuilderScene {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
 
-        Minecraft.getMinecraft().getTextureManager().bindTexture(te.getDinosaur().getTextureLocation(te.getDinosaurEntity()));
-        Map<String, Vector3f> poseData = te.getPoseData();
-        if(te.getModel() != null) {
-            for (ModelRenderer box : te.getModel().boxList) {
-                Vector3f rotations = poseData.get(box.boxName);
-                if (rotations != null) {
-                    box.rotateAngleX = rotations.x;
-                    box.rotateAngleY = rotations.y;
-                    box.rotateAngleZ = rotations.z;
+        if(te.getDinosaurEntity().isPresent()) {
+            Minecraft.getMinecraft().getTextureManager().bindTexture(te.getTexture());
+            Map<String, Vector3f> poseData = te.getPoseData();
+            if(te.getModel() != null) {
+                for (ModelRenderer box : te.getModel().boxList) {
+                    Vector3f rotations = poseData.get(box.boxName);
+                    if (rotations != null) {
+                        box.rotateAngleX = rotations.x;
+                        box.rotateAngleY = rotations.y;
+                        box.rotateAngleZ = rotations.z;
+                    }
                 }
+                DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
+                animator.setRotationAngles(te.getModel(), te.getDinosaurEntity().get(), 0f, 0f, 100f, 0f, 0f, 1f / 16f);
+                MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f / 16f);
             }
-            DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
-            animator.setRotationAngles(te.getModel(), te.getDinosaurEntity(), 0f, 0f, 100f, 0f, 0f, 1f / 16f);
-            MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f / 16f);
         }
+
 
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GlStateManager.disableBlend();

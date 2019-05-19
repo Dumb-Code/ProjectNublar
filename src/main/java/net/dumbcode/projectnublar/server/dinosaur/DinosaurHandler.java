@@ -15,7 +15,6 @@ public class DinosaurHandler {
 
     @SubscribeEvent
     public static void register(RegisterDinosaurEvent event) {
-        event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:missing")); // TODO: remove
         event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
     }
 
