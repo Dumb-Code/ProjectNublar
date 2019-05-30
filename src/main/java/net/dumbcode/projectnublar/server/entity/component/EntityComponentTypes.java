@@ -24,7 +24,7 @@ public class EntityComponentTypes {
 
     public static final EntityComponentType<AnimationComponent, AnimationComponent.Storage> ANIMATION = InjectedUtils.injected();
 
-    public static final EntityComponentType<SkeletalBuilderCompoent,?> SKELETAL_BUILDER = InjectedUtils.injected();
+    public static final EntityComponentType<SkeletalBuilderCompoent,SkeletalBuilderCompoent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
 
     @SubscribeEvent
     public static void onRegisterComponents(RegisterComponentsEvent event) {
@@ -65,9 +65,11 @@ public class EntityComponentTypes {
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "wander_ai"))
                         .withConstructor(WanderComponent::new)
                         .build(),
-                SimpleComponentType.builder(SkeletalBuilderCompoent.class)
+                SimpleComponentType.builder(SkeletalBuilderCompoent.class, SkeletalBuilderCompoent.Storage.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
                         .withConstructor(SkeletalBuilderCompoent::new)
+                        .withStorage(SkeletalBuilderCompoent.Storage::new)
+                        .disableDefaultAttach()
                         .build(),
                 SimpleComponentType.builder(AnimationComponent.class, AnimationComponent.Storage.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "animation"))

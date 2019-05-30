@@ -7,7 +7,6 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.data.FeedingDiet;
-import net.dumbcode.projectnublar.server.dinosaur.data.SkeletalInformation;
 import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
@@ -35,16 +34,6 @@ public class Tyrannosaurus extends Dinosaur {
                 .setRawMeatSaturation(0.6f)
                 .setCookingExperience(1f);
 
-
-        SkeletalInformation skeletalInformation = this.getSkeletalInformation();
-        skeletalInformation.initializeMap(
-                "foot", "legLowerLeft",
-                "foot", "legLowerRight",
-                "leg", "legUpperLeft",
-                "leg", "legUpperRight",
-                "body", "hips"
-        );
-
         DinosaurInformation dinosaurInfomation = this.getDinosaurInfomation();
         dinosaurInfomation.setPeriod(DinosaurPeriod.CRETACEOUS);
         dinosaurInfomation.getBiomeTypes().addAll(Lists.newArrayList(
@@ -59,7 +48,7 @@ public class Tyrannosaurus extends Dinosaur {
 
     @Override
     public void attachDefaultComponents() {
-        addDefaultComponent(EntityComponentTypes.METABOLISM)
+        addComponent(EntityComponentTypes.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
                         .add(new ItemStack(Items.APPLE)))
@@ -87,11 +76,11 @@ public class Tyrannosaurus extends Dinosaur {
                 "chest",
                 "jawUpper1",
                 "head"));
-        addDefaultComponent(EntityComponentTypes.MULTIPART)
+        addComponent(EntityComponentTypes.MULTIPART)
                 .setDefaultStage(ModelStage.ADULT)
                 .setLinkedCubeMap(entity);
 
-        addDefaultComponent(EntityComponentTypes.ANIMATION)
+        addComponent(EntityComponentTypes.ANIMATION)
                 .setModelGetter(e -> {
                     ModelStage stage = this.getSystemInfo().defaultStage();
                     AgeComponent component = ((ComponentAccess) e).getOrNull(EntityComponentTypes.AGE);
@@ -107,10 +96,20 @@ public class Tyrannosaurus extends Dinosaur {
                 .setInfo(this.getSystemInfo());
 
 
-        this.addDefaultComponent(EntityComponentTypes.GENDER);
-        this.addDefaultComponent(EntityComponentTypes.AGE);
-        this.addDefaultComponent(EntityComponentTypes.HERD)
+        this.addComponent(EntityComponentTypes.GENDER);
+        this.addComponent(EntityComponentTypes.AGE);
+        this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
-        this.addDefaultComponent(EntityComponentTypes.WANDER_AI);
+        this.addComponent(EntityComponentTypes.WANDER_AI);
+
+
+        this.addComponent(EntityComponentTypes.SKELETAL_BUILDER)
+                .initializeMap(
+                        "foot", "legLowerLeft",
+                        "foot", "legLowerRight",
+                        "leg", "legUpperLeft",
+                        "leg", "legUpperRight",
+                        "body", "hips"
+                );
     }
 }

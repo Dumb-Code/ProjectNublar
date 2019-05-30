@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -20,11 +19,13 @@ public class SimpleComponentType<T extends EntityComponent, S extends EntityComp
     @ToString.Exclude private final Supplier<T> constructor;
     @Nullable @ToString.Exclude private final Supplier<S> storageConstructor;
     @EqualsAndHashCode.Include private final ResourceLocation identifier;
+    @EqualsAndHashCode.Include private final boolean defaultAttach;
     private final Class<T> type;
 
-    private SimpleComponentType(Supplier<T> constructor, @Nullable Supplier<S> storageConstructor, ResourceLocation identifier, Class<T> type) {
+    private SimpleComponentType(Supplier<T> constructor, @Nullable Supplier<S> storageConstructor, ResourceLocation identifier, boolean defaultAttach, Class<T> type) {
         this.constructor = constructor;
         this.identifier = identifier;
+        this.defaultAttach = defaultAttach;
         this.type = type;
         this.storageConstructor = storageConstructor;
     }
@@ -61,6 +62,12 @@ public class SimpleComponentType<T extends EntityComponent, S extends EntityComp
         return this.type;
     }
 
+    @Nonnull
+    @Override
+    public boolean defaultAttach() {
+        return this.defaultAttach;
+    }
+
 
     public static class Builder<T extends EntityComponent, S extends EntityComponentStorage<T>> {
         private final Class<T> type;
@@ -68,6 +75,7 @@ public class SimpleComponentType<T extends EntityComponent, S extends EntityComp
         private Supplier<T> constructor;
         private Supplier<S> storageConstructor;
         private ResourceLocation identifier;
+        private boolean defaultAttach = true;
 
         private Builder(Class<T> type, Class<S> storageType) {
             this.type = type;
@@ -89,6 +97,11 @@ public class SimpleComponentType<T extends EntityComponent, S extends EntityComp
             return this;
         }
 
+        public Builder<T, S> disableDefaultAttach() {
+            this.defaultAttach = false;
+            return this;
+        }
+
         public EntityComponentType<T, S> build() {
             Preconditions.checkNotNull(this.identifier, "Component identifier must be set");
             if(this.constructor == null) {
@@ -102,7 +115,7 @@ public class SimpleComponentType<T extends EntityComponent, S extends EntityComp
                     }
                 };
             }
-            return new SimpleComponentType<>(this.constructor, this.storageConstructor, this.identifier, this.type);
+            return new SimpleComponentType<>(this.constructor, this.storageConstructor, this.identifier, this.defaultAttach, this.type);
         }
     }
 }

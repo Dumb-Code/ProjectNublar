@@ -13,6 +13,7 @@ import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
@@ -385,15 +386,14 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.popMatrix();
     }
 
-    private static void setVisability(DinosaurEntity entity, TabulaModel tabulaModel) {
-        Dinosaur dinosaur = entity.getDinosaur();
+    private static void setVisability(ComponentAccess entity, TabulaModel tabulaModel) {
         Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
         List<String> modelList = Lists.newArrayList();
-        for (String s : dinosaur.getSkeletalInformation().getIndividualBones()) {
-            modelList.addAll(dinosaur.getSkeletalInformation().getBoneToModelMap().get(s));
-        }
         SkeletalBuilderCompoent compoent = entity.getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
         if(compoent != null) {
+            for (String s : compoent.getIndividualBones()) {
+                modelList.addAll(compoent.getBoneToModelMap().get(s));
+            }
             int id = compoent.modelIndex % (modelList.size() + 1);
             List<ModelRenderer> nonHiddenCubes = Lists.newArrayList();
             if(id != 0) {

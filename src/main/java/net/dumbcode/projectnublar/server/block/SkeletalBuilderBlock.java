@@ -58,9 +58,9 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                 }
                 if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
                     SkeletalBuilderCompoent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
-                    List<String> boneList = dinosaur.getSkeletalInformation().getBoneListed();
-                    if(component != null && component.modelIndex < boneList.size()) {
-                        if(varient.equals(boneList.get(component.modelIndex))) {
+                    if(component != null) {
+                        List<String> boneList = component.getBoneListed();
+                        if(component.modelIndex < boneList.size() && varient.equals(boneList.get(component.modelIndex))) {
                             skeletalBuilder.getBoneHandler().setStackInSlot(component.modelIndex++, stack.splitStack(1));
                         }
                     }
