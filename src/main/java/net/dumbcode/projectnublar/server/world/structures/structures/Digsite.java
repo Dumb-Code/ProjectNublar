@@ -327,7 +327,7 @@ public class Digsite extends Structure {
                 for (int z = -this.zSize/2; z < this.zSize/2; z++) {
                     BlockPos pos = this.position.add(x, 0, z);
 
-                    Chunk chunk = this.world.getChunkFromBlockCoords(pos);
+                    Chunk chunk = this.world.getChunk(pos);
                     BlockPos blockpos;
                     BlockPos blockpos1;
                     for (blockpos = new BlockPos(pos.getX(), chunk.getTopFilledSegment() + 16, pos.getZ()); blockpos.getY() >= 0; blockpos = blockpos1) {

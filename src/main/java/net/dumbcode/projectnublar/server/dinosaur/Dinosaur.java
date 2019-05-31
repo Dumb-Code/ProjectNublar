@@ -46,11 +46,11 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private DinosaurEntitySystemInfo systemInfo = new DinosaurEntitySystemInfo(this);
 
     public String getOreSuffix() {
-        return StringUtils.toCamelCase(getRegName().getResourcePath());
+        return StringUtils.toCamelCase(getRegName().getPath());
     }
 
     public String getFormattedName() {
-        return (this.getRegName().getResourceDomain().equals(ProjectNublar.MODID) ? this.getRegName().getResourcePath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
+        return (this.getRegName().getNamespace().equals(ProjectNublar.MODID) ? this.getRegName().getPath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
     }
 
     public DinosaurEntity createEntity(World world) {
@@ -84,13 +84,13 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
         String name = entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName();
         if(gcomp != null) {
-            return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
+            return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
         }
-        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
+        return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + name + ".png");
     }
 
     public TextComponentTranslation createNameComponent() {
-        return new TextComponentTranslation(getRegName().getResourceDomain()+".dino."+getRegName().getResourcePath()+".name");
+        return new TextComponentTranslation(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
     }
 
     public static class JsonAdapter implements JsonSerializer<Dinosaur>, JsonDeserializer<Dinosaur> {

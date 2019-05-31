@@ -29,7 +29,7 @@ public enum ModelCommandLoader implements ICustomModelLoader {
 
     @Override
     public boolean accepts(ResourceLocation modelLocation) {
-        return modelLocation.getResourcePath().endsWith(".command");
+        return modelLocation.getPath().endsWith(".command");
     }
 
     @Override
@@ -42,7 +42,7 @@ public enum ModelCommandLoader implements ICustomModelLoader {
         ResourceLocation location = new ResourceLocation(filter.group(1));
         IModel model;
         try {
-            model = ModelLoaderRegistry.getModel(new ResourceLocation(location.getResourceDomain(), location.getResourcePath().substring("models/".length())));
+            model = ModelLoaderRegistry.getModel(new ResourceLocation(location.getNamespace(), location.getPath().substring("models/".length())));
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

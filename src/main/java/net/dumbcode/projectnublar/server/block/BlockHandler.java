@@ -39,17 +39,17 @@ public class BlockHandler {
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
         event.getRegistry().registerAll(
-                SKELETAL_BUILDER.setRegistryName("skeletal_builder").setUnlocalizedName("skeletal_builder").setCreativeTab(ProjectNublar.TAB),
-                FOSSIL_PROCESSOR.setUnlocalizedName("fossil_processor").setRegistryName("fossil_processor").setCreativeTab(ProjectNublar.TAB),
-                DRILL_EXTRACTOR.setUnlocalizedName("drill_extractor").setRegistryName("drill_extractor").setCreativeTab(ProjectNublar.TAB),
-                SEQUENCING_SYNTHESIZER.setUnlocalizedName("sequencer_synthesizer").setRegistryName("sequencer_synthesizer").setCreativeTab(ProjectNublar.TAB),
-                EGG_PRINTER.setUnlocalizedName("egg_printer").setRegistryName("egg_printer").setCreativeTab(ProjectNublar.TAB),
-                INCUBATOR.setUnlocalizedName("incubator").setRegistryName("incubator").setCreativeTab(ProjectNublar.TAB),
-                COAL_GENERATOR.setUnlocalizedName("coal_generator").setRegistryName("coal_generator").setCreativeTab(ProjectNublar.TAB),
-                LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setUnlocalizedName("low_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
-                HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setUnlocalizedName("high_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
-                ELECTRIC_FENCE.setRegistryName("electric_fence").setUnlocalizedName("electric_fence").setCreativeTab(ProjectNublar.TAB),
-                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setUnlocalizedName("creative_power").setCreativeTab(ProjectNublar.TAB)
+                SKELETAL_BUILDER.setRegistryName("skeletal_builder").setTranslationKey("skeletal_builder").setCreativeTab(ProjectNublar.TAB),
+                FOSSIL_PROCESSOR.setTranslationKey("fossil_processor").setRegistryName("fossil_processor").setCreativeTab(ProjectNublar.TAB),
+                DRILL_EXTRACTOR.setTranslationKey("drill_extractor").setRegistryName("drill_extractor").setCreativeTab(ProjectNublar.TAB),
+                SEQUENCING_SYNTHESIZER.setTranslationKey("sequencer_synthesizer").setRegistryName("sequencer_synthesizer").setCreativeTab(ProjectNublar.TAB),
+                EGG_PRINTER.setTranslationKey("egg_printer").setRegistryName("egg_printer").setCreativeTab(ProjectNublar.TAB),
+                INCUBATOR.setTranslationKey("incubator").setRegistryName("incubator").setCreativeTab(ProjectNublar.TAB),
+                COAL_GENERATOR.setTranslationKey("coal_generator").setRegistryName("coal_generator").setCreativeTab(ProjectNublar.TAB),
+                LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setTranslationKey("low_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
+                HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setTranslationKey("high_security_electric_fence_pole").setCreativeTab(ProjectNublar.TAB),
+                ELECTRIC_FENCE.setRegistryName("electric_fence").setTranslationKey("electric_fence").setCreativeTab(ProjectNublar.TAB),
+                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(ProjectNublar.TAB)
         );
 
         for (FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
@@ -65,7 +65,7 @@ public class BlockHandler {
             T item = supplier.apply(dinosaur);
             String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
             item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-            item.setUnlocalizedName(name);
+            item.setTranslationKey(name);
             item.setCreativeTab(ProjectNublar.TAB);
             itemMap.put(dinosaur, item);
             event.getRegistry().register(item);
@@ -82,7 +82,7 @@ public class BlockHandler {
                 T item = creationFunc.apply(dinosaur, s);
                 String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
                 item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-                item.setUnlocalizedName(name);
+                item.setTranslationKey(name);
                 item.setCreativeTab(ProjectNublar.TAB);
                 itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
                 event.getRegistry().register(item);

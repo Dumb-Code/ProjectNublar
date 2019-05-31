@@ -87,7 +87,7 @@ public class ProjectNublar {
 
     public static CreativeTabs TAB = new CreativeTabs(MODID) {
         @Override
-        public ItemStack getTabIconItem() {
+        public ItemStack createIcon() {
             return new ItemStack(ItemBlock.getItemFromBlock(Blocks.DEADBUSH)); //TODO: custom item
         }
 
@@ -192,7 +192,7 @@ public class ProjectNublar {
         JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
         DINOSAUR_REGISTRY.getValuesCollection().forEach(dino -> {
-            File jsonFile = new File("./mods/projectnublar/debug/" + dino.getRegName().getResourcePath() + ".json");
+            File jsonFile = new File("./mods/projectnublar/debug/" + dino.getRegName().getPath() + ".json");
             if (!jsonFile.getParentFile().exists()) {
                 jsonFile.getParentFile().mkdirs();
             }

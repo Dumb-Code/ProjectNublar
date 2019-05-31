@@ -23,7 +23,7 @@ public class EntityHandler {
                         .entity(DinosaurEntity.class)
                         .factory(DinosaurEntity::new)
                         .name(ProjectNublar.MODID + ".dinosaur")
-                        .tracker(64, 3, true)
+                        .tracker(128, 3, true)
                         .id(new ResourceLocation(ProjectNublar.MODID, "dinosaur"), 0)
                         .build(),
 
@@ -39,7 +39,7 @@ public class EntityHandler {
                         .entity(EntityPart.class)
                         .factory(EntityPart::new)
                         .name(ProjectNublar.MODID + ".dummypart")
-                        .tracker(128, 20, false)
+                        .tracker(128, 20, true)
                         .id(new ResourceLocation(ProjectNublar.MODID, "dummypart"), 2)
                         .build()
         );

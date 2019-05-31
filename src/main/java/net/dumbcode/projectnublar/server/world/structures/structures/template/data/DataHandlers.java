@@ -10,7 +10,7 @@ public class DataHandlers {
         TileEntity tileEntity = world.getTileEntity(pos.down());
         if(tileEntity instanceof TileEntityLockableLoot) {
             ResourceLocation res = new ResourceLocation(name.substring(6));
-            ((TileEntityLockableLoot) tileEntity).setLootTable(new ResourceLocation(res.getResourceDomain(), "chests/" + res.getResourcePath()), random.nextLong());
+            ((TileEntityLockableLoot) tileEntity).setLootTable(new ResourceLocation(res.getNamespace(), "chests/" + res.getPath()), random.nextLong());
         }
         return Blocks.AIR.getDefaultState();
     });

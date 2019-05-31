@@ -55,16 +55,16 @@ public final class ItemHandler {
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
 
         event.getRegistry().registerAll(
-                EMPTY_TEST_TUBE.setRegistryName("test_tube").setUnlocalizedName("test_tube").setCreativeTab(TAB),
-                FILTER.setRegistryName("filter").setUnlocalizedName("filter").setCreativeTab(TAB),
-                AMBER.setRegistryName("amber").setUnlocalizedName("amber").setCreativeTab(TAB),
-                HARD_DRIVE.setRegistryName("hard_drive").setUnlocalizedName("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
-                EMPTY_SYRINGE.setRegistryName("empty_syringe").setUnlocalizedName("empty_syringe").setCreativeTab(TAB),
-                DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setUnlocalizedName("dna_filled_syringe").setCreativeTab(TAB),
-                EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setUnlocalizedName("embryo_filled_syringe").setCreativeTab(TAB),
-                FENCE_REMOVER.setRegistryName("fence_remover").setUnlocalizedName("fence_remover").setCreativeTab(TAB),
-                CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setUnlocalizedName("creative_fence_remover").setCreativeTab(TAB),
-                ARTIFICIAL_EGG.setRegistryName("artificial_egg").setUnlocalizedName("artificial_egg").setCreativeTab(TAB)
+                EMPTY_TEST_TUBE.setRegistryName("test_tube").setTranslationKey("test_tube").setCreativeTab(TAB),
+                FILTER.setRegistryName("filter").setTranslationKey("filter").setCreativeTab(TAB),
+                AMBER.setRegistryName("amber").setTranslationKey("amber").setCreativeTab(TAB),
+                HARD_DRIVE.setRegistryName("hard_drive").setTranslationKey("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
+                EMPTY_SYRINGE.setRegistryName("empty_syringe").setTranslationKey("empty_syringe").setCreativeTab(TAB),
+                DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setTranslationKey("dna_filled_syringe").setCreativeTab(TAB),
+                EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setTranslationKey("embryo_filled_syringe").setCreativeTab(TAB),
+                FENCE_REMOVER.setRegistryName("fence_remover").setTranslationKey("fence_remover").setCreativeTab(TAB),
+                CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setTranslationKey("creative_fence_remover").setCreativeTab(TAB),
+                ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB)
         );
 
         Function<Item, Item> tab = item -> item.setCreativeTab(TAB);
@@ -84,8 +84,8 @@ public final class ItemHandler {
             if(block instanceof IItemBlock) {
                 event.getRegistry().register(((IItemBlock)block).createItem()
                         .setRegistryName(Objects.requireNonNull(block.getRegistryName()))
-                        .setUnlocalizedName(block.getUnlocalizedName().substring("tile.".length()))
-                        .setCreativeTab(block.getCreativeTabToDisplayOn()));
+                        .setTranslationKey(block.getTranslationKey().substring("tile.".length()))
+                        .setCreativeTab(block.getCreativeTab()));
             }
         }
 
@@ -116,7 +116,7 @@ public final class ItemHandler {
             T item = supplier.apply(dinosaur);
             String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
             item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-            item.setUnlocalizedName(name);
+            item.setTranslationKey(name);
             if(initializer != null) {
                 item = runInitilizer(item, initializer);
             }
@@ -135,7 +135,7 @@ public final class ItemHandler {
                 T item = creationFunc.apply(dinosaur, s);
                 String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
                 item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-                item.setUnlocalizedName(name);
+                item.setTranslationKey(name);
                 if(initializer != null) {
                     item = runInitilizer(item, initializer);
                 }

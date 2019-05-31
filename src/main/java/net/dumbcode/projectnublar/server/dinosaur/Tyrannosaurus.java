@@ -91,7 +91,7 @@ public class Tyrannosaurus extends Dinosaur {
                         }
                     }
                     ResourceLocation regname = this.getRegName();
-                    return new ResourceLocation(regname.getResourceDomain(), "models/entities/" + regname.getResourcePath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + this.getModelProperties().getMainModelMap().get(stage));
+                    return new ResourceLocation(regname.getNamespace(), "models/entities/" + regname.getPath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + this.getModelProperties().getMainModelMap().get(stage));
                 })
                 .setInfo(this.getSystemInfo());
 

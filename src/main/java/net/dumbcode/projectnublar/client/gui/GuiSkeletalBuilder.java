@@ -15,6 +15,7 @@ import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
 import net.dumbcode.projectnublar.server.network.C2SkeletalMovement;
 import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
 import net.dumbcode.projectnublar.server.network.C8FullPoseChange;
+import net.dumbcode.projectnublar.server.utils.DialogBox;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
@@ -46,6 +47,7 @@ import org.lwjgl.util.vector.Vector2f;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
+import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -95,6 +97,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private TextComponentTranslation zoomText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.zoom");
     private TextComponentTranslation selectModelPartText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.select_part");
     private TextComponentTranslation rotateCameraText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.rotate_camera");
+
+    private DialogBox dialogBox;
 
     private double prevXSlider;
     private double prevYSlider;
@@ -188,7 +192,13 @@ public class GuiSkeletalBuilder extends GuiScreen {
             ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder.getPos(), SkeletalHistory.RESET_NAME, new Vector3f()));
 
         } else if(button == exportButton) {
-            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
+            (this.dialogBox = new DialogBox(file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file)))
+                    .root(new File(mc.gameDir, "dinosaur poses"))
+                    .title("Export pose")
+                    .extension("ProjectNublar Dinosaur Pose (.dpose)", true, "*.dpose")
+
+                    .showBox(DialogBox.Type.SAVE);
+//            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
         } else if(button == importButton) {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Import", file -> ProjectNublar.NETWORK.sendToServer(new C8FullPoseChange(this.builder, SkeletalBuilderFileHandler.deserilize(file).getPoseData())))); //TODO: localize
         } else if(button == propertiesButton) {

@@ -18,7 +18,7 @@ import javax.vecmath.Vector3f;
 
 public class RenderUtils {
     public static void setupPointers(VertexFormat format) {
-        int stride = format.getNextOffset();
+        int stride = format.getSize();
         int offset = 0;
         for (VertexFormatElement element : format.getElements()) {
             switch (element.getUsage()) {

@@ -351,7 +351,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
     }
 
     @Override
-    public BlockRenderLayer getBlockLayer() {
+    public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.CUTOUT;
     }
 

@@ -14,11 +14,9 @@ import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentAccess;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
-import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
+import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.block.state.IBlockState;
@@ -260,7 +258,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     translateMatrix.transform(rendererPos);
 
                     AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
-                            new AxisAlignedBB(0, 0, 0, enumFacing.getFrontOffsetX() * 256F, enumFacing.getFrontOffsetY() * 256F, enumFacing.getFrontOffsetZ() * 256F)
+                            new AxisAlignedBB(0, 0, 0, enumFacing.getXOffset() * 256F, enumFacing.getYOffset() * 256F, enumFacing.getZOffset() * 256F)
                                     .offset(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F)
                                     .grow(baseWidth / 2F);
 
@@ -389,7 +387,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
     private static void setVisability(ComponentAccess entity, TabulaModel tabulaModel) {
         Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
         List<String> modelList = Lists.newArrayList();
-        SkeletalBuilderCompoent compoent = entity.getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
+        SkeletalBuilderComponent compoent = entity.getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
         if(compoent != null) {
             for (String s : compoent.getIndividualBones()) {
                 modelList.addAll(compoent.getBoneToModelMap().get(s));
