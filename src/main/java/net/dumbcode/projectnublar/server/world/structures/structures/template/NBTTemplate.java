@@ -177,7 +177,7 @@ public class NBTTemplate
             {
                 NBTTagCompound nbttagcompound = template$entityinfo.entityData;
                 Vec3d vec3d = transformedVec3d(template$entityinfo.pos, mirrorIn, rotationIn);
-                Vec3d vec3d1 = vec3d.addVector((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
+                Vec3d vec3d1 = vec3d.add((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
                 NBTTagList nbttaglist = new NBTTagList();
                 nbttaglist.appendTag(new NBTTagDouble(vec3d1.x));
                 nbttaglist.appendTag(new NBTTagDouble(vec3d1.y));
@@ -298,7 +298,7 @@ public class NBTTemplate
         List<BlockInfo> blocks = Lists.newArrayList();
         List<EntityInfo> entities = Lists.newArrayList();
         try {
-            @Cleanup InputStream stream = ProjectNublar.class.getResourceAsStream("/assets/" + location.getResourceDomain() + "/structures/" + location.getResourcePath() + ".nbt");
+            @Cleanup InputStream stream = ProjectNublar.class.getResourceAsStream("/assets/" + location.getNamespace() + "/structures/" + location.getPath() + ".nbt");
             compound = CompressedStreamTools.readCompressed(stream);
         } catch (IOException e) {
             ProjectNublar.getLogger().error("Error loading structure " + location, e);

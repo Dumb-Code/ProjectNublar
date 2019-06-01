@@ -2,12 +2,9 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
-import lombok.Value;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
-import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -76,8 +73,8 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     }
 
     private void reassureSize() {
-        this.getDinosaur().ifPresent(dinosaur -> {
-            int size = dinosaur.getSkeletalInformation().getBoneListed().size();
+        this.getDinosaurEntity().flatMap(d -> d.get(EntityComponentTypes.SKELETAL_BUILDER)).ifPresent(c -> {
+            int size = c.getBoneListed().size();
             if(size != this.boneHandler.getSlots()) {
                 this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
             }
@@ -96,7 +93,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
-            DinosaurEntity entity = dinosaur.createEntity(this.world);
+            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(EntityComponentTypes.SKELETAL_BUILDER));
             entity.attachComponent(EntityComponentTypes.SKELETAL_BUILDER);
             entity.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
             entity.get(EntityComponentTypes.AGE).ifPresent(age -> age.stage = ModelStage.SKELETON);

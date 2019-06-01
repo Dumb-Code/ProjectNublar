@@ -80,7 +80,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public void onUpdate() {
         Entity parent = this.getParent();
-        if((this.setInParent && parent == null) || (parent != null && parent.isDead)) {
+        if(!this.world.isRemote && ((this.setInParent && parent == null) || (parent != null && parent.isDead))) {
             this.setDead();
         }
 

@@ -105,7 +105,7 @@ public class BlockConnectableBase extends Block {
     }
 
     @Override
-    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
+    public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
         TileEntity te = worldIn.getTileEntity(pos);
         AxisAlignedBB entityBox = entityIn.getCollisionBoundingBox();
         if(entityBox == null) {

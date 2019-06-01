@@ -49,7 +49,7 @@ public class GuiFileExplorer extends GuiScreen {
     @SneakyThrows
     public GuiFileExplorer(@Nullable GuiScreen parent, String root, String buttonText, Consumer<File> fileConsumer) {
         this.parent = parent;
-        this.root = new File(mc.mcDataDir, root);
+        this.root = new File(mc.gameDir, root);
         this.buttonText = buttonText;
         this.fileConsumer = fileConsumer;
         if(!this.root.exists() && !this.root.mkdirs() ) {
@@ -61,7 +61,7 @@ public class GuiFileExplorer extends GuiScreen {
         if(IMAGE_CACHE.containsKey("")) {
             this.folderLoc = IMAGE_CACHE.get("");
         } else {
-            IMAGE_CACHE.put("", this.folderLoc = this.mc.renderEngine.getDynamicTextureLocation("", new DynamicTexture(getIcon(this.mc.mcDataDir))));
+            IMAGE_CACHE.put("", this.folderLoc = this.mc.renderEngine.getDynamicTextureLocation("", new DynamicTexture(getIcon(this.mc.gameDir))));
         }
     }
 

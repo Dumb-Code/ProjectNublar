@@ -18,6 +18,7 @@ import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
+import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -101,16 +102,6 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     }
 
     @Override
-    public AnimationRunWrapper<DinosaurEntity, ModelStage> onWrapperCreated(AnimationRunWrapper<DinosaurEntity, ModelStage> animationWrapper) {
-        DinosaurEntity entity = animationWrapper.getEntity();
-        AnimationComponent component = entity.getOrNull(EntityComponentTypes.ANIMATION);
-        if(component != null) {
-            component.animationWrapper = animationWrapper;
-        }
-        return animationWrapper;
-    }
-
-    @Override
     public ModelStage getStageFromEntity(DinosaurEntity entity) {
         return entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT);
     }
@@ -123,5 +114,18 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     @Override
     public ResourceLocation identifier() {
         return new ResourceLocation(ProjectNublar.MODID, this.dinosaur.getFormattedName() + "_info");
+    }
+
+    @Override
+    public AnimationRunWrapper<DinosaurEntity, ModelStage> getOrCreateWrapper(DinosaurEntity entity, PoseHandler<DinosaurEntity, ModelStage> poseHandler, TabulaModel model, boolean inertia) {
+        @SuppressWarnings("unchecked")
+        AnimationComponent<DinosaurEntity, ModelStage> component = entity.getOrNull(EntityComponentTypes.ANIMATION);
+        if(component != null) {
+            if(component.animationWrapper == null) {
+                component.animationWrapper = poseHandler.createAnimationWrapper(entity, model, this.getStageFromEntity(entity), inertia, this.createFactories());
+            }
+            return component.animationWrapper;
+        }
+        throw new IllegalArgumentException("Tried to get animation wrapper from entity with no animation component " + entity);
     }
 }

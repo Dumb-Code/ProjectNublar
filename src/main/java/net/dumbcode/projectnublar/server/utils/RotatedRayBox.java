@@ -47,7 +47,7 @@ public class RotatedRayBox {
         Vec3d diff = sv.subtract(ev);
 
         //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
-        sv = sv.addVector(diff.x*100, diff.y*100, diff.z*100);
+        sv = sv.add(diff.x*100, diff.y*100, diff.z*100);
         ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
 
         RayTraceResult result = this.box.calculateIntercept(sv, ev);
@@ -161,7 +161,7 @@ public class RotatedRayBox {
             Vec3d diff = sv.subtract(ev);
 
             //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
-            sv = sv.addVector(diff.x*100, diff.y*100, diff.z*100);
+            sv = sv.add(diff.x*100, diff.y*100, diff.z*100);
             ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
 
             //Draw a line from the where the players eyes are, and where theyre looking in transformed space

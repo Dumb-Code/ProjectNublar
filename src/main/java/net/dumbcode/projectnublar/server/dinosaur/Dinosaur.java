@@ -1,16 +1,17 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.Value;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
-import net.dumbcode.projectnublar.server.dinosaur.data.*;
-import net.dumbcode.projectnublar.server.entity.*;
+import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
+import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
+import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.*;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
@@ -18,7 +19,6 @@ import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -27,8 +27,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 @Getter
@@ -37,10 +35,9 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     private final ModelProperties modelProperties = new ModelProperties();
     private final ItemProperties itemProperties = new ItemProperties();
-    private final SkeletalInformation skeletalInformation = new SkeletalInformation();
     private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
 
-    private final List<ComponentPair> defaultComponents = Lists.newArrayList();
+    private final EntityComponentAttacher attacher = new EntityComponentAttacher();
 
     @SideOnly(Side.CLIENT)
     private ModelContainer<DinosaurEntity, ModelStage> modelContainer;
@@ -49,28 +46,29 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private DinosaurEntitySystemInfo systemInfo = new DinosaurEntitySystemInfo(this);
 
     public String getOreSuffix() {
-        return StringUtils.toCamelCase(getRegName().getResourcePath());
+        return StringUtils.toCamelCase(getRegName().getPath());
     }
 
     public String getFormattedName() {
-        return (this.getRegName().getResourceDomain().equals(ProjectNublar.MODID) ? this.getRegName().getResourcePath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
+        return (this.getRegName().getNamespace().equals(ProjectNublar.MODID) ? this.getRegName().getPath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
     }
 
     public DinosaurEntity createEntity(World world) {
+        return createEntity(world, null);
+    }
+
+    public DinosaurEntity createEntity(World world, @Nullable EntityComponentAttacher.ConstructConfiguration config) {
+        if(config == null) {
+            config = this.attacher.getDefaultConfig();
+        }
         DinosaurEntity entity = new DinosaurEntity(world);
         entity.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = this;
-
-        for (ComponentPair componentPair : this.defaultComponents) {
-            componentPair.attach(entity);
-        }
-
+        config.attachAll(entity);
         return entity;
     }
 
-    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addDefaultComponent(EntityComponentType<T, S> type) {
-        S storage = type.constructStorage();
-        this.defaultComponents.add(new ComponentPair<>(type, storage));
-        return storage;
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(EntityComponentType<T, S> type) {
+        return this.attacher.addComponent(type); //delegate
     }
 
     @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings
@@ -86,13 +84,13 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
         String name = entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName();
         if(gcomp != null) {
-            return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
+            return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
         }
-        return new ResourceLocation(regname.getResourceDomain(), "textures/entities/" + regname.getResourcePath() + "/" + name + ".png");
+        return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + name + ".png");
     }
 
     public TextComponentTranslation createNameComponent() {
-        return new TextComponentTranslation(getRegName().getResourceDomain()+".dino."+getRegName().getResourcePath()+".name");
+        return new TextComponentTranslation(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
     }
 
     public static class JsonAdapter implements JsonSerializer<Dinosaur>, JsonDeserializer<Dinosaur> {
@@ -106,8 +104,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             Dinosaur dinosaur = new Dinosaur();
             ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
             ModelProperties readModelProperties = context.deserialize(object.get("model_properties"), TypeToken.of(ModelProperties.class).getType());
-            SkeletalInformation readSkeletalInformation = context.deserialize(object.get("skeletal_information"), TypeToken.of(SkeletalInformation.class).getType());
-            dinosaur.getSkeletalInformation().copyFrom(readSkeletalInformation);
             dinosaur.getModelProperties().copyFrom(readModelProperties);
             dinosaur.getItemProperties().copyFrom(readItemProperties);
             return dinosaur;
@@ -118,7 +114,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             JsonObject object = new JsonObject();
             object.add("model_properties", context.serialize(dino.modelProperties));
             object.add("item_attributes", context.serialize(dino.itemProperties));
-            object.add("skeletal_information", context.serialize(dino.skeletalInformation));
             return object;
         }
     }
@@ -134,13 +129,5 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     }
 
-    @Value
-    private static class ComponentPair<T extends EntityComponent, S extends EntityComponentStorage<T>> {
-        private final EntityComponentType<T, S> type;
-        @Nullable private final S storage;
 
-        private void attach(ComponentWriteAccess access) {
-            access.attachComponent(this.type, this.storage);
-        }
-    }
 }

@@ -23,6 +23,9 @@ import java.util.zip.ZipOutputStream;
 public class SkeletalBuilderFileHandler {
 
     public static void serilize(SkeletalBuilderFileInfomation infomation, File file) {
+        if(file == null) {
+            return;
+        }
         if(!file.exists() && Strings.isEmpty(FilenameUtils.getExtension(file.getName()))) {
             file = new File(file.getParentFile(), file.getName() + ".dpose");
         }

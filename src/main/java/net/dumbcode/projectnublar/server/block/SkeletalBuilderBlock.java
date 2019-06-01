@@ -4,7 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderCompoent;
+import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
 import net.minecraft.block.BlockDirectional;
@@ -57,10 +57,10 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                     skeletalBuilder.setDinosaur(dinosaur);
                 }
                 if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
-                    SkeletalBuilderCompoent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
-                    List<String> boneList = dinosaur.getSkeletalInformation().getBoneListed();
-                    if(component != null && component.modelIndex < boneList.size()) {
-                        if(varient.equals(boneList.get(component.modelIndex))) {
+                    SkeletalBuilderComponent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
+                    if(component != null) {
+                        List<String> boneList = component.getBoneListed();
+                        if(component.modelIndex < boneList.size() && varient.equals(boneList.get(component.modelIndex))) {
                             skeletalBuilder.getBoneHandler().setStackInSlot(component.modelIndex++, stack.splitStack(1));
                         }
                     }

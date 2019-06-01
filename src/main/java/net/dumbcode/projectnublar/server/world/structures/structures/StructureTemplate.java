@@ -77,7 +77,7 @@ public class StructureTemplate extends Structure {
                 for (int z = Math.min(minp.getZ(), maxp.getZ()); z <= Math.max(minp.getZ(), maxp.getZ()); z++) {
                     BlockPos pos = this.position.add(x, 0, z);
 
-                    Chunk chunk = this.world.getChunkFromBlockCoords(pos);
+                    Chunk chunk = this.world.getChunk(pos);
                     BlockPos blockpos;
                     BlockPos blockpos1;
                     for (blockpos = new BlockPos(pos.getX(), chunk.getTopFilledSegment() + 16, pos.getZ()); blockpos.getY() >= 0; blockpos = blockpos1) {
