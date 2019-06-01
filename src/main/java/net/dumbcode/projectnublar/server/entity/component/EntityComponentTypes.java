@@ -16,7 +16,6 @@ public class EntityComponentTypes {
     public static final EntityComponentType<GenderComponent,?> GENDER = InjectedUtils.injected();
     public static final EntityComponentType<AgeComponent,AgeComponent.Storage> AGE = InjectedUtils.injected();
     public static final EntityComponentType<HerdComponent,HerdComponent.Storage> HERD = InjectedUtils.injected();
-    public static final EntityComponentType<AdvancedAIComponent,?> ADVANCED_AI = InjectedUtils.injected();
     public static final EntityComponentType<MetabolismComponent,MetabolismComponent.Storage> METABOLISM = InjectedUtils.injected();
     public static final EntityComponentType<MultipartEntityComponent,MultipartEntityComponent.Storage> MULTIPART = InjectedUtils.injected();
 
@@ -46,10 +45,6 @@ public class EntityComponentTypes {
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "herd"))
                         .withStorage(HerdComponent.Storage::new)
                         .withConstructor(HerdComponent::new)
-                        .build(),
-                SimpleComponentType.builder(AdvancedAIComponent.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "advanced_ai"))
-                        .withConstructor(AdvancedAIComponent::new)
                         .build(),
                 SimpleComponentType.builder(MetabolismComponent.class, MetabolismComponent.Storage.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "metabolism"))
