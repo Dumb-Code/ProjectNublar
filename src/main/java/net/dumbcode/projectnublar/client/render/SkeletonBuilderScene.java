@@ -1,9 +1,7 @@
 package net.dumbcode.projectnublar.client.render;
 
 import lombok.Getter;
-import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -13,7 +11,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
@@ -72,9 +69,7 @@ public class SkeletonBuilderScene {
                         box.rotateAngleZ = rotations.z;
                     }
                 }
-                DinosaurAnimator animator = ReflectionHelper.getPrivateValue(TabulaModel.class, te.getModel(), "tabulaAnimator");
-                animator.setRotationAngles(te.getModel(), te.getDinosaurEntity().get(), 0f, 0f, 100f, 0f, 0f, 1f / 16f);
-                MoreTabulaUtils.renderModelWithoutChangingPose(te.getModel(), 1f / 16f);
+                te.getModel().render(te.getDinosaurEntity().get(), 0f, 0f, 100f, 0f, 0f, 1f / 16f);
             }
         }
 

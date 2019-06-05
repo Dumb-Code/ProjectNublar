@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
@@ -10,7 +11,6 @@ import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalPr
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;

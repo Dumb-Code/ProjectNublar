@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
+import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.*;
@@ -84,7 +85,7 @@ public enum MultipartSystem implements EntitySystem {
                         double maxZ = Integer.MIN_VALUE;
 
                         for (int i = 0; i < 8; i++) {
-                            Vec3d startPoint = animatableCube.getModelPos((i >> 2)&1, (i >> 1)&1, i&1);
+                            Vec3d startPoint = TabulaUtils.getModelPosAlpha(animatableCube, (i >> 2)&1, (i >> 1)&1, i&1);
                             Point3d point = new Point3d(startPoint.x, startPoint.y + 1.5, startPoint.z);
                             point.scale(2.5);
                             entityRotate.transform(point);

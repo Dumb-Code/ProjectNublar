@@ -7,10 +7,8 @@ import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
 
 public class MovementLayer extends AnimationLayer<DinosaurEntity, ModelStage> {
@@ -31,7 +29,7 @@ public class MovementLayer extends AnimationLayer<DinosaurEntity, ModelStage> {
     private boolean isMoving(DinosaurEntity entity) {
         float deltaX = (float) (entity.posX - entity.prevPosX);
         float deltaZ = (float) (entity.posZ - entity.prevPosZ);
-        return deltaX * deltaX + deltaZ * deltaZ > 0.0001F;
+        return deltaX * deltaX + deltaZ * deltaZ > -0.0001F;
     }
 
     @Override

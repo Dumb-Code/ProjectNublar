@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.block;
 
-import net.ilexiconn.llibrary.server.capability.EntityDataCapabilityStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

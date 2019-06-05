@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
 import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileHandler;
 import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileInfomation;
-import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
-import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
@@ -17,8 +17,6 @@ import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
 import net.dumbcode.projectnublar.server.network.C8FullPoseChange;
 import net.dumbcode.projectnublar.server.utils.DialogBox;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
-import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -34,7 +32,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiSlider;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -60,12 +57,11 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private final SkeletalBuilderBlockEntity builder;
     private final SkeletalProperties properties;
     private final TabulaModel model;
-    private final DinosaurAnimator animator;
     private final TextComponentTranslation titleText;
     private boolean registeredLeftClick;
     private Vector2f lastClickPosition = new Vector2f();
     private IntBuffer colorBuffer = BufferUtils.createIntBuffer(1);
-    private AdvancedModelRenderer selectedPart;
+    private TabulaModelRenderer selectedPart;
     private boolean movedPart;
     private TextComponentTranslation undoText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.undo");
     private TextComponentTranslation redoText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.redo");
@@ -124,7 +120,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
         this.builder = builder;
         this.properties = builder.getSkeletalProperties();
         this.model = builder.getModel(); // TODO: child models? -> Selectable
-        this.animator = ReflectionHelper.getPrivateValue(TabulaModel.class, this.model, "tabulaAnimator");
         TextComponentTranslation dinosaurNameComponent = this.getDinosaur().createNameComponent();
         this.titleText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.title", dinosaurNameComponent.getUnformattedText());
         this.rotationRingModel = TabulaUtils.getModel(GuiConstants.ROTATION_RING_LOCATION);
@@ -322,7 +317,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
             dMouse.set(0f, 0f);
             draggingRing = false;
         }
-        AdvancedModelRenderer partBelowMouse = findPartBelowMouse();
+        TabulaModelRenderer partBelowMouse = findPartBelowMouse();
         if(registeredLeftClick) {
             if(ringBelowMouse == RotationAxis.NONE) {
                 this.selectedPart = partBelowMouse;
@@ -382,19 +377,18 @@ public class GuiSkeletalBuilder extends GuiScreen {
         return colorBuffer.get(0);
     }
 
-    private AdvancedModelRenderer findPartBelowMouse() {
-        AdvancedModelRenderer newSelection = null;
+    private TabulaModelRenderer findPartBelowMouse() {
+        TabulaModelRenderer newSelection = null;
         hideAllModelParts();
 
         GlStateManager.pushMatrix();
         GlStateManager.disableBlend();
         GlStateManager.disableTexture2D();
 
-        animator.setRescalingEnabled(false);
         for (int index = 0; index < model.boxList.size(); index++) {
             // Render the model part with a specific color and check if the color below the mouse has changed.
             // If it did, the mouse is over this given box
-            AdvancedModelRenderer box = (AdvancedModelRenderer) model.boxList.get(index);
+            TabulaModelRenderer box = (TabulaModelRenderer) model.boxList.get(index);
 
             // multiply by 2 because in some cases, the colors are not far enough to allow to pick the correct part
             // (a box behind another may be picked instead because the color are too close)
@@ -417,7 +411,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
                 newSelection = box;
             }
         }
-        animator.setRescalingEnabled(true);
         GlStateManager.color(1f, 1f, 1f);
         GlStateManager.enableTexture2D();
         GlStateManager.enableBlend();
@@ -558,26 +551,26 @@ public class GuiSkeletalBuilder extends GuiScreen {
         actualizeRotation(selectedPart, currentSelectedRing, previousAngle+rotAmount);
     }
 
-    private void actualizeRotation(AdvancedModelRenderer part, RotationAxis axis, float amount) {
+    private void actualizeRotation(TabulaModelRenderer part, RotationAxis axis, float amount) {
         ProjectNublar.NETWORK.sendToServer(new C0MoveSelectedSkeletalPart(builder, part.boxName, axis, amount));
     }
 
-    private Vector3f computeTranslationVector(AdvancedModelRenderer part) {
+    private Vector3f computeTranslationVector(TabulaModelRenderer part) {
         Matrix4f transform = computeTransformMatrix(part);
         Vector3f result = new Vector3f(0f, 0f, 0f);
         transform.transform(result);
         return result;
     }
 
-    private Matrix4f computeTransformMatrix(AdvancedModelRenderer part) {
+    private Matrix4f computeTransformMatrix(TabulaModelRenderer part) {
         Matrix4f result = new Matrix4f();
         result.setIdentity();
         applyTransformations(part, result);
         return result;
     }
 
-    private void applyTransformations(AdvancedModelRenderer part, Matrix4f out) {
-        AdvancedModelRenderer parent = part.getParent();
+    private void applyTransformations(TabulaModelRenderer part, Matrix4f out) {
+        TabulaModelRenderer parent = part.getParent();
         if(parent != null) {
             applyTransformations(parent, out);
         }
@@ -605,10 +598,10 @@ public class GuiSkeletalBuilder extends GuiScreen {
         }
     }
 
-    private Matrix3f computeRotationMatrix(AdvancedModelRenderer part) {
+    private Matrix3f computeRotationMatrix(TabulaModelRenderer part) {
         Matrix3f result = new Matrix3f();
         result.setIdentity();
-        AdvancedModelRenderer parent = part.getParent();
+        TabulaModelRenderer parent = part.getParent();
         if(parent != null) {
             result.mul(computeRotationMatrix(parent));
         }
@@ -675,8 +668,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
     }
 
-    private void actualModelRender(float partialTicks, AdvancedModelRenderer partBelowMouse) {
-        animator.setRescalingEnabled(false);
+    private void actualModelRender(float partialTicks, TabulaModelRenderer partBelowMouse) {
         highlight(selectedPart, 0f, 0f, 1f);
         highlight(partBelowMouse, 1f, 1f, 0f);
         resetScalings();
@@ -684,7 +676,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
         hidePart(partBelowMouse);
         GlStateManager.color(1f, 1f, 1f);
         renderModel();
-        animator.setRescalingEnabled(true);
         resetScalings();
 
         // render rotation ring
@@ -698,14 +689,14 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.disableLighting();
         GlStateManager.disableTexture2D();
         GlStateManager.pushMatrix();
-        selectedPart.parentedPostRender(1f/16f);
+        selectedPart.setParentedAngles(1f/16f);
         GlStateManager.color(1f, 0f, 0f);
         GlStateManager.scale(ringScale, ringScale, ringScale);
         rotationRingModel.render(null, 0f, 0f, 0f, 0f, 0f, 1f/16f);
         GlStateManager.popMatrix();
 
         GlStateManager.pushMatrix();
-        selectedPart.parentedPostRender(1f/16f);
+        selectedPart.setParentedAngles(1f/16f);
         GlStateManager.rotate(90f, 1f, 0f, 0f);
         GlStateManager.color(0f, 1f, 0f);
         GlStateManager.scale(ringScale, ringScale, ringScale);
@@ -713,7 +704,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.popMatrix();
 
         GlStateManager.pushMatrix();
-        selectedPart.parentedPostRender(1f/16f);
+        selectedPart.setParentedAngles(1f/16f);
         GlStateManager.rotate(90f, 0f, 0f, 1f);
         GlStateManager.color(0f, 0f, 1f);
         GlStateManager.scale(ringScale, ringScale, ringScale);
@@ -723,7 +714,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.enableLighting();
     }
 
-    private void hidePart(AdvancedModelRenderer part) {
+    private void hidePart(TabulaModelRenderer part) {
         if(part == null)
             return;
         part.scaleX = 0f;
@@ -734,7 +725,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     /**
      * Renders a single model part with the given color
      */
-    private void highlight(AdvancedModelRenderer part, float red, float green, float blue) {
+    private void highlight(TabulaModelRenderer part, float red, float green, float blue) {
         if(part != null) {
             hideAllModelParts();
             part.scaleX = 1f;
@@ -751,8 +742,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     private void resetScalings() {
         for(ModelRenderer renderer : model.boxList) {
-            if(renderer instanceof AdvancedModelRenderer) {
-                AdvancedModelRenderer part = (AdvancedModelRenderer)renderer;
+            if(renderer instanceof TabulaModelRenderer) {
+                TabulaModelRenderer part = (TabulaModelRenderer)renderer;
                 part.scaleX = 1f;
                 part.scaleY = 1f;
                 part.scaleZ = 1f;
@@ -764,28 +755,29 @@ public class GuiSkeletalBuilder extends GuiScreen {
         setModelToPose();
 
         mc.getTextureManager().bindTexture(builder.getTexture());
-        MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
+        model.renderBoxes(1f/16f);
     }
 
     private void setModelToPose() {
         Map<String, Vector3f> poseData = builder.getPoseData();
-        for(ModelRenderer box : model.boxList) {
+        for(TabulaModelRenderer box : model.getAllCubes()) {
             Vector3f rotations = poseData.get(box.boxName);
             if(rotations != null) {
                 box.rotateAngleX = rotations.x;
                 box.rotateAngleY = rotations.y;
                 box.rotateAngleZ = rotations.z;
             } else {
-                box.rotateAngleX = ((AdvancedModelRenderer)box).defaultRotationX;
-                box.rotateAngleY = ((AdvancedModelRenderer)box).defaultRotationY;
-                box.rotateAngleZ = ((AdvancedModelRenderer)box).defaultRotationZ;
+                float[] rotation = box.getDefaultRotation();
+                box.rotateAngleX = rotation[0];
+                box.rotateAngleY = rotation[1];
+                box.rotateAngleZ = rotation[2];
             }
         }
     }
 
     private void hideAllModelParts() {
         for(ModelRenderer box : model.boxList) {
-            AdvancedModelRenderer renderer = (AdvancedModelRenderer)box;
+            TabulaModelRenderer renderer = (TabulaModelRenderer)box;
             renderer.scaleX = 0f;
             renderer.scaleY = 0f;
             renderer.scaleZ = 0f;

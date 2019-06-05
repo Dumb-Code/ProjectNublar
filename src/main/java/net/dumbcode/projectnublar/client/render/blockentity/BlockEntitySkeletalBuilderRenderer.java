@@ -2,7 +2,9 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.client.model.InfoTabulaModel;
+import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
@@ -17,11 +19,8 @@ import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
-import net.ilexiconn.llibrary.client.model.tools.AdvancedModelRenderer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -33,7 +32,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.lwjgl.opengl.GL11;
 
 import javax.vecmath.Matrix4d;
@@ -47,7 +45,6 @@ import static java.lang.Math.PI;
 
 public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<SkeletalBuilderBlockEntity> {
     private Minecraft mc = Minecraft.getMinecraft();
-
 
 
 
@@ -90,7 +87,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             GlStateManager.translate(0f, 1.70f, 0f);
             GlStateManager.rotate(180f, 0f, 0f, 1f);
             Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png"));
-            MoreTabulaUtils.renderModelWithoutChangingPose(dinosaur.getModelContainer().getModelMap().get(ModelStage.SKELETON), 1/16F);
+            dinosaur.getModelContainer().getModelMap().get(ModelStage.SKELETON).renderBoxes(1/16F);
 
             GlStateManager.popMatrix();
             GlStateManager.enableTexture2D();
@@ -186,21 +183,19 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         TabulaModel model = te.getModel();
 
         if(model != null) {
-            for(ModelRenderer box : model.boxList) {
+            for(TabulaModelRenderer box : model.getAllCubes()) {
                 Vector3f rotations = poseData.get(box.boxName);
                 if(rotations != null) {
                     box.rotateAngleX = rotations.x;
                     box.rotateAngleY = rotations.y;
                     box.rotateAngleZ = rotations.z;
                 } else {
-                    box.rotateAngleX = ((AdvancedModelRenderer)box).defaultRotationX;
-                    box.rotateAngleY = ((AdvancedModelRenderer)box).defaultRotationY;
-                    box.rotateAngleZ = ((AdvancedModelRenderer)box).defaultRotationZ;
+                    box.resetRotations();
                 }
             }
 
             setVisability(te.getDinosaurEntity().get(), model);
-            MoreTabulaUtils.renderModelWithoutChangingPose(model, 1f/16f);
+            model.renderBoxes(1F/16F);
             resetVisability(model);
 
         }
@@ -226,28 +221,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 PoleFacing poleFacing = pole.getFacing();
                 EnumFacing enumFacing = poleFacing.getFacing();
 
-                AdvancedModelRenderer cube = model.getCube(anchoredPart);
+                TabulaModelRenderer cube = model.getCube(anchoredPart);
                 if (poleFacing != PoleFacing.NONE && cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
-                    InfoTabulaModel infoModel = (InfoTabulaModel) model;
-                    int[] dimensions = infoModel.getDimension(cube);
-                    ModelBox box = ObfuscationReflectionHelper.<List<ModelBox>, ModelRenderer>getPrivateValue(ModelRenderer.class, cube, "cubeList", "field_78804" + "_l").get(0); //TODO: remove this god awful method of getting the offsets
-
-                    Point3d endPoint = new Point3d((box.posX1 + dimensions[0] / 2F) / 16F, (box.posY1 + dimensions[1] / 2F) / -16F, (box.posZ1 + dimensions[2] / 2F) / -16F);
-
-                    Matrix4d boxTranslate = new Matrix4d();
-                    Matrix4d boxRotateX = new Matrix4d();
-                    Matrix4d boxRotateY = new Matrix4d();
-                    Matrix4d boxRotateZ = new Matrix4d();
-                    boxTranslate.set(new Vector3d(cube.rotationPointX / 16, -cube.rotationPointY / 16, -cube.rotationPointZ / 16));
-                    boxRotateX.rotX(cube.rotateAngleX);
-                    boxRotateY.rotY(-cube.rotateAngleY);
-                    boxRotateZ.rotZ(-cube.rotateAngleZ);
-                    boxRotateX.transform(endPoint);
-                    boxRotateY.transform(endPoint);
-                    boxRotateZ.transform(endPoint);
-                    boxTranslate.transform(endPoint);
-
-                    Vec3d partOrigin = cube.getModelPos(cube, new Vec3d(endPoint.x, endPoint.y, endPoint.z));
+                    Vec3d partOrigin = TabulaUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
                     partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
 
                     Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
@@ -407,35 +383,32 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 for (String activeState : activeStates) {
                     nonHiddenCubes.addAll(modelChildMap.get(activeState));
                 }
-                for (ModelRenderer modelRenderer : tabulaModel.boxList) {
-                    AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-                    if(nonHiddenCubes.contains(modelRenderer)) {
+                for (TabulaModelRenderer box : tabulaModel.getAllCubes()) {
+                    if(nonHiddenCubes.contains(box)) {
                         box.scaleX = 1;
                         box.scaleY = 1;
                         box.scaleZ = 1;
                     } else {
-                        box.scaleX = 0;
-                        box.scaleY = 0;
-                        box.scaleZ = 0;
+//                        box.scaleX = 0;
+//                        box.scaleY = 0;
+//                        box.scaleZ = 0;
                     }
                 }
             } else {
-                for (ModelRenderer modelRenderer : tabulaModel.boxList) {
-                    AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-                    box.scaleX = 1;
-                    box.scaleY = 1;
-                    box.scaleZ = 1;
+                for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
+                    modelRenderer.scaleX = 1;
+                    modelRenderer.scaleY = 1;
+                    modelRenderer.scaleZ = 1;
                 }
             }
         }
     }
 
     private static void resetVisability(TabulaModel tabulaModel) {
-        for (ModelRenderer modelRenderer : tabulaModel.boxList) {
-            AdvancedModelRenderer box = (AdvancedModelRenderer) modelRenderer;
-            box.scaleX = 1;
-            box.scaleY = 1;
-            box.scaleZ = 1;
+        for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
+            modelRenderer.scaleX = 1;
+            modelRenderer.scaleY = 1;
+            modelRenderer.scaleZ = 1;
         }
     }
 
@@ -491,12 +464,12 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.popMatrix();
     }
 
-    private float getRotation(EnumFacing poleFacing, EnumFacing teFacing, AdvancedModelRenderer cube, float rot) {
+    private float getRotation(EnumFacing poleFacing, EnumFacing teFacing, TabulaModelRenderer cube, float rot) {
         float rotation = 0;
         if(poleFacing.getAxis() == EnumFacing.Axis.Y) {
             rotation = rot * poleFacing.getAxisDirection().getOffset() * teFacing.getAxisDirection().getOffset();
         }
-        AdvancedModelRenderer reference = cube;
+        TabulaModelRenderer reference = cube;
         while(reference != null) {
             double axisRotation;
             switch (poleFacing.getAxis()) {

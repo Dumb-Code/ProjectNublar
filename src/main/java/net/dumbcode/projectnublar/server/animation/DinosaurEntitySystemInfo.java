@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.client.animation.objects.Animation;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
 import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.client.animation.MovementLayer;
 import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
@@ -18,7 +19,6 @@ import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
-import net.ilexiconn.llibrary.client.model.tabula.TabulaModel;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -60,7 +60,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
 
     @Override
     public EntityAnimator<DinosaurEntity, ModelStage> createAnimator(PoseHandler<DinosaurEntity, ModelStage> poseHandler) {
-        return new DinosaurAnimator(poseHandler);
+        return new EntityAnimator<>(poseHandler);
     }
 
     @Override
