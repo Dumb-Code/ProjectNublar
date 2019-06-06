@@ -3,5 +3,14 @@
   "textures": {
     "layer0": "projectnublar:blocks/high_security_electric_fence_pole_powered"
   },
-  "tabula": "projectnublar:models/block/high_security_electric_fence_pole_upper"
+  "tabula": "projectnublar:models/block/high_security_electric_fence_pole_upper",
+
+  "lightup_data": [
+    {
+      "layers_applied": ["layer0"],
+      "cubes_lit": [
+        "SecurityLightBulb", "PoleLight1", "PoleLight2"
+      ]
+    }
+  ]
 }

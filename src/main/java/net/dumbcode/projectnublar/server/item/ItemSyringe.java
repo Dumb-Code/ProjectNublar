@@ -1,9 +1,9 @@
 package net.dumbcode.projectnublar.server.item;
 
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
-import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;

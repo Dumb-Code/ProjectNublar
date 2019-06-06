@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;

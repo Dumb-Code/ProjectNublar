@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.utils;
 
-import net.dumbcode.projectnublar.server.utils.MathUtils;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

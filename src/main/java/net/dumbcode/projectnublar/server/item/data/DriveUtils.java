@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.item.data;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;

@@ -9,8 +9,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Getter
 public enum ConnectionType {
-    LOW_SECURITY(2, 3, 6/16F, 0.75F, 90F, 1/8F, 10),
-    HIGH_SECURITY(1, 8, 1/2F, 2F, 0F, 2/8F, 15);
+    LOW_SECURITY(2, 3, 6/16F, 0.75F, 90F, 1/8F, 4),
+    HIGH_SECURITY(1, 8, 1/2F, 2F, 0F, 2/8F, 8);
     private final double[] offsets;
     private final int height;
     private final float radius;

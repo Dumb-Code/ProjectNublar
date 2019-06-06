@@ -2,9 +2,9 @@ package net.dumbcode.projectnublar.server.world.structures.network;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.utils.BuilderNode;
-import net.dumbcode.projectnublar.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;

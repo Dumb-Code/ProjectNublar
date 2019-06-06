@@ -63,12 +63,11 @@ import java.io.IOException;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
-@Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION, dependencies = "required-after:llibrary@[" + ProjectNublar.LLIBRARY_VERSION + ",);required-after:dumblibrary@[" + ProjectNublar.DUMBLIBRARY_VERSION + ",)")
+@Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION, dependencies = "required-after:dumblibrary@[" + ProjectNublar.DUMBLIBRARY_VERSION + ",)")
 public class ProjectNublar {
     public static final String MODID = "projectnublar";
     public static final String NAME = "Project Nublar";
     public static final String VERSION = "0.0.22";
-    public static final String LLIBRARY_VERSION = "1.7.15";
     public static final String DUMBLIBRARY_VERSION = "0.2.4";
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
