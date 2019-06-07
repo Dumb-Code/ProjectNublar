@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.MachineModule;
-import net.dumbcode.projectnublar.server.utils.ConnectionType;
+import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -21,8 +21,8 @@ import java.util.function.Function;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class BlockHandler {
     public static final SkeletalBuilderBlock SKELETAL_BUILDER = new SkeletalBuilderBlock();
-    public static final BlockElectricFencePole LOW_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.LOW_SECURITY);
-    public static final BlockElectricFencePole HIGH_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(ConnectionType.HIGH_SECURITY);
+    public static final BlockElectricFencePole LOW_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(EnumConnectionType.LOW_SECURITY);
+    public static final BlockElectricFencePole HIGH_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(EnumConnectionType.HIGH_SECURITY);
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
     public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
 

@@ -1,47 +1,25 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import lombok.Getter;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
+import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Getter
-public enum ConnectionType {
-    LOW_SECURITY(2, 3, 6/16F, 0.75F, 90F, 1/8F, 4),
-    HIGH_SECURITY(1, 8, 1/2F, 2F, 0F, 2/8F, 8);
-    private final double[] offsets;
-    private final int height;
-    private final float radius;
-    private final float cableWidth;
-    private final float rotationOffset;
-    private final float halfSize;
-    private final int lightLevel;
-    private final ResourceLocation texture;
+import java.util.Map;
 
-    @SideOnly(Side.CLIENT)
-    public int listID;
-    @SideOnly(Side.CLIENT)
-    public VertexBuffer vbo;
-
-    ConnectionType(int amount, int height, float radius, float cableWidth, float defaultRotation, float halfSize, int lightLevel) {
-        this.offsets = new double[amount];
-        this.height = height;
-        this.radius = radius;
-        this.cableWidth = cableWidth / 32F; //cableWidth is actually halfCableWidth, the 16 comes from the texturemap size
-        this.rotationOffset = defaultRotation;
-        this.halfSize = halfSize;
-        this.lightLevel = lightLevel;
-        this.texture = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/" + this.name().toLowerCase() + "_electric_fence_pole.png");
-
-        double off = 1D / (amount * 2);
-        for (int i = 0; i < amount; i++) {
-            this.offsets[i] = (i*2 + 1) * off;
-        }
+public interface ConnectionType {
+    Map<ResourceLocation, ConnectionType> registryMap = Maps.newHashMap(); //todo: move to a registry?
+    default void register() {
+        registryMap.put(this.getRegistryName(), this);
     }
+    double[] getOffsets();
+    int getHeight();
+    float getRadius();
+    float getCableWidth();
+    float getRotationOffset();
+    float getHalfSize();
+    int getLightLevel();
+    ResourceLocation getRegistryName();
 
-    public static ConnectionType getType(int id) {
-        return values()[id % values().length];
+    static ConnectionType getType(ResourceLocation id) {
+        return ConnectionType.registryMap.getOrDefault(id, EnumConnectionType.LOW_SECURITY);
     }
 }

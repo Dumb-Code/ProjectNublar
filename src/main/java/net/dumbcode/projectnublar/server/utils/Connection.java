@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -155,7 +156,7 @@ public class Connection {
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        nbt.setInteger("type", this.type.ordinal());
+        nbt.setString("id", this.type.getRegistryName().toString());
         nbt.setDouble("offset", this.offset);
         nbt.setLong("from", this.getFrom().toLong());
         nbt.setLong("to", this.getTo().toLong());
@@ -168,7 +169,7 @@ public class Connection {
 
 
     public static Connection fromNBT(NBTTagCompound nbt, TileEntity tileEntity) {
-        return new Connection(ConnectionType.getType(nbt.getInteger("type")), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos()).setBroken(nbt.getBoolean("broken")).setSign(nbt.getBoolean("sign"));
+        return new Connection(ConnectionType.getType(new ResourceLocation(nbt.getString("id"))), nbt.getDouble("offset"), BlockPos.fromLong(nbt.getLong("from")), BlockPos.fromLong(nbt.getLong("to")), BlockPos.fromLong(nbt.getLong("previous")), BlockPos.fromLong(nbt.getLong("next")), tileEntity.getPos()).setBroken(nbt.getBoolean("broken")).setSign(nbt.getBoolean("sign"));
     }
 
     public boolean lazyEquals(Connection con) {
