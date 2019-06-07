@@ -108,7 +108,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
             return null;
         }
         DinosaurEntity de = this.dinosaurEntity.get();
-        return de.getDinosaur().getModelContainer().getModelMap().get(de.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage);
+        return de.getDinosaur().getModelContainer().get(de.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage).getMainModel();
     }
 
     public ItemStackHandler getBoneHandler() {

@@ -1,24 +1,32 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
-import net.dumbcode.projectnublar.server.dinosaur.data.ModelProperties;
+import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.*;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -27,23 +35,30 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 @Getter
 @Setter
 public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
-    private final ModelProperties modelProperties = new ModelProperties();
     private final ItemProperties itemProperties = new ItemProperties();
     private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
 
     private final EntityComponentAttacher attacher = new EntityComponentAttacher();
 
     @SideOnly(Side.CLIENT)
-    private ModelContainer<DinosaurEntity, ModelStage> modelContainer;
-    @SideOnly(Side.CLIENT)
-    private ModelContainer<DinosaurEntity, ModelStage> noAnimationModelContainer;
-    private DinosaurEntitySystemInfo systemInfo = new DinosaurEntitySystemInfo(this);
+    private Map<ModelStage, ModelContainer<DinosaurEntity>> modelContainer = Maps.newEnumMap(ModelStage.class);
+
+    private Map<ModelStage, DinosaurEntitySystemInfo> systemInfo = Maps.newEnumMap(ModelStage.class);
+
+
+    public Dinosaur() {
+        for (ModelStage value : ModelStage.values()) {
+            this.systemInfo.put(value, new DinosaurEntitySystemInfo(this, value));
+        }
+    }
 
     public String getOreSuffix() {
         return StringUtils.toCamelCase(getRegName().getPath());
@@ -103,8 +118,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             }
             Dinosaur dinosaur = new Dinosaur();
             ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
-            ModelProperties readModelProperties = context.deserialize(object.get("model_properties"), TypeToken.of(ModelProperties.class).getType());
-            dinosaur.getModelProperties().copyFrom(readModelProperties);
             dinosaur.getItemProperties().copyFrom(readItemProperties);
             return dinosaur;
         }
@@ -112,7 +125,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         @Override
         public JsonElement serialize(Dinosaur dino, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject object = new JsonObject();
-            object.add("model_properties", context.serialize(dino.modelProperties));
             object.add("item_attributes", context.serialize(dino.itemProperties));
             return object;
         }
@@ -127,6 +139,53 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         int i = rnd.nextInt(from.size());
         return from.toArray(new Dinosaur[0])[i];
 
+    }
+
+    public static class DinosaurModelGetter extends AnimationComponent.ModelGetter<DinosaurEntity> {
+
+        private Dinosaur dinosaur;
+
+        public DinosaurModelGetter(Dinosaur dinosaur) {
+            super(dinosaur.getRegistryName());
+            this.dinosaur = dinosaur;
+        }
+
+        @Override
+        public ResourceLocation getLocation(DinosaurEntity entity){
+            ModelStage stage = ModelStage.ADULT;
+            AgeComponent component = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.AGE);
+            if(component != null) {
+                stage = component.stage;
+            }
+            ResourceLocation regname = this.dinosaur.getRegName();
+            return new ResourceLocation(regname.getNamespace(), "models/entities/" + regname.getPath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + regname.getPath() + "_" + stage.getName() + "_idle");
+        }
+
+        @Override
+        public AnimationSystemInfo<DinosaurEntity> getInfo(DinosaurEntity entity) {
+            return this.dinosaur.getSystemInfo().get(entity.getState());
+        }
+
+        @Override
+        public NBTTagCompound serialize(NBTTagCompound compound) {
+            compound.setString("id", this.dinosaur.getRegName().toString());
+            return compound;
+        }
+
+        @Override
+        public void deserialize(NBTTagCompound compound) {
+            this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(compound.getString("id")));
+        }
+
+        @Override
+        public void serialize(ByteBuf buf) {
+            ByteBufUtils.writeRegistryEntry(buf, this.dinosaur);
+        }
+
+        @Override
+        public void deserialize(ByteBuf buf) {
+            this.dinosaur = ByteBufUtils.readRegistryEntry(buf, ProjectNublar.DINOSAUR_REGISTRY);
+        }
     }
 
 

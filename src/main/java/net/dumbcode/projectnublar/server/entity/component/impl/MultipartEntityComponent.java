@@ -119,7 +119,8 @@ public class MultipartEntityComponent implements EntityComponent {
         @Override
         public MultipartEntityComponent construct() {
             MultipartEntityComponent component = new MultipartEntityComponent();
-            component.multipartNames = access -> this.linkedCubeMap.getOrDefault(access.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(access.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur.getSystemInfo().defaultStage()), Lists.newArrayList());
+            component.multipartNames = access ->
+                    this.linkedCubeMap.getOrDefault(access.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(this.defaultStage), Lists.newArrayList());
             return component;
         }
 

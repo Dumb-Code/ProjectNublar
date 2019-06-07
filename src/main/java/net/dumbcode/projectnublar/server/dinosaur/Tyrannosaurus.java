@@ -2,30 +2,23 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import lombok.val;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.data.FeedingDiet;
-import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class Tyrannosaurus extends Dinosaur {
 
     public Tyrannosaurus() {
-        val map = getModelProperties().getMainModelMap();
-        map.put(ModelStage.ADULT, "tyrannosaurus_adult_idle");
-        map.put(ModelStage.SKELETON, "tyrannosaurus_skeleton_idle");
 
         getItemProperties()
                 .setCookedMeatHealAmount(10)
@@ -81,19 +74,8 @@ public class Tyrannosaurus extends Dinosaur {
                 .setLinkedCubeMap(entity);
 
         addComponent(EntityComponentTypes.ANIMATION)
-                .setModelGetter(e -> {
-                    ModelStage stage = this.getSystemInfo().defaultStage();
-                    AgeComponent component = ((ComponentAccess) e).getOrNull(EntityComponentTypes.AGE);
-                    if(component != null) {
-                        stage = component.stage;
-                        if (!this.getSystemInfo().allAcceptedStages().contains(stage)) {
-                            stage = this.getSystemInfo().defaultStage();
-                        }
-                    }
-                    ResourceLocation regname = this.getRegName();
-                    return new ResourceLocation(regname.getNamespace(), "models/entities/" + regname.getPath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + this.getModelProperties().getMainModelMap().get(stage));
-                })
-                .setInfo(this.getSystemInfo());
+                .setModelGetter(new DinosaurModelGetter(this))
+                .setModelGrowthStages(Lists.newArrayList(ModelStage.ADULT, ModelStage.SKELETON));
 
 
         this.addComponent(EntityComponentTypes.GENDER);

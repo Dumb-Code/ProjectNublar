@@ -53,12 +53,12 @@ public enum MultipartSystem implements EntitySystem {
 
         @SuppressWarnings("unchecked")
         List<AnimationLayer> layers = animation.animationWrapper.getLayers();
-        for (AnimationLayer<?, ?> layer : layers) {
+        for (AnimationLayer<?> layer : layers) {
             for (String cubeName : layer.getCubeNames()) {
                 layer.getAnicubeRef().apply(cubeName).reset();
             }
         }
-        for (AnimationLayer<?, ?> layer : layers) {
+        for (AnimationLayer<?> layer : layers) {
             layer.animate(entity.ticksExisted);
         }
         Matrix4d entityRotate = new Matrix4d();

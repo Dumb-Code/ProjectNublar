@@ -11,15 +11,15 @@ import net.dumbcode.projectnublar.server.entity.ModelStage;
 import java.util.Collection;
 import java.util.function.Function;
 
-public class MovementLayer extends AnimationLayer<DinosaurEntity, ModelStage> {
+public class MovementLayer extends AnimationLayer<DinosaurEntity> {
 
 
-    public MovementLayer(DinosaurEntity entity, ModelStage stage, Collection<String> cubeNames, Function<String, AnimatableCube> anicubeRef, Function<String, AnimationRunWrapper.CubeWrapper> cuberef, AnimationSystemInfo<ModelStage, DinosaurEntity> info, boolean inertia) {
-        super(entity, stage, cubeNames, anicubeRef, cuberef, info, inertia);
+    public MovementLayer(DinosaurEntity entity, Collection<String> cubeNames, Function<String, AnimatableCube> anicubeRef, Function<String, AnimationRunWrapper.CubeWrapper> cuberef, AnimationSystemInfo<DinosaurEntity> info, boolean inertia) {
+        super(entity, cubeNames, anicubeRef, cuberef, info, inertia);
     }
 
     @Override
-    public Animation<ModelStage> getAnimation() {
+    public Animation getAnimation() {
         if(this.isMoving(this.getEntity())) {
             return EnumAnimation.WALKING.get();
         }

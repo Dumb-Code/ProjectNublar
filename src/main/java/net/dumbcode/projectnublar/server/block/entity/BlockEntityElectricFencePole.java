@@ -131,6 +131,7 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
                     }
                 }
             }
+            //Pass power to other poles connected to this.
             if(this.energy.getEnergyStored() > 300) {
                 Set<IEnergyStorage> storages = Sets.newLinkedHashSet();
                 for (Connection connection : this.fenceConnections) {
