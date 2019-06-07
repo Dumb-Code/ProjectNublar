@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.render.animator;
 
-import net.dumbcode.dumblibrary.client.animation.PoseHandler;
-import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
+import net.dumbcode.dumblibrary.server.animation.PoseHandler;
+import net.dumbcode.dumblibrary.client.animation.EntityAnimator;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;

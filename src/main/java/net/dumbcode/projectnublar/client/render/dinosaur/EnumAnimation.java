@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.render.dinosaur;
 
 import com.google.common.collect.Lists;
-import net.dumbcode.dumblibrary.client.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 
 import java.util.Collection;

@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.dumblibrary.client.model.tabula.baked.TabulaModelHandler;
-import net.dumbcode.projectnublar.client.commandmodel.ModelCommandLoader;
 import net.dumbcode.projectnublar.client.render.FenceStateMapper;
 import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -40,7 +39,6 @@ public class ModelHandler {
         ModelLoader.setCustomStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE, new FenceStateMapper(HIGH_SECURITY_ELECTRIC_FENCE_POLE));
 
         TabulaModelHandler.INSTANCE.allow(ProjectNublar.MODID);
-        ModelLoaderRegistry.registerLoader(ModelCommandLoader.INSTANCE);
 
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE, Item.getItemFromBlock(HIGH_SECURITY_ELECTRIC_FENCE_POLE),
                 Item.getItemFromBlock(LOW_SECURITY_ELECTRIC_FENCE_POLE), Item.getItemFromBlock(ELECTRIC_FENCE), Item.getItemFromBlock(CREATIVE_POWER_SOURCE));

@@ -2,15 +2,14 @@ package net.dumbcode.projectnublar.server.animation;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
-import net.dumbcode.dumblibrary.client.animation.PoseHandler;
-import net.dumbcode.dumblibrary.client.animation.objects.Animation;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
-import net.dumbcode.dumblibrary.client.animation.objects.EntityAnimator;
+import net.dumbcode.dumblibrary.server.animation.PoseHandler;
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationRunWrapper;
+import net.dumbcode.dumblibrary.client.animation.EntityAnimator;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.client.animation.MovementLayer;
-import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -20,6 +19,8 @@ import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -97,6 +98,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<ModelStage,
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public ModelContainer<DinosaurEntity, ModelStage> getModelContainer(DinosaurEntity entity) {
         return entity.getDinosaur().getModelContainer();
     }

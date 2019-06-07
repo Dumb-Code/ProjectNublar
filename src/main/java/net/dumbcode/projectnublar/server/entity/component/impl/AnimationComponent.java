@@ -1,17 +1,15 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.DumbLibrary;
-import net.dumbcode.dumblibrary.client.animation.PoseHandler;
-import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
-import net.dumbcode.dumblibrary.client.animation.objects.Animation;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
+import net.dumbcode.dumblibrary.server.animation.PoseHandler;
+import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationRunWrapper;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.dumblibrary.server.network.S0SyncAnimation;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;

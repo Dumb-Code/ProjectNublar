@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.client.animation;
 
-import net.dumbcode.dumblibrary.client.animation.objects.Animation;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationRunWrapper;
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationRunWrapper;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;

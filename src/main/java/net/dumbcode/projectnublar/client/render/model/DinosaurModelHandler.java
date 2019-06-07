@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.model;
 
-import net.dumbcode.dumblibrary.client.animation.AnimatableRenderer;
+import net.dumbcode.dumblibrary.server.animation.AnimatableRenderer;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFencePoleRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFenceRenderer;
@@ -8,7 +8,6 @@ import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalB
 import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;

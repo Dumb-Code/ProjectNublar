@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
-import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
-import net.dumbcode.dumblibrary.client.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.*;
 import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
@@ -20,7 +20,6 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Function;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)

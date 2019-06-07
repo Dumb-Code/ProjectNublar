@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
 import lombok.Data;
-import net.dumbcode.dumblibrary.client.animation.ModelContainer;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.client.render.animator.DinosaurAnimator;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

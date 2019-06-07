@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui;
 
-import net.dumbcode.dumblibrary.client.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
 import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileHandler;
