@@ -40,7 +40,7 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
         TileEntity te = world.getTileEntity(pos);
         if(te instanceof ConnectableBlockEntity) {
             for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
-                if(connection.isBroken()) {
+                if(connection.isBroken() || !connection.isPowered(world)) {
                     continue;
                  }
                 Vector3d center = connection.getCenter();
