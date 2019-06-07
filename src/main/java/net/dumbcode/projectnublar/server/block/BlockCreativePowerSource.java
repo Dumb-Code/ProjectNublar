@@ -30,7 +30,7 @@ public class BlockCreativePowerSource extends Block implements IItemBlock {
         return new TileEntityCreativePowerSource();
     }
 
-    public class TileEntityCreativePowerSource extends TileEntity implements ITickable {
+    public static class TileEntityCreativePowerSource extends TileEntity implements ITickable {
         private IEnergyStorage storage = new EnergyStorage(0) {
 
             @Override
