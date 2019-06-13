@@ -397,13 +397,13 @@ public class GuiSkeletalBuilder extends GuiScreen {
             GlStateManager.color(color, color, color);
             int prevColor = getColorUnderMouse();
 
-            box.scaleX = 1f;
-            box.scaleY = 1f;
-            box.scaleZ = 1f;
+            box.setScaleX(1);
+            box.setScaleY(1);
+            box.setScaleZ(1);
             renderModel();
-            box.scaleX = 0f;
-            box.scaleY = 0f;
-            box.scaleZ = 0f;
+            box.setScaleX(0);
+            box.setScaleY(0);
+            box.setScaleZ(0);
 
             int newColor = getColorUnderMouse();
 
@@ -588,12 +588,12 @@ public class GuiSkeletalBuilder extends GuiScreen {
         out.rotY(part.rotateAngleY);
         out.rotX(part.rotateAngleX);
 
-        if(part.scaleChildren) {
+        if(part.isScaleChildren()) {
             Matrix4f scaling = new Matrix4f();
             scaling.setIdentity();
-            scaling.m00 = part.scaleX;
-            scaling.m11 = part.scaleY;
-            scaling.m22 = part.scaleZ;
+            scaling.m00 = part.getScaleX();
+            scaling.m11 = part.getScaleY();
+            scaling.m22 = part.getScaleZ();
             out.mul(scaling);
         }
     }
@@ -717,9 +717,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private void hidePart(TabulaModelRenderer part) {
         if(part == null)
             return;
-        part.scaleX = 0f;
-        part.scaleY = 0f;
-        part.scaleZ = 0f;
+        part.setScaleX(0f);
+        part.setScaleY(0f);
+        part.setScaleZ(0f);
     }
 
     /**
@@ -728,9 +728,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private void highlight(TabulaModelRenderer part, float red, float green, float blue) {
         if(part != null) {
             hideAllModelParts();
-            part.scaleX = 1f;
-            part.scaleY = 1f;
-            part.scaleZ = 1f;
+            part.setScaleX(1f);
+            part.setScaleY(1f);
+            part.setScaleZ(1f);
             GlStateManager.disableTexture2D();
             GlStateManager.color(red, green, blue);
             renderModel();
@@ -744,9 +744,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
         for(ModelRenderer renderer : model.boxList) {
             if(renderer instanceof TabulaModelRenderer) {
                 TabulaModelRenderer part = (TabulaModelRenderer)renderer;
-                part.scaleX = 1f;
-                part.scaleY = 1f;
-                part.scaleZ = 1f;
+                part.setScaleX(1f);
+                part.setScaleY(1f);
+                part.setScaleZ(1f);
             }
         }
     }
@@ -778,9 +778,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private void hideAllModelParts() {
         for(ModelRenderer box : model.boxList) {
             TabulaModelRenderer renderer = (TabulaModelRenderer)box;
-            renderer.scaleX = 0f;
-            renderer.scaleY = 0f;
-            renderer.scaleZ = 0f;
+            renderer.setScaleX(0f);
+            renderer.setScaleY(0f);
+            renderer.setScaleZ(0f);
         }
     }
 

@@ -222,7 +222,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 EnumFacing enumFacing = poleFacing.getFacing();
 
                 TabulaModelRenderer cube = model.getCube(anchoredPart);
-                if (poleFacing != PoleFacing.NONE && cube != null && (cube.scaleX != 0 || cube.scaleY != 0 || cube.scaleZ != 0)) {
+                if (poleFacing != PoleFacing.NONE && cube != null && (cube.getScaleX() != 0 || cube.getScaleY() != 0 || cube.getScaleZ() != 0)) {
                     Vec3d partOrigin = TabulaUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
                     partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
 
@@ -233,8 +233,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                     rendererPos.y -= 1.5;
                     translateMatrix.transform(rendererPos);
 
-                    AxisAlignedBB bounding = //TileEntity.INFINITE_EXTENT_AABB;
-                            new AxisAlignedBB(0, 0, 0, enumFacing.getXOffset() * 256F, enumFacing.getYOffset() * 256F, enumFacing.getZOffset() * 256F)
+                    AxisAlignedBB bounding = new AxisAlignedBB(0, 0, 0, enumFacing.getXOffset() * 256F, enumFacing.getYOffset() * 256F, enumFacing.getZOffset() * 256F)
                                     .offset(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F)
                                     .grow(baseWidth / 2F);
 
@@ -385,9 +384,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 }
                 for (TabulaModelRenderer box : tabulaModel.getAllCubes()) {
                     if(nonHiddenCubes.contains(box)) {
-                        box.scaleX = 1;
-                        box.scaleY = 1;
-                        box.scaleZ = 1;
+                        box.setScaleX(1);
+                        box.setScaleY(1);
+                        box.setScaleZ(1);
                     } else {
 //                        box.scaleX = 0;
 //                        box.scaleY = 0;
@@ -396,9 +395,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 }
             } else {
                 for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
-                    modelRenderer.scaleX = 1;
-                    modelRenderer.scaleY = 1;
-                    modelRenderer.scaleZ = 1;
+                    modelRenderer.setScaleX(1);
+                    modelRenderer.setScaleY(1);
+                    modelRenderer.setScaleZ(1);
                 }
             }
         }
@@ -406,9 +405,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
     private static void resetVisability(TabulaModel tabulaModel) {
         for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
-            modelRenderer.scaleX = 1;
-            modelRenderer.scaleY = 1;
-            modelRenderer.scaleZ = 1;
+            modelRenderer.setScaleX(1);
+            modelRenderer.setScaleY(1);
+            modelRenderer.setScaleZ(1);
         }
     }
 

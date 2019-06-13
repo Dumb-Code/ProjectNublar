@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import org.lwjgl.input.Mouse;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.DoubleFunction;
@@ -25,9 +26,9 @@ public class SequencingSynthesizerGui extends TabbedGui {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
-    private GuiDropdownBox initialBox;
-    private GuiDropdownBox secondaryBox;
-    private GuiDropdownBox thirdBox;
+    private GuiDropdownBox<DriveEntry> initialBox;
+    private GuiDropdownBox<DriveEntry> secondaryBox;
+    private GuiDropdownBox<DriveEntry> thirdBox;
 
     private ClampedGuiSlider initialSlider;
     private ClampedGuiSlider secondarySlider;
@@ -50,13 +51,20 @@ public class SequencingSynthesizerGui extends TabbedGui {
     public void initGui() {
         super.initGui();
 
-        this.initialBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 4, 78, 20, 5, () -> this.dinosaurList);
-        this.secondaryBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 27, 78, 20, 5, () -> this.entryList);
-        this.thirdBox = new GuiDropdownBox(this.guiLeft + 23, this.guiTop + 49, 78, 20, 5, () -> this.entryList);
+        this.initialBox = new GuiDropdownBox<>(this.guiLeft + 23, this.guiTop + 4, 78, 20, 5, () -> this.dinosaurList);
+        this.secondaryBox = new GuiDropdownBox<>(this.guiLeft + 23, this.guiTop + 27, 78, 20, 5, () -> this.entryList);
+        this.thirdBox = new GuiDropdownBox<>(this.guiLeft + 23, this.guiTop + 49, 78, 20, 5, () -> this.entryList);
 
-        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 4, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true, d -> Math.max(d, 0.5D), this.initialBox);
-        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 27, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true, d -> Math.min(this.secondaryBox.getActive() != null && !this.dinosaurList.contains(this.secondaryBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D))), this.secondaryBox, this.initialSlider);
-        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 49, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true, d -> Math.min(this.thirdBox.getActive() != null && !this.dinosaurList.contains(this.thirdBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue)), this.thirdBox, this.secondarySlider, this.initialSlider);
+        this.initialSlider = new ClampedGuiSlider(0, this.guiLeft + 106, this.guiTop + 4, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(1) * 100D, false, true,
+                d -> Math.max(d, 0.5D), this.initialBox);
+
+
+        this.secondarySlider = new ClampedGuiSlider(1, this.guiLeft + 106, this.guiTop + 27, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(2) * 100D, false, true,
+                d -> Math.min(this.secondaryBox.getActive() != null && !this.dinosaurList.contains(this.secondaryBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D))), this.secondaryBox, this.initialSlider);
+
+
+        this.thirdSlider = new ClampedGuiSlider(2, this.guiLeft + 106, this.guiTop + 49, 79, 20, "", "%", 0D, 100D, this.blockEntity.getSelectAmount(3) * 100D, false, true,
+                d -> Math.min(this.thirdBox.getActive() != null && !this.dinosaurList.contains(this.thirdBox.getActive()) ? 0.15D : 1D, Math.min(d, 1D - Math.max(this.initialSlider.sliderValue, 0.5D) - this.secondarySlider.sliderValue)), this.thirdBox, this.secondarySlider, this.initialSlider);
 
         for (DriveEntry driveEntry : this.dinosaurList) {
             if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(1))) {
@@ -167,10 +175,7 @@ public class SequencingSynthesizerGui extends TabbedGui {
         Gui.drawRect(xStart, yStart, xStart + 1, yEnd, -1);
         Gui.drawRect(xStart + w, yStart, xStart + w - 1, yEnd, -1);
 
-        GuiDropdownBox mouseOver =
-                this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.open  ? this.initialBox :
-                        this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.open  ? this.secondaryBox :
-                                this.thirdBox.isMouseOver(mouseX, mouseY) || this.thirdBox.open  ? this.thirdBox : null;
+        GuiDropdownBox mouseOver = this.getMouseOver(mouseX, mouseY);
 
         if(mouseOver != this.initialBox) {
             this.initialBox.render(mouseX, mouseY);
@@ -218,22 +223,29 @@ public class SequencingSynthesizerGui extends TabbedGui {
         int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
         int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 
-        GuiDropdownBox mouseOver =
-                this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.open  ? this.initialBox :
-                        this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.open  ? this.secondaryBox :
-                                this.thirdBox.isMouseOver(mouseX, mouseY) || this.thirdBox.open  ? this.thirdBox : null;
+        GuiDropdownBox mouseOver = this.getMouseOver(mouseX, mouseY);
 
         if(mouseOver != null) {
             mouseOver.handleMouseInput();
         }
     }
 
+    @Nullable
+    public GuiDropdownBox getMouseOver(int mouseX, int mouseY) {
+        for (GuiDropdownBox box : new GuiDropdownBox[] { this.initialBox, this.secondaryBox, this.thirdBox }) {
+            if(box.isMouseOver(mouseX, mouseY) || box.isOpen()) {
+                return box;
+            }
+        }
+        return null;
+    }
+
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         GuiDropdownBox mouseOver =
-                this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.open ? this.initialBox :
-                        this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.open ? this.secondaryBox :
-                                this.thirdBox.isMouseOver(mouseX, mouseY) || this.thirdBox.open ? this.thirdBox : null;
+                this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.isOpen() ? this.initialBox :
+                        this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.isOpen() ? this.secondaryBox :
+                                this.thirdBox.isMouseOver(mouseX, mouseY) || this.thirdBox.isOpen() ? this.thirdBox : null;
 
         if(mouseOver != null) {
             mouseOver.mouseClicked(mouseX, mouseY, mouseButton);
