@@ -118,7 +118,7 @@ public class DinosaurEntitySystemInfo implements AnimationSystemInfo<DinosaurEnt
 
     @Override
     public List<PoseData> getPoseData(Animation animation) {
-        return animationList.getOrDefault(animation, Lists.newArrayList());
+        return this.animationList.getOrDefault(animation, Lists.newArrayList());
     }
 
 

@@ -21,7 +21,7 @@ public class MovementLayer extends AnimationLayer<DinosaurEntity> {
     @Override
     public Animation getAnimation() {
         if(this.isMoving(this.getEntity())) {
-            return EnumAnimation.WALKING.get();
+            return EnumAnimation.IDLE.get();
         }
         return EnumAnimation.IDLE.get();
     }
@@ -29,7 +29,7 @@ public class MovementLayer extends AnimationLayer<DinosaurEntity> {
     private boolean isMoving(DinosaurEntity entity) {
         float deltaX = (float) (entity.posX - entity.prevPosX);
         float deltaZ = (float) (entity.posZ - entity.prevPosZ);
-        return deltaX * deltaX + deltaZ * deltaZ > -0.0001F;
+        return deltaX * deltaX + deltaZ * deltaZ > 1.001F;
     }
 
     @Override

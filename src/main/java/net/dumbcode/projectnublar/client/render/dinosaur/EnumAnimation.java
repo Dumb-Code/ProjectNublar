@@ -8,13 +8,27 @@ import java.util.List;
 import java.util.Locale;
 
 public enum EnumAnimation  {
-    IDLE(false, false),
-    WALKING(false, false);
+    IDLE,
+    WALKING,
+    ATTACK,
+    CALL_SHORT,
+    CALLING,
+    DRINKING,
+    EATING,
+    INJURED,
+    LOOK_AROUND,
+    RESTING(true),
+    ROARING,
+    RUNNING,
+    SLEEPING(true),
+    SNIFF_AIR,
+    SNIFF_GROUND,
 
+    ;
     private final Animation animation;
 
     EnumAnimation() {
-        this(false, true);
+        this(false, false);
     }
 
     EnumAnimation(boolean hold) {
