@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
+import net.dumbcode.dumblibrary.server.entity.component.impl.AiComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAITasks;

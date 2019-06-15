@@ -2,27 +2,30 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.server.entity.EntityManager;
+import net.dumbcode.dumblibrary.server.entity.system.RegisterSystemsEvent;
+import net.dumbcode.dumblibrary.server.entity.system.impl.AnimationSystem;
+import net.dumbcode.dumblibrary.server.entity.system.impl.HerdSystem;
+import net.dumbcode.dumblibrary.server.entity.system.impl.MetabolismSystem;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
-import net.dumbcode.projectnublar.server.dinosaur.Tyrannosaurus;
-import net.dumbcode.projectnublar.server.entity.EntityManager;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentType;
-import net.dumbcode.projectnublar.server.entity.system.RegisterSystemsEvent;
-import net.dumbcode.projectnublar.server.entity.system.impl.*;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.plants.Plant;
-import net.dumbcode.projectnublar.server.registry.RegisterComponentsEvent;
 import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
 import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
-import net.dumbcode.projectnublar.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
@@ -36,8 +39,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -72,10 +73,6 @@ public class ProjectNublar {
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;
-    public static IForgeRegistry<EntityComponentType<?, ?>> COMPONENT_REGISTRY;
-
-    @CapabilityInject(EntityManager.class)
-    public static final Capability<EntityManager> ENTITY_MANAGER = InjectedUtils.injected();
 
     private static Logger logger;
 
@@ -158,6 +155,20 @@ public class ProjectNublar {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+
+        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
+            ResourceLocation regName = dinosaur.getRegName();
+            for (ModelStage value : new ModelStage[] {ModelStage.ADULT, ModelStage.INFANT, ModelStage.CHILD, ModelStage.ADOLESCENCE, ModelStage.SKELETON}) {
+                Map<ModelStage, ModelContainer<DinosaurEntity>> container = dinosaur.getModelContainer();
+
+                if(!dinosaur.getActiveModels().contains(value)) {
+                    container.put(value, container.get(ModelStage.ADULT));
+                } else {
+                    container.put(value, new ModelContainer<>(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + value), dinosaur.getSystemInfo().get(value)));
+                }
+            }
+        }
+
         GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
 
         GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
@@ -205,12 +216,6 @@ public class ProjectNublar {
 
     @SubscribeEvent
     public static void createRegistries(RegistryEvent.NewRegistry event) {
-        COMPONENT_REGISTRY = new RegistryBuilder<EntityComponentType<?, ?>>()
-                .setType(EntityComponentType.getWildcardType())
-                .setName(new ResourceLocation(ProjectNublar.MODID, "component"))
-                .create();
-        MinecraftForge.EVENT_BUS.post(new RegisterComponentsEvent(COMPONENT_REGISTRY));
-
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
                 .setType(Dinosaur.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))

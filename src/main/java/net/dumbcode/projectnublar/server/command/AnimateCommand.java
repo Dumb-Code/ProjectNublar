@@ -1,20 +1,23 @@
 package net.dumbcode.projectnublar.server.command;
 
 import com.google.common.collect.Lists;
-import net.dumbcode.projectnublar.client.render.dinosaur.EnumAnimation;
+import net.dumbcode.dumblibrary.server.registry.DumbRegistries;
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Locale;
 
 public class AnimateCommand extends CommandBase {
     @Override
@@ -29,12 +32,22 @@ public class AnimateCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EnumAnimation animation = EnumAnimation.valueOf(args[0].toUpperCase(Locale.ROOT));
+        Animation animation = DumbRegistries.ANIMATION_REGISTRY.getValue(new ResourceLocation(args[0]));
         for (Entity entity : sender.getEntityWorld().loadedEntityList) {
             if(entity instanceof DinosaurEntity) {
                 AnimationComponent comp = ((DinosaurEntity) entity).getOrNull(EntityComponentTypes.ANIMATION);
                 if (comp != null) {
-                    comp.setAnimation((DinosaurEntity) entity, animation.get());
+                    AnimationLayer.AnimationEntry entry = new AnimationLayer.AnimationEntry(animation);
+                    if(args.length > 1) {
+                        entry = entry.withTime(parseInt(args[1]));
+                    }
+                    if(args.length > 2) {
+                        entry = entry.withHold(parseBoolean(args[2]));
+                    }
+                    if(args.length > 3) {
+                        entry = entry.withUseInertia(parseBoolean(args[3]));
+                    }
+                    comp.playAnimation((ComponentAccess) entity, entry, args.length > 4 ? parseInt(args[4]) : -1); //ATTEMPT MERGE
                 }
             }
         }
@@ -42,6 +55,6 @@ public class AnimateCommand extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, EnumAnimation.getNames()) : Lists.newArrayList();
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, DumbRegistries.ANIMATION_REGISTRY.getKeys()) : Lists.newArrayList();
     }
 }

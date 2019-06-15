@@ -2,7 +2,8 @@ package net.dumbcode.projectnublar.server.entity;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -87,7 +88,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         if(!this.setInParent) {
             this.setInParent = parent != null;
             if(parent instanceof ComponentAccess) {
-                ((ComponentAccess) parent).get(EntityComponentTypes.MULTIPART)
+                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART)
                         .ifPresent(multipartEntityComponent -> multipartEntityComponent.entities.add(new MultipartEntityComponent.LinkedEntity(this.partName, this.getUniqueID())));
             }
         }

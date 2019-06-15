@@ -1,12 +1,10 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import io.netty.buffer.ByteBuf;
-import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentMap;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;

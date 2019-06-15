@@ -15,9 +15,10 @@ import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -362,7 +363,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
     private static void setVisability(ComponentAccess entity, TabulaModel tabulaModel) {
         Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
         List<String> modelList = Lists.newArrayList();
-        SkeletalBuilderComponent compoent = entity.getOrNull(EntityComponentTypes.SKELETAL_BUILDER);
+        SkeletalBuilderComponent compoent = entity.getOrNull(NublarEntityComponentTypes.SKELETAL_BUILDER);
         if(compoent != null) {
             for (String s : compoent.getIndividualBones()) {
                 modelList.addAll(compoent.getBoneToModelMap().get(s));

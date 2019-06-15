@@ -10,7 +10,8 @@ import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
@@ -73,7 +74,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     }
 
     private void reassureSize() {
-        this.getDinosaurEntity().flatMap(d -> d.get(EntityComponentTypes.SKELETAL_BUILDER)).ifPresent(c -> {
+        this.getDinosaurEntity().flatMap(d -> d.get(NublarEntityComponentTypes.SKELETAL_BUILDER)).ifPresent(c -> {
             int size = c.getBoneListed().size();
             if(size != this.boneHandler.getSlots()) {
                 this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
@@ -93,10 +94,10 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
-            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(EntityComponentTypes.SKELETAL_BUILDER));
-            entity.attachComponent(EntityComponentTypes.SKELETAL_BUILDER);
-            entity.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
-            entity.get(EntityComponentTypes.AGE).ifPresent(age -> age.stage = ModelStage.SKELETON);
+            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(NublarEntityComponentTypes.SKELETAL_BUILDER));
+            entity.attachComponent(NublarEntityComponentTypes.SKELETAL_BUILDER);
+            entity.getOrExcept(NublarEntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
+            entity.get(NublarEntityComponentTypes.AGE).ifPresent(age -> age.stage = ModelStage.SKELETON);
             this.dinosaurEntity = Optional.of(entity);
         }
         this.history.clear();
@@ -108,7 +109,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
             return null;
         }
         DinosaurEntity de = this.dinosaurEntity.get();
-        return de.getDinosaur().getModelContainer().get(de.getOrExcept(EntityComponentTypes.SKELETAL_BUILDER).stage).getMainModel();
+        return de.getDinosaur().getModelContainer().get(de.getOrExcept(NublarEntityComponentTypes.SKELETAL_BUILDER).stage).getMainModel();
     }
 
     public ItemStackHandler getBoneHandler() {

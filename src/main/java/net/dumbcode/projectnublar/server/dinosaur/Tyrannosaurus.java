@@ -5,9 +5,10 @@ import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
-import net.dumbcode.projectnublar.server.dinosaur.data.FeedingDiet;
+import net.dumbcode.dumblibrary.server.entity.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -37,6 +38,8 @@ public class Tyrannosaurus extends Dinosaur {
                 BiomeDictionary.Type.FOREST,
                 BiomeDictionary.Type.MOUNTAIN
         ));
+
+        this.getActiveModels().addAll(Lists.newArrayList(ModelStage.ADULT, ModelStage.SKELETON));
     }
 
     @Override
@@ -69,23 +72,22 @@ public class Tyrannosaurus extends Dinosaur {
                 "chest",
                 "jawUpper1",
                 "head"));
-        addComponent(EntityComponentTypes.MULTIPART)
+        addComponent(NublarEntityComponentTypes.MULTIPART)
                 .setDefaultStage(ModelStage.ADULT)
                 .setLinkedCubeMap(entity);
 
         addComponent(EntityComponentTypes.ANIMATION)
-                .setModelGetter(new DinosaurModelGetter(this))
-                .setModelGrowthStages(Lists.newArrayList(ModelStage.ADULT, ModelStage.SKELETON));
+                .setModelGetter(new DinosaurModelGetter(this));
 
 
         this.addComponent(EntityComponentTypes.GENDER);
-        this.addComponent(EntityComponentTypes.AGE);
+        this.addComponent(NublarEntityComponentTypes.AGE);
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
-        this.addComponent(EntityComponentTypes.WANDER_AI);
+        this.addComponent(NublarEntityComponentTypes.WANDER_AI);
 
 
-        this.addComponent(EntityComponentTypes.SKELETAL_BUILDER)
+        this.addComponent(NublarEntityComponentTypes.SKELETAL_BUILDER)
                 .initializeMap(
                         "foot", "legLowerLeft",
                         "foot", "legLowerRight",

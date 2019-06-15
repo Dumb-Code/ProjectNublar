@@ -1,14 +1,11 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
-import net.dumbcode.projectnublar.server.entity.EntityFamily;
-import net.dumbcode.projectnublar.server.entity.EntityManager;
+import net.dumbcode.dumblibrary.server.entity.EntityFamily;
+import net.dumbcode.dumblibrary.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
-import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
-import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
-
-import java.util.Map;
+import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
 
 public enum AgeSystem implements EntitySystem {
     INSTANCE;
@@ -16,8 +13,8 @@ public enum AgeSystem implements EntitySystem {
 
     @Override
     public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(EntityComponentTypes.AGE);
-        this.ages = family.populateBuffer(EntityComponentTypes.AGE);
+        EntityFamily family = manager.resolveFamily(NublarEntityComponentTypes.AGE);
+        this.ages = family.populateBuffer(NublarEntityComponentTypes.AGE);
     }
 
     @Override

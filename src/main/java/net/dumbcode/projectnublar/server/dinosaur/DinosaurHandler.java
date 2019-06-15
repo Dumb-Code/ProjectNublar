@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
-import net.dumbcode.projectnublar.server.utils.InjectedUtils;
+import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;

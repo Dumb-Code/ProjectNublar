@@ -2,19 +2,17 @@ package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.block.Block;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -25,7 +23,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.TAB;
-import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
@@ -77,7 +74,7 @@ public final class ItemHandler {
         populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(stack.getOrCreateSubCompound(ProjectNublar.MODID).getInteger("AmountDone") + "%")));
         populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
 
-        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(EntityComponentTypes.SKELETAL_BUILDER).getIndividualBones(), FossilItem::new, "fossil_%s_%s"); //TODO: redo format
+        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(NublarEntityComponentTypes.SKELETAL_BUILDER).getIndividualBones(), FossilItem::new, "fossil_%s_%s"); //TODO: redo format
 
 
         for (Block block : ForgeRegistries.BLOCKS) {

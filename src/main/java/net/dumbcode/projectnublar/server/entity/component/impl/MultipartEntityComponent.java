@@ -10,16 +10,15 @@ import io.netty.buffer.ByteBuf;
 import lombok.Setter;
 import lombok.Value;
 import lombok.experimental.Accessors;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponent;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentStorage;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -87,7 +86,7 @@ public class MultipartEntityComponent implements EntityComponent {
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if(entity instanceof ComponentAccess && !event.getWorld().isRemote) {
-            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(EntityComponentTypes.MULTIPART);
+            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
             if (multipart.isPresent()) {
                 MultipartEntityComponent component = multipart.get();
                 for (String s : component.multipartNames.apply((ComponentAccess) entity)) {
@@ -101,7 +100,7 @@ public class MultipartEntityComponent implements EntityComponent {
         if(event.getWorld().isRemote && entity instanceof EntityPart) {
             Entity parent = ((EntityPart) entity).getParent();
             if(parent instanceof ComponentAccess) {
-                ((ComponentAccess) parent).get(EntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
+                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
             }
         }
     }
@@ -120,7 +119,7 @@ public class MultipartEntityComponent implements EntityComponent {
         public MultipartEntityComponent construct() {
             MultipartEntityComponent component = new MultipartEntityComponent();
             component.multipartNames = access ->
-                    this.linkedCubeMap.getOrDefault(access.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(this.defaultStage), Lists.newArrayList());
+                    this.linkedCubeMap.getOrDefault(access.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(this.defaultStage), Lists.newArrayList());
             return component;
         }
 

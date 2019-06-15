@@ -2,12 +2,15 @@ package net.dumbcode.projectnublar.server.entity.system.impl;
 
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.EntityFamily;
+import net.dumbcode.dumblibrary.server.entity.EntityManager;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.*;
-import net.dumbcode.projectnublar.server.entity.component.EntityComponentTypes;
-import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
-import net.dumbcode.projectnublar.server.entity.system.EntitySystem;
+import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
@@ -32,9 +35,9 @@ public enum MultipartSystem implements EntitySystem {
 
     @Override
     public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(EntityComponentTypes.MULTIPART, EntityComponentTypes.ANIMATION);
+        EntityFamily family = manager.resolveFamily(NublarEntityComponentTypes.MULTIPART, EntityComponentTypes.ANIMATION);
         this.animations = family.populateBuffer(EntityComponentTypes.ANIMATION, this.animations);
-        this.multiparts = family.populateBuffer(EntityComponentTypes.MULTIPART, this.multiparts);
+        this.multiparts = family.populateBuffer(NublarEntityComponentTypes.MULTIPART, this.multiparts);
         this.entities = family.getEntities();
     }
 
@@ -47,12 +50,12 @@ public enum MultipartSystem implements EntitySystem {
 
 
     private static void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
-        if(animation.animationWrapper == null) {
+        if(animation.getAnimationWrapper() == null) {
             return;
         }
 
         @SuppressWarnings("unchecked")
-        List<AnimationLayer> layers = animation.animationWrapper.getLayers();
+        List<AnimationLayer> layers = animation.getAnimationWrapper().getLayers();
         for (AnimationLayer<?> layer : layers) {
             for (String cubeName : layer.getCubeNames()) {
                 layer.getAnicubeRef().apply(cubeName).reset();
@@ -127,7 +130,7 @@ public enum MultipartSystem implements EntitySystem {
             for (Entity entity : world.loadedEntityList) {
                 if(entity instanceof ComponentAccess) {
                     AnimationComponent animation = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.ANIMATION);
-                    MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.MULTIPART);
+                    MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(NublarEntityComponentTypes.MULTIPART);
                     if(animation != null && multipart != null) {
                         updatePart(entity, multipart, animation);
                     }

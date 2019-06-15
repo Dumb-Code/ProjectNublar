@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
@@ -7,18 +8,19 @@ import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.server.entity.component.*;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
-import net.dumbcode.projectnublar.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.component.*;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
-import net.dumbcode.projectnublar.server.entity.component.impl.AnimationComponent;
-import net.dumbcode.projectnublar.server.entity.component.impl.GenderComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -30,10 +32,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Getter
 @Setter
@@ -47,6 +46,8 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private Map<ModelStage, ModelContainer<DinosaurEntity>> modelContainer = Maps.newEnumMap(ModelStage.class);
 
     private Map<ModelStage, DinosaurEntitySystemInfo> systemInfo = Maps.newEnumMap(ModelStage.class);
+
+    private List<ModelStage> activeModels = Lists.newArrayList(); //todo : seriailzie
 
 
     public Dinosaur() {
@@ -72,7 +73,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             config = this.attacher.getDefaultConfig();
         }
         DinosaurEntity entity = new DinosaurEntity(world);
-        entity.getOrExcept(EntityComponentTypes.DINOSAUR).dinosaur = this;
+        entity.getOrExcept(NublarEntityComponentTypes.DINOSAUR).dinosaur = this;
         config.attachAll(entity);
         return entity;
     }
@@ -92,7 +93,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
         GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
-        String name = entity.get(EntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName();
+        String name = entity.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(ModelStage.ADULT).getName();
         if(gcomp != null) {
             return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
         }
@@ -148,7 +149,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         @Override
         public ResourceLocation getLocation(DinosaurEntity entity){
             ModelStage stage = ModelStage.ADULT;
-            AgeComponent component = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.AGE);
+            AgeComponent component = ((ComponentAccess) entity).getOrNull(NublarEntityComponentTypes.AGE);
             if(component != null) {
                 stage = component.stage;
             }
