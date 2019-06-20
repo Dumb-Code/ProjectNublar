@@ -154,7 +154,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
                 stage = component.stage;
             }
             ResourceLocation regname = this.dinosaur.getRegName();
-            return new ResourceLocation(regname.getNamespace(), "models/entities/" + regname.getPath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + regname.getPath() + "_" + stage.getName() + "_idle");
+            return new ResourceLocation(regname.getNamespace(), "models/entities/" + regname.getPath() + "/" + stage.getName().toLowerCase(Locale.ROOT) + "/" + regname.getPath() + "_" + stage.getName());
         }
 
         @Override
