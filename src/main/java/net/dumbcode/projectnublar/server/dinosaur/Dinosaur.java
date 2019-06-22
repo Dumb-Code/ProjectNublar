@@ -8,19 +8,19 @@ import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.*;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
-import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
-import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
-import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -40,15 +40,15 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     private final ItemProperties itemProperties = new ItemProperties();
     private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
-
     private final EntityComponentAttacher attacher = new EntityComponentAttacher();
 
     private Map<ModelStage, ModelContainer<DinosaurEntity>> modelContainer = Maps.newEnumMap(ModelStage.class);
-
     private Map<ModelStage, DinosaurEntitySystemInfo> systemInfo = Maps.newEnumMap(ModelStage.class);
+    private List<ModelStage> activeModels = Lists.newArrayList(); //todo : serialize
 
-    private List<ModelStage> activeModels = Lists.newArrayList(); //todo : seriailzie
-
+    //TODO: Eventually move to Json.
+    /** Scale the model should be rendered at */
+    private Map<ModelStage, Double> scale = Maps.newHashMap();
 
     public Dinosaur() {
         for (ModelStage value : ModelStage.values()) {

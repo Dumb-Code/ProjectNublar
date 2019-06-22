@@ -17,27 +17,24 @@ import net.minecraftforge.common.BiomeDictionary;
 import java.util.List;
 import java.util.Map;
 
-public class Tyrannosaurus extends Dinosaur {
+public class Dilophosaurus extends Dinosaur {
 
-    public Tyrannosaurus() {
-        this.getScale().put(ModelStage.ADULT, 2.5);
+    public Dilophosaurus() {
+        this.getScale().put(ModelStage.ADULT, 1D);
 
         getItemProperties()
-                .setCookedMeatHealAmount(10)
+                .setCookedMeatHealAmount(5)
                 .setCookedMeatSaturation(1f)
                 .setRawMeatHealAmount(4)
                 .setRawMeatSaturation(0.6f)
                 .setCookingExperience(1f);
 
         DinosaurInformation dinosaurInfomation = this.getDinosaurInfomation();
-        dinosaurInfomation.setPeriod(DinosaurPeriod.CRETACEOUS);
+        dinosaurInfomation.setPeriod(DinosaurPeriod.JURASSIC);
         dinosaurInfomation.getBiomeTypes().addAll(Lists.newArrayList(
                 BiomeDictionary.Type.CONIFEROUS,
-                BiomeDictionary.Type.DRY,
                 BiomeDictionary.Type.PLAINS,
-                BiomeDictionary.Type.MESA,
-                BiomeDictionary.Type.FOREST,
-                BiomeDictionary.Type.MOUNTAIN
+                BiomeDictionary.Type.FOREST
         ));
 
         this.getActiveModels().addAll(Lists.newArrayList(ModelStage.ADULT, ModelStage.SKELETON));
@@ -48,14 +45,19 @@ public class Tyrannosaurus extends Dinosaur {
         addComponent(EntityComponentTypes.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
-                        .add(new ItemStack(Items.APPLE)))
-                .setMaxFood(7500)
-                .setMaxWater(6000);
+                        .add(new ItemStack(Items.PORKCHOP))
+                        .add(new ItemStack(Items.COOKED_PORKCHOP))
+                        .add(new ItemStack(Items.CHICKEN))
+                        .add(new ItemStack(Items.COOKED_CHICKEN))
+                        .add(new ItemStack(Items.BEEF))
+                        .add(new ItemStack(Items.COOKED_BEEF)))
+                .setMaxFood(6000)
+                .setMaxWater(4500);
 
         Map<ModelStage, List<String>> entity = Maps.newEnumMap(ModelStage.class);
         entity.put(ModelStage.ADULT, Lists.newArrayList(
                 "tail4",
-                "Tail3",
+                "tail3",
                 "tail2",
                 "tail1",
 
@@ -67,27 +69,23 @@ public class Tyrannosaurus extends Dinosaur {
                 "legMiddleLeft",
                 "legLowerLeft",
 
+                "neck2",
                 "neck3",
 
                 "hips",
                 "chest",
                 "jawUpper1",
                 "head"));
-        addComponent(NublarEntityComponentTypes.MULTIPART)
+        this.addComponent(NublarEntityComponentTypes.MULTIPART)
                 .setDefaultStage(ModelStage.ADULT)
                 .setLinkedCubeMap(entity);
-
-        addComponent(EntityComponentTypes.ANIMATION)
+        this.addComponent(EntityComponentTypes.ANIMATION)
                 .setModelGetter(new DinosaurModelGetter(this));
-
-
         this.addComponent(EntityComponentTypes.GENDER);
         this.addComponent(NublarEntityComponentTypes.AGE);
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addComponent(NublarEntityComponentTypes.WANDER_AI);
-
-
         this.addComponent(NublarEntityComponentTypes.SKELETAL_BUILDER)
                 .initializeMap(
                         "foot", "legLowerLeft",

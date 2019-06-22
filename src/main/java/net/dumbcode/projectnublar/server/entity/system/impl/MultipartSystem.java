@@ -5,12 +5,14 @@ import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.EntityFamily;
 import net.dumbcode.dumblibrary.server.entity.EntityManager;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.entity.*;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
-import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
+import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityPart;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
@@ -54,6 +56,11 @@ public enum MultipartSystem implements EntitySystem {
             return;
         }
 
+        DinosaurEntity dinosaur = null;
+        if(entity instanceof DinosaurEntity) {
+            dinosaur = (DinosaurEntity) entity;
+        }
+
         @SuppressWarnings("unchecked")
         List<AnimationLayer> layers = animation.getAnimationWrapper().getLayers();
         for (AnimationLayer<?> layer : layers) {
@@ -89,7 +96,7 @@ public enum MultipartSystem implements EntitySystem {
                         for (int i = 0; i < 8; i++) {
                             Vec3d startPoint = TabulaUtils.getModelPosAlpha(animatableCube, (i >> 2)&1, (i >> 1)&1, i&1);
                             Point3d point = new Point3d(startPoint.x, startPoint.y + 1.5, startPoint.z);
-                            point.scale(2.5);
+                            point.scale(dinosaur != null ? dinosaur.getCurrentScale() : 1);
                             entityRotate.transform(point);
 
                             minX = Math.min(minX, point.x);

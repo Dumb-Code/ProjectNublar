@@ -13,7 +13,6 @@ import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
@@ -34,6 +33,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * This component allows an Entity
+ * to have multiple hit boxes.
+ */
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class MultipartEntityComponent implements EntityComponent {
 
@@ -113,6 +116,7 @@ public class MultipartEntityComponent implements EntityComponent {
     public static class Storage implements EntityComponentStorage<MultipartEntityComponent> {
         private Map<ModelStage, List<String>> linkedCubeMap = Maps.newEnumMap(ModelStage.class);
 
+        /** The model this system applies to. */
         private ModelStage defaultStage;
 
         @Override
