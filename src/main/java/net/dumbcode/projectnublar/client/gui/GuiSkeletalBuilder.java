@@ -1,8 +1,9 @@
 package net.dumbcode.projectnublar.client.gui;
 
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.client.gui.GuiHelper;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
+import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileHandler;
 import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileInfomation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -17,14 +18,10 @@ import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
 import net.dumbcode.projectnublar.server.network.C8FullPoseChange;
 import net.dumbcode.projectnublar.server.utils.DialogBox;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -337,7 +334,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
             registeredLeftClick = false;
         }
         actualModelRender(partialTicks, partBelowMouse);
-        cleanupModelRendering();
+        GuiHelper.cleanupModelRendering();
 
         if(partBelowMouse != null) {
             drawHoveringText(partBelowMouse.boxName, mouseX, mouseY);
@@ -565,37 +562,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private Matrix4f computeTransformMatrix(TabulaModelRenderer part) {
         Matrix4f result = new Matrix4f();
         result.setIdentity();
-        applyTransformations(part, result);
+        TabulaUtils.applyTransformations(part, result);
         return result;
-    }
-
-    private void applyTransformations(TabulaModelRenderer part, Matrix4f out) {
-        TabulaModelRenderer parent = part.getParent();
-        if(parent != null) {
-            applyTransformations(parent, out);
-        }
-        Matrix4f translation = new Matrix4f();
-        translation.setIdentity();
-        translation.setTranslation(new Vector3f(part.offsetX, part.offsetY, part.offsetZ));
-        out.mul(translation);
-
-        float scale = 1f/16f;
-        translation.setIdentity();
-        translation.setTranslation(new Vector3f(part.rotationPointX*scale, part.rotationPointY*scale, part.rotationPointZ*scale));
-        out.mul(translation);
-
-        out.rotZ(part.rotateAngleZ);
-        out.rotY(part.rotateAngleY);
-        out.rotX(part.rotateAngleX);
-
-        if(part.isScaleChildren()) {
-            Matrix4f scaling = new Matrix4f();
-            scaling.setIdentity();
-            scaling.m00 = part.getScaleX();
-            scaling.m11 = part.getScaleY();
-            scaling.m22 = part.getScaleZ();
-            out.mul(scaling);
-        }
     }
 
     private Matrix3f computeRotationMatrix(TabulaModelRenderer part) {
@@ -644,28 +612,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     private void prepareModelRendering(int posX, int posY, float scale) {
         scale *= zoom;
-        GlStateManager.enableColorMaterial();
-        GlStateManager.pushMatrix();
-        GlStateManager.translate((float)posX, (float)posY, 500.0F);
-        GlStateManager.translate(0f, -20f, 0f);
-        GlStateManager.scale((float)(-scale), (float)scale, (float)scale);
-        RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotate(cameraPitch, 1.0F, 0.0F, 0.0F);
-        GlStateManager.rotate(cameraYaw, 0.0F, 1.0F, 0.0F);
-        RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
-        rendermanager.setPlayerViewY(180.0F);
-        rendermanager.setRenderShadow(false);
-    }
-
-    private void cleanupModelRendering() {
-        RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
-        rendermanager.setRenderShadow(true);
-        GlStateManager.popMatrix();
-        RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GuiHelper.prepareModelRendering(posX, posY, scale, cameraPitch, cameraYaw);
     }
 
     private void actualModelRender(float partialTicks, TabulaModelRenderer partBelowMouse) {

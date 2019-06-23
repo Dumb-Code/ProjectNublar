@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
@@ -53,7 +52,7 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
             if(stack.getItem() instanceof FossilItem) {
                 FossilItem item = (FossilItem)stack.getItem();
                 Dinosaur dinosaur = item.getDinosaur();
-                String varient = item.getVarient();
+                String variant = item.getVariant();
                 if(!skeletalBuilder.getDinosaur().isPresent()) {
                     skeletalBuilder.setDinosaur(dinosaur);
                 }
@@ -61,7 +60,7 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                     SkeletalBuilderComponent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(NublarEntityComponentTypes.SKELETAL_BUILDER);
                     if(component != null) {
                         List<String> boneList = component.getBoneListed();
-                        if(component.modelIndex < boneList.size() && varient.equals(boneList.get(component.modelIndex))) {
+                        if (component.modelIndex < boneList.size() && variant.equals(boneList.get(component.modelIndex))) {
                             skeletalBuilder.getBoneHandler().setStackInSlot(component.modelIndex++, stack.splitStack(1));
                         }
                     }
