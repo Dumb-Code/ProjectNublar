@@ -9,9 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.ItemStackHandler;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEntity> {
     INSTANCE;
 
@@ -54,9 +51,6 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     public boolean acceptsInputSlot(DrillExtractorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
         switch (slotIndex) {
             case 0: return testStack.getItem() == ItemHandler.AMBER;
-            case 1:
-            case 2:
-            case 3:
             case 4:
                 return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
         }

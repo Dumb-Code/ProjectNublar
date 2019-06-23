@@ -44,6 +44,29 @@ public class MultipartEntityComponent implements EntityComponent {
 
     public Function<ComponentAccess, List<String>> multipartNames = c -> Lists.newArrayList();
 
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinWorldEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof ComponentAccess && !event.getWorld().isRemote) {
+            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
+            if (multipart.isPresent()) {
+                MultipartEntityComponent component = multipart.get();
+                for (String s : component.multipartNames.apply((ComponentAccess) entity)) {
+                    EntityPart e = new EntityPart(entity, s);
+                    e.setPosition(entity.posX, entity.posY, entity.posZ);
+                    entity.world.spawnEntity(e);
+                    component.entities.add(new LinkedEntity(s, e.getUniqueID()));
+                }
+            }
+        }
+        if (event.getWorld().isRemote && entity instanceof EntityPart) {
+            Entity parent = ((EntityPart) entity).getParent();
+            if (parent instanceof ComponentAccess) {
+                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
+            }
+        }
+    }
+
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
         NBTTagList list = new NBTTagList();
@@ -84,31 +107,6 @@ public class MultipartEntityComponent implements EntityComponent {
             this.entities.add(new LinkedEntity(ByteBufUtils.readUTF8String(buf), new UUID(buf.readLong(), buf.readLong())));
         }
     }
-
-    @SubscribeEvent
-    public static void onEntityJoin(EntityJoinWorldEvent event) {
-        Entity entity = event.getEntity();
-        if(entity instanceof ComponentAccess && !event.getWorld().isRemote) {
-            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
-            if (multipart.isPresent()) {
-                MultipartEntityComponent component = multipart.get();
-                for (String s : component.multipartNames.apply((ComponentAccess) entity)) {
-                    EntityPart e = new EntityPart(entity, s);
-                    e.setPosition(entity.posX, entity.posY, entity.posZ);
-                    entity.world.spawnEntity(e);
-                    component.entities.add(new LinkedEntity(s, e.getUniqueID()));
-                }
-            }
-        }
-        if(event.getWorld().isRemote && entity instanceof EntityPart) {
-            Entity parent = ((EntityPart) entity).getParent();
-            if(parent instanceof ComponentAccess) {
-                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
-            }
-        }
-    }
-
-    @Value public static class LinkedEntity { String cubeName; UUID entityUUID; }
 
     //PN only
     @Accessors(chain = true)
@@ -157,5 +155,11 @@ public class MultipartEntityComponent implements EntityComponent {
             }
             json.add("entity_map", entity);
         }
+    }
+
+    @Value
+    public static class LinkedEntity {
+        String cubeName;
+        UUID entityUUID;
     }
 }

@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.entity;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -43,41 +42,6 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         super(world);
     }
 
-
-    @Nullable
-    public Entity getParent() {
-        if(this.parentCache != null) {
-            return parentCache;
-        }
-        for (Entity entity : this.world.loadedEntityList) {
-            if(entity.getUniqueID().equals(this.parentUUID)) {
-                this.parentCache = entity;
-            }
-        }
-        return this.parentCache;
-    }
-
-    @Override
-    protected void entityInit() {
-    }
-
-    @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-        this.parentUUID = compound.getUniqueId("parent");
-        this.partName = compound.getString("partname");
-    }
-
-    @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
-        compound.setUniqueId("parent", this.parentUUID);
-        compound.setString("partname", this.partName);
-    }
-
-    @Override
-    public boolean canBeCollidedWith() {
-        return true;
-    }
-
     @Override
     public void onUpdate() {
         Entity parent = this.getParent();
@@ -105,6 +69,23 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     }
 
     @Override
+    protected void entityInit() {
+    }
+
+    @Nullable
+    public Entity getParent() {
+        if (this.parentCache != null) {
+            return parentCache;
+        }
+        for (Entity entity : this.world.loadedEntityList) {
+            if (entity.getUniqueID().equals(this.parentUUID)) {
+                this.parentCache = entity;
+            }
+        }
+        return this.parentCache;
+    }
+
+    @Override
     public void setPosition(double x, double y, double z) {
         this.posX = x;
         this.posY = y;
@@ -123,11 +104,6 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public boolean canBePushed() {
-        return true;
-    }
-
-    @Override
     public void applyEntityCollision(Entity entityIn) {
         if(entityIn == this.getParent()) {
             return;
@@ -143,6 +119,28 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         } else {
             super.addVelocity(x, y, z);
         }
+    }
+
+    @Override
+    public boolean canBePushed() {
+        return true;
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return true;
+    }
+
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound compound) {
+        this.parentUUID = compound.getUniqueId("parent");
+        this.partName = compound.getString("partname");
+    }
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound compound) {
+        compound.setUniqueId("parent", this.parentUUID);
+        compound.setString("partname", this.partName);
     }
 
     @Override

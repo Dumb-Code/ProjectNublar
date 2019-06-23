@@ -115,7 +115,7 @@ public class ProjectNublar {
     }
 
     public static void spawnParticles(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int amount, int... data) {
-        if(world.isRemote) {
+        if (world.isRemote) {
             for (int i = 0; i < amount; i++) {
                 spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
             }
@@ -158,10 +158,10 @@ public class ProjectNublar {
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();
-            for (ModelStage value : new ModelStage[] {ModelStage.ADULT, ModelStage.INFANT, ModelStage.CHILD, ModelStage.ADOLESCENCE, ModelStage.SKELETON}) {
+            for (ModelStage value : new ModelStage[]{ModelStage.ADULT, ModelStage.INFANT, ModelStage.CHILD, ModelStage.ADOLESCENCE, ModelStage.SKELETON}) {
                 Map<ModelStage, ModelContainer<DinosaurEntity>> container = dinosaur.getModelContainer();
 
-                if(!dinosaur.getActiveModels().contains(value)) {
+                if (!dinosaur.getActiveModels().contains(value)) {
                     container.put(value, container.get(ModelStage.ADULT));
                 } else {
                     container.put(value, new ModelContainer<>(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + value), dinosaur.getSystemInfo().get(value)));
@@ -181,7 +181,7 @@ public class ProjectNublar {
         GameRegistry.registerTileEntity(BlockEntityElectricFence.class, new ResourceLocation(MODID, "electric_fence"));
         GameRegistry.registerTileEntity(BlockCreativePowerSource.TileEntityCreativePowerSource.class, new ResourceLocation(MODID, "creative_power"));
 
-        for(Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
+        for (Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();
             ItemDinosaurMeat referenceRawMeat = entry.getValue();
             ItemDinosaurMeat referenceCookedMeat = ItemHandler.COOKED_MEAT_ITEMS.get(dino);

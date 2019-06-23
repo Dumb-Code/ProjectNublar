@@ -246,7 +246,7 @@ public class Connection {
         double xcomp = halfthick * Math.sin(tangrad);
         double zcomp = halfthick * Math.cos(tangrad);
         double tangrady = posdist == 0 ? Math.PI/2D : Math.atan((this.to.getY() - this.from.getY()) / posdist);
-        double yxzcomp = Math.sin(tangrady) ;
+        double yxzcomp = Math.sin(tangrady);
         double[] ct = new double[] {
                 this.in[0] - xcomp + yxzcomp*zcomp, this.in[2] - zcomp - yxzcomp*xcomp,
                 this.in[1] - xcomp + yxzcomp*zcomp, this.in[3] - zcomp - yxzcomp*xcomp,

@@ -50,7 +50,6 @@ public enum MultipartSystem implements EntitySystem {
         }
     }
 
-
     private static void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
         if(animation.getAnimationWrapper() == null) {
             return;

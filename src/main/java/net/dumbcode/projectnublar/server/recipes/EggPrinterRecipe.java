@@ -1,12 +1,9 @@
 package net.dumbcode.projectnublar.server.recipes;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
-import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
-import net.dumbcode.projectnublar.server.item.DinosaurProvider;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -14,8 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
-    INSTANCE
-    ;
+    INSTANCE;
 
     @Override
     public boolean accepts(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {

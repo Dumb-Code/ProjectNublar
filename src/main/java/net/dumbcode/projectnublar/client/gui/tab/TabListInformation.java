@@ -59,7 +59,7 @@ public class TabListInformation {
                 Gui.drawModalRectWithCustomSizedTexture(xStart, cont.getGuiTop() - TAB_HEIGHT - 1, 28, selected ? 32 : 0, TAB_WIDTH, TAB_HEIGHT + tabExtension, 256, 256);
 //                Gui.drawRect(xStart, cont.getGuiTop() - TAB_HEIGHT, xStart + TAB_WIDTH, cont.getGuiTop() + 5, 0xFF000000 | new Random((i + this.pageOffset) << 21).nextInt());
 //                if(mouseY > cont.getGuiTop() - TAB_HEIGHT && mouseY < cont.getGuiTop() + tabExtension && mouseX > xStart && mouseX < xStart + TAB_WIDTH) {
-//                    Gui.drawRect(xStart, cont.getGuiTop() - TAB_HEIGHT, xStart + TAB_WIDTH, cont.getGuiTop() + tabExtension, 0x6A0063FF);
+//                    Gui.drawRect(xStart, cont.getGuiTop() - TAB_HEIGHT, xStart + TAB_WIDTH, cont.getGuiTop() + tabExtension, 0x6A0063FF); TODO: Remove this?
 //                }
             }
             FontRenderer font = Minecraft.getMinecraft().fontRenderer;

@@ -4,14 +4,13 @@ import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 
 public class EntityPartRenderer extends Render<EntityPart> {
 
-    public static final boolean debug = false;
+    public static final boolean DEBUG = false;
 
     public EntityPartRenderer(RenderManager renderManager) {
         super(renderManager);
@@ -19,7 +18,7 @@ public class EntityPartRenderer extends Render<EntityPart> {
 
     @Override
     public void doRender(EntityPart entity, double x, double y, double z, float entityYaw, float partialTicks) {
-        if(debug) {
+        if (DEBUG) {
             GlStateManager.pushMatrix();
             renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
             GlStateManager.popMatrix();
