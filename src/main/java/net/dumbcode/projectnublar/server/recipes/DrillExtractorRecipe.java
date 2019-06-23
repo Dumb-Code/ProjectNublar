@@ -51,6 +51,9 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     public boolean acceptsInputSlot(DrillExtractorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
         switch (slotIndex) {
             case 0: return testStack.getItem() == ItemHandler.AMBER;
+            case 1:
+            case 2:
+            case 3:
             case 4:
                 return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
         }
