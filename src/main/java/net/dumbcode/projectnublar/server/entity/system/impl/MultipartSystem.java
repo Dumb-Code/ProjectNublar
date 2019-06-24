@@ -142,7 +142,7 @@ public enum MultipartSystem implements EntitySystem {
                     AnimationComponent animation = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.ANIMATION);
                     MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(NublarEntityComponentTypes.MULTIPART);
                     if(animation != null && multipart != null) {
-//                        updatePart(entity, multipart, animation);
+                        updatePart(entity, multipart, animation);
                     }
                 }
             }

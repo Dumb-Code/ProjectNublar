@@ -54,7 +54,6 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-//        System.out.println(this.getPositionVector().distanceTo(new Vec3d(x, y, z)));
         super.setPositionAndRotationDirect(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 
