@@ -29,7 +29,7 @@ public class GuiFileExplorer extends GuiScreen {
 
     private final Minecraft mc = Minecraft.getMinecraft();
     private final File root;
-    private String superseedingFolder = ""; //Why not just make this a File?
+    private String superseedingFolder = ""; //TODO: Why not just make this a File?
 
     private final List<GuiFileEntry> entries = Lists.newArrayList();
     private final List<GuiFileEntry> searchedEntries = Lists.newArrayList();
@@ -45,6 +45,8 @@ public class GuiFileExplorer extends GuiScreen {
     private int selectedIndex = -1;
 
     private final ResourceLocation folderLoc;
+
+    private static final Map<String, ResourceLocation> IMAGE_CACHE = Maps.newHashMap();
 
     @SneakyThrows
     public GuiFileExplorer(@Nullable GuiScreen parent, String root, String buttonText, Consumer<File> fileConsumer) {
@@ -221,8 +223,6 @@ public class GuiFileExplorer extends GuiScreen {
             super.elementClicked(slotIndex, isDoubleClick, mouseX, mouseY);
         }
     }
-
-    private static final Map<String, ResourceLocation> IMAGE_CACHE = Maps.newHashMap();
 
     public static BufferedImage getIcon(File file) throws FileNotFoundException {
         Image icon = ShellFolder.getShellFolder(file).getIcon(true); //Test usability on other os

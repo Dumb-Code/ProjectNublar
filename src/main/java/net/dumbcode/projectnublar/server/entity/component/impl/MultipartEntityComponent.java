@@ -13,7 +13,6 @@ import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
@@ -34,12 +33,39 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * This component allows an Entity
+ * to have multiple hit boxes.
+ */
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class MultipartEntityComponent implements EntityComponent {
 
     public Set<LinkedEntity> entities = Sets.newHashSet();
 
     public Function<ComponentAccess, List<String>> multipartNames = c -> Lists.newArrayList();
+
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinWorldEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof ComponentAccess && !event.getWorld().isRemote) {
+            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
+            if (multipart.isPresent()) {
+                MultipartEntityComponent component = multipart.get();
+                for (String s : component.multipartNames.apply((ComponentAccess) entity)) {
+                    EntityPart e = new EntityPart(entity, s);
+                    e.setPosition(entity.posX, entity.posY, entity.posZ);
+                    entity.world.spawnEntity(e);
+                    component.entities.add(new LinkedEntity(s, e.getUniqueID()));
+                }
+            }
+        }
+        if (event.getWorld().isRemote && entity instanceof EntityPart) {
+            Entity parent = ((EntityPart) entity).getParent();
+            if (parent instanceof ComponentAccess) {
+                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
+            }
+        }
+    }
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -82,37 +108,13 @@ public class MultipartEntityComponent implements EntityComponent {
         }
     }
 
-    @SubscribeEvent
-    public static void onEntityJoin(EntityJoinWorldEvent event) {
-        Entity entity = event.getEntity();
-        if(entity instanceof ComponentAccess && !event.getWorld().isRemote) {
-            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
-            if (multipart.isPresent()) {
-                MultipartEntityComponent component = multipart.get();
-                for (String s : component.multipartNames.apply((ComponentAccess) entity)) {
-                    EntityPart e = new EntityPart(entity, s);
-                    e.setPosition(entity.posX, entity.posY, entity.posZ);
-                    entity.world.spawnEntity(e);
-                    component.entities.add(new LinkedEntity(s, e.getUniqueID()));
-                }
-            }
-        }
-        if(event.getWorld().isRemote && entity instanceof EntityPart) {
-            Entity parent = ((EntityPart) entity).getParent();
-            if(parent instanceof ComponentAccess) {
-                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
-            }
-        }
-    }
-
-    @Value public static class LinkedEntity { String cubeName; UUID entityUUID; }
-
     //PN only
     @Accessors(chain = true)
     @Setter
     public static class Storage implements EntityComponentStorage<MultipartEntityComponent> {
         private Map<ModelStage, List<String>> linkedCubeMap = Maps.newEnumMap(ModelStage.class);
 
+        /** The model this system applies to. */
         private ModelStage defaultStage;
 
         @Override
@@ -153,5 +155,11 @@ public class MultipartEntityComponent implements EntityComponent {
             }
             json.add("entity_map", entity);
         }
+    }
+
+    @Value
+    public static class LinkedEntity {
+        String cubeName;
+        UUID entityUUID;
     }
 }

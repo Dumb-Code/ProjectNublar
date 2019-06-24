@@ -2,19 +2,14 @@ package net.dumbcode.projectnublar.client.files;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import lombok.Cleanup;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import javax.vecmath.Vector3f;
 import java.io.*;
-import java.net.FileNameMap;
-import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -23,49 +18,45 @@ import java.util.zip.ZipOutputStream;
 public class SkeletalBuilderFileHandler {
 
     public static void serilize(SkeletalBuilderFileInfomation infomation, File file) {
-        if(file == null) {
-            return;
-        }
-        if(!file.exists() && Strings.isEmpty(FilenameUtils.getExtension(file.getName()))) {
-            file = new File(file.getParentFile(), file.getName() + ".dpose");
-        }
-        StringBuilder outBuilder = new StringBuilder(infomation.getDinosaurLocation().toString() + "\n");
-        infomation.getPoseData().forEach((s, v) -> {
-            outBuilder.append(s);
-            outBuilder.append("\n");
-            outBuilder.append(v.x);
-            outBuilder.append(" ");
-            outBuilder.append(v.y);
-            outBuilder.append(" ");
-            outBuilder.append(v.z);
-            outBuilder.append("\n");
-        });
-        String out = outBuilder.toString().trim();
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            BufferedOutputStream bos = new BufferedOutputStream(fos);
-            ZipOutputStream zos = new ZipOutputStream(bos);
-
+        if (file != null) {
+            if (!file.exists() && Strings.isEmpty(FilenameUtils.getExtension(file.getName()))) {
+                file = new File(file.getParentFile(), file.getName() + ".dpose");
+            }
+            StringBuilder outBuilder = new StringBuilder(infomation.getDinosaurLocation().toString() + "\n");
+            infomation.getPoseData().forEach((s, v) -> {
+                outBuilder.append(s);
+                outBuilder.append("\n");
+                outBuilder.append(v.x);
+                outBuilder.append(" ");
+                outBuilder.append(v.y);
+                outBuilder.append(" ");
+                outBuilder.append(v.z);
+                outBuilder.append("\n");
+            });
+            String out = outBuilder.toString().trim();
             try {
-                zos.putNextEntry(new ZipEntry("pose"));
-                zos.write(out.getBytes());
-                zos.closeEntry();
-            }
-            finally {
-                zos.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                FileOutputStream fos = new FileOutputStream(file);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                ZipOutputStream zos = new ZipOutputStream(bos);
 
+                try {
+                    zos.putNextEntry(new ZipEntry("pose"));
+                    zos.write(out.getBytes());
+                    zos.closeEntry();
+                } finally {
+                    zos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static SkeletalBuilderFileInfomation deserilize(File file) {
         Map<String, Vector3f> map = Maps.newHashMap();
         ResourceLocation fileLocation = null;
-        try {
+        try (FileInputStream fis = new FileInputStream(file)) {
             InputStream stream = null;
-            @Cleanup FileInputStream fis = new FileInputStream(file);
             ZipInputStream zip = new ZipInputStream(fis);
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {

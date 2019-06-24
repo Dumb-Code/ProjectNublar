@@ -12,13 +12,13 @@ public class FossilItem extends Item implements DinosaurProvider {
     @Getter
     private final Dinosaur dinosaur;
     @Getter
-    private final String varient;
+    private final String variant;
     private final TextComponentTranslation stackDisplayName;
 
-    public FossilItem(Dinosaur dinosaur, String varient) {
+    public FossilItem(Dinosaur dinosaur, String variant) {
         this.dinosaur = dinosaur;
-        this.varient = varient;
-        this.stackDisplayName = new TextComponentTranslation(ProjectNublar.MODID+".item.fossil.name", this.dinosaur.createNameComponent(), this.varient);
+        this.variant = variant;
+        this.stackDisplayName = new TextComponentTranslation(ProjectNublar.MODID + ".item.fossil.name", this.dinosaur.createNameComponent(), this.variant);
     }
 
     @Override

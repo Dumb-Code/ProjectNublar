@@ -6,7 +6,10 @@ import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
-import net.dumbcode.projectnublar.server.utils.*;
+import net.dumbcode.projectnublar.server.utils.Connection;
+import net.dumbcode.projectnublar.server.utils.ConnectionType;
+import net.dumbcode.projectnublar.server.utils.LineUtils;
+import net.dumbcode.projectnublar.server.utils.PropertyRotation;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -40,6 +43,8 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
     public static final PropertyRotation ROTATION_PROPERTY = PropertyRotation.create("rotation");
     public static final PropertyBool POWERED_PROPERTY = PropertyBool.create("powered");
     private final BlockStateContainer blockState;
+
+    private static boolean destroying = false;
 
     public static final int LIMIT = 15;
 
@@ -271,8 +276,6 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
         }
         return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
     }
-
-    private static boolean destroying = false;
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {

@@ -14,7 +14,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
     @Override
     public void render(BlockEntityElectricFencePole te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         GlStateManager.pushMatrix();
-//        RenderHelper.enableStandardItemLighting();
+//        RenderHelper.enableStandardItemLighting(); //TODO: Get rid of this?
         GlStateManager.translate(x, y, z);
         GlStateManager.disableAlpha();
         GlStateManager.disableBlend();

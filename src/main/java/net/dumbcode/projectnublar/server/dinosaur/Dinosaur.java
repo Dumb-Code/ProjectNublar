@@ -8,19 +8,19 @@ import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.*;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.dumblibrary.server.info.AnimationSystemInfo;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.animation.DinosaurEntitySystemInfo;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
-import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
-import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
-import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
@@ -41,15 +41,16 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
     private final ItemProperties itemProperties = new ItemProperties();
     private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
-
     private final EntityComponentAttacher attacher = new EntityComponentAttacher();
 
     private Map<ModelStage, ModelContainer<DinosaurEntity>> modelContainer = Maps.newEnumMap(ModelStage.class);
-
     private Map<ModelStage, DinosaurEntitySystemInfo> systemInfo = Maps.newEnumMap(ModelStage.class);
+    private List<ModelStage> activeModels = Lists.newArrayList(); //todo : serialize
 
-    private List<ModelStage> activeModels = Lists.newArrayList(); //todo : seriailzie
-
+    /**
+     * Scale the model should be rendered at
+     */ //TODO: Eventually move to ECS.
+    private Map<ModelStage, Double> scale = Maps.newHashMap();
 
     public Dinosaur() {
         for (ModelStage value : ModelStage.values()) {
@@ -65,10 +66,22 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return (this.getRegName().getNamespace().equals(ProjectNublar.MODID) ? this.getRegName().getPath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
     }
 
+    /**
+     * Creates a dinosaur entity with a default component config.
+     *
+     * @param world current world.
+     * @return new dinosaur entity.
+     */
     public DinosaurEntity createEntity(World world) {
         return createEntity(world, null);
     }
 
+    /**
+     * Creates a dinosaur entity with a custom component config.
+     * @param world current world.
+     * @param config custom config.
+     * @return customized dinosaur entity.
+     */
     public DinosaurEntity createEntity(World world, @Nullable EntityComponentAttacher.ConstructConfiguration config) {
         if(config == null) {
             config = this.attacher.getDefaultConfig();
@@ -83,7 +96,13 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return this.attacher.addComponent(type); //delegate
     }
 
-    @Nonnull //A quick nonnull registry name. Usefull to prevent complier warnings
+    /**
+     * Returns the registry name of the dinosaur if it exists,
+     * otherwise throws a runtime exception.
+     *
+     * @return registry name.
+     */
+    @Nonnull
     public ResourceLocation getRegName() {
         if(this.getRegistryName() == null) {
             throw new RuntimeException("Null Registry Name Found");
@@ -91,6 +110,12 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return this.getRegistryName();
     }
 
+    /**
+     * Gets the texture location from the resources folder
+     * for this dinosaur.
+     * @param entity dinosaur entity.
+     * @return Resource location of the entity texture.
+     */
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
         GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
@@ -105,31 +130,14 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return new TextComponentTranslation(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
     }
 
-    public static class JsonAdapter implements JsonSerializer<Dinosaur>, JsonDeserializer<Dinosaur> {
-
-        @Override
-        public Dinosaur deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            System.out.println(element);
-            Dinosaur dinosaur = new Dinosaur();
-            JsonObject object = element.getAsJsonObject();
-            ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
-            dinosaur.attacher.readFromJson(JsonUtils.getJsonArray(object, "entity_info"));
-            dinosaur.getItemProperties().copyFrom(readItemProperties);
-            return dinosaur;
-        }
-
-        @Override
-        public JsonElement serialize(Dinosaur dino, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject object = new JsonObject();
-            object.add("item_attributes", context.serialize(dino.itemProperties));
-            object.add("entity_info", dino.attacher.writeToJson(new JsonArray()));
-            return object;
-        }
-    }
-
     public void attachDefaultComponents() {
     }
 
+    /**
+     * Gets a random dinosaur from the
+     * available set of dinosaurs.
+     * @return random dinosaur.
+     */
     public static Dinosaur getRandom() {
         Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection();
         Random rnd = new Random();
@@ -185,5 +193,24 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         }
     }
 
+    public static class JsonAdapter implements JsonSerializer<Dinosaur>, JsonDeserializer<Dinosaur> {
 
+        @Override
+        public Dinosaur deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+            Dinosaur dinosaur = new Dinosaur();
+            JsonObject object = element.getAsJsonObject();
+            ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
+            dinosaur.attacher.readFromJson(JsonUtils.getJsonArray(object, "entity_info"));
+            dinosaur.getItemProperties().copyFrom(readItemProperties);
+            return dinosaur;
+        }
+
+        @Override
+        public JsonElement serialize(Dinosaur dino, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject object = new JsonObject();
+            object.add("item_attributes", context.serialize(dino.itemProperties));
+            object.add("entity_info", dino.attacher.writeToJson(new JsonArray()));
+            return object;
+        }
+    }
 }

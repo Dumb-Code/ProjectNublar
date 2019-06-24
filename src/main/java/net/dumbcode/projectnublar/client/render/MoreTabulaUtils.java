@@ -12,8 +12,7 @@ public class MoreTabulaUtils {
         if(box.childModels == null) {
             return Lists.newArrayList();
         }
-        List<ModelRenderer> list = Lists.newArrayList();
-        list.add(box);
+        List<ModelRenderer> list = Lists.newArrayList(box);
         for (ModelRenderer childModel : box.childModels) {
             if(!ignoreList.contains(childModel.boxName)) {
                 list.add(childModel);

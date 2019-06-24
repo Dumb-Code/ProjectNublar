@@ -24,7 +24,7 @@ public enum CoalGeneratorRecipe implements MachineRecipe<CoalGeneratorBlockEntit
 
     @Override
     public void onRecipeFinished(CoalGeneratorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        ;
+
     }
 
     @Override

@@ -9,9 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.ItemStackHandler;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEntity> {
     INSTANCE;
 

@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.world.gen;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public enum  WorldGenerator implements IWorldGenerator {
+public enum WorldGenerator implements IWorldGenerator {
 
     INSTANCE;
 

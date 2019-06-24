@@ -49,10 +49,11 @@ public class DinosaurModelHandler {
 
         @Override
         protected void preRenderCallback(DinosaurEntity entity, float partialTickTime) {
+            double scale = entity.getCurrentScale();
             if(entity.getCustomNameTag().equals("JTGhawk137"))
-                GlStateManager.scale(0.1, 2.5, 2.5);
+                GlStateManager.scale(0.1, scale, scale);
             else
-                GlStateManager.scale(2.5,2.5,2.5);
+                GlStateManager.scale(scale, scale, scale);
             super.preRenderCallback(entity, partialTickTime);
         }
     }

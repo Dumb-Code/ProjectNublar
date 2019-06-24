@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.recipes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
 import net.dumbcode.projectnublar.server.item.DinosaurProvider;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -15,9 +14,9 @@ import net.minecraft.util.ResourceLocation;
 public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     INSTANCE;
 
-    private static int TIME_SECONDS = 120;
-    private static int TIME_TICKS = TIME_SECONDS * 20;
-    private static int TIME_PER_PERCENT = TIME_TICKS / 100;
+    private static final int TIME_SECONDS = 120;
+    private static final int TIME_TICKS = TIME_SECONDS * 20;
+    private static final int TIME_PER_PERCENT = TIME_TICKS / 100;
 
     @Override
     public boolean accepts(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {

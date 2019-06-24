@@ -2,9 +2,10 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
+import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
@@ -15,9 +16,7 @@ import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.minecraft.block.state.IBlockState;
@@ -56,7 +55,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             return;
         }
 
-        if(false) {
+        if (false) { // TODO: Get rid of this?
             this.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/low_security_electric_fence_pole_powered.png"));
             GlStateManager.enableTexture2D();
             GlStateManager.disableBlend();
@@ -390,7 +389,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                         box.setScaleZ(1);
                     } else {
 //                        box.scaleX = 0;
-//                        box.scaleY = 0;
+//                        box.scaleY = 0;//TODO: Get rid of this?
 //                        box.scaleZ = 0;
                     }
                 }
