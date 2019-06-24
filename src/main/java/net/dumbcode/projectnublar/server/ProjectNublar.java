@@ -14,6 +14,7 @@ import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
@@ -155,6 +156,8 @@ public class ProjectNublar {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+
+        DataSerializerHandler.register();
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();

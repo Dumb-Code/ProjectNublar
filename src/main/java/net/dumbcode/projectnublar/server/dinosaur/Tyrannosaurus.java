@@ -53,25 +53,7 @@ public class Tyrannosaurus extends Dinosaur {
 
         Map<ModelStage, List<String>> entity = Maps.newEnumMap(ModelStage.class);
         entity.put(ModelStage.ADULT, Lists.newArrayList(
-                "tail4",
-                "Tail3",
-                "tail2",
-                "tail1",
-
-                "legUpperRight",
-                "legMiddleRight",
-                "legLowerRight",
-
-                "legUpperLeft",
-                "legMiddleLeft",
-                "legLowerLeft",
-
-                "neck3",
-
-                "hips",
-                "chest",
-                "jawUpper1",
-                "head"));
+                "tail4"));
         addComponent(NublarEntityComponentTypes.MULTIPART)
                 .setDefaultStage(ModelStage.ADULT)
                 .setLinkedCubeMap(entity);

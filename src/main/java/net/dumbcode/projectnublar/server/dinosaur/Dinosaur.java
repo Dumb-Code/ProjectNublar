@@ -23,6 +23,7 @@ import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -108,12 +109,11 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
         @Override
         public Dinosaur deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            JsonObject object = element.getAsJsonObject();
-            if(object.has("_is_example") && object.get("_is_example").getAsBoolean()) {
-                return null;
-            }
+            System.out.println(element);
             Dinosaur dinosaur = new Dinosaur();
+            JsonObject object = element.getAsJsonObject();
             ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
+            dinosaur.attacher.readFromJson(JsonUtils.getJsonArray(object, "entity_info"));
             dinosaur.getItemProperties().copyFrom(readItemProperties);
             return dinosaur;
         }
@@ -122,6 +122,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         public JsonElement serialize(Dinosaur dino, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject object = new JsonObject();
             object.add("item_attributes", context.serialize(dino.itemProperties));
+            object.add("entity_info", dino.attacher.writeToJson(new JsonArray()));
             return object;
         }
     }

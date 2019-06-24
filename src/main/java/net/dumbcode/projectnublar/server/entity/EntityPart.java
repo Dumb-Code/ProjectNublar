@@ -7,9 +7,12 @@ import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -21,12 +24,10 @@ import java.util.UUID;
 
 public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
+    private static final DataParameter<Vec3d> WATCHER_SIZE = EntityDataManager.createKey(EntityPart.class, DataSerializerHandler.VEC_3D);
+
     private UUID parentUUID;
     @Getter private String partName;
-
-    public double cubeWidth;
-    public double cubeHeight;
-    public double cubeDepth;
 
     private Entity parentCache;
 
@@ -43,6 +44,9 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         super(world);
     }
 
+    public void setSize(Vec3d size) {
+        this.dataManager.set(WATCHER_SIZE, size);
+    }
 
     @Nullable
     public Entity getParent() {
@@ -59,6 +63,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     protected void entityInit() {
+        this.dataManager.register(WATCHER_SIZE, Vec3d.ZERO);
     }
 
     @Override
@@ -76,6 +81,12 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public boolean canBeCollidedWith() {
         return true;
+    }
+
+    @Override
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+//        System.out.println(this.getPositionVector().distanceTo(new Vec3d(x, y, z)));
+        super.setPositionAndRotationDirect(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 
     @Override
@@ -109,11 +120,12 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         this.posX = x;
         this.posY = y;
         this.posZ = z;
-        double width = this.cubeWidth / 2.0F;
-        double depth = this.cubeDepth / 2.0F;
+        Vec3d size = this.dataManager == null ? Vec3d.ZERO : this.dataManager.get(WATCHER_SIZE);
+        double width = size.x / 2.0F;
+        double depth = size.z / 2.0F;
 
-        this.height = (float) this.cubeHeight;
-        this.setEntityBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + this.cubeHeight, z + depth));
+        this.height = (float) size.y;
+        this.setEntityBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + this.height, z + depth));
     }
 
     @Override

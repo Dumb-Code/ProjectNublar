@@ -392,7 +392,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
             // multiply by 2 because in some cases, the colors are not far enough to allow to pick the correct part
             // (a box behind another may be picked instead because the color are too close)
-            float color = index*2 / 255f; // FIXME: 128 boxes MAX
+            float color = index*2 / 255f; // FIXME: 128 boxes MAX - can be done by having the int id as the color index, or a random color. Maybe make it so it splits 0 - 0xFFFFFF by the model box size and sets that as the color
 
             GlStateManager.color(color, color, color);
             int prevColor = getColorUnderMouse();

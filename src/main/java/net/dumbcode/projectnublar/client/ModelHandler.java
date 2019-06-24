@@ -28,6 +28,8 @@ import static net.dumbcode.projectnublar.server.item.ItemHandler.*;
 //TODO:
 //  ModelLoaderRegistry#registerLoader
 //  register a custom model loader in order to have the same model have different dinosaur symbols
+//  OR: we can have it so if no models are explicitly defined, then we automatically infer the model from the base texture + overlay.
+//  We'd need our own model system to take in a Map and populate all the entries
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class ModelHandler {

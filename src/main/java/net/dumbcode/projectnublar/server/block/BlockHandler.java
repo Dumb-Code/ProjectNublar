@@ -89,10 +89,4 @@ public class BlockHandler {
             }
         }
     }
-
-//    @Nonnull//TODO: fix
-    @SuppressWarnings("all")
-    private static <T> T getNonNull() { //Used to prevent compiler warnings on object holders
-        return null;
-    }
 }

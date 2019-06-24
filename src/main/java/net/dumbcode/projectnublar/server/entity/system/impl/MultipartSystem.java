@@ -18,6 +18,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -107,14 +109,15 @@ public enum MultipartSystem implements EntitySystem {
                             }
                         }
 
-                        cubeEntity.cubeWidth = maxX - minX + 0.1f;
-                        cubeEntity.cubeHeight = maxY - minY + 0.1f;
-                        cubeEntity.cubeDepth = maxZ - minZ + 0.1f;
+
+                        Vec3d size = new Vec3d(maxX, maxY, maxZ).subtract(minX, minY, minZ).add(0.1F, 0.1F, 0.1F); //0.1F -> padding
+
+                        cubeEntity.setSize(size);
 
                         Objects.requireNonNull(ep);
                         Objects.requireNonNull(sp);
 
-                        cubeEntity.setPosition(sp.x + (ep.x - sp.x) / 2D + entity.posX, sp.y + (ep.y - sp.y) / 2D + entity.posY - cubeEntity.cubeHeight / 2, sp.z + (ep.z - sp.z) / 2D + entity.posZ);
+                        cubeEntity.setPosition(sp.x + (ep.x - sp.x) / 2D + entity.posX, sp.y + (ep.y - sp.y) / 2D + entity.posY - size.y / 2, sp.z + (ep.z - sp.z) / 2D + entity.posZ);
                     }
 
                     break;
@@ -124,7 +127,8 @@ public enum MultipartSystem implements EntitySystem {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.ClientTickEvent event) {
+    @SideOnly(Side.CLIENT)
+    public static void onClientWorldTick(TickEvent.ClientTickEvent event) {
         World world = Minecraft.getMinecraft().world;
         if(world != null && !Minecraft.getMinecraft().isGamePaused()) {
             for (Entity entity : world.loadedEntityList) {
@@ -132,7 +136,7 @@ public enum MultipartSystem implements EntitySystem {
                     AnimationComponent animation = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.ANIMATION);
                     MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(NublarEntityComponentTypes.MULTIPART);
                     if(animation != null && multipart != null) {
-                        updatePart(entity, multipart, animation);
+//                        updatePart(entity, multipart, animation);
                     }
                 }
             }
