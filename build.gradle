@@ -44,6 +44,7 @@ dependencies {
     deobfCompile "mezz.jei:jei_1.12.2:4.9.1.187:api"
     runtime "mezz.jei:jei_1.12.2:4.9.1.187"
     compile 'org.projectlombok:lombok:1.18.0'
+    compile project('dumb_library')
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

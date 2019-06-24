@@ -1,0 +1,3 @@
+[submodule "dumb_library"]
+	path = dumb_library
+	url = https://github.com/Dumb-Code/DumbLibrary.git
