@@ -1,4 +1,4 @@
-## Build Troubleshooting
+## Setup Troubleshooting
 
 ### Git submodules
 If, when you try and set up the project, and get an error like `Configuration with name 'default' not found.`, simply run `git submodule init | git submodule update`, then re-run the setup commands
