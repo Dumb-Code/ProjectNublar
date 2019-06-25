@@ -1,5 +1,8 @@
 ## Build Troubleshooting
 
+### Git submodules
+If, when you try and set up the project, and get an error like `Configuration with name 'default' not found.`, simply run `git submodule init | git submodule update`, then re-run the setup commands
+
 ### Importing the project correctly in IDEA
 After cloning the project and ':setupDecompWorkspace', close your currently opened project on IDEA (if any) so that you have the main window of IDEA.
 **If you do not have the Lombok Plugin installed**, install it from within IDEA. Restart IDEA.
