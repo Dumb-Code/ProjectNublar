@@ -4,9 +4,10 @@ import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -21,8 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import static net.dumbcode.projectnublar.server.ProjectNublar.TAB;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
@@ -47,6 +46,8 @@ public final class ItemHandler {
     public static final Map<Dinosaur, BasicDinosaurItem> DINOSAUR_INCUBATED_EGG = new HashMap<>();
 
     public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
+
+    private static final CreativeTabs TAB = TabHandler.TAB;
 
     @SubscribeEvent
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
