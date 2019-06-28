@@ -8,8 +8,8 @@ import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
@@ -72,7 +72,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     }
 
     private void reassureSize() {
-        this.getDinosaurEntity().flatMap(d -> d.get(NublarEntityComponentTypes.SKELETAL_BUILDER)).ifPresent(c -> {
+        this.getDinosaurEntity().flatMap(d -> d.get(ComponentHandler.SKELETAL_BUILDER)).ifPresent(c -> {
             int size = c.getBoneListed().size();
             if(size != this.boneHandler.getSlots()) {
                 this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
@@ -92,8 +92,8 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
-            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(NublarEntityComponentTypes.SKELETAL_BUILDER));
-            entity.attachComponent(NublarEntityComponentTypes.SKELETAL_BUILDER);
+            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(ComponentHandler.SKELETAL_BUILDER));
+            entity.attachComponent(ComponentHandler.SKELETAL_BUILDER);
             this.dinosaurEntity = Optional.of(entity);
         }
         this.history.clear();
@@ -108,7 +108,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         //Not *really* sure if this is the best way about it.
         //todo: think of a better way of getting the skeletal builder model.
         // maybe could store the AgeStage on the builder component, then use that to get the container then the model location, and the rest is as follows
-        return de.getOrExcept(NublarEntityComponentTypes.SKELETAL_BUILDER).getCachedModel(de.getDinosaur().getModelContainer().get(Dinosaur.SKELETON_AGE).getModelLocation());
+        return de.getOrExcept(ComponentHandler.SKELETAL_BUILDER).getCachedModel(de.getDinosaur().getModelContainer().get(Dinosaur.SKELETON_AGE).getModelLocation());
     }
 
     public ItemStackHandler getBoneHandler() {

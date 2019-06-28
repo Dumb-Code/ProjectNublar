@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.server.entity.EntityFamily;
 import net.dumbcode.dumblibrary.server.entity.EntityManager;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.entity.Entity;
 
@@ -18,8 +18,8 @@ public enum AgeSystem implements EntitySystem {
 
     @Override
     public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(NublarEntityComponentTypes.AGE);
-        this.ages = family.populateBuffer(NublarEntityComponentTypes.AGE);
+        EntityFamily family = manager.resolveFamily(ComponentHandler.AGE);
+        this.ages = family.populateBuffer(ComponentHandler.AGE);
         this.entities = family.getEntities();
     }
 

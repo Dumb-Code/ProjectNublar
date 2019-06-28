@@ -9,7 +9,7 @@ import lombok.Getter;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.util.JsonUtils;
@@ -25,7 +25,7 @@ public class DinosaurMultipartStorage implements EntityComponentStorage<Multipar
 
     private final Map<String, List<String>> ageCubeMap = Maps.newHashMap();
 
-    private final Function<ComponentAccess, List<String>> function = access -> access.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
+    private final Function<ComponentAccess, List<String>> function = access -> access.get(ComponentHandler.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
 
     @Override
     public MultipartEntityComponent construct() {

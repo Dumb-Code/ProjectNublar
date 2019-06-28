@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.entity;
 
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentType;
 import net.dumbcode.dumblibrary.server.entity.component.RegisterStoragesEvent;
-import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.dumbcode.projectnublar.server.entity.storage.DinosaurMultipartStorage;
@@ -17,9 +16,6 @@ public class EntityStorageOverrides {
 
     @SubscribeEvent
     public static void onRegisterStorages(RegisterStoragesEvent event) {
-
-        DINOSAUR_MULTIPART = event.register(NublarEntityComponentTypes.MULTIPART, "dinosaur_age", DinosaurMultipartStorage::new);
-
+        DINOSAUR_MULTIPART = event.register(ComponentHandler.MULTIPART, "dinosaur_age", DinosaurMultipartStorage::new);
     }
-
 }

@@ -9,8 +9,8 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -44,7 +44,7 @@ public class MultipartEntityComponent implements EntityComponent {
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof ComponentAccess && !event.getWorld().isRemote) {
-            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
+            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(ComponentHandler.MULTIPART);
             if (multipart.isPresent()) {
                 MultipartEntityComponent component = multipart.get();
                 if(component.getEntities().isEmpty()) {
@@ -60,7 +60,7 @@ public class MultipartEntityComponent implements EntityComponent {
         if (event.getWorld().isRemote && entity instanceof EntityPart) {
             Entity parent = ((EntityPart) entity).getParent();
             if (parent instanceof ComponentAccess) {
-                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
+                ((ComponentAccess) parent).get(ComponentHandler.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
             }
         }
     }

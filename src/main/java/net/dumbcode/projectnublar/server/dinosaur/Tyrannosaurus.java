@@ -8,8 +8,8 @@ import net.dumbcode.dumblibrary.server.entity.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -75,11 +75,11 @@ public class Tyrannosaurus extends Dinosaur {
                 "head"));
 
 
-
-        addComponent(NublarEntityComponentTypes.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
+        addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .getAgeCubeMap().putAll(entity);
 
         addComponent(EntityComponentTypes.ANIMATION);
+
 
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
                 .setScaleX(2.5F)
@@ -88,17 +88,17 @@ public class Tyrannosaurus extends Dinosaur {
 
 
         this.addComponent(EntityComponentTypes.GENDER);
-        this.addComponent(NublarEntityComponentTypes.AGE)
+        this.addComponent(ComponentHandler.AGE)
                 .addStage(new AgeStage(ADULT_AGE, -1))
                 .addStage(new AgeStage(SKELETON_AGE, -1));
 
         this.addComponent(EntityComponentTypes.MODEL);
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
-        this.addComponent(NublarEntityComponentTypes.WANDER_AI);
+        this.addComponent(ComponentHandler.WANDER_AI);
+        this.addComponent(ComponentHandler.DRINKING_AI);
 
-
-        this.addComponent(NublarEntityComponentTypes.SKELETAL_BUILDER)
+        this.addComponent(ComponentHandler.SKELETAL_BUILDER)
                 .initializeMap(
                         "foot", "legLowerLeft",
                         "foot", "legLowerRight",

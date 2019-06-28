@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
@@ -75,7 +75,7 @@ public final class ItemHandler {
         populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(stack.getOrCreateSubCompound(ProjectNublar.MODID).getInteger("AmountDone") + "%")));
         populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
 
-        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(NublarEntityComponentTypes.SKELETAL_BUILDER).getIndividualBones(), FossilItem::new, "fossil_%s_%s"); //TODO: redo format
+        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(ComponentHandler.SKELETAL_BUILDER).getIndividualBones(), FossilItem::new, "fossil_%s_%s"); //TODO: redo format
 
 
         for (Block block : ForgeRegistries.BLOCKS) {
