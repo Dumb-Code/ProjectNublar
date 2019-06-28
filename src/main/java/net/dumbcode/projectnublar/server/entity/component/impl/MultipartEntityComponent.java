@@ -2,9 +2,6 @@ package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
 import lombok.Setter;
 import lombok.Value;
@@ -13,14 +10,12 @@ import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.JsonUtils;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -29,8 +24,6 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * This component allows an Entity
@@ -47,7 +40,7 @@ public class MultipartEntityComponent implements EntityComponent {
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof ComponentAccess && !event.getWorld().isRemote) {
-            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(NublarEntityComponentTypes.MULTIPART);
+            Optional<MultipartEntityComponent> multipart = ((ComponentAccess) entity).get(ComponentHandler.MULTIPART);
             if (multipart.isPresent()) {
                 MultipartEntityComponent component = multipart.get();
                 for (String s : component.multipartNames.apply((ComponentAccess) entity)) {
@@ -61,7 +54,7 @@ public class MultipartEntityComponent implements EntityComponent {
         if (event.getWorld().isRemote && entity instanceof EntityPart) {
             Entity parent = ((EntityPart) entity).getParent();
             if (parent instanceof ComponentAccess) {
-                ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
+                ((ComponentAccess) parent).get(ComponentHandler.MULTIPART).ifPresent(c -> c.entities.add(new LinkedEntity(((EntityPart) entity).getPartName(), entity.getUniqueID())));
             }
         }
     }

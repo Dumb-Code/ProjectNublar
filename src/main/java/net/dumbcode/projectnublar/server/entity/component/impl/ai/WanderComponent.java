@@ -1,4 +1,4 @@
-package net.dumbcode.projectnublar.server.entity.component.impl;
+package net.dumbcode.projectnublar.server.entity.component.impl.ai;
 
 import net.dumbcode.dumblibrary.server.entity.component.FinalizableComponent;
 import net.minecraft.entity.Entity;
@@ -13,7 +13,7 @@ public class WanderComponent implements FinalizableComponent {
     public boolean avoidWater = false;
     public int priority = 3;
     public double speed = 0.3D;
-    public int chance = 120;
+    public int chance = 50;
 
 
     @Override
@@ -22,7 +22,7 @@ public class WanderComponent implements FinalizableComponent {
             EntityCreature creature = (EntityCreature) entity;
             ((EntityCreature) entity).tasks.addTask(this.priority, this.avoidWater ? new EntityAIWanderAvoidWater(creature, this.speed, 1F / this.chance) : new EntityAIWander(creature, this.speed, this.chance));
         } else {
-            throw new IllegalArgumentException("Tried to attack a wander component to an entity of class " + entity.getClass() + ". The given entity must be a subclass of EntityCreature");
+            throw new IllegalArgumentException("Tried to attach a wander component to an entity of class " + entity.getClass() + ". The given entity must be a subclass of EntityCreature");
         }
     }
 

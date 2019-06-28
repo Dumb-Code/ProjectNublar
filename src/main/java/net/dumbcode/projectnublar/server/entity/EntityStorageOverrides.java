@@ -17,7 +17,7 @@ public class EntityStorageOverrides {
     @SubscribeEvent
     public static void onRegisterStorages(RegisterStoragesEvent event) {
 
-        DINOSAUR_STORAGE = event.register(NublarEntityComponentTypes.MULTIPART, "dinosaur_age", DinosaurMultipartStorage::new);
+        DINOSAUR_STORAGE = event.register(ComponentHandler.MULTIPART, "dinosaur_age", DinosaurMultipartStorage::new);
 
     }
 

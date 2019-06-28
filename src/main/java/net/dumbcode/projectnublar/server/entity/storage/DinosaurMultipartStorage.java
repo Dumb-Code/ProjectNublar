@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.util.JsonUtils;
@@ -27,7 +27,7 @@ public class DinosaurMultipartStorage implements EntityComponentStorage<Multipar
     public MultipartEntityComponent construct() {
         MultipartEntityComponent component = new MultipartEntityComponent();
 
-        component.multipartNames = access -> access.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
+        component.multipartNames = access -> access.get(ComponentHandler.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
 
         return component;
     }

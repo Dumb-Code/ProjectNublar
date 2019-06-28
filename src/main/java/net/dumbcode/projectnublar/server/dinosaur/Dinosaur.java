@@ -13,9 +13,9 @@ import net.dumbcode.dumblibrary.server.entity.component.impl.GenderComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.JsonUtils;
@@ -76,7 +76,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             config = this.attacher.getDefaultConfig();
         }
         DinosaurEntity entity = new DinosaurEntity(world);
-        entity.getOrExcept(NublarEntityComponentTypes.DINOSAUR).dinosaur = this;
+        entity.getOrExcept(ComponentHandler.DINOSAUR).dinosaur = this;
         config.attachAll(entity);
         return entity;
     }
@@ -114,7 +114,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     public ResourceLocation getTextureLocation(DinosaurEntity entity) {
         ResourceLocation regname = getRegName();
         GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
-        String name = entity.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName();
+        String name = entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName();
         if(gcomp != null) {
             return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
         }

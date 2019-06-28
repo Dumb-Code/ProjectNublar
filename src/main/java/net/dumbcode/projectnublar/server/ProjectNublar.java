@@ -14,8 +14,8 @@ import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
 import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
@@ -106,7 +106,7 @@ public class ProjectNublar {
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();
-            for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(NublarEntityComponentTypes.AGE).getOrderedAges()) {
+            for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(ComponentHandler.AGE).getOrderedAges()) {
                 Map<String, AnimationContainer> container = dinosaur.getModelContainer();
                 container.put(orderedAge.getName(), new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + orderedAge.getName())));
 

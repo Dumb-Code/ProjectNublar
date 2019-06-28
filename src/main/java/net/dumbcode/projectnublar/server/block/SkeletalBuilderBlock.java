@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
@@ -57,7 +57,7 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                     skeletalBuilder.setDinosaur(dinosaur);
                 }
                 if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
-                    SkeletalBuilderComponent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(NublarEntityComponentTypes.SKELETAL_BUILDER);
+                    SkeletalBuilderComponent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(ComponentHandler.SKELETAL_BUILDER);
                     if(component != null) {
                         List<String> boneList = component.getBoneListed();
                         if (component.modelIndex < boneList.size() && variant.equals(boneList.get(component.modelIndex))) {

@@ -10,9 +10,9 @@ import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
 import net.dumbcode.dumblibrary.server.entity.component.impl.RenderAdjustmentsComponent;
 import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -41,9 +41,9 @@ public enum MultipartSystem implements EntitySystem {
 
     @Override
     public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(NublarEntityComponentTypes.MULTIPART, EntityComponentTypes.ANIMATION);
+        EntityFamily family = manager.resolveFamily(ComponentHandler.MULTIPART, EntityComponentTypes.ANIMATION);
         this.animations = family.populateBuffer(EntityComponentTypes.ANIMATION, this.animations);
-        this.multiparts = family.populateBuffer(NublarEntityComponentTypes.MULTIPART, this.multiparts);
+        this.multiparts = family.populateBuffer(ComponentHandler.MULTIPART, this.multiparts);
         this.entities = family.getEntities();
     }
 
@@ -146,7 +146,7 @@ public enum MultipartSystem implements EntitySystem {
             for (Entity entity : world.loadedEntityList) {
                 if(entity instanceof ComponentAccess) {
                     AnimationComponent animation = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.ANIMATION);
-                    MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(NublarEntityComponentTypes.MULTIPART);
+                    MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(ComponentHandler.MULTIPART);
                     if(animation != null && multipart != null) {
                         updatePart(entity, multipart, animation);
                     }

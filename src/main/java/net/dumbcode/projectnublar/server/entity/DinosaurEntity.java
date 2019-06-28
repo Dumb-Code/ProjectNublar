@@ -12,7 +12,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
 
     @Override
     protected void attachComponents() {
-        this.attachComponent(NublarEntityComponentTypes.DINOSAUR);
+        this.attachComponent(ComponentHandler.DINOSAUR);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
      * @return Dinosaur class.
      */
     public Dinosaur getDinosaur() {
-        return this.getOrExcept(NublarEntityComponentTypes.DINOSAUR).dinosaur;
+        return this.getOrExcept(ComponentHandler.DINOSAUR).dinosaur;
     }
 
 }
