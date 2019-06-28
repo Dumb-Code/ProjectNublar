@@ -1,17 +1,27 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
+import lombok.Setter;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.entity.component.additionals.RenderLocationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
-public class DinosaurComponent implements RenderLocationComponent {
+@Getter
+@Setter
+public class DinosaurComponent implements RenderLocationComponent, FinalizableComponent {
 
-    public Dinosaur dinosaur = DinosaurHandler.TYRANNOSAURUS;
+    private Dinosaur dinosaur = DinosaurHandler.TYRANNOSAURUS;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -51,5 +61,12 @@ public class DinosaurComponent implements RenderLocationComponent {
         texture.addFolderName("textures/entities", 0);
         texture.addFolderName(this.dinosaur.getRegName().getPath(), 10);
 
+    }
+
+    @Override
+    public void finalizeComponent(ComponentAccess entity) {
+        entity.get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.setMultipartNames(this.dinosaur.getAttacher().getStorage(NublarEntityComponentTypes.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART).getFunction()));
+
+        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName())));
     }
 }

@@ -4,10 +4,9 @@ import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.EntityFamily;
 import net.dumbcode.dumblibrary.server.entity.EntityManager;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
-import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
 import net.minecraft.entity.Entity;
 
 import java.util.Iterator;
@@ -31,13 +30,15 @@ public enum AgeSystem implements EntitySystem {
             AgeStage start = age.stage;
             int ageoff = age.ageInTicks;
 
-            if(age.stage.getTime() == -1) {
-                Iterator<AgeStage> iterator = age.orderedAges.iterator();
-                while(ageoff > 0 && iterator.hasNext()) {
-                    age.stage = iterator.next();
-                    ageoff -= age.stage.getTime();
+            Iterator<AgeStage> iterator = age.orderedAges.iterator();
+            while(ageoff > 0 && iterator.hasNext()) {
+                age.stage = iterator.next();
+                ageoff -= age.stage.getTime();
+                if(age.stage.getTime() == -1) {
+                    break;
                 }
             }
+
 
             if(age.stage == null) {
                 age.percentageStage = 0F;

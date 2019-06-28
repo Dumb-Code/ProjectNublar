@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
@@ -14,7 +13,6 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
@@ -28,7 +26,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -44,8 +41,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     private final EntityComponentAttacher attacher = new EntityComponentAttacher();
 
     private Map<String, AnimationContainer> modelContainer = Maps.newHashMap();
-    private List<ModelStage> activeModels = Lists.newArrayList(); //todo : serialize
-
 
     public String getOreSuffix() {
         return StringUtils.toCamelCase(getRegName().getPath());
@@ -76,7 +71,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
             config = this.attacher.getDefaultConfig();
         }
         DinosaurEntity entity = new DinosaurEntity(world);
-        entity.getOrExcept(NublarEntityComponentTypes.DINOSAUR).dinosaur = this;
+        entity.getOrExcept(NublarEntityComponentTypes.DINOSAUR).setDinosaur(this);
         config.attachAll(entity);
         return entity;
     }

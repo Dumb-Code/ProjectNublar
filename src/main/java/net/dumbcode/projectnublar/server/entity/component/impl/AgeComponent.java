@@ -9,11 +9,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.entity.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -33,7 +31,7 @@ public class AgeComponent implements RenderLocationComponent {
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
         compound.setInteger("Age", this.ageInTicks);
-        compound.setInteger("AgeIndex", this.orderedAges.indexOf(this.stage));
+        compound.setString("CurrentAge", this.stage.getName());
 
         NBTTagList ages = new NBTTagList();
         for (AgeStage age : this.orderedAges) {
@@ -51,16 +49,24 @@ public class AgeComponent implements RenderLocationComponent {
 
     @Override
     public void deserialize(NBTTagCompound compound) {
-        this.ageInTicks = compound.getInteger("age");
-
         this.orderedAges.clear();
+        this.stage = AgeStage.MISSING;
+
+        this.ageInTicks = compound.getInteger("Age");
         NBTTagList ages = compound.getTagList("OrderedAges", Constants.NBT.TAG_COMPOUND);
         for (NBTBase base : ages) {
             NBTTagCompound ageTag = (NBTTagCompound) base;
             this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time")));
         }
 
-        this.stage = this.orderedAges.get(compound.getInteger("AgeIndex"));
+        String currentAge = compound.getString("CurrentAge");
+        for (AgeStage orderedAge : this.orderedAges) {
+            if(currentAge.equals(orderedAge.getName())) {
+                this.stage = orderedAge;
+                break;
+            }
+        }
+
     }
 
     @Override

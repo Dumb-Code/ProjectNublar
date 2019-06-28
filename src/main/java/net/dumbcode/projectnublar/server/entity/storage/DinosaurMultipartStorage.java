@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Getter;
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
@@ -15,6 +16,7 @@ import net.minecraft.util.JsonUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -23,14 +25,15 @@ public class DinosaurMultipartStorage implements EntityComponentStorage<Multipar
 
     private final Map<String, List<String>> ageCubeMap = Maps.newHashMap();
 
+    private final Function<ComponentAccess, List<String>> function = access -> access.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
+
     @Override
     public MultipartEntityComponent construct() {
         MultipartEntityComponent component = new MultipartEntityComponent();
-
-        component.multipartNames = access -> access.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
-
+        component.setMultipartNames(this.function);
         return component;
     }
+
 
     @Override
     public void readJson(JsonObject json) {

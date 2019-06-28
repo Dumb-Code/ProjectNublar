@@ -8,7 +8,6 @@ import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
-import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilderBlock;
@@ -16,7 +15,6 @@ import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
 import net.minecraft.block.state.IBlockState;

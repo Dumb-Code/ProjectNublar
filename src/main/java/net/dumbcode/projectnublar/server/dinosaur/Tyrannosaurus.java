@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentType;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.entity.objects.FeedingDiet;
@@ -10,7 +9,6 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.init.Items;
@@ -78,12 +76,10 @@ public class Tyrannosaurus extends Dinosaur {
 
 
 
-        addComponent(NublarEntityComponentTypes.MULTIPART, EntityStorageOverrides.DINOSAUR_STORAGE)
+        addComponent(NublarEntityComponentTypes.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .getAgeCubeMap().putAll(entity);
 
-        addComponent(EntityComponentTypes.ANIMATION)
-                .setAnimationContainer(c -> this.getModelContainer().get(c.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName()));
-
+        addComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
                 .setScaleX(2.5F)

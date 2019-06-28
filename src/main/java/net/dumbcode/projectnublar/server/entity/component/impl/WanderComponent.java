@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.FinalizableComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -17,7 +18,7 @@ public class WanderComponent implements FinalizableComponent {
 
 
     @Override
-    public void finalizeComponent(Entity entity) {
+    public void finalizeComponent(ComponentAccess entity) {
         if(entity instanceof EntityCreature) {
             EntityCreature creature = (EntityCreature) entity;
             ((EntityCreature) entity).tasks.addTask(this.priority, this.avoidWater ? new EntityAIWanderAvoidWater(creature, this.speed, 1F / this.chance) : new EntityAIWander(creature, this.speed, this.chance));

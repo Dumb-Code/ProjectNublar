@@ -65,17 +65,19 @@ public enum MultipartSystem implements EntitySystem {
             dinosaur = (DinosaurEntity) entity;
         }
 
-        for (String cubeName : layer.getCubeNames()) {
-            layer.getAnicubeRef().apply(cubeName).reset();
+        if(!entity.world.isRemote) {
+            for (String cubeName : layer.getCubeNames()) {
+                layer.getAnicubeRef().apply(cubeName).reset();
+            }
+            layer.animate(entity.ticksExisted);
         }
-        layer.animate(entity.ticksExisted);
 
         Matrix4d entityRotate = new Matrix4d();
         entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
 
         @SuppressWarnings("unchecked")
         Function<String, AnimationLayer.AnimatableCube> function = layer.getAnicubeRef();
-        for (MultipartEntityComponent.LinkedEntity cube : multipart.entities) {
+        for (MultipartEntityComponent.LinkedEntity cube : multipart.getEntities()) {
             for (Entity e : entity.world.loadedEntityList) {
                 if(e instanceof EntityPart && e.getUniqueID().equals(cube.getEntityUUID())) {
                     AnimationLayer.AnimatableCube animatableCube = function.apply(cube.getCubeName());

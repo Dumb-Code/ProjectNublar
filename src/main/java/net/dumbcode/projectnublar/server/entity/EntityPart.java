@@ -68,7 +68,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
             this.setInParent = parent != null;
             if(parent instanceof ComponentAccess) {
                 ((ComponentAccess) parent).get(NublarEntityComponentTypes.MULTIPART)
-                        .ifPresent(multipartEntityComponent -> multipartEntityComponent.entities.add(new MultipartEntityComponent.LinkedEntity(this.partName, this.getUniqueID())));
+                        .ifPresent(multipartEntityComponent -> multipartEntityComponent.getEntities().add(new MultipartEntityComponent.LinkedEntity(this.partName, this.getUniqueID())));
             }
         }
 
