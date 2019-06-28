@@ -11,8 +11,8 @@ import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -65,8 +65,8 @@ public class DinosaurComponent implements RenderLocationComponent, FinalizableCo
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        entity.get(NublarEntityComponentTypes.MULTIPART).ifPresent(c -> c.setMultipartNames(this.dinosaur.getAttacher().getStorage(NublarEntityComponentTypes.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART).getFunction()));
+        entity.get(ComponentHandler.MULTIPART).ifPresent(c -> c.setMultipartNames(this.dinosaur.getAttacher().getStorage(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART).getFunction()));
 
-        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName())));
+        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName())));
     }
 }

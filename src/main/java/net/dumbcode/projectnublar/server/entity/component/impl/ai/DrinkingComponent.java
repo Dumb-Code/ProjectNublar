@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.entity.component.impl.ai;
 
+import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.FinalizableComponent;
 import net.dumbcode.projectnublar.server.entity.ai.DrinkingAI;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -12,7 +12,7 @@ public class DrinkingComponent implements FinalizableComponent {
     private float speed = 11f;
 
     @Override
-    public void finalizeComponent(Entity entity) {
+    public void finalizeComponent(ComponentAccess entity) {
         if(entity instanceof EntityCreature) {
             EntityCreature creature = (EntityCreature) entity;
             ((EntityCreature) entity).tasks.addTask(this.priority, new DrinkingAI(creature, speed));
