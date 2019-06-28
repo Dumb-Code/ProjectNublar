@@ -16,10 +16,9 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class NublarEntityComponentTypes {
     public static final EntityComponentType<DinosaurComponent,?> DINOSAUR = InjectedUtils.injected();
     public static final EntityComponentType<AgeComponent,AgeComponent.Storage> AGE = InjectedUtils.injected();
-    public static final EntityComponentType<MultipartEntityComponent,MultipartEntityComponent.Storage> MULTIPART = InjectedUtils.injected();
+    public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
-
 
 
     @SubscribeEvent
@@ -34,9 +33,8 @@ public class NublarEntityComponentTypes {
                         .withConstructor(AgeComponent::new)
                         .withStorage(AgeComponent.Storage::new)
                         .build(),
-                SimpleComponentType.builder(MultipartEntityComponent.class, MultipartEntityComponent.Storage.class)
+                SimpleComponentType.builder(MultipartEntityComponent.class)
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "multipart"))
-                        .withStorage(MultipartEntityComponent.Storage::new)
                         .withConstructor(MultipartEntityComponent::new)
                         .build(),
                 SimpleComponentType.builder(WanderComponent.class)

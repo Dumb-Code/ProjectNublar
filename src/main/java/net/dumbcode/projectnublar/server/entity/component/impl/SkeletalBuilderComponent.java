@@ -6,14 +6,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Getter;
-import lombok.Setter;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
+import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
@@ -24,12 +28,13 @@ public class SkeletalBuilderComponent implements EntityComponent {
     @Getter private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
 
     public int modelIndex;
-    public ModelStage stage = ModelStage.ADULT;
+
+    @SideOnly(Side.CLIENT)
+    private TabulaModel cachedModel;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
         compound.setInteger("model_index", this.modelIndex);
-        compound.setInteger("stage", this.stage.ordinal());
 
         NBTTagCompound tag = new NBTTagCompound();
         for(Map.Entry<String, List<String>> entry : this.boneToModelMap.entrySet()) {
@@ -51,7 +56,6 @@ public class SkeletalBuilderComponent implements EntityComponent {
     @Override
     public void deserialize(NBTTagCompound compound) {
         this.modelIndex = compound.getInteger("model_index");
-        this.stage = ModelStage.values()[compound.getInteger("stage")];
 
         NBTTagCompound tag = compound.getCompoundTag("bone_map");
         Map<String, List<String>> nbtBoneMap = new HashMap<>();
@@ -82,14 +86,19 @@ public class SkeletalBuilderComponent implements EntityComponent {
         }
     }
 
+    public TabulaModel getCachedModel(ResourceLocation fileLocation) {
+        if(this.cachedModel == null) {
+            this.cachedModel = TabulaUtils.getModel(fileLocation);
+        }
+        return cachedModel;
+    }
+
     public static class Storage implements EntityComponentStorage<SkeletalBuilderComponent> {
 
         @Getter private List<String> individualBones = Lists.newArrayList();
         @Getter private List<String> boneListed = Lists.newArrayList();
 
         @Getter private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
-
-        @Getter @Setter private ModelStage stage = ModelStage.ADULT;
 
         @Override
         public SkeletalBuilderComponent construct() {
@@ -99,7 +108,6 @@ public class SkeletalBuilderComponent implements EntityComponent {
             component.boneListed = this.boneListed;
             component.boneToModelMap = this.boneToModelMap;
 
-            component.stage = this.stage;
 
             return component;
         }
@@ -122,7 +130,6 @@ public class SkeletalBuilderComponent implements EntityComponent {
 
         @Override
         public void readJson(JsonObject json) {
-            this.stage = ModelStage.valueOf(json.get("stage").getAsString().toUpperCase());
             JsonObject boneMap = json.getAsJsonObject("bone_map");
             Map<String, List<String>> jsonBoneMap = new HashMap<>();
             for(Map.Entry<String, JsonElement> entry : boneMap.entrySet()) {
@@ -142,7 +149,6 @@ public class SkeletalBuilderComponent implements EntityComponent {
 
         @Override
         public void writeJson(JsonObject json) {
-            json.addProperty("stage", this.stage.name());
             JsonObject boneMap = new JsonObject();
             for(Map.Entry<String, List<String>> entry : this.boneToModelMap.entrySet()) {
                 String bone = entry.getKey();

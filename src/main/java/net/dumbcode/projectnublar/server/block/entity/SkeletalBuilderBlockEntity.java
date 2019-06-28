@@ -96,8 +96,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         if(dinosaur != null) {
             DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(NublarEntityComponentTypes.SKELETAL_BUILDER));
             entity.attachComponent(NublarEntityComponentTypes.SKELETAL_BUILDER);
-            entity.getOrExcept(NublarEntityComponentTypes.SKELETAL_BUILDER).stage = ModelStage.SKELETON; //TODO: change life?
-            entity.get(NublarEntityComponentTypes.AGE).ifPresent(age -> age.stage = ModelStage.SKELETON);
             this.dinosaurEntity = Optional.of(entity);
         }
         this.history.clear();
@@ -109,7 +107,10 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
             return null;
         }
         DinosaurEntity de = this.dinosaurEntity.get();
-        return de.getDinosaur().getModelContainer().get(de.getOrExcept(NublarEntityComponentTypes.SKELETAL_BUILDER).stage).getMainModel();
+        //Not *really* sure if this is the best way about it.
+        //todo: think of a better way of getting the skeletal builder model.
+        // maybe could store the AgeStage on the builder component, then use that to get the container then the model location, and the rest is as follows
+        return de.getOrExcept(NublarEntityComponentTypes.SKELETAL_BUILDER).getCachedModel(de.getDinosaur().getModelContainer().get(Dinosaur.SKELETON_AGE).getModelLocation());
     }
 
     public ItemStackHandler getBoneHandler() {

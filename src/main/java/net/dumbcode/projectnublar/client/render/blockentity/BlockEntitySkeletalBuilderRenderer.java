@@ -78,8 +78,8 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             Dinosaur dinosaur = te.getDinosaur().get();
 
             Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/male_adult.png"));
-            TabulaModelClipPlane clipPlane = new TabulaModelClipPlane(dinosaur.getModelContainer().get(ModelStage.ADULT).getMainModel());
-            clipPlane.render(4-((te.getWorld().getTotalWorldTime() + partialTicks) / 30D)%6, 0xbda47e);
+//            TabulaModelClipPlane clipPlane = new TabulaModelClipPlane(dinosaur.getModelContainer().get(ModelStage.ADULT).getMainModel());
+//            clipPlane.render(4-((te.getWorld().getTotalWorldTime() + partialTicks) / 30D)%6, 0xbda47e);
 
             GlStateManager.popMatrix();
             GlStateManager.pushMatrix();
@@ -87,7 +87,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
             GlStateManager.translate(0f, 1.70f, 0f);
             GlStateManager.rotate(180f, 0f, 0f, 1f);
             Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/tyrannosaurus/female_skeleton.png"));
-            dinosaur.getModelContainer().get(ModelStage.SKELETON).getMainModel().renderBoxes(1/16F);
+//            dinosaur.getModelContainer().get(ModelStage.SKELETON).getMainModel().renderBoxes(1/16F);
 
             GlStateManager.popMatrix();
             GlStateManager.enableTexture2D();

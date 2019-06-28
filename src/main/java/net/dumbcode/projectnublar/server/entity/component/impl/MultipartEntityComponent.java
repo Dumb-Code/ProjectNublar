@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -111,49 +110,17 @@ public class MultipartEntityComponent implements EntityComponent {
     //PN only
     @Accessors(chain = true)
     @Setter
+    //TODO: have pn extend this class, and have the component attatcher allow for custom storages.
+    // WOuld have to create a system for custom storages in the deserilization.
+    // could make a whole thing about it in the
     public static class Storage implements EntityComponentStorage<MultipartEntityComponent> {
-        private Map<ModelStage, List<String>> linkedCubeMap = Maps.newEnumMap(ModelStage.class);
-
-        /** The model this system applies to. */
-        private ModelStage defaultStage;
+        private Function<ComponentAccess, List<String>> linkedCubeMap = c -> Lists.newArrayList();
 
         @Override
         public MultipartEntityComponent construct() {
             MultipartEntityComponent component = new MultipartEntityComponent();
-            component.multipartNames = access ->
-                    this.linkedCubeMap.getOrDefault(access.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(this.defaultStage), Lists.newArrayList());
-            return component;
-        }
-
-        @Override
-        public void readJson(JsonObject json) {
-            JsonElement entityMap = json.get("entity_map");
-            if(entityMap instanceof JsonObject) {
-                JsonObject entityobj = entityMap.getAsJsonObject();
-                for (ModelStage stage : ModelStage.values()) {
-                    if(JsonUtils.isJsonArray(entityobj, stage.getName())) {
-                        this.linkedCubeMap.computeIfAbsent(stage, m -> Lists.newArrayList())
-                                .addAll(StreamSupport.stream(entityobj.getAsJsonArray(stage.getName()).spliterator(), false)
-                                        .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).collect(Collectors.toList()));
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void writeJson(JsonObject json) {
-            JsonObject entity = new JsonObject();
-            for (Map.Entry<ModelStage, List<String>> entry : this.linkedCubeMap.entrySet()) {
-                List<String> value = entry.getValue();
-                if(value != null && !value.isEmpty()) {
-                    JsonArray obj = new JsonArray();
-                    for (String s : entry.getValue()) {
-                        obj.add(s);
-                    }
-                    entity.add(entry.getKey().getName(), obj);
-                }
-            }
-            json.add("entity_map", entity);
+            component.multipartNames = this.linkedCubeMap; //
+                        return component;
         }
     }
 

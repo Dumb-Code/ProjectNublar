@@ -2,13 +2,17 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentType;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.entity.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
+import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ModelStage;
 import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
+import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -20,7 +24,6 @@ import java.util.Map;
 public class Tyrannosaurus extends Dinosaur {
 
     public Tyrannosaurus() {
-        this.getScale().put(ModelStage.ADULT, 2.5);
 
         getItemProperties()
                 .setCookedMeatHealAmount(10)
@@ -39,12 +42,11 @@ public class Tyrannosaurus extends Dinosaur {
                 BiomeDictionary.Type.FOREST,
                 BiomeDictionary.Type.MOUNTAIN
         ));
-
-        this.getActiveModels().addAll(Lists.newArrayList(ModelStage.ADULT, ModelStage.SKELETON));
     }
 
     @Override
     public void attachDefaultComponents() {
+
         addComponent(EntityComponentTypes.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
@@ -52,8 +54,8 @@ public class Tyrannosaurus extends Dinosaur {
                 .setMaxFood(7500)
                 .setMaxWater(6000);
 
-        Map<ModelStage, List<String>> entity = Maps.newEnumMap(ModelStage.class);
-        entity.put(ModelStage.ADULT, Lists.newArrayList(
+        Map<String, List<String>> entity = Maps.newHashMap();
+        entity.put(ADULT_AGE, Lists.newArrayList(
                 "tail4",
                 "Tail3",
                 "tail2",
@@ -73,16 +75,28 @@ public class Tyrannosaurus extends Dinosaur {
                 "chest",
                 "jawUpper1",
                 "head"));
-        addComponent(NublarEntityComponentTypes.MULTIPART)
-                .setDefaultStage(ModelStage.ADULT)
-                .setLinkedCubeMap(entity);
+
+
+
+        addComponent(NublarEntityComponentTypes.MULTIPART, EntityStorageOverrides.DINOSAUR_STORAGE)
+                .getAgeCubeMap().putAll(entity);
 
         addComponent(EntityComponentTypes.ANIMATION)
-                .setModelGetter(new DinosaurModelGetter(this));
+                .setAnimationContainer(c -> this.getModelContainer().get(c.get(NublarEntityComponentTypes.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName()));
+
+
+        this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
+                .setScaleX(2.5F)
+                .setScaleY(2.5F)
+                .setScaleZ(2.5F);
 
 
         this.addComponent(EntityComponentTypes.GENDER);
-        this.addComponent(NublarEntityComponentTypes.AGE);
+        this.addComponent(NublarEntityComponentTypes.AGE)
+                .addStage(new AgeStage(ADULT_AGE, -1))
+                .addStage(new AgeStage(SKELETON_AGE, -1));
+
+        this.addComponent(EntityComponentTypes.MODEL);
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addComponent(NublarEntityComponentTypes.WANDER_AI);

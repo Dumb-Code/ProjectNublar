@@ -2,10 +2,10 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.dumbcode.dumblibrary.client.animation.ModelContainer;
+import net.dumbcode.dumblibrary.client.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.entity.EntityManager;
+import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.entity.system.RegisterSystemsEvent;
-import net.dumbcode.dumblibrary.server.entity.system.impl.AnimationSystem;
 import net.dumbcode.dumblibrary.server.entity.system.impl.HerdSystem;
 import net.dumbcode.dumblibrary.server.entity.system.impl.MetabolismSystem;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
@@ -15,8 +15,7 @@ import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.projectnublar.server.entity.ModelStage;
+import net.dumbcode.projectnublar.server.entity.NublarEntityComponentTypes;
 import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
 import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
@@ -31,9 +30,6 @@ import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.NonNullList;
@@ -110,14 +106,10 @@ public class ProjectNublar {
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();
-            for (ModelStage value : new ModelStage[]{ModelStage.ADULT, ModelStage.INFANT, ModelStage.CHILD, ModelStage.ADOLESCENCE, ModelStage.SKELETON}) {
-                Map<ModelStage, ModelContainer<DinosaurEntity>> container = dinosaur.getModelContainer();
+            for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(NublarEntityComponentTypes.AGE).getOrderedAges()) {
+                Map<String, AnimationContainer> container = dinosaur.getModelContainer();
+                container.put(orderedAge.getName(), new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + orderedAge.getName())));
 
-                if (!dinosaur.getActiveModels().contains(value)) {
-                    container.put(value, container.get(ModelStage.ADULT));
-                } else {
-                    container.put(value, new ModelContainer<>(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + value), dinosaur.getSystemInfo().get(value)));
-                }
             }
         }
 
@@ -183,7 +175,6 @@ public class ProjectNublar {
     @SubscribeEvent
     public static void register(RegisterSystemsEvent event) {
         event.registerSystem(AgeSystem.INSTANCE);
-        event.registerSystem(AnimationSystem.INSTANCE);
         event.registerSystem(MultipartSystem.INSTANCE);
         event.registerSystem(MetabolismSystem.INSTANCE);
         event.registerSystem(HerdSystem.INSTANCE);

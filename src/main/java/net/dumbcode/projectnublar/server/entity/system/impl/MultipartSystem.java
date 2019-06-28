@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.server.entity.EntityFamily;
 import net.dumbcode.dumblibrary.server.entity.EntityManager;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.RenderAdjustmentsComponent;
 import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
@@ -25,6 +26,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -53,7 +55,8 @@ public enum MultipartSystem implements EntitySystem {
     }
 
     private static void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
-        if(animation.getAnimationWrapper() == null) {
+        AnimationLayer layer = animation.getAnimationLayer(entity);
+        if(layer == null) {
             return;
         }
 
@@ -62,21 +65,16 @@ public enum MultipartSystem implements EntitySystem {
             dinosaur = (DinosaurEntity) entity;
         }
 
-        @SuppressWarnings("unchecked")
-        List<AnimationLayer> layers = animation.getAnimationWrapper().getLayers();
-        for (AnimationLayer<?> layer : layers) {
-            for (String cubeName : layer.getCubeNames()) {
-                layer.getAnicubeRef().apply(cubeName).reset();
-            }
+        for (String cubeName : layer.getCubeNames()) {
+            layer.getAnicubeRef().apply(cubeName).reset();
         }
-        for (AnimationLayer<?> layer : layers) {
-            layer.animate(entity.ticksExisted);
-        }
+        layer.animate(entity.ticksExisted);
+
         Matrix4d entityRotate = new Matrix4d();
         entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
 
         @SuppressWarnings("unchecked")
-        Function<String, AnimationLayer.AnimatableCube> function = layers.get(0).getAnicubeRef(); //ew
+        Function<String, AnimationLayer.AnimatableCube> function = layer.getAnicubeRef();
         for (MultipartEntityComponent.LinkedEntity cube : multipart.entities) {
             for (Entity e : entity.world.loadedEntityList) {
                 if(e instanceof EntityPart && e.getUniqueID().equals(cube.getEntityUUID())) {
@@ -97,7 +95,15 @@ public enum MultipartSystem implements EntitySystem {
                         for (int i = 0; i < 8; i++) {
                             Vec3d startPoint = TabulaUtils.getModelPosAlpha(animatableCube, (i >> 2)&1, (i >> 1)&1, i&1);
                             Point3d point = new Point3d(startPoint.x, startPoint.y + 1.5, startPoint.z);
-                            point.scale(dinosaur != null ? dinosaur.getCurrentScale() : 1);
+
+                            if(dinosaur != null) {
+                                dinosaur.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> {
+                                            point.x *= floats[0];
+                                            point.y *= floats[1];
+                                            point.z *= floats[2];
+                                        }
+                                );
+                            }
                             entityRotate.transform(point);
 
                             minX = Math.min(minX, point.x);
