@@ -107,6 +107,7 @@ public class Tyrannosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addComponent(ComponentHandler.WANDER_AI);
+        this.addComponent(ComponentHandler.DRINKING_AI);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
                 .initializeMap(
