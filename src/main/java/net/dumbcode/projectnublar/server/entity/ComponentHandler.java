@@ -23,6 +23,7 @@ public class ComponentHandler {
     public static final EntityComponentType<DrinkingComponent,?> DRINKING_AI = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
 
+    public static final EntityComponentType<DinosaurDropsComponent, DinosaurDropsComponent.Storage> ITEM_DROPS = InjectedUtils.injected();
 
     @SubscribeEvent
     public static void onRegisterComponents(RegisterComponentsEvent event) {
@@ -53,6 +54,11 @@ public class ComponentHandler {
                         .withConstructor(SkeletalBuilderComponent::new)
                         .withStorage(SkeletalBuilderComponent.Storage::new)
                         .disableDefaultAttach()
+                        .build(),
+                SimpleComponentType.builder(DinosaurDropsComponent.class, DinosaurDropsComponent.Storage.class)
+                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "item_drops"))
+                        .withConstructor(DinosaurDropsComponent::new)
+                        .withStorage(DinosaurDropsComponent.Storage::new)
                         .build()
         );
     }

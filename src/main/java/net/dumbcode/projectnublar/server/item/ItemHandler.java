@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
@@ -65,7 +66,7 @@ public final class ItemHandler {
                 ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB)
         );
 
-        Function<Item, Item> tab = item -> item.setCreativeTab(TAB);
+        UnaryOperator<Item> tab = item -> item.setCreativeTab(TAB);
 
         populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
         populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);
@@ -75,7 +76,7 @@ public final class ItemHandler {
         populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(stack.getOrCreateSubCompound(ProjectNublar.MODID).getInteger("AmountDone") + "%")));
         populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
 
-        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(ComponentHandler.SKELETAL_BUILDER).getIndividualBones(), FossilItem::new, "fossil_%s_%s"); //TODO: redo format
+        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(ComponentHandler.ITEM_DROPS).getFossilList(), FossilItem::new, "%s_fossil_%s", tab);
 
 
         for (Block block : ForgeRegistries.BLOCKS) {
@@ -123,8 +124,13 @@ public final class ItemHandler {
         }
     }
 
+    @Deprecated
     private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
         populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname, null);
+    }
+
+    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {
+        populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname, initializer);
     }
 
     private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {

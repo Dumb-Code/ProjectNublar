@@ -10,7 +10,6 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -75,10 +74,22 @@ public class Tyrannosaurus extends Dinosaur {
                 "head"));
 
 
-        addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
+        this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .getAgeCubeMap().putAll(entity);
 
-        addComponent(EntityComponentTypes.ANIMATION);
+        this.addComponent(EntityComponentTypes.ANIMATION);
+
+        this.addComponent(ComponentHandler.ITEM_DROPS)
+                .addFossils(
+                        "foot",
+                        "claw",
+                        "leg",
+                        "neck",
+                        "pelvis",
+                        "ribcage",
+                        "skull",
+                        "tail"
+                );
 
 
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
@@ -104,7 +115,10 @@ public class Tyrannosaurus extends Dinosaur {
                         "foot", "legLowerRight",
                         "leg", "legUpperLeft",
                         "leg", "legUpperRight",
-                        "body", "hips"
+                        "ribs", "ribcage",
+                        "tail", "tail4",
+                        "neck", "neck3",
+                        "skull", "head"
                 );
     }
 }

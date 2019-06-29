@@ -4,6 +4,8 @@ import net.dumbcode.dumblibrary.client.model.tabula.baked.TabulaModelHandler;
 import net.dumbcode.projectnublar.client.render.FenceStateMapper;
 import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.item.FossilItem;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -44,7 +46,17 @@ public class ModelHandler {
 
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE, Item.getItemFromBlock(HIGH_SECURITY_ELECTRIC_FENCE_POLE),
                 Item.getItemFromBlock(LOW_SECURITY_ELECTRIC_FENCE_POLE), Item.getItemFromBlock(ELECTRIC_FENCE), Item.getItemFromBlock(CREATIVE_POWER_SOURCE));
-        reg(TEST_TUBES_GENETIC_MATERIAL);
+        reg(TEST_TUBES_GENETIC_MATERIAL, "test_tube_genetic_material");
+
+
+        for (Dinosaur dinosaur : FOSSIL_ITEMS.keySet()) {
+            Map<String, FossilItem> itemMap = FOSSIL_ITEMS.get(dinosaur);
+            for (String bone : itemMap.keySet()) {
+                FossilItem item = itemMap.get(bone);
+                reg(item, new ResourceLocation(dinosaur.getRegName().getNamespace(), "fossils/" + dinosaur.getRegName().getPath() + "/fossil_" + dinosaur.getRegName().getPath() + "_" + bone));
+            }
+        }
+
     }
 
     private static void reg(Item... items) {
@@ -56,6 +68,13 @@ public class ModelHandler {
     private static void reg(Map<?, ? extends Item> map) {
         for (Item item : map.values()) {
             reg(item);
+        }
+    }
+
+    //TODO: make overlay system
+    private static void reg(Map<?, ? extends Item> map, String name) {
+        for (Item item : map.values()) {
+            reg(item, new ResourceLocation(Objects.requireNonNull(item.getRegistryName()).getNamespace(), name));
         }
     }
 
