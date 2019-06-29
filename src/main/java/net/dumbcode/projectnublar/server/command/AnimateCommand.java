@@ -15,6 +15,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,25 +34,31 @@ public class AnimateCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        Animation animation = DumbRegistries.ANIMATION_REGISTRY.getValue(new ResourceLocation(args[0]));
-        for (Entity entity : sender.getEntityWorld().loadedEntityList) {
-            if(entity instanceof DinosaurEntity) {
-                AnimationComponent comp = ((DinosaurEntity) entity).getOrNull(EntityComponentTypes.ANIMATION);
-                if (comp != null) {
-                    AnimationLayer.AnimationEntry entry = new AnimationLayer.AnimationEntry(animation);
-                    if(args.length > 1) {
-                        entry = entry.withTime(parseInt(args[1]));
+        if(args.length > 0) {
+            Animation animation = DumbRegistries.ANIMATION_REGISTRY.getValue(new ResourceLocation(args[0]));
+            for (Entity entity : sender.getEntityWorld().loadedEntityList) {
+                if (entity instanceof DinosaurEntity) {
+                    AnimationComponent comp = ((DinosaurEntity) entity).getOrNull(EntityComponentTypes.ANIMATION);
+                    if (comp != null) {
+                        AnimationLayer.AnimationEntry entry = new AnimationLayer.AnimationEntry(animation);
+                        if (args.length > 1) {
+                            entry = entry.withTime(parseInt(args[1]));
+                        }
+                        if (args.length > 2) {
+                            entry = entry.withHold(parseBoolean(args[2]));
+                        }
+                        if (args.length > 3) {
+                            entry = entry.withUseInertia(parseBoolean(args[3]));
+                        }
+                        comp.playAnimation((ComponentAccess) entity, entry, args.length > 4 ? parseInt(args[4]) : -1); //ATTEMPT MERGE
                     }
-                    if(args.length > 2) {
-                        entry = entry.withHold(parseBoolean(args[2]));
-                    }
-                    if(args.length > 3) {
-                        entry = entry.withUseInertia(parseBoolean(args[3]));
-                    }
-                    comp.playAnimation((ComponentAccess) entity, entry, args.length > 4 ? parseInt(args[4]) : -1); //ATTEMPT MERGE
                 }
             }
+            return;
         }
+        TextComponentTranslation text = new TextComponentTranslation("Usage: /projectnublar animate {animation}");
+        text.getStyle().setColor(TextFormatting.RED);
+        sender.sendMessage(text);
     }
 
     @Override

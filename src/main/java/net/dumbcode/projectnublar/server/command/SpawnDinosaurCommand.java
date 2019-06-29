@@ -10,6 +10,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -27,10 +29,16 @@ public class SpawnDinosaurCommand extends CommandBase {
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        DinosaurEntity entity = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(args[0])).createEntity(sender.getEntityWorld());
-        entity.setPosition(sender.getPositionVector().x, sender.getPositionVector().y, sender.getPositionVector().z);
-        sender.getEntityWorld().spawnEntity(entity);
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
+        if(args.length > 0) {
+            DinosaurEntity entity = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(args[0])).createEntity(sender.getEntityWorld());
+            entity.setPosition(sender.getPositionVector().x, sender.getPositionVector().y, sender.getPositionVector().z);
+            sender.getEntityWorld().spawnEntity(entity);
+            return;
+        }
+        TextComponentTranslation text = new TextComponentTranslation("Usage: /projectnublar spawn {dinosaur}");
+        text.getStyle().setColor(TextFormatting.RED);
+        sender.sendMessage(text);
     }
 
     @Override
