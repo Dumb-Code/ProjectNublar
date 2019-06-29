@@ -6,21 +6,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Getter;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
+//TODO:
+//  - change this to allow for an ast tree for the bones, rather than a list of them. For example
+//    when we get to the ribcage, they player should be allowed to either go to the tail, or the neck, rather than always the tail first
+//  - Make this instead of caching the model to look into the model component and get that
 public class SkeletalBuilderComponent implements EntityComponent {
 
     @Getter private List<String> individualBones = Lists.newArrayList();
@@ -28,9 +26,6 @@ public class SkeletalBuilderComponent implements EntityComponent {
     @Getter private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
 
     public int modelIndex;
-
-    @SideOnly(Side.CLIENT)
-    private TabulaModel cachedModel;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -84,13 +79,6 @@ public class SkeletalBuilderComponent implements EntityComponent {
             boneListed.add(bone);
             boneToModelMap.put(bone, entry.getValue());
         }
-    }
-
-    public TabulaModel getCachedModel(ResourceLocation fileLocation) {
-        if(this.cachedModel == null) {
-            this.cachedModel = TabulaUtils.getModel(fileLocation);
-        }
-        return cachedModel;
     }
 
     public static class Storage implements EntityComponentStorage<SkeletalBuilderComponent> {

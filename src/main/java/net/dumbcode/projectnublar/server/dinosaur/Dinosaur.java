@@ -100,22 +100,6 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return this.getRegistryName();
     }
 
-    /**
-     * Gets the texture location from the resources folder
-     * for this dinosaur.
-     * @param entity dinosaur entity.
-     * @return Resource location of the entity texture.
-     */
-    public ResourceLocation getTextureLocation(DinosaurEntity entity) {
-        ResourceLocation regname = getRegName();
-        GenderComponent gcomp = entity.getOrNull(EntityComponentTypes.GENDER);
-        String name = entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName();
-        if(gcomp != null) {
-            return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + (gcomp.male ? "male" : "female") + "_" + name + ".png");
-        }
-        return new ResourceLocation(regname.getNamespace(), "textures/entities/" + regname.getPath() + "/" + name + ".png");
-    }
-
     public TextComponentTranslation createNameComponent() {
         return new TextComponentTranslation(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
     }

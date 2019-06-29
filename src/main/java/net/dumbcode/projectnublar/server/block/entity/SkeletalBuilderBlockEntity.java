@@ -4,12 +4,16 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.entity.component.additionals.RenderLocationComponent;
+import net.dumbcode.dumblibrary.server.entity.component.impl.ModelComponent;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
@@ -75,40 +79,46 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         this.getDinosaurEntity().flatMap(d -> d.get(ComponentHandler.SKELETAL_BUILDER)).ifPresent(c -> {
             int size = c.getBoneListed().size();
             if(size != this.boneHandler.getSlots()) {
-                this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items?
+                this.boneHandler.setSize(size); //TODO: Maybe make a diffrent method that keeps the items if possible?
             }
         });
     }
-
 
     public Optional<Dinosaur> getDinosaur() {
         return this.dinosaurEntity.map(DinosaurEntity::getDinosaur);
     }
 
     public ResourceLocation getTexture() {
-        Optional<Dinosaur> dinosaur = this.getDinosaur();
-        return (dinosaur.isPresent() && this.dinosaurEntity.isPresent()) ? dinosaur.get().getTextureLocation(this.dinosaurEntity.get()) : TextureMap.LOCATION_MISSING_TEXTURE;
+        return this.dinosaurEntity
+                .flatMap(e -> e.get(EntityComponentTypes.MODEL))
+                .map(ModelComponent::getTexture)
+                .map(RenderLocationComponent.ConfigurableLocation::getLocation)
+                .orElse(TextureMap.LOCATION_MISSING_TEXTURE);
     }
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
             DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(ComponentHandler.SKELETAL_BUILDER));
-            entity.attachComponent(ComponentHandler.SKELETAL_BUILDER);
+            entity.get(ComponentHandler.AGE).ifPresent(age -> age.setRawStage(Dinosaur.SKELETON_AGE));
+            entity.finalizeComponents();
             this.dinosaurEntity = Optional.of(entity);
         }
         this.history.clear();
         this.reassureSize();
     }
 
+    @SideOnly(Side.CLIENT)
     public TabulaModel getModel() {
         if(!this.dinosaurEntity.isPresent()) {
             return null;
         }
         DinosaurEntity de = this.dinosaurEntity.get();
-        //Not *really* sure if this is the best way about it.
-        //todo: think of a better way of getting the skeletal builder model.
-        // maybe could store the AgeStage on the builder component, then use that to get the container then the model location, and the rest is as follows
-        return de.getOrExcept(ComponentHandler.SKELETAL_BUILDER).getCachedModel(de.getDinosaur().getModelContainer().get(Dinosaur.SKELETON_AGE).getModelLocation());
+
+        ModelBase modelCache = de.getOrExcept(EntityComponentTypes.MODEL).getModelCache();
+        if(modelCache instanceof TabulaModel) {
+            return (TabulaModel) modelCache;
+        }
+        return null;
     }
 
     public ItemStackHandler getBoneHandler() {
@@ -117,7 +127,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
 
     public Map<String, Vector3f> getPoseData() {
-        //todo caching
+        //todo caching - of fucking what. Wyn, make your todos easier to understand fuckface
         Map<String, Vector3f> map = Maps.newHashMap();
 
         this.history.getHistory().forEach(recordList -> recordList.forEach(record -> {

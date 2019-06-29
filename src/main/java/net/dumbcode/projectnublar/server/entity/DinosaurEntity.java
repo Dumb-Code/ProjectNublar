@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.entity;
 
 import net.dumbcode.dumblibrary.server.entity.ComposableCreatureEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 public class DinosaurEntity extends ComposableCreatureEntity {
@@ -27,10 +26,5 @@ public class DinosaurEntity extends ComposableCreatureEntity {
      */
     public Dinosaur getDinosaur() {
         return this.getOrExcept(ComponentHandler.DINOSAUR).getDinosaur();
-    }
-
-    @Override
-    protected void damageEntity(DamageSource damageSrc, float damageAmount) {
-        super.damageEntity(damageSrc, damageAmount);
     }
 }

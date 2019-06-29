@@ -28,6 +28,15 @@ public class AgeComponent implements RenderLocationComponent {
     public AgeStage stage = AgeStage.MISSING;
     public float percentageStage = 1F;
 
+    public void setRawStage(String stage) {
+        for (AgeStage orderedAge : this.orderedAges) {
+            if(stage.equals(orderedAge.getName())) {
+                this.stage = orderedAge;
+                break;
+            }
+        }
+    }
+
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
         compound.setInteger("Age", this.ageInTicks);
@@ -59,13 +68,7 @@ public class AgeComponent implements RenderLocationComponent {
             this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time")));
         }
 
-        String currentAge = compound.getString("CurrentAge");
-        for (AgeStage orderedAge : this.orderedAges) {
-            if(currentAge.equals(orderedAge.getName())) {
-                this.stage = orderedAge;
-                break;
-            }
-        }
+        this.setRawStage(compound.getString("CurrentAge"));
 
     }
 

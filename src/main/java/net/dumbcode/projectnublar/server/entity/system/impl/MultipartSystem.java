@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public enum MultipartSystem implements EntitySystem {
     INSTANCE;
 
@@ -54,7 +53,7 @@ public enum MultipartSystem implements EntitySystem {
         }
     }
 
-    private static void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
+    private void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
         AnimationLayer layer = animation.getAnimationLayer(entity);
         if(layer == null) {
             return;
@@ -142,7 +141,7 @@ public enum MultipartSystem implements EntitySystem {
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    public static void onClientWorldTick(TickEvent.ClientTickEvent event) {
+    public void onClientWorldTick(TickEvent.ClientTickEvent event) {
         World world = Minecraft.getMinecraft().world;
         if(world != null && !Minecraft.getMinecraft().isGamePaused()) {
             for (Entity entity : world.loadedEntityList) {
