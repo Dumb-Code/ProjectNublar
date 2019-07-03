@@ -61,7 +61,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
-@Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION, dependencies = "required-after:dumblibrary@[" + ProjectNublar.DUMBLIBRARY_VERSION + ",)")
+@Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION, dependencies = "required-after:dumblibrary")
 public class ProjectNublar {
 
     public static final String MODID = "projectnublar";
