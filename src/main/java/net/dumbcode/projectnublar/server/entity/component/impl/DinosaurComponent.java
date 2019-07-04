@@ -3,12 +3,15 @@ package net.dumbcode.projectnublar.server.entity.component.impl;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.entity.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.entity.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
+import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
@@ -20,6 +23,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 @Getter
 @Setter
 public class DinosaurComponent implements RenderLocationComponent, FinalizableComponent {
+
+    private static final int MOVEMENT_CHANNEL = 60;
 
     private Dinosaur dinosaur = DinosaurHandler.TYRANNOSAURUS;
 
@@ -67,6 +72,15 @@ public class DinosaurComponent implements RenderLocationComponent, FinalizableCo
     public void finalizeComponent(ComponentAccess entity) {
         entity.get(ComponentHandler.MULTIPART).ifPresent(c -> c.setMultipartNames(this.dinosaur.getAttacher().getStorage(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART).getFunction()));
 
-        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName())));
+        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
+            c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName()));
+
+            c.proposeAnimation(entity, new AnimationLayer.AnimationEntry(AnimationHandler.WALKING)
+                            .loop()
+                            .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)
+                            .withSpeedFactor(AnimationFactorHandler.LIMB_SWING)
+                    , MOVEMENT_CHANNEL, 5);
+
+        });
     }
 }

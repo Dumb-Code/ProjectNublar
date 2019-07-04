@@ -176,8 +176,6 @@ public class ProjectNublar {
     public static void register(RegisterSystemsEvent event) {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(MultipartSystem.INSTANCE);
-        event.registerSystem(MetabolismSystem.INSTANCE);
-        event.registerSystem(HerdSystem.INSTANCE);
     }
 
     @EventHandler

@@ -42,6 +42,9 @@ public class AnimateCommand extends CommandBase {
                     if (comp != null) {
                         AnimationLayer.AnimationEntry entry = new AnimationLayer.AnimationEntry(animation);
                         if (args.length > 1) {
+                            if(args[1].equalsIgnoreCase("stop")) {
+                                comp.stopAll();
+                            }
                             entry = entry.withTime(parseInt(args[1]));
                         }
                         if (args.length > 2) {
@@ -50,7 +53,7 @@ public class AnimateCommand extends CommandBase {
                         if (args.length > 3) {
                             entry = entry.withUseInertia(parseBoolean(args[3]));
                         }
-                        comp.playAnimation((ComponentAccess) entity, entry, args.length > 4 ? parseInt(args[4]) : -1); //ATTEMPT MERGE
+                        comp.playAnimation((ComponentAccess) entity, entry, args.length > 4 ? parseInt(args[4]) : 0); //ATTEMPT MERGE
                     }
                 }
             }
