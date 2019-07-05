@@ -13,7 +13,7 @@ public class WanderComponent implements FinalizableComponent {
 
     public boolean avoidWater = false;
     public int priority = 3;
-    public double speed = 0.3D;
+    public double speed = 0.5D;
     public int chance = 50;
 
 

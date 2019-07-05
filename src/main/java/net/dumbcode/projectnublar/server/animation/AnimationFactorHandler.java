@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.server.animation;
 
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationFactor;
+import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.entity.Entity;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -21,10 +21,15 @@ public class AnimationFactorHandler {
     @SubscribeEvent
     public static void onAnimationFactorRegister(RegistryEvent.Register<AnimationFactor> event) {
         event.getRegistry().registerAll(
-                new AnimationFactor((access, partialTicks) -> {
-                    EntityLivingBase entity = (EntityLivingBase) access; //don't use ELB
-                    return (entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTicks) * 1.75F;
-                    //TODO: look at RenderLivingBase L115 and just copy that with some multiplier
+                new AnimationFactor((access, type, partialTicks) -> {
+                    Entity entity = (Entity) access;
+                    double speed = access.get(EntityComponentTypes.SPEED_TRACKING)
+                            .map(comp -> comp.getPreviousSpeed() + (comp.getSpeed() - comp.getPreviousSpeed()) * partialTicks)
+                            .orElse(Math.sqrt(entity.motionX*entity.motionX + entity.motionZ*entity.motionZ)) * 12F;
+                    if(type.isAngle()) {
+                        speed = Math.min(speed, 1.0F);
+                    }
+                    return (float)speed;
                 }).setRegistryName("limb_swing")
         );
     }
