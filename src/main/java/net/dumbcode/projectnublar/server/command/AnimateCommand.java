@@ -1,12 +1,14 @@
 package net.dumbcode.projectnublar.server.command;
 
 import com.google.common.collect.Lists;
-import net.dumbcode.dumblibrary.server.registry.DumbRegistries;
+import net.dumbcode.dumblibrary.server.animation.interpolation.CosInterpolation;
+import net.dumbcode.dumblibrary.server.animation.interpolation.LinearInterpolation;
 import net.dumbcode.dumblibrary.server.animation.objects.Animation;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
 import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.registry.DumbRegistries;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -29,7 +31,7 @@ public class AnimateCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "usage here";
+        return "Usage: /projectnublar animate {animation}";
     }
 
     @Override
@@ -41,6 +43,7 @@ public class AnimateCommand extends CommandBase {
                     AnimationComponent comp = ((DinosaurEntity) entity).getOrNull(EntityComponentTypes.ANIMATION);
                     if (comp != null) {
                         AnimationLayer.AnimationEntry entry = new AnimationLayer.AnimationEntry(animation);
+
                         if (args.length > 1) {
                             if(args[1].equalsIgnoreCase("stop")) {
                                 comp.stopAll();
@@ -53,7 +56,15 @@ public class AnimateCommand extends CommandBase {
                         if (args.length > 3) {
                             entry = entry.withUseInertia(parseBoolean(args[3]));
                         }
-                        comp.playAnimation((ComponentAccess) entity, entry, args.length > 4 ? parseInt(args[4]) : 0); //ATTEMPT MERGE
+                        if (args.length > 4) {
+                            int interp = parseInt(args[4]);
+                            if (interp == 1) {
+                                entry = entry.withInterpolation(new CosInterpolation()); // TODO: Fix this not working.
+                            } else {
+                                entry = entry.withInterpolation(new LinearInterpolation());
+                            }
+                        }
+                        comp.playAnimation((ComponentAccess) entity, entry, args.length > 5 ? parseInt(args[5]) : 0); //ATTEMPT MERGE
                     }
                 }
             }
