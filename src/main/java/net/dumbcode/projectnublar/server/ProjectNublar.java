@@ -2,12 +2,10 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.dumbcode.dumblibrary.client.animation.AnimationContainer;
+import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.entity.EntityManager;
 import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.entity.system.RegisterSystemsEvent;
-import net.dumbcode.dumblibrary.server.entity.system.impl.HerdSystem;
-import net.dumbcode.dumblibrary.server.entity.system.impl.MetabolismSystem;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
