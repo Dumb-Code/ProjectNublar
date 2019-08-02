@@ -300,7 +300,7 @@ public class SequencingSynthesizerGui extends TabbedGui {
         }
 
         @Override
-        public void draw(int x, int y) {
+        public void draw(int x, int y, int mouseX, int mouseY) {
             Minecraft.getMinecraft().fontRenderer.drawString(this.entry, x + 2, y + 5, -1);
         }
 
@@ -315,7 +315,7 @@ public class SequencingSynthesizerGui extends TabbedGui {
         }
 
         @Override
-        public void onClicked(int relMouseX, int relMouseY) {
+        public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
             SequencingSynthesizerGui.this.dirty = true;
         }
     }
@@ -342,6 +342,7 @@ public class SequencingSynthesizerGui extends TabbedGui {
         }
 
         private void directUpdateSlider() {
+            double prevValue = this.sliderValue;
             if(this.dropdownBox.getActive() == null) {
                 this.sliderValue = 0;
             } else {
@@ -362,8 +363,10 @@ public class SequencingSynthesizerGui extends TabbedGui {
                     this.sliderValue = amount / 100D;
                 }
             }
+            if(prevValue != this.sliderValue) {
+                SequencingSynthesizerGui.this.dirty = true;
+            }
             super.updateSlider();
-            SequencingSynthesizerGui.this.dirty = true;
         }
     }
 }

@@ -46,7 +46,7 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
                     s = "generic";//Shouldn't happen, but its how vanilla handles it
                 }
                 nbt.setString("ContainedType", s);
-                nbt.setInteger("ContainedSize", MathUtils.getWeightedResult(50));// TODO: 16/10/2018 make a better number generator
+                nbt.setInteger("ContainedSize", MathUtils.getWeightedResult(10, 5));
             }
             stack.shrink(1);
             if(stack.isEmpty()) {
@@ -70,7 +70,12 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return "entity." + this.getKey(stack) + ".name";
+        return "entity." + this.getKey(stack);
+    }
+
+    @Override
+    public String getDriveTranslationKey(ItemStack stack) {
+        return this.getTranslationKey(stack) + ".name";
     }
 
     @Override

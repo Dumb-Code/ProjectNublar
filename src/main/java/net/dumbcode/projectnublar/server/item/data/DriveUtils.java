@@ -51,9 +51,9 @@ public class DriveUtils {
         if(current >= 100) {
             return;
         }
-        int result = MathUtils.getWeightedResult(info.getSize(inItem));
+        int result = info.getSize(inItem);
         inner.setInteger("amount", MathHelper.clamp(current + result, 0, 100));
-        inner.setString("translation_key", info.getTranslationKey(inItem));
+        inner.setString("translation_key", info.getDriveTranslationKey(inItem));
         inner.setInteger("drive_type", info.getDriveType(inItem).ordinal());
         nbt.setTag(key, inner);
 
@@ -63,7 +63,7 @@ public class DriveUtils {
     public interface DriveInformation {
         int getSize(ItemStack stack);
         String getKey(ItemStack stack);
-        String getTranslationKey(ItemStack stack);
+        String getDriveTranslationKey(ItemStack stack);
         default DriveType getDriveType(ItemStack stack) {
             return DriveType.OTHER;
         }

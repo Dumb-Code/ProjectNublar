@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
+import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
@@ -30,7 +32,9 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
     private GuiSlider globalRotation = new GuiSlider(0, 0, 0, 200, 20, "rotaion", "",0, 360, 0.0, true, true, this);
     private GuiButton addButton = new GuiButton(121, 0, 0, 20, 20, "+");
     private float previousRot;
-    public float scroll;
+
+    private GuiScrollBox<PoleEntry> scrollBox = new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries);
+
     public PoleEntry editingPole;
 
     private GuiTextField editText = new GuiTextField(5, Minecraft.getMinecraft().fontRenderer, 0, 0, 75, 20);
@@ -48,6 +52,9 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
     public void initGui() {
 
         this.updateList();
+
+        this.scrollBox = new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries);
+
 
         int diff = 0;
 
@@ -83,55 +90,12 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled()) {
-            Minecraft.getMinecraft().getFramebuffer().enableStencil();
-        }
-
-        int diff = 0;
-
-        int padding = 25;
-        int top = 100;
-        int total = this.height - top - 50;
-        int left = this.width / 2 - 100;
-        int totalAmount = MathHelper.floor(total / (float)padding);
-        int bottom = totalAmount < 5 ? this.height - 80 : top + padding * 5;
-
-        if(this.height > 275) {
-            diff = this.height/2 - (bottom + top)/2;
-            bottom += diff;
-            top += diff;
-        }
 
         FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
         String poleliststr = "Pole List";  //todo: localize
-        fr.drawString(poleliststr, (this.width-fr.getStringWidth(poleliststr))/2, 65 + diff, 0xAAAAAA);
+        fr.drawString(poleliststr, (this.width-fr.getStringWidth(poleliststr))/2, 65, 0xAAAAAA);
 
-
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
-        GL11.glColorMask(false, false, false, false);
-        GL11.glDepthMask(false);
-        GL11.glStencilFunc(GL11.GL_NEVER, 1, 0xFF);
-        GL11.glStencilOp(GL11.GL_REPLACE, GL11.GL_KEEP, GL11.GL_KEEP);
-
-        GL11.glStencilMask(0xFF);
-        GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
-
-        Gui.drawRect(left, top-10, this.width / 2 + 100, bottom+10, -1);
-
-        GL11.glColorMask(true, true, true, true);
-        GL11.glDepthMask(true);
-        GL11.glStencilMask(0x00);
-
-        GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
-
-
-        int scrolledTop = (int) (top - this.scroll * 5F);
-
-        for (int i = 0; i < this.entries.size(); i++) {
-            this.entries.get(i).render(mouseX, mouseY, scrolledTop + padding*i, partialTicks);
-        }
-
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
+        this.scrollBox.render(mouseX, mouseY);
 
         if(this.editingPole != null) {
             this.editText.drawTextBox();
@@ -191,10 +155,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
-        int mouseInput = Mouse.getEventDWheel();
-        if(mouseInput != 0) {
-            this.scroll = MathHelper.clamp(this.scroll + (mouseInput > 0 ? 1 : -1), 0, 100); //todo upper limit
-        }
+        this.scrollBox.handleMouseInput();
     }
 
     @Override
@@ -217,8 +178,18 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         if(mouseButton == 1) {
             this.globalRotation.mousePressed(Minecraft.getMinecraft(), mouseX, mouseY);
         }
+        this.scrollBox.mouseClicked(mouseX, mouseY, mouseButton);
+
+        boolean hasRemoved = false;
         for (PoleEntry entry : this.entries) {
-            entry.mouseClicked(mouseX, mouseY, mouseButton);
+            if(entry.markedRemoved) {
+                this.getBuilder().getSkeletalProperties().getPoles().remove(entry.pole);
+                hasRemoved = true;
+            }
+        }
+
+        if(hasRemoved) {
+            this.sync();
         }
         if(this.editingPole != null) {
             this.editText.mouseClicked(mouseX, mouseY, mouseButton);
@@ -250,35 +221,39 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         this.sync();
     }
 
-    public class PoleEntry {
+    public class PoleEntry implements GuiScrollboxEntry {
         @Getter private final SkeletalProperties.Pole pole;
 
         private final GuiButton edit = new GuiButton(-1, 0, 0, 20, 20, ""); //todo localize
         private final GuiButton delete = new GuiButton(-1, 0, 0, 20, 20, ""); //todo localize
 
+        private boolean markedRemoved;
+
         private PoleEntry(SkeletalProperties.Pole pole) {
             this.pole = pole;
         }
 
-        public void render(int mouseX, int mouseY, int y, float partialTicks) {
-            mc.fontRenderer.drawString(pole.getCubeName(), width / 2 - 100, y, 0xDDDDDD);
+        @Override
+        public void draw(int x, int y, int mouseX, int mouseY) {
+            y += 12;
+            mc.fontRenderer.drawString(pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
 
             this.edit.x = width/2+40;
             this.edit.y = y - 10;
-            this.edit.drawButton(mc, mouseX, mouseY, partialTicks);
+            this.edit.drawButton(mc, mouseX, mouseY, 1f);
 
             this.delete.x = width/2+70;
             this.delete.y = y - 10;
-            this.delete.drawButton(mc, mouseX, mouseY, partialTicks);
+            this.delete.drawButton(mc, mouseX, mouseY, 1f);
         }
 
-        protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        @Override
+        public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
             if(this.edit.mousePressed(mc, mouseX, mouseY)) {
                 editingPole = this;
                 editText.setText(this.pole.getCubeName());
             } else if(this.delete.mousePressed(mc, mouseX, mouseY)) {
-                entries.removeIf(p -> p.getPole() == this.pole);
-                sync();
+                this.markedRemoved = true;
             }
         }
     }
