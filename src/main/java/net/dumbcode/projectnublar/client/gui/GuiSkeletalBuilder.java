@@ -18,6 +18,7 @@ import net.dumbcode.projectnublar.server.network.C4MoveInHistory;
 import net.dumbcode.projectnublar.server.network.C8FullPoseChange;
 import net.dumbcode.projectnublar.server.utils.DialogBox;
 import net.dumbcode.projectnublar.server.utils.RotationAxis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.model.ModelRenderer;
@@ -91,7 +92,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private TextComponentTranslation selectModelPartText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.select_part");
     private TextComponentTranslation rotateCameraText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.controls.rotate_camera");
 
-    private DialogBox dialogBox;
+    private DialogBox dialogBox = new DialogBox()
+            .root(new File(Minecraft.getMinecraft().gameDir, "dinosaur_poses"))
+            .extension("ProjectNublar Dinosaur Pose (.dpose)", true, "*.dpose");
 
     private double prevXSlider;
     private double prevYSlider;
@@ -184,12 +187,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
             ProjectNublar.NETWORK.sendToServer(new C2SkeletalMovement(builder.getPos(), SkeletalHistory.RESET_NAME, new Vector3f()));
 
         } else if(button == exportButton) {
-            (this.dialogBox = new DialogBox(file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file)))
-                    .root(new File(mc.gameDir, "dinosaur poses"))
+            this.dialogBox
                     .title("Export pose")
-                    .extension("ProjectNublar Dinosaur Pose (.dpose)", true, "*.dpose")
-
-                    .showBox(DialogBox.Type.SAVE);
+                    .showBox(DialogBox.Type.SAVE, file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file));
 //            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
         } else if(button == importButton) {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Import", file -> ProjectNublar.NETWORK.sendToServer(new C8FullPoseChange(this.builder, SkeletalBuilderFileHandler.deserilize(file).getPoseData())))); //TODO: localize
@@ -216,6 +216,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     @Override
     public void updateScreen() {
+        if(this.dialogBox.isOpen()) {
+            return;
+        }
         super.updateScreen();
         int scrollDirection = (int) Math.signum(Mouse.getDWheel());
         final double zoomSpeed = 0.1;
@@ -265,6 +268,10 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        if(this.dialogBox.isOpen()) {
+            mouseX = mouseY = -1;
+        }
+
         drawBackground(0);
 
         GlStateManager.pushMatrix();
@@ -369,6 +376,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private int getColorUnderMouse() {
         int x = Mouse.getX();
         int y = Mouse.getY();
+        if(this.dialogBox.isOpen()) {
+            x = y = 0;
+        }
         colorBuffer.rewind();
         GL11.glReadPixels(x, y, 1, 1, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, colorBuffer);
         return colorBuffer.get(0);
@@ -593,6 +603,9 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     @Override
     public void handleKeyboardInput() throws IOException {
+        if(this.dialogBox.isOpen()) {
+            return;
+        }
         super.handleKeyboardInput();
         GameSettings settings = mc.gameSettings;
         final float cameraSpeed = 10f;
@@ -608,6 +621,14 @@ public class GuiSkeletalBuilder extends GuiScreen {
         if(Keyboard.isKeyDown(settings.keyBindForward.getKeyCode()) || Keyboard.isKeyDown(Keyboard.KEY_UP)) {
             cameraPitch -= cameraSpeed;
         }
+    }
+
+    @Override
+    public void handleMouseInput() throws IOException {
+        if(this.dialogBox.isOpen()) {
+            return;
+        }
+        super.handleMouseInput();
     }
 
     private void prepareModelRendering(int posX, int posY, float scale) {
