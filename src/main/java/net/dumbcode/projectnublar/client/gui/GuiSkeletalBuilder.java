@@ -439,15 +439,15 @@ public class GuiSkeletalBuilder extends GuiScreen {
             }
             return;
         }
-        if(clickedMouseButton == 2) {
+        if(clickedMouseButton == 0 && currentSelectedRing == RotationAxis.NONE) {
             float dx = Mouse.getX() - lastClickPosition.x;
             float dy = Mouse.getY() - lastClickPosition.y;
-            cameraPitch += dy*0.1f;
-            cameraYaw += dx*0.1f;
+            cameraPitch += dy;
+            cameraYaw -= dx;
 
             cameraPitch %= 360f;
             cameraYaw %= 360f;
-        } else if(clickedMouseButton == 0 && currentSelectedRing != RotationAxis.NONE) {
+        } else if(clickedMouseButton == 0) {
             float dx = Mouse.getX() - lastClickPosition.x;
             float dy = Mouse.getY() - lastClickPosition.y;
             draggingRing = true;
