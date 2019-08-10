@@ -88,6 +88,7 @@ public class ProjectNublar {
         registerJsonDinosaurs();
 
         DINOSAUR_REGISTRY.forEach(Dinosaur::attachDefaultComponents);
+        PLANT_REGISTRY.forEach(Plant::attachComponents);
 
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler.INSTANCE);
         registerPackets();
