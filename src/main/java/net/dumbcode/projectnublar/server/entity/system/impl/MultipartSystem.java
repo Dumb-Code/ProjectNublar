@@ -43,7 +43,7 @@ public enum MultipartSystem implements EntitySystem {
     }
 
     @Override
-    public void update() {
+    public void update(World world) {
         for (int i = 0; i < this.multiparts.length; i++) {
             updatePart(this.entities[i], this.multiparts[i], this.animations[i]);
         }

@@ -8,6 +8,7 @@ import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
 
 import java.util.Iterator;
 
@@ -24,7 +25,7 @@ public enum AgeSystem implements EntitySystem {
     }
 
     @Override
-    public void update() {
+    public void update(World world) {
         for (int i = 0; i < this.ages.length; i++) {
             AgeComponent age = this.ages[i];
             AgeStage start = age.stage;
