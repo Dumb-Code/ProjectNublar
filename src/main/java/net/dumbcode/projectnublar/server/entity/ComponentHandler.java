@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentType;
-import net.dumbcode.dumblibrary.server.entity.component.RegisterComponentsEvent;
-import net.dumbcode.dumblibrary.server.entity.component.SimpleComponentType;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
+import net.dumbcode.dumblibrary.server.ecs.component.RegisterComponentsEvent;
+import net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType;
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.*;

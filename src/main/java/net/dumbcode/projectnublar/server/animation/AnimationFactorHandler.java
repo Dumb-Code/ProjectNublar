@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.animation;
 
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationFactor;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.entity.Entity;

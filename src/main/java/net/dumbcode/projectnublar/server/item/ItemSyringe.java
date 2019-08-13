@@ -70,7 +70,7 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return "entity." + this.getKey(stack);
+        return "ecs." + this.getKey(stack);
     }
 
     @Override

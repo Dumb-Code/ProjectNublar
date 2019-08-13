@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
-import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
-import net.dumbcode.dumblibrary.server.entity.EntityFamily;
-import net.dumbcode.dumblibrary.server.entity.EntityManager;
-import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
-import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
+import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.EntityFamily;
+import net.dumbcode.dumblibrary.server.ecs.EntityManager;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.entity.Entity;

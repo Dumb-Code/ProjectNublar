@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.entity;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;

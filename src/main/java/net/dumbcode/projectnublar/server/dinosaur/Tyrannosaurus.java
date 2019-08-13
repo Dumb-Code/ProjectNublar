@@ -2,9 +2,9 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
-import net.dumbcode.dumblibrary.server.entity.component.impl.AgeStage;
-import net.dumbcode.dumblibrary.server.entity.objects.FeedingDiet;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;

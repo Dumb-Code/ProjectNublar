@@ -6,10 +6,10 @@ import com.google.gson.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponent;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentAttacher;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentStorage;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentType;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
@@ -51,20 +51,20 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     }
 
     /**
-     * Creates a dinosaur entity with a default component config.
+     * Creates a dinosaur ecs with a default component config.
      *
      * @param world current world.
-     * @return new dinosaur entity.
+     * @return new dinosaur ecs.
      */
     public DinosaurEntity createEntity(World world) {
         return createEntity(world, null);
     }
 
     /**
-     * Creates a dinosaur entity with a custom component config.
+     * Creates a dinosaur ecs with a custom component config.
      * @param world current world.
      * @param config custom config.
-     * @return customized dinosaur entity.
+     * @return customized dinosaur ecs.
      */
     public DinosaurEntity createEntity(World world, @Nullable EntityComponentAttacher.ConstructConfiguration config) {
         if(config == null) {

@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentType;
-import net.dumbcode.dumblibrary.server.entity.component.RegisterStoragesEvent;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
+import net.dumbcode.dumblibrary.server.ecs.component.RegisterStoragesEvent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.dumbcode.projectnublar.server.entity.storage.DinosaurMultipartStorage;

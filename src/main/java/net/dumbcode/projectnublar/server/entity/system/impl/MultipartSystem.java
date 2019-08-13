@@ -2,14 +2,13 @@ package net.dumbcode.projectnublar.server.entity.system.impl;
 
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
-import net.dumbcode.dumblibrary.server.entity.ComponentAccess;
-import net.dumbcode.dumblibrary.server.entity.EntityFamily;
-import net.dumbcode.dumblibrary.server.entity.EntityManager;
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentTypes;
-import net.dumbcode.dumblibrary.server.entity.component.impl.AnimationComponent;
-import net.dumbcode.dumblibrary.server.entity.component.impl.RenderAdjustmentsComponent;
-import net.dumbcode.dumblibrary.server.entity.system.EntitySystem;
-import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.EntityFamily;
+import net.dumbcode.dumblibrary.server.ecs.EntityManager;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.AnimationComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.RenderAdjustmentsComponent;
+import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
@@ -18,7 +17,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -26,8 +24,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 

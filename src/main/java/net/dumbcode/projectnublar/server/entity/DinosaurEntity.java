@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import net.dumbcode.dumblibrary.server.entity.ComposableCreatureEntity;
+import net.dumbcode.dumblibrary.server.ecs.ComposableCreatureEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.world.World;
 
@@ -21,7 +21,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
     }
 
     /**
-     * Gets the dinosaur wrapper class for this entity.
+     * Gets the dinosaur wrapper class for this ecs.
      * @return Dinosaur class.
      */
     public Dinosaur getDinosaur() {

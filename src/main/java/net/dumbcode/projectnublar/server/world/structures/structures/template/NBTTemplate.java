@@ -424,11 +424,11 @@ public class NBTTemplate
     }
 
     public static class EntityInfo {
-        /** the position the entity is will be generated to */
+        /** the position the ecs is will be generated to */
         public final Vec3d pos;
         /** None */
         public final BlockPos blockPos;
-        /** the serialized NBT data of the entity in the structure */
+        /** the serialized NBT data of the ecs in the structure */
         public final NBTTagCompound entityData;
 
         public EntityInfo(Vec3d vecIn, BlockPos posIn, NBTTagCompound compoundIn) {

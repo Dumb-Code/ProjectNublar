@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.plants;
 
-import net.dumbcode.dumblibrary.server.entity.component.EntityComponentAttacher;
+import net.dumbcode.dumblibrary.server.ecs.blocks.BlockstateComponentProperty;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.HashMap;
@@ -11,8 +12,8 @@ public class Plant extends IForgeRegistryEntry.Impl<Plant> {
     protected final Map<String, EntityComponentAttacher> stateOverrides = new HashMap<>();
 
 
-    public PlantComponentProperty createOverrideProperty() {
-        return new PlantComponentProperty(this.baseAttacher, this.stateOverrides);
+    public BlockstateComponentProperty createOverrideProperty() {
+        return new BlockstateComponentProperty(this.baseAttacher, this.stateOverrides);
     }
 
     public void attachComponents() {
