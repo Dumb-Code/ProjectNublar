@@ -12,11 +12,14 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class PlantHandler {
 
     public static final Plant CYCAD = InjectedUtils.injected();
+    public static final Plant SERENNA_VERIFORMANS = InjectedUtils.injected();
 
     @SubscribeEvent
     public static void register(RegisterPlantEvent event) {
         event.getRegistry().registerAll(
-                new Cycad().setRegistryName("cycad")
+                new Cycad().setRegistryName("cycad"),
+                new SerennaVeriformans().setRegistryName("serenna_veriformans")
+
         );
     }
 }

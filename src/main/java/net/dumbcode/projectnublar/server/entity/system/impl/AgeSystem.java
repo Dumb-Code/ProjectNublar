@@ -18,8 +18,8 @@ public enum AgeSystem implements EntitySystem {
     private Entity[] entities = new Entity[0];
 
     @Override
-    public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(ComponentHandler.AGE);
+    public void populateEntityBuffers(EntityManager manager) {
+        EntityFamily<Entity> family = manager.resolveFamily(ComponentHandler.AGE);
         this.ages = family.populateBuffer(ComponentHandler.AGE);
         this.entities = family.getEntities();
     }

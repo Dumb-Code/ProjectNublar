@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.MachineModule;
+import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
 import net.minecraft.block.Block;
@@ -59,7 +60,10 @@ public class BlockHandler {
             Map<Dinosaur, FossilBlock> map = Maps.newHashMap();
             FOSSIL.put(value, map);
             populateMap(event, map, "%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value));
+        }
 
+        for (Plant plant : ProjectNublar.PLANT_REGISTRY) {
+            event.getRegistry().register(plant.createBlock().setRegistryName(plant.getRegistryName()).setTranslationKey(plant.getRegistryName().getPath()));
         }
     }
 

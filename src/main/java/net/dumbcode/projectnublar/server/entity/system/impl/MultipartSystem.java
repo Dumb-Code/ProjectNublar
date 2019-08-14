@@ -35,8 +35,8 @@ public enum MultipartSystem implements EntitySystem {
     private MultipartEntityComponent[] multiparts = new MultipartEntityComponent[0];
 
     @Override
-    public void populateBuffers(EntityManager manager) {
-        EntityFamily family = manager.resolveFamily(ComponentHandler.MULTIPART, EntityComponentTypes.ANIMATION);
+    public void populateEntityBuffers(EntityManager manager) {
+        EntityFamily<Entity> family = manager.resolveFamily(ComponentHandler.MULTIPART, EntityComponentTypes.ANIMATION);
         this.animations = family.populateBuffer(EntityComponentTypes.ANIMATION, this.animations);
         this.multiparts = family.populateBuffer(ComponentHandler.MULTIPART, this.multiparts);
         this.entities = family.getEntities();
