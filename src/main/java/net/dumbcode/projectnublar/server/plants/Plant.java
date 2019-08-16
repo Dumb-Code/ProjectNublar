@@ -6,7 +6,6 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraftforge.registries.IForgeRegistryEntry;

@@ -90,7 +90,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public ResourceLocation getTexture() {
         return this.dinosaurEntity
-                .flatMap(e -> e.get(EntityComponentTypes.MODEL))
+                .flatMap(EntityComponentTypes.MODEL)
                 .map(ModelComponent::getTexture)
                 .map(RenderLocationComponent.ConfigurableLocation::getLocation)
                 .orElse(TextureMap.LOCATION_MISSING_TEXTURE);
