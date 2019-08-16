@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.plants;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityStorageOverrides;
 import net.dumbcode.dumblibrary.server.ecs.item.ItemComponentAccessCreatable;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
@@ -39,6 +40,8 @@ public class SerennaVeriformans extends Plant {
                         }))
                 ));
 
+        this.baseAttacher.addComponent(EntityComponentTypes.BLOCK_PLACEABLE, EntityStorageOverrides.PLANT_PLACEABLE)
+                .setPlantType(EnumPlantType.Plains);
 
         this.stateOverrides.put("age_0", create(a -> {
             a.addComponent(EntityComponentTypes.BLOCK_GROWING).setGrowTo("age_1");
