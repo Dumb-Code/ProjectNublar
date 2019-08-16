@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.server.plants;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.dumbcode.dumblibrary.server.ecs.blocks.BlockPropertyAccess;
 import net.dumbcode.dumblibrary.server.ecs.blocks.BlockstateComponentProperty;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
@@ -8,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.JsonUtils;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.HashMap;
@@ -33,6 +36,16 @@ public class Plant extends IForgeRegistryEntry.Impl<Plant> {
         EntityComponentAttacher attacher = new EntityComponentAttacher();
         onAttach.accept(attacher);
         this.stateOverrides.put(overrideName, attacher);
+    }
+
+    public JsonObject toJson(JsonObject object) {
+        object.add("base_values", this.baseAttacher.writeToJson(new JsonArray()));
+
+        JsonObject overrides = new JsonObject();
+        this.stateOverrides.forEach((key, attacher) -> overrides.add(key, attacher.writeToJson(new JsonArray())));
+        object.add("overrides", overrides);
+
+        return object;
     }
 
     //todo: move to own class

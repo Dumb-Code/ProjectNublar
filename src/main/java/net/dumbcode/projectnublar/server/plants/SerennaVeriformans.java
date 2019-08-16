@@ -1,11 +1,13 @@
 package net.dumbcode.projectnublar.server.plants;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.item.ItemComponentAccessCreatable;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.EnumPlantType;
 
 import java.util.Optional;
 
@@ -18,6 +20,7 @@ public class SerennaVeriformans extends Plant {
     public void attachComponents() {
         this.baseAttacher.addComponent(EntityComponentTypes.FLOWER_WORLDGEN)
                 .setBiomeTypes(Lists.newArrayList(JUNGLE.getName()))
+                .setPlantType(EnumPlantType.Plains)
                 .setGroupSpawnSize(3)
                 .setChancePerChunk(0.05F);
 
