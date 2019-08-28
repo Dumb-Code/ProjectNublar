@@ -15,18 +15,19 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.Objects;
 
-public class PlantComponent implements EntityComponent, FinalizableComponent {
+public class PlantComponent extends EntityComponent implements FinalizableComponent {
 
     @NonNull @Getter private Plant plant = PlantHandler.CYCAD;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
         compound.setString("plant", Objects.requireNonNull(this.plant.getRegistryName()).toString());
-        return compound;
+        return super.serialize(compound);
     }
 
     @Override
     public void deserialize(NBTTagCompound compound) {
+        super.deserialize(compound);
         ResourceLocation identifier = new ResourceLocation(compound.getString("plant"));
         if (ProjectNublar.PLANT_REGISTRY.containsKey(identifier)) {
             this.plant = ProjectNublar.PLANT_REGISTRY.getValue(identifier);

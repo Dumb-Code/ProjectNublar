@@ -19,7 +19,7 @@ import java.util.*;
 //  - change this to allow for an ast tree for the bones, rather than a list of them. For example
 //    when we get to the ribcage, they player should be allowed to either go to the tail, or the neck, rather than always the tail first
 //  - Make this instead of caching the model to look into the model component and get that
-public class SkeletalBuilderComponent implements EntityComponent {
+public class SkeletalBuilderComponent extends EntityComponent {
 
     @Getter private List<String> individualBones = Lists.newArrayList();
     @Getter private List<String> boneListed = Lists.newArrayList();

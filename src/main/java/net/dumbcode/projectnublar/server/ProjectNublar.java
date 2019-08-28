@@ -81,7 +81,6 @@ public class ProjectNublar {
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
 
-        ObjectHolderRegistry.INSTANCE.applyObjectHolders(); //Not sure about this. It seems costly. But its needed to make sure the components are injected
         MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
         MinecraftForge.EVENT_BUS.post(new RegisterPlantEvent(PLANT_REGISTRY));
 

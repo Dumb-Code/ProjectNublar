@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
@@ -21,7 +22,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.List;
 
-public class AgeComponent implements RenderLocationComponent {
+public class AgeComponent extends EntityComponent implements RenderLocationComponent {
     public List<AgeStage> orderedAges = Lists.newLinkedList();
     public int ageInTicks = 0;
 
@@ -53,7 +54,7 @@ public class AgeComponent implements RenderLocationComponent {
 
         compound.setTag("OrderedAges", ages);
 
-        return compound;
+        return super.serialize(compound);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class AgeComponent implements RenderLocationComponent {
         }
 
         this.setRawStage(compound.getString("CurrentAge"));
-
+        super.deserialize(compound);
     }
 
     @Override

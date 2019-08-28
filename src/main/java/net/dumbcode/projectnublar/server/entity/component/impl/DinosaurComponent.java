@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
@@ -22,7 +23,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 @Getter
 @Setter
-public class DinosaurComponent implements RenderLocationComponent, FinalizableComponent {
+public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent {
 
     private static final int MOVEMENT_CHANNEL = 60;
 
@@ -31,11 +32,12 @@ public class DinosaurComponent implements RenderLocationComponent, FinalizableCo
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
         compound.setString("dinosaur", this.dinosaur.getRegName().toString());
-        return compound;
+        return super.serialize(compound);
     }
 
     @Override
     public void deserialize(NBTTagCompound compound) {
+        super.deserialize(compound);
         ResourceLocation identifier = new ResourceLocation(compound.getString("dinosaur"));
         if (ProjectNublar.DINOSAUR_REGISTRY.containsKey(identifier)) {
             this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(identifier);
@@ -70,8 +72,6 @@ public class DinosaurComponent implements RenderLocationComponent, FinalizableCo
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        entity.get(ComponentHandler.MULTIPART).ifPresent(c -> c.setMultipartNames(this.dinosaur.getAttacher().getStorage(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART).getFunction()));
-
         entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
             c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName()));
 

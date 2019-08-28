@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ItemDropComponent;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Getter
-public class DinosaurDropsComponent implements ItemDropComponent {
+public class DinosaurDropsComponent extends EntityComponent implements ItemDropComponent {
 
     private final List<String> fossilList = Lists.newArrayList();
 
@@ -34,11 +35,12 @@ public class DinosaurDropsComponent implements ItemDropComponent {
             list.appendTag(new NBTTagString(fossil));
         }
         compound.setTag("drop_fossils", list);
-        return compound;
+        return super.serialize(compound);
     }
 
     @Override
     public void deserialize(NBTTagCompound compound) {
+        super.deserialize(compound);
         this.fossilList.clear();
         for (NBTBase base : compound.getTagList("drop_fossils", Constants.NBT.TAG_STRING)) {
             this.fossilList.add(((NBTTagString)base).getString());

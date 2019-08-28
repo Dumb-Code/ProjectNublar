@@ -10,12 +10,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class EntityStorageOverrides {
-    //todo: move storage overrides to registry event ?
 
     public static EntityComponentType.StorageOverride<MultipartEntityComponent, DinosaurMultipartStorage> DINOSAUR_MULTIPART;
 
     @SubscribeEvent
     public static void onRegisterStorages(RegisterStoragesEvent event) {
-        DINOSAUR_MULTIPART = event.register(ComponentHandler.MULTIPART, "dinosaur_age", DinosaurMultipartStorage::new);
+        DINOSAUR_MULTIPART = event.register(ComponentHandler.MULTIPART, "dinosaur_multipart", DinosaurMultipartStorage::new);
     }
 }

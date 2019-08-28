@@ -1,13 +1,14 @@
 package net.dumbcode.projectnublar.server.entity.component.impl.ai;
 
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class WanderComponent implements FinalizableComponent {
+public class WanderComponent extends EntityComponent implements FinalizableComponent {
 
     public boolean avoidWater = false;
     public int priority = 3;

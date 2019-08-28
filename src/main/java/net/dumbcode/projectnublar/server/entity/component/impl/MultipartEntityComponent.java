@@ -34,7 +34,7 @@ import java.util.function.Function;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 @Getter
 @Setter
-public class MultipartEntityComponent implements EntityComponent {
+public class MultipartEntityComponent extends EntityComponent {
 
     private final Set<LinkedEntity> entities = Sets.newHashSet();
 
@@ -75,11 +75,12 @@ public class MultipartEntityComponent implements EntityComponent {
             list.appendTag(nbt);
         }
         compound.setTag("entities", list);
-        return compound;
+        return super.serialize(compound);
     }
 
     @Override
     public void deserialize(NBTTagCompound compound) {
+        super.deserialize(compound);
         this.entities.clear();
         for (NBTBase base : compound.getTagList("entities", Constants.NBT.TAG_COMPOUND)) {
             NBTTagCompound nbt = (NBTTagCompound) base;
