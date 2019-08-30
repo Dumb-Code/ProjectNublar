@@ -1,4 +1,4 @@
 {
   "parent": "block/cube_all",
-  "tabula": "projectnublar:models/block/incubator"
+  "tabula": "projectnublar:models/block/incubator_no_arm"
 }

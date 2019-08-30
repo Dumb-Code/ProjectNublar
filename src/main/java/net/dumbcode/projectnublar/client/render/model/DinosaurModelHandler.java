@@ -36,7 +36,7 @@ public class DinosaurModelHandler {
         ClientRegistry.bindTileEntitySpecialRenderer(SkeletalBuilderBlockEntity.class, new BlockEntitySkeletalBuilderRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFencePole.class, new BlockEntityElectricFencePoleRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFence.class, new BlockEntityElectricFenceRenderer());
-
+        ClientRegistry.bindTileEntitySpecialRenderer(IncubatorBlockEntity.class, new BlockEntityIncubatorRenderer());
     }
 
 }
