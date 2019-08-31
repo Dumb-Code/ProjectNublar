@@ -380,17 +380,17 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public abstract Container createContainer(EntityPlayer player, int tab);
 
-    @Getter
     @Setter
+    @Getter
     public static class MachineProcess<B extends MachineModuleBlockEntity<B>> {
-        final int[] inputSlots;
-        final int[] outputSlots;
+        private final int[] inputSlots;
+        private final int[] outputSlots;
 
-        final int[] allSlots;
+        private final int[] allSlots;
         private final MachineModuleBlockEntity<B> machine;
 
-        int time;
-        int totalTime;
+        private int time;
+        private int totalTime;
         @Nullable
         MachineRecipe<B> currentRecipe;
         boolean processing;
@@ -399,8 +399,15 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             this.inputSlots = inputSlots;
             this.outputSlots = outputSlots;
             this.machine = machine;
-
             this.allSlots = ArrayUtils.addAll(this.inputSlots, this.outputSlots);
+        }
+
+        public int getInputSlot(int index) {
+            return this.inputSlots[index];
+        }
+
+        public int getOutputSlot(int index) {
+            return this.outputSlots[index];
         }
 
         public int getCurrentConsumptionPerTick() {

@@ -13,7 +13,7 @@ public enum CoalGeneratorRecipe implements MachineRecipe<CoalGeneratorBlockEntit
 
     @Override
     public boolean accepts(CoalGeneratorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        Item item = blockEntity.getHandler().getStackInSlot(process.getInputSlots()[0]).getItem();
+        Item item = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0)).getItem();
         return item == Items.COAL;
     }
 
@@ -29,7 +29,7 @@ public enum CoalGeneratorRecipe implements MachineRecipe<CoalGeneratorBlockEntit
 
     @Override
     public void onRecipeStarted(CoalGeneratorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        ItemStack inSlot = blockEntity.getHandler().getStackInSlot(process.getInputSlots()[0]);
+        ItemStack inSlot = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0));
         inSlot.shrink(1);
     }
 

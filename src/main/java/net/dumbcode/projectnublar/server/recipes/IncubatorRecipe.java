@@ -20,7 +20,7 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
 
     @Override
     public boolean accepts(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        Item item = blockEntity.getHandler().getStackInSlot(process.getInputSlots()[0]).getItem();
+        Item item = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0)).getItem();
         return blockEntity.getPlantMatter() == IncubatorBlockEntity.TOTAL_PLANT_MATTER && item instanceof BasicDinosaurItem && ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(item);
     }
 
@@ -31,13 +31,13 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
 
     @Override
     public void onRecipeFinished(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        ItemStack out = blockEntity.getHandler().getStackInSlot(process.getInputSlots()[0]);
+        ItemStack out = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0));
         Item item = out.getItem();
         NBTTagCompound nbt = out.getOrCreateSubCompound(ProjectNublar.MODID);
         if(nbt.getInteger("AmountDone") < 99) {
             nbt.setInteger("AmountDone", nbt.getInteger("AmountDone") + 1);
         } else if(item instanceof DinosaurProvider) {
-            blockEntity.getHandler().setStackInSlot(process.getOutputSlots()[0], new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) item).getDinosaur())));
+            blockEntity.getHandler().setStackInSlot(process.getOutputSlot(0), new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) item).getDinosaur())));
         }
     }
 

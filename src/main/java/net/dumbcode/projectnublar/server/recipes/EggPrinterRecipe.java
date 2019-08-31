@@ -16,9 +16,9 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     @Override
     public boolean accepts(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
-        ItemStack boneStack = handler.getStackInSlot(process.getInputSlots()[1]);
-        if(handler.getStackInSlot(process.getInputSlots()[0]).getItem() == ItemHandler.EMBRYO_FILLED_SYRINGE && boneStack.getItem() == Items.DYE && boneStack.getMetadata() == 15 && boneStack.getCount() >= 5) {
-            return handler.insertOutputItem(process.getOutputSlots()[0], new ItemStack(ItemHandler.EMPTY_SYRINGE), true).isEmpty() && handler.insertOutputItem(process.getOutputSlots()[0], new ItemStack(ItemHandler.ARTIFICIAL_EGG), true).isEmpty();
+        ItemStack boneStack = handler.getStackInSlot(process.getInputSlot(1));
+        if(handler.getStackInSlot(process.getInputSlot(0)).getItem() == ItemHandler.EMBRYO_FILLED_SYRINGE && boneStack.getItem() == Items.DYE && boneStack.getMetadata() == 15 && boneStack.getCount() >= 5) {
+            return handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.EMPTY_SYRINGE), true).isEmpty() && handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.ARTIFICIAL_EGG), true).isEmpty();
         }
         return false;
     }
@@ -33,12 +33,12 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     public void onRecipeFinished(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
 
-        handler.insertOutputItem(process.getOutputSlots()[1], new ItemStack(ItemHandler.EMPTY_SYRINGE), false);
-        handler.insertOutputItem(process.getOutputSlots()[0], new ItemStack(ItemHandler.ARTIFICIAL_EGG), false);
+        handler.insertOutputItem(process.getOutputSlot(1), new ItemStack(ItemHandler.EMPTY_SYRINGE), false);
+        handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.ARTIFICIAL_EGG), false);
 
 
-        handler.getStackInSlot(process.getInputSlots()[0]).shrink(1);
-        handler.getStackInSlot(process.getInputSlots()[1]).shrink(5);
+        handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
+        handler.getStackInSlot(process.getInputSlot(1)).shrink(5);
 
 
     }

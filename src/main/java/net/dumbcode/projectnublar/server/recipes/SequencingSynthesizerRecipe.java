@@ -29,7 +29,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     @Override
     public boolean accepts(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
-        ItemStack testTube = handler.getStackInSlot(process.getInputSlots()[0]);
+        ItemStack testTube = handler.getStackInSlot(process.getInputSlot(0));
 
         if(blockEntity.getTank().getFluidAmount() >= Fluid.BUCKET_VOLUME / 6 && blockEntity.getPlantAmount() >= 1 && blockEntity.getBoneAmount() >= 1 && blockEntity.getSugarAmount() >= 1 && testTube.getItem() == ItemHandler.EMPTY_TEST_TUBE) {
             NBTTagCompound nbt = handler.getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
@@ -46,7 +46,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
                     return false;
                 }
             }
-            return handler.insertOutputItem(process.getOutputSlots()[0], this.createStack(blockEntity, true), true).isEmpty();
+            return handler.insertOutputItem(process.getOutputSlot(0), this.createStack(blockEntity, true), true).isEmpty();
 
         }
 
@@ -61,11 +61,11 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     @Override
     public void onRecipeFinished(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
-        handler.getStackInSlot(process.getInputSlots()[0]).shrink(1);
+        handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
 
         blockEntity.getTank().drainInternal(Fluid.BUCKET_VOLUME / 6, true);
 
-        handler.insertOutputItem(process.getOutputSlots()[0], this.createStack(blockEntity, false), false);
+        handler.insertOutputItem(process.getOutputSlot(0), this.createStack(blockEntity, false), false);
 
         blockEntity.setBoneAmount(0);
         blockEntity.setPlantAmount(0);

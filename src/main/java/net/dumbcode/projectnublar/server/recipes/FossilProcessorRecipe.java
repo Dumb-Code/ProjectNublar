@@ -24,10 +24,10 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public boolean accepts(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
-        ItemStack inSlot = handler.getStackInSlot(process.getInputSlots()[0]);
+        ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
         Item item = inSlot.getItem();
         return item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item)
-                && handler.insertOutputItem(process.getOutputSlots()[0], new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur())), true).isEmpty();
+                && handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur())), true).isEmpty();
     }
 
     @Override
@@ -38,11 +38,11 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler itemStackHandler = blockEntity.getHandler();
-        ItemStack inputStack = itemStackHandler.getStackInSlot(process.getInputSlots()[0]);
+        ItemStack inputStack = itemStackHandler.getStackInSlot(process.getInputSlot(0));
         inputStack.shrink(1);
         Item item = inputStack.getItem();
         if(item instanceof DinosaurProvider) {
-            itemStackHandler.insertOutputItem(process.getOutputSlots()[0], new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur())), false);
+            itemStackHandler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur())), false);
         }
     }
 
