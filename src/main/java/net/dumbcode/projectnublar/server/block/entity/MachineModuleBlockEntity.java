@@ -59,17 +59,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     private MachineModuleItemStackWrapper getFromProcesses(Function<MachineProcess<B>, int[]> func) {
-        List<Integer> list = Lists.newArrayList();
-        for (MachineProcess<B> process : this.processes) {
-            for (int i : func.apply(process)) {
-                list.add(i);
-            }
-        }
-        int[] aint = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            aint[i] = list.get(i);
-        }
-        return new MachineModuleItemStackWrapper(this.handler, aint);
+        return new MachineModuleItemStackWrapper(this.handler,
+                this.processes.stream()
+                        .map(func)
+                        .flatMapToInt(Arrays::stream)
+                        .toArray()
+        );
     }
 
     @Override
