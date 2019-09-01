@@ -51,8 +51,6 @@ import java.util.Set;
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class BlockConnectableBase extends Block {
 
-    public static final boolean DEBUG = false;
-
     //Set this at your own will, just remember to set it back to true after collection
     public static boolean collidableClient = true;
     public static boolean collidableServer = true;
@@ -186,7 +184,7 @@ public class BlockConnectableBase extends Block {
 
                     Tessellator.getInstance().getBuffer().setTranslation(-d3, -d4, -d5);
 
-                    if(DEBUG) {
+                    if(ProjectNublar.DEBUG) {
                         chunk.getResult().debugRender();
                     }
 
