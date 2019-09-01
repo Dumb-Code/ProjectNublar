@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
@@ -15,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -23,6 +25,18 @@ import java.util.List;
 public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBlockEntity> {
 
     public static int TOTAL_PLANT_MATTER = 100;
+
+    @SideOnly(Side.CLIENT)
+    public float movementTicks;
+    @SideOnly(Side.CLIENT)
+    public float[] snapshot = new float[7];
+    @SideOnly(Side.CLIENT)
+    public Egg activeEgg = null;
+    @Getter
+    @SideOnly(Side.CLIENT)
+    private final List<Egg> eggList = Lists.newArrayList(
+            new Egg(new Vec3d(9.0 / 16, 22.3/16, 2.9/16), new Vec3d(1, 0, 1))
+    );
 
     @Getter
     @Setter
@@ -125,6 +139,16 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     @Override
     public int getEnergyMaxExtractSpeed() {
         return 50;
+    }
+
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    public class Egg {
+        private final Vec3d eggPosition;
+        private final Vec3d pickupDirection;
+        private float rotation;
+        private float ticksSinceTurned;
     }
 
 }
