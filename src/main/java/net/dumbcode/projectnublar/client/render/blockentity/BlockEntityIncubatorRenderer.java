@@ -44,8 +44,8 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     private static final ResourceLocation LID_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.tbl");
 
     private final Arm BASE_ROTATION = new Arm("Neck1", 2.5 / 16F);
-    private final Arm FIRST_ARM = new Arm("Arm1", 7 / 16F);
-    private final Arm LAST_ARM = new Arm("Arm2Base", 5.5 / 16F);
+    private final Arm FIRST_ARM = new Arm("Arm1", 10.5 / 16F);
+    private final Arm LAST_ARM = new Arm("Arm2Base", 8.5 / 16F);
     private final Arm HAND_JOINT = new Arm("ClawNeck2", 4 / 16F);
     private final Arm HAND_JOINT_ROTATE = new Arm("ClawNeck1", 0); //Used for fixing parenting
 
