@@ -1,16 +1,16 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
+import com.google.common.collect.Lists;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -29,6 +29,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import javax.xml.ws.Holder;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<IncubatorBlockEntity> {
 
@@ -38,7 +40,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     private static final float TICKS_WAIT_BEFORE_SPIN = 20F;
     private static final float TICKS_TO_SPIN = 50F;
     private static final float TICKS_WAIT_AFTER_SPIN = 20F;
-    private static final float TICKS_COOLDOWN = 40F;
+    private static final float TICKS_COOLDOWN = 50F;
 
     private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.tbl");
     private static final ResourceLocation LID_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.tbl");
@@ -77,19 +79,23 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
 
-        this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
         this.renderLid(te.getWorld(), te.getPos());
 
+        this.setupLightmap(te.getPos());
+
         this.renderArm(te, partialTicks);
+
+        Vec3d look = Minecraft.getMinecraft().player.getLookVec();
+
+        for (IncubatorBlockEntity.Egg egg : Lists.newArrayList(te.getEggList())) {
+            this.renderEgg(egg);
+        }
 
         GlStateManager.popMatrix();
     }
 
     private void renderArm(IncubatorBlockEntity te, float partialTicks) {
-        RenderHelper.enableStandardItemLighting();
-        GlStateManager.disableTexture2D();
-        this.setLightmapDisabled(true);
+//        GlStateManager.disableTexture2D();
         this.bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
 
         GlStateManager.pushMatrix();
@@ -104,6 +110,71 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         GlStateManager.enableTexture2D();
     }
 
+    private void renderEgg(IncubatorBlockEntity.Egg egg) {
+        if(egg.getEggType() == DinosaurEggType.EMPTY) {
+//            return;
+        }
+        DinosaurEggType type = EnumDinosaurEggTypes.TEST;//egg.getEggType();
+
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+
+        Vec3d eggEnd = egg.getEggPosition();
+        Vec3d normal = egg.getPickupDirection().normalize();
+        double eggRotationY = Math.atan2(normal.z, normal.x);
+        double eggRotationZ = Math.atan2(normal.y, this.xzDistance(Vec3d.ZERO, normal));
+
+        double eggLength = type.getEggLength();
+        float scale = type.getScale() *2;
+
+        GlStateManager.translate(eggEnd.x, eggEnd.y, eggEnd.z);
+
+        GlStateManager.rotate((float) -Math.toDegrees(eggRotationY) + 180, 0, 1, 0);
+        GlStateManager.rotate((float) -Math.toDegrees(eggRotationZ) + 180, 0, 0, 1);
+        GlStateManager.rotate(-90, 0, 0, 1);
+
+        GlStateManager.rotate((float) -Math.toDegrees(egg.getRotation()), 0, 1, 0);
+
+        GlStateManager.scale(-scale, -scale, scale);
+        if(ProjectNublar.DEBUG) {
+            this.drawDebugLines(0, 0, 0);
+        }
+        GlStateManager.translate(0, eggLength*scale, 0);
+        if(ProjectNublar.DEBUG) {
+            this.drawDebugLines(0, 0, 0);
+        }
+        GlStateManager.translate(0, -1.5, 0);
+        type.getModel().render(null, 0F, 0F, 0F, 0F, 0F, 1/16F);
+        GlStateManager.enableTexture2D();
+
+        GlStateManager.popMatrix();
+    }
+
+    private void renderLid(World world, BlockPos pos) {
+        this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0, 2, 0);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buff = tessellator.getBuffer();
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.enableBlend();
+        GlStateManager.disableCull();
+
+        if (Minecraft.isAmbientOcclusionEnabled()) {
+            GlStateManager.shadeModel(GL11.GL_SMOOTH);
+        } else {
+            GlStateManager.shadeModel(GL11.GL_FLAT);
+        }
+
+        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
+        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, this.lidModel, world.getBlockState(pos), pos, buff, false);
+        buff.setTranslation(0, 0, 0);
+        tessellator.draw();
+        GlStateManager.popMatrix();
+    }
+
     private void doTabulaTransforms() {
         GlStateManager.translate(0.5, 1.5, 0.5);
         GlStateManager.scale(-1F, -1F, 1F);
@@ -111,20 +182,26 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
     private void updateEgg(IncubatorBlockEntity blockEntity, float partialTicks) {
         blockEntity.getEggList().forEach(egg -> egg.setTicksSinceTurned(egg.getTicksSinceTurned() + partialTicks));
-        if(blockEntity.activeEgg == null && blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_COOLDOWN) {
-            blockEntity.getEggList().stream().filter(egg -> egg.getTicksSinceTurned() > 400).findAny().ifPresent(egg -> {
+        boolean doneSpin = blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN + TICKS_WAIT_AFTER_SPIN;
+        Holder<Boolean> holder = new Holder<>(false);
+        if((blockEntity.activeEgg == null && blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_COOLDOWN) || doneSpin) {
+            //Get all the eggs that haven't been turned around for a minute
+            //then shuffle the stream with a comparator that returns a between -1 and 1 on random.
+            //Without the shuffling, #findAny will mean some eggs at the start of the list have more chance of being picked
+            blockEntity.getEggList().stream().filter(egg -> egg.getTicksSinceTurned() - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN - TICKS_TO_SPIN> 1200).sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2)).findAny().ifPresent(egg -> {
                 blockEntity.activeEgg = egg;
                 blockEntity.movementTicks = 0;
                 egg.setTicksSinceTurned(0);
+                holder.value = true;
                 this.createSnapshot(blockEntity);
             });
-        } else {
-            if(blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN + TICKS_WAIT_AFTER_SPIN) {
-                blockEntity.activeEgg = null;
-                blockEntity.movementTicks = 0;
-                this.createSnapshot(blockEntity);
-            }
         }
+        if(doneSpin && !holder.value) {
+            blockEntity.activeEgg = null;
+            blockEntity.movementTicks = 0;
+            this.createSnapshot(blockEntity);
+        }
+
         blockEntity.movementTicks += partialTicks;
     }
 
@@ -203,30 +280,6 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             }
         }
     }
-    
-    private void renderLid(World world, BlockPos pos) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0, 2, 0);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buff = tessellator.getBuffer();
-        RenderHelper.disableStandardItemLighting();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GlStateManager.enableBlend();
-        GlStateManager.disableCull();
-
-        if (Minecraft.isAmbientOcclusionEnabled()) {
-            GlStateManager.shadeModel(GL11.GL_SMOOTH);
-        } else {
-            GlStateManager.shadeModel(GL11.GL_FLAT);
-        }
-
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
-        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, this.lidModel, world.getBlockState(pos), pos, buff, false);
-        buff.setTranslation(0, 0, 0);
-        tessellator.draw();
-        GlStateManager.popMatrix();
-    }
 
     private float interpolate(double from, double to, double partialTicks) {
         //Make sure the degrees are from 0 to 360
@@ -239,6 +292,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             to += 2*Math.PI;
         }
         to %= 2*Math.PI;
+
         //This is to fix the issue that euler angles interpolation causes.
         //Interpolating from 1 degree to 359 degrees is 2 degrees visually, but without
         //wrapping it around would cause the interpolation to take the long way around
@@ -249,7 +303,24 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
                 to += 2*Math.PI;
             }
         }
+
+        //If `to` or `from` are NAN, then the interpolation will return a NAN. This is to make sure that doesn't happen
+        if(partialTicks >= 1) {
+            return (float) to;
+        }
+        if(partialTicks <= 0) {
+            return (float) from;
+        }
         return (float) (from + (to - from) * Math.min(partialTicks, 1));
+    }
+
+    private void setupLightmap(BlockPos pos) {
+        RenderHelper.enableStandardItemLighting();
+        int i = this.getWorld().getCombinedLight(pos.up(), 0);
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private double cosineRule(double opposite, double sideA, double sideB) {

@@ -2,12 +2,14 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.recipes.IncubatorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
@@ -35,7 +37,13 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     @Getter
     @SideOnly(Side.CLIENT)
     private final List<Egg> eggList = Lists.newArrayList(
-            new Egg(new Vec3d(9.0 / 16, 22.3/16, 2.9/16), new Vec3d(1, 0, 1))
+            new Egg(new Vec3d(11.0 / 16, 22.3/16, 2.9/16), new Vec3d(1, 0, 1)),
+            new Egg(new Vec3d(7.0 / 16, 22.2/16, 7.0/16), new Vec3d(0.8, 0, -0.4)),
+            new Egg(new Vec3d(5.0 / 16, 22.2/16, 3.0/16), new Vec3d(0.26, 0.5, 0.91)),
+            new Egg(new Vec3d(1.0 / 16, 22.2/16, 5.0/16), new Vec3d(1, 0, 0)),
+            new Egg(new Vec3d(10.5 / 16, 22.2/16, 8.5/16), new Vec3d(0, 1, 0)),
+            new Egg(new Vec3d(13.0 / 16, 22.2/16, 13.0/16), new Vec3d(-0.9, 0.1, -0.5)),
+            new Egg(new Vec3d(6.0 / 16, 22.2/16, 13.0/16), new Vec3d(0.9, -0.1, 0.3))
     );
 
     @Getter
@@ -147,6 +155,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     public class Egg {
         private final Vec3d eggPosition;
         private final Vec3d pickupDirection;
+        @NonNull private DinosaurEggType eggType = DinosaurEggType.EMPTY;
         private float rotation;
         private float ticksSinceTurned;
     }
