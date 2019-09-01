@@ -169,7 +169,8 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         double angleFirstArm = angleFirstArmTriangle + 1.5*Math.PI + Math.atan2(handJointTarget.y - baseJoinTarget.y, xzlen);
         double angleLastArm = this.cosineRule(xzlen, FIRST_ARM.length, LAST_ARM.length);
 
-        double handRotY = Math.atan2(-normal.z, -normal.x);
+        //Usually this would be flipped, but because the model is also flipped, we flip it here.
+        double handRotY = Math.atan2(-normal.x, -normal.z);
         double handRotZ = Math.atan2(-normal.y, this.xzDistance(Vec3d.ZERO, normal));
 
         if(ProjectNublar.DEBUG) {
