@@ -29,6 +29,8 @@ public class BlockHandler {
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
     public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
 
+    public static final FossilBlockNeus FOSSIL_ORE = new FossilBlockNeus();
+
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, DrillExtractorBlockEntity::new);
     public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, SequencingSynthesizerBlockEntity::new);
@@ -53,7 +55,8 @@ public class BlockHandler {
                 LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setTranslationKey("low_security_electric_fence_pole").setCreativeTab(TAB),
                 HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setTranslationKey("high_security_electric_fence_pole").setCreativeTab(TAB),
                 ELECTRIC_FENCE.setRegistryName("electric_fence").setTranslationKey("electric_fence").setCreativeTab(TAB),
-                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB)
+                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB),
+                FOSSIL_ORE.setRegistryName("fossil_ore").setTranslationKey("fossil_ore").setCreativeTab(TAB)
         );
 
         for (FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
