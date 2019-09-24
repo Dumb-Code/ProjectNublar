@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
+import net.dumbcode.projectnublar.server.block.fossils.FossilBlockNeus;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.MachineModule;
 import net.dumbcode.projectnublar.server.plants.Plant;
@@ -29,7 +30,8 @@ public class BlockHandler {
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
     public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
 
-    public static final FossilBlockNeus FOSSIL_ORE = new FossilBlockNeus();
+    //In 1.14, this would just be more blockstates. This isn't possible in 1.12
+    public static final Map<FossilBlockNeus.Type, Map<FossilBlockNeus.Background, FossilBlockNeus>> FOSSIL_ORES = new HashMap<>();
 
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, DrillExtractorBlockEntity::new);
@@ -55,9 +57,20 @@ public class BlockHandler {
                 LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setTranslationKey("low_security_electric_fence_pole").setCreativeTab(TAB),
                 HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setTranslationKey("high_security_electric_fence_pole").setCreativeTab(TAB),
                 ELECTRIC_FENCE.setRegistryName("electric_fence").setTranslationKey("electric_fence").setCreativeTab(TAB),
-                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB),
-                FOSSIL_ORE.setRegistryName("fossil_ore").setTranslationKey("fossil_ore").setCreativeTab(TAB)
+                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB)
         );
+
+        //Yuck
+        for (FossilBlockNeus.Type value : FossilBlockNeus.Type.values()) {
+            Map<FossilBlockNeus.Background, FossilBlockNeus> map = new HashMap<>();
+            for (FossilBlockNeus.Background background : FossilBlockNeus.Background.values()) {
+                FossilBlockNeus fossilBlock = value.getCreator().apply(background);
+                String name = "generic_fossil_" + value.getName() + "_" + background.getName();
+                event.getRegistry().registerAll(fossilBlock.setRegistryName(name).setTranslationKey(name).setCreativeTab(TAB));
+                map.put(background, fossilBlock);
+            }
+            FOSSIL_ORES.put(value, map);
+        }
 
         for (FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
             Map<Dinosaur, FossilBlock> map = Maps.newHashMap();
