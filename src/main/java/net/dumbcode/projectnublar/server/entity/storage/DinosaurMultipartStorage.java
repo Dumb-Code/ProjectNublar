@@ -26,12 +26,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Getter
 public class DinosaurMultipartStorage implements SaveableEntityStorage<MultipartEntityComponent> {
 
     private final Map<String, List<String>> ageCubeMap = Maps.newHashMap();
 
     private final Function<ComponentAccess, List<String>> function = access -> access.get(ComponentHandler.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
+
+    public DinosaurMultipartStorage addCubesForAge(String age, String... cubes) {
+        this.ageCubeMap.put(age, Lists.newArrayList(cubes));
+        return this;
+    }
 
     @Override
     public MultipartEntityComponent construct() {

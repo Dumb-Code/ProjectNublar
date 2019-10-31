@@ -17,7 +17,7 @@ public class DinosaurHandler {
     @SubscribeEvent
     public static void register(RegisterDinosaurEvent event) {
         event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
-//        event.getRegistry().register(new Dilophosaurus().setRegistryName("projectnublar:dilophosaurus"));
+        event.getRegistry().register(new Dilophosaurus().setRegistryName("projectnublar:dilophosaurus"));
     }
 
 }

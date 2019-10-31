@@ -18,9 +18,9 @@ import net.minecraftforge.common.BiomeDictionary;
 import java.util.List;
 import java.util.Map;
 
-public class Tyrannosaurus extends Dinosaur {
+public class Dilophosaurus extends Dinosaur {
 
-    public Tyrannosaurus() {
+    public Dilophosaurus() {
 
         getItemProperties()
                 .setCookedMeatHealAmount(10)
@@ -44,7 +44,7 @@ public class Tyrannosaurus extends Dinosaur {
     @Override
     public void attachDefaultComponents() {
 
-        addComponent(EntityComponentTypes.METABOLISM)
+        this.addComponent(EntityComponentTypes.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
                         .add(new ItemStack(Items.APPLE)))
@@ -53,22 +53,18 @@ public class Tyrannosaurus extends Dinosaur {
 
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
             .addCubesForAge(ADULT_AGE,
-                "tail4", "Tail3", "tail2", "tail1",
+                "tail4", "tail3", "tail2", "tail1",
+                "hips", "chest",
+                "neck1", "neck2", "neck3",
+                "head", "jawUpper1",
                 "legUpperRight", "legMiddleRight", "legLowerRight",
-                "legUpperLeft", "legMiddleLeft", "legLowerLeft",
-                "neck3", "hips", "chest", "jawUpper1", "head"
+                "legUpperLeft", "legMiddleLeft", "legLowerLeft"
             );
 
         this.addComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(ComponentHandler.ITEM_DROPS)
-                .addFossils("foot", "claw", "leg", "neck", "pelvis", "ribcage", "skull", "tail");
-
-
-        this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
-                .setScaleX(2.5F)
-                .setScaleY(2.5F)
-                .setScaleZ(2.5F);
+            .addFossils("foot", "claw", "leg", "neck", "pelvis", "ribcage", "skull", "tail");
 
 
         this.addComponent(EntityComponentTypes.GENDER);
@@ -88,7 +84,7 @@ public class Tyrannosaurus extends Dinosaur {
                         "foot", "legLowerRight",
                         "leg", "legUpperLeft",
                         "leg", "legUpperRight",
-                        "ribs", "ribcage",
+                        "ribs", "hips",
                         "tail", "tail4",
                         "neck", "neck3",
                         "skull", "head"
