@@ -65,8 +65,8 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
         fileLocation.addFolderName("models/entities", 0);
         fileLocation.addName(this.dinosaur.getRegName().getPath(), 10);
 
-        texture.addFolderName("textures/entities", 0);
-        texture.addFolderName(this.dinosaur.getRegName().getPath(), 10);
+        texture.addFolderName("textures/entities/" + this.dinosaur.getRegName().getPath(), 0);
+        texture.addFileName(this.dinosaur.getRegName().getPath(), 0);
 
     }
 

@@ -101,7 +101,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     @Override
     public void editLocations(ConfigurableLocation texture, ConfigurableLocation fileLocation) {
         fileLocation.addName(this.stage.getName(), 20);
-        texture.addFileName(this.stage.getName(), 20);
+        texture.addFolderName(this.stage.getName(), 20);
     }
 
     @Accessors(chain = true)

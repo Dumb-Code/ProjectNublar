@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
+import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeLayerColorStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
@@ -89,5 +91,15 @@ public class Dilophosaurus extends Dinosaur {
                         "neck", "neck3",
                         "skull", "head"
                 );
+
+        this.addComponent(EntityComponentTypes.GENETICS);
+
+        this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
+            .addLayer("base", "base", 0, 255, 128, 255, 100, 255)
+            .addLayer("belly", "belly", 0, 255, 128, 255, 100, 255)
+            .addLayer("frills", "frills", 0, 255, 128, 255, 100, 255)
+            .addLayer("outlines", "outlines", 0, 255, 128, 255, 100, 255)
+            .addLayer("patterns", "patterns", 0, 255, 128, 255, 100, 255)
+            .addLayer("spots", "spots", 0, 255, 128, 255, 100, 255);
     }
 }
