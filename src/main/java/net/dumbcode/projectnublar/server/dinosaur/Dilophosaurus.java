@@ -95,11 +95,8 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.GENETICS);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("base", "base", 0, 255, 128, 255, 100, 255)
-            .addLayer("belly", "belly", 0, 255, 128, 255, 100, 255)
-            .addLayer("frills", "frills", 0, 255, 128, 255, 100, 255)
-            .addLayer("outlines", "outlines", 0, 255, 128, 255, 100, 255)
-            .addLayer("patterns", "patterns", 0, 255, 128, 255, 100, 255)
-            .addLayer("spots", "spots", 0, 255, 128, 255, 100, 255);
+            .addLayer("base", "base", "belly")
+            .addLayer("frills", "frills")
+            .addLayer("patterns", "patterns", "outlines", "spots");
     }
 }
