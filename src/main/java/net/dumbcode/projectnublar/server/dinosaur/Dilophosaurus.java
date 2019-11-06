@@ -96,7 +96,7 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
             .staticLayer("claws", 5F)
             .staticLayer("mouth", 5F)
-            .staticLayer("nostril", 5F)
+            .staticLayer("nostrils", 5F)
             .staticLayer("teeth", 5F);
 
         this.addComponent(EntityComponentTypes.BLINKING)
