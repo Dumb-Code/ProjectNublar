@@ -1,9 +1,6 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
-import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeLayerColorStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
@@ -16,9 +13,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
-
-import java.util.List;
-import java.util.Map;
 
 public class Dilophosaurus extends Dinosaur {
 
@@ -95,8 +89,20 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.GENETICS);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("base", "base", "belly")
-            .addLayer("frills", "frills")
-            .addLayer("patterns", "patterns", "outlines", "spots");
+            .addLayer("base", "base")
+            .addLayer("belly", "belly")
+            .addLayer("overlays", "frills", "patterns", "outlines", "spots");
+
+        this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
+            .staticLayer("claws", 5F)
+            .staticLayer("mouth", 5F)
+            .staticLayer("nostril", 5F)
+            .staticLayer("teeth", 5F);
+
+        this.addComponent(EntityComponentTypes.BLINKING)
+            .setEyesOnTexture("eyes")
+            .setEyesOffTexture("eyes_closed")
+            .setTickTimeOpen(25)
+            .setTickTimeClose(5);
     }
 }

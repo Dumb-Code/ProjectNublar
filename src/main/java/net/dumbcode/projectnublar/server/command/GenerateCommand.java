@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.command;
 
-import net.dumbcode.projectnublar.server.utils.BuilderNode;
+import net.dumbcode.dumblibrary.server.utils.BuilderNode;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.Structures;
 import net.dumbcode.projectnublar.server.world.structures.network.NetworkBuilder;
@@ -13,9 +13,6 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityLockableLoot;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.Random;
 
