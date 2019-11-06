@@ -79,7 +79,7 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
                             .loop()
                             .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)
                             .withSpeedFactor(AnimationFactorHandler.LIMB_SWING)
-                    , MOVEMENT_CHANNEL, 5);
+                    , MOVEMENT_CHANNEL, 20);
 
         });
     }

@@ -93,5 +93,23 @@ public class Tyrannosaurus extends Dinosaur {
                         "neck", "neck3",
                         "skull", "head"
                 );
+
+        this.addComponent(EntityComponentTypes.GENETICS);
+
+        this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
+            .addLayer("body", "body")
+            .addLayer("stripes", "stripes");
+
+        this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
+            .staticLayer("claws", 5F)
+            .staticLayer("mouth", 5F)
+            .staticLayer("nostrils", 5F)
+            .staticLayer("teeth", 5F);
+
+        this.addComponent(EntityComponentTypes.BLINKING)
+            .setEyesOnTexture("eyes")
+            .setEyesOffTexture("eyes_closed")
+            .setTickTimeOpen(25)
+            .setTickTimeClose(5);
     }
 }
