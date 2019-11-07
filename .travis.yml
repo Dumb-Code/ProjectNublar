@@ -15,7 +15,7 @@ before_script:
 install:
   - true
 script:
-  - "./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:jar -x :dumb_library:javadoc"
+  - "./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:javadoc"
   - "./gradlew sonarqube"
 after_failure:
   - "./gradlew notifyIfError -x :dumb_library:notifyIfError"
