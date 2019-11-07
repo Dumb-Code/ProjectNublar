@@ -1,17 +1,29 @@
+import net.dumbcode.gradlehook.tasks.form.FieldObject
+import net.dumbcode.gradlehook.tasks.form.PostForm
+
+import java.time.Instant
+import java.time.ZoneOffset
+
 buildscript {
     repositories {
         jcenter()
         maven { url = "http://files.minecraftforge.net/maven" }
+        maven { url = "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath "net.dumbcode.gradlehook:GradleHook:1.2.1"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.8"
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: "net.dumbcode.gradlehook"
+apply plugin: "org.sonarqube"
+
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "0.0.23"
+version = "1.12.2-${getDirectVersion()}"
 group = "net.dumbcode.projectnublar" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "projectnublar" //MODID
 
@@ -47,6 +59,30 @@ dependencies {
     compile project('dumb_library')
 }
 
+sonarqube {
+    properties {
+        property "sonar.projectName", "ProjectNublar"
+        property "sonar.projectKey", "net.dumbcode.projectnublar"
+
+        property "sonar.links.homepage", "https://github.com/Dumb-Code/ProjectNublar"
+        property "sonar.links.ci", "https://travis-ci.com/Dumb-Code/ProjectNublar"
+        property "sonar.links.scm", "https://github.com/Dumb-Code/ProjectNublar"
+        property "sonar.links.issue", "https://github.com/Dumb-Code/ProjectNublar/issues"
+
+    }
+}
+
+def setDebugCommitVersion() {
+    def version = "debug-" + System.getenv("TRAVIS_BUILD_NUMBER") + "-" + System.getenv("TRAVIS_COMMIT").substring(0, 7)
+
+    def prefix = 'public static final String VERSION = "'
+    def file = file("src/main/java/net/dumbcode/projectnublar/server/ProjectNublar.java")
+    def text = file.text
+
+    file.withWriter { w -> w << text.replaceAll("\\Q$prefix\\E.+\"", prefix + version + '"') }
+    return version
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = "sources"
     from sourceSets.main.allSource
@@ -68,6 +104,32 @@ artifacts {
     archives javadocJar
 }
 
+String getDirectVersion() {
+    if(System.getenv("TRAVIS")) {
+        return setDebugCommitVersion()
+    }
+    def major = "0"
+    def revision = "0"
+    def patch = "0"
+    def prefix = "public static final String VERSION = \""
+    def file = file("src/main/java/net/dumbcode/projectnublar/server/ProjectNublar.java")
+    file.eachLine { String s ->
+        s = s.trim()
+        if (s.startsWith(prefix)) {
+            s = s.substring(prefix.length(), s.length() - 2)
+            def pts = s.split("\\.")
+            if(pts.length != 3) {
+                return s
+            }
+            major = pts[0]
+            revision = pts[1]
+            patch = pts[2]
+        }
+    }
+
+    return "$major.$revision.$patch"
+}
+
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
@@ -84,4 +146,30 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+task notifyIfError (group: "upload", description: "Checks to see if travis has errored, and if so sends a webhook") {
+    doLast {
+        if(System.getenv("TRAVIS_TEST_RESULT") == "1") {
+            println "Build has errored. Deploying webhook"
+
+            def buildVersion = System.getenv("TRAVIS_BUILD_NUMBER")?: "???"
+            def url = System.getenv("TRAVIS_BUILD_WEB_URL")?: "???"
+            def datetime = Instant.now().atZone(ZoneOffset.UTC).toString()
+
+            def form = new PostForm(System.getenv('WEBHOOK_URL'))
+            form.addObject(new FieldObject("payload_json", "{ \"embeds\": [{ \"title\":\"Build $buildVersion has errored - ${System.getenv('TRAVIS_COMMIT_MESSAGE')}\", \"color\": 9306112,  \"url\": \"$url\", \"timestamp\":\"$datetime\"}] }"))
+            def result = form.send()
+
+            println "Webhook uploaded with response code $result.responseCode"
+        }
+    }
+}
+
+gradlehook {
+    urlToken System.getenv('WEBHOOK_URL')
+
+    addField 'payload_json', '{ "embeds": [{ "title":"' + System.getenv('TRAVIS_COMMIT_MESSAGE') + " - " + System.getenv("COMMITTER_NAME") + '", "timestamp": "{{datetime}}" }] }'
+
+    addArtifact jar
 }

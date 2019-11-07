@@ -1,0 +1,41 @@
+language: java
+
+addons:
+  sonarcloud:
+    organization: "dumb-code"
+    token:
+      secure: "S3Of78EyN1QC0snjw/vndWYhYp9hgtlLbNiPlLIklSTheITnBfOUGaKDyL3uEM9enQuOkRbRCO3VThByApgoYU/abeqCj2d/Omji3+iTd63P/gtTebExrFtUEnhj6NKOeQPlA3ejYgdCJoIAsyN1k2UhG1VRkGezVoVw63qlx8WfFjOt3Tvhn5RnXrl9sKeYr68RgkDOaptEcqYKTyKkwUynr8ZUzOcXSaKdEaEVgR+/k7HamZWYxzaD+ar/NMgms6hdWbpL3Wx1YtcqqupRVbSOvhl7Yoif8Z+GPpnmKSW0rZ5PtH5OHKVRyPursSxKQMTsFeEQGLxJL/MQvgJwDjGTAuQy4jSLGZ8xuroKFh+oUfz146xqpOwxwVzYOJeSFVYmLAINfMkCDII8P5gVnRkVDTHvMtuymOPNLz1/yrZvgY7319lXcWLc/W9v272JqaaC2LIWYMvaopf8Z8KuSdf2sjujVPMWwc28g8nY1kj8Gb2zD0tAZTta5yAOJJjHvJ70aS+kDTaBmFn4zrXGJludzNSHdwoZlYFDv25GRbs6E8gxU8SWqwA4c9Yemp9EQAeSKx5w9mDKS0o2GgVxydeD6Ir6Q/LgoK7YLDje7dFfAGr6vQh9HUDE8TGFvOi+mphRbKc/VX4wittJl9Ct9zuGR1zZr9cwpOEAIVm9vA8="
+
+jdk:
+  - oraclejdk8
+  
+dist: trusty
+
+before_script:
+  - export COMMITTER_EMAIL="$(git log -1 $TRAVIS_COMMIT --pretty="%cE")"
+  - export COMMITTER_NAME="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
+  - export COMMIT_HASH="$(echo $TRAVIS_COMMIT | cut -c1-7)"
+  - "git fetch --unshallow"
+  
+install:
+  - true
+
+script:
+  - "./gradlew postRequest"
+  - "./gradlew sonarqube"
+    
+after_script:
+  - "bash changelog.sh"
+after_failure:
+  - "./gradlew notifyIfError"
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+    - '$HOME/.gradle'
+    - '.gradle'
+
+env:
+  global:
+    - secure: "WnoOXbD2O1ozbEhhkHTNt8x7w527+75cN+b8GgkHMDUq5S53gmiAheBe26VdOiwCJ/npd7XySufyTvlwKyHcCPd9pFUMd6NRzxyKJpYoI16/EWVsQuzuK8DBF/6b0uOXAMK3YgzkRQGrulRLPNNKyn3PTC/V9s43MqOfBJ7R9cSQ5SCYVcKt7r/L9aIG4/KAn3xMRjuDBiaYj8H3ikLf6Yeka+jZcSwCMEqhmBcbEnpAvuaxjxIUqffF9JOa6yENDTAJBHl+r+BxvPmnpZhAWVk3jPOR96JV5PE4YMSwYEVLm3KJSZ6j5sjTT/v+VMFmWP6dUfzTlPxCwVXiwucsXGDO1Df/JAoRPTGCYqCmK5ih7/QoLm4r5eRjl4aFXvhUEg1AeKgXM4huOggpBBlF59ZicMsWdFHjBtJpiWHSbY5LDTSIV+FgYizjk2KZSlFdeZEQTOHV3wW8tR6bJl+vMgy4J0bYw1J5puHfOFYx15RoV6LMdb1ONCCFe8iILSirfxYNkGp+PGP+QtTuVqxwgqlIJwqoJgFwOe4r39nAY87cvIjR4isy/HHJXACZjfkh1KGmhddw8wG38yGhwcT/QFbiFOdtsazRs6erfxpY+jNILPFSD37VKFZ3dAy3rrS3KgCeGDQskGkhPvS+JLYbGdIv76XINfoC6L8yXL2PopY="
