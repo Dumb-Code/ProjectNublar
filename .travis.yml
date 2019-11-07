@@ -9,9 +9,12 @@ addons:
       CIj16ZsdKuzGEf2IWkaDAaOv6EhhfSUefJAG2elCoLtYJdLLHAL0Z27Z+mczyHiih94hLGpg+5ykccikpZ1EQTGxUhaY90utLYgvkBx/IjNSbDK4dGcY7Jju/58Z3U2xJA7
       jsP7IS75h3HlZ0iA6+a2K13Qfuh4kgY6TjCf9stK6/rsR6xpK7a/GQPCUFNlJfTXjF1jq3yw+ZD1fMReVJPHBhkE9fv3N2EK8aaId0jiziu9lL/ELteimVbSOElAT9KOtOl
       TPvFMQx3J9gg8wXxq9c6GIMlfXtf1ZKVpoYWH/8=
+
 jdk:
   - oraclejdk8
+  -
 dist: trusty
+
 before_script:
   - export COMMITTER_EMAIL="$(git log -1 $TRAVIS_COMMIT --pretty="%cE")"
   - export COMMITTER_NAME="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
