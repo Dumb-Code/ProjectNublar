@@ -33,7 +33,3 @@ cache:
     - '$HOME/.sonar/cache'
     - '$HOME/.gradle'
     - '.gradle'
-
-env:
-  global:
-    - secure: evRohqMGfqXJ+FLLb3E+n2eoM7//VB7IsUfqMBKq2lJWWazWIB9g5xB185/rdAy3W19IuVxyq+DVQidbiyb249uLzvYQsk42PPdE8jd8aGTwfXfpdSqgnhjamJYQuhve5jDeF/fZFxz/ds/fZ8s9t2toAKcGEdbZRw3Xyd8WJ+BOZGjnr0YdZUmA6NjMiJZ5di71/litWe1bu+L+6GRDHuMqMkg/LKXgodklFOTdxHLqOokj76LslodmqoLu/zrk9Aog8h0W8okftommFbBclKtDtdxRrIr4YQLQNMZ6A3wS6RuWVd7jmqzDr9pLm4BwMf64TBxpk8Loh3eLBNgNBPZb6RiRtXSF6QoM8FRCOQGNiDNeZU8LswHeKDCS7h7/DEJJ4HmJJ437FXMv2sb+ZWxaM4Ox0MJp69wi1fLdi+wtTf1P7HB2x5O2RKbEtJyOaWToUeEhNqPSrLfgwKKsnlmHm/1eRdeSFXzToXhD/kRqkXOvZXSxMvRJ30zVzhiUH35aEgv0KW/nPcTDqUepkTzJTLmgRP8ZRJwlJKSyqodmsrdO+MPaFL5ornfPKnEWtFh/wBX8BRgtBPp2hXJJd+0dZ8NvawvCRwSwTgNp2na+ZWeUwevkVkxB6+rpY3RQajzUSHrUQAtD3kjqC/i2a4QCUZTZlVYlJPOGzmnpFdA=
