@@ -23,9 +23,7 @@ install:
 script:
   - "./gradlew postRequest"
   - "./gradlew sonarqube"
-    
-after_script:
-  - "bash changelog.sh"
+
 after_failure:
   - "./gradlew notifyIfError"
 
