@@ -21,7 +21,7 @@ install:
   - true
 
 script:
-  - "./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:jar -x :dumb_library:javadoc"
+  - "./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:javadoc"
   - "./gradlew sonarqube -x :dumb_library:sonarqube"
 
 after_failure:
