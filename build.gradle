@@ -150,8 +150,6 @@ processResources {
 
 task notifyIfError (group: "upload", description: "Checks to see if travis has errored, and if so sends a webhook") {
     doLast {
-        println(System.getenv('WEBHOOK_URL'))
-
         if(System.getenv("TRAVIS_TEST_RESULT") == "1") {
             println "Build has errored. Deploying webhook"
 
