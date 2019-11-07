@@ -22,10 +22,10 @@ install:
 
 script:
   - "./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:jar -x :dumb_library:javadoc"
-  - "./gradlew sonarqube"
+  - "./gradlew sonarqube -x :dumb_library:sonarqube"
 
 after_failure:
-  - "./gradlew notifyIfError"
+  - "./gradlew notifyIfError -x :dumb_library:notifyIfError"
 
 cache:
   directories:
