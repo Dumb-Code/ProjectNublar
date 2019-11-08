@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.dumblibrary.server.dna.GeneticType;
+import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
@@ -86,7 +88,8 @@ public class Dilophosaurus extends Dinosaur {
                         "skull", "head"
                 );
 
-        this.addComponent(EntityComponentTypes.GENETICS);
+        this.addComponent(EntityComponentTypes.GENETICS)
+            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, 0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
             .addLayer("base", "base")
