@@ -69,7 +69,7 @@ public class SkeletonBuilderScene {
                         box.rotateAngleZ = rotations.z;
                     }
                 }
-                te.getModel().render(te.getDinosaurEntity().get(), 0f, 0f, 100f, 0f, 0f, 1f / 16f);
+                te.getDinosaurEntity().ifPresent(e -> te.getModel().render(e, 0f, 0f, 100f, 0f, 0f, 1f / 16f));
             }
         }
 

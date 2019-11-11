@@ -13,6 +13,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,8 +64,7 @@ public class StructureTemplate extends Structure {
             BlockPos minp = template.transformedBlockPos(this.settings, template.getMinimum());
             BlockPos maxp = template.transformedBlockPos(this.settings, template.getMaximum());
 
-            double[] data = new double[(Math.abs(maxp.getX() - minp.getX()) + 1)*(Math.abs(maxp.getZ() - minp.getZ()) + 1)];
-            AtomicInteger pointer = new AtomicInteger();
+            List<Double> heightList = new ArrayList<>();
 
             AtomicInteger max = new AtomicInteger(Integer.MIN_VALUE);
             AtomicInteger min = new AtomicInteger(Integer.MAX_VALUE);
@@ -74,7 +74,7 @@ public class StructureTemplate extends Structure {
 
 
             this.traverseTopdown(minp.getX(), maxp.getX(), minp.getZ(), maxp.getZ(), blockpos -> {
-                data[pointer.getAndIncrement()] = blockpos.getY();
+                heightList.add((double) blockpos.getY());
                 max.getAndAccumulate(blockpos.getY(), Math::max);
                 min.getAndAccumulate(blockpos.getY(), Math::min);
                 if(this.world.getBlockState(blockpos.down()).getMaterial().isLiquid()) {
@@ -88,10 +88,10 @@ public class StructureTemplate extends Structure {
             if(liquids.floatValue() / (solids.get() + liquids.get()) > 0.3) { //cant be 30% water base
                 return false;
             }
-            if(max.get() - min.get() > 5) {
+            if(max.get() - min.get() > 3) {
                 return false;
             }
-            return MathUtils.meanDeviation(data) <= 2;
+            return MathUtils.meanDeviation(heightList.stream().mapToDouble(i -> i).toArray()) <= 2;
         }
     }
 }

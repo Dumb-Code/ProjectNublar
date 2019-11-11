@@ -60,7 +60,7 @@ public abstract class StructureInstance {
         }
 
         for (int x = minX; x < maxX; x++) {
-            for (int z = -minZ; z < maxZ; z++) {
+            for (int z = minZ; z < maxZ; z++) {
                 BlockPos pos = this.position.add(x, 0, z);
 
                 Chunk chunk = this.world.getChunk(pos);

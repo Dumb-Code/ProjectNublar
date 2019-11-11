@@ -26,10 +26,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
 public class Digsite extends Structure {
@@ -278,12 +280,9 @@ public class Digsite extends Structure {
             int startx = circle.startx;
             int startz = circle.startz;
 
-
             int rad = circle.rad;
 
-            for (Pair<Integer, Integer> coord : this.circleIterator(distX, distZ, xsize, zsize, rad)) {
-                holePositions.add(new BlockPos(startx+coord.getLeft(), this.position.getY()+layer-this.totalLayers, startz+coord.getRight()));
-            }
+            this.iterateCircle(distX, distZ, xsize, zsize, rad, (x, z) -> holePositions.add(new BlockPos(startx+x, this.position.getY()+layer-this.totalLayers, startz+z)));
             if(layer == 0) {
                 int totalBlocks = Math.max(rad/2, 5);
                 int x = startx;
@@ -299,15 +298,32 @@ public class Digsite extends Structure {
                         totalBlocks--;
                     }
                 }
-            } else if(layer == this.totalLayers -1) {
-                for (Pair<Integer, Integer> coord : this.circleIterator(distX, distZ, xsize, zsize, rad)) {
-                    BlockPos blockPos = new BlockPos(startx + coord.getLeft(), this.position.getY() + layer - this.totalLayers, startz + coord.getRight());
-                    int ytop = this.world.getTopSolidOrLiquidBlock(blockPos).getY();
+            } else if(layer == this.totalLayers - 1) {
+                this.iterateCircle(distX, distZ, xsize, zsize, rad, (x, z) -> {
+                    BlockPos blockPos = new BlockPos(startx + x, this.position.getY() + layer - this.totalLayers, startz + z);
+                    int ytop = this.getTopSolid(blockPos);
                     for (;blockPos.getY() <= ytop; blockPos = blockPos.up()) {
                         this.world.setBlockState(blockPos, Blocks.AIR.getDefaultState());
                     }
+                });
+            }
+        }
+
+        private int getTopSolid(BlockPos pos) {
+            Chunk chunk = this.world.getChunk(pos);
+            BlockPos blockpos;
+            BlockPos blockpos1;
+
+            for (blockpos = new BlockPos(pos.getX(), chunk.getTopFilledSegment() + 16, pos.getZ()); blockpos.getY() >= 0; blockpos = blockpos1) {
+                blockpos1 = blockpos.down();
+                IBlockState state = chunk.getBlockState(blockpos1);
+
+                if ((state.getMaterial().blocksMovement() || state.getMaterial().isLiquid()) && !state.getBlock().isLeaves(state, this.world, blockpos1) && !state.getBlock().isFoliage(this.world, blockpos1)) {
+                    break;
                 }
             }
+
+            return blockpos.getY();
         }
 
         private void setFossils(Set<BlockPos> fossilPositions) {
@@ -318,61 +334,19 @@ public class Digsite extends Structure {
             }
         }
 
-        public Iterable<Pair<Integer, Integer>> circleIterator(double distX, double distZ, float xSize, float zSize, int radius) {
-            int minX = -MathHelper.floor(distX);
-            int maxX = MathHelper.ceil(distX);
-            int rangeX = maxX - minX;
-
-            int minZ = -MathHelper.floor(distZ);
-            int maxZ = MathHelper.ceil(distZ);
-            int rangeZ = maxZ - minZ;
-
-            return () -> new Iterator<Pair<Integer, Integer>>() {
-
-                private int currentValue;
-
-                private int cachedValue = -1;
-
-                @Override
-                public boolean hasNext() {
-                    return this.searchNextValue() == -1;
-                }
-
-                @Override
-                public Pair<Integer, Integer> next() {
-                    int value = this.cachedValue == -1 ? this.searchNextValue() : this.cachedValue;
-                    if(value == -1) {
-                        throw new NoSuchElementException("Iterator Reached End of Circle");
+        public void iterateCircle(double distX, double distZ, float xSize, float zSize, int radius, BiConsumer<Integer, Integer> consumer) {
+            for (int x = -MathHelper.floor(distX); x < Math.ceil(distX); x++) {
+                for (int z = -MathHelper.floor(distZ); z < Math.ceil(distZ); z++) {
+                    if(xSize * x * x + zSize * z * z < radius*radius) {
+                        consumer.accept(x, z);
                     }
-                    this.cachedValue = -1;
-                    return Pair.of(value % rangeX, value / rangeZ);
                 }
-
-                private int searchNextValue() {
-                    int x;
-                    int z;
-
-                    do {
-                        x = this.currentValue % rangeX;
-                        z = this.currentValue / rangeZ;
-
-                        if(this.currentValue > rangeX*rangeZ) {
-                            return -1;
-                        }
-
-                        this.currentValue++;
-                    } while (xSize*x*x + zSize*z*z >= radius*radius);
-
-                    this.cachedValue = -1;
-                    return currentValue;
-                }
-            };
+            }
         }
 
         @Override
         public boolean canBuild() { //todo: more predicates, and make the constants not so constant
-            double[] data = new double[(this.xSize + 1) * (this.zSize + 1)];
-            AtomicInteger pointer = new AtomicInteger();
+            List<Double> heightList = new ArrayList<>();
 
             AtomicInteger max = new AtomicInteger(Integer.MIN_VALUE);
             AtomicInteger min = new AtomicInteger(Integer.MAX_VALUE);
@@ -382,7 +356,7 @@ public class Digsite extends Structure {
 
 
             this.traverseTopdown(blockpos -> {
-                data[pointer.getAndIncrement()] = blockpos.getY();
+                heightList.add((double) blockpos.getY());
                 max.getAndAccumulate(blockpos.getY(), Math::max);
                 min.getAndAccumulate(blockpos.getY(), Math::min);
                 if(this.world.getBlockState(blockpos.down()).getMaterial().isLiquid()) {
@@ -398,7 +372,7 @@ public class Digsite extends Structure {
             if(max.get() - min.get() > 5) {
                 return false;
             }
-            return MathUtils.meanDeviation(data) <= 2;
+            return MathUtils.meanDeviation(heightList.stream().mapToDouble(i -> i).toArray()) <= 2;
         }
     }
 }
