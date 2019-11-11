@@ -1,3 +1,6 @@
+[![Build Status](https://api.travis-ci.org/Dumb-Code/ProjectNublar.svg?branch=master)](https://travis-ci.org/Dumb-Code/ProjectNublar)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=net.dumbcode.projectnublar&metric=alert_status)](https://sonarcloud.io/dashboard?id=net.dumbcode.projectnublar)
+
 # Project: Nublar
 
 A mod that adds Dinosaurs into the world of Minecraft
