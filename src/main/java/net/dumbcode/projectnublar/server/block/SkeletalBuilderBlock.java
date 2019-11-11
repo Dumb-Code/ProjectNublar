@@ -52,19 +52,10 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
             if(stack.getItem() instanceof FossilItem) {
                 FossilItem item = (FossilItem)stack.getItem();
                 Dinosaur dinosaur = item.getDinosaur();
-                String variant = item.getVariant();
                 if(!skeletalBuilder.getDinosaur().isPresent()) {
                     skeletalBuilder.setDinosaur(dinosaur);
                 }
-                if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
-                    SkeletalBuilderComponent component = skeletalBuilder.getDinosaurEntity().get().getOrNull(ComponentHandler.SKELETAL_BUILDER);
-                    if(component != null) {
-                        List<String> boneList = component.getBoneListed();
-                        if (component.modelIndex < boneList.size() && variant.equals(boneList.get(component.modelIndex))) {
-                            skeletalBuilder.getBoneHandler().setStackInSlot(component.modelIndex++, stack.splitStack(1));
-                        }
-                    }
-                }
+                this.setBonesInHandler(skeletalBuilder, dinosaur, stack, item.getVariant());
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
                 if (skeletalBuilder.getDinosaur().isPresent()) {
                     playerIn.openGui(ProjectNublar.INSTANCE, GuiHandler.SKELETAL_BUILDER_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
@@ -74,6 +65,17 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
             }
         }
         return true;
+    }
+
+    private void setBonesInHandler(SkeletalBuilderBlockEntity skeletalBuilder, Dinosaur dinosaur, ItemStack stack, String variant) {
+        if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
+            skeletalBuilder.getDinosaurEntity().flatMap(ComponentHandler.SKELETAL_BUILDER).ifPresent(component -> {
+                List<String> boneList = component.getBoneListed();
+                if (component.modelIndex < boneList.size() && variant.equals(boneList.get(component.modelIndex))) {
+                    skeletalBuilder.getBoneHandler().setStackInSlot(component.modelIndex++, stack.splitStack(1));
+                }
+            });
+        }
     }
 
     @Override
@@ -86,6 +88,7 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
         return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand).withProperty(FACING, facing);
     }
 
+    @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         TileEntity tileentity = worldIn.getTileEntity(pos);
         if (tileentity instanceof SkeletalBuilderBlockEntity) {

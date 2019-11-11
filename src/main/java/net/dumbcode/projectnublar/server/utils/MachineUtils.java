@@ -40,6 +40,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
+
 @UtilityClass
 public class MachineUtils {
 
@@ -49,13 +52,7 @@ public class MachineUtils {
         if(stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
             IFluidHandler fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,  null);
             if(fluidHandler != null) {
-                int totalAmount = -1;
-                for (IFluidTankProperties properties : fluidHandler.getTankProperties()) {
-                    FluidStack contents = properties.getContents();
-                    if(contents != null && contents.getFluid() == FluidRegistry.WATER && contents.amount > 0 && properties.canDrainFluidType(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME))) {
-                        totalAmount += properties.getContents().amount;
-                    }
-                }
+                int totalAmount = getWaterAmount(fluidHandler);
                 if(totalAmount != -1) {
                     return totalAmount;
                 }
@@ -67,36 +64,56 @@ public class MachineUtils {
         FluidStack fluid =  new FluidBucketWrapper(stack).getFluid();
         return fluid != null && fluid.getFluid() == FluidRegistry.WATER ? fluid.amount : -1;
     }
+
+    private static int getWaterAmount(IFluidHandler fluidHandler) {
+        int totalAmount = -1;
+        for (IFluidTankProperties properties : fluidHandler.getTankProperties()) {
+            FluidStack contents = properties.getContents();
+            if(contents != null && contents.getFluid() == FluidRegistry.WATER && contents.amount > 0 && properties.canDrainFluidType(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME))) {
+                totalAmount += properties.getContents().amount;
+            }
+        }
+        return totalAmount;
+    }
     
     public static ItemStack fillTank(ItemStack stack, FluidTank tank) {
         if(stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
-            IFluidHandler fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,  null);
-            if(fluidHandler != null) {
-                FluidStack fluidStack = new FluidStack(FluidRegistry.WATER, tank.getCapacity() - tank.getFluidAmount());
-                FluidStack drained = fluidHandler.drain(fluidStack, false);
-                if(drained != null && tank.fill(drained, false) > 0) {
-                    tank.fill(fluidHandler.drain(fluidStack, true), true);
-                }
-            }
+            fillItemTank(stack, tank);
         } else if(tank.getFluidAmount() < tank.getCapacity()) {
             if(stack.getItem() == Items.POTIONITEM && PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER) {
                 tank.fill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME / 3), true);
                 return new ItemStack(Items.GLASS_BOTTLE);
             } else {
-                int waterAmount = getWaterAmount(stack);
-                if(waterAmount != -1) {
-                    FluidBucketWrapper wrapper = new FluidBucketWrapper(stack);
-                    FluidStack drained = wrapper.drain(waterAmount, true);
-                    if(drained != null) {
-                        tank.fill(drained, true);
-                    } else {
-                        ProjectNublar.getLogger().warn("Tried to drain item {}, but yielded no results", stack.getItem().getRegistryName());
-                    }
-                    return wrapper.getContainer();
-                }
+                return fillBucket(stack, tank).orElse(stack);
             }
         }
         return stack;
+    }
+
+    private static void fillItemTank(ItemStack stack, FluidTank tank) {
+        IFluidHandler fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,  null);
+        if(fluidHandler != null) {
+            FluidStack fluidStack = new FluidStack(FluidRegistry.WATER, tank.getCapacity() - tank.getFluidAmount());
+            FluidStack drained = fluidHandler.drain(fluidStack, false);
+            if(drained != null && tank.fill(drained, false) > 0) {
+                tank.fill(fluidHandler.drain(fluidStack, true), true);
+            }
+        }
+    }
+
+    private static Optional<ItemStack> fillBucket(ItemStack stack, FluidTank tank) {
+        int waterAmount = getWaterAmount(stack);
+        if(waterAmount != -1) {
+            FluidBucketWrapper wrapper = new FluidBucketWrapper(stack);
+            FluidStack drained = wrapper.drain(waterAmount, true);
+            if(drained != null) {
+                tank.fill(drained, true);
+            } else {
+                ProjectNublar.getLogger().warn("Tried to drain item {}, but yielded no results", stack.getItem().getRegistryName());
+            }
+            return Optional.of(wrapper.getContainer());
+        }
+        return Optional.empty();
     }
 
     public static double getPlantMatter(ItemStack stack, World world, BlockPos pos) {
@@ -226,13 +243,17 @@ public class MachineUtils {
     }
 
     //Gives the player an item without the fake item
-    //Copied from jeis CommandUtilServer
+    //Copied and modified from jeis CommandUtilServer
     public static void giveToInventory(EntityPlayer player, ItemStack itemStack) {
         int count = itemStack.getCount();
         boolean addedToInventory = player.inventory.addItemStackToInventory(itemStack);
 
         if (addedToInventory) {
-            player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRNG().nextFloat() - player.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.world.playSound(null,
+                player.posX, player.posY, player.posZ,
+                SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS,
+                0.2F, (player.getRNG().nextFloat() * 1.4F + 1.0F) * 2.0F
+            );
             player.inventoryContainer.detectAndSendChanges();
         }
 

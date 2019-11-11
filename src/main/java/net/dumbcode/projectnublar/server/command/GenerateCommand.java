@@ -30,9 +30,9 @@ public class GenerateCommand extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         //todo: when the structure system is jsonified, the varibles i have here will be constants that are created at the start of each network
-        //todo: These constants can then be references later on
-        //Not that the constant should be a primitive, not just an integer/float
-        Random rand = new Random();
+        //todo: These constants can then be references later on - Not that the constant should be a primitive, not just an integer/float
+        Random rand = sender.getEntityWorld().rand;
+
         int color1 = rand.nextInt(16);
         int color2 = rand.nextInt(16);
         while (color1 == color2) {
@@ -43,7 +43,8 @@ public class GenerateCommand extends CommandBase {
         new NetworkBuilder(sender.getEntityWorld(), sender.getPosition())
                 .addData(DataHandlers.LOOTTABLE)
                 .addData(new DataHandler(DataHandler.Scope.STRUCTURE, s -> s.equals("projectnublar:digsite_wool_1"),
-                        (world, pos, name, random) -> Blocks.WOOL.getStateFromMeta(colors[random.nextInt(colors.length)])))
+                        (world, pos, name, random) -> Blocks.WOOL.getStateFromMeta(colors[random.nextInt(colors.length)]))
+                )
 
                 .generate(rand,
                         BuilderNode.builder(Structure.class)

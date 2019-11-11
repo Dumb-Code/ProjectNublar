@@ -36,15 +36,17 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     public static final String ADULT_AGE = "adult";
     public static final String SKELETON_AGE = "skeleton";
 
-    private final ItemProperties itemProperties = new ItemProperties();
-    private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
-    private final EntityComponentAttacher attacher = new EntityComponentAttacher();
-
-    private Map<String, AnimationContainer> modelContainer = Maps.newHashMap();
+    private static final Random RANDOM = new Random();
 
     public String getOreSuffix() {
         return StringUtils.toCamelCase(getRegName().getPath());
     }
+    private final ItemProperties itemProperties = new ItemProperties();
+    private final DinosaurInformation dinosaurInfomation = new DinosaurInformation();
+
+    private final EntityComponentAttacher attacher = new EntityComponentAttacher();
+
+    private Map<String, AnimationContainer> modelContainer = Maps.newHashMap();
 
     public String getFormattedName() {
         return (this.getRegName().getNamespace().equals(ProjectNublar.MODID) ? this.getRegName().getPath() : this.getRegName().toString()).toLowerCase().replace(":", "_");
@@ -95,7 +97,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     @Nonnull
     public ResourceLocation getRegName() {
         if(this.getRegistryName() == null) {
-            throw new RuntimeException("Null Registry Name Found");
+            throw new NullPointerException("Null Registry Name Found");
         }
         return this.getRegistryName();
     }
@@ -105,6 +107,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
     }
 
     public void attachDefaultComponents() {
+        //Should be overpriced
     }
 
     /**
@@ -114,8 +117,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
      */
     public static Dinosaur getRandom() {
         Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection();
-        Random rnd = new Random();
-        int i = rnd.nextInt(from.size());
+        int i = RANDOM.nextInt(from.size());
         return from.toArray(new Dinosaur[0])[i];
 
     }

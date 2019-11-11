@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import lombok.*;
 import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.client.utils.RenderUtils;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -86,20 +85,18 @@ public class Connection {
         this.next = next;
         this.previous = previous;
 
-//        this.compared = this.from.getX() == this.to.getX() ? this.to.getZ() - this.from.getZ() : this.from.getX() - this.to.getX();
-
         this.toFromHash = (this.compared < 0 ? this.from : this.to).hashCode() + (this.compared < 0 ? this.to : this.from).hashCode() * 31;
 
-        double[] in = LineUtils.intersect(this.position, this.from, this.to, this.offset);
-        if(in == null) {
-           in = new double[6]; //ew
+        double[] intercept = LineUtils.intersect(this.position, this.from, this.to, this.offset);
+        if(intercept == null) {
+           intercept = new double[6]; //ew
             this.valid = false;
         } else {
             this.valid = true;
         }
 
         this.random = new Random(this.getPosition().toLong() * (long)(this.getOffset() * 1000));
-        this.in = in;
+        this.in = intercept;
         double w = this.type.getCableWidth();
         this.xzlen = Math.sqrt((this.in[1]-this.in[0])*(this.in[1]-this.in[0]) + (this.in[3]-this.in[2])*(this.in[3]-this.in[2]));
         this.fullLen = Math.sqrt(this.xzlen*this.xzlen + (this.in[5]-this.in[4])*(this.in[5]-this.in[4]));
@@ -199,20 +196,10 @@ public class Connection {
     }
 
     public boolean isPowered(IBlockAccess world) {
-        for (BlockPos pos : LineUtils.getBlocksInbetween(this.from, this.to, this.offset)) { //TODO: cache ?
+        for (BlockPos pos : LineUtils.getBlocksInbetween(this.from, this.to, this.offset)) {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof ConnectableBlockEntity) {
-                boolean has = false;
-                for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
-                    if(connection.lazyEquals(this)) {
-                        if(connection.isBroken()) {
-                            return false;
-                        }
-                        has = true;
-                        break;
-                    }
-                }
-                if(!has) {
+                if(!this.isContactablePowerAllowed((ConnectableBlockEntity) te)) {
                     return false;
                 }
             } else {
@@ -222,12 +209,26 @@ public class Connection {
 
         for(BlockPos pos : Lists.newArrayList(this.from, this.to)) {
             TileEntity te = world.getTileEntity(pos);
-            if(te instanceof BlockEntityElectricFencePole && te.hasCapability(CapabilityEnergy.ENERGY, null) && Objects.requireNonNull(te.getCapability(CapabilityEnergy.ENERGY, null)).getEnergyStored() > 0) {
+            if(te != null && te.hasCapability(CapabilityEnergy.ENERGY, null) && Objects.requireNonNull(te.getCapability(CapabilityEnergy.ENERGY, null)).getEnergyStored() > 0) {
                 return true;
             }
         }
 
         return false;
+    }
+    
+    private boolean isContactablePowerAllowed(ConnectableBlockEntity connectable) {
+        boolean has = false;
+        for (Connection connection : connectable.getConnections()) {
+            if(connection.lazyEquals(this)) {
+                if(connection.isBroken()) {
+                    return false;
+                }
+                has = true;
+                break;
+            }
+        }
+        return has;
     }
 
     public VboCache getCache() {
@@ -241,7 +242,7 @@ public class Connection {
         double halfthick = this.type.getCableWidth() / 2F;
 
         double posdist = this.distance(this.from, this.to.getX()+0.5F, this.to.getZ()+0.5F);
-        double yrange = (this.to.getY() - from.getY()) / posdist;
+        double yrange = posdist == 0 ? 1 : (this.to.getY() - this.from.getY()) / posdist;
         double tangrad = this.in[1] == this.in[0] ? Math.PI/2D : Math.atan((this.in[2] - this.in[3]) / (this.in[1] - this.in[0]));
         double xcomp = halfthick * Math.sin(tangrad);
         double zcomp = halfthick * Math.cos(tangrad);
@@ -276,8 +277,8 @@ public class Connection {
         double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1]-ct[3] : ct[0]-ct[2], 2) + (ytop-ybot)*(ytop-ybot)) / (halfthick*32F);
         double yThick = halfthick * Math.cos(tangrady);
         Tessellator.getInstance().getBuffer().setTranslation(-this.position.getX(), this.offset, -this.position.getZ());
-        Pair<Integer, Integer> prev = this.genRenderCache(false, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, yThick, len, ytop, ybot);
-        Pair<Integer, Integer> next = this.genRenderCache(true,  new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, yThick, len, ytop, ybot);
+        Pair<Integer, Integer> prevRenderCache = this.genRenderCache(false, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[] {cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, yThick, len, ytop, ybot);
+        Pair<Integer, Integer> nextRenderCache = this.genRenderCache(true,  new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[] {cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, yThick, len, ytop, ybot);
         double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16)/16F).toArray();
         int main = GlStateManager.glGenLists(1);
         GlStateManager.glNewList(main, GL11.GL_COMPILE);
@@ -300,7 +301,7 @@ public class Connection {
         );
         GlStateManager.glEndList();
         Tessellator.getInstance().getBuffer().setTranslation(0, 0, 0);
-        return new VboCache(main, prev.getLeft(), next.getLeft(), prev.getRight(), next.getRight());
+        return new VboCache(main, prevRenderCache.getLeft(), nextRenderCache.getLeft(), prevRenderCache.getRight(), nextRenderCache.getRight());
     }
 
     private double distance(BlockPos from, double x, double z) {

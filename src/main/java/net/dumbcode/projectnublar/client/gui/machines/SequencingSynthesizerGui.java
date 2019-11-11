@@ -127,6 +127,12 @@ public class SequencingSynthesizerGui extends TabbedGui {
                 safeEntries.add(match);
             }
         }
+
+        this.updateDriveEntires(safeEntries);
+
+    }
+
+    private void updateDriveEntires(List<DriveEntry> safeEntries) {
         for (DriveEntry e : this.entryList) {
             if(safeEntries.contains(e)) {
                 continue;
@@ -195,10 +201,11 @@ public class SequencingSynthesizerGui extends TabbedGui {
         this.secondarySlider.drawButton(mc, mouseX, mouseY, partialTicks);
         this.thirdSlider.drawButton(mc, mouseX, mouseY, partialTicks);
 
-        if(mouseX <= xStart + w && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart
-                && !this.initialBox.isMouseOver(mouseX, mouseY)
-                && !this.secondaryBox.isMouseOver(mouseX, mouseY)
-                && !this.thirdBox.isMouseOver(mouseX, mouseY)) {
+        if(this.initialBox != null && this.secondaryBox != null && this.thirdBox != null &&
+            mouseX <= xStart + w && mouseX >= xStart && mouseY <= yEnd && mouseY >= yStart &&
+            !this.initialBox.isMouseOver(mouseX, mouseY) &&
+            !this.secondaryBox.isMouseOver(mouseX, mouseY) &&
+            !this.thirdBox.isMouseOver(mouseX, mouseY)) {
             int x = mouseX - xStart;
             String text = "Not Set";
             if(x != 0) {
@@ -242,10 +249,14 @@ public class SequencingSynthesizerGui extends TabbedGui {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        GuiDropdownBox mouseOver =
-                this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.isOpen() ? this.initialBox :
-                        this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.isOpen() ? this.secondaryBox :
-                                this.thirdBox.isMouseOver(mouseX, mouseY) || this.thirdBox.isOpen() ? this.thirdBox : null;
+        GuiDropdownBox mouseOver = null;
+        if(this.initialBox.isMouseOver(mouseX, mouseY) || this.initialBox.isOpen()) {
+            mouseOver = this.initialBox;
+        } else if(this.secondaryBox.isMouseOver(mouseX, mouseY) || this.secondaryBox.isOpen()) {
+            mouseOver = this.secondaryBox;
+        } else if(this.thirdBox.isMouseOver(mouseX, mouseY) || this.thirdBox.isOpen()) {
+            mouseOver = this.thirdBox;
+        }
 
         if(mouseOver != null) {
             mouseOver.mouseClicked(mouseX, mouseY, mouseButton);

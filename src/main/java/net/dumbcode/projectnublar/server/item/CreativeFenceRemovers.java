@@ -18,6 +18,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class CreativeFenceRemovers extends Item {
@@ -39,13 +40,12 @@ public class CreativeFenceRemovers extends Item {
                 for (int i = 0; i < ((BlockElectricFencePole) baseState.getBlock()).getType().getHeight(); i++) {
                     listConnections(worldIn.getTileEntity(o.up(i)), set);
                 }
-                Set<BlockPos> positions = Sets.newHashSet();
-                for (ConnectableBlockEntity cbe : set) {
-                    for (Connection connection : cbe.getConnections()) {
-                        positions.addAll(LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset()));
-                    }
-                }
-                positions.forEach(worldIn::setBlockToAir);
+                //Remove all the fence blocks. Maybe we should only remove the connection?
+                set.stream()
+                    .flatMap(cbe -> cbe.getConnections().stream())
+                    .map(connection -> LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset()))
+                    .flatMap(Collection::stream)
+                    .forEach(worldIn::setBlockToAir);
             }
             return EnumActionResult.SUCCESS;
         }
@@ -59,7 +59,7 @@ public class CreativeFenceRemovers extends Item {
             for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
                 BlockPos other = connection.getFrom().equals(connection.getPosition()) ? connection.getTo() : connection.getFrom();
                 TileEntity o = te.getWorld().getTileEntity(other);
-                if(o instanceof ConnectableBlockEntity && !set.contains(o)) {
+                if(o instanceof ConnectableBlockEntity && !set.contains((ConnectableBlockEntity) o)) {
                     listConnections(o, set);
                 }
             }

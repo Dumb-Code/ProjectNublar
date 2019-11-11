@@ -9,7 +9,6 @@ import net.dumbcode.projectnublar.client.files.SkeletalBuilderFileInfomation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
-import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.network.C0MoveSelectedSkeletalPart;
@@ -53,7 +52,6 @@ import static net.dumbcode.projectnublar.client.gui.GuiConstants.mouseOn;
 public class GuiSkeletalBuilder extends GuiScreen {
 
     private final SkeletalBuilderBlockEntity builder;
-    private final SkeletalProperties properties;
     private final TabulaModel model;
     private final TextComponentTranslation titleText;
     private boolean registeredLeftClick;
@@ -100,17 +98,22 @@ public class GuiSkeletalBuilder extends GuiScreen {
     private double prevYSlider;
     private double prevZSlider;
 
+    private static final String PREFIX_KEY = ProjectNublar.MODID + ".gui.skeletal_builder.rotation_slider.prefix";
+    private static final String SUFFIX_KEY = ProjectNublar.MODID + ".gui.skeletal_builder.rotation_slider.prefix";
+
     private GuiSlider xRotationSlider = new GuiSlider(5, 0, 0, 200, 20,
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "X").getUnformattedText(),
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "X").getUnformattedText(),
+            new TextComponentTranslation(PREFIX_KEY, "X").getUnformattedText(),
+            new TextComponentTranslation(SUFFIX_KEY).getUnformattedText(),
             -180.0, 180.0, 0.0, true, true);
+
     private GuiSlider yRotationSlider = new GuiSlider(6, 0, 0, 200, 20,
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "Y").getUnformattedText(),
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Y").getUnformattedText(),
+            new TextComponentTranslation(PREFIX_KEY, "Y").getUnformattedText(),
+            new TextComponentTranslation(SUFFIX_KEY).getUnformattedText(),
             -180.0, 180.0, 0.0, true, true);
+
     private GuiSlider zRotationSlider = new GuiSlider(7, 0, 0, 200, 20,
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.prefix", "Z").getUnformattedText(),
-            new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.rotation_slider.suffix", "Z").getUnformattedText(),
+            new TextComponentTranslation(PREFIX_KEY, "Z").getUnformattedText(),
+            new TextComponentTranslation(SUFFIX_KEY).getUnformattedText(),
             -180.0, 180.0, 0.0, true, true);
 
 
@@ -118,7 +121,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
     public GuiSkeletalBuilder(SkeletalBuilderBlockEntity builder) {
         this.builder = builder;
-        this.properties = builder.getSkeletalProperties();
         this.model = builder.getModel(); // TODO: child models? -> Selectable
         TextComponentTranslation dinosaurNameComponent = this.getDinosaur().createNameComponent();
         this.titleText = new TextComponentTranslation(ProjectNublar.MODID+".gui.skeletal_builder.title", dinosaurNameComponent.getUnformattedText());
@@ -340,7 +342,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
             }
             registeredLeftClick = false;
         }
-        actualModelRender(partialTicks, partBelowMouse);
+        actualModelRender(partBelowMouse);
         GuiHelper.cleanupModelRendering();
 
         if(partBelowMouse != null) {
@@ -399,7 +401,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
 
             // multiply by 2 because in some cases, the colors are not far enough to allow to pick the correct part
             // (a box behind another may be picked instead because the color are too close)
-            float color = index*2 / 255f; // FIXME: 128 boxes MAX - can be done by having the int id as the color index, or a random color. Maybe make it so it splits 0 - 0xFFFFFF by the model box size and sets that as the color
+            float color = index*2 / 255f; // TODO: 128 boxes MAX - can be done by having the int id as the color index, or a random color. Maybe make it so it splits 0 - 0xFFFFFF by the model box size and sets that as the color
 
             GlStateManager.color(color, color, color);
             int prevColor = getColorUnderMouse();
@@ -428,7 +430,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        if(onSliders(mouseX, mouseY) || onSliders(mouseX, mouseY))
+        if(onSliders(mouseX, mouseY))
             return;
         if(mouseButton == 0) {
             registeredLeftClick = true;
@@ -442,10 +444,8 @@ public class GuiSkeletalBuilder extends GuiScreen {
         if(onButtons(mouseX, mouseY))
             return;
         if(onSliders(mouseX, mouseY)) {
-            if(clickedMouseButton == 0) {
-                if(!movedPart) {
-                    movedPart = true;
-                }
+            if(clickedMouseButton == 0 && !movedPart) {
+                movedPart = true;
             }
             return;
         }
@@ -477,9 +477,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
             return true;
         if(mouseOn(yRotationSlider, mouseX, mouseY))
             return true;
-        if(mouseOn(zRotationSlider, mouseX, mouseY))
-            return true;
-        return false;
+        return mouseOn(zRotationSlider, mouseX, mouseY);
     }
 
     private boolean onButtons(int mouseX, int mouseY) {
@@ -522,19 +520,19 @@ public class GuiSkeletalBuilder extends GuiScreen {
         float mouseZ = 400f;
 
         Vector3f offset = new Vector3f(out.get(0), out.get(1), mouseZ);
-        Matrix4f model = new Matrix4f();
+        Matrix4f modelMatrixCopy = new Matrix4f();
         float[] modelCopy = new float[16];
         for (int j = 0;j<4;j++) {
             for(int i = 0;i<4;i++) {
                 modelCopy[i*4+j] = modelMatrix.get(i*4+j);
             }
         }
-        model.set(modelCopy);
+        modelMatrixCopy.set(modelCopy);
         Vector3f partOrigin = computeTranslationVector(selectedPart);
 
         // Make sure our vectors are in the correct space
-        model.transform(partOrigin);
-        model.transform(force);
+        modelMatrixCopy.transform(partOrigin);
+        modelMatrixCopy.transform(force);
 
         offset.sub(partOrigin);
         Vector3f moment = new Vector3f();
@@ -636,7 +634,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GuiHelper.prepareModelRendering(posX, posY, scale, cameraPitch, cameraYaw);
     }
 
-    private void actualModelRender(float partialTicks, TabulaModelRenderer partBelowMouse) {
+    private void actualModelRender(TabulaModelRenderer partBelowMouse) {
         highlight(selectedPart, 0f, 0f, 1f);
         highlight(partBelowMouse, 1f, 1f, 0f);
         resetScalings();
@@ -645,11 +643,6 @@ public class GuiSkeletalBuilder extends GuiScreen {
         GlStateManager.color(1f, 1f, 1f);
         renderModel();
         resetScalings();
-
-        // render rotation ring
-        if(selectedPart != null) {
-//            renderRotationRing();
-        }
     }
 
     private void renderRotationRing() {
