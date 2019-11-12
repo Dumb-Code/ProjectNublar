@@ -27,7 +27,8 @@ public class FossilBlock extends Block implements DinosaurProvider, IItemBlock {
     }
 
     @SideOnly(Side.CLIENT)
-    public BlockRenderLayer getBlockLayer() {
+    @Override
+    public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.CUTOUT_MIPPED;
     }
 
