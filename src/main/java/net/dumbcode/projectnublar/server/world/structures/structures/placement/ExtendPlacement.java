@@ -1,4 +1,4 @@
-package net.dumbcode.projectnublar.server.world.structures.structures.template.placement;
+package net.dumbcode.projectnublar.server.world.structures.structures.placement;
 
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
@@ -7,7 +7,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ExtendPlacement implements TemplatePlacement {
+public class ExtendPlacement implements StructurePlacement {
 
     private final int yStart;
 
@@ -36,6 +36,6 @@ public class ExtendPlacement implements TemplatePlacement {
                 mut = mut.down();
             }
         }
-        return TemplatePlacement.super.place(worldIn, instance, pos, relativePosition, state, flags);
+        return StructurePlacement.super.place(worldIn, instance, pos, relativePosition, state, flags);
     }
 }

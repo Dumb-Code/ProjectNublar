@@ -2,8 +2,8 @@ package net.dumbcode.projectnublar.server.world.structures;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
-import net.dumbcode.projectnublar.server.world.structures.structures.template.placement.ExtendPlacement;
-import net.dumbcode.projectnublar.server.world.structures.structures.template.placement.PushdownPlacement;
+import net.dumbcode.projectnublar.server.world.structures.structures.placement.ExtendPlacement;
+import net.dumbcode.projectnublar.server.world.structures.structures.placement.PushdownPlacement;
 import net.minecraft.util.ResourceLocation;
 
 public class Structures {

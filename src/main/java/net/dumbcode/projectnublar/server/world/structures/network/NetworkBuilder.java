@@ -1,12 +1,15 @@
 package net.dumbcode.projectnublar.server.world.structures.network;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.dumblibrary.server.utils.BuilderNode;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
+import net.dumbcode.projectnublar.server.world.structures.structures.predicates.StructurePredicate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.init.Blocks;
@@ -15,10 +18,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.util.vector.Vector2f;
 
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class NetworkBuilder {
     private final World world;
@@ -27,6 +31,7 @@ public class NetworkBuilder {
     private List<Runnable> generations = Lists.newArrayList();
 
     private List<DataHandler> data = Lists.newArrayList();
+    private Map<String, List<StructurePredicate>> globalPredicates = Maps.newHashMap();
 
     public NetworkBuilder(World world, BlockPos startingPosition) {
         this.world = world;
@@ -38,12 +43,18 @@ public class NetworkBuilder {
         return this;
     }
 
-    public void generate(Random random, List<BuilderNode.Entry<Structure>> aviliable) {
-        BuilderNode.Entry<Structure> rootEntry = getWeightedChoice(random, aviliable);
-        List<Pair<Integer, Integer>> placedEntries = Lists.newArrayList();
-        StructureInstance instance = rootEntry.getElement().createInstance(this.world, this.startingPosition, random);
-        prepGeneration(random, placedEntries, instance, chooseChildren(random, rootEntry, instance), 0, 0);
+    public NetworkBuilder globalPredicate(String name, StructurePredicate... predicates) {
+        Collections.addAll(this.globalPredicates.computeIfAbsent(name, s -> new ArrayList<>()), predicates);
+        return this;
+    }
 
+    public Stats generate(Random random, List<BuilderNode.Entry<Structure>> aviliable) {
+        long startTime = System.currentTimeMillis();
+        BuilderNode.Entry<Structure> rootEntry = getWeightedChoice(random, aviliable);
+        StructureInstance instance = rootEntry.getElement().createInstance(this.world, this.startingPosition, random);
+        instance.getGlobalPredicates().stream().filter(this.globalPredicates::containsKey).map(this.globalPredicates::get).forEach(instance.getPredicates()::addAll);
+        prepGeneration(random, Lists.newArrayList(), instance, chooseChildren(random, rootEntry, instance), 0, 0);
+        long prepTime = System.currentTimeMillis();
         Set<BlockPos> generatedPaths = Sets.newHashSet();
         Biome biome = this.world.getBiome(this.startingPosition);
         for (BlockPos pathPosition : this.pathPositions) {
@@ -64,22 +75,30 @@ public class NetworkBuilder {
             this.world.setBlockState(pathPosition, BlockUtils.getBiomeDependantState(Blocks.GRASS_PATH.getDefaultState(), biome));
         }
 
+        long pathTime = System.currentTimeMillis();
         this.generations.forEach(Runnable::run);
-
         for (DataHandler handler : this.data) {
             handler.end(DataHandler.Scope.NETWORK);
         }
+        long generationTime = System.currentTimeMillis();
+
+        return new Stats(
+            prepTime - startTime,
+            pathTime - prepTime,
+            generationTime - pathTime,
+            this.generations.size()
+        );
     }
 
-    private void prepGeneration(Random random, List<Pair<Integer, Integer>> placedEntries, StructureInstance instance, List<BuilderNode.Entry<Structure>> children, int baseoffX, int baseoffZ) {
+    private void prepGeneration(Random random, List<Vector2f> placedEntries, StructureInstance instance, List<BuilderNode.Entry<Structure>> children, int baseoffX, int baseoffZ) {
         if(!instance.canBuild()) {
             return;
         }
         generateEntry(instance, random, placedEntries, baseoffX, baseoffZ);
         for (BuilderNode.Entry<Structure> child : children) {
-            List<Pair<Integer, Integer>> places = Lists.newArrayList();
             outer:
             for (int tries = 0; tries < 100; tries++) {
+                Set<Vector2f> generatedPlaces = Sets.newHashSet();
 
                 int offx = instance.getXSize() * 3/4;
                 int offz = instance.getZSize() * 3/4;
@@ -102,17 +121,18 @@ public class NetworkBuilder {
 
 
                 StructureInstance childInstance = child.getElement().createInstance(this.world, this.startingPosition.add(offx, 0, offz), random);
+                childInstance.getGlobalPredicates().stream().filter(this.globalPredicates::containsKey).map(this.globalPredicates::get).forEach(childInstance.getPredicates()::addAll);
 
-                for (int x = -childInstance.getXSize()/2; x < childInstance.getXSize()/2; x++) {
-                    for (int z = -childInstance.getZSize()/2; z < childInstance.getZSize()/2; z++) {
-                        places.add(Pair.of(offx+x, offz+z));
+
+                int padding = 3;
+                for (int x = -padding; x <= childInstance.getXSize()+padding; x++) {
+                    for (int z = -padding; z < childInstance.getZSize()+padding; z++) {
+                        generatedPlaces.add(new Vector2f(offx+x, offz+z));
                     }
                 }
-                for (Pair<Integer, Integer> placedEntry : placedEntries) {
-                    for (Pair<Integer, Integer> place : places) {
-                        if(placedEntry.getLeft().equals(place.getLeft()) && placedEntry.getRight().equals(place.getRight())) {
-                            continue outer;
-                        }
+                for (Vector2f entry : generatedPlaces) {
+                    if(placedEntries.contains(entry)) {
+                        continue outer;
                     }
                 }
 
@@ -158,13 +178,13 @@ public class NetworkBuilder {
         }
     }
 
-    private void generateEntry(StructureInstance structure, Random random, List<Pair<Integer, Integer>> placedEntries, int offX, int offZ) {
+    private void generateEntry(StructureInstance structure, Random random, List<Vector2f> placedEntries, int offX, int offZ) {
         //2 blocks padding
         int padding = 2;
         //todo: have this as a function on the structure, as to make it more dynamic
-        for (int x = -structure.getXSize()/2-padding; x < structure.getXSize()/2+padding; x++) {
-            for (int z = -structure.getZSize()/2-padding; z < structure.getZSize()/2+padding; z++) {
-                placedEntries.add(Pair.of(offX+x, offZ+z));
+        for (int x = -padding; x < structure.getXSize()+padding; x++) {
+            for (int z = -padding; z < structure.getZSize()+padding; z++) {
+                placedEntries.add(new Vector2f(offX+x, offZ+z));
             }
         }
         Random constRand = new Random(random.nextLong());
@@ -202,6 +222,16 @@ public class NetworkBuilder {
             }
         }
         throw new IllegalArgumentException("Should not be accessible. Is the passed list empty?");
+
+    }
+
+    @Value
+    public class Stats {
+        private final long timeTakenPrepareMs;
+        private final long timeTakenPathGeneration;
+        private final long timeTakenGenerateMs;
+
+        private final int structures;
 
     }
 }
