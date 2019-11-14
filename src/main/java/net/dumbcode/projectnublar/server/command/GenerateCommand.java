@@ -56,7 +56,7 @@ public class GenerateCommand extends CommandBase {
                     (world, pos, name, random) -> Blocks.WOOL.getStateFromMeta(colors[random.nextInt(colors.length)]))
             )
             .globalPredicate(N,
-                new HeightRangePredicate(ValueRange.upperBound(5)),
+                new HeightRangePredicate(ValueRange.upperBound(3)),
                 new SolidLiquidRatioPredicate(ValueRange.upperBound(0.3D), ValueRange.inifinty())
             )
             .globalPredicate(D,

@@ -113,8 +113,8 @@ public class NetworkBuilder {
                     offz *= 2;
                 }
 
-                offx *= random.nextBoolean()?1:-1;
-                offz *= random.nextBoolean()?1:-1;
+                offx *= random.nextGaussian() * tries/5;
+                offz *= random.nextGaussian() * tries/5;
 
                 offx += baseoffX;
                 offz += baseoffZ;
