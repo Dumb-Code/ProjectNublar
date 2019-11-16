@@ -2,9 +2,11 @@ package net.dumbcode.projectnublar.server.command;
 
 import net.dumbcode.dumblibrary.server.utils.BuilderNode;
 import net.dumbcode.projectnublar.server.utils.ValueRange;
+import net.dumbcode.projectnublar.server.world.constants.ConstantDefinition;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.Structures;
 import net.dumbcode.projectnublar.server.world.structures.network.NetworkBuilder;
+import net.dumbcode.projectnublar.server.world.structures.network.StructureNetwork;
 import net.dumbcode.projectnublar.server.world.structures.structures.Digsite;
 import net.dumbcode.projectnublar.server.world.structures.structures.StructureTemplate;
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.HeightDeviationPredicate;
@@ -12,15 +14,19 @@ import net.dumbcode.projectnublar.server.world.structures.structures.predicates.
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.SolidLiquidRatioPredicate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandlers;
+import net.minecraft.block.BlockColored;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.Random;
+import java.util.function.Function;
 
 public class GenerateCommand extends CommandBase {
 
@@ -39,22 +45,20 @@ public class GenerateCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        //todo: when the structure system is jsonified, the varibles i have here will be constants that are created at the start of each network
-        //todo: These constants can then be references later on - Not that the constant should be a primitive, not just an integer/float
-        Random rand = args.length > 0 ? new Random(args[0].hashCode()) : sender.getEntityWorld().rand;
 
-        int color1 = rand.nextInt(16);
-        int color2;
-        do {
-            color2 = rand.nextInt(16);
-        }  while (color1 == color2);
-        int[] colors = {color1, color2};
+        ConstantDefinition<IBlockState> wool1 = new ConstantDefinition<>();
+        ConstantDefinition<IBlockState> wool2 = new ConstantDefinition<>();
 
-        NetworkBuilder.Stats stats = new NetworkBuilder(sender.getEntityWorld(), sender.getPosition())
+        StructureNetwork network = new NetworkBuilder()
+
             .addData(DataHandlers.LOOTTABLE)
             .addData(new DataHandler(DataHandler.Scope.STRUCTURE, s -> s.equals("projectnublar:digsite_wool_1"),
-                    (world, pos, name, random) -> Blocks.WOOL.getStateFromMeta(colors[random.nextInt(colors.length)]))
+                (world, pos, name, random, decision) -> decision.requireEntry((random.nextBoolean() ? wool1 : wool2)))
             )
+
+            .addConstant(wool1, random -> Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.byMetadata(random.nextInt(16))))
+            .addConstant(wool2, random -> Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.byDyeDamage(random.nextInt(16))))
+
             .globalPredicate(N,
                 new HeightRangePredicate(ValueRange.upperBound(3)),
                 new SolidLiquidRatioPredicate(ValueRange.upperBound(0.3D), ValueRange.inifinty())
@@ -63,8 +67,7 @@ public class GenerateCommand extends CommandBase {
                 new HeightRangePredicate(ValueRange.upperBound(6)),
                 new SolidLiquidRatioPredicate(ValueRange.upperBound(0.3D), ValueRange.inifinty())
             )
-            .generate(rand,
-                BuilderNode.builder(Structure.class)
+            .build(BuilderNode.builder(Structure.class)
                 .child(new Digsite(1, 2, 10).addGlobalPredicates(D))
                     .child(new StructureTemplate(Structures.PREBUILT, 1, 1).fs().addGlobalPredicates(N))
                         .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 3).fs().addGlobalPredicates(N))
@@ -96,7 +99,10 @@ public class GenerateCommand extends CommandBase {
                         .sibling(new StructureTemplate(Structures.TENT_SMALL_2, 1, 4).fs().addGlobalPredicates(N))
                             .child(new StructureTemplate(Structures.CRATE_SMALL, 0, 1).fs().addGlobalPredicates(N))
                             .end()
-                    .buildToRoots());
+                    .buildToRoots()
+            );
+
+        StructureNetwork.Stats stats = network.generate(sender.getEntityWorld(), sender.getPosition(), args.length > 0 ? new Random(args[0].hashCode()) : sender.getEntityWorld().rand);
 
         sender.sendMessage(new TextComponentString(
             "-------------\n"+

@@ -6,7 +6,7 @@ import net.minecraft.tileentity.TileEntityLockableLoot;
 import net.minecraft.util.ResourceLocation;
 
 public class DataHandlers {
-    public static DataHandler LOOTTABLE = new DataHandler(DataHandler.Scope.BLOCK, s -> s.startsWith("chest~"),(world, pos, name, random) -> {
+    public static DataHandler LOOTTABLE = new DataHandler(DataHandler.Scope.BLOCK, s -> s.startsWith("chest~"), (world, pos, name, random, decision) -> {
         TileEntity tileEntity = world.getTileEntity(pos.down());
         if(tileEntity instanceof TileEntityLockableLoot) {
             ResourceLocation res = new ResourceLocation(name.substring(6));

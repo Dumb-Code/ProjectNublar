@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.world.structures.structures.placement;
 
+import net.dumbcode.dumblibrary.server.utils.WorldUtils;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.minecraft.block.state.IBlockState;
@@ -21,7 +22,7 @@ public class ExtendPlacement implements StructurePlacement {
         int total = 0;
         for (int x = 0; x <= instance.getXSize(); x++) {
             for (int z = 0; z <= instance.getZSize(); z++) {
-                total += BlockUtils.getTopSolid(world, start.add(x, 0, z)).getY();
+                total += WorldUtils.getDirectTopdownBlock(world, start.add(x, 0, z)).getY() - 1;
             }
         }
         return new BlockPos(worldPosition.getX(), total / ((instance.getXSize() + 1) * (instance.getZSize() + 1)), worldPosition.getZ()).up(relativePosition.getY());

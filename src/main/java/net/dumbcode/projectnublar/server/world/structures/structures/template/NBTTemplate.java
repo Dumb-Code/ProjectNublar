@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import lombok.Cleanup;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.PlacementSettings;
 import net.dumbcode.projectnublar.server.world.structures.structures.placement.StructurePlacement;
@@ -57,6 +58,7 @@ public class NBTTemplate
         BlockPos pos,
         StructureInstance instance,
         List<DataHandler> handlers,
+        StructureConstants.Decision decision,
         PlacementSettings.Decision settingsDecision,
         Random random,
         BiFunction<BlockPos, BlockInfo, BlockInfo> infoFunc,
@@ -128,7 +130,7 @@ public class NBTTemplate
                     if (tileentitystructure$mode == TileEntityStructure.Mode.DATA)
                     {
                         for (DataHandler handler : handlers) {
-                            IBlockState state = handler.get(info.tileentityData.getString("metadata"), worldIn, blockpos1, random);
+                            IBlockState state = handler.get(info.tileentityData.getString("metadata"), worldIn, blockpos1, random, decision);
                             if(state != null) {
                                 worldIn.setBlockState(blockpos1, state);
                                 break;

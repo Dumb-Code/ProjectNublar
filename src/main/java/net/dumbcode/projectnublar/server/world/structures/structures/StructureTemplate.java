@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.world.structures.structures;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
+import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
@@ -68,11 +69,11 @@ public class StructureTemplate extends Structure {
         }
 
         @Override
-        public void build(Random random, List<DataHandler> handlers) {
+        public void build(Random random, List<DataHandler> handlers, StructureConstants.Decision decision) {
             Biome biome = this.world.getBiome(this.position);
             StructureTemplate.this.template.addBlocksToWorld(
                 this.world, this.position,
-                this, handlers, this.decision, random,
+                this, handlers, decision, this.decision, random,
                 (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData),
                 2
             );

@@ -4,10 +4,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.WorldUtils;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.LootTableHandler;
+import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class Digsite extends Structure {
@@ -99,11 +102,11 @@ public class Digsite extends Structure {
             this.overallsize = overallsize;
             this.circles = circles;
             this.totalLayers = totalLayers;
-            this.centralPosition = position.add(-dims.x, 0, -dims.z);
+            this.centralPosition =  BlockUtils.getTopSolid(world, new BlockPos(position.getX() - dims.x, 257, position.getZ() - dims.z));
         }
 
         @Override
-        public void build(Random random, List<DataHandler> handlers) {
+        public void build(Random random, List<DataHandler> handlers, StructureConstants.Decision decision) {
             Set<BlockPos> holePositions = Sets.newHashSet();
             Set<BlockPos> fossilPositions = Sets.newHashSet();
 
@@ -156,7 +159,7 @@ public class Digsite extends Structure {
                     IBlockState blockState = this.world.getBlockState(holePosition);
                     blockState.getBlock().getDrops(drops, this.world, holePosition, blockState, 0);
 
-                    BlockPos mutPos = this.world.getTopSolidOrLiquidBlock(holePosition);
+                    BlockPos mutPos = WorldUtils.getTopNonLeavesBlock(world, holePosition, state -> (state.getMaterial().blocksMovement() || state.getMaterial().isLiquid()));
                     while (mutPos.getY() >= holePosition.getY() && mutPos.getY() > 0) {
                         this.world.setBlockState(mutPos, Blocks.AIR.getDefaultState());
                         mutPos = mutPos.down();
@@ -277,7 +280,7 @@ public class Digsite extends Structure {
 
         private void setHoldState(IBlockState currentState, BlockPos pos, Random random, Biome biome) {
             if (!currentState.getBlock().isReplaceable(this.world, pos)) {
-                if (random.nextFloat() < 0.1 - 0.05 * (this.circles.length - this.position.getY() + pos.getY())) {
+                if (random.nextFloat() < 0.1 - 0.05 * (this.circles.length - this.centralPosition.getY() + pos.getY())) {
                     this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.STONE.getDefaultState(), biome));
                 } else if (random.nextFloat() < 0.1) {
                     this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.GRASS.getDefaultState(), biome));
@@ -287,7 +290,15 @@ public class Digsite extends Structure {
                     this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(currentState, biome));
                 }
             } else if (currentState.getMaterial().isLiquid()) {
-                this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.getDefaultState(), biome));
+                if(pos.getY() - this.centralPosition.getY() == -1) { //Top circle layer
+                    BlockPos mut = pos;
+                    while(this.world.getBlockState(mut).getMaterial().isLiquid()) {
+                        this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.getDefaultState(), biome));
+                        mut = mut.up();
+                    }
+                } else {
+                    this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.getDefaultState(), biome));
+                }
             }
         }
 
@@ -303,7 +314,7 @@ public class Digsite extends Structure {
 
             int rad = circle.rad;
 
-            this.iterateCircle(distX, distZ, xsize, zsize, rad, (x, z) -> holePositions.add(new BlockPos(startx + x, this.position.getY() + layer - this.totalLayers, startz + z)));
+            this.iterateCircle(distX, distZ, xsize, zsize, rad, (x, z) -> holePositions.add(new BlockPos(startx + x, this.centralPosition.getY() + layer - this.totalLayers, startz + z)));
             if (layer == 0) {
                 int totalBlocks = Math.max(rad / 2, 5);
                 int x = startx;
@@ -312,7 +323,7 @@ public class Digsite extends Structure {
                     x += random.nextInt(3) - 1;
                     z += random.nextInt(3) - 1;
 
-                    BlockPos pos = new BlockPos(x, this.position.getY() + layer - this.totalLayers - 1, z);
+                    BlockPos pos = new BlockPos(x, this.centralPosition.getY() + layer - this.totalLayers - 1, z);
 
                     if (!fossilPositions.contains(pos)) {
                         fossilPositions.add(pos);
@@ -321,7 +332,7 @@ public class Digsite extends Structure {
                 }
             } else if (layer == this.totalLayers - 1) {
                 this.iterateCircle(distX, distZ, xsize, zsize, rad, (x, z) -> {
-                    BlockPos blockPos = new BlockPos(startx + x, this.position.getY() + layer - this.totalLayers, startz + z);
+                    BlockPos blockPos = new BlockPos(startx + x, this.centralPosition.getY() + layer - this.totalLayers, startz + z);
                     int ytop = this.getTopSolid(blockPos);
                     for (; blockPos.getY() <= ytop; blockPos = blockPos.up()) {
                         this.world.setBlockState(blockPos, Blocks.AIR.getDefaultState());

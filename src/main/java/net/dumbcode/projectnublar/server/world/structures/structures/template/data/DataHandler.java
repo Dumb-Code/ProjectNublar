@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.world.structures.structures.template.data;
 
+import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -12,7 +13,7 @@ public class DataHandler {
 
     private final Scope scope;
     private final Predicate<String> predicate;
-    private final StateFunction  func;
+    private final StateFunction func;
 
     private IBlockState cache;
 
@@ -22,10 +23,10 @@ public class DataHandler {
         this.func = func;
     }
 
-    public IBlockState get(String name, World world, BlockPos pos, Random random) {
+    public IBlockState get(String name, World world, BlockPos pos, Random random, StructureConstants.Decision decision) {
         if(this.predicate.test(name)) {
             if(this.cache == null || this.scope == Scope.BLOCK) {
-                this.cache = this.func.getState(world, pos, name, random);
+                this.cache = this.func.getState(world, pos, name, random, decision);
             }
             return this.cache;
         }
@@ -43,6 +44,6 @@ public class DataHandler {
     }
 
     public interface StateFunction {
-        IBlockState getState(World world, BlockPos pos, String name, Random random);
+        IBlockState getState(World world, BlockPos pos, String name, Random random, StructureConstants.Decision decision);
     }
 }
