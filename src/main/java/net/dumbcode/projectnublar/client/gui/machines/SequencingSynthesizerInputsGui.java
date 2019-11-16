@@ -44,17 +44,17 @@ public class SequencingSynthesizerInputsGui extends TabbedGui {
         TextureAtlasSprite leaves = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.LEAVES.getDefaultState());
 
         double total = SequencingSynthesizerBlockEntity.TOTAL_AMOUNT;
-        MachineUtils.drawTiledTexture(this.guiLeft + 21, this.guiTop + 5 + 52F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 37, this.guiTop + 55, 16, 16, water.getMinU(), water.getMinV(), water.getMaxU(), water.getMaxV());
-        MachineUtils.drawTiledTexture(this.guiLeft + 59, (float) (this.guiTop + 5 + 52F * (1F - this.blockEntity.getSugarAmount() / total)), this.guiLeft + 75, this.guiTop + 55, 16, 16, sugar.getMinU(), sugar.getMinV(), sugar.getMaxU(), sugar.getMaxV());
-        MachineUtils.drawTiledTexture(this.guiLeft + 97, (float) (this.guiTop + 5 + 52F * (1F - this.blockEntity.getBoneAmount() / total)), this.guiLeft + 113, this.guiTop + 55, 16, 16, bone.getMinU(), bone.getMinV(), bone.getMaxU(), bone.getMaxV());
+        MachineUtils.drawTiledTexture(this.guiLeft + 21F, this.guiTop + 5F + 52F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 37F, this.guiTop + 55F, 16, 16, water.getMinU(), water.getMinV(), water.getMaxU(), water.getMaxV());
+        MachineUtils.drawTiledTexture(this.guiLeft + 59F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getSugarAmount() / total)), this.guiLeft + 75F, this.guiTop + 55F, 16, 16, sugar.getMinU(), sugar.getMinV(), sugar.getMaxU(), sugar.getMaxV());
+        MachineUtils.drawTiledTexture(this.guiLeft + 97F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getBoneAmount() / total)), this.guiLeft + 113F, this.guiTop + 55F, 16, 16, bone.getMinU(), bone.getMinV(), bone.getMaxU(), bone.getMaxV());
         GlStateManager.color(0.0941F, 0.7098F, 0.2823F, 1f);
-        MachineUtils.drawTiledTexture(this.guiLeft + 135, (float) (this.guiTop + 5 + 52F * (1F - this.blockEntity.getPlantAmount() / total)), this.guiLeft + 151, this.guiTop + 55, 16, 16, leaves.getMinU(), leaves.getMinV(), leaves.getMaxU(), leaves.getMaxV());
+        MachineUtils.drawTiledTexture(this.guiLeft + 135F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getPlantAmount() / total)), this.guiLeft + 151F, this.guiTop + 55F, 16, 16, leaves.getMinU(), leaves.getMinV(), leaves.getMaxU(), leaves.getMaxV());
         GlStateManager.color(1f, 1f, 1f, 1f);
 
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-        this.drawTexturedModalRect(this.guiLeft + 21, this.guiTop + 5, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 59, this.guiTop + 5, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 97, this.guiTop + 5, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 135, this.guiTop + 5, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 21F, this.guiTop + 5F, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 59F, this.guiTop + 5F, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 97F, this.guiTop + 5F, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 135F, this.guiTop + 5F, 176, 0, 16, 52);
     }
 }

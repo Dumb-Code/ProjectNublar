@@ -71,8 +71,8 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
             this.rotationYaw = driver.rotationYaw;
         }
 
-        float velX = this.getIntInput(DefaultInput.LEFT) - this.getIntInput(DefaultInput.RIGHT);
-        float velZ = this.getIntInput(DefaultInput.FORWARD) - this.getIntInput(DefaultInput.BACKWARDS);
+        float velX = (float) this.getIntInput(DefaultInput.LEFT) - this.getIntInput(DefaultInput.RIGHT);
+        float velZ = (float) this.getIntInput(DefaultInput.FORWARD) - this.getIntInput(DefaultInput.BACKWARDS);
 
         velX /= 30F;
         velZ /= 30F;

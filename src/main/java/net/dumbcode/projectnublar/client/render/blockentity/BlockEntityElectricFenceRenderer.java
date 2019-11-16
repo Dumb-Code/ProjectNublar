@@ -53,7 +53,7 @@ public class BlockEntityElectricFenceRenderer extends TileEntitySpecialRenderer<
         GlStateManager.rotate((float) Math.toDegrees(Math.atan((in[3]-in[2]) / (in[1]-in[0]))), 0, -1, 0);
         for (int i = 0; i < 2; i++) {
             GlStateManager.pushMatrix();
-            GlStateManager.rotate(180*i, 0, 1, 0);
+            GlStateManager.rotate(180F*i, 0, 1, 0);
             GlStateManager.rotate((float) angle * (i==1?-1:1), 0, 0, 1);
             GlStateManager.translate(0, -h-connection.getType().getCableWidth()/2F, 0);
             buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);

@@ -249,7 +249,7 @@ public class GuiFileExplorer extends GuiScreen {
 
             String fileExtension = FilenameUtils.getExtension(file.getName());
             try {
-                ResourceLocation location = new ResourceLocation(ProjectNublar.MODID, "textures/gui/file-explorer/custom-extensions/" + fileExtension + ".png");
+                ResourceLocation location = new ResourceLocation(ProjectNublar.MODID, "textures/gui/file_explorer/custom_extensions/" + fileExtension + ".png");
                 mc.getResourceManager().getResource(location);
                 this.location = location;
             } catch (IOException ignored) { //If something goes wrong with loading the file (if its not there or coruppted
@@ -262,7 +262,7 @@ public class GuiFileExplorer extends GuiScreen {
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                    this.location = location == null ? new ResourceLocation(ProjectNublar.MODID, "textures/gui/file-explorer/unknownfile.png") : location;
+                    this.location = location == null ? new ResourceLocation(ProjectNublar.MODID, "textures/gui/file_explorer/unknownfile.png") : location;
                 }
             }
         }
@@ -274,7 +274,7 @@ public class GuiFileExplorer extends GuiScreen {
         @Override
         public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
             mc.renderEngine.bindTexture(this.location);
-            Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, 16, 16, 16, 16);
+            Gui.drawModalRectWithCustomSizedTexture(x, y, 0F, 0F, 16, 16, 16, 16);
             GuiFileExplorer.this.mc.fontRenderer.drawStringWithShadow(this.isParent ? ".." : this.file.getName(), x + 25, y + slotHeight / 2 - 4, -1);
         }
 

@@ -42,7 +42,7 @@ public class FossilProcessorGui extends TabbedGui {
         GlStateManager.disableBlend();
         this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         TextureAtlasSprite tas = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState()); //TODO cache
-        MachineUtils.drawTiledTexture(this.guiLeft + 8, this.guiTop + 8 + 52F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 24, this.guiTop + 58, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
+        MachineUtils.drawTiledTexture(this.guiLeft + 8F, this.guiTop + 8F + 52F * (1F - this.blockEntity.getTank().getFluidAmount() / (float) this.blockEntity.getTank().getCapacity()), this.guiLeft + 24F, this.guiTop + 58F, 16, 16, tas.getMinU(), tas.getMinV(), tas.getMaxU(), tas.getMaxV());
 
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
         this.drawTexturedModalRect(this.guiLeft + 8, this.guiTop + 8, 176, 0, 16, 102);
