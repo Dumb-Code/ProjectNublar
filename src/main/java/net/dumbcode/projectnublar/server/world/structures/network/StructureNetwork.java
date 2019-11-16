@@ -81,8 +81,7 @@ public class StructureNetwork {
                     pos = WorldUtils.getDirectTopdownBlock(world, pos.add(startingPosition)).down();
                     if(world.getBlockState(pos).getMaterial().isLiquid()) {
                         world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.PLANKS.getDefaultState(), biome));
-                    }
-                    if(perc < 0.6) {
+                    } else if(perc < 0.6) {
                         world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
                     }
                 }
