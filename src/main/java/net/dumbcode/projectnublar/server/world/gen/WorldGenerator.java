@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.world.structures.network.StructureNetwork;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -30,12 +31,17 @@ public enum WorldGenerator implements IWorldGenerator {
 
     public void generateOverworld(World world, Random random, int chunkX, int chunkZ) {
         Biome biome = world.getBiome(new BlockPos(chunkX, 0, chunkZ));
+        int posX = chunkX + random.nextInt(16);
+        int posZ = chunkZ + random.nextInt(16);
 
-        dinosaurList:
+        this.generateDinosaurFossils(world, biome, posX, posZ, random);
+
+        this.generateDigsiteStructure(world, posX, posZ, random);
+
+    }
+
+    private void generateDinosaurFossils(World world, Biome biome, int posX, int posZ, Random random) {
         for (int i = 0; i < 32; i++) {
-            int posX = chunkX + random.nextInt(16);
-            int posZ = chunkZ + random.nextInt(16);
-
             List<Dinosaur> dinoList = Lists.newArrayList(ProjectNublar.DINOSAUR_REGISTRY);
             Collections.shuffle(dinoList, random);
             for (Dinosaur dinosaur : dinoList) {
@@ -43,10 +49,16 @@ public enum WorldGenerator implements IWorldGenerator {
                     if(dinosaur.getDinosaurInfomation().getBiomeTypes().contains(type)) {
                         int posY = dinosaur.getDinosaurInfomation().getPeriod().getYLevel(random);
                         new WorldGenMinable(FossilBlock.FossilType.guess(world.getBlockState(new BlockPos(posX, posY, posZ)), dinosaur), 5).generate(world, random, new BlockPos(posX, posY, posZ));
-                        break dinosaurList;
+                        return;
                     }
                 }
             }
+        }
+    }
+
+    private void generateDigsiteStructure(World world, int x, int z, Random random) {
+        if (random.nextFloat() < 0.001) {
+            DigsiteStructureNetwork.NETWORK.generate(world, new BlockPos(x, 100, z), random);
         }
     }
 }
