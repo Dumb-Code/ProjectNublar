@@ -52,8 +52,8 @@ import java.util.Set;
 public class BlockConnectableBase extends Block {
 
     //Set this at your own will, just remember to set it back to true after collection
-    public static boolean collidableClient = true;
-    public static boolean collidableServer = true;
+    public static final boolean collidableClient = true;
+    public static final boolean collidableServer = true;
 
     public BlockConnectableBase(Material blockMaterialIn, MapColor blockMapColorIn) {
         super(blockMaterialIn, blockMapColorIn);

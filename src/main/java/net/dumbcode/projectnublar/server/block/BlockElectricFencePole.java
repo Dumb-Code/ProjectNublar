@@ -117,10 +117,10 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
         TileEntity te = worldIn.getTileEntity(pos.down(state.getValue(INDEX_PROPERTY)));
         if(te instanceof BlockEntityElectricFencePole) {
             BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
-            if(!ef.fenceConnections.isEmpty()) {
+            if(!ef.getConnections().isEmpty()) {
 
                 List<Connection> differingConnections = Lists.newArrayList();
-                for (Connection connection : ef.fenceConnections) {
+                for (Connection connection : ef.getConnections()) {
                     boolean has = false;
                     for (Connection dc : differingConnections) {
                         if(connection.getFrom().equals(dc.getFrom()) && connection.getTo().equals(dc.getTo())) {
@@ -152,7 +152,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
             }
 
             rotation += this.getType().getRotationOffset() + 90F;
-            if(ef.rotatedAround) {
+            if(ef.isRotatedAround()) {
                 rotation += 180;
             }
         }
@@ -185,7 +185,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
             if(stack.isEmpty()) {
                 TileEntity te = worldIn.getTileEntity(pos);
                 if(te instanceof BlockEntityElectricFencePole) {
-                    ((BlockEntityElectricFencePole) te).rotatedAround = !((BlockEntityElectricFencePole) te).rotatedAround;
+                    ((BlockEntityElectricFencePole) te).setRotatedAround(!((BlockEntityElectricFencePole) te).isRotatedAround());
                     te.markDirty();
                     for (int y = 0; y < this.type.getHeight(); y++) {
                         IBlockState blockState = worldIn.getBlockState(pos.up(y));

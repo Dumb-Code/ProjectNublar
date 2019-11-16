@@ -27,16 +27,16 @@ import java.util.function.UnaryOperator;
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
 
-    public static Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
-    public static Item FILTER = new Item();
-    public static Item AMBER = new Item();
-    public static Item HARD_DRIVE = new DriveItem();
-    public static Item EMPTY_SYRINGE = new ItemSyringe(ItemSyringe.Type.EMPTY);
-    public static Item DNA_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_DNA);
-    public static Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
-    public static Item FENCE_REMOVER = new ItemFenceRemover();
-    public static Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
-    public static Item ARTIFICIAL_EGG = new Item();
+    public static final Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
+    public static final Item FILTER = new Item();
+    public static final Item AMBER = new Item();
+    public static final Item HARD_DRIVE = new DriveItem();
+    public static final Item EMPTY_SYRINGE = new ItemSyringe(ItemSyringe.Type.EMPTY);
+    public static final Item DNA_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_DNA);
+    public static final Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
+    public static final Item FENCE_REMOVER = new ItemFenceRemover();
+    public static final Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
+    public static final Item ARTIFICIAL_EGG = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();

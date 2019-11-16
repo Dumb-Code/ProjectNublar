@@ -23,11 +23,15 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import java.util.List;
 
 public class AgeComponent extends EntityComponent implements RenderLocationComponent {
-    public List<AgeStage> orderedAges = Lists.newLinkedList();
+
+    @Getter private List<AgeStage> orderedAges = Lists.newLinkedList();
+
+    @Getter @Setter
     public int ageInTicks = 0;
 
     public AgeStage stage = AgeStage.MISSING;
-    public float percentageStage = 1F;
+
+    @Setter private float percentageStage = 1F;
 
     public void setRawStage(String stage) {
         for (AgeStage orderedAge : this.orderedAges) {

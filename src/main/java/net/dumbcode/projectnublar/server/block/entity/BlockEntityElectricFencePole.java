@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.Getter;
+import lombok.Setter;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.block.state.IBlockState;
@@ -22,9 +24,11 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity, ITickable {
-    public Set<Connection> fenceConnections = Sets.newLinkedHashSet();
 
-    public boolean rotatedAround = false;
+    private Set<Connection> fenceConnections = Sets.newLinkedHashSet();
+
+    @Getter @Setter
+    private boolean rotatedAround = false;
 
     private MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
     

@@ -10,10 +10,10 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class WanderComponent extends EntityComponent implements FinalizableComponent {
 
-    public boolean avoidWater = false;
-    public int priority = 3;
-    public double speed = 0.5D;
-    public int chance = 50;
+    private boolean avoidWater = false;
+    private int priority = 3;
+    private double speed = 0.5D;
+    private int chance = 50;
 
 
     @Override

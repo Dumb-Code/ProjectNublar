@@ -18,7 +18,7 @@ public enum DinosaurPeriod {
     ORDOVICIAN("ordovician", 485.4F, 443.5F),
     CAMBRIAN("cambrian", 541.0F, 485.5F);
 
-    public static float yStart = 64;
+    public static final float yStart = 64;
 
     private final String name;
     private final float startTime;

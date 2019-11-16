@@ -75,15 +75,15 @@ public class S12UpdatePoleList implements IMessage {
                 GuiSkeletalProperties gui = (GuiSkeletalProperties)screen;
                 if(gui.getBuilder().getPos().equals(pos)) {
                     gui.updateList();//Update the gui screen for other players
-                    if(gui.editingPole != null) {
+                    if(gui.getEditingPole() != null) {
                         entries: {
                             for (GuiSkeletalProperties.PoleEntry entry : gui.entries) {
-                                if(entry.getPole().equals(gui.editingPole.getPole())) {
-                                    gui.editingPole = entry;
+                                if(entry.getPole().equals(gui.getEditingPole().getPole())) {
+                                    gui.setEditingPole(entry);
                                     break entries;
                                 }
                             }
-                            gui.editingPole = null;
+                            gui.setEditingPole(null);
                         }
                     }
                 }

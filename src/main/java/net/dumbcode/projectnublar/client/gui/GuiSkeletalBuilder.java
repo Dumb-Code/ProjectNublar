@@ -191,7 +191,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
         } else if(button == exportButton) {
             this.dialogBox
                     .title("Export pose")
-                    .showBox(DialogBox.Type.SAVE, file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file));
+                    .showBox(DialogBox.Type.SAVE, file -> SkeletalBuilderFileHandler.serialize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file));
 //            this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Export", file -> SkeletalBuilderFileHandler.serilize(new SkeletalBuilderFileInfomation(this.getDinosaur().getRegName(), this.builder.getPoseData()), file))); //TODO: localize
         } else if(button == importButton) {
             this.mc.displayGuiScreen(new GuiFileExplorer(this, "dinosaur poses", "Import", file -> ProjectNublar.NETWORK.sendToServer(new C8FullPoseChange(this.builder, SkeletalBuilderFileHandler.deserilize(file).getPoseData())))); //TODO: localize

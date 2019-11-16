@@ -37,7 +37,7 @@ public class S17MachinePositionDirty implements IMessage {
         protected void handleMessage(S17MachinePositionDirty message, MessageContext ctx, World world, EntityPlayer player) {
             TileEntity te = world.getTileEntity(message.pos);
             if(te instanceof MachineModuleBlockEntity) {
-                ((MachineModuleBlockEntity) te).positionDirty = true;
+                ((MachineModuleBlockEntity) te).setPositionDirty(true);
             }
         }
     }

@@ -26,7 +26,7 @@ import java.util.List;
 
 public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBlockEntity> {
 
-    public static int TOTAL_PLANT_MATTER = 100;
+    public static final int TOTAL_PLANT_MATTER = 100;
 
     @SideOnly(Side.CLIENT)
     public float movementTicks;

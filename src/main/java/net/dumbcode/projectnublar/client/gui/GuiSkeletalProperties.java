@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import lombok.Setter;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -35,7 +36,8 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
 
     private GuiScrollBox<PoleEntry> scrollBox = new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries);
 
-    public PoleEntry editingPole;
+    @Getter @Setter
+    private PoleEntry editingPole;
 
     private GuiTextField editText = new GuiTextField(5, Minecraft.getMinecraft().fontRenderer, 0, 0, 75, 20);
     private GuiButton editDirection = new GuiButtonExt(1, 0, 0, 75, 20, "");

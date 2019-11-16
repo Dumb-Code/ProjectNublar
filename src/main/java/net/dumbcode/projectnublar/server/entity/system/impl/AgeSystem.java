@@ -29,9 +29,9 @@ public enum AgeSystem implements EntitySystem {
         for (int i = 0; i < this.ages.length; i++) {
             AgeComponent age = this.ages[i];
             AgeStage start = age.stage;
-            int ageoff = age.ageInTicks;
+            int ageoff = age.getAgeInTicks();
 
-            Iterator<AgeStage> iterator = age.orderedAges.iterator();
+            Iterator<AgeStage> iterator = age.getOrderedAges().iterator();
             while(ageoff > 0 && iterator.hasNext()) {
                 age.stage = iterator.next();
                 ageoff -= age.stage.getTime();
@@ -42,9 +42,9 @@ public enum AgeSystem implements EntitySystem {
 
 
             if(age.stage == null) {
-                age.percentageStage = 0F;
+                age.setPercentageStage(0F);
             } else {
-                age.percentageStage = (ageoff + age.stage.getTime()) / (float) age.stage.getTime();
+                age.setPercentageStage((ageoff + age.stage.getTime()) / (float) age.stage.getTime());
             }
 
             if(start != age.stage) {
@@ -54,7 +54,7 @@ public enum AgeSystem implements EntitySystem {
                 }
             }
 
-            age.ageInTicks++;
+            age.setAgeInTicks(age.getAgeInTicks() + 1);
         }
     }
 }

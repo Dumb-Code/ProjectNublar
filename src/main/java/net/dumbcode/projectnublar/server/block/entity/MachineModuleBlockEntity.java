@@ -47,7 +47,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     @Getter @Setter private int stateID;
 
-    public boolean positionDirty;
+    @Setter private boolean positionDirty;
 
     @Getter
     private EnergyStorage energy;

@@ -78,7 +78,7 @@ public class ProjectNublar {
     @Mod.Instance(MODID)
     public static ProjectNublar INSTANCE;
 
-    public static SimpleNetworkWrapper NETWORK = new SimpleNetworkWrapper(MODID);
+    public static final  SimpleNetworkWrapper NETWORK = new SimpleNetworkWrapper(MODID);
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -153,7 +153,7 @@ public class ProjectNublar {
             try (FileWriter writer = new FileWriter(jsonFile)) {
                 gson.toJson(dino, writer);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.warn("There was an issue writing to {}", jsonFile.getName());
             }
         });
     }
