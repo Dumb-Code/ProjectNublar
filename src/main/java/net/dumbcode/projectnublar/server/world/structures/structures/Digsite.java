@@ -159,13 +159,13 @@ public class Digsite extends Structure {
                     IBlockState blockState = this.world.getBlockState(holePosition);
                     blockState.getBlock().getDrops(drops, this.world, holePosition, blockState, 0);
 
-                    BlockPos mutPos = WorldUtils.getTopNonLeavesBlock(world, holePosition, state -> (state.getMaterial().blocksMovement() && !state.getMaterial().isLiquid()));
+                    BlockPos mutPos = WorldUtils.getTopNonLeavesBlock(this.world, holePosition, state -> (state.getMaterial().blocksMovement() && !state.getMaterial().isLiquid()));
                     while (mutPos.getY() >= holePosition.getY() && mutPos.getY() > 0) {
                         this.world.setBlockState(mutPos, Blocks.AIR.getDefaultState());
                         mutPos = mutPos.down();
                     }
-                    this.world.setBlockState(holePosition, Blocks.AIR.getDefaultState());
                 }
+                this.world.setBlockState(holePosition, Blocks.AIR.getDefaultState());
             }
         }
 
