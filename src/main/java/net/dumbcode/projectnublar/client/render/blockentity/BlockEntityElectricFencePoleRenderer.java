@@ -22,7 +22,7 @@ public class BlockEntityElectricFencePoleRenderer extends TileEntitySpecialRende
 
         GlStateManager.color(1f, 1f, 1f, 1f);
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
-        for (Connection connection : te.fenceConnections) {
+        for (Connection connection : te.getConnections()) {
             BlockEntityElectricFenceRenderer.renderConnection(connection);
         }
         RenderHelper.enableStandardItemLighting();

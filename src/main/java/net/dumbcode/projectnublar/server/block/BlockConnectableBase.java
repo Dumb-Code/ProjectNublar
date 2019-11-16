@@ -52,8 +52,8 @@ import java.util.Set;
 public class BlockConnectableBase extends Block {
 
     //Set this at your own will, just remember to set it back to true after collection
-    public static final boolean collidableClient = true;
-    public static final boolean collidableServer = true;
+    private static boolean collidableClient = true;
+    private static boolean collidableServer = true;
 
     public BlockConnectableBase(Material blockMaterialIn, MapColor blockMapColorIn) {
         super(blockMaterialIn, blockMapColorIn);
@@ -580,6 +580,14 @@ public class BlockConnectableBase extends Block {
         }
     }
 
+    public static void setCollidableClient(boolean client) {
+        collidableClient = client;
+    }
+
+    public static void setCollidableServer(boolean server) {
+        collidableServer = server;
+    }
+    
     @Value
     public static class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir; RotatedRayBox.Result result;}
 

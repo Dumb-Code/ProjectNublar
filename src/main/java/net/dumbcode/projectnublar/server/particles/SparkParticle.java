@@ -30,9 +30,9 @@ public class SparkParticle extends Particle {
 
     @Override
     public void move(double x, double y, double z) {
-        BlockConnectableBase.collidableClient = false;
+        BlockConnectableBase.setCollidableClient(false);
         super.move(x, y, z);
-        BlockConnectableBase.collidableClient = true;
+        BlockConnectableBase.setCollidableClient(true);
     }
 
     @Override
