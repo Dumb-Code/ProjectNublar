@@ -80,7 +80,7 @@ public class Tyrannosaurus extends Dinosaur {
                 .addStage(new AgeStage(SKELETON_AGE, -1, SKELETON_AGE))
                 .setDefaultStageName(ADULT_AGE);
 
-        this.addComponent(EntityComponentTypes.MODEL);
+        this.addComponent(EntityComponentTypes.MODEL).setShadowSize(3F);
         this.addComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
