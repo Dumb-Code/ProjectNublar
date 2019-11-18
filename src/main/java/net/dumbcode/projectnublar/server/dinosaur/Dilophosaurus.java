@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -45,7 +46,8 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
-                        .add(new ItemStack(Items.APPLE)))
+                        .add(new ItemStack(Items.APPLE))
+                )
                 .setMaxFood(7500)
                 .setMaxWater(6000);
 
@@ -78,6 +80,7 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addComponent(ComponentHandler.WANDER_AI);
+        this.addComponent(ComponentHandler.ATTACK_AI).addEnemies(DinosaurEntity.class);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
                 .initializeMap(
