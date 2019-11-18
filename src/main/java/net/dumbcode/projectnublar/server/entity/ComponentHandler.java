@@ -6,6 +6,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType;
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.*;
+import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
 import net.dumbcode.projectnublar.server.plants.component.PlantComponent;
 import net.minecraft.util.ResourceLocation;
@@ -21,6 +22,7 @@ public class ComponentHandler {
     public static final EntityComponentType<AgeComponent,AgeComponent.Storage> AGE = InjectedUtils.injected();
     public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
+    public static final EntityComponentType<WanderComponent,?> ATTACK_AI = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
 
     public static final EntityComponentType<DinosaurDropsComponent, DinosaurDropsComponent.Storage> ITEM_DROPS = InjectedUtils.injected();
@@ -58,6 +60,10 @@ public class ComponentHandler {
                         .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "item_drops"))
                         .withConstructor(DinosaurDropsComponent::new)
                         .withStorage(DinosaurDropsComponent.Storage::new)
+                        .build(),
+                SimpleComponentType.builder(AttackComponent.class)
+                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "attack_ai"))
+                        .withConstructor(AttackComponent::new)
                         .build()
         );
     }
