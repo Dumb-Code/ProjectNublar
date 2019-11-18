@@ -9,18 +9,14 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.GatherEnemiesComponent;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.GatherGeneticsComponent;
 import net.dumbcode.projectnublar.server.entity.ai.EntityAttackAI;
-import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.GatherEnemiesComponent;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class AttackComponent extends EntityComponent implements FinalizableComponent {
 
@@ -60,7 +56,7 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
     public static class Storage implements EntityComponentStorage<AttackComponent> {
 
         private List<Class<? extends EntityLiving>> enemies = new ArrayList<>();
-        
+
         @Override
         public AttackComponent construct() {
             AttackComponent component = new AttackComponent();

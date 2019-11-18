@@ -1,9 +1,5 @@
 package net.dumbcode.projectnublar.server.entity.ai;
 
-import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
-import net.dumbcode.dumblibrary.server.ecs.component.impl.MetabolismComponent;
-import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
