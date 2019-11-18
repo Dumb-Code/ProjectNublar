@@ -1,10 +1,11 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 
-import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface GatherEnemiesComponent {
-
-    List<Class<? extends EntityLiving>> gatherEnemies();
+    void gatherEnemyPredicates(Consumer<Predicate<EntityLivingBase>> registry);
 }

@@ -7,23 +7,23 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.world.World;
 
-import java.util.List;
+import java.util.function.Predicate;
 
 public class EntityAttackAI extends EntityAIAttackMelee {
 
     private final EntityCreature attacker;
-    private final List<Class<? extends EntityLiving>> enemies;
+    private final Predicate<EntityLivingBase> enemyPredicate;
 
     private World world;
 
-    public EntityAttackAI(EntityCreature entity, List<Class<? extends EntityLiving>> enemies) {
-        this(entity, enemies, entity.getAIMoveSpeed());
+    public EntityAttackAI(EntityCreature entity, Predicate<EntityLivingBase> enemyPredicate) {
+        this(entity, enemyPredicate, entity.getAIMoveSpeed());
     }
 
-    public EntityAttackAI(EntityCreature entity, List<Class<? extends EntityLiving>> enemies, double speed) {
+    public EntityAttackAI(EntityCreature entity, Predicate<EntityLivingBase> enemyPredicate, double speed) {
         super(entity, speed, false);
         this.attacker = entity;
-        this.enemies = enemies;
+        this.enemyPredicate = enemyPredicate;
         this.world = entity.world;
     }
 
@@ -44,7 +44,7 @@ public class EntityAttackAI extends EntityAIAttackMelee {
     private boolean findNewTarget() {
         if(attacker.getAttackTarget() == null || !attacker.getAttackTarget().isEntityAlive()) {
             for(Entity entity : world.loadedEntityList) {
-                if(entity.isEntityAlive() && enemies.contains(entity.getClass()) && entity != attacker) {
+                if(entity instanceof EntityLivingBase && entity.isEntityAlive() && this.enemyPredicate.test((EntityLivingBase) entity) && entity != this.attacker) {
                     attacker.setAttackTarget((EntityLivingBase) entity);
                     return true;
                 }

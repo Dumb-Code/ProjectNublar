@@ -22,7 +22,7 @@ public class ComponentHandler {
     public static final EntityComponentType<AgeComponent,AgeComponent.Storage> AGE = InjectedUtils.injected();
     public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
-    public static final EntityComponentType<AttackComponent, AttackComponent.Storage> ATTACK_AI = InjectedUtils.injected();
+    public static final EntityComponentType<AttackComponent, ?> ATTACK_AI = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
     public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
 
@@ -65,7 +65,6 @@ public class ComponentHandler {
             SimpleComponentType.builder(AttackComponent.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "attack_ai"))
                 .withConstructor(AttackComponent::new)
-                .withStorage(AttackComponent.Storage::new)
                 .build(),
             SimpleComponentType.builder(DinosaurEggLayingComponent.class, DinosaurEggLayingComponent.Storage.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur_egg_laying"))
