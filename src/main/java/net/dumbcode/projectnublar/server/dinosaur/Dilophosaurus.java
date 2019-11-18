@@ -47,7 +47,6 @@ public class Dilophosaurus extends Dinosaur {
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
                         .add(new ItemStack(Items.APPLE))
-                        .add(DinosaurEntity.class)
                 )
                 .setMaxFood(7500)
                 .setMaxWater(6000);
@@ -78,7 +77,7 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addComponent(ComponentHandler.WANDER_AI);
-        this.addComponent(ComponentHandler.ATTACK_AI);
+        this.addComponent(ComponentHandler.ATTACK_AI).addEnemies(DinosaurEntity.class);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
                 .initializeMap(

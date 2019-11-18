@@ -50,7 +50,6 @@ public class Tyrannosaurus extends Dinosaur {
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
                         .add(new ItemStack(Items.APPLE))
-                        .add(DinosaurEntity.class)
                 )
                 .setMaxFood(7500)
                 .setMaxWater(6000);
