@@ -74,8 +74,9 @@ public class Tyrannosaurus extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.GENDER);
         this.addComponent(ComponentHandler.AGE)
-                .addStage(new AgeStage(ADULT_AGE, -1))
-                .addStage(new AgeStage(SKELETON_AGE, -1));
+                .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE))
+                .addStage(new AgeStage(SKELETON_AGE, -1, SKELETON_AGE))
+                .setDefaultStageName(ADULT_AGE);
 
         this.addComponent(EntityComponentTypes.MODEL);
         this.addComponent(EntityComponentTypes.SPEED_TRACKING);
@@ -96,7 +97,7 @@ public class Tyrannosaurus extends Dinosaur {
                 );
 
         this.addComponent(EntityComponentTypes.GENETICS)
-            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, 0, 0.75F);
+            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", 0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
             .addLayer("body", "body")

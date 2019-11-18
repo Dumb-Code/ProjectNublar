@@ -3,12 +3,21 @@ package net.dumbcode.projectnublar.server.entity.system.impl;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.EntityFamily;
 import net.dumbcode.dumblibrary.server.ecs.EntityManager;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.AnimationComponent;
 import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Iterator;
 
@@ -27,34 +36,49 @@ public enum AgeSystem implements EntitySystem {
     @Override
     public void update(World world) {
         for (int i = 0; i < this.ages.length; i++) {
-            AgeComponent age = this.ages[i];
-            AgeStage start = age.stage;
-            int ageoff = age.getAgeInTicks();
+            this.update(this.ages[i], this.entities[i]);
+        }
+    }
 
-            Iterator<AgeStage> iterator = age.getOrderedAges().iterator();
-            while(ageoff > 0 && iterator.hasNext()) {
-                age.stage = iterator.next();
-                ageoff -= age.stage.getTime();
-                if(age.stage.getTime() == -1) {
-                    break;
-                }
+    private void update(AgeComponent age, Entity entity) {
+        AgeStage start = age.stage;
+        int ageoff = age.getAgeInTicks();
+
+        Iterator<AgeStage> iterator = age.getOrderedAges().iterator();
+        while(ageoff > 0 && iterator.hasNext()) {
+            age.stage = iterator.next();
+            ageoff -= age.stage.getTime();
+            if(age.stage.getTime() == -1) {
+                break;
             }
+        }
 
 
-            if(age.stage == null) {
-                age.setPercentageStage(0F);
-            } else {
-                age.setPercentageStage((ageoff + age.stage.getTime()) / (float) age.stage.getTime());
+        if(age.stage == null) {
+            age.setPercentageStage(0F);
+        } else {
+            age.setPercentageStage((ageoff + age.stage.getTime()) / (float) age.stage.getTime());
+        }
+
+        if(start != age.stage) {
+            if(entity instanceof ComponentAccess) {
+                ((ComponentAccess) entity).finalizeComponents();
             }
+        }
 
-            if(start != age.stage) {
-                Entity entity = this.entities[i];
+        age.setAgeInTicks(age.getAgeInTicks() + 1);
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onClientWorldTick(TickEvent.ClientTickEvent event) {
+        World world = Minecraft.getMinecraft().world;
+        if(world != null && !Minecraft.getMinecraft().isGamePaused()) {
+            for (Entity entity : world.loadedEntityList) {
                 if(entity instanceof ComponentAccess) {
-                    ((ComponentAccess) entity).finalizeComponents();
+                    ((ComponentAccess) entity).get(ComponentHandler.AGE).ifPresent(a -> this.update(a, entity));
                 }
             }
-
-            age.setAgeInTicks(age.getAgeInTicks() + 1);
         }
     }
 }

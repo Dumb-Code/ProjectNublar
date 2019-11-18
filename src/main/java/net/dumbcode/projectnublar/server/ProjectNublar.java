@@ -15,6 +15,7 @@ import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.DinosaurEggLayingSystem;
 import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
@@ -109,7 +110,9 @@ public class ProjectNublar {
             ResourceLocation regName = dinosaur.getRegName();
             for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(ComponentHandler.AGE).getOrderedAges()) {
                 Map<String, AnimationContainer> container = dinosaur.getModelContainer();
-                container.put(orderedAge.getName(), new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + orderedAge.getName())));
+
+                container.computeIfAbsent(orderedAge.getModelStage(),
+                    s -> new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + s)));
 
             }
         }
@@ -177,6 +180,7 @@ public class ProjectNublar {
     public static void register(RegisterSystemsEvent event) {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(MultipartSystem.INSTANCE);
+        event.registerSystem(DinosaurEggLayingSystem.INSTANCE);
     }
 
     @EventHandler

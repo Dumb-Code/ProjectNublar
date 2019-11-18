@@ -33,6 +33,7 @@ import java.util.Random;
 @Setter
 public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
 
+    public static final String CHILD_AGE = "child";
     public static final String ADULT_AGE = "adult";
     public static final String SKELETON_AGE = "skeleton";
 

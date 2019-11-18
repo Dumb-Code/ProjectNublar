@@ -8,6 +8,7 @@ import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -23,7 +24,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 @Getter
 @Setter
-public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent {
+public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent, CanBreedComponent {
 
     private static final int MOVEMENT_CHANNEL = 60;
 
@@ -73,7 +74,7 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
     @Override
     public void finalizeComponent(ComponentAccess entity) {
         entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
-            c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).map(AgeComponent::getStage).orElse(AgeStage.MISSING).getName()));
+            c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).orElse(AgeStage.MISSING).getName()));
 
             c.proposeAnimation(entity, new AnimationLayer.AnimationEntry(AnimationHandler.WALKING)
                             .loop()
@@ -82,5 +83,10 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
                     , MOVEMENT_CHANNEL, 20);
 
         });
+    }
+
+    @Override
+    public boolean canBreedWith(ComponentAccess otherEntity) {
+        return otherEntity.get(ComponentHandler.DINOSAUR).map(d -> d.dinosaur == this.dinosaur).orElse(false);
     }
 }

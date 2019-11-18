@@ -22,6 +22,7 @@ public class ComponentHandler {
     public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
+    public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
 
     public static final EntityComponentType<DinosaurDropsComponent, DinosaurDropsComponent.Storage> ITEM_DROPS = InjectedUtils.injected();
 
@@ -31,34 +32,39 @@ public class ComponentHandler {
     @SubscribeEvent
     public static void onRegisterComponents(RegisterComponentsEvent event) {
         event.getRegistry().registerAll(
-                SimpleComponentType.builder(DinosaurComponent.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
-                        .withConstructor(DinosaurComponent::new)
-                        .build(),
-                SimpleComponentType.builder(AgeComponent.class, AgeComponent.Storage.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "age"))
-                        .withConstructor(AgeComponent::new)
-                        .withStorage(AgeComponent.Storage::new)
-                        .build(),
-                SimpleComponentType.builder(MultipartEntityComponent.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "multipart"))
-                        .withConstructor(MultipartEntityComponent::new)
-                        .build(),
-                SimpleComponentType.builder(WanderComponent.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "wander_ai"))
-                        .withConstructor(WanderComponent::new)
-                        .build(),
-                SimpleComponentType.builder(SkeletalBuilderComponent.class, SkeletalBuilderComponent.Storage.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
-                        .withConstructor(SkeletalBuilderComponent::new)
-                        .withStorage(SkeletalBuilderComponent.Storage::new)
-                        .disableDefaultAttach()
-                        .build(),
-                SimpleComponentType.builder(DinosaurDropsComponent.class, DinosaurDropsComponent.Storage.class)
-                        .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "item_drops"))
-                        .withConstructor(DinosaurDropsComponent::new)
-                        .withStorage(DinosaurDropsComponent.Storage::new)
-                        .build()
+            SimpleComponentType.builder(DinosaurComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
+                .withConstructor(DinosaurComponent::new)
+                .build(),
+            SimpleComponentType.builder(AgeComponent.class, AgeComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "age"))
+                .withConstructor(AgeComponent::new)
+                .withStorage(AgeComponent.Storage::new)
+                .build(),
+            SimpleComponentType.builder(MultipartEntityComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "multipart"))
+                .withConstructor(MultipartEntityComponent::new)
+                .build(),
+            SimpleComponentType.builder(WanderComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "wander_ai"))
+                .withConstructor(WanderComponent::new)
+                .build(),
+            SimpleComponentType.builder(SkeletalBuilderComponent.class, SkeletalBuilderComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
+                .withConstructor(SkeletalBuilderComponent::new)
+                .withStorage(SkeletalBuilderComponent.Storage::new)
+                .disableDefaultAttach()
+                .build(),
+            SimpleComponentType.builder(DinosaurDropsComponent.class, DinosaurDropsComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "item_drops"))
+                .withConstructor(DinosaurDropsComponent::new)
+                .withStorage(DinosaurDropsComponent.Storage::new)
+                .build(),
+            SimpleComponentType.builder(DinosaurEggLayingComponent.class, DinosaurEggLayingComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur_egg_laying"))
+                .withConstructor(DinosaurEggLayingComponent::new)
+                .withStorage(DinosaurEggLayingComponent.Storage::new)
+                .build()
         );
     }
 }

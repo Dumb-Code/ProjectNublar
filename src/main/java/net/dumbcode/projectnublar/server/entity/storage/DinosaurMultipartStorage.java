@@ -30,7 +30,7 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
 
     private final Map<String, List<String>> ageCubeMap = Maps.newHashMap();
 
-    private final Function<ComponentAccess, List<String>> function = access -> access.get(ComponentHandler.AGE).map(AgeComponent::getStage).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
+    private final Function<ComponentAccess, List<String>> function = access -> access.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).map(AgeStage::getName).map(this.ageCubeMap::get).orElse(Lists.newArrayList());
 
     public DinosaurMultipartStorage addCubesForAge(String age, String... cubes) {
         this.ageCubeMap.put(age, Lists.newArrayList(cubes));

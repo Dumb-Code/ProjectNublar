@@ -11,8 +11,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderCallbackComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ScaleAdjustmentComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -21,8 +24,11 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class AgeComponent extends EntityComponent implements RenderLocationComponent {
+public class AgeComponent extends EntityComponent implements RenderLocationComponent, ScaleAdjustmentComponent {
 
     @Getter private List<AgeStage> orderedAges = Lists.newLinkedList();
 
@@ -33,12 +39,27 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
 
     @Setter private float percentageStage = 1F;
 
-    public void setRawStage(String stage) {
+    public boolean setRawStage(String stage) {
         for (AgeStage orderedAge : this.orderedAges) {
             if(stage.equals(orderedAge.getName())) {
                 this.stage = orderedAge;
-                break;
+                return true;
             }
+        }
+        return false;
+
+    }
+
+    public void resetStageTo(String stage) {
+        if (this.setRawStage(stage)) {
+            this.ageInTicks = 0;
+            for (AgeStage age : this.orderedAges) {
+                if(age == this.stage || age.getTime() < 0) {
+                    break;
+                }
+                this.ageInTicks += age.getTime();
+            }
+
         }
     }
 
@@ -52,6 +73,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
             NBTTagCompound ageTag = new NBTTagCompound();
             ageTag.setString("Name", age.getName());
             ageTag.setInteger("Time", age.getTime());
+            ageTag.setString("ModelStage", age.getModelStage());
 
             ages.appendTag(ageTag);
         }
@@ -70,7 +92,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         NBTTagList ages = compound.getTagList("OrderedAges", Constants.NBT.TAG_COMPOUND);
         for (NBTBase base : ages) {
             NBTTagCompound ageTag = (NBTTagCompound) base;
-            this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time")));
+            this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time"), ageTag.getString("ModelStage")));
         }
 
         this.setRawStage(compound.getString("CurrentAge"));
@@ -83,8 +105,11 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         for (AgeStage s : this.orderedAges) {
             ByteBufUtils.writeUTF8String(buf, s.getName());
             buf.writeInt(s.getTime());
+            ByteBufUtils.writeUTF8String(buf, s.getModelStage());
         }
         buf.writeInt(this.orderedAges.indexOf(this.stage));
+
+        buf.writeInt(this.ageInTicks);
     }
 
     @Override
@@ -92,9 +117,11 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         this.orderedAges.clear();
         short size = buf.readShort();
         for (int i = 0; i < size; i++) {
-            this.orderedAges.add(new AgeStage(ByteBufUtils.readUTF8String(buf), buf.readInt()));
+            this.orderedAges.add(new AgeStage(ByteBufUtils.readUTF8String(buf), buf.readInt(), ByteBufUtils.readUTF8String(buf)));
         }
         this.stage = this.orderedAges.get(buf.readInt());
+
+        this.ageInTicks = buf.readInt();
     }
 
     @NonNull
@@ -102,24 +129,49 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         return this.stage;
     }
 
-    @Override
-    public void editLocations(ConfigurableLocation texture, ConfigurableLocation fileLocation) {
-        fileLocation.addName(this.stage.getName(), 20);
-        texture.addFolderName(this.stage.getName(), 20);
+    @NonNull
+    public Optional<AgeStage> getModelState() {
+        String stage = this.stage.getModelStage();
+        return this.orderedAges.stream().filter(p -> p.getName().equals(stage)).findFirst();
     }
 
-    @Accessors(chain = true)
+    @Override
+    public void editLocations(ConfigurableLocation texture, ConfigurableLocation fileLocation) {
+        fileLocation.addName(this.stage.getModelStage(), 20);
+        texture.addFolderName(this.stage.getModelStage(), 20);
+    }
+
+    @Override
+    public void applyScale(Consumer<Supplier<Float>> scale) {
+        scale.accept(() -> {
+            if(this.stage.getTime() >= 0) {
+                return 0.5F + this.percentageStage * 0.5F;
+            }
+            return 1F;
+        });
+    }
+
     @Setter
     @Getter
+    @Accessors(chain = true)
     public static class Storage implements EntityComponentStorage<AgeComponent> {
 
         private final List<AgeStage> orderedAges = Lists.newLinkedList();
+        private String defaultStageName = "";
 
         @Override
         public AgeComponent construct() {
             AgeComponent component = new AgeComponent();
             component.orderedAges = this.orderedAges;
-            component.stage = this.orderedAges.get(0);
+            component.stage = this.orderedAges.stream().filter(s -> s.getName().equals(this.defaultStageName)).findFirst().orElse(this.orderedAges.get(0));
+
+            for (AgeStage age : this.orderedAges) {
+                if(age == component.stage || age.getTime() < 0) {
+                    break;
+                }
+                component.ageInTicks += age.getTime();
+            }
+
             return component;
         }
 
@@ -135,7 +187,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
             JsonArray ages = JsonUtils.getJsonArray(json, "ordered_ages");
             for (JsonElement element : ages) {
                 JsonObject jsonObject = JsonUtils.getJsonObject(element, "ordered_ages_element");
-                this.orderedAges.add(new AgeStage(JsonUtils.getString(jsonObject, "name"), JsonUtils.getInt(jsonObject, "time")));
+                this.orderedAges.add(new AgeStage(JsonUtils.getString(jsonObject, "name"), JsonUtils.getInt(jsonObject, "time"), JsonUtils.getString(json, "model_stage")));
             }
         }
 
@@ -146,6 +198,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
                 JsonObject ageTag = new JsonObject();
                 ageTag.addProperty("name", age.getName());
                 ageTag.addProperty("time", age.getTime());
+                ageTag.addProperty("model_stage", age.getModelStage());
 
                 ages.add(ageTag);
             }

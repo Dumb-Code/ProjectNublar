@@ -70,7 +70,6 @@ public enum MultipartSystem implements EntitySystem {
         Matrix4d entityRotate = new Matrix4d();
         entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
 
-        @SuppressWarnings("unchecked")
         Function<String, AnimationLayer.AnimatableCube> function = layer.getAnicubeRef();
         for (MultipartEntityComponent.LinkedEntity cube : multipart.getEntities()) {
             for (Entity e : entity.world.loadedEntityList) {
