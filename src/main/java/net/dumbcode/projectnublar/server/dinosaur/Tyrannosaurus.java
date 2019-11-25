@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
@@ -10,15 +9,11 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
-
-import java.util.List;
-import java.util.Map;
 
 public class Tyrannosaurus extends Dinosaur {
 
@@ -54,13 +49,16 @@ public class Tyrannosaurus extends Dinosaur {
                 .setMaxFood(7500)
                 .setMaxWater(6000);
 
+        this.addComponent(ComponentHandler.MOOD);
+        this.addComponent(ComponentHandler.ATTACK_FENCE_AI);
+
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
-            .addCubesForAge(ADULT_AGE,
-                "tail4", "Tail3", "tail2", "tail1",
-                "legUpperRight", "legMiddleRight", "legLowerRight",
-                "legUpperLeft", "legMiddleLeft", "legLowerLeft",
-                "neck3", "hips", "chest", "jawUpper1", "head"
-            );
+                .addCubesForAge(ADULT_AGE,
+                        "tail4", "Tail3", "tail2", "tail1",
+                        "legUpperRight", "legMiddleRight", "legLowerRight",
+                        "legUpperLeft", "legMiddleLeft", "legLowerLeft",
+                        "neck3", "hips", "chest", "jawUpper1", "head"
+                );
 
         this.addComponent(EntityComponentTypes.ANIMATION);
 
@@ -101,22 +99,22 @@ public class Tyrannosaurus extends Dinosaur {
                 );
 
         this.addComponent(EntityComponentTypes.GENETICS)
-            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", 0, 0.75F);
+                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", 0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("body", "body")
-            .addLayer("stripes", "stripes");
+                .addLayer("body", "body")
+                .addLayer("stripes", "stripes");
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
-            .staticLayer("claws", 5F)
-            .staticLayer("mouth", 5F)
-            .staticLayer("nostrils", 5F)
-            .staticLayer("teeth", 5F);
+                .staticLayer("claws", 5F)
+                .staticLayer("mouth", 5F)
+                .staticLayer("nostrils", 5F)
+                .staticLayer("teeth", 5F);
 
         this.addComponent(EntityComponentTypes.BLINKING)
-            .setEyesOnTexture("eyes")
-            .setEyesOffTexture("eyes_closed")
-            .setTickTimeOpen(25)
-            .setTickTimeClose(5);
+                .setEyesOnTexture("eyes")
+                .setEyesOffTexture("eyes_closed")
+                .setTickTimeOpen(25)
+                .setTickTimeClose(5);
     }
 }
