@@ -16,6 +16,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
 import net.dumbcode.projectnublar.server.entity.system.impl.DinosaurEggLayingSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.MoodSystem;
 import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
@@ -50,7 +51,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.ObjectHolderRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.Logger;
 
@@ -181,6 +181,7 @@ public class ProjectNublar {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(MultipartSystem.INSTANCE);
         event.registerSystem(DinosaurEggLayingSystem.INSTANCE);
+        event.registerSystem(MoodSystem.INSTANCE);
     }
 
     @EventHandler
