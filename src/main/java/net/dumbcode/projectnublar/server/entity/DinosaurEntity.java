@@ -51,6 +51,6 @@ public class DinosaurEntity extends ComposableCreatureEntity {
 
     @Override
     public boolean isOnLadder() {
-        return getDinosaur().getDinosaurInfomation().isCanClimb();
+        return getDinosaur().getDinosaurInfomation().isCanClimb() && super.isOnLadder();
     }
 }
