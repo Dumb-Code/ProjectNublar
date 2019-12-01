@@ -3,16 +3,13 @@ package net.dumbcode.projectnublar.server.entity.ai;
 import net.dumbcode.dumblibrary.server.utils.AIUtils;
 import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
-import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.dumbcode.projectnublar.server.utils.Connection;
-import net.dumbcode.projectnublar.server.utils.FenceExplosion;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -20,10 +17,19 @@ import java.util.List;
 public class EntityAttackFenceAI extends EntityAIBase {
 
     private EntityCreature entity;
+
     private MoodComponent mood;
 
+    /**
+     * Fence that was targeted.
+     */
     private BlockPos fence;
 
+    private BlockEntityElectricFence fenceEntity;
+
+    /**
+     * Only break a fence once and a while.
+     */
     private boolean hasBrokenFence;
 
     public EntityAttackFenceAI(EntityCreature entity, MoodComponent mood) {
@@ -35,7 +41,7 @@ public class EntityAttackFenceAI extends EntityAIBase {
     @Override
     public void startExecuting() {
         PathNavigate navigator = entity.getNavigator();
-        navigator.setPath(navigator.getPathToPos(fence), entity.getAIMoveSpeed() + 0.2F);
+        navigator.setPath(navigator.getPathToPos(fence), entity.getAIMoveSpeed() + 0.1F);
     }
 
     @Override
@@ -44,9 +50,7 @@ public class EntityAttackFenceAI extends EntityAIBase {
         World world = entity.world;
         for (BlockPos bPos : pos) {
             if (world.getBlockState(bPos).getBlock() instanceof BlockElectricFence) {
-                Explosion explosion = new FenceExplosion(world, entity, bPos.getX(), bPos.getY(), bPos.getZ(), 4);
-                explosion.doExplosionA();
-                explosion.doExplosionB(false);
+                fenceEntity.breakFence(6);
                 hasBrokenFence = true;
             }
         }
@@ -59,13 +63,14 @@ public class EntityAttackFenceAI extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.entity.getRNG().nextFloat() <= 0.1F && mood.getMood() == MoodComponent.MoodType.ANGRY && !hasBrokenFence) {
+        if (this.entity.getRNG().nextFloat() <= 0.5F && mood.getMood() == MoodComponent.MoodType.ANGRY && !hasBrokenFence) {
             List<BlockPos> pos = AIUtils.traverseXZ((int) entity.posX, (int) entity.posY, (int) entity.posZ, 10);
             for (BlockPos bPos : pos) {
                 if (entity.world.getBlockState(bPos).getBlock() instanceof BlockElectricFence) {
                     TileEntity te = entity.world.getTileEntity(bPos);
                     if (te instanceof BlockEntityElectricFence) {
-                        for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
+                        fenceEntity = (BlockEntityElectricFence) te;
+                        for (Connection connection : fenceEntity.getConnections()) {
                             if (!connection.isPowered(entity.world)) {
                                 this.fence = bPos;
                                 return true;

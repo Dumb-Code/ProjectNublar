@@ -36,8 +36,8 @@ public enum MoodSystem implements EntitySystem {
     }
 
     private void update(MoodComponent mood, Entity entity) {
-        // Update once a second.
-        if(entity.ticksExisted % 20 == 0) {
+        // Update once every 2 seconds.
+        if(entity.ticksExisted % 40 == 0) {
             mood.update();
         }
     }
