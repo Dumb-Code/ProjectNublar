@@ -27,6 +27,7 @@ public class Tyrannosaurus extends Dinosaur {
                 .setCookingExperience(1f);
 
         DinosaurInformation dinosaurInfomation = this.getDinosaurInfomation();
+        dinosaurInfomation.setCanClimb(false);
         dinosaurInfomation.setPeriod(DinosaurPeriod.CRETACEOUS);
         dinosaurInfomation.getBiomeTypes().addAll(Lists.newArrayList(
                 BiomeDictionary.Type.CONIFEROUS,

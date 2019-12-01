@@ -10,4 +10,5 @@ import java.util.List;
 public class DinosaurInformation {
     private DinosaurPeriod period;
     private final List<BiomeDictionary.Type> biomeTypes = Lists.newArrayList();
+    private boolean canClimb;
 }

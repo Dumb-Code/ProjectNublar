@@ -48,4 +48,9 @@ public class DinosaurEntity extends ComposableCreatureEntity {
         }
         return super.attackEntityAsMob(entity);
     }
+
+    @Override
+    public boolean isOnLadder() {
+        return getDinosaur().getDinosaurInfomation().isCanClimb();
+    }
 }
