@@ -125,8 +125,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
 
         @Override
-        public DinosaurEggLayingComponent construct() {
-            DinosaurEggLayingComponent component = new DinosaurEggLayingComponent();
+        public DinosaurEggLayingComponent constructTo(DinosaurEggLayingComponent component) {
             component.eggAmountMean = this.eggAmountMean;
             component.eggAmountDeviation = this.eggAmountDeviation;
             component.ticksPregnancyMean = this.ticksPregnancyMean;

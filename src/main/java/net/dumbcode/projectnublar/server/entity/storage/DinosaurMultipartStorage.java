@@ -38,12 +38,6 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
     }
 
     @Override
-    public MultipartEntityComponent construct() {
-        return this.constructTo(new MultipartEntityComponent());
-    }
-
-
-    @Override
     public MultipartEntityComponent constructTo(MultipartEntityComponent component) {
         component.setMultipartNames(this.function);
         return component;

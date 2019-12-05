@@ -89,8 +89,7 @@ public class SkeletalBuilderComponent extends EntityComponent {
         @Getter private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
 
         @Override
-        public SkeletalBuilderComponent construct() {
-            SkeletalBuilderComponent component = new SkeletalBuilderComponent();
+        public SkeletalBuilderComponent constructTo(SkeletalBuilderComponent component) {
 
             component.individualBones = this.individualBones;
             component.boneListed = this.boneListed;

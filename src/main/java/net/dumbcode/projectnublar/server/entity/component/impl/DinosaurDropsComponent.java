@@ -69,8 +69,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
         }
 
         @Override
-        public DinosaurDropsComponent construct() {
-            DinosaurDropsComponent component = new DinosaurDropsComponent();
+        public DinosaurDropsComponent constructTo(DinosaurDropsComponent component) {
 
             component.fossilList.addAll(this.fossilList);
 
