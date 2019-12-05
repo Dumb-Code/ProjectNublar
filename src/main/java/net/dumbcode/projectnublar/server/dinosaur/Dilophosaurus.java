@@ -71,7 +71,7 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.GENDER);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
-            .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE))
+            .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))
             .addStage(new AgeStage(SKELETON_AGE, -1, SKELETON_AGE))
             .setDefaultStageName(ADULT_AGE);
 
@@ -115,6 +115,9 @@ public class Dilophosaurus extends Dinosaur {
             .setTickTimeClose(5);
 
         this.addComponent(EntityComponentTypes.BREEDING);
-        this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING);
+        this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING)
+            .setEggAmount(7F, 1F)
+            .setTicksPregnant(192000, 12000) //8 Minecraft days, give or take half a day
+            .setTicksEggHatch(24000, 2000); //1 Minecraft day, give or take 100 seconds
     }
 }

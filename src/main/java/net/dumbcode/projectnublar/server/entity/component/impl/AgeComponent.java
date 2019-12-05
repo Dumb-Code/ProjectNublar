@@ -9,13 +9,14 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderCallbackComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ScaleAdjustmentComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
-import net.minecraft.client.renderer.GlStateManager;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -28,7 +29,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class AgeComponent extends EntityComponent implements RenderLocationComponent, ScaleAdjustmentComponent {
+public class AgeComponent extends EntityComponent implements RenderLocationComponent, ScaleAdjustmentComponent, CanBreedComponent {
 
     @Getter private List<AgeStage> orderedAges = Lists.newLinkedList();
 
@@ -149,6 +150,11 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
             }
             return 1F;
         });
+    }
+
+    @Override
+    public boolean canBreedWith(ComponentAccess otherEntity) {
+        return this.stage.isCanBreed() && otherEntity.get(ComponentHandler.AGE).map(a -> a.stage.isCanBreed()).orElse(true);
     }
 
     @Setter

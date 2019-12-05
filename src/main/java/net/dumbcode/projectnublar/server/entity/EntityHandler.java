@@ -19,29 +19,36 @@ public class EntityHandler {
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
         event.getRegistry().registerAll(
-                EntityEntryBuilder.create()
-                        .entity(DinosaurEntity.class)
-                        .factory(DinosaurEntity::new)
-                        .name(ProjectNublar.MODID + ".dinosaur")
-                        .tracker(128, 3, true)
-                        .id(new ResourceLocation(ProjectNublar.MODID, "dinosaur"), 0)
-                        .build(),
+            EntityEntryBuilder.create()
+                .entity(DinosaurEntity.class)
+                .factory(DinosaurEntity::new)
+                .name(ProjectNublar.MODID + ".dinosaur")
+                .tracker(128, 3, true)
+                .id(new ResourceLocation(ProjectNublar.MODID, "dinosaur"), 0)
+                .build(),
+            EntityEntryBuilder.create()
+                .entity(DinosaurEggEntity.class)
+                .factory(DinosaurEggEntity::new)
+                .name(ProjectNublar.MODID + ".dinosaur_egg")
+                .tracker(32, 10, true)
+                .id(new ResourceLocation(ProjectNublar.MODID, "dinosaur_egg"), 3)
+                .build(),
 
-                EntityEntryBuilder.create()
-                        .entity(GyrosphereVehicle.class)
-                        .factory(GyrosphereVehicle::new)
-                        .name(ProjectNublar.MODID + ".gyrosphere")
-                        .tracker(64, 10, true)
-                        .id(new ResourceLocation(ProjectNublar.MODID, "gyrosphere"), 1)
-                        .build(),
+            EntityEntryBuilder.create()
+                .entity(GyrosphereVehicle.class)
+                .factory(GyrosphereVehicle::new)
+                .name(ProjectNublar.MODID + ".gyrosphere")
+                .tracker(64, 10, true)
+                .id(new ResourceLocation(ProjectNublar.MODID, "gyrosphere"), 1)
+                .build(),
 
-                EntityEntryBuilder.create()
-                        .entity(EntityPart.class)
-                        .factory(EntityPart::new)
-                        .name(ProjectNublar.MODID + ".dummypart")
-                        .tracker(128, 20, true)
-                        .id(new ResourceLocation(ProjectNublar.MODID, "dummypart"), 2)
-                        .build()
+            EntityEntryBuilder.create()
+                .entity(EntityPart.class)
+                .factory(EntityPart::new)
+                .name(ProjectNublar.MODID + ".dummypart")
+                .tracker(128, 20, true)
+                .id(new ResourceLocation(ProjectNublar.MODID, "dummypart"), 2)
+                .build()
         );
     }
 }
