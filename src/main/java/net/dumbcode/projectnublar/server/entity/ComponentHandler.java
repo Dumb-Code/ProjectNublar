@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.*;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackFenceComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
 import net.dumbcode.projectnublar.server.plants.component.PlantComponent;
 import net.minecraft.util.ResourceLocation;
@@ -26,6 +27,8 @@ public class ComponentHandler {
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
     public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
 
+    public static final EntityComponentType<MoodComponent, ?> MOOD = InjectedUtils.injected();
+    public static final EntityComponentType<AttackFenceComponent, ?> ATTACK_FENCE_AI = InjectedUtils.injected();
     public static final EntityComponentType<DinosaurDropsComponent, DinosaurDropsComponent.Storage> ITEM_DROPS = InjectedUtils.injected();
 
 
@@ -51,6 +54,14 @@ public class ComponentHandler {
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "wander_ai"))
                 .withConstructor(WanderComponent::new)
                 .build(),
+            SimpleComponentType.builder(MoodComponent.class)
+                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "mood"))
+                 .withConstructor(MoodComponent::new)
+                 .build(),
+            SimpleComponentType.builder(AttackFenceComponent.class)
+                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "attack_fence_ai"))
+                 .withConstructor(AttackFenceComponent::new)
+                 .build(),
             SimpleComponentType.builder(SkeletalBuilderComponent.class, SkeletalBuilderComponent.Storage.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
                 .withConstructor(SkeletalBuilderComponent::new)

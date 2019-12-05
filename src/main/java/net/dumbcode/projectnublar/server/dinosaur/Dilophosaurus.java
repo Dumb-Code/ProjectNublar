@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Lists;
-import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
@@ -10,7 +9,6 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -29,6 +27,7 @@ public class Dilophosaurus extends Dinosaur {
                 .setCookingExperience(1f);
 
         DinosaurInformation dinosaurInfomation = this.getDinosaurInfomation();
+        dinosaurInfomation.setCanClimb(false);
         dinosaurInfomation.setPeriod(DinosaurPeriod.CRETACEOUS);
         dinosaurInfomation.getBiomeTypes().addAll(Lists.newArrayList(
                 BiomeDictionary.Type.CONIFEROUS,
