@@ -109,7 +109,7 @@ public class BlockConnectableBase extends Block {
         if(entityBox == null) {
             entityBox = entityIn.getEntityBoundingBox();
         }
-        if(te instanceof ConnectableBlockEntity && entityIn instanceof EntityLivingBase) {
+        if(te instanceof ConnectableBlockEntity) {
             entityBox = entityBox.grow(0.1D);
             for (ConnectionAxisAlignedBB box : this.createBoundingBox(((ConnectableBlockEntity) te).getConnections(), pos)) {
                 if (entityBox.intersects(box.offset(pos)) && box.getConnection().isPowered(worldIn)) {
