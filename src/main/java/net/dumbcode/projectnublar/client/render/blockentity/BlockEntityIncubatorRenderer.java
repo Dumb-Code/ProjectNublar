@@ -114,7 +114,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         if(egg.getEggType() == DinosaurEggType.EMPTY) {
 //            return;
         }
-        DinosaurEggType type = EnumDinosaurEggTypes.TEST;//egg.getEggType();
+        DinosaurEggType type = EnumDinosaurEggTypes.TEST.getType();//egg.getEggType();
 
         GlStateManager.pushMatrix();
         GlStateManager.disableTexture2D();
@@ -144,7 +144,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             this.drawDebugLines(0, 0, 0);
         }
         GlStateManager.translate(0, -1.5, 0);
-        type.getModel().render(null, 0F, 0F, 0F, 0F, 0F, 1/16F);
+        type.getEggModel().render(null, 0F, 0F, 0F, 0F, 0F, 1/16F);
         GlStateManager.enableTexture2D();
 
         GlStateManager.popMatrix();

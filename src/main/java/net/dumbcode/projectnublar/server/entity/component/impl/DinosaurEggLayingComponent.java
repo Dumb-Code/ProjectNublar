@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +16,11 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.BreedingResultComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.GeneticComponent;
-import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.StreamUtils;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
+import net.dumbcode.projectnublar.server.utils.GuassianValue;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
 
 import java.util.*;
@@ -25,14 +29,12 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
     private static final Random RANDOM = new Random();
 
-    private float eggAmountMean;
-    private float eggAmountDeviation;
+    private final List<DinosaurEggType> eggTypes = new ArrayList<>();
 
-    private float ticksPregnancyMean;
-    private float ticksPregnancyDeviation;
-
-    private float ticksEggHatchMean;
-    private float ticksEggHatchDeviation;
+    private GuassianValue eggAmount = new GuassianValue(1, 0);
+    private GuassianValue eggSize = new GuassianValue(1, 0);
+    private GuassianValue ticksPregnancy = new GuassianValue(1, 0);
+    private GuassianValue ticksEggHatch = new GuassianValue(1, 0);
 
     @Getter
     private final List<EggEntry> heldEggs = new ArrayList<>();
@@ -43,12 +45,14 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
             Optional<GeneticComponent> thisGenetics = this.access.get(EntityComponentTypes.GENETICS);
             Optional<GeneticComponent> otherGenetics = other.get(EntityComponentTypes.GENETICS);
             if(thisGenetics.isPresent() && otherGenetics.isPresent()) {
-                int pregnancyTime = (int) (this.ticksPregnancyMean + RANDOM.nextGaussian() * this.ticksPregnancyDeviation);
-                int eggs = (int) (this.eggAmountMean + RANDOM.nextGaussian() * this.eggAmountDeviation);
+                int pregnancyTime = (int) this.ticksPregnancy.getRandomValue(RANDOM);
+                int eggs = (int) this.eggAmount.getRandomValue(RANDOM);
                 for (int i = 0; i < eggs; i++) {
                     this.heldEggs.add(new EggEntry(
+                        this.eggSize.getRandomValue(RANDOM),
+                        this.eggTypes.get(RANDOM.nextInt(this.eggTypes.size())),
                         pregnancyTime,
-                        (int) (this.ticksEggHatchMean+RANDOM.nextGaussian()*this.ticksEggHatchDeviation),
+                        (int) this.ticksEggHatch.getRandomValue(RANDOM),
                         this.generateCombinedGenetics(thisGenetics.get(), otherGenetics.get())
                     ));
                 }
@@ -84,75 +88,73 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         return combinedGenetics;
     }
 
+    @Override
+    public NBTTagCompound serialize(NBTTagCompound compound) {
+        return super.serialize(compound);
+    }
+
+    @Override
+    public void deserialize(NBTTagCompound compound) {
+        super.deserialize(compound);
+    }
 
     @Data
     @AllArgsConstructor
-    public class EggEntry {
+    public static class EggEntry {
+        private final float randomScaleAdjustment;
+        private final DinosaurEggType type;
         private int ticksLeft;
-        private int eggTicks;
+        private final int eggTicks;
         private final List<GeneticEntry<?>> combinedGenetics;
     }
 
     @Getter
+    @Setter
+    @Accessors(chain = true)
     public static class Storage implements EntityComponentStorage<DinosaurEggLayingComponent> {
 
-        private float eggAmountMean;
-        private float eggAmountDeviation;
+        private final List<DinosaurEggType> eggTypes = new ArrayList<>();
 
-        private float ticksPregnancyMean = 1;
-        private float ticksPregnancyDeviation = 1;
+        private GuassianValue eggAmount = new GuassianValue(1, 0);
+        private GuassianValue eggSize = new GuassianValue(1, 0);
+        private GuassianValue ticksPregnancy = new GuassianValue(1, 0);
+        private GuassianValue ticksEggHatch = new GuassianValue(1, 0);
 
-        private float ticksEggHatchMean = 1;
-        private float ticksEggHatchDeviation = 1;
-
-        public Storage setEggAmount(float mean, float deviation) {
-            this.eggAmountMean = mean;
-            this.eggAmountDeviation = deviation;
-            return this;
-        }
-
-        public Storage setTicksPregnant(float mean, float deviation) {
-            this.ticksPregnancyMean = mean;
-            this.ticksPregnancyDeviation = deviation;
-            return this;
-        }
-
-        public Storage setTicksEggHatch(float mean, float deviation) {
-            this.ticksEggHatchMean = mean;
-            this.ticksEggHatchDeviation = deviation;
+        public Storage addEggType(DinosaurEggType... type) {
+            Collections.addAll(this.eggTypes, type);
             return this;
         }
 
 
         @Override
         public DinosaurEggLayingComponent constructTo(DinosaurEggLayingComponent component) {
-            component.eggAmountMean = this.eggAmountMean;
-            component.eggAmountDeviation = this.eggAmountDeviation;
-            component.ticksPregnancyMean = this.ticksPregnancyMean;
-            component.ticksPregnancyDeviation = this.ticksPregnancyDeviation;
-            component.ticksEggHatchMean = this.ticksEggHatchMean;
-            component.ticksEggHatchDeviation = this.ticksEggHatchDeviation;
+            component.eggTypes.addAll(this.eggTypes);
+            component.eggAmount = this.eggAmount;
+            component.eggSize = this.eggSize;
+            component.ticksPregnancy = this.ticksPregnancy;
+            component.ticksEggHatch = this.ticksEggHatch;
             return component;
         }
 
         @Override
         public void writeJson(JsonObject json) {
-            json.addProperty("egg_amount_mean", this.eggAmountMean);
-            json.addProperty("egg_amount_deviation", this.eggAmountDeviation);
-            json.addProperty("ticks_pregnancy_mean", this.ticksPregnancyMean);
-            json.addProperty("ticks_pregnancy_deviation", this.ticksPregnancyDeviation);
-            json.addProperty("ticks_egg_hatch_mean", this.ticksEggHatchMean);
-            json.addProperty("ticks_egg_hatch_deviation", this.ticksEggHatchDeviation);
+            json.add("egg_amount", GuassianValue.writeToJson(this.eggAmount));
+            json.add("egg_size", GuassianValue.writeToJson(this.eggSize));
+            json.add("ticks_pregnancy", GuassianValue.writeToJson(this.ticksPregnancy));
+            json.add("ticks_egg_hatch", GuassianValue.writeToJson(this.ticksEggHatch));
+
+            json.add("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToJson).collect(IOCollectors.toJsonArray()));
         }
 
         @Override
         public void readJson(JsonObject json) {
-            this.eggAmountMean = JsonUtils.getFloat(json, "egg_amount_mean");
-            this.eggAmountDeviation = JsonUtils.getFloat(json, "egg_amount_deviation");
-            this.ticksPregnancyMean = JsonUtils.getFloat(json, "ticks_pregnancy_mean");
-            this.ticksPregnancyDeviation = JsonUtils.getFloat(json, "ticks_pregnancy_deviation");
-            this.ticksEggHatchMean = JsonUtils.getFloat(json, "ticks_egg_hatch_mean");
-            this.ticksEggHatchDeviation = JsonUtils.getFloat(json, "ticks_egg_hatch_deviation");
+            this.eggAmount = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_amount"));
+            this.eggSize = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_size"));
+            this.ticksPregnancy = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_pregnancy"));
+            this.ticksEggHatch = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_egg_hatch"));
+
+            this.eggTypes.clear();
+            StreamUtils.stream(JsonUtils.getJsonArray(json, "egg_types")).map(JsonElement::getAsJsonObject).map(DinosaurEggType::readFromJson).forEach(this.eggTypes::add);
         }
     }
 }

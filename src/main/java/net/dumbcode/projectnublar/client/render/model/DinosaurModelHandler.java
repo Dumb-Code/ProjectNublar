@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricF
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFenceRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
+import net.dumbcode.projectnublar.client.render.entity.DinosaurEggRenderer;
 import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -13,6 +14,7 @@ import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePo
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
+import net.dumbcode.projectnublar.server.entity.DinosaurEggEntity;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
@@ -33,6 +35,7 @@ public class DinosaurModelHandler {
         RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, ComponentRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, GyrosphereRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(EntityPart.class, EntityPartRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(DinosaurEggEntity.class, DinosaurEggRenderer::new);
 
         ClientRegistry.bindTileEntitySpecialRenderer(SkeletalBuilderBlockEntity.class, new BlockEntitySkeletalBuilderRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFencePole.class, new BlockEntityElectricFencePoleRenderer());

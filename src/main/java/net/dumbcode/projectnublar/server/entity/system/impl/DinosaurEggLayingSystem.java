@@ -42,11 +42,13 @@ public enum DinosaurEggLayingSystem implements EntitySystem {
                         en.world,
                         egg.getCombinedGenetics(),
                         dinosaur.getDinosaur(),
+                        egg.getType(),
+                        egg.getRandomScaleAdjustment(),
                         access.get(EntityComponentTypes.FAMILY).map(FamilyComponent::getFamilyUUID).orElse(null),
                         egg.getEggTicks()
                     );
 
-                    eggEntity.setPosition(en.posX, en.posY, en.posZ);
+                    eggEntity.setPosition(en.posX + en.world.rand.nextGaussian()*0.2, en.posY, en.posZ + en.world.rand.nextGaussian()*0.2);
 
                     world.spawnEntity(eggEntity);
 

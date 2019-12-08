@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.command;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
@@ -32,11 +33,14 @@ public class SpawnDinosaurCommand extends CommandBase {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         if(args.length > 0) {
             DinosaurEntity entity = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(args[0])).createEntity(sender.getEntityWorld());
+            if(args.length > 1) {
+                entity.get(EntityComponentTypes.GENDER).ifPresent(g -> g.male = "male".equalsIgnoreCase(args[1]));
+            }
             entity.setPosition(sender.getPositionVector().x, sender.getPositionVector().y, sender.getPositionVector().z);
             sender.getEntityWorld().spawnEntity(entity);
             return;
         }
-        TextComponentTranslation text = new TextComponentTranslation("Usage: /projectnublar spawn {dinosaur}");
+        TextComponentTranslation text = new TextComponentTranslation("Usage: /projectnublar spawn {dinosaur} {male|female}?");
         text.getStyle().setColor(TextFormatting.RED);
         sender.sendMessage(text);
     }

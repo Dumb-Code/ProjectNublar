@@ -8,8 +8,10 @@ import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
+import net.dumbcode.projectnublar.server.utils.GuassianValue;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -115,8 +117,9 @@ public class Dilophosaurus extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.BREEDING);
         this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING)
-            .setEggAmount(7F, 1F)
-            .setTicksPregnant(192000, 12000) //8 Minecraft days, give or take half a day
-            .setTicksEggHatch(24000, 2000); //1 Minecraft day, give or take 100 seconds
+            .addEggType(EnumDinosaurEggTypes.TEST.getType())
+            .setEggAmount(new GuassianValue(7F, 1F))
+            .setTicksPregnancy(new GuassianValue(192000, 12000)) //8 Minecraft days, give or take half a day
+            .setTicksEggHatch(new GuassianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
     }
 }
