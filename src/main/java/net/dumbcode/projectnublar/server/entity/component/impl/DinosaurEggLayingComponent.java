@@ -22,6 +22,7 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.utils.GuassianValue;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
 
@@ -32,7 +33,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     private final List<DinosaurEggType> eggTypes = new ArrayList<>();
 
     private GuassianValue eggAmount = new GuassianValue(1, 0);
-    private GuassianValue eggSize = new GuassianValue(1, 0);
+    private GuassianValue eggModifier = new GuassianValue(1, 0);
     private GuassianValue ticksPregnancy = new GuassianValue(1, 0);
     private GuassianValue ticksEggHatch = new GuassianValue(1, 0);
 
@@ -49,7 +50,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
                 int eggs = (int) this.eggAmount.getRandomValue(RANDOM);
                 for (int i = 0; i < eggs; i++) {
                     this.heldEggs.add(new EggEntry(
-                        this.eggSize.getRandomValue(RANDOM),
+                        this.eggModifier.getRandomValue(RANDOM),
                         this.eggTypes.get(RANDOM.nextInt(this.eggTypes.size())),
                         pregnancyTime,
                         (int) this.ticksEggHatch.getRandomValue(RANDOM),
@@ -90,12 +91,26 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
+        compound.setTag("egg_amount", GuassianValue.writeToNBT(this.eggAmount));
+        compound.setTag("egg_modifier", GuassianValue.writeToNBT(this.eggModifier));
+        compound.setTag("ticks_pregnancy", GuassianValue.writeToNBT(this.ticksPregnancy));
+        compound.setTag("ticks_egg_hatch", GuassianValue.writeToNBT(this.ticksEggHatch));
+
+        compound.setTag("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToNBT).collect(IOCollectors.toNBTTagList()));
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
-        super.deserialize(compound);
+    public void deserialize(NBTTagCompound nbt) {
+        this.eggAmount = GuassianValue.readFromNBT(nbt.getCompoundTag("egg_amount"));
+        this.eggModifier = GuassianValue.readFromNBT(nbt.getCompoundTag("egg_modifier"));
+        this.ticksPregnancy = GuassianValue.readFromNBT(nbt.getCompoundTag("ticks_pregnancy"));
+        this.ticksEggHatch = GuassianValue.readFromNBT(nbt.getCompoundTag("ticks_egg_hatch"));
+
+        this.eggTypes.clear();
+        StreamUtils.stream(nbt.getTagList("egg_types", Constants.NBT.TAG_COMPOUND)).map(b -> DinosaurEggType.readFromNBT((NBTTagCompound) b)).forEach(this.eggTypes::add);
+
+        super.deserialize(nbt);
     }
 
     @Data
@@ -116,7 +131,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         private final List<DinosaurEggType> eggTypes = new ArrayList<>();
 
         private GuassianValue eggAmount = new GuassianValue(1, 0);
-        private GuassianValue eggSize = new GuassianValue(1, 0);
+        private GuassianValue eggModifier = new GuassianValue(1, 0);
         private GuassianValue ticksPregnancy = new GuassianValue(1, 0);
         private GuassianValue ticksEggHatch = new GuassianValue(1, 0);
 
@@ -130,7 +145,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         public DinosaurEggLayingComponent constructTo(DinosaurEggLayingComponent component) {
             component.eggTypes.addAll(this.eggTypes);
             component.eggAmount = this.eggAmount;
-            component.eggSize = this.eggSize;
+            component.eggModifier = this.eggModifier;
             component.ticksPregnancy = this.ticksPregnancy;
             component.ticksEggHatch = this.ticksEggHatch;
             return component;
@@ -139,7 +154,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         @Override
         public void writeJson(JsonObject json) {
             json.add("egg_amount", GuassianValue.writeToJson(this.eggAmount));
-            json.add("egg_size", GuassianValue.writeToJson(this.eggSize));
+            json.add("egg_modifier", GuassianValue.writeToJson(this.eggModifier));
             json.add("ticks_pregnancy", GuassianValue.writeToJson(this.ticksPregnancy));
             json.add("ticks_egg_hatch", GuassianValue.writeToJson(this.ticksEggHatch));
 
@@ -149,7 +164,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         @Override
         public void readJson(JsonObject json) {
             this.eggAmount = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_amount"));
-            this.eggSize = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_size"));
+            this.eggModifier = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_modifier"));
             this.ticksPregnancy = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_pregnancy"));
             this.ticksEggHatch = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_egg_hatch"));
 

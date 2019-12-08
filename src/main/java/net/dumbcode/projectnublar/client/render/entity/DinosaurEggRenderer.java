@@ -25,8 +25,12 @@ public class DinosaurEggRenderer extends Render<DinosaurEggEntity> {
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
 
-        GlStateManager.translate(0, 1.5, 0);
-        GlStateManager.scale(-1, -1, 1);
+        float scale = entity.getRandomScaleAdjustment();
+
+        this.shadowSize = scale * 0.3F;
+
+        GlStateManager.scale(-scale, -scale, scale);
+        GlStateManager.translate(0, -1.5, 0);
 
         GlStateManager.rotate(entity.randomRotation, 0, 1, 0);
 

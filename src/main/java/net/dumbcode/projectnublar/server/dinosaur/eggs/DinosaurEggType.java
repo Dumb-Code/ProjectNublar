@@ -19,8 +19,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 public class DinosaurEggType {
     public static final DinosaurEggType EMPTY = new DinosaurEggType(0F, 0F, TextureMap.LOCATION_MISSING_TEXTURE, TextureMap.LOCATION_MISSING_TEXTURE);
 
-    private final float eggLength;
-    private final float scale;
+    private final float eggLength; //Used for incubator
+    private final float scale; //Used for incubator
     private final ResourceLocation texture;
     private final ResourceLocation modelLocation;
 
