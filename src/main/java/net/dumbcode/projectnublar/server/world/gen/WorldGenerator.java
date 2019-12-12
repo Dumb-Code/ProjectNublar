@@ -57,7 +57,7 @@ public enum WorldGenerator implements IWorldGenerator {
     }
 
     private void generateDigsiteStructure(World world, int x, int z, Random random) {
-        if (random.nextFloat() < 0.001) {
+        if (random.nextFloat() < 0.0005) {
             DigsiteStructureNetwork.NETWORK.generate(world, new BlockPos(x, 100, z), random);
         }
     }

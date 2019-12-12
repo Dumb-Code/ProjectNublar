@@ -7,10 +7,15 @@ import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 
 
-//TODO: remove this shit
 @Getter
-public enum EnumDinosaurEggTypes {
-    TEST(12/16F, 1/4F);
+public enum EnumDinosaurEggTypes { //TODO: check scale
+    NORMAL(10F/16F, 1/4F),
+    ROUND(6.5F/16F, 1/4F),
+    TALL_1(14F/16F, 1/4F),
+    TALL_2(13.5F/16F, 1/4F),
+    TYRANNOSAURUS(12.5F/16F, 1/4F),
+    VELOCIRAPTOR(10F/16F, 1/4F);
+
 
     private final DinosaurEggType type;
 
@@ -18,8 +23,10 @@ public enum EnumDinosaurEggTypes {
         this.type = new DinosaurEggType(
             length,
             scale,
-            new ResourceLocation(ProjectNublar.MODID, "textures/blocks/eggs/egg_type_" + this.ordinal()),
-            new ResourceLocation(ProjectNublar.MODID, "models/block/eggs/egg_type_" + this.ordinal())
+            new ResourceLocation(ProjectNublar.MODID, "models/entities/eggs/egg_" + this.name()),
+
+            new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + ".png"),
+            new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + "_qr.png")
         );
     }
 

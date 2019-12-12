@@ -114,7 +114,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         if(egg.getEggType() == DinosaurEggType.EMPTY) {
 //            return;
         }
-        DinosaurEggType type = EnumDinosaurEggTypes.TEST.getType();//egg.getEggType();
+        DinosaurEggType type = egg.getEggType();
 
         GlStateManager.pushMatrix();
         GlStateManager.disableTexture2D();

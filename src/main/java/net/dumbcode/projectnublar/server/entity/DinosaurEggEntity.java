@@ -35,7 +35,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     @Getter
     private float randomScaleAdjustment;
     @Getter
-    private DinosaurEggType type = EnumDinosaurEggTypes.TEST.getType();
+    private DinosaurEggType type = DinosaurEggType.EMPTY;
     private UUID familyUUID;
     private int hatchingTicks;
 
@@ -57,7 +57,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
 
     @Override
     public void onEntityUpdate() {
-        this.setSize(7/16F, this.type.getEggLength() + 2/16F);
+        this.setSize(7/16F * this.randomScaleAdjustment, (this.type.getEggLength() + 2/16F) * this.randomScaleAdjustment);
 
         this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
         this.motionX *= 0.8F;

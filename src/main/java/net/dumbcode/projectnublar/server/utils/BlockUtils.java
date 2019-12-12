@@ -65,6 +65,23 @@ public class BlockUtils {
                     return Blocks.ACACIA_FENCE.getDefaultState();
                 }
             }
+            if(type == BiomeDictionary.Type.MESA || biome instanceof BiomeMesa) {
+                if (state.getBlock() == Blocks.LOG || state.getBlock() == Blocks.LOG2 || state.getBlock() == Blocks.STONE || state.getBlock() == Blocks.GRASS_PATH) {
+                    return Blocks.RED_SANDSTONE.getDefaultState();
+                }
+                if (state.getBlock() == Blocks.COBBLESTONE) {
+                    return Blocks.RED_SANDSTONE.getStateFromMeta(BlockRedSandstone.EnumType.DEFAULT.getMetadata());
+                }
+                if (state.getBlock() == Blocks.PLANKS) {
+                    return Blocks.RED_SANDSTONE.getStateFromMeta(BlockRedSandstone.EnumType.SMOOTH.getMetadata());
+                }
+                if (state.getBlock() == Blocks.OAK_STAIRS || state.getBlock() == Blocks.STONE_STAIRS) {
+                    return Blocks.RED_SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, state.getValue(BlockStairs.FACING));
+                }
+                if (state.getBlock() == Blocks.GRAVEL || state.getBlock() == Blocks.GRASS || state.getBlock() == Blocks.DIRT) {
+                    return Blocks.SAND.getDefaultState().withProperty(BlockSand.VARIANT, BlockSand.EnumType.RED_SAND);
+                }
+            }
             if(type == BiomeDictionary.Type.SANDY || biome instanceof BiomeDesert) {
                 if (state.getBlock() == Blocks.LOG || state.getBlock() == Blocks.LOG2 || state.getBlock() == Blocks.STONE || state.getBlock() == Blocks.GRASS_PATH) {
                     return Blocks.SANDSTONE.getDefaultState();
