@@ -16,18 +16,14 @@ public enum EnumDinosaurEggTypes { //TODO: check scale
     TYRANNOSAURUS(12.5F/16F, 1/4F),
     VELOCIRAPTOR(10F/16F, 1/4F);
 
-
     private final DinosaurEggType type;
+    private final DinosaurEggType qrType;
 
     EnumDinosaurEggTypes(float length, float scale) {
-        this.type = new DinosaurEggType(
-            length,
-            scale,
-            new ResourceLocation(ProjectNublar.MODID, "models/entities/eggs/egg_" + this.name()),
-
-            new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + ".png"),
-            new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + "_qr.png")
-        );
+        ResourceLocation modelLocation = new ResourceLocation(ProjectNublar.MODID, "models/entities/eggs/egg_" + this.name());
+        ResourceLocation mainTextureLocation = new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + ".png");
+        this.type = new DinosaurEggType(length, scale, modelLocation, mainTextureLocation);
+        this.qrType = new DinosaurEggType(length, scale, modelLocation, mainTextureLocation, new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + "_qr.png"));
     }
 
 

@@ -118,7 +118,7 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.BREEDING);
         this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING)
             .addEggType(EnumDinosaurEggTypes.NORMAL.getType())
-            .setEggModifier(new GuassianValue(1F, 0.25F))
+            .setEggModifier(new GuassianValue(1F, 0.1F))
             .setEggAmount(new GuassianValue(7F, 1F))
             .setTicksPregnancy(new GuassianValue(192000, 12000)) //8 Minecraft days, give or take half a day
             .setTicksEggHatch(new GuassianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
