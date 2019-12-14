@@ -38,6 +38,8 @@ public final class ItemHandler {
     public static final Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
     public static final Item ARTIFICIAL_EGG = new Item();
 
+    public static final Item TRACKING_TABLET = new ItemTrackingTablet();
+
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
@@ -54,16 +56,17 @@ public final class ItemHandler {
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
 
         event.getRegistry().registerAll(
-                EMPTY_TEST_TUBE.setRegistryName("test_tube").setTranslationKey("test_tube").setCreativeTab(TAB),
-                FILTER.setRegistryName("filter").setTranslationKey("filter").setCreativeTab(TAB),
-                AMBER.setRegistryName("amber").setTranslationKey("amber").setCreativeTab(TAB),
-                HARD_DRIVE.setRegistryName("hard_drive").setTranslationKey("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
-                EMPTY_SYRINGE.setRegistryName("empty_syringe").setTranslationKey("empty_syringe").setCreativeTab(TAB),
-                DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setTranslationKey("dna_filled_syringe").setCreativeTab(TAB),
-                EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setTranslationKey("embryo_filled_syringe").setCreativeTab(TAB),
-                FENCE_REMOVER.setRegistryName("fence_remover").setTranslationKey("fence_remover").setCreativeTab(TAB),
-                CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setTranslationKey("creative_fence_remover").setCreativeTab(TAB),
-                ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB)
+            EMPTY_TEST_TUBE.setRegistryName("test_tube").setTranslationKey("test_tube").setCreativeTab(TAB),
+            FILTER.setRegistryName("filter").setTranslationKey("filter").setCreativeTab(TAB),
+            AMBER.setRegistryName("amber").setTranslationKey("amber").setCreativeTab(TAB),
+            HARD_DRIVE.setRegistryName("hard_drive").setTranslationKey("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
+            EMPTY_SYRINGE.setRegistryName("empty_syringe").setTranslationKey("empty_syringe").setCreativeTab(TAB),
+            DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setTranslationKey("dna_filled_syringe").setCreativeTab(TAB),
+            EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setTranslationKey("embryo_filled_syringe").setCreativeTab(TAB),
+            FENCE_REMOVER.setRegistryName("fence_remover").setTranslationKey("fence_remover").setCreativeTab(TAB),
+            CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setTranslationKey("creative_fence_remover").setCreativeTab(TAB),
+            ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB),
+            TRACKING_TABLET.setRegistryName("tracking_tablet").setTranslationKey("tracking_tablet").setCreativeTab(TAB)
         );
 
         UnaryOperator<Item> tab = item -> item.setCreativeTab(TAB);

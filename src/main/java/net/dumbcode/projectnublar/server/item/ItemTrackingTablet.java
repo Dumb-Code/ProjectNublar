@@ -1,0 +1,23 @@
+package net.dumbcode.projectnublar.server.item;
+
+import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.network.S22OpenTrackingTabletGui;
+import net.dumbcode.projectnublar.server.utils.TrackingTabletIterator;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.world.World;
+
+public class ItemTrackingTablet extends Item {
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+        if(!worldIn.isRemote) {
+            new TrackingTabletIterator((EntityPlayerMP) playerIn, playerIn.getPosition(), 150);
+        }
+        return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
+    }
+}
