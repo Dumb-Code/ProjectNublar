@@ -4,6 +4,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
 import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletHomeGui;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
@@ -13,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -48,13 +50,14 @@ public enum GuiHandler implements IGuiHandler {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
         TileEntity te = world.getTileEntity(pos);
+        pos.release();
         switch (ID) {
-            case SKELETAL_BUILDER_ID: {
+            case SKELETAL_BUILDER_ID:
                 if(te instanceof SkeletalBuilderBlockEntity) {
                     return new GuiSkeletalBuilder((SkeletalBuilderBlockEntity)te);
                 }
                 return null;
-            }
+
         }
         if(te instanceof MachineModuleBlockEntity) {
             TabListInformation info;

@@ -26,6 +26,7 @@ import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
 import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
+import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
@@ -73,6 +74,8 @@ public class ProjectNublar {
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;
+
+    public static IForgeRegistry<TabletModuleType<?>> TABLET_MODULES_REGISTRY;
 
     private static Logger logger;
 
@@ -174,6 +177,11 @@ public class ProjectNublar {
                 .setType(Plant.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
                 .create();
+
+        TABLET_MODULES_REGISTRY = new RegistryBuilder<TabletModuleType<?>>()
+                .setType(TabletModuleType.getWildcardType())
+                .setName(new ResourceLocation(MODID, "module_type"))
+                .create();
     }
 
     @SubscribeEvent
@@ -241,5 +249,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C23ConfirmTrackingTablet.Handler(), C23ConfirmTrackingTablet.class, 23, Side.SERVER);
         NETWORK.registerMessage(new S24TrackingTabletUpdateChunk.Handler(), S24TrackingTabletUpdateChunk.class, 24, Side.CLIENT);
         NETWORK.registerMessage(new C25StopTrackingTablet.Handler(), C25StopTrackingTablet.class, 25, Side.SERVER);
+        NETWORK.registerMessage(new S26OpenTablet.Handler(), S26OpenTablet.class, 26, Side.CLIENT);
+        NETWORK.registerMessage(new C27InstallModule.Handler(), C27InstallModule.class, 27, Side.SERVER);
     }
 }
