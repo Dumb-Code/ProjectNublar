@@ -1,21 +1,20 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.CoalGeneratorBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 
-public class CoalGeneratorGui extends TabbedGui {
+public class CoalGeneratorGui extends TabbedGuiContainer {
 
     private final CoalGeneratorBlockEntity blockEntity;
 
-    public CoalGeneratorGui(EntityPlayer player, CoalGeneratorBlockEntity blockEntity, TabListInformation info, int tab) {
+    public CoalGeneratorGui(EntityPlayer player, CoalGeneratorBlockEntity blockEntity, TabInformationBar info, int tab) {
         super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
     }

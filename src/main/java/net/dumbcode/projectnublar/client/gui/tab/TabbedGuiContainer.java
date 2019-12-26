@@ -5,11 +5,11 @@ import net.minecraft.inventory.Container;
 
 import java.io.IOException;
 
-public abstract class TabbedGui extends GuiContainer {
+public abstract class TabbedGuiContainer extends GuiContainer {
 
-    private final TabListInformation info;
+    private final TabInformationBar info;
 
-    public TabbedGui(Container inventorySlotsIn, TabListInformation list) {
+    public TabbedGuiContainer(Container inventorySlotsIn, TabInformationBar list) {
         super(inventorySlotsIn);
         this.info = list;
     }
@@ -17,7 +17,7 @@ public abstract class TabbedGui extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
-        this.info.configurePageSelect();
+        this.info.configurePageSelect(this.xSize);
         this.guiTop += this.getOffset();
     }
 
@@ -34,23 +34,16 @@ public abstract class TabbedGui extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.info.render(mouseX, mouseY);
+        this.info.render(this.guiLeft, this.xSize, this.guiTop);
     }
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.info.mouseClicked(mouseX, mouseY, mouseButton);
+        this.info.mouseClicked(this.guiLeft, this.xSize, this.guiTop, mouseX, mouseY, mouseButton);
     }
 
-    public abstract static class Tab {
-        public boolean isDirty() {
-            return false;
-        }
-        public abstract void onClicked();//Mouse X/Y ?
-    }
-
-    public TabListInformation getInfo() {
+    public TabInformationBar getInfo() {
         return info;
     }
 }

@@ -1,10 +1,8 @@
 package net.dumbcode.projectnublar.server.gui;
 
-import io.netty.channel.embedded.EmbeddedChannel;
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletHomeGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
@@ -14,16 +12,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.fml.common.network.FMLOutboundHandler;
 import net.minecraftforge.fml.common.network.IGuiHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.internal.FMLMessage;
-import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 
@@ -60,9 +53,9 @@ public enum GuiHandler implements IGuiHandler {
 
         }
         if(te instanceof MachineModuleBlockEntity) {
-            TabListInformation info;
-            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGui) {
-                info = ((TabbedGui) Minecraft.getMinecraft().currentScreen).getInfo();
+            TabInformationBar info;
+            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGuiContainer) {
+                info = ((TabbedGuiContainer) Minecraft.getMinecraft().currentScreen).getInfo();
             } else {
                 info = ((MachineModuleBlockEntity) te).createInfo();
             }

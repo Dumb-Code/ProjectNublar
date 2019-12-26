@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -279,12 +278,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
         return tab != 0 ? new SequencingSynthesizerInputsGui(player, this, info, tab) : new SequencingSynthesizerGui(player, this, info, tab);
     }
 
     @Override
-    protected void addTabs(List<TabbedGui.Tab> tabList) {
+    protected void addTabs(List<TabInformationBar.Tab> tabList) {
         tabList.add(new DefaultTab(0));
         tabList.add(new DefaultTab(1));
     }

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Value;
-import net.dumbcode.projectnublar.client.utils.RenderUtils;
+import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;

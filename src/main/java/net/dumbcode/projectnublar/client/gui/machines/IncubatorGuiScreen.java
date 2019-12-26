@@ -1,22 +1,20 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 
-public class IncubatorGuiScreen extends TabbedGui {
+public class IncubatorGuiScreen extends TabbedGuiContainer {
 
     private final IncubatorBlockEntity blockEntity;
 
-    public IncubatorGuiScreen(EntityPlayer player, IncubatorBlockEntity blockEntity, TabListInformation info, int tab) {
+    public IncubatorGuiScreen(EntityPlayer player, IncubatorBlockEntity blockEntity, TabInformationBar info, int tab) {
         super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
     }

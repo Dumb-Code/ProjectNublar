@@ -2,18 +2,14 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.DrillExtractorGui;
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
-import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.recipes.DrillExtractorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -46,7 +42,7 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
         return new DrillExtractorGui(player, this, info, tab);
     }
 

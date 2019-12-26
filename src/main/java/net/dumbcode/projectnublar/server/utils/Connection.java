@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Lists;
 import lombok.*;
 import lombok.experimental.Accessors;
-import net.dumbcode.projectnublar.client.utils.RenderUtils;
+import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;

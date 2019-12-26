@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.CoalGeneratorGui;
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.CoalGeneratorRecipe;
@@ -67,7 +67,7 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab) {
+    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
         return new CoalGeneratorGui(player, this, info, tab);
     }
 
