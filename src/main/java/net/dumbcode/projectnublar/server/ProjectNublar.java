@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.server.ecs.EntityManager;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
@@ -108,6 +109,7 @@ public class ProjectNublar {
     public void init(FMLInitializationEvent event) {
 
         DataSerializerHandler.register();
+        EnumWeatherIcons.register();
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();

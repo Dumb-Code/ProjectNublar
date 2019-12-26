@@ -19,12 +19,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class TabletHomeGui extends GuiScreen {
-
-    private static final int MAX_SCREEN_WIDTH = 250;
-    private static final float SCREEN_RATIO = 16F/9F;
-
-    private static final int PADDING_SIDES = 50;
+public class TabletHomeGui extends BaseTabletScreen {
 
     private static final int ICON_ROWS = 2;
     private static final int ICON_COLUMNS = 4;
@@ -46,11 +41,6 @@ public class TabletHomeGui extends GuiScreen {
     private GuiDropdownBox<DropdownBoxEntry> dropdownBox;
     private GuiButton installButton;
 
-    private int leftStart;
-    private int tabletWidth;
-    private int topStart;
-    private int tabletHeight;
-
     public TabletHomeGui(ItemStack stack, EnumHand hand) {
         this.hand = hand;
         this.addIcons(stack);
@@ -67,12 +57,6 @@ public class TabletHomeGui extends GuiScreen {
     }
 
     private void initIcons() {
-        this.leftStart = Math.max(PADDING_SIDES, this.width / 2 - MAX_SCREEN_WIDTH);
-        this.tabletWidth = this.width - leftStart * 2;
-
-        this.tabletHeight = (int) (this.tabletWidth / SCREEN_RATIO);
-        this.topStart = this.height / 2 - this.tabletHeight / 2;
-
         int widthSpace = this.tabletWidth / ICON_COLUMNS;
         int heightSpace = this.tabletHeight / ICON_ROWS;
 
@@ -100,6 +84,8 @@ public class TabletHomeGui extends GuiScreen {
 
     @Override
     public void initGui() {
+        super.initGui();
+
         this.dropdownBox = new GuiDropdownBox<>(this.width / 2 - 50, (int) (this.height * 0.25F - 10), 100, 20, 10, () -> this.entries);
 
         this.initIcons();
@@ -108,7 +94,6 @@ public class TabletHomeGui extends GuiScreen {
         this.installButton.enabled = false;
         this.installButton.visible = false;
 
-        super.initGui();
     }
 
     @Override
@@ -124,22 +109,14 @@ public class TabletHomeGui extends GuiScreen {
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        if(!this.openedInstallPopup) {
-            this.drawDefaultBackground();
-        }
-
-        this.drawGradientRect(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0xFFFFFFFF, 0xFFFFFFFF);
-
-
+    public void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
         this.forAllIcons(icon -> icon.render(icon.isMouseOver(mouseX, mouseY)));
 
         if(this.openedInstallPopup) {
-            this.drawDefaultBackground();
+            //Copied from #drawWorldBackground
+            this.drawGradientRect(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, -1072689136, -804253680);
             this.dropdownBox.render(mouseX, mouseY);
         }
-
-        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
     @Override
