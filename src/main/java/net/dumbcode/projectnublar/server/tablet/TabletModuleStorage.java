@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.tablet;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public interface TabletModuleStorage<TabletModuleType> {
+public interface TabletModuleStorage {
     void readFromNBT(NBTTagCompound compound);
 
     NBTTagCompound writeToNBT();

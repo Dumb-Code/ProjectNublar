@@ -43,7 +43,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
 
         if(stencil) {
             GL11.glEnable(GL11.GL_STENCIL_TEST);
-            RenderUtils.renderSquareStencil(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, true);
+            RenderUtils.renderSquareStencil(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, true, 1, GL11.GL_LEQUAL);
         }
 
         drawRect(0, 0, this.width, this.height, -1);

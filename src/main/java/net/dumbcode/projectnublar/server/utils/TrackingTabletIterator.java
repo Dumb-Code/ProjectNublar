@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Maps;
+import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.S22OpenTrackingTabletGui;
+import net.dumbcode.projectnublar.server.network.S22StartTrackingTabletHandshake;
 import net.dumbcode.projectnublar.server.network.S24TrackingTabletUpdateChunk;
-import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -17,12 +17,10 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public class TrackingTabletIterator {
     public static final Map<UUID, TrackingTabletIterator> PLAYER_TO_TABLET_MAP = Maps.newHashMap();
@@ -43,17 +41,14 @@ public class TrackingTabletIterator {
         this.fromPos = center.add(-squareRadius, 0, -squareRadius);
         this.toPos = center.add(squareRadius, 0, squareRadius);
 
-        PLAYER_TO_TABLET_MAP.compute(player.getUniqueID(), (uuid, iterator) -> {
-            if(iterator != null) {
-                iterator.finish();
-            }
-            return this;
-        });
+        if(PLAYER_TO_TABLET_MAP.containsKey(player.getUniqueID())) {
+            PLAYER_TO_TABLET_MAP.get(player.getUniqueID()).finish();
+        }
+
+        PLAYER_TO_TABLET_MAP.put(player.getUniqueID(), this);
 
         this.currentPos = new ChunkPos(this.fromPos);
-
-        //Start the handshaking
-        ProjectNublar.NETWORK.sendTo(new S22OpenTrackingTabletGui(this.fromPos.getX(), this.toPos.getX(), this.fromPos.getZ(), this.toPos.getZ()), this.player);
+        ProjectNublar.NETWORK.sendTo(new S22StartTrackingTabletHandshake(this.fromPos.getX(), this.toPos.getX(), this.fromPos.getZ(), this.toPos.getZ()), player);
     }
 
     @SubscribeEvent
@@ -62,12 +57,15 @@ public class TrackingTabletIterator {
 
         for (int i = 0; i < 10; i++) {
             this.doCurrentChunk();
-            this.incrementPosition();
-
+            if(!this.incrementPosition()) {
+                this.finish();
+                break;
+            }
             //After 20ms, do no more
             if(System.currentTimeMillis() - startTime >= 20) {
                 break;
             }
+
         }
 
     }

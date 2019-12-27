@@ -78,7 +78,7 @@ public class BlockConnectableBase extends Block {
 
     @Override
     public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity) {
-        if(!ForgeModContainer.fullBoundingBoxLadders) { //TODO: add a config to not do this yeah
+        if(!ForgeModContainer.fullBoundingBoxLadders) { //TODO: set a config to not do this yeah
             ForgeModContainer.fullBoundingBoxLadders = true;
         }
         TileEntity te = world.getTileEntity(pos);

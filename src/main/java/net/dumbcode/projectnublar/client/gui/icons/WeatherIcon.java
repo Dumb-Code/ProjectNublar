@@ -13,7 +13,7 @@ public interface WeatherIcon {
     List<WeatherIcon> ORDERED_ICONS = new ArrayList<>();
 
     static void registerIcon(WeatherIcon icon) {
-        //todo: just insert at the right place, don't add and resort
+        //todo: just insert at the right place, don't set and resort
         ORDERED_ICONS.add(icon);
         ORDERED_ICONS.sort(Comparator.comparing(WeatherIcon::getPriority));
     }

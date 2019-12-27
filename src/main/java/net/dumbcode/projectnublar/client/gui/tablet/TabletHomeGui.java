@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C27InstallModule;
+import net.dumbcode.projectnublar.server.network.C28ModuleClicked;
 import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
@@ -113,6 +114,7 @@ public class TabletHomeGui extends BaseTabletScreen {
         this.forAllIcons(icon -> icon.render(icon.isMouseOver(mouseX, mouseY)));
 
         if(this.openedInstallPopup) {
+            this.installButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
             //Copied from #drawWorldBackground
             this.drawGradientRect(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, -1072689136, -804253680);
             this.dropdownBox.render(mouseX, mouseY);
@@ -255,6 +257,8 @@ public class TabletHomeGui extends BaseTabletScreen {
         @Override
         public void onClicked() {
             System.out.println(entry.getType().getRegistryName() + ": clicked");
+            mc.displayGuiScreen(new OpenedTabletScreen());
+            ProjectNublar.NETWORK.sendToServer(new C28ModuleClicked(this.entry.getType().getRegistryName(), hand));
         }
     }
 

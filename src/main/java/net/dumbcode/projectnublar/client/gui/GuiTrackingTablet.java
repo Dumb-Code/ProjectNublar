@@ -28,7 +28,6 @@ public class GuiTrackingTablet extends GuiScreen {
         this.texture = new DynamicTexture(textureWidth, textureHeight);
         this.location = Minecraft.getMinecraft().renderEngine.getDynamicTextureLocation("tracking_tablet_map", this.texture);
 
-        ProjectNublar.NETWORK.sendToServer(new C23ConfirmTrackingTablet());
     }
 
     @Override
