@@ -46,7 +46,7 @@ public class C30TrackingTabletEntryClicked implements IMessage {
         protected void handleMessage(C30TrackingTabletEntryClicked message, MessageContext ctx, World world, EntityPlayer player) {
             TileEntity tileEntity = world.getTileEntity(message.pos);
             if(tileEntity instanceof TrackingBeaconBlockEntity) {
-                new TrackingTabletIterator((EntityPlayerMP) player, message.pos, 150);
+                new TrackingTabletIterator((EntityPlayerMP) player, message.pos, ((TrackingBeaconBlockEntity) tileEntity).getRadius());
             }
         }
     }

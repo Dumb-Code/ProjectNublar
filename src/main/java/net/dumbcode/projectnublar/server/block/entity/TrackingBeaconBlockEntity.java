@@ -23,15 +23,20 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
     @Getter
     private String name = "Unnamed";
 
+    @Getter
+    private int radius = 150;
+
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         this.name = compound.getString("name");
+        this.radius = compound.getInteger("radius");
         super.readFromNBT(compound);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setString("name", this.name);
+        compound.setInteger("radius", this.radius);
         return super.writeToNBT(compound);
     }
 
@@ -44,11 +49,14 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
     public void setName(String name) {
         this.name = name;
         this.markDirty();
-        if(!this.world.isRemote) {
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+        this.syncToClient();
         getTrackingList(this.world).set(this.pos, this.name);
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+        this.markDirty();
+        this.syncToClient();
     }
 
     public static TrackingSavedData getTrackingList(World world) {

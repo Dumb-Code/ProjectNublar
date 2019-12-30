@@ -43,6 +43,8 @@ public class TrackingTabletScreen extends TabletScreen {
     private int textureWidth;
     private int textureHeight;
 
+    //The reason I don't use DynamicTexture is because I don't want to have to reupload ALL the pixels every time i make a change.
+    //Doing direct texture IDs, I can use glTexSubImage2d (uploadTextureMipmap), and just change the affected pixels
     private int textureID = -1;
 
     private int prevClickedX;

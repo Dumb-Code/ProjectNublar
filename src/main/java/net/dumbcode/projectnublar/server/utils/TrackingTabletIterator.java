@@ -25,6 +25,8 @@ import java.util.UUID;
 public class TrackingTabletIterator {
     public static final Map<UUID, TrackingTabletIterator> PLAYER_TO_TABLET_MAP = Maps.newHashMap();
 
+    public static final int MAX_RADIUS = 1000;
+
     private final EntityPlayerMP player;
     private final BlockPos fromPos;
     private final BlockPos toPos;
@@ -37,7 +39,7 @@ public class TrackingTabletIterator {
         this.player = player;
         this.world = player.world;
 
-        squareRadius = Math.abs(squareRadius);
+        squareRadius = Math.min(Math.abs(squareRadius), MAX_RADIUS);
         this.fromPos = center.add(-squareRadius, 0, -squareRadius);
         this.toPos = center.add(squareRadius, 0, squareRadius);
 

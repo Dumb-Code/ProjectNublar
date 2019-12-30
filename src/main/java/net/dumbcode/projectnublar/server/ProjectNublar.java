@@ -9,7 +9,6 @@ import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
-import net.dumbcode.projectnublar.server.block.BlockTrackingBeacon;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -258,6 +257,6 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C28ModuleClicked.Handler(), C28ModuleClicked.class, 28, Side.SERVER);
         NETWORK.registerMessage(new S29OpenTabletModule.Handler(), S29OpenTabletModule.class, 29, Side.CLIENT);
         NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
-        NETWORK.registerMessage(new C31TrackingBeaconNameChanged.Handler(), C31TrackingBeaconNameChanged.class, 31, Side.SERVER);
+        NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
     }
 }
