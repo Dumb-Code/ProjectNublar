@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -41,8 +43,7 @@ public class TrackingTabletScreen extends TabletScreen {
     private int textureWidth;
     private int textureHeight;
 
-    private DynamicTexture texture;
-    private ResourceLocation location;
+    private int textureID = -1;
 
     private int prevClickedX;
     private int prevClickedY;
@@ -68,12 +69,12 @@ public class TrackingTabletScreen extends TabletScreen {
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
 
-        if(this.texture != null) {
-            Minecraft.getMinecraft().renderEngine.deleteTexture(this.location);
+        if(this.textureID != -1) {
+            TextureUtil.deleteTexture(this.textureID);
         }
 
-        this.texture = new DynamicTexture(this.textureWidth, this.textureHeight);
-        this.location = Minecraft.getMinecraft().renderEngine.getDynamicTextureLocation("tracking_tablet_map", this.texture);
+        this.textureID = TextureUtil.glGenTextures();
+        TextureUtil.allocateTextureImpl(this.textureID, 0, this.textureWidth, this.textureHeight);
 
         ProjectNublar.NETWORK.sendToServer(new C23ConfirmTrackingTablet());
 
@@ -87,7 +88,7 @@ public class TrackingTabletScreen extends TabletScreen {
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
 
-        if(this.location != null) {
+        if(this.textureID != -1) {
             GlStateManager.pushMatrix();
 
             this.putInFloat();
@@ -95,7 +96,7 @@ public class TrackingTabletScreen extends TabletScreen {
             GlStateManager.multMatrix(this.buffer);
 
 
-            Minecraft.getMinecraft().renderEngine.bindTexture(this.location);
+            GlStateManager.bindTexture(this.textureID);
             GlStateManager.disableAlpha();
             GlStateManager.disableBlend();
 
@@ -134,25 +135,13 @@ public class TrackingTabletScreen extends TabletScreen {
 
     @Override
     public void onClosed() {
-        MC.renderEngine.deleteTexture(this.location);
-        this.texture.deleteGlTexture();
-
+        TextureUtil.deleteTexture(this.textureID);
         ProjectNublar.NETWORK.sendToServer(new C25StopTrackingTablet());
     }
 
     public void setRGB(int startX, int startZ, int width, int height, int[] setIntoArray) {
-
-        int arrayStartX = startX - this.startX;
-        int arrayStartZ = startZ - this.startZ;
-
-        int off = 0;
-        for (int z = arrayStartZ; z < arrayStartZ+height; z++) {
-            for (int x = arrayStartX; x < arrayStartX+width; x++) {
-                this.texture.getTextureData()[x + z*this.textureWidth] = setIntoArray[off++];
-            }
-        }
-
-        this.texture.updateDynamicTexture();
+        GlStateManager.bindTexture(this.textureID);
+        TextureUtil.uploadTextureMipmap(new int[][]{setIntoArray}, width, height, startX - this.startX, startZ - this.startZ, false, false);
     }
 
     @Override
