@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
+import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
+import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -11,6 +13,7 @@ import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
@@ -58,7 +61,7 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                 this.setBonesInHandler(skeletalBuilder, dinosaur, stack, item.getVariant());
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
                 if (skeletalBuilder.getDinosaur().isPresent()) {
-                    playerIn.openGui(ProjectNublar.INSTANCE, GuiHandler.SKELETAL_BUILDER_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                    SidedExecutor.runClient(() -> () -> Minecraft.getMinecraft().displayGuiScreen(new GuiSkeletalBuilder(skeletalBuilder)));
                 } else {
                     playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);
                 }

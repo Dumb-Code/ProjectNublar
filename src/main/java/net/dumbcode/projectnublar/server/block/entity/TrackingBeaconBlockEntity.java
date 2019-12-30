@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
@@ -42,6 +43,11 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
 
     public void setName(String name) {
         this.name = name;
+        this.markDirty();
+        if(!this.world.isRemote) {
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
         getTrackingList(this.world).set(this.pos, this.name);
     }
 

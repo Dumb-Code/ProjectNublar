@@ -1,11 +1,9 @@
 package net.dumbcode.projectnublar.server.gui;
 
-import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.network.S19SetGuiWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,10 +20,6 @@ import javax.annotation.Nullable;
 
 public enum GuiHandler implements IGuiHandler {
     INSTANCE;
-
-
-    //All IDS should be negative. This is because the tab system takes up all of the positive numbers. Todo: maybe switch this around?
-    public static final int SKELETAL_BUILDER_ID = -1;
 
     @Nullable
     @Override
@@ -44,14 +38,6 @@ public enum GuiHandler implements IGuiHandler {
         BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(x, y, z);
         TileEntity te = world.getTileEntity(pos);
         pos.release();
-        switch (ID) {
-            case SKELETAL_BUILDER_ID:
-                if(te instanceof SkeletalBuilderBlockEntity) {
-                    return new GuiSkeletalBuilder((SkeletalBuilderBlockEntity)te);
-                }
-                return null;
-
-        }
         if(te instanceof MachineModuleBlockEntity) {
             TabInformationBar info;
             if(Minecraft.getMinecraft().currentScreen instanceof TabbedGuiContainer) {

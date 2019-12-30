@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
 import lombok.RequiredArgsConstructor;
+import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
@@ -209,14 +210,20 @@ public class TrackingTabletScreen extends TabletScreen {
 
         @Override
         public void draw(int x, int y, int mouseX, int mouseY) {
+            Minecraft.getMinecraft().fontRenderer.drawString(this.name, x + 5, y + 4, -1);
+        }
+
+        @Override
+        public void postDraw(int x, int y, int mouseX, int mouseY) {
             if(mouseX - x >= 0 && mouseX - x <= 100 && mouseY - y >= 0 && mouseY - y <= 15) {
                 GL11.glDisable(GL11.GL_STENCIL_TEST);
+                GlStateManager.enableDepth();
                 GuiUtils.drawHoveringText(ItemStack.EMPTY, Collections.singletonList(this.pos.getX() + ", " + this.pos.getY() + ", " + this.pos.getZ()), mouseX, mouseY, xSize, ySize, -1, Minecraft.getMinecraft().fontRenderer);
+                GlStateManager.enableDepth();
                 GL11.glEnable(GL11.GL_STENCIL_TEST);
                 RenderHelper.enableGUIStandardItemLighting();
                 GlStateManager.color(1F, 1F, 1F,1F);
             }
-            Minecraft.getMinecraft().fontRenderer.drawString(this.name, x + 5, y + 4, -1);
         }
 
         @Override

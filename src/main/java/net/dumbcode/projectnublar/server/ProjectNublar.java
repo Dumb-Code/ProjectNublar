@@ -258,5 +258,6 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C28ModuleClicked.Handler(), C28ModuleClicked.class, 28, Side.SERVER);
         NETWORK.registerMessage(new S29OpenTabletModule.Handler(), S29OpenTabletModule.class, 29, Side.CLIENT);
         NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
+        NETWORK.registerMessage(new C31TrackingBeaconNameChanged.Handler(), C31TrackingBeaconNameChanged.class, 31, Side.SERVER);
     }
 }
