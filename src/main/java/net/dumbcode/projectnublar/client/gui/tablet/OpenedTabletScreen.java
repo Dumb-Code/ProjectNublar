@@ -89,4 +89,12 @@ public class OpenedTabletScreen extends BaseTabletScreen {
         }
         super.handleMouseInput();
     }
+
+    @Override
+    public void onGuiClosed() {
+        if(this.screen != null) {
+            this.screen.onClosed();
+        }
+        super.onGuiClosed();
+    }
 }
