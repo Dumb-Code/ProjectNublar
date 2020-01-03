@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Maps;
-import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.S22StartTrackingTabletHandshake;
 import net.dumbcode.projectnublar.server.network.S24TrackingTabletUpdateChunk;
@@ -85,7 +84,7 @@ public class TrackingTabletIterator {
 
         this.generateBiomeData(xStart, zStart, xEnd, zEnd, colorData, biomes);
 
-        if(this.world.isChunkGeneratedAt(this.currentPos.x, this.currentPos.z)) {
+        if(this.isChunkOffsetGenerated(0, 0)) {
             this.generateBlockMapData(xStart, zStart, xEnd, zEnd, colorData, biomes);
         }
 
@@ -102,7 +101,7 @@ public class TrackingTabletIterator {
                 IBlockState state = this.world.getBlockState(blockPos);
 
                 int colorIndex = 1;
-                if(state.isFullBlock() && this.world.isBlockLoaded(blockPos.north())) {
+                if(this.world.isBlockLoaded(blockPos.north())) {
                     int prevHeight = blockPos.getY() - this.getTopBlock(blockPos.move(EnumFacing.NORTH)).getY();
                     colorIndex = MathHelper.clamp(prevHeight, -1, 1) + 1;
                 }
@@ -121,15 +120,15 @@ public class TrackingTabletIterator {
         }
         pos.release();
 
-        boolean topCorner = this.isCornerGenerated(0, -1);
-        boolean leftCorner = this.isCornerGenerated(-1, 0);
-        boolean rightCorner = this.isCornerGenerated(1, 0);
-        boolean downCorner = this.isCornerGenerated(0, 1);
+        boolean topCorner = this.isChunkOffsetGenerated(0, -1);
+        boolean leftCorner = this.isChunkOffsetGenerated(-1, 0);
+        boolean rightCorner = this.isChunkOffsetGenerated(1, 0);
+        boolean downCorner = this.isChunkOffsetGenerated(0, 1);
 
         boolean[] generatedGrid = {
-            leftCorner && this.isCornerGenerated(-1, -1) && topCorner, topCorner,  topCorner && this.isCornerGenerated(1, -1) && rightCorner,
+            leftCorner && this.isChunkOffsetGenerated(-1, -1) && topCorner, topCorner,  topCorner && this.isChunkOffsetGenerated(1, -1) && rightCorner,
             leftCorner,                   /*Self will always be generated*/ true, rightCorner,
-            leftCorner && this.isCornerGenerated(-1, 1) && downCorner, downCorner, downCorner && this.isCornerGenerated(1, 1) && rightCorner,
+            leftCorner && this.isChunkOffsetGenerated(-1, 1) && downCorner, downCorner, downCorner && this.isChunkOffsetGenerated(1, 1) && rightCorner,
         };
 
         boolean needsGradient = false;
@@ -262,8 +261,8 @@ public class TrackingTabletIterator {
 
     }
 
-    private boolean isCornerGenerated(int xOff, int zOff) {
-        return this.world.isChunkGeneratedAt(this.currentPos.x + xOff, this.currentPos.z + zOff);
+    private boolean isChunkOffsetGenerated(int xOff, int zOff) {
+        return this.world.isChunkGeneratedAt(this.currentPos.x + xOff, this.currentPos.z + zOff) && this.world.getChunk(this.currentPos.x + xOff, this.currentPos.z + zOff).isTerrainPopulated();
     }
 
     private void generateBiomeData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[] biomes) {
@@ -320,7 +319,7 @@ public class TrackingTabletIterator {
         topPos.setY(256);
         while(topPos.getY() >= 1) {
             IBlockState state = this.world.getBlockState(topPos);
-            if(state.isFullBlock() || state.getMaterial().isLiquid()) {
+            if(state.isFullBlock() || state.getMaterial().isLiquid() || state.getBlock() == Blocks.SNOW_LAYER) {
                 break;
             }
             topPos.setY(topPos.getY() - 1);
