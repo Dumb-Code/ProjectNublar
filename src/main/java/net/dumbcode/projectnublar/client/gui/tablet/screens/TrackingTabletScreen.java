@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
@@ -14,11 +13,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec2f;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.BufferUtils;
@@ -26,10 +24,12 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Point3f;
+import javax.vecmath.Vector4f;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class TrackingTabletScreen extends TabletScreen {
@@ -49,8 +49,9 @@ public class TrackingTabletScreen extends TabletScreen {
 
     private int prevClickedX;
     private int prevClickedY;
-    private Matrix4f transformation = new Matrix4f();
-    private FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+
+    private final Matrix4f transformation = new Matrix4f();
+    private final FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
 
     public TrackingTabletScreen(List<Pair<BlockPos, String>> entries) {
@@ -82,14 +83,9 @@ public class TrackingTabletScreen extends TabletScreen {
 
     }
 
-    @Override
-    public void onSetAsCurrentScreen() {
-        super.onSetAsCurrentScreen();
-    }
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
-
         if(this.textureID != -1) {
             GlStateManager.pushMatrix();
 
@@ -97,14 +93,18 @@ public class TrackingTabletScreen extends TabletScreen {
             GlStateManager.translate(this.xSize / 2F, this.ySize / 2F, 0);
             GlStateManager.multMatrix(this.buffer);
 
-
             GlStateManager.bindTexture(this.textureID);
             GlStateManager.disableAlpha();
             GlStateManager.disableBlend();
 
-            Gui.drawScaledCustomSizeModalRect(-this.ySize / 2, -this.ySize / 2, 0, 0, 1, 1, this.ySize, this.ySize, 1F, 1F);
+            Gui.drawScaledCustomSizeModalRect(-this.xSize / 2, -this.xSize / 2, 0, 0, 1, 1, this.xSize, this.xSize, 1F, 1F);
 
             GlStateManager.popMatrix();
+
+            Vec2f point = this.getTransformedPoint(0, 0, this.transformation);
+
+            RenderUtils.renderBorderExclusive((int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFF00FF00);
+
         }
 
         this.scrollBox.render(mouseX, mouseY);
@@ -158,19 +158,10 @@ public class TrackingTabletScreen extends TabletScreen {
     public void onMouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if(!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize())) {
             if(clickedMouseButton == 0) {
-                Matrix4f newTransformation = new Matrix4f();
-                newTransformation.setIdentity();
-
-                int deltaX = mouseX - this.prevClickedX;
-                int deltaY = mouseY - this.prevClickedY;
-
-                newTransformation.m03 = deltaX;
-                newTransformation.m13 = deltaY;
-
-                this.transformation.mul(newTransformation, this.transformation);
+                this.tryMulMatrix(matrix4f -> matrix4f.m03 = mouseX - this.prevClickedX, fail -> {});
+                this.tryMulMatrix(matrix4f -> matrix4f.m13 = mouseY - this.prevClickedY, fail -> {});
             }
         }
-
 
         this.prevClickedX = mouseX;
         this.prevClickedY = mouseY;
@@ -185,12 +176,98 @@ public class TrackingTabletScreen extends TabletScreen {
             if(wheel != 0) {
                 float modifier = 0.75F;
                 float mod = wheel < 0 ? modifier : 1F/modifier;
-                Matrix4f newTransformation = new Matrix4f();
-                newTransformation.setIdentity();
-                newTransformation.setScale(mod);
-                this.transformation.mul(newTransformation, this.transformation);
+
+                //Ignore disgusting code below. In the future maybe remove the matrix stuff, it don't really be needed
+                this.tryMulMatrix(matrix4f -> matrix4f.setScale(mod), fail -> {
+                    boolean leftOut = fail.x > 0;
+                    boolean rightOut = fail.z < this.xSize;
+
+                    boolean topOut = fail.y > 0;
+                    boolean bottomOut = fail.w < this.ySize;
+
+
+                    float xOffset = 0;
+                    if(leftOut != rightOut) {
+                        if(leftOut) {
+                            xOffset = -fail.x;
+                        } else {
+                            xOffset = this.xSize - fail.z;
+                        }
+                    }
+
+                    float yOffset = 0;
+                    if(topOut != bottomOut) {
+                        if(topOut) {
+                            yOffset = -fail.y;
+                        } else {
+                            yOffset = this.ySize - fail.z;
+                        }
+                    }
+
+                    float finalXOff = xOffset;
+                    float finalYOff = yOffset;
+
+                    this.tryMulMatrix(matrix4f -> {
+                        Matrix4f scale = new Matrix4f();
+                        scale.setIdentity();
+                        scale.setScale(mod);
+
+                        Matrix4f translation = new Matrix4f();
+                        translation.setIdentity();
+                        translation.m03 = finalXOff;
+                        translation.m13 = finalYOff;
+
+                        matrix4f.mul(translation, scale);
+                    }, failImpossible -> { /*Throw something?*/ });
+                });
             }
         }
+    }
+
+    private void tryMulMatrix(Consumer<Matrix4f> mat, Consumer<Vector4f> onFail) {
+        Matrix4f newTransformation = new Matrix4f();
+        newTransformation.setIdentity();
+        mat.accept(newTransformation);
+
+        Matrix4f finishedTransformation = new Matrix4f();
+        finishedTransformation.mul(newTransformation, this.transformation);
+
+        // (x, y)
+        //
+        //          (z, w)
+        Vector4f fail = new Vector4f();
+        boolean legal = true;
+
+        for (int i = 0; i < 4; i++) {
+            Vec2f point = this.getTransformedPoint((i & 1) == 0 ? 0 : this.xSize, (i & 2) == 0 ? 0 : this.xSize, finishedTransformation);
+            legal &= this.isInBound(point.x, point.y);
+
+            if(i == 0) {
+                fail.x = point.x;
+                fail.y = point.y;
+            }
+
+            if(i == 3) {
+                fail.z = point.x;
+                fail.w = point.y;
+            }
+        }
+
+        if(legal) {
+            this.transformation.set(finishedTransformation);
+        } else {
+            onFail.accept(fail);
+        }
+    }
+
+    private boolean isInBound(float x, float y) {
+        return !( (x > 0 && x < this.xSize) || (y > 0 && y < this.ySize) );
+    }
+
+    private Vec2f getTransformedPoint(float x, float y, Matrix4f transformation) {
+        Point3f point = new Point3f( x - this.xSize / 2, y - this.xSize / 2, 0);
+        transformation.transform(point);
+        return new Vec2f(point.x + this.xSize / 2, point.y + this.ySize / 2);
     }
 
     @RequiredArgsConstructor
