@@ -6,6 +6,7 @@ import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.dumbcode.projectnublar.server.network.C23ConfirmTrackingTablet;
 import net.dumbcode.projectnublar.server.network.C25StopTrackingTablet;
 import net.dumbcode.projectnublar.server.network.C30TrackingTabletEntryClicked;
@@ -27,6 +28,7 @@ import javax.vecmath.Matrix4f;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector4f;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -53,6 +55,7 @@ public class TrackingTabletScreen extends TabletScreen {
     private final Matrix4f transformation = new Matrix4f();
     private final FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
+    private List<TrackingSavedData.DataEntry> trackingData = new ArrayList<>();
 
     public TrackingTabletScreen(List<Pair<BlockPos, String>> entries) {
         this.scrollEntries = entries.stream().map(pair -> new ScrollEntry(pair.getKey(), pair.getRight())).collect(Collectors.toList());
@@ -87,6 +90,7 @@ public class TrackingTabletScreen extends TabletScreen {
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         if(this.textureID != -1) {
+
             GlStateManager.pushMatrix();
 
             this.putInFloat();
@@ -101,13 +105,37 @@ public class TrackingTabletScreen extends TabletScreen {
 
             GlStateManager.popMatrix();
 
-            Vec2f point = this.getTransformedPoint(0, 0, this.transformation);
 
-            RenderUtils.renderBorderExclusive((int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFF00FF00);
+            TrackingSavedData.DataEntry nearest = null;
+            float nearestDist = Integer.MAX_VALUE;
+            for (TrackingSavedData.DataEntry datum : this.trackingData) {
+                Vec2f point = this.getPoint(datum);
+                datum.getInformation().forEach(i -> i.render((int) point.x, (int) point.y));
+                float dist = (point.x - mouseX)*(point.x - mouseX) + (point.y - mouseY)*(point.y - mouseY);
+                if(dist < nearestDist) {
+                    nearestDist = dist;
+                    nearest = datum;
+                }
 
+                //Debug
+                RenderUtils.renderBorderExclusive((int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFFFF0000);
+            }
+
+            if(nearest != null && nearestDist <= 100) {
+                List<String> lines = new ArrayList<>();
+                nearest.getInformation().forEach(i -> i.addTooltip(lines::add));
+                GuiUtils.drawHoveringText(ItemStack.EMPTY, lines, mouseX, mouseY, this.xSize, this.ySize, -1, Minecraft.getMinecraft().fontRenderer);
+            }
         }
 
         this.scrollBox.render(mouseX, mouseY);
+    }
+
+    private Vec2f getPoint(TrackingSavedData.DataEntry entry) {
+        float x = (entry.getPosition().getX() - this.startX) / (float) this.textureWidth * this.xSize;
+        float y = (entry.getPosition().getZ() - this.startZ) / (float) this.textureHeight * this.xSize;
+
+        return this.getTransformedPoint(x, y, this.transformation);
     }
 
     private void putInFloat() {
@@ -139,6 +167,10 @@ public class TrackingTabletScreen extends TabletScreen {
     public void onClosed() {
         TextureUtil.deleteTexture(this.textureID);
         ProjectNublar.NETWORK.sendToServer(new C25StopTrackingTablet());
+    }
+
+    public void setTrackingData(List<TrackingSavedData.DataEntry> trackingData) {
+        this.trackingData = trackingData;
     }
 
     public void setRGB(int startX, int startZ, int width, int height, int[] setIntoArray) {

@@ -122,5 +122,8 @@ public class Dilophosaurus extends Dinosaur {
             .setEggAmount(new GuassianValue(7F, 1F))
             .setTicksPregnancy(new GuassianValue(192000, 12000)) //8 Minecraft days, give or take half a day
             .setTicksEggHatch(new GuassianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
+
+        this.addComponent(ComponentHandler.TRACKING_DATA);
+        this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
     }
 }

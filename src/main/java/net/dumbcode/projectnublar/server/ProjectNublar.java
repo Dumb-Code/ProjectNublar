@@ -15,10 +15,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
-import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.DinosaurEggLayingSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.MoodSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -193,6 +190,7 @@ public class ProjectNublar {
         event.registerSystem(MultipartSystem.INSTANCE);
         event.registerSystem(DinosaurEggLayingSystem.INSTANCE);
         event.registerSystem(MoodSystem.INSTANCE);
+        event.registerSystem(TrackingSystem.INSTANCE);
     }
 
     @EventHandler
@@ -258,5 +256,6 @@ public class ProjectNublar {
         NETWORK.registerMessage(new S29OpenTabletModule.Handler(), S29OpenTabletModule.class, 29, Side.CLIENT);
         NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
         NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
+        NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
     }
 }

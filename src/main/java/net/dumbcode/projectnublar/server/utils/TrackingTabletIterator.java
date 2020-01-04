@@ -2,8 +2,10 @@ package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.dumbcode.projectnublar.server.network.S22StartTrackingTabletHandshake;
 import net.dumbcode.projectnublar.server.network.S24TrackingTabletUpdateChunk;
+import net.dumbcode.projectnublar.server.network.S32SetTrackingDataList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -20,6 +22,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TrackingTabletIterator {
     public static final Map<UUID, TrackingTabletIterator> PLAYER_TO_TABLET_MAP = Maps.newHashMap();
@@ -27,6 +30,8 @@ public class TrackingTabletIterator {
     public static final int MAX_RADIUS = 1000;
 
     private final EntityPlayerMP player;
+    private final BlockPos center;
+    private final int radius;
     private final BlockPos fromPos;
     private final BlockPos toPos;
 
@@ -34,11 +39,17 @@ public class TrackingTabletIterator {
 
     private ChunkPos currentPos;
 
+    private boolean finishedTerrain;
+    private int tickCounter;
+
     public TrackingTabletIterator(EntityPlayerMP player, BlockPos center, int squareRadius) {
         this.player = player;
         this.world = player.world;
+        this.center = center;
 
         squareRadius = Math.min(Math.abs(squareRadius), MAX_RADIUS);
+        this.radius = squareRadius;
+
         this.fromPos = center.add(-squareRadius, 0, -squareRadius);
         this.toPos = center.add(squareRadius, 0, squareRadius);
 
@@ -56,18 +67,28 @@ public class TrackingTabletIterator {
     public void onWorldTick(TickEvent.WorldTickEvent event) {
         long startTime = System.currentTimeMillis();
 
-        for (int i = 0; i < 10; i++) {
-            this.doCurrentChunk();
-            if(!this.incrementPosition()) {
-                this.finish();
-                break;
+        if(!this.finishedTerrain) {
+            for (int i = 0; i < 10; i++) {
+                this.doCurrentChunk();
+                if(!this.incrementPosition()) {
+                    this.finishedTerrain = true;
+                    break;
+                }
+                //After 20ms, do no more
+                if(System.currentTimeMillis() - startTime >= 20) {
+                    break;
+                }
             }
-            //After 20ms, do no more
-            if(System.currentTimeMillis() - startTime >= 20) {
-                break;
-            }
-
         }
+
+        if(this.tickCounter++ % 5 == 0) {
+            ProjectNublar.NETWORK.sendTo(new S32SetTrackingDataList(
+                TrackingSavedData.getData(event.world).getEntries().stream()
+                    .filter(entry -> entry.getPosition().distanceSq(this.center) <= this.radius*this.radius)
+                    .collect(Collectors.toList())
+            ), this.player);
+        }
+
 
     }
 
