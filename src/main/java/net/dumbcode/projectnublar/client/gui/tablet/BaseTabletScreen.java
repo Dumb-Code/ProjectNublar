@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui.tablet;
 
 import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -48,7 +49,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
 
         drawRect(0, 0, this.width, this.height, -1);
 
-        this.drawTabletScreen(mouseX, mouseY, partialTicks);
+        this.drawTabletScreen(mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
 
         if(stencil) {
             GL11.glDisable(GL11.GL_STENCIL_TEST);
