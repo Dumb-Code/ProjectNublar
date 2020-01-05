@@ -110,15 +110,16 @@ public class TrackingTabletScreen extends TabletScreen {
             float nearestDist = Integer.MAX_VALUE;
             for (TrackingSavedData.DataEntry datum : this.trackingData) {
                 Vec2f point = this.getPoint(datum);
+
+                //Debug
+                RenderUtils.renderBorderExclusive((int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFFFF0000);
+
                 datum.getInformation().forEach(i -> i.render((int) point.x, (int) point.y));
                 float dist = (point.x - mouseX)*(point.x - mouseX) + (point.y - mouseY)*(point.y - mouseY);
                 if(dist < nearestDist) {
                     nearestDist = dist;
                     nearest = datum;
                 }
-
-                //Debug
-                RenderUtils.renderBorderExclusive((int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFFFF0000);
             }
 
             if(nearest != null && nearestDist <= 100) {

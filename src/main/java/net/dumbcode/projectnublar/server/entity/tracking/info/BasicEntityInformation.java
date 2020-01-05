@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.function.Consumer;
@@ -24,7 +25,7 @@ public class BasicEntityInformation extends TrackingDataInformation {
 
     @Override
     public void addTooltip(Consumer<String> lineAdder) {
-        lineAdder.accept("Health: " + this.health + "/" + this.maxHealth);
+        lineAdder.accept(I18n.format("projectnublar.gui.tracking.health", this.health, this.maxHealth));
         super.addTooltip(lineAdder);
     }
 

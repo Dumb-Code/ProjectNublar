@@ -25,6 +25,11 @@ projectnublar.gui.controls.left_click=Left click
 projectnublar.gui.controls.movement_keys=Movement keys
 projectnublar.gui.controls.arrow_keys=Arrow keys
 
+projectnublar.gui.tracking.health=Health: %s/%s
+projectnublar.gui.tracking.dinosaur=Dinosaur: %s
+projectnublar.gui.tracking.pregnancy=Pregnancy Information:
+projectnublar.gui.tracking.pregnancy.entry=    %s x %sh, %sm, %ss
+
 projectnublar.item.fossil.name=Fossil: %1$s %2$s
 
 projectnublar.action.skeletal_builder.no_dino_to_display=No dinosaur to display!
@@ -37,3 +42,4 @@ projectnublar.dino.missing.name=<!Missing Dinosaur!>
 
 projectnublar.fences.length.toolong=%sm is too long. The max distance is %sm
 projectnublar.fences.length.notenough=Not enough cable. Need a total of %s cable. (You have %s)
+

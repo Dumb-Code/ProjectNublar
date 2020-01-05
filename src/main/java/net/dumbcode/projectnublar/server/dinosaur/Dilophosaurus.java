@@ -11,7 +11,7 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.utils.GuassianValue;
+import net.dumbcode.projectnublar.server.utils.GaussianValue;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -115,13 +115,15 @@ public class Dilophosaurus extends Dinosaur {
             .setTickTimeOpen(25)
             .setTickTimeClose(5);
 
-        this.addComponent(EntityComponentTypes.BREEDING);
+        this.addComponent(EntityComponentTypes.BREEDING)
+            .setMinTicksBetweenBreeding(240000); //10 Minecraft days
+
         this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING)
             .addEggType(EnumDinosaurEggTypes.NORMAL.getType())
-            .setEggModifier(new GuassianValue(1F, 0.1F))
-            .setEggAmount(new GuassianValue(7F, 1F))
-            .setTicksPregnancy(new GuassianValue(192000, 12000)) //8 Minecraft days, give or take half a day
-            .setTicksEggHatch(new GuassianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
+            .setEggModifier(new GaussianValue(1F, 0.1F))
+            .setEggAmount(new GaussianValue(7F, 1F))
+            .setTicksPregnancy(new GaussianValue(192000, 12000)) //8 Minecraft days, give or take half a day
+            .setTicksEggHatch(new GaussianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
 
         this.addComponent(ComponentHandler.TRACKING_DATA);
         this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);

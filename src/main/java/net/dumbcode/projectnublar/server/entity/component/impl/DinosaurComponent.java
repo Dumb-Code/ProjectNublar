@@ -18,13 +18,19 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
+import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
+import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
+import net.dumbcode.projectnublar.server.entity.tracking.info.DinosaurInformation;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 @Getter
 @Setter
-public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent, CanBreedComponent {
+public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent, CanBreedComponent, TrackingDataComponent {
 
     private static final int MOVEMENT_CHANNEL = 60;
 
@@ -88,5 +94,10 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
     @Override
     public boolean canBreedWith(ComponentAccess otherEntity) {
         return otherEntity.get(ComponentHandler.DINOSAUR).map(d -> d.dinosaur == this.dinosaur).orElse(false);
+    }
+
+    @Override
+    public void addTrackingData(Consumer<Supplier<TrackingDataInformation>> consumer) {
+        consumer.accept(() -> new DinosaurInformation(this.dinosaur));
     }
 }
