@@ -19,6 +19,9 @@ public  class TabletScreen {
     public void render(int mouseX, int mouseY, float partialTicks) {
     }
 
+    public void updateScreen() {
+    }
+
     public void onMouseInput(int mouseX, int mouseY) {
     }
 

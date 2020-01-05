@@ -41,6 +41,14 @@ public class OpenedTabletScreen extends BaseTabletScreen {
     }
 
     @Override
+    public void updateScreen() {
+        if(this.screen != null) {
+            this.screen.updateScreen();
+        }
+        super.updateScreen();
+    }
+
+    @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         if(this.screen != null) {
             this.screen.onKeyTyped(typedChar, keyCode);
