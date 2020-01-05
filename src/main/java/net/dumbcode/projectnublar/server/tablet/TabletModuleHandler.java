@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.tablet;
 
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
+import net.dumbcode.projectnublar.client.gui.tablet.screens.FlappyDinoScreen;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
@@ -22,6 +23,7 @@ import java.util.stream.IntStream;
 public class TabletModuleHandler {
 
     public static final TabletModuleType<?> TRACKING_TABLET = InjectedUtils.injected();
+    public static final TabletModuleType<?> FLAPPY_DINO = InjectedUtils.injected();
 
     @SubscribeEvent
     public static void onTabletRegistry(RegistryEvent.Register event) {
@@ -45,7 +47,11 @@ public class TabletModuleHandler {
                             ByteBufUtils.writeUTF8String(buf, entry.getName());
                         }
                     })//new TrackingTabletIterator(player, player.getPosition(), 500).writeData(buf)
-                    .build().setRegistryName("tracking_tablet")
+                    .build().setRegistryName("tracking_tablet"),
+
+                TabletModuleType.builder()
+                    .screenCreator(b -> new FlappyDinoScreen())
+                    .build().setRegistryName("flappy_dino")
 
             );
         }
