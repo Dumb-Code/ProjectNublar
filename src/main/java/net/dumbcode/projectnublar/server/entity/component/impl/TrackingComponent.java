@@ -24,7 +24,7 @@ public class TrackingComponent extends EntityComponent implements FinalizableCom
         this.infoSuppliers.clear();
         for (EntityComponent component : entity.getAllComponents()) {
             if(component instanceof TrackingDataComponent) {
-                ((TrackingDataComponent) component).addTrackingData(this.infoSuppliers::add);
+                ((TrackingDataComponent) component).addTrackingData(entity, this.infoSuppliers::add);
             }
         }
     }

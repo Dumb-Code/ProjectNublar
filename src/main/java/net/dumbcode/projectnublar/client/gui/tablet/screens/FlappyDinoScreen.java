@@ -21,7 +21,7 @@ public class FlappyDinoScreen extends TabletScreen {
     private static final int PLAYER_JUMP_STRENGTH = 10;
     private static final int PLAYER_X_COORD = 100;
     private static final int HALF_PLAYER_WIDTH = 10;
-    private static final int GRAVITY = 3; //pixels per second
+    private static final int GRAVITY = 3; //pixels per tick squared
 
     private static final Random RAND = new Random();
 

@@ -97,7 +97,7 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
     }
 
     @Override
-    public void addTrackingData(Consumer<Supplier<TrackingDataInformation>> consumer) {
+    public void addTrackingData(ComponentAccess entity, Consumer<Supplier<TrackingDataInformation>> consumer) {
         consumer.accept(() -> new DinosaurInformation(this.dinosaur));
     }
 }

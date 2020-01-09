@@ -45,7 +45,7 @@ public class Tyrannosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.METABOLISM)
             .setDistanceSmellFood(30)
             .setDiet(new FeedingDiet()
-                .add(new ItemStack(Items.APPLE))
+                .add(500, 20, new ItemStack(Items.APPLE))
             )
             .setMaxFood(7500)
             .setMaxWater(6000);

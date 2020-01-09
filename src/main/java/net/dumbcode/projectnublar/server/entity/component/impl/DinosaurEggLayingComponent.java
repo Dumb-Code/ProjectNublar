@@ -46,9 +46,9 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     private final List<EggEntry> heldEggs = new ArrayList<>();
 
     @Override
-    public void onBreed(ComponentAccess other) {
-        if(!this.access.getOrExcept(EntityComponentTypes.GENDER).male) {
-            Optional<GeneticComponent> thisGenetics = this.access.get(EntityComponentTypes.GENETICS);
+    public void onBreed(ComponentAccess self, ComponentAccess other) {
+        if(!self.getOrExcept(EntityComponentTypes.GENDER).male) {
+            Optional<GeneticComponent> thisGenetics = self.get(EntityComponentTypes.GENETICS);
             Optional<GeneticComponent> otherGenetics = other.get(EntityComponentTypes.GENETICS);
             if(thisGenetics.isPresent() && otherGenetics.isPresent()) {
                 int pregnancyTime = (int) this.ticksPregnancy.getRandomValue(RANDOM);
@@ -119,7 +119,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     }
 
     @Override
-    public void addTrackingData(Consumer<Supplier<TrackingDataInformation>> consumer) {
+    public void addTrackingData(ComponentAccess access, Consumer<Supplier<TrackingDataInformation>> consumer) {
         consumer.accept(() -> new PregnancyInformation(this.heldEggs.stream().mapToInt(EggEntry::getTicksLeft).toArray()));
     }
 

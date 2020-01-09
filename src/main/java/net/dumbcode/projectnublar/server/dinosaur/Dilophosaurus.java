@@ -12,6 +12,8 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.utils.GaussianValue;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -47,10 +49,13 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
-                        .add(new ItemStack(Items.APPLE))
+                    .add(500, 20, new ItemStack(Items.APPLE))
+                    .add(500, 20, Blocks.SPONGE)
+                    .add(500, 20, EntityArrow.class)
                 )
                 .setMaxFood(7500)
-                .setMaxWater(6000);
+                .setMaxWater(6000)
+                .setFoodTicks(32);
 
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
             .addCubesForAge(ADULT_AGE,
