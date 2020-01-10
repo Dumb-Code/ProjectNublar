@@ -2,9 +2,8 @@ package net.dumbcode.projectnublar.server.entity.tracking;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Value;
-import net.dumbcode.projectnublar.server.entity.tracking.info.BasicEntityInformation;
-import net.dumbcode.projectnublar.server.entity.tracking.info.DinosaurInformation;
-import net.dumbcode.projectnublar.server.entity.tracking.info.PregnancyInformation;
+import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
+import net.dumbcode.projectnublar.server.entity.tracking.info.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
@@ -77,5 +76,7 @@ public abstract class TrackingDataInformation {
         registerTrackingType(BasicEntityInformation.KEY, BasicEntityInformation::decodeBuf, BasicEntityInformation::encodeBuf, BasicEntityInformation::decodeNBT, BasicEntityInformation::encodeNBT);
         registerTrackingType(DinosaurInformation.KEY, DinosaurInformation::decodeBuf, DinosaurInformation::encodeBuf, DinosaurInformation::decodeNBT, DinosaurInformation::encodeNBT);
         registerTrackingType(PregnancyInformation.KEY, PregnancyInformation::decodeBuf, PregnancyInformation::encodeBuf, PregnancyInformation::decodeNBT, PregnancyInformation::encodeNBT);
+        registerTrackingType(MoodInformation.KEY, MoodInformation::decodeBuf, MoodInformation::encodeBuf, MoodInformation::decodeNBT, MoodInformation::encodeNBT);
+        registerTrackingType(MetabolismInformation.KEY, MetabolismInformation::decodeBuf, MetabolismInformation::encodeBuf, MetabolismInformation::decodeNBT, MetabolismInformation::encodeNBT);
     }
 }

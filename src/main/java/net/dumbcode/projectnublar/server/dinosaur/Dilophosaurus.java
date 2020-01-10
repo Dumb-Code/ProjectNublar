@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
-import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
+import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
@@ -46,16 +46,20 @@ public class Dilophosaurus extends Dinosaur {
     @Override
     public void attachDefaultComponents() {
 
-        this.addComponent(EntityComponentTypes.METABOLISM)
+        this.addComponent(ComponentHandler.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
                     .add(500, 20, new ItemStack(Items.APPLE))
                     .add(500, 20, Blocks.SPONGE)
                     .add(500, 20, EntityArrow.class)
                 )
-                .setMaxFood(7500)
-                .setMaxWater(6000)
-                .setFoodTicks(32);
+                .setMaxFood(18000)
+                .setMaxWater(18000)
+
+                .setHydrateAmountPerTick(500)
+
+                .setFoodTicks(32)
+                .setWaterTicks(18);
 
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
             .addCubesForAge(ADULT_AGE,
@@ -67,6 +71,7 @@ public class Dilophosaurus extends Dinosaur {
                 "legUpperLeft", "legMiddleLeft", "legLowerLeft"
             );
 
+        this.addComponent(ComponentHandler.MOOD);
         this.addComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(ComponentHandler.ITEM_DROPS)

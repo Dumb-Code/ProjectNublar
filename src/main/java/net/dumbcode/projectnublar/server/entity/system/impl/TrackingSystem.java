@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public enum TrackingSystem implements EntitySystem {
@@ -32,7 +33,7 @@ public enum TrackingSystem implements EntitySystem {
     public void update(World world) {
         for (int i = 0; i < this.entities.length; i++) {
             TrackingSavedData.DataEntry entry = new TrackingSavedData.DataEntry(this.entities[i].getUniqueID(), this.entities[i].getPosition());
-            this.components[i].getInfoSuppliers().stream().map(Supplier::get).forEach(entry.getInformation()::add);
+            this.components[i].getInfoSuppliers().stream().map(Supplier::get).filter(Objects::nonNull).forEach(entry.getInformation()::add);
             TrackingSavedData.getData(world).setEntry(entry);
         }
     }

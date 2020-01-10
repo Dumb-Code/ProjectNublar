@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity;
 
+import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
 import net.dumbcode.dumblibrary.server.ecs.component.RegisterComponentsEvent;
 import net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType;
@@ -25,6 +26,7 @@ public class ComponentHandler {
     public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
     public static final EntityComponentType<AttackComponent, ?> ATTACK_AI = InjectedUtils.injected();
+    public static final EntityComponentType<MetabolismComponent, MetabolismComponent.Storage> METABOLISM = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
     public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
     public static final EntityComponentType<TrackingComponent, ?> TRACKING_DATA = InjectedUtils.injected();
@@ -65,6 +67,11 @@ public class ComponentHandler {
                  .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "attack_fence_ai"))
                  .withConstructor(AttackFenceComponent::new)
                  .build(),
+            SimpleComponentType.builder(MetabolismComponent.class, MetabolismComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "metabolism"))
+                .withStorage(MetabolismComponent.Storage::new)
+                .withConstructor(MetabolismComponent::new)
+                .build(),
             SimpleComponentType.builder(SkeletalBuilderComponent.class, SkeletalBuilderComponent.Storage.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
                 .withConstructor(SkeletalBuilderComponent::new)
