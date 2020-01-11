@@ -10,9 +10,14 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismCompone
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.pathfinding.Path;
+import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -23,9 +28,11 @@ public class DrinkingAI extends EntityAIBase {
     private final ComponentAccess access;
     private EntityLiving entity;
     private Future<List<BlockPos>> blockPosList;
-    private BlockPos foundPos;
+    private final List<BlockPos> foundPositions = new ArrayList<>();
     private MetabolismComponent metabolism;
     private int drinkingTicks;
+
+    private Path path;
 
     private static final int WATER_THRESHOLD = 3600; // TODO: Vary
 
@@ -38,9 +45,9 @@ public class DrinkingAI extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if(this.metabolism.water <= WATER_THRESHOLD || true) {
+        if(this.metabolism.water <= WATER_THRESHOLD) {
             if(this.blockPosList == null) {
-                this.blockPosList = BlockStateWorker.INSTANCE.runTask(this.entity.world, this.entity.getPosition(), 25, (state, pos) -> state.getMaterial() == Material.WATER);
+                this.blockPosList = BlockStateWorker.INSTANCE.runTask(this.entity.world, this.entity.getPosition(), 25, (state, pos) -> state.getMaterial() == Material.WATER && this.entity.world.isAirBlock(pos.up()));
             }
             if(this.blockPosList.isDone()) {
                 try {
@@ -48,8 +55,7 @@ public class DrinkingAI extends EntityAIBase {
                     blockPos.sort(Comparator.comparingDouble(o -> o.distanceSq(this.entity.posX, this.entity.posY, this.entity.posZ)));
                     for (BlockPos pos : blockPos) {
                         if(this.entity.world.getBlockState(pos).getMaterial() == Material.WATER) {
-                            this.foundPos = pos;
-                            return true;
+                            this.foundPositions.add(pos);
                         }
                     }
                 }  catch (InterruptedException e) {
@@ -57,16 +63,42 @@ public class DrinkingAI extends EntityAIBase {
                     Thread.currentThread().interrupt();
                 } catch (ExecutionException e) {
                     DumbLibrary.getLogger().warn("Unable to finish process", e);
+                } finally {
+                    this.blockPosList = null;
                 }
-                this.blockPosList = null;
+                return !this.foundPositions.isEmpty();
             }
         }
         return false;
     }
 
+
     @Override
     public void updateTask() {
-        Vec3d position = new Vec3d(this.foundPos.getX() + 0.5D, this.foundPos.getY() + 0.5D, this.foundPos.getZ() + 0.5D);
+        //This is to make sure that our destination is reachable:
+        if(this.path == null) {
+            boolean foundPath = false;
+            for (int i = 0; i < 15; i++) {
+                BlockPos foundPos = this.foundPositions.get(0);
+                this.path = this.entity.getNavigator().getPathToPos(foundPos);
+                if(this.path != null) {
+                    PathPoint finalPoint = this.path.getFinalPathPoint();
+                    if(finalPoint != null && foundPos.add(-finalPoint.x, -finalPoint.y, -finalPoint.z).distanceSq(Vec3i.NULL_VECTOR) < 2*2) {
+                        foundPath = true;
+                        break;
+                    } else {
+                        this.foundPositions.remove(0);
+                    }
+                }
+            }
+            if(!foundPath) {
+                this.path = null;
+                return;
+            }
+        }
+
+        BlockPos foundPos = this.foundPositions.get(0);
+        Vec3d position = new Vec3d(foundPos.getX() + 0.5D, foundPos.getY() + 0.5D, foundPos.getZ() + 0.5D);
         if(this.entity.getPositionVector().squareDistanceTo(position) <= 2*2) {
             this.entity.getNavigator().setPath(null, 0F);
             this.entity.getLookHelper().setLookPosition(position.x, position.y, position.z, this.entity.getHorizontalFaceSpeed(), this.entity.getVerticalFaceSpeed());
@@ -81,9 +113,8 @@ public class DrinkingAI extends EntityAIBase {
                 this.metabolism.water += this.metabolism.hydrateAmountPerTick;
             }
         } else {
-            this.entity.getNavigator().tryMoveToXYZ(position.x, position.y, position.z, 0.4D);
+            this.entity.getNavigator().setPath(this.path, 0.5F);
         }
-        this.entity.getNavigator().tryMoveToXYZ(this.foundPos.getX(), this.foundPos.getY(), this.foundPos.getZ(), this.entity.getAIMoveSpeed());
 
         super.updateTask();
     }
@@ -91,12 +122,17 @@ public class DrinkingAI extends EntityAIBase {
     @Override
     public void resetTask() {
         this.drinkingTicks = 0;
-        this.foundPos = null;
+        this.foundPositions.clear();
         this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(MetabolismComponent.METABOLISM_CHANNEL));
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.world.getBlockState(this.foundPos).getMaterial() == Material.WATER && this.metabolism.water < (this.metabolism.maxWater / 4) * 3;
+        if(this.foundPositions.isEmpty() || this.path == null) {
+            return false;
+        }
+        BlockPos foundPos = this.foundPositions.get(0);
+        Vec3d position = new Vec3d(foundPos.getX() + 0.5D, foundPos.getY() + 0.5D, foundPos.getZ() + 0.5D);
+        return (this.entity.getNavigator().getPath() == this.path || this.entity.getPositionVector().squareDistanceTo(position) <= 2*2) && this.entity.world.getBlockState(foundPos).getMaterial() == Material.WATER && this.metabolism.water < (this.metabolism.maxWater / 4) * 3;
     }
 }
