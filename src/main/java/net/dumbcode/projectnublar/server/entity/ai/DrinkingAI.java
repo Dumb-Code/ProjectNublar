@@ -47,7 +47,7 @@ public class DrinkingAI extends EntityAIBase {
     public boolean shouldExecute() {
         if(this.metabolism.water <= WATER_THRESHOLD) {
             if(this.blockPosList == null) {
-                this.blockPosList = BlockStateWorker.INSTANCE.runTask(this.entity.world, this.entity.getPosition(), 25, (state, pos) -> state.getMaterial() == Material.WATER && this.entity.world.isAirBlock(pos.up()));
+                this.blockPosList = BlockStateWorker.INSTANCE.runTask(this.entity.world, this.entity.getPosition(), 50, 50, 7, (world, pos) -> world.getBlockState(pos).getMaterial() == Material.WATER && world.isAirBlock(pos.up()));
             }
             if(this.blockPosList.isDone()) {
                 try {

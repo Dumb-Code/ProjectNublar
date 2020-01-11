@@ -58,7 +58,7 @@ public class FeedingAI extends EntityAIBase {
                 }
                 if(this.process == null) {
                     if(this.blockPosList == null) {
-                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.world, entityLiving.getPosition(), metabolism.foodSmellDistance, (state, pos) -> this.metabolism.diet.getResult(state).isPresent() && this.entityLiving.getNavigator().getPathToPos(pos) != null);
+                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.world, entityLiving.getPosition(), metabolism.foodSmellDistance, (w, pos) -> this.metabolism.diet.getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigator().getPathToPos(pos) != null);
                     } else if(this.blockPosList.isDone()) {
                         try {
                             List<BlockPos> results = this.blockPosList.get();
