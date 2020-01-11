@@ -7,14 +7,20 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.TrackingComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public enum TrackingSystem implements EntitySystem {
     INSTANCE;
@@ -25,7 +31,13 @@ public enum TrackingSystem implements EntitySystem {
     @Override
     public void populateEntityBuffers(EntityManager manager) {
         EntityFamily<Entity> family = manager.resolveFamily(ComponentHandler.TRACKING_DATA);
-        this.entities = family.getEntities();
+        Entity[] newEntities = family.getEntities();
+        Set<Entity> entitySet = Arrays.stream(newEntities).collect(Collectors.toSet());
+        if(newEntities.length < this.entities.length) { //Entity removed
+            TrackingSavedData data = TrackingSavedData.getData(this.entities[0].world);
+            Arrays.stream(this.entities).filter(e -> !entitySet.contains(e)).forEach(e -> data.removeEntry(e.getUniqueID()));
+        }
+        this.entities = newEntities;
         this.components = family.populateBuffer(ComponentHandler.TRACKING_DATA, this.components);
     }
 
