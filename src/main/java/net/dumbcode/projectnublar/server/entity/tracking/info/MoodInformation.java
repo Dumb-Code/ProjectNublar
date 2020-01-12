@@ -5,24 +5,18 @@ import lombok.Data;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
-import net.minecraft.client.resources.I18n;
+import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Data
-public class MoodInformation extends TrackingDataInformation {
+public class MoodInformation extends TooltipInformation {
 
     public static final String KEY = "mood_info";
 
@@ -42,23 +36,26 @@ public class MoodInformation extends TrackingDataInformation {
         this.negativeReasons = collected.get(false);
     }
 
-
     @Override
     protected String getTypeName() {
         return KEY;
     }
 
     @Override
-    public void addTooltip(Consumer<String> lineAdder) {
+    protected List<String> getTooltipLines() {
+        List<String> lines = new ArrayList<>();
+
         int toShow = 3;
 
-        lineAdder.accept("Reasons Happy:");
-        this.positiveReasons.stream().limit(toShow).forEachOrdered(a -> lineAdder.accept("+" + a.change + ":" + a.reason));
+        lines.add("Reasons Happy:");
+        this.positiveReasons.stream().limit(toShow).forEachOrdered(a -> lines.add("+" + a.change + ":" + a.reason));
 
-        lineAdder.accept("Reasons Angry:");
-        this.negativeReasons.stream().limit(toShow).forEachOrdered(a -> lineAdder.accept(a.change + ":" + a.reason));
-        super.addTooltip(lineAdder);
+        lines.add("Reasons Angry:");
+        this.negativeReasons.stream().limit(toShow).forEachOrdered(a -> lines.add(a.change + ":" + a.reason));
+
+        return lines;
     }
+
 
     public static void encodeNBT(NBTTagCompound nbt, MoodInformation info) {
         nbt.setTag("reasons", info.reasons.stream().map(MoodReason::serialize).collect(IOCollectors.toNBTTagList()));

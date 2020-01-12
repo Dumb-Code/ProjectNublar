@@ -3,15 +3,18 @@ package net.dumbcode.projectnublar.server.entity.tracking.info;
 import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class MetabolismInformation extends TrackingDataInformation {
+public class MetabolismInformation extends TooltipInformation {
 
     public static final String KEY = "metabolism_info";
 
@@ -26,11 +29,13 @@ public class MetabolismInformation extends TrackingDataInformation {
         return KEY;
     }
 
+
     @Override
-    public void addTooltip(Consumer<String> lineAdder) {
-        lineAdder.accept(I18n.format("projectnublar.gui.tracking.metatlism.food", this.food, this.maxFood));
-        lineAdder.accept(I18n.format("projectnublar.gui.tracking.metatlism.water", this.water, this.maxWater));
-        super.addTooltip(lineAdder);
+    protected List<String> getTooltipLines() {
+        return Arrays.asList(
+            I18n.format("projectnublar.gui.tracking.metatlism.food", this.food, this.maxFood),
+            I18n.format("projectnublar.gui.tracking.metatlism.water", this.water, this.maxWater)
+        );
     }
 
     public static void encodeNBT(NBTTagCompound nbt, MetabolismInformation info) {

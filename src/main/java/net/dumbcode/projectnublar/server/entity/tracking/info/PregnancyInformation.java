@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.entity.tracking.info;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Value;
+import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 @Value
-public class PregnancyInformation extends TrackingDataInformation {
+public class PregnancyInformation extends TooltipInformation {
 
     public static final String KEY = "pregnancy_information";
 
@@ -23,8 +24,9 @@ public class PregnancyInformation extends TrackingDataInformation {
     }
 
     @Override
-    public void addTooltip(Consumer<String> lineAdder) {
-        if(ticksTillGiveBirth.length != 0) {
+    protected List<String> getTooltipLines() {
+        List<String> lines = new ArrayList<>();
+        if(this.ticksTillGiveBirth.length != 0) {
             Map<Integer, Integer> countMap = new HashMap<>();
 
             for (int i : this.ticksTillGiveBirth) {
@@ -39,18 +41,16 @@ public class PregnancyInformation extends TrackingDataInformation {
             List<Integer> keys = new ArrayList<>(countMap.keySet());
             Collections.sort(keys);
 
-            lineAdder.accept(I18n.format("projectnublar.gui.tracking.pregnancy"));
+            lines.add(I18n.format("projectnublar.gui.tracking.pregnancy"));
 
             for (Integer key : keys) {
                 int hours = key / 72000;
                 int minutes = (key % 72000) / 1200;
                 int seconds = (key % 1200) / 20;
-                System.out.println(key);
-                lineAdder.accept(I18n.format("projectnublar.gui.tracking.pregnancy.entry", countMap.get(key), hours, minutes, seconds));
+                lines.add(I18n.format("projectnublar.gui.tracking.pregnancy.entry", countMap.get(key), hours, minutes, seconds));
             }
         }
-
-        super.addTooltip(lineAdder);
+        return lines;
     }
 
     public static void encodeNBT(NBTTagCompound nbt, PregnancyInformation info) {

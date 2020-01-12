@@ -4,17 +4,21 @@ import io.netty.buffer.ByteBuf;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
+import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
-import java.util.function.Consumer;
+import java.util.Collections;
+import java.util.List;
 
 @Value
-public class DinosaurInformation extends TrackingDataInformation {
+public class DinosaurInformation extends TooltipInformation {
+
+    private final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
 
     public static final String KEY = "dinosaur_info";
 
@@ -26,17 +30,16 @@ public class DinosaurInformation extends TrackingDataInformation {
     }
 
     @Override
-    public void render(int x, int y) {
+    public void renderMap(int x, int y) {
         String s = this.dinosaur.getRegName().getPath().substring(0, 1);
         int width = Minecraft.getMinecraft().fontRenderer.getStringWidth(s);
         Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s, x - width/2, y - 3, 0xAAAAAA);
-        super.render(x, y);
+        super.renderMap(x, y);
     }
 
     @Override
-    public void addTooltip(Consumer<String> lineAdder) {
-        lineAdder.accept(I18n.format("projectnublar.gui.tracking.dinosaur", this.dinosaur.getRegName()));
-        super.addTooltip(lineAdder);
+    protected List<String> getTooltipLines() {
+        return Collections.singletonList(I18n.format("projectnublar.gui.tracking.dinosaur", this.dinosaur.getRegName()));
     }
 
     public static void encodeNBT(NBTTagCompound nbt, DinosaurInformation info) {

@@ -29,8 +29,8 @@ projectnublar.gui.tracking.health=Health: %s/%s
 projectnublar.gui.tracking.dinosaur=Dinosaur: %s
 projectnublar.gui.tracking.pregnancy=Pregnancy Information:
 projectnublar.gui.tracking.pregnancy.entry=    %s x %sh, %sm, %ss
-projectnublar.gui.tracking.metatlism.food="Food %s/%s
-projectnublar.gui.tracking.metatlism.water="Water %s/%s
+projectnublar.gui.tracking.metatlism.food=Food %s/%s
+projectnublar.gui.tracking.metatlism.water=Water %s/%s
 
 projectnublar.item.fossil.name=Fossil: %1$s %2$s
 

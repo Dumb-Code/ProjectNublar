@@ -6,6 +6,7 @@ import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.dumbcode.projectnublar.server.network.C23ConfirmTrackingTablet;
 import net.dumbcode.projectnublar.server.network.C25StopTrackingTablet;
@@ -27,9 +28,9 @@ import org.lwjgl.opengl.GL11;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector4f;
+import java.awt.*;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -56,6 +57,7 @@ public class TrackingTabletScreen extends TabletScreen {
     private final FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
     private List<TrackingSavedData.DataEntry> trackingData = new ArrayList<>();
+    private TrackingSavedData.DataEntry selected;
 
     public TrackingTabletScreen(List<Pair<BlockPos, String>> entries) {
         this.scrollEntries = entries.stream().map(pair -> new ScrollEntry(pair.getKey(), pair.getRight())).collect(Collectors.toList());
@@ -105,31 +107,51 @@ public class TrackingTabletScreen extends TabletScreen {
 
             GlStateManager.popMatrix();
 
-
-            TrackingSavedData.DataEntry nearest = null;
-            float nearestDist = Integer.MAX_VALUE;
             for (TrackingSavedData.DataEntry datum : this.trackingData) {
                 Vec2f point = this.getPoint(datum);
-
                 //Debug
                 RenderUtils.renderBorderExclusive((int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFFFF0000);
-
-                datum.getInformation().forEach(i -> i.render((int) point.x, (int) point.y));
-                float dist = (point.x - mouseX)*(point.x - mouseX) + (point.y - mouseY)*(point.y - mouseY);
-                if(dist < nearestDist) {
-                    nearestDist = dist;
-                    nearest = datum;
-                }
+                datum.getInformation().forEach(i -> i.renderMap((int) point.x, (int) point.y));
             }
-
-            if(nearest != null && nearestDist <= 100) {
-                List<String> lines = new ArrayList<>();
-                nearest.getInformation().forEach(i -> i.addTooltip(lines::add));
-                GuiUtils.drawHoveringText(ItemStack.EMPTY, lines, mouseX, mouseY, this.xSize, this.ySize, -1, Minecraft.getMinecraft().fontRenderer);
+            if(this.selected != null) {
+                this.renderTooltip(mouseX, mouseY);
             }
         }
 
         this.scrollBox.render(mouseX, mouseY);
+    }
+
+    private void renderTooltip(int mouseX, int mouseY) {
+        int padding = 15;
+        int borderSize = 2;
+
+        List<Dimension> dimensions = this.selected.getInformation().stream().map(TrackingDataInformation::getInfoDimensions).collect(Collectors.toList());
+        double width = 2*padding + dimensions.stream().mapToDouble(Dimension::getWidth).reduce(Math::max).orElseThrow(NoSuchElementException::new);
+        double height = padding + dimensions.stream().mapToDouble(Dimension::getHeight).map(d -> d != 0 ? d + padding : 0).sum();
+
+        Gui.drawRect(0, 15, (int) width, (int) height, 0xFF7A7A7A);
+        RenderUtils.renderBorderExclusive(borderSize, 15 + borderSize, (int) width - borderSize, (int) height - borderSize, borderSize, 0xFF333333);
+        double yCoord = 15D + padding;
+        for (TrackingDataInformation info : this.selected.getInformation()) {
+            info.renderInfo(padding, (int) yCoord, mouseX - padding, mouseY - (int) yCoord);
+            yCoord += info.getInfoDimensions().height;
+        }
+    }
+
+    private Optional<TrackingSavedData.DataEntry> getEntryUnder(int x, int y, int maxDistFromPoint) {
+        TrackingSavedData.DataEntry nearest = null;
+        float nearestDist = Integer.MAX_VALUE;
+
+        for (TrackingSavedData.DataEntry datum : this.trackingData) {
+            Vec2f point = this.getPoint(datum);
+            float dist = (point.x - x)*(point.x - x) + (point.y - y)*(point.y - y);
+            if(dist < nearestDist) {
+                nearestDist = dist;
+                nearest = datum;
+            }
+        }
+
+        return nearestDist <= maxDistFromPoint*maxDistFromPoint ? Optional.ofNullable(nearest) : Optional.empty();
     }
 
     private Vec2f getPoint(TrackingSavedData.DataEntry entry) {
@@ -172,6 +194,12 @@ public class TrackingTabletScreen extends TabletScreen {
 
     public void setTrackingData(List<TrackingSavedData.DataEntry> trackingData) {
         this.trackingData = trackingData;
+        trackingData.stream().filter(d -> this.selected != null && d.getUuid().equals(this.selected.getUuid())).findAny().ifPresent(entry -> {
+            this.selected = entry;
+            Vec2f point = this.getPoint(entry);
+            this.translateWithZoom(matrix4f -> matrix4f.m03 = -point.x + this.xSize / 2);
+            this.translateWithZoom(matrix4f -> matrix4f.m13 = -point.y + this.ySize / 2);
+        });
     }
 
     public void setRGB(int startX, int startZ, int width, int height, int[] setIntoArray) {
@@ -188,16 +216,31 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
-    public void onMouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public void onMouseReleased(int mouseX, int mouseY, int state) {
         if(!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize())) {
-            if(clickedMouseButton == 0) {
-                this.tryMulMatrix(matrix4f -> matrix4f.m03 = mouseX - this.prevClickedX, fail -> {});
-                this.tryMulMatrix(matrix4f -> matrix4f.m13 = mouseY - this.prevClickedY, fail -> {});
-            }
+            this.selected = this.selected != null ? null : this.getEntryUnder(mouseX, mouseY, 10).orElse(null);
+        }
+        super.onMouseReleased(mouseX, mouseY, state);
+    }
+
+    @Override
+    public void onMouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        if(!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize()) && clickedMouseButton == 0 && this.selected == null) {
+            this.tryMulMatrix(matrix4f -> matrix4f.m03 = mouseX - this.prevClickedX, fail -> {});
+            this.tryMulMatrix(matrix4f -> matrix4f.m13 = mouseY - this.prevClickedY, fail -> {});
         }
 
         this.prevClickedX = mouseX;
         this.prevClickedY = mouseY;
+    }
+
+    private void translateWithZoom(Consumer<Matrix4f> mat) {
+        float modifier = 0.75F;
+        this.tryMulMatrix(mat, fail -> {
+            this.tryMulMatrix(m -> m.setScale(1F/modifier), impossibleFails -> {});
+            this.translateWithZoom(mat);
+        });
+
     }
 
     @Override
@@ -212,6 +255,9 @@ public class TrackingTabletScreen extends TabletScreen {
 
                 //Ignore disgusting code below. In the future maybe remove the matrix stuff, it don't really be needed
                 this.tryMulMatrix(matrix4f -> matrix4f.setScale(mod), fail -> {
+                    if(this.selected != null || wheel > 0) {
+                        return;
+                    }
                     boolean leftOut = fail.x > 0;
                     boolean rightOut = fail.z < this.xSize;
 
@@ -329,6 +375,7 @@ public class TrackingTabletScreen extends TabletScreen {
 
         @Override
         public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+            transformation.setIdentity();
             ProjectNublar.NETWORK.sendToServer(new C30TrackingTabletEntryClicked(this.pos));
         }
     }

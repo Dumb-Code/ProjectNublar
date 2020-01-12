@@ -5,8 +5,12 @@ import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.info.*;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.Vec2f;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -21,11 +25,20 @@ public abstract class TrackingDataInformation {
 
     protected abstract String getTypeName();
 
-    public void render(int x, int y) {
+    public void renderMap(int x, int y) {
 
     }
 
     public void addTooltip(Consumer<String> lineAdder) {
+    }
+
+    @Nonnull
+    public Dimension getInfoDimensions() {
+        return new Dimension();
+    }
+
+    public void renderInfo(int x, int y, int relativeMouseX, int relativeMouseY) {
+
     }
 
     public static <T extends TrackingDataInformation> void registerTrackingType(
