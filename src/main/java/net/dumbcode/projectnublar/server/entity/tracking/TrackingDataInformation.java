@@ -29,9 +29,6 @@ public abstract class TrackingDataInformation {
 
     }
 
-    public void addTooltip(Consumer<String> lineAdder) {
-    }
-
     @Nonnull
     public Dimension getInfoDimensions() {
         return new Dimension();

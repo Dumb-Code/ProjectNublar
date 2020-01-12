@@ -122,19 +122,22 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     private void renderTooltip(int mouseX, int mouseY) {
-        int padding = 15;
+        int padding = 10;
         int borderSize = 2;
 
         List<Dimension> dimensions = this.selected.getInformation().stream().map(TrackingDataInformation::getInfoDimensions).collect(Collectors.toList());
         double width = 2*padding + dimensions.stream().mapToDouble(Dimension::getWidth).reduce(Math::max).orElseThrow(NoSuchElementException::new);
         double height = padding + dimensions.stream().mapToDouble(Dimension::getHeight).map(d -> d != 0 ? d + padding : 0).sum();
-
-        Gui.drawRect(0, 15, (int) width, (int) height, 0xFF7A7A7A);
-        RenderUtils.renderBorderExclusive(borderSize, 15 + borderSize, (int) width - borderSize, (int) height - borderSize, borderSize, 0xFF333333);
+        Gui.drawRect(0, 15, (int) width, (int) height + 15, 0xFF7A7A7A);
+        RenderUtils.renderBorderExclusive(borderSize, 15 + borderSize, (int) width - borderSize, (int) height + 15 - borderSize, borderSize, 0xFF333333);
         double yCoord = 15D + padding;
         for (TrackingDataInformation info : this.selected.getInformation()) {
-            info.renderInfo(padding, (int) yCoord, mouseX - padding, mouseY - (int) yCoord);
-            yCoord += info.getInfoDimensions().height;
+            int h = info.getInfoDimensions().height;
+            if(h != 0) {
+                info.renderInfo(padding, (int) yCoord, mouseX - padding, mouseY - (int) yCoord);
+                yCoord += h + padding;
+
+            }
         }
     }
 
