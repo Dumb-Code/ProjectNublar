@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
@@ -132,10 +133,13 @@ public class TrackingTabletScreen extends TabletScreen {
         RenderUtils.renderBorderExclusive(borderSize, 15 + borderSize, (int) width - borderSize, (int) height + 15 - borderSize, borderSize, 0xFF333333);
         double yCoord = 15D + padding;
         for (TrackingDataInformation info : this.selected.getInformation()) {
-            int h = info.getInfoDimensions().height;
-            if(h != 0) {
-                info.renderInfo(padding, (int) yCoord, mouseX - padding, mouseY - (int) yCoord);
-                yCoord += h + padding;
+            Dimension d = info.getInfoDimensions();
+            int relx = mouseX - padding;
+            int rely = mouseY - (int) yCoord;
+            boolean over = MathUtils.inBetween(relx, 0, d.width) && MathUtils.inBetween(rely, 0, d.height);
+            if(d.height != 0) {
+                info.renderInfo(padding, (int) yCoord, over ? relx : -1, over ? rely : -1);
+                yCoord += d.height + padding;
 
             }
         }
@@ -379,6 +383,7 @@ public class TrackingTabletScreen extends TabletScreen {
         @Override
         public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
             transformation.setIdentity();
+            selected = null;
             ProjectNublar.NETWORK.sendToServer(new C30TrackingTabletEntryClicked(this.pos));
         }
     }

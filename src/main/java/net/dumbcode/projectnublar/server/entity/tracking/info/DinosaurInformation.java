@@ -10,6 +10,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.Collections;
@@ -39,7 +40,7 @@ public class DinosaurInformation extends TooltipInformation {
 
     @Override
     protected List<String> getTooltipLines() {
-        return Collections.singletonList(I18n.format("projectnublar.gui.tracking.dinosaur", this.dinosaur.getRegName()));
+        return Collections.singletonList(I18n.format("projectnublar.gui.tracking.dinosaur", this.dinosaur.createNameComponent().getUnformattedText()));
     }
 
     public static void encodeNBT(NBTTagCompound nbt, DinosaurInformation info) {

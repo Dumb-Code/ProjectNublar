@@ -25,7 +25,7 @@ projectnublar.gui.controls.left_click=Left click
 projectnublar.gui.controls.movement_keys=Movement keys
 projectnublar.gui.controls.arrow_keys=Arrow keys
 
-projectnublar.gui.tracking.health=Health: %s/%s
+projectnublar.gui.tracking.health=Health:
 projectnublar.gui.tracking.dinosaur=Dinosaur: %s
 projectnublar.gui.tracking.pregnancy=Pregnancy Information:
 projectnublar.gui.tracking.pregnancy.entry=    %s x %sh, %sm, %ss
@@ -40,6 +40,7 @@ item.meat_dinosaur_tyrannosaurus_raw.name=Raw Tyrannosaurus meat
 item.meat_dinosaur_tyrannosaurus_cooked.name=Cooked Tyrannosaurus meat
 
 projectnublar.dino.tyrannosaurus.name=Tyrannosaurus
+projectnublar.dino.dilophosaurus.name=Dilophosaurus
 projectnublar.dino.missing.name=<!Missing Dinosaur!>
 
 projectnublar.fences.length.toolong=%sm is too long. The max distance is %sm
