@@ -3,10 +3,11 @@ package net.dumbcode.projectnublar.server.entity.tracking.info;
 import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.dumbcode.dumblibrary.client.RepeatingIconDisplay;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -17,7 +18,6 @@ import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -28,20 +28,17 @@ public class BasicEntityInformation extends TooltipInformation {
     private static final int PADDING_AFTER_TEXT = 10;
 
     private static final int HEART_SIZE = 9;
-    private static final int HEARTS_PER_LINE = 5;
 
-    private final float health;
-    private final float maxHealth;
+    private final RepeatingIconDisplay display;
 
-    private final int hearts;
-    private final int maxHearts;
+    private float health;
+    private float maxHealth;
 
     public BasicEntityInformation(float health, float maxHealth) {
         this.health = health;
         this.maxHealth = maxHealth;
 
-        this.maxHearts = (int) Math.ceil(this.maxHealth / 2F);
-        this.hearts = (int) Math.ceil(this.health / 2F);
+        this.display = new RepeatingIconDisplay(health, maxHealth, HEART_SIZE, 5, 2, this::renderHeartAt);
     }
 
     @Override
@@ -58,7 +55,14 @@ public class BasicEntityInformation extends TooltipInformation {
     @Override
     public Dimension getInfoDimensions() {
         Dimension d = super.getInfoDimensions();
-        return new Dimension(d.width + PADDING_AFTER_TEXT + Math.min(this.maxHearts, HEARTS_PER_LINE) * HEART_SIZE, Math.max(d.height, HEART_SIZE * this.maxHearts / HEARTS_PER_LINE));
+        return new Dimension(d.width + PADDING_AFTER_TEXT + this.display.getWidth(), Math.max(d.height, this.display.getHeight()));
+    }
+
+    private void renderHeartAt(int x, int y, float size) {
+        RenderUtils.draw256Texture(x, y, 16, 0, HEART_SIZE, HEART_SIZE);
+        if(size > 0) {
+            RenderUtils.draw256Texture(x, y, 52, 0, size * HEART_SIZE, HEART_SIZE);
+        }
     }
 
     @Override
@@ -66,26 +70,11 @@ public class BasicEntityInformation extends TooltipInformation {
         super.renderInfo(x, y, relativeMouseX, relativeMouseY);
 
         int startX = super.getInfoDimensions().width + PADDING_AFTER_TEXT;
-        GuiScreen screen = Objects.requireNonNull(Minecraft.getMinecraft().currentScreen);
         Minecraft.getMinecraft().renderEngine.bindTexture(Gui.ICONS);
 
         GlStateManager.enableAlpha();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-
-        for (int heart = 0; heart < this.maxHearts; heart++) {
-            int heartX = HEART_SIZE * (heart % HEARTS_PER_LINE) - HEART_SIZE/2 + x + startX;
-            int heartY = HEART_SIZE * (heart / HEARTS_PER_LINE) + y;
-
-            screen.drawTexturedModalRect(heartX, heartY, 16, 0, HEART_SIZE, HEART_SIZE);
-
-            if(heart*2 <= this.health) {
-                if(heart*2 + 1 < this.health) {
-                    screen.drawTexturedModalRect(heartX, heartY, 52, 0, HEART_SIZE, HEART_SIZE);
-                } else {
-                    screen.drawTexturedModalRect(heartX, heartY, 61, 0, HEART_SIZE, HEART_SIZE);
-                }
-            }
-        }
+        this.display.render(x + startX, y);
 
         if(relativeMouseX >= startX && relativeMouseY != -1) {
             GuiUtils.drawHoveringText(ItemStack.EMPTY, Collections.singletonList((Math.round(this.health * 10) / 10F) + "/" + (Math.round(this.maxHealth * 10) / 10F)),
