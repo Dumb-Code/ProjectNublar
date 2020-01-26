@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.gson.JsonObject;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
@@ -9,12 +10,14 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
-import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.ai.DrinkingAI;
 import net.dumbcode.projectnublar.server.entity.ai.FeedingAI;
+import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.MoodChangingComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
+import net.dumbcode.projectnublar.server.entity.mood.MoodReason;
+import net.dumbcode.projectnublar.server.entity.mood.MoodReasons;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.MetabolismInformation;
 import net.minecraft.entity.EntityLiving;
@@ -25,25 +28,27 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Getter
+@Setter
 public class MetabolismComponent extends EntityComponent implements FinalizableComponent, CanBreedComponent, MoodChangingComponent, TrackingDataComponent {
 
     public static final int METABOLISM_CHANNEL = 61;
 
-    public int food;
-    public int water;
+    private int food;
+    private int water;
 
-    public int maxFood;
-    public int maxWater;
+    private int maxFood;
+    private int maxWater;
 
-    public int foodRate;
-    public int waterRate;
+    private int foodRate;
+    private int waterRate;
 
-    public int foodTicks;
-    public int waterTicks;
+    private int foodTicks;
+    private int waterTicks;
 
-    public FeedingDiet diet = new FeedingDiet();
-    public int foodSmellDistance;
-    public int hydrateAmountPerTick;
+    private FeedingDiet diet = new FeedingDiet();
+    private int foodSmellDistance;
+    private int hydrateAmountPerTick;
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
@@ -101,15 +106,15 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     }
 
     @Override
-    public void applyMoodModifiers(BiConsumer<Integer, String> acceptor) {
+    public void applyMoods(BiConsumer<MoodReason, Number> acceptor) {
         float foodDiff = (this.food / (float) this.maxFood) * 4 - 2;
         if(foodDiff != 0) {
-            acceptor.accept(MathUtils.ceilAwayZero(foodDiff), foodDiff < 0 ? "Hungry" : "Full");
+            acceptor.accept(foodDiff < 0 ? MoodReasons.STARVED : MoodReasons.FULL, Math.abs(foodDiff));
         }
 
         float waterDiff = (this.water / (float) this.maxWater) * 4 - 2;
         if(waterDiff  != 0) {
-            acceptor.accept(MathUtils.ceilAwayZero(waterDiff), waterDiff  < 0 ? "Dehydrated" : "Hydrated");
+            acceptor.accept(waterDiff < 0 ? MoodReasons.DEHYDRATED : MoodReasons.HYDRATED, Math.abs(waterDiff));
         }
     }
 

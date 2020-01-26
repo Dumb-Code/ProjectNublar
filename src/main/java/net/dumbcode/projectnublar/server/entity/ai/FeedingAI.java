@@ -41,16 +41,16 @@ public class FeedingAI extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.metabolism.food <= 3600) {
+        if (this.metabolism.getFood() <= 3600) {
             if (this.process == null) {
                 World world = this.entityLiving.world;
                 //Search entities first
                 for (Entity entity : world.loadedEntityList) {
-                    if (entity.getDistanceSq(this.entityLiving) < this.metabolism.foodSmellDistance * this.metabolism.foodSmellDistance) {
-                        if (entity instanceof EntityItem && this.metabolism.diet.getResult(((EntityItem) entity).getItem()).isPresent()) {
+                    if (entity.getDistanceSq(this.entityLiving) < this.metabolism.getFoodSmellDistance() * this.metabolism.getFoodSmellDistance()) {
+                        if (entity instanceof EntityItem && this.metabolism.getDiet().getResult(((EntityItem) entity).getItem()).isPresent()) {
                             this.process = new ItemStackProcess((EntityItem) entity);
                             break;
-                        } else if (this.metabolism.diet.getResult(entity).isPresent()) {
+                        } else if (this.metabolism.getDiet().getResult(entity).isPresent()) {
                             this.process = new EntityProcess(entity);
                             break;
                         }
@@ -58,7 +58,7 @@ public class FeedingAI extends EntityAIBase {
                 }
                 if(this.process == null) {
                     if(this.blockPosList == null) {
-                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.world, entityLiving.getPosition(), metabolism.foodSmellDistance, (w, pos) -> this.metabolism.diet.getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigator().getPathToPos(pos) != null);
+                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.world, entityLiving.getPosition(), metabolism.getFoodSmellDistance(), (w, pos) -> this.metabolism.getDiet().getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigator().getPathToPos(pos) != null);
                     } else if(this.blockPosList.isDone()) {
                         try {
                             List<BlockPos> results = this.blockPosList.get();
@@ -67,7 +67,7 @@ public class FeedingAI extends EntityAIBase {
                             if (!results.isEmpty()) {
                                 results.sort(Comparator.comparingDouble(o -> o.distanceSq(pos.x, pos.y, pos.z)));
                                 for (BlockPos result : results) {
-                                    if(this.metabolism.diet.getResult(this.entityLiving.world.getBlockState(result)).isPresent()) {
+                                    if(this.metabolism.getDiet().getResult(this.entityLiving.world.getBlockState(result)).isPresent()) {
                                         this.process = new BlockStateProcess(world, result);
                                         break;
                                     }
@@ -102,8 +102,10 @@ public class FeedingAI extends EntityAIBase {
                         a.playAnimation(this.access, new AnimationLayer.AnimationEntry(AnimationHandler.EATING), MetabolismComponent.METABOLISM_CHANNEL)
                     );
                 }
-                if(this.eatingTicks++ >= this.metabolism.foodTicks) {
-                    this.process.consume();
+                if(this.eatingTicks++ >= this.metabolism.getFoodTicks()) {
+                    FeedingResult result = this.process.consume();
+                    this.metabolism.setFood(this.metabolism.getFood() + result.getFood());
+                    this.metabolism.setWater(this.metabolism.getWater() + result.getWater());
                     this.eatingTicks = 0;
                 }
             } else {
@@ -115,7 +117,7 @@ public class FeedingAI extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.process != null && this.process.active() && this.metabolism.food < (this.metabolism.maxFood / 4) * 3;
+        return this.process != null && this.process.active() && this.metabolism.getFood() < (this.metabolism.getMaxFood() / 4) * 3;
     }
 
     @Override
@@ -155,7 +157,7 @@ public class FeedingAI extends EntityAIBase {
 
         @Override
         public FeedingResult consume() {
-            FeedingResult result = metabolism.diet.getResult(this.entity.getItem()).orElse(new FeedingResult(0, 0));
+            FeedingResult result = metabolism.getDiet().getResult(this.entity.getItem()).orElse(new FeedingResult(0, 0));
             this.entity.getItem().shrink(1);
             this.entity.setItem(this.entity.getItem());
             return result;
@@ -184,7 +186,7 @@ public class FeedingAI extends EntityAIBase {
         @Override
         public FeedingResult consume() {
             this.entity.setDead();
-            return metabolism.diet.getResult(this.entity).orElse(new FeedingResult(0, 0));
+            return metabolism.getDiet().getResult(this.entity).orElse(new FeedingResult(0, 0));
         }
     }
 
@@ -214,7 +216,7 @@ public class FeedingAI extends EntityAIBase {
         @Override
         public FeedingResult consume() {
             this.world.setBlockToAir(this.position);
-            return metabolism.diet.getResult(this.initialState).orElse(new FeedingResult(0, 0));
+            return metabolism.getDiet().getResult(this.initialState).orElse(new FeedingResult(0, 0));
         }
     }
 }

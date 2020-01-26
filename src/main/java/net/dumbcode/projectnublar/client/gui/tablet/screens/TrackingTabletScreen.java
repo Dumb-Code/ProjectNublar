@@ -71,7 +71,7 @@ public class TrackingTabletScreen extends TabletScreen {
         this.scrollBox = new GuiScrollBox<>(this.xSize - 100, 20, 100, 15, (this.ySize - 30) / 15, () -> this.scrollEntries);
     }
 
-    public void initilizeSize(int startX, int startZ, int textureWidth, int textureHeight) {
+    public void initializeSize(int startX, int startZ, int textureWidth, int textureHeight) {
         this.startX = startX;
         this.startZ = startZ;
 
@@ -201,12 +201,12 @@ public class TrackingTabletScreen extends TabletScreen {
 
     public void setTrackingData(List<TrackingSavedData.DataEntry> trackingData) {
         this.trackingData = trackingData;
-        trackingData.stream().filter(d -> this.selected != null && d.getUuid().equals(this.selected.getUuid())).findAny().ifPresent(entry -> {
-            this.selected = entry;
-            Vec2f point = this.getPoint(entry);
+        this.selected = trackingData.stream().filter(d -> this.selected != null && d.getUuid().equals(this.selected.getUuid())).findAny().orElse(null);
+        if(this.selected != null) {
+            Vec2f point = this.getPoint(this.selected);
             this.translateWithZoom(matrix4f -> matrix4f.m03 = -point.x + this.xSize / 2);
             this.translateWithZoom(matrix4f -> matrix4f.m13 = -point.y + this.ySize / 2);
-        });
+        }
     }
 
     public void setRGB(int startX, int startZ, int width, int height, int[] setIntoArray) {

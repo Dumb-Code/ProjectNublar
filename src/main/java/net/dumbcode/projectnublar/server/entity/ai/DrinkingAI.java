@@ -45,7 +45,7 @@ public class DrinkingAI extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if(this.metabolism.water <= WATER_THRESHOLD) {
+        if(this.metabolism.getWater() <= WATER_THRESHOLD) {
             if(this.blockPosList == null) {
                 this.blockPosList = BlockStateWorker.INSTANCE.runTask(this.entity.world, this.entity.getPosition(), 50, 50, 7, (world, pos) -> world.getBlockState(pos).getMaterial() == Material.WATER && world.isAirBlock(pos.up()));
             }
@@ -107,10 +107,10 @@ public class DrinkingAI extends EntityAIBase {
                     a.playAnimation(this.access, new AnimationLayer.AnimationEntry(AnimationHandler.DRINKING), MetabolismComponent.METABOLISM_CHANNEL)
                 );
             }
-            if(this.drinkingTicks++ >= this.metabolism.waterTicks) {
+            if(this.drinkingTicks++ >= this.metabolism.getWaterTicks()) {
                 this.drinkingTicks = 0;
             } else {
-                this.metabolism.water += this.metabolism.hydrateAmountPerTick;
+                this.metabolism.setWater(this.metabolism.getWater() + this.metabolism.getHydrateAmountPerTick());
             }
         } else {
             this.entity.getNavigator().setPath(this.path, 0.5F);
@@ -133,6 +133,6 @@ public class DrinkingAI extends EntityAIBase {
         }
         BlockPos foundPos = this.foundPositions.get(0);
         Vec3d position = new Vec3d(foundPos.getX() + 0.5D, foundPos.getY() + 0.5D, foundPos.getZ() + 0.5D);
-        return (this.entity.getNavigator().getPath() == this.path || this.entity.getPositionVector().squareDistanceTo(position) <= 2*2) && this.entity.world.getBlockState(foundPos).getMaterial() == Material.WATER && this.metabolism.water < (this.metabolism.maxWater / 4) * 3;
+        return (this.entity.getNavigator().getPath() == this.path || this.entity.getPositionVector().squareDistanceTo(position) <= 2*2) && this.entity.world.getBlockState(foundPos).getMaterial() == Material.WATER && this.metabolism.getWater() < (this.metabolism.getMaxWater() / 4) * 3;
     }
 }

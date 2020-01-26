@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 
 public  class TabletScreen {

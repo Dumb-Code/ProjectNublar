@@ -31,6 +31,16 @@ projectnublar.gui.tracking.pregnancy=Pregnancy Information:
 projectnublar.gui.tracking.pregnancy.entry=    %s x %sh, %sm, %ss
 projectnublar.gui.tracking.metatlism.food=Food:
 projectnublar.gui.tracking.metatlism.water=Water:
+projectnublar.gui.tracking.mood=Mood: %s
+
+
+projectnublar.mood.stressful.positive=Relaxed
+projectnublar.mood.stressful.negative=Stressed
+
+projectnublar.mood.reason.hydrated=Hydrated
+projectnublar.mood.reason.dehydrated=Dehydrated
+projectnublar.mood.reason.full=Full
+projectnublar.mood.reason.hungry=Hungry
 
 projectnublar.item.fossil.name=Fossil: %1$s %2$s
 

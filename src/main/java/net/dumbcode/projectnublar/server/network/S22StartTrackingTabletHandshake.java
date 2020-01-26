@@ -52,7 +52,7 @@ public class S22StartTrackingTabletHandshake implements IMessage {
             if(screen instanceof OpenedTabletScreen) {
                 TabletScreen tabletScreen = ((OpenedTabletScreen) screen).getScreen();
                 if(tabletScreen instanceof TrackingTabletScreen) {
-                    ((TrackingTabletScreen) tabletScreen).initilizeSize(message.startX, message.startZ, message.endX - message.startX + 1, message.endZ - message.startZ + 1);
+                    ((TrackingTabletScreen) tabletScreen).initializeSize(message.startX, message.startZ, message.endX - message.startX + 1, message.endZ - message.startZ + 1);
                 }
             }
         }
