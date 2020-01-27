@@ -119,9 +119,11 @@ public class Dilophosaurus extends Dinosaur {
             .staticLayer("nostrils", 5F)
             .staticLayer("teeth", 5F);
 
-        this.addComponent(EntityComponentTypes.BLINKING)
+        this.addComponent(EntityComponentTypes.EYES_CLOSED)
             .setEyesOnTexture("eyes")
-            .setEyesOffTexture("eyes_closed")
+            .setEyesOffTexture("eyes_closed");
+
+        this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(25)
             .setTickTimeClose(5);
 

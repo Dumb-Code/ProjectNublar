@@ -26,18 +26,18 @@ public class MetabolismInformation extends TooltipInformation {
 
     private static final int PADDING_AFTER_TEXT = 10;
 
-    private final int food;
-    private final int maxFood;
+    private final float food;
+    private final float maxFood;
     private final RepeatingIconDisplay foodDisplay;
 
-    private final int water;
-    private final int maxWater;
+    private final float water;
+    private final float maxWater;
     private final RepeatingIconDisplay waterDisplay;
 
     private final TextureAtlasSprite BOTTLE_SPRITE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/potion_bottle_drinkable");
     private final TextureAtlasSprite BOTTLE_WATER_SPRITE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/potion_overlay");
 
-    public MetabolismInformation(int food, int maxFood, int water, int maxWater) {
+    public MetabolismInformation(float food, float maxFood, float water, float maxWater) {
         this.food = food;
         this.maxFood = maxFood;
         this.foodDisplay = new RepeatingIconDisplay(this.food, this.maxFood, 9, 5, this.maxFood / 5F, this::renderFoodIcon);
@@ -103,28 +103,28 @@ public class MetabolismInformation extends TooltipInformation {
     }
 
     public static void encodeNBT(NBTTagCompound nbt, MetabolismInformation info) {
-        nbt.setInteger("food", info.food);
-        nbt.setInteger("max_food", info.maxFood);
+        nbt.setFloat("food", info.food);
+        nbt.setFloat("max_food", info.maxFood);
 
-        nbt.setInteger("water", info.water);
-        nbt.setInteger("max_water", info.maxWater);
+        nbt.setFloat("water", info.water);
+        nbt.setFloat("max_water", info.maxWater);
     }
 
     public static MetabolismInformation decodeNBT(NBTTagCompound nbt) {
         return new MetabolismInformation(
-            nbt.getInteger("food"), nbt.getInteger("max_food"),
-            nbt.getInteger("water"), nbt.getInteger("max_water")
+            nbt.getFloat("food"), nbt.getFloat("max_food"),
+            nbt.getFloat("water"), nbt.getFloat("max_water")
         );
     }
 
     public static void encodeBuf(ByteBuf buf, MetabolismInformation info) {
-        buf.writeInt(info.food);
-        buf.writeInt(info.maxFood);
-        buf.writeInt(info.water);
-        buf.writeInt(info.maxWater);
+        buf.writeFloat(info.food);
+        buf.writeFloat(info.maxFood);
+        buf.writeFloat(info.water);
+        buf.writeFloat(info.maxWater);
     }
 
     public static MetabolismInformation decodeBuf(ByteBuf buf) {
-        return new MetabolismInformation(buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt());
+        return new MetabolismInformation(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
     }
 }

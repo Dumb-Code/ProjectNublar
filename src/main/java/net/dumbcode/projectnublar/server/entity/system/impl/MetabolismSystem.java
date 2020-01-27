@@ -30,9 +30,9 @@ public enum MetabolismSystem implements EntitySystem {
         for (int i = 0; i < this.metabolism.length; i++) {
             if(this.entities[i].ticksExisted % 20 == 0) {
                 MetabolismComponent meta = this.metabolism[i];
-                meta.setFood(MathHelper.clamp(meta.getFood() - meta.getFoodRate(), 0, meta.getMaxFood()));
-                meta.setWater(MathHelper.clamp(meta.getWater() - meta.getWaterRate(), 0, meta.getMaxWater()));
-                
+                meta.setFood((float) MathHelper.clamp(meta.getFood() - meta.getFoodRate().getValue(), 0, meta.getMaxFood().getValue()));
+                meta.setWater((float) MathHelper.clamp(meta.getWater() - meta.getWaterRate().getValue(), 0, meta.getMaxWater().getValue()));
+
                 if(this.entities[i] instanceof EntityLivingBase) {
                     if(meta.getFood() == 0) {
                         this.entities[i].attackEntityFrom(DamageSource.STARVE, 1F);

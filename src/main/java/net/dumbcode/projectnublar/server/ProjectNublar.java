@@ -191,6 +191,7 @@ public class ProjectNublar {
         event.registerSystem(DinosaurEggLayingSystem.INSTANCE);
         event.registerSystem(TrackingSystem.INSTANCE);
         event.registerSystem(MetabolismSystem.INSTANCE);
+        event.registerSystem(MoodSystem.INSTANCE);
     }
 
     @EventHandler

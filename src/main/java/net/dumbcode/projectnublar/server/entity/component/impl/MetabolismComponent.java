@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.dumbcode.dumblibrary.server.attributes.ModifiableField;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
@@ -23,6 +24,7 @@ import net.dumbcode.projectnublar.server.entity.tracking.info.MetabolismInformat
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -34,14 +36,14 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
 
     public static final int METABOLISM_CHANNEL = 61;
 
-    private int food;
-    private int water;
+    private float food;
+    private float water;
 
-    private int maxFood;
-    private int maxWater;
+    private final ModifiableField maxFood = new ModifiableField();
+    private final ModifiableField maxWater = new ModifiableField();
 
-    private int foodRate;
-    private int waterRate;
+    private final ModifiableField foodRate = new ModifiableField();
+    private final ModifiableField waterRate = new ModifiableField();
 
     private int foodTicks;
     private int waterTicks;
@@ -52,15 +54,15 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setInteger("food", this.food);
-        compound.setInteger("water", this.water);
+        compound.setFloat("food", this.food);
+        compound.setFloat("water", this.water);
 
-        compound.setInteger("max_food", this.maxFood);
-        compound.setInteger("max_water", this.maxWater);
+        compound.setTag("max_food", this.maxFood.writeToNBT());
+        compound.setTag("max_water", this.maxWater.writeToNBT());
 
 
-        compound.setInteger("food_rate", this.foodRate);
-        compound.setInteger("water_rate", this.waterRate);
+        compound.setTag("food_rate", this.foodRate.writeToNBT());
+        compound.setTag("water_rate", this.waterRate.writeToNBT());
 
         compound.setInteger("food_ticks", this.foodTicks);
         compound.setInteger("water_ticks", this.waterTicks);
@@ -74,14 +76,14 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     @Override
     public void deserialize(NBTTagCompound compound) {
         super.deserialize(compound);
-        this.food = compound.getInteger("food");
-        this.water = compound.getInteger("water");
+        this.food = compound.getFloat("food");
+        this.water = compound.getFloat("water");
 
-        this.maxFood = compound.getInteger("max_food");
-        this.maxWater = compound.getInteger("max_water");
+        this.maxFood.readFromNBT(compound.getCompoundTag("max_food"));
+        this.maxWater.readFromNBT(compound.getCompoundTag("max_water"));
 
-        this.foodRate = compound.getInteger("food_rate");
-        this.waterRate = compound.getInteger("water_rate");
+        this.foodRate.readFromNBT(compound.getCompoundTag("food_rate"));
+        this.waterRate.readFromNBT(compound.getCompoundTag("water_rate"));
 
         this.foodTicks = compound.getInteger("food_ticks");
         this.waterTicks = compound.getInteger("water_ticks");
@@ -106,21 +108,21 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     }
 
     @Override
-    public void applyMoods(BiConsumer<MoodReason, Number> acceptor) {
-        float foodDiff = (this.food / (float) this.maxFood) * 4 - 2;
-        if(foodDiff != 0) {
-            acceptor.accept(foodDiff < 0 ? MoodReasons.STARVED : MoodReasons.FULL, Math.abs(foodDiff));
-        }
+    public void applyMoods(BiConsumer<MoodReason, Supplier<Float>> acceptor) {
+        Supplier<Float> foodDiff = () -> (this.food / (float) this.maxFood.getValue()) * 4 - 2;
+        Supplier<Float> waterDiff = () -> (this.water / (float) this.maxWater.getValue()) * 4 - 2;
 
-        float waterDiff = (this.water / (float) this.maxWater) * 4 - 2;
-        if(waterDiff  != 0) {
-            acceptor.accept(waterDiff < 0 ? MoodReasons.DEHYDRATED : MoodReasons.HYDRATED, Math.abs(waterDiff));
-        }
+        acceptor.accept(MoodReasons.STARVED, () -> -MathHelper.clamp(foodDiff.get(), -2, 0));
+        acceptor.accept(MoodReasons.FULL, () -> MathHelper.clamp(foodDiff.get(), 0, 2));
+
+        acceptor.accept(MoodReasons.DEHYDRATED, () -> -MathHelper.clamp(waterDiff.get(), -2, 0));
+        acceptor.accept(MoodReasons.HYDRATED, () -> MathHelper.clamp(waterDiff.get(), 0, 2));
+
     }
 
     @Override
     public void addTrackingData(ComponentAccess entity, Consumer<Supplier<TrackingDataInformation>> consumer) {
-        consumer.accept(() -> new MetabolismInformation(this.food, this.maxFood, this.water, this.maxWater));
+        consumer.accept(() -> new MetabolismInformation(this.food, (float) this.maxFood.getValue(), this.water, (float) this.maxWater.getValue()));
     }
 
     @Accessors(chain = true)
@@ -145,10 +147,10 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
 
         @Override
         public MetabolismComponent constructTo(MetabolismComponent component) {
-            component.food = component.maxFood = this.maxFood;
-            component.water = component.maxWater = this.maxWater;
-            component.waterRate = this.waterRate;
-            component.foodRate = this.foodRate;
+            component.maxFood.setBaseValue(component.food = this.maxFood);
+            component.maxWater.setBaseValue(component.water = this.maxWater);
+            component.waterRate.setBaseValue(this.waterRate);
+            component.foodRate.setBaseValue(this.foodRate);
             component.foodTicks = this.foodTicks;
             component.waterTicks = this.waterTicks;
 
