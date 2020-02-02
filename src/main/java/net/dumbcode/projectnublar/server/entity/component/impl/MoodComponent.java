@@ -95,7 +95,7 @@ public class MoodComponent extends EntityComponent implements FinalizableCompone
                     break;
                 }
             }
-            return number;
+            return this.number;
         }
 
         public void runIfDirty(ComponentAccess access) {

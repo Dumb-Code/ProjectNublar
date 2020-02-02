@@ -23,7 +23,6 @@ public class AnimationHandler {
     public static final Animation RESTING = InjectedUtils.injected();
     public static final Animation ROARING = InjectedUtils.injected();
     public static final Animation RUNNING = InjectedUtils.injected();
-    public static final Animation SLEEPING = InjectedUtils.injected();
     public static final Animation SNIFF_AIR = InjectedUtils.injected();
     public static final Animation SNIFF_GROUND = InjectedUtils.injected();
 
@@ -41,7 +40,6 @@ public class AnimationHandler {
                 new Animation().setRegistryName("resting"),
                 new Animation().setRegistryName("roaring"),
                 new Animation().setRegistryName("running"),
-                new Animation().setRegistryName("sleeping"),
                 new Animation().setRegistryName("sniff_air"),
                 new Animation().setRegistryName("sniff_ground")
 

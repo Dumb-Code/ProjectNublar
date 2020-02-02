@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
@@ -136,6 +137,12 @@ public class Dilophosaurus extends Dinosaur {
             .setEggAmount(new GaussianValue(7F, 1F))
             .setTicksPregnancy(new GaussianValue(192000, 12000)) //8 Minecraft days, give or take half a day
             .setTicksEggHatch(new GaussianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
+
+        this.addComponent(EntityComponentTypes.SLEEPING)
+            .setSleepingAnimation(new ResourceLocation(ProjectNublar.MODID, "resting"))
+            .setTirednessChanceConstant(140000) //7 minecraft hours
+            .setTirednessLossPerTickSleeping(2.5F);
+
 
         this.addComponent(ComponentHandler.TRACKING_DATA);
         this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);

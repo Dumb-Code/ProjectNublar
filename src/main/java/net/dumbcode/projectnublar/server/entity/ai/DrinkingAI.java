@@ -123,7 +123,7 @@ public class DrinkingAI extends EntityAIBase {
     public void resetTask() {
         this.drinkingTicks = 0;
         this.foundPositions.clear();
-        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(MetabolismComponent.METABOLISM_CHANNEL));
+        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(this.entity, MetabolismComponent.METABOLISM_CHANNEL));
     }
 
     @Override

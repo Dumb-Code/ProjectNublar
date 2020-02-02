@@ -124,7 +124,7 @@ public class FeedingAI extends EntityAIBase {
     public void resetTask() {
         this.process = null;
         this.eatingTicks = 0;
-        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(MetabolismComponent.METABOLISM_CHANNEL));
+        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(this.entityLiving, MetabolismComponent.METABOLISM_CHANNEL));
     }
 
 
