@@ -129,16 +129,13 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         public Dinosaur deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
             Dinosaur dinosaur = new Dinosaur();
             JsonObject object = element.getAsJsonObject();
-            ItemProperties readItemProperties = context.deserialize(object.get("item_attributes"), TypeToken.of(ItemProperties.class).getType());
             dinosaur.attacher.readFromJson(JsonUtils.getJsonArray(object, "entity_info"));
-            dinosaur.getItemProperties().copyFrom(readItemProperties);
             return dinosaur;
         }
 
         @Override
         public JsonElement serialize(Dinosaur dino, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject object = new JsonObject();
-            object.add("item_attributes", context.serialize(dino.itemProperties));
             object.add("entity_info", dino.attacher.writeToJson(new JsonArray()));
             return object;
         }

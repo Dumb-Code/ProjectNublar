@@ -36,6 +36,8 @@ projectnublar.gui.tracking.mood=Mood: %s
 
 projectnublar.mood.stressful.positive=Relaxed
 projectnublar.mood.stressful.negative=Stressed
+projectnublar.mood.happy.positive=Happy
+projectnublar.mood.happy.negative=Sad
 
 projectnublar.mood.reason.hydrated=Hydrated
 projectnublar.mood.reason.dehydrated=Dehydrated

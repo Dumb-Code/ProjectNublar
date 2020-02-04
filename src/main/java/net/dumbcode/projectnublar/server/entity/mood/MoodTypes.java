@@ -19,5 +19,10 @@ public class MoodTypes {
         )
         .build();
 
+    public static final MoodType HAPPY = MoodType.builder()
+        .translationKey("projectnublar.mood.happy")
+
+        .build();
+
 
 }

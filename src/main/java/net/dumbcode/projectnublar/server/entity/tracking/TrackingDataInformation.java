@@ -55,20 +55,20 @@ public abstract class TrackingDataInformation {
         return entry;
     }
 
-    public static TrackingDataInformation deseralizeBuf(ByteBuf buf) {
+    public static TrackingDataInformation deserializeBuf(ByteBuf buf) {
         return getEntry(ByteBufUtils.readUTF8String(buf)).bufDeserailizer.apply(buf);
     }
 
-    public static void seralizeBuf(ByteBuf buf, TrackingDataInformation info) {
+    public static void serializeBuf(ByteBuf buf, TrackingDataInformation info) {
         ByteBufUtils.writeUTF8String(buf, info.typeName);
         getEntry(info.typeName).bufSerializer.accept(buf, info);
     }
 
-    public static TrackingDataInformation deseralizeNBT(NBTTagCompound nbt) {
+    public static TrackingDataInformation deserializeNBT(NBTTagCompound nbt) {
         return getEntry(nbt.getString("key")).nbtDeserailizer.apply(nbt);
     }
 
-    public static NBTTagCompound seralizeNBT(NBTTagCompound nbt, TrackingDataInformation info) {
+    public static NBTTagCompound serializeNBT(NBTTagCompound nbt, TrackingDataInformation info) {
         nbt.setString("key", info.typeName);
         getEntry(info.typeName).nbtSerailizer.accept(nbt, info);
         return nbt;
@@ -88,5 +88,6 @@ public abstract class TrackingDataInformation {
         registerTrackingType(PregnancyInformation.KEY, PregnancyInformation::decodeBuf, PregnancyInformation::encodeBuf, PregnancyInformation::decodeNBT, PregnancyInformation::encodeNBT);
         registerTrackingType(MoodInformation.KEY, MoodInformation::decodeBuf, MoodInformation::encodeBuf, MoodInformation::decodeNBT, MoodInformation::encodeNBT);
         registerTrackingType(MetabolismInformation.KEY, MetabolismInformation::decodeBuf, MetabolismInformation::encodeBuf, MetabolismInformation::decodeNBT, MetabolismInformation::encodeNBT);
+        registerTrackingType(SleepInformation.KEY, SleepInformation::decodeBuf, SleepInformation::encodeBuf, SleepInformation::decodeNBT, SleepInformation::encodeNBT);
     }
 }

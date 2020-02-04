@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.entity.tracking;
 import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.dumbcode.dumblibrary.server.ecs.HerdSavedData;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.nbt.NBTTagCompound;
@@ -72,13 +71,13 @@ public class TrackingSavedData extends WorldSavedData {
         public static NBTTagCompound serialize(DataEntry info) {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setUniqueId("uuid", info.uuid);
-            compound.setTag("infos", info.information.stream().map(d -> TrackingDataInformation.seralizeNBT(new NBTTagCompound(), d)).collect(IOCollectors.toNBTTagList()));
+            compound.setTag("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new NBTTagCompound(), d)).collect(IOCollectors.toNBTTagList()));
             return compound;
         }
 
         public static DataEntry deserialize(NBTTagCompound nbt) {
             DataEntry info = new DataEntry(nbt.getUniqueId("uuid"), BlockPos.fromLong(nbt.getLong("position")));
-            StreamUtils.stream(nbt.getTagList("infos", Constants.NBT.TAG_COMPOUND)).map(base -> TrackingDataInformation.deseralizeNBT((NBTTagCompound) base)).forEach(info.information::add);
+            StreamUtils.stream(nbt.getTagList("infos", Constants.NBT.TAG_COMPOUND)).map(base -> TrackingDataInformation.deserializeNBT((NBTTagCompound) base)).forEach(info.information::add);
             return info;
         }
 
@@ -89,12 +88,12 @@ public class TrackingSavedData extends WorldSavedData {
             buf.writeLong(info.position.toLong());
 
             buf.writeShort(info.information.size());
-            info.information.forEach(d -> TrackingDataInformation.seralizeBuf(buf, d));
+            info.information.forEach(d -> TrackingDataInformation.serializeBuf(buf, d));
         }
 
         public static DataEntry deserailize(ByteBuf buf) {
             DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()), BlockPos.fromLong(buf.readLong()));
-            IntStream.range(0, buf.readShort()).mapToObj(i -> TrackingDataInformation.deseralizeBuf(buf)).forEach(info.information::add);
+            IntStream.range(0, buf.readShort()).mapToObj(i -> TrackingDataInformation.deserializeBuf(buf)).forEach(info.information::add);
             return info;
         }
 
