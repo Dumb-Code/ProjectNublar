@@ -19,31 +19,36 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.GeneticComponent;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
-import net.dumbcode.projectnublar.server.utils.GuassianValue;
+import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
+import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
+import net.dumbcode.projectnublar.server.entity.tracking.info.PregnancyInformation;
+import net.dumbcode.projectnublar.server.utils.GaussianValue;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class DinosaurEggLayingComponent extends EntityComponent implements BreedingResultComponent {
+public class DinosaurEggLayingComponent extends EntityComponent implements BreedingResultComponent, TrackingDataComponent {
 
     private static final Random RANDOM = new Random();
 
     private final List<DinosaurEggType> eggTypes = new ArrayList<>();
 
-    private GuassianValue eggAmount = new GuassianValue(1, 0);
-    private GuassianValue eggModifier = new GuassianValue(1, 0);
-    private GuassianValue ticksPregnancy = new GuassianValue(1, 0);
-    private GuassianValue ticksEggHatch = new GuassianValue(1, 0);
+    private GaussianValue eggAmount = new GaussianValue(1, 0);
+    private GaussianValue eggModifier = new GaussianValue(1, 0);
+    private GaussianValue ticksPregnancy = new GaussianValue(1, 0);
+    private GaussianValue ticksEggHatch = new GaussianValue(1, 0);
 
     @Getter
     private final List<EggEntry> heldEggs = new ArrayList<>();
 
     @Override
-    public void onBreed(ComponentAccess other) {
-        if(!this.access.getOrExcept(EntityComponentTypes.GENDER).male) {
-            Optional<GeneticComponent> thisGenetics = this.access.get(EntityComponentTypes.GENETICS);
+    public void onBreed(ComponentAccess self, ComponentAccess other) {
+        if(!self.getOrExcept(EntityComponentTypes.GENDER).male) {
+            Optional<GeneticComponent> thisGenetics = self.get(EntityComponentTypes.GENETICS);
             Optional<GeneticComponent> otherGenetics = other.get(EntityComponentTypes.GENETICS);
             if(thisGenetics.isPresent() && otherGenetics.isPresent()) {
                 int pregnancyTime = (int) this.ticksPregnancy.getRandomValue(RANDOM);
@@ -91,10 +96,10 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
     @Override
     public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setTag("egg_amount", GuassianValue.writeToNBT(this.eggAmount));
-        compound.setTag("egg_modifier", GuassianValue.writeToNBT(this.eggModifier));
-        compound.setTag("ticks_pregnancy", GuassianValue.writeToNBT(this.ticksPregnancy));
-        compound.setTag("ticks_egg_hatch", GuassianValue.writeToNBT(this.ticksEggHatch));
+        compound.setTag("egg_amount", GaussianValue.writeToNBT(this.eggAmount));
+        compound.setTag("egg_modifier", GaussianValue.writeToNBT(this.eggModifier));
+        compound.setTag("ticks_pregnancy", GaussianValue.writeToNBT(this.ticksPregnancy));
+        compound.setTag("ticks_egg_hatch", GaussianValue.writeToNBT(this.ticksEggHatch));
 
         compound.setTag("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToNBT).collect(IOCollectors.toNBTTagList()));
         return super.serialize(compound);
@@ -102,15 +107,20 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
     @Override
     public void deserialize(NBTTagCompound nbt) {
-        this.eggAmount = GuassianValue.readFromNBT(nbt.getCompoundTag("egg_amount"));
-        this.eggModifier = GuassianValue.readFromNBT(nbt.getCompoundTag("egg_modifier"));
-        this.ticksPregnancy = GuassianValue.readFromNBT(nbt.getCompoundTag("ticks_pregnancy"));
-        this.ticksEggHatch = GuassianValue.readFromNBT(nbt.getCompoundTag("ticks_egg_hatch"));
+        this.eggAmount = GaussianValue.readFromNBT(nbt.getCompoundTag("egg_amount"));
+        this.eggModifier = GaussianValue.readFromNBT(nbt.getCompoundTag("egg_modifier"));
+        this.ticksPregnancy = GaussianValue.readFromNBT(nbt.getCompoundTag("ticks_pregnancy"));
+        this.ticksEggHatch = GaussianValue.readFromNBT(nbt.getCompoundTag("ticks_egg_hatch"));
 
         this.eggTypes.clear();
         StreamUtils.stream(nbt.getTagList("egg_types", Constants.NBT.TAG_COMPOUND)).map(b -> DinosaurEggType.readFromNBT((NBTTagCompound) b)).forEach(this.eggTypes::add);
 
         super.deserialize(nbt);
+    }
+
+    @Override
+    public void addTrackingData(ComponentAccess access, Consumer<Supplier<TrackingDataInformation>> consumer) {
+        consumer.accept(() -> new PregnancyInformation(this.heldEggs.stream().mapToInt(EggEntry::getTicksLeft).toArray()));
     }
 
     @Data
@@ -130,10 +140,10 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
         private final List<DinosaurEggType> eggTypes = new ArrayList<>();
 
-        private GuassianValue eggAmount = new GuassianValue(1, 0);
-        private GuassianValue eggModifier = new GuassianValue(1, 0);
-        private GuassianValue ticksPregnancy = new GuassianValue(1, 0);
-        private GuassianValue ticksEggHatch = new GuassianValue(1, 0);
+        private GaussianValue eggAmount = new GaussianValue(1, 0);
+        private GaussianValue eggModifier = new GaussianValue(1, 0);
+        private GaussianValue ticksPregnancy = new GaussianValue(1, 0);
+        private GaussianValue ticksEggHatch = new GaussianValue(1, 0);
 
         public Storage addEggType(DinosaurEggType... type) {
             Collections.addAll(this.eggTypes, type);
@@ -153,20 +163,20 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
         @Override
         public void writeJson(JsonObject json) {
-            json.add("egg_amount", GuassianValue.writeToJson(this.eggAmount));
-            json.add("egg_modifier", GuassianValue.writeToJson(this.eggModifier));
-            json.add("ticks_pregnancy", GuassianValue.writeToJson(this.ticksPregnancy));
-            json.add("ticks_egg_hatch", GuassianValue.writeToJson(this.ticksEggHatch));
+            json.add("egg_amount", GaussianValue.writeToJson(this.eggAmount));
+            json.add("egg_modifier", GaussianValue.writeToJson(this.eggModifier));
+            json.add("ticks_pregnancy", GaussianValue.writeToJson(this.ticksPregnancy));
+            json.add("ticks_egg_hatch", GaussianValue.writeToJson(this.ticksEggHatch));
 
             json.add("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToJson).collect(IOCollectors.toJsonArray()));
         }
 
         @Override
         public void readJson(JsonObject json) {
-            this.eggAmount = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_amount"));
-            this.eggModifier = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_modifier"));
-            this.ticksPregnancy = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_pregnancy"));
-            this.ticksEggHatch = GuassianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_egg_hatch"));
+            this.eggAmount = GaussianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_amount"));
+            this.eggModifier = GaussianValue.readFromJson(JsonUtils.getJsonObject(json, "egg_modifier"));
+            this.ticksPregnancy = GaussianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_pregnancy"));
+            this.ticksEggHatch = GaussianValue.readFromJson(JsonUtils.getJsonObject(json, "ticks_egg_hatch"));
 
             this.eggTypes.clear();
             StreamUtils.stream(JsonUtils.getJsonArray(json, "egg_types")).map(JsonElement::getAsJsonObject).map(DinosaurEggType::readFromJson).forEach(this.eggTypes::add);

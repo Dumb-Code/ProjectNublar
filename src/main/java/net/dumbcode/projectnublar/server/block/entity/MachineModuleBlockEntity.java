@@ -3,8 +3,8 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
-import net.dumbcode.projectnublar.client.gui.tab.TabListInformation;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGui;
+import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C18OpenContainer;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
@@ -330,12 +330,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
 
-    public TabListInformation createInfo() {
-        return new TabListInformation(this::createTabList);
+    public TabInformationBar createInfo() {
+        return new TabInformationBar(this::createTabList);
     }
 
-    private List<TabbedGui.Tab> createTabList() {
-        List<TabbedGui.Tab> tabs = Lists.newArrayList();
+    private List<TabInformationBar.Tab> createTabList() {
+        List<TabInformationBar.Tab> tabs = Lists.newArrayList();
         for (MachineModuleBlockEntity blockEntity : this.getSurroundings(Lists.newArrayList())) {
             blockEntity.addTabs(tabs);
         }
@@ -365,13 +365,13 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         this.positionDirty = true;
     }
 
-    protected void addTabs(List<TabbedGui.Tab> tabList) {
+    protected void addTabs(List<TabInformationBar.Tab> tabList) {
         tabList.add(new DefaultTab(0));
     }
 
     //tab - used to split the same gui into diffrent tabs. Not used for grouping diffrent guis together with tabs
     @SideOnly(Side.CLIENT)
-    public abstract GuiScreen createScreen(EntityPlayer player, TabListInformation info, int tab);
+    public abstract GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab);
 
     public abstract Container createContainer(EntityPlayer player, int tab);
 
@@ -442,7 +442,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         }
     }
 
-    protected class DefaultTab extends TabbedGui.Tab {
+    protected class DefaultTab implements TabInformationBar.Tab {
 
         private final int tab;
 
@@ -461,9 +461,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         @Override
         public void onClicked() {
-            TabListInformation info;
-            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGui) {
-                info = ((TabbedGui) Minecraft.getMinecraft().currentScreen).getInfo();
+            TabInformationBar info;
+            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGuiContainer) {
+                info = ((TabbedGuiContainer) Minecraft.getMinecraft().currentScreen).getInfo();
             } else {
                 info = MachineModuleBlockEntity.this.createInfo();
             }

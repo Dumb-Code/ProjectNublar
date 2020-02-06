@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
-import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
+import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
@@ -42,10 +42,10 @@ public class Tyrannosaurus extends Dinosaur {
     @Override
     public void attachDefaultComponents() {
 
-        this.addComponent(EntityComponentTypes.METABOLISM)
+        this.addComponent(ComponentHandler.METABOLISM)
             .setDistanceSmellFood(30)
             .setDiet(new FeedingDiet()
-                .add(new ItemStack(Items.APPLE))
+                .add(500, 20, new ItemStack(Items.APPLE))
             )
             .setMaxFood(7500)
             .setMaxWater(6000);
@@ -113,10 +113,12 @@ public class Tyrannosaurus extends Dinosaur {
                 .staticLayer("nostrils", 5F)
                 .staticLayer("teeth", 5F);
 
-        this.addComponent(EntityComponentTypes.BLINKING)
+        this.addComponent(EntityComponentTypes.EYES_CLOSED)
                 .setEyesOnTexture("eyes")
-                .setEyesOffTexture("eyes_closed")
-                .setTickTimeOpen(25)
-                .setTickTimeClose(5);
+                .setEyesOffTexture("eyes_closed");
+
+        this.addComponent(EntityComponentTypes.BLINKING)
+            .setTickTimeOpen(25)
+            .setTickTimeClose(5);
     }
 }

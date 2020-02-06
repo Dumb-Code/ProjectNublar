@@ -18,7 +18,7 @@ public class AttackFenceComponent extends EntityComponent implements Finalizable
 
         if (entity instanceof ComposableCreatureEntity) {
             ComposableCreatureEntity creature = (ComposableCreatureEntity) entity;
-            creature.getComponentMap().get(ComponentHandler.MOOD).ifPresent(component -> creature.tasks.addTask(this.priority, new EntityAttackFenceAI(creature, component)));
+            creature.tasks.addTask(this.priority, new EntityAttackFenceAI(creature));
         } else {
             throw new IllegalArgumentException("Tried to attach a attack component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of EntityCreature");
         }

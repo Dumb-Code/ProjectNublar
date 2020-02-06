@@ -18,8 +18,6 @@ public class EntityAttackFenceAI extends EntityAIBase {
 
     private EntityCreature entity;
 
-    private MoodComponent mood;
-
     /**
      * Fence that was targeted.
      */
@@ -32,9 +30,8 @@ public class EntityAttackFenceAI extends EntityAIBase {
      */
     private boolean hasBrokenFence;
 
-    public EntityAttackFenceAI(EntityCreature entity, MoodComponent mood) {
+    public EntityAttackFenceAI(EntityCreature entity) {
         this.entity = entity;
-        this.mood = mood;
         this.hasBrokenFence = false;
     }
 
@@ -63,7 +60,7 @@ public class EntityAttackFenceAI extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.entity.getRNG().nextFloat() <= 0.5F && mood.getMood() == MoodComponent.MoodType.ANGRY && !hasBrokenFence) {
+        if (this.entity.getRNG().nextFloat() <= 0.5F && !hasBrokenFence) {
             List<BlockPos> pos = AIUtils.traverseXZ((int) entity.posX, (int) entity.posY, (int) entity.posZ, 10);
             for (BlockPos bPos : pos) {
                 if (entity.world.getBlockState(bPos).getBlock() instanceof BlockElectricFence) {

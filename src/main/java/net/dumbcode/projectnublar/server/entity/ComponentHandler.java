@@ -1,11 +1,13 @@
 package net.dumbcode.projectnublar.server.entity;
 
+import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
 import net.dumbcode.dumblibrary.server.ecs.component.RegisterComponentsEvent;
 import net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType;
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.*;
+import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackFenceComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
@@ -24,8 +26,12 @@ public class ComponentHandler {
     public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
     public static final EntityComponentType<AttackComponent, ?> ATTACK_AI = InjectedUtils.injected();
+    public static final EntityComponentType<MetabolismComponent, MetabolismComponent.Storage> METABOLISM = InjectedUtils.injected();
     public static final EntityComponentType<SkeletalBuilderComponent, SkeletalBuilderComponent.Storage> SKELETAL_BUILDER = InjectedUtils.injected();
     public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
+    public static final EntityComponentType<TrackingComponent, ?> TRACKING_DATA = InjectedUtils.injected();
+    public static final EntityComponentType<BasicEntityInformationComponent, ?> BASIC_ENTITY_INFORMATION = InjectedUtils.injected();
+    public static final EntityComponentType<BasicEntityInformationComponent, ?> SLEEPING_TRACKING_INFO = InjectedUtils.injected();
 
     public static final EntityComponentType<MoodComponent, ?> MOOD = InjectedUtils.injected();
     public static final EntityComponentType<AttackFenceComponent, ?> ATTACK_FENCE_AI = InjectedUtils.injected();
@@ -62,6 +68,11 @@ public class ComponentHandler {
                  .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "attack_fence_ai"))
                  .withConstructor(AttackFenceComponent::new)
                  .build(),
+            SimpleComponentType.builder(MetabolismComponent.class, MetabolismComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "metabolism"))
+                .withStorage(MetabolismComponent.Storage::new)
+                .withConstructor(MetabolismComponent::new)
+                .build(),
             SimpleComponentType.builder(SkeletalBuilderComponent.class, SkeletalBuilderComponent.Storage.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "skeletal_builder"))
                 .withConstructor(SkeletalBuilderComponent::new)
@@ -81,7 +92,20 @@ public class ComponentHandler {
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur_egg_laying"))
                 .withConstructor(DinosaurEggLayingComponent::new)
                 .withStorage(DinosaurEggLayingComponent.Storage::new)
+                .build(),
+            SimpleComponentType.builder(TrackingComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "tracking_data"))
+                .withConstructor(TrackingComponent::new)
+                .build(),
+            SimpleComponentType.builder(BasicEntityInformationComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "basic_entity_information"))
+                .withConstructor(BasicEntityInformationComponent::new)
+                .build(),
+            SimpleComponentType.builder(SleepTrackingComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "sleeping_tracking_info"))
+                .withConstructor(SleepTrackingComponent::new)
                 .build()
+
         );
     }
 }

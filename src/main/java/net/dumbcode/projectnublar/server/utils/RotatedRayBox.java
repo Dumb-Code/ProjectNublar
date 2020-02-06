@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Value;
-import net.dumbcode.projectnublar.client.utils.RenderUtils;
+import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;

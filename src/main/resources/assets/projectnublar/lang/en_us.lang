@@ -25,6 +25,25 @@ projectnublar.gui.controls.left_click=Left click
 projectnublar.gui.controls.movement_keys=Movement keys
 projectnublar.gui.controls.arrow_keys=Arrow keys
 
+projectnublar.gui.tracking.health=Health:
+projectnublar.gui.tracking.dinosaur=Dinosaur: %s
+projectnublar.gui.tracking.pregnancy=Pregnancy Information:
+projectnublar.gui.tracking.pregnancy.entry=    %s x %sh, %sm, %ss
+projectnublar.gui.tracking.metatlism.food=Food:
+projectnublar.gui.tracking.metatlism.water=Water:
+projectnublar.gui.tracking.mood=Mood: %s
+
+
+projectnublar.mood.stressful.positive=Relaxed
+projectnublar.mood.stressful.negative=Stressed
+projectnublar.mood.happy.positive=Happy
+projectnublar.mood.happy.negative=Sad
+
+projectnublar.mood.reason.hydrated=Hydrated
+projectnublar.mood.reason.dehydrated=Dehydrated
+projectnublar.mood.reason.full=Full
+projectnublar.mood.reason.hungry=Hungry
+
 projectnublar.item.fossil.name=Fossil: %1$s %2$s
 
 projectnublar.action.skeletal_builder.no_dino_to_display=No dinosaur to display!
@@ -33,7 +52,9 @@ item.meat_dinosaur_tyrannosaurus_raw.name=Raw Tyrannosaurus meat
 item.meat_dinosaur_tyrannosaurus_cooked.name=Cooked Tyrannosaurus meat
 
 projectnublar.dino.tyrannosaurus.name=Tyrannosaurus
+projectnublar.dino.dilophosaurus.name=Dilophosaurus
 projectnublar.dino.missing.name=<!Missing Dinosaur!>
 
 projectnublar.fences.length.toolong=%sm is too long. The max distance is %sm
 projectnublar.fences.length.notenough=Not enough cable. Need a total of %s cable. (You have %s)
+

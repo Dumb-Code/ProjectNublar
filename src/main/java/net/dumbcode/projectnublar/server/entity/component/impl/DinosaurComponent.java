@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.ComponentWriteAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
@@ -18,13 +20,19 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
+import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
+import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
+import net.dumbcode.projectnublar.server.entity.tracking.info.DinosaurInformation;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 @Getter
 @Setter
-public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent, CanBreedComponent {
+public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent, CanBreedComponent, TrackingDataComponent {
 
     private static final int MOVEMENT_CHANNEL = 60;
 
@@ -81,12 +89,26 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
                             .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)
                             .withSpeedFactor(AnimationFactorHandler.LIMB_SWING)
                     , MOVEMENT_CHANNEL, 20);
-
         });
+
+        if(entity instanceof ComponentWriteAccess) {
+            for (EntityComponentAttacher.ComponentPair pair : this.dinosaur.getAttacher().getDefaultConfig().getTypes()) {
+                if(!entity.matchesAll(pair.getType())) {
+                    ProjectNublar.getLogger().info("Attaching un-found component {}", pair.getType().getIdentifier());
+                    pair.attach((ComponentWriteAccess) entity);
+                }
+            }
+        }
+
     }
 
     @Override
     public boolean canBreedWith(ComponentAccess otherEntity) {
         return otherEntity.get(ComponentHandler.DINOSAUR).map(d -> d.dinosaur == this.dinosaur).orElse(false);
+    }
+
+    @Override
+    public void addTrackingData(ComponentAccess entity, Consumer<Supplier<TrackingDataInformation>> consumer) {
+        consumer.accept(() -> new DinosaurInformation(this.dinosaur));
     }
 }

@@ -461,7 +461,7 @@ public class GuiSkeletalBuilder extends GuiScreen {
             float dx = Mouse.getX() - lastClickPosition.x;
             float dy = Mouse.getY() - lastClickPosition.y;
             draggingRing = true;
-            // add, don't set. This method can be called multiple types before rendering the screen, which causes the dMouse vector to be nil more often that it should
+            // set, don't set. This method can be called multiple types before rendering the screen, which causes the dMouse vector to be nil more often that it should
             dMouse.x += dx;
             dMouse.y += dy;
 

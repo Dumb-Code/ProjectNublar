@@ -9,7 +9,7 @@ import net.minecraft.util.JsonUtils;
 import java.util.Random;
 
 @AllArgsConstructor
-public class GuassianValue {
+public class GaussianValue {
     private final float mean;
     private final float deviation;
 
@@ -17,34 +17,34 @@ public class GuassianValue {
         return (float) (this.mean + random.nextGaussian() * this.deviation);
     }
 
-    public static NBTTagCompound writeToNBT(GuassianValue value) {
+    public static NBTTagCompound writeToNBT(GaussianValue value) {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setFloat("mean", value.mean);
         nbt.setFloat("deviation", value.deviation);
         return nbt;
     }
 
-    public static GuassianValue readFromNBT(NBTTagCompound nbt) {
-        return new GuassianValue(nbt.getFloat("mean"), nbt.getFloat("deviation"));
+    public static GaussianValue readFromNBT(NBTTagCompound nbt) {
+        return new GaussianValue(nbt.getFloat("mean"), nbt.getFloat("deviation"));
     }
 
-    public static JsonObject writeToJson(GuassianValue value) {
+    public static JsonObject writeToJson(GaussianValue value) {
         JsonObject json = new JsonObject();
         json.addProperty("mean", value.mean);
         json.addProperty("deviation", value.deviation);
         return json;
     }
 
-    public static GuassianValue readFromJson(JsonObject json) {
-        return new GuassianValue(JsonUtils.getFloat(json, "mean"), JsonUtils.getFloat(json, "deviation"));
+    public static GaussianValue readFromJson(JsonObject json) {
+        return new GaussianValue(JsonUtils.getFloat(json, "mean"), JsonUtils.getFloat(json, "deviation"));
     }
 
-    public static void writeToBuf(GuassianValue value, ByteBuf buf) {
+    public static void writeToBuf(GaussianValue value, ByteBuf buf) {
         buf.writeFloat(value.mean);
         buf.writeFloat(value.deviation);
     }
 
-    public static GuassianValue readFromBuf(ByteBuf buf) {
-        return new GuassianValue(buf.readFloat(), buf.readFloat());
+    public static GaussianValue readFromBuf(ByteBuf buf) {
+        return new GaussianValue(buf.readFloat(), buf.readFloat());
     }
 }

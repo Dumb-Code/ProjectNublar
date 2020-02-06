@@ -4,14 +4,17 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
-import net.dumbcode.dumblibrary.server.ecs.objects.FeedingDiet;
+import net.dumbcode.projectnublar.server.animation.AnimationHandler;
+import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.utils.GuassianValue;
+import net.dumbcode.projectnublar.server.utils.GaussianValue;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -44,13 +47,20 @@ public class Dilophosaurus extends Dinosaur {
     @Override
     public void attachDefaultComponents() {
 
-        this.addComponent(EntityComponentTypes.METABOLISM)
+        this.addComponent(ComponentHandler.METABOLISM)
                 .setDistanceSmellFood(30)
                 .setDiet(new FeedingDiet()
-                        .add(new ItemStack(Items.APPLE))
+                    .add(500, 20, new ItemStack(Items.APPLE))
+                    .add(500, 20, Blocks.SPONGE)
+                    .add(500, 20, EntityArrow.class)
                 )
-                .setMaxFood(7500)
-                .setMaxWater(6000);
+                .setMaxFood(18000)
+                .setMaxWater(18000)
+
+                .setHydrateAmountPerTick(500)
+
+                .setFoodTicks(32)
+                .setWaterTicks(18);
 
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
             .addCubesForAge(ADULT_AGE,
@@ -62,6 +72,7 @@ public class Dilophosaurus extends Dinosaur {
                 "legUpperLeft", "legMiddleLeft", "legLowerLeft"
             );
 
+        this.addComponent(ComponentHandler.MOOD);
         this.addComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(ComponentHandler.ITEM_DROPS)
@@ -109,18 +120,37 @@ public class Dilophosaurus extends Dinosaur {
             .staticLayer("nostrils", 5F)
             .staticLayer("teeth", 5F);
 
-        this.addComponent(EntityComponentTypes.BLINKING)
+        this.addComponent(EntityComponentTypes.EYES_CLOSED)
             .setEyesOnTexture("eyes")
-            .setEyesOffTexture("eyes_closed")
+            .setEyesOffTexture("eyes_closed");
+
+        this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(25)
             .setTickTimeClose(5);
 
-        this.addComponent(EntityComponentTypes.BREEDING);
+        this.addComponent(EntityComponentTypes.BREEDING)
+            .setMinTicksBetweenBreeding(240000); //10 Minecraft days
+
         this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING)
             .addEggType(EnumDinosaurEggTypes.NORMAL.getType())
-            .setEggModifier(new GuassianValue(1F, 0.1F))
-            .setEggAmount(new GuassianValue(7F, 1F))
-            .setTicksPregnancy(new GuassianValue(192000, 12000)) //8 Minecraft days, give or take half a day
-            .setTicksEggHatch(new GuassianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
+            .setEggModifier(new GaussianValue(1F, 0.1F))
+            .setEggAmount(new GaussianValue(7F, 1F))
+            .setTicksPregnancy(new GaussianValue(192000, 12000)) //8 Minecraft days, give or take half a day
+            .setTicksEggHatch(new GaussianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
+
+        this.addComponent(EntityComponentTypes.SLEEPING)
+            .setSleepingAnimation(new ResourceLocation(ProjectNublar.MODID, "resting"))
+            .setTirednessChanceConstant(10000) //10 minecraft hours
+            .setTirednessLossPerTickSleeping(2.5F);
+
+        this.addComponent(EntityComponentTypes.LIGHT_AFFECT_SLEEPING)
+            .setSkylightLevelStart(7)
+            .setBlocklightLevelStart(4);
+
+        this.addComponent(ComponentHandler.SLEEPING_TRACKING_INFO);
+
+
+        this.addComponent(ComponentHandler.TRACKING_DATA);
+        this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
     }
 }

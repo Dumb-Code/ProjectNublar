@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -29,6 +30,13 @@ public class SimpleBlockEntity extends TileEntity {
     @Override
     public void handleUpdateTag(NBTTagCompound tag) {
         this.readFromNBT(tag);
+    }
+
+    public void syncToClient() {
+        if(!this.world.isRemote) {
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
     }
 
     @Override

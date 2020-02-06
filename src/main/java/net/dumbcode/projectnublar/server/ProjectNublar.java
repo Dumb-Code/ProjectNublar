@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.server.ecs.EntityManager;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
@@ -14,10 +15,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
-import net.dumbcode.projectnublar.server.entity.system.impl.AgeSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.DinosaurEggLayingSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.MoodSystem;
-import net.dumbcode.projectnublar.server.entity.system.impl.MultipartSystem;
+import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -26,6 +24,7 @@ import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
 import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
+import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
@@ -74,6 +73,8 @@ public class ProjectNublar {
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;
 
+    public static IForgeRegistry<TabletModuleType<?>> TABLET_MODULES_REGISTRY;
+
     private static Logger logger;
 
     @Mod.Instance(MODID)
@@ -105,6 +106,7 @@ public class ProjectNublar {
     public void init(FMLInitializationEvent event) {
 
         DataSerializerHandler.register();
+        EnumWeatherIcons.register();
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();
@@ -127,6 +129,7 @@ public class ProjectNublar {
         GameRegistry.registerTileEntity(BlockEntityElectricFencePole.class, new ResourceLocation(MODID, "electric_fence_pole"));
         GameRegistry.registerTileEntity(BlockEntityElectricFence.class, new ResourceLocation(MODID, "electric_fence"));
         GameRegistry.registerTileEntity(BlockCreativePowerSource.TileEntityCreativePowerSource.class, new ResourceLocation(MODID, "creative_power"));
+        GameRegistry.registerTileEntity(TrackingBeaconBlockEntity.class, new ResourceLocation(MODID, "tracking_beacon"));
 
         for (Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();
@@ -174,6 +177,11 @@ public class ProjectNublar {
                 .setType(Plant.class)
                 .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
                 .create();
+
+        TABLET_MODULES_REGISTRY = new RegistryBuilder<TabletModuleType<?>>()
+                .setType(TabletModuleType.getWildcardType())
+                .setName(new ResourceLocation(MODID, "module_type"))
+                .create();
     }
 
     @SubscribeEvent
@@ -181,6 +189,8 @@ public class ProjectNublar {
         event.registerSystem(AgeSystem.INSTANCE);
         event.registerSystem(MultipartSystem.INSTANCE);
         event.registerSystem(DinosaurEggLayingSystem.INSTANCE);
+        event.registerSystem(TrackingSystem.INSTANCE);
+        event.registerSystem(MetabolismSystem.INSTANCE);
         event.registerSystem(MoodSystem.INSTANCE);
     }
 
@@ -237,5 +247,16 @@ public class ProjectNublar {
         NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
         NETWORK.registerMessage(new S20RegenCache.Handler(), S20RegenCache.class, 20, Side.CLIENT);
         NETWORK.registerMessage(new S21SpawnParticle.Handler(), S21SpawnParticle.class, 21, Side.CLIENT);
+        NETWORK.registerMessage(new S22StartTrackingTabletHandshake.Handler(), S22StartTrackingTabletHandshake.class, 22, Side.CLIENT);
+        NETWORK.registerMessage(new C23ConfirmTrackingTablet.Handler(), C23ConfirmTrackingTablet.class, 23, Side.SERVER);
+        NETWORK.registerMessage(new S24TrackingTabletUpdateChunk.Handler(), S24TrackingTabletUpdateChunk.class, 24, Side.CLIENT);
+        NETWORK.registerMessage(new C25StopTrackingTablet.Handler(), C25StopTrackingTablet.class, 25, Side.SERVER);
+        NETWORK.registerMessage(new S26OpenTablet.Handler(), S26OpenTablet.class, 26, Side.CLIENT);
+        NETWORK.registerMessage(new C27InstallModule.Handler(), C27InstallModule.class, 27, Side.SERVER);
+        NETWORK.registerMessage(new C28ModuleClicked.Handler(), C28ModuleClicked.class, 28, Side.SERVER);
+        NETWORK.registerMessage(new S29OpenTabletModule.Handler(), S29OpenTabletModule.class, 29, Side.CLIENT);
+        NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
+        NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
+        NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
     }
 }
