@@ -7,6 +7,8 @@ import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
@@ -39,7 +41,7 @@ public class TrackingSavedData extends WorldSavedData {
     }
 
     public void removeEntry(UUID uuid) {
-        this.entries.remove(new DataEntry(uuid, BlockPos.ORIGIN));
+        this.entries.remove(new DataEntry(uuid, Vec3d.ZERO));
         this.markDirty();
     }
 
@@ -64,19 +66,22 @@ public class TrackingSavedData extends WorldSavedData {
     public static class DataEntry {
         private final UUID uuid;
         @EqualsAndHashCode.Exclude
-        private final BlockPos position;
+        private final Vec3d position;
         @EqualsAndHashCode.Exclude
         private final List<TrackingDataInformation> information = new ArrayList<>();
 
         public static NBTTagCompound serialize(DataEntry info) {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setUniqueId("uuid", info.uuid);
+            compound.setDouble("position_x", info.position.x);
+            compound.setDouble("position_y", info.position.y);
+            compound.setDouble("position_z", info.position.z);
             compound.setTag("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new NBTTagCompound(), d)).collect(IOCollectors.toNBTTagList()));
             return compound;
         }
 
         public static DataEntry deserialize(NBTTagCompound nbt) {
-            DataEntry info = new DataEntry(nbt.getUniqueId("uuid"), BlockPos.fromLong(nbt.getLong("position")));
+            DataEntry info = new DataEntry(nbt.getUniqueId("uuid"), new Vec3d(nbt.getDouble("position_x"), nbt.getDouble("position_y"), nbt.getDouble("position_z")));
             StreamUtils.stream(nbt.getTagList("infos", Constants.NBT.TAG_COMPOUND)).map(base -> TrackingDataInformation.deserializeNBT((NBTTagCompound) base)).forEach(info.information::add);
             return info;
         }
@@ -85,14 +90,16 @@ public class TrackingSavedData extends WorldSavedData {
             buf.writeLong(info.uuid.getLeastSignificantBits());
             buf.writeLong(info.uuid.getMostSignificantBits());
 
-            buf.writeLong(info.position.toLong());
+            buf.writeDouble(info.position.x);
+            buf.writeDouble(info.position.y);
+            buf.writeDouble(info.position.z);
 
             buf.writeShort(info.information.size());
             info.information.forEach(d -> TrackingDataInformation.serializeBuf(buf, d));
         }
 
         public static DataEntry deserailize(ByteBuf buf) {
-            DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()), BlockPos.fromLong(buf.readLong()));
+            DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()),new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()));
             IntStream.range(0, buf.readShort()).mapToObj(i -> TrackingDataInformation.deserializeBuf(buf)).forEach(info.information::add);
             return info;
         }

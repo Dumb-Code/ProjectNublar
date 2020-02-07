@@ -162,8 +162,8 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     private Vec2f getPoint(TrackingSavedData.DataEntry entry) {
-        float x = (entry.getPosition().getX() - this.startX) / (float) this.textureWidth * this.xSize;
-        float y = (entry.getPosition().getZ() - this.startZ) / (float) this.textureHeight * this.xSize;
+        float x = (float) ((entry.getPosition().x - this.startX) / this.textureWidth * this.xSize);
+        float y = (float) ((entry.getPosition().z - this.startZ) / this.textureHeight * this.xSize);
 
         return this.getTransformedPoint(x, y, this.transformation);
     }

@@ -65,7 +65,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
 
         this.drawGradientRect(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16, -1072689136, -804253680);
 
-        long time = this.mc.world.getWorldTime() % 24000;
+        long time = (this.mc.world.getWorldTime() + 6000) % 24000;
         this.mc.fontRenderer.drawString(this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
 
         WeatherIcon icon = WeatherIcon.guess(this.mc.world, this.mc.player.getPosition());

@@ -84,7 +84,7 @@ public class TrackingTabletIterator {
         if(this.tickCounter++ % 5 == 0) {
             ProjectNublar.NETWORK.sendTo(new S32SetTrackingDataList(
                 TrackingSavedData.getData(event.world).getEntries().stream()
-                    .filter(entry -> entry.getPosition().distanceSq(this.center) <= this.radius*this.radius)
+                    .filter(entry -> this.center.distanceSqToCenter(entry.getPosition().x, 0, entry.getPosition().z) <= this.radius*this.radius)
                     .collect(Collectors.toList())
             ), this.player);
         }

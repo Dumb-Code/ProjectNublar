@@ -44,7 +44,7 @@ public enum TrackingSystem implements EntitySystem {
     @Override
     public void update(World world) {
         for (int i = 0; i < this.entities.length; i++) {
-            TrackingSavedData.DataEntry entry = new TrackingSavedData.DataEntry(this.entities[i].getUniqueID(), this.entities[i].getPosition());
+            TrackingSavedData.DataEntry entry = new TrackingSavedData.DataEntry(this.entities[i].getUniqueID(), this.entities[i].getPositionVector());
             this.components[i].getInfoSuppliers().stream().map(Supplier::get).filter(Objects::nonNull).forEach(entry.getInformation()::add);
             TrackingSavedData.getData(world).setEntry(entry);
         }

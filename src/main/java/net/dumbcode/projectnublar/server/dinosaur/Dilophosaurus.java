@@ -140,8 +140,8 @@ public class Dilophosaurus extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.SLEEPING)
             .setSleepingAnimation(new ResourceLocation(ProjectNublar.MODID, "resting"))
-            .setTirednessChanceConstant(10000) //10 minecraft hours
-            .setTirednessLossPerTickSleeping(2.5F);
+            .setTirednessChanceConstant(7500) //7.5 minecraft hours
+            .setTirednessLossPerTickSleeping(1F);
 
         this.addComponent(EntityComponentTypes.LIGHT_AFFECT_SLEEPING)
             .setSkylightLevelStart(7)
