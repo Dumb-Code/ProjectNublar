@@ -27,8 +27,7 @@ import javax.vecmath.Point3d;
 import java.util.Objects;
 import java.util.function.Function;
 
-public enum MultipartSystem implements EntitySystem {
-    INSTANCE;
+public class MultipartSystem implements EntitySystem {
 
     private Entity[] entities = new Entity[0];
     private AnimationComponent[] animations = new AnimationComponent[0];

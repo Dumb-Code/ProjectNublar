@@ -9,8 +9,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
-public enum MoodSystem implements EntitySystem {
-    INSTANCE;
+public class MoodSystem implements EntitySystem {
 
     private Entity[] entities = new Entity[0];
     private MoodComponent[] components = new MoodComponent[0];

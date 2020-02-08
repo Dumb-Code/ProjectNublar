@@ -186,12 +186,12 @@ public class ProjectNublar {
 
     @SubscribeEvent
     public static void register(RegisterSystemsEvent event) {
-        event.registerSystem(AgeSystem.INSTANCE);
-        event.registerSystem(MultipartSystem.INSTANCE);
-        event.registerSystem(DinosaurEggLayingSystem.INSTANCE);
-        event.registerSystem(TrackingSystem.INSTANCE);
-        event.registerSystem(MetabolismSystem.INSTANCE);
-        event.registerSystem(MoodSystem.INSTANCE);
+        event.registerSystem(new AgeSystem());
+        event.registerSystem(new MultipartSystem());
+        event.registerSystem(new DinosaurEggLayingSystem());
+        event.registerSystem(new TrackingSystem());
+        event.registerSystem(new MetabolismSystem());
+        event.registerSystem(new MoodSystem());
     }
 
     @EventHandler

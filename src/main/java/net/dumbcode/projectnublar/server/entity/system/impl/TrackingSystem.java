@@ -22,8 +22,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public enum TrackingSystem implements EntitySystem {
-    INSTANCE;
+public class TrackingSystem implements EntitySystem {
 
     private Entity[] entities = new Entity[0];
     private TrackingComponent[] components = new TrackingComponent[0];

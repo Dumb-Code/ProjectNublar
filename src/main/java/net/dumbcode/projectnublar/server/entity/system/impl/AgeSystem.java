@@ -21,8 +21,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Iterator;
 
-public enum AgeSystem implements EntitySystem {
-    INSTANCE;
+public class AgeSystem implements EntitySystem {
+
     private AgeComponent[] ages = new AgeComponent[0];
     private Entity[] entities = new Entity[0];
 

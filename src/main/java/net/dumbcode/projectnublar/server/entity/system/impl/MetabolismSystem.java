@@ -13,8 +13,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public enum MetabolismSystem implements EntitySystem {
-    INSTANCE;
+public class MetabolismSystem implements EntitySystem {
+
     private MetabolismComponent[] metabolism = new MetabolismComponent[0];
     private Entity[] entities = new Entity[0];
 

@@ -13,8 +13,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurEggLaying
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
-public enum DinosaurEggLayingSystem implements EntitySystem {
-    INSTANCE;
+public class DinosaurEggLayingSystem implements EntitySystem {
 
     private Entity[] entities = new Entity[0];
     private DinosaurEggLayingComponent[] eggLayingComponents = new DinosaurEggLayingComponent[0];
