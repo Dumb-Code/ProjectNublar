@@ -116,25 +116,17 @@ public class StructureNetwork {
         }
         generateEntry(instance, random, placedEntries, baseoffX, baseoffZ, generations, decision);
         for (BuilderNode.Entry<Structure> child : children) {
-            for (int tries = 0; tries < 25; tries++) {
-                int offx = instance.getXSize() * 3/4;
-                int offz = instance.getZSize() * 3/4;
+            BlockPos attemptSize = child.getElement().attemptSize();
 
-                BlockPos attemptSize = child.getElement().attemptSize();
+            double startOffX = (instance.getXSize() + (attemptSize != null ? attemptSize.getX() : 0)) * 3F/4F;
+            double startOffZ = (instance.getZSize() + (attemptSize != null ? attemptSize.getZ() : 0)) * 3F/4F;
 
-                if(attemptSize != null) {
-                    offx += attemptSize.getX() * 3/4;
-                    offz += attemptSize.getZ() * 3/4;
-                } else {
-                    offx *= 2;
-                    offz *= 2;
-                }
+            for (int tries = 0; tries < (attemptSize == null ? 25: 50); tries++) {
+                double theta = 2F * Math.PI * random.nextDouble();
 
-                offx *= random.nextGaussian() * (tries + 1)/15D;
-                offz *= random.nextGaussian() * (tries + 1)/15D;
+                int offx = (int) (Math.sin(theta) * (startOffX + tries / 2D) + baseoffX);
+                int offz = (int) (Math.cos(theta) * (startOffZ + tries / 2D) + baseoffZ);
 
-                offx += baseoffX;
-                offz += baseoffZ;
 
                 StructureInstance childInstance = this.instantiate(world, pos.add(offx, 0, offz), random, child);
 
