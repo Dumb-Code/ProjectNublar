@@ -31,7 +31,6 @@ public class ComponentHandler {
     public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
     public static final EntityComponentType<TrackingComponent, ?> TRACKING_DATA = InjectedUtils.injected();
     public static final EntityComponentType<BasicEntityInformationComponent, ?> BASIC_ENTITY_INFORMATION = InjectedUtils.injected();
-    public static final EntityComponentType<BasicEntityInformationComponent, ?> SLEEPING_TRACKING_INFO = InjectedUtils.injected();
 
     public static final EntityComponentType<MoodComponent, ?> MOOD = InjectedUtils.injected();
     public static final EntityComponentType<AttackFenceComponent, ?> ATTACK_FENCE_AI = InjectedUtils.injected();
@@ -100,10 +99,6 @@ public class ComponentHandler {
             SimpleComponentType.builder(BasicEntityInformationComponent.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "basic_entity_information"))
                 .withConstructor(BasicEntityInformationComponent::new)
-                .build(),
-            SimpleComponentType.builder(SleepTrackingComponent.class)
-                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "sleeping_tracking_info"))
-                .withConstructor(SleepTrackingComponent::new)
                 .build()
 
         );

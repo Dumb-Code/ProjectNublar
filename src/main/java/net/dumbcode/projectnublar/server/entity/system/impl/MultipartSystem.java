@@ -49,6 +49,10 @@ public class MultipartSystem implements EntitySystem {
     }
 
     private void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
+        if(entity.ticksExisted % 3 != 0) {
+            return;
+        }
+
         AnimationLayer layer = animation.getAnimationLayer(entity);
         if(layer == null) {
             return;

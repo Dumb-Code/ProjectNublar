@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 
@@ -80,7 +81,7 @@ public class MoodComponent extends EntityComponent implements FinalizableCompone
             this.negativeReasons.clear();
 
             for (MoodReasonEntry entry : this.entries) {
-                float amount = entry.amountSupplier.get() * entry.modifier;
+                float amount = entry.modifier.apply(entry.amountSupplier.get());
                 this.number += amount;
                 if(amount != 0) {
                     (amount < 0 ? this.negativeReasons : this.positiveReasons).add(new IndexedObject<>(entry.reason.getTranslationKey(), Math.abs(amount)));
@@ -108,7 +109,7 @@ public class MoodComponent extends EntityComponent implements FinalizableCompone
             }
         }
 
-        private void add(MoodReason reason, Supplier<Float> amountSupplier, float modifier, BooleanSupplier isDirty) {
+        private void add(MoodReason reason, Supplier<Float> amountSupplier, UnaryOperator<Float> modifier, BooleanSupplier isDirty) {
             this.entries.add(new MoodReasonEntry(reason, amountSupplier, modifier, isDirty));
         }
     }
@@ -117,7 +118,7 @@ public class MoodComponent extends EntityComponent implements FinalizableCompone
     private static class MoodReasonEntry {
         private final MoodReason reason;
         private final Supplier<Float> amountSupplier;
-        private final float modifier;
+        private final UnaryOperator<Float> modifier;
         private final BooleanSupplier isDirty;
     }
 }

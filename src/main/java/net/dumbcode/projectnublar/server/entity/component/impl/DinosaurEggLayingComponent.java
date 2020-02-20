@@ -22,7 +22,7 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.PregnancyInformation;
-import net.dumbcode.projectnublar.server.utils.GaussianValue;
+import net.dumbcode.dumblibrary.server.utils.GaussianValue;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
 import net.minecraftforge.common.util.Constants;

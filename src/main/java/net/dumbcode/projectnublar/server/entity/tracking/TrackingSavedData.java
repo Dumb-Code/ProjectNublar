@@ -82,7 +82,12 @@ public class TrackingSavedData extends WorldSavedData {
 
         public static DataEntry deserialize(NBTTagCompound nbt) {
             DataEntry info = new DataEntry(nbt.getUniqueId("uuid"), new Vec3d(nbt.getDouble("position_x"), nbt.getDouble("position_y"), nbt.getDouble("position_z")));
-            StreamUtils.stream(nbt.getTagList("infos", Constants.NBT.TAG_COMPOUND)).map(base -> TrackingDataInformation.deserializeNBT((NBTTagCompound) base)).forEach(info.information::add);
+            StreamUtils.stream(nbt.getTagList("infos", Constants.NBT.TAG_COMPOUND))
+                .map(base -> TrackingDataInformation.deserializeNBT((NBTTagCompound) base))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(info.information::add);
+
             return info;
         }
 
@@ -100,7 +105,11 @@ public class TrackingSavedData extends WorldSavedData {
 
         public static DataEntry deserailize(ByteBuf buf) {
             DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()),new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()));
-            IntStream.range(0, buf.readShort()).mapToObj(i -> TrackingDataInformation.deserializeBuf(buf)).forEach(info.information::add);
+            IntStream.range(0, buf.readShort())
+                .mapToObj(i -> TrackingDataInformation.deserializeBuf(buf))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(info.information::add);
             return info;
         }
 

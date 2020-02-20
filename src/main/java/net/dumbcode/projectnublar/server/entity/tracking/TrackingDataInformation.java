@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -46,31 +47,29 @@ public abstract class TrackingDataInformation {
         REGISTERED_MAP.put(typeName, new Entry<>(bufDeserailizer, bufSerializer, nbtDeserailizer, nbtSerailizer));
     }
 
-    private static Entry<TrackingDataInformation> getEntry(String name) {
-        @SuppressWarnings("unchecked")
-        Entry<TrackingDataInformation> entry = REGISTERED_MAP.get(name);
-        if(entry == null) {
-            throw new NullPointerException("Could not find type with name " + name);
-        }
-        return entry;
+    @SuppressWarnings("unchecked")
+    private static Optional<Entry<TrackingDataInformation>> getEntry(String name) {
+        return Optional.ofNullable(REGISTERED_MAP.get(name));
     }
 
-    public static TrackingDataInformation deserializeBuf(ByteBuf buf) {
-        return getEntry(ByteBufUtils.readUTF8String(buf)).bufDeserailizer.apply(buf);
+    public static Optional<TrackingDataInformation> deserializeBuf(ByteBuf buf) {
+        return getEntry(ByteBufUtils.readUTF8String(buf)).map(c -> c.getBufDeserailizer().apply(buf));
     }
 
     public static void serializeBuf(ByteBuf buf, TrackingDataInformation info) {
         ByteBufUtils.writeUTF8String(buf, info.typeName);
-        getEntry(info.typeName).bufSerializer.accept(buf, info);
+        getEntry(info.typeName).ifPresent(c -> c.getBufSerializer().accept(buf, info));
     }
 
-    public static TrackingDataInformation deserializeNBT(NBTTagCompound nbt) {
-        return getEntry(nbt.getString("key")).nbtDeserailizer.apply(nbt);
+    public static Optional<TrackingDataInformation> deserializeNBT(NBTTagCompound nbt) {
+        return getEntry(nbt.getString("key")).map(c -> c.getNbtDeserailizer().apply(nbt));
     }
 
     public static NBTTagCompound serializeNBT(NBTTagCompound nbt, TrackingDataInformation info) {
-        nbt.setString("key", info.typeName);
-        getEntry(info.typeName).nbtSerailizer.accept(nbt, info);
+        getEntry(info.typeName).ifPresent(c -> {
+            nbt.setString("key", info.typeName);
+            c.getNbtSerailizer().accept(nbt, info);
+        });
         return nbt;
     }
 
@@ -88,6 +87,5 @@ public abstract class TrackingDataInformation {
         registerTrackingType(PregnancyInformation.KEY, PregnancyInformation::decodeBuf, PregnancyInformation::encodeBuf, PregnancyInformation::decodeNBT, PregnancyInformation::encodeNBT);
         registerTrackingType(MoodInformation.KEY, MoodInformation::decodeBuf, MoodInformation::encodeBuf, MoodInformation::decodeNBT, MoodInformation::encodeNBT);
         registerTrackingType(MetabolismInformation.KEY, MetabolismInformation::decodeBuf, MetabolismInformation::encodeBuf, MetabolismInformation::decodeNBT, MetabolismInformation::encodeNBT);
-        registerTrackingType(SleepInformation.KEY, SleepInformation::decodeBuf, SleepInformation::encodeBuf, SleepInformation::decodeNBT, SleepInformation::encodeNBT);
     }
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
-import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
@@ -12,7 +11,7 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
-import net.dumbcode.projectnublar.server.utils.GaussianValue;
+import net.dumbcode.dumblibrary.server.utils.GaussianValue;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -140,14 +139,8 @@ public class Dilophosaurus extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.SLEEPING)
             .setSleepingAnimation(new ResourceLocation(ProjectNublar.MODID, "resting"))
-            .setTirednessChanceConstant(7500) //7.5 minecraft hours
-            .setTirednessLossPerTickSleeping(1F);
-
-        this.addComponent(EntityComponentTypes.LIGHT_AFFECT_SLEEPING)
-            .setSkylightLevelStart(7)
-            .setBlocklightLevelStart(4);
-
-        this.addComponent(ComponentHandler.SLEEPING_TRACKING_INFO);
+            .setWakeupTime(1000)
+            .setSleepTime(13000);
 
 
         this.addComponent(ComponentHandler.TRACKING_DATA);

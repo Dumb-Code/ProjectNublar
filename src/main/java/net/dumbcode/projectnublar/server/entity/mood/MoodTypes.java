@@ -23,8 +23,12 @@ public class MoodTypes {
 
     public static final MoodType HAPPY = MoodType.builder()
         .translationKey("projectnublar.mood.happy")
-        .addFieldModifierCallback(EntityComponentTypes.SLEEPING, SleepingComponent::getTirednessChanceConstant, amount ->
-            new ModifiableFieldModifier(UUID.fromString("d7ad52a0-4421-4b32-85d4-b1201d4c012d"), ModOp.MULTIPLY_BASE_THEN_ADD, -amount / 8F)
+        .build();
+
+    public static final MoodType AWAKE = MoodType.builder()
+        .translationKey("projectnublar.mood.awake")
+        .addFieldModifierCallback(EntityComponentTypes.SLEEPING, SleepingComponent::getSleepTime, amount ->
+            new ModifiableFieldModifier(UUID.fromString("d7ad52a0-4421-4b32-85d4-b1201d4c012d"), ModOp.MULTIPLY_BASE_THEN_ADD, amount / 8D)
         )
         .build();
 
