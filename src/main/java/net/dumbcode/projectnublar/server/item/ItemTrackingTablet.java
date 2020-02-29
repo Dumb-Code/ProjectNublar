@@ -16,7 +16,6 @@ public class ItemTrackingTablet extends Item {
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         if(!worldIn.isRemote) {
             ProjectNublar.NETWORK.sendTo(new S26OpenTablet(handIn), (EntityPlayerMP) playerIn);
-//            new TrackingTabletIterator((EntityPlayerMP) playerIn, playerIn.getPosition(), 150);
         }
         return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
     }

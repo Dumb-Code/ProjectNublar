@@ -25,6 +25,7 @@ import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
 import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
@@ -107,6 +108,7 @@ public class ProjectNublar {
 
         DataSerializerHandler.register();
         EnumWeatherIcons.register();
+        TabletBackground.registerDefaults();
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();
@@ -258,5 +260,6 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
         NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
         NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
+        NETWORK.registerMessage(new C33SetTabletBackground.Handler(), C33SetTabletBackground.class, 33, Side.SERVER);
     }
 }

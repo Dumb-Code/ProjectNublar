@@ -1,0 +1,7 @@
+{
+  "vertex": "projectnublar:colorwheel",
+  "fragment": "projectnublar:colorwheel",
+  "uniforms": [
+    { "name": "lightness", "type": "float", "count": 1, "values": [ 1.0 ] }
+  ]
+}

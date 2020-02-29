@@ -34,7 +34,7 @@ public class S26OpenTablet implements IMessage {
 
         @Override
         protected void handleMessage(S26OpenTablet message, MessageContext ctx, World world, EntityPlayer player) {
-            Minecraft.getMinecraft().displayGuiScreen(new TabletHomeGui(player.getHeldItem(message.hand), message.hand));
+            Minecraft.getMinecraft().displayGuiScreen(new TabletHomeGui(message.hand));
         }
     }
 }

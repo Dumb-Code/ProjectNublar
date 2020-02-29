@@ -46,7 +46,7 @@ public class TabletModuleHandler {
                             buf.writeLong(entry.getPos().toLong());
                             ByteBufUtils.writeUTF8String(buf, entry.getName());
                         }
-                    })//new TrackingTabletIterator(player, player.getPosition(), 500).writeData(buf)
+                    })
                     .build().setRegistryName("tracking_tablet"),
 
                 TabletModuleType.builder()

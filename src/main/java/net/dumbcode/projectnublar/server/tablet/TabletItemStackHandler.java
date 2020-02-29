@@ -2,7 +2,10 @@ package net.dumbcode.projectnublar.server.tablet;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.SolidColorBackground;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -17,11 +20,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+@Getter
+@Setter
 public class TabletItemStackHandler implements AutoCloseable {
 
     private final ItemStack stack;
 
-    @Getter
+    private TabletBackground background = new SolidColorBackground();
     private final List<Entry<?>> entryList = new ArrayList<>();
 
     public TabletItemStackHandler(ItemStack stack) {
@@ -32,7 +37,8 @@ public class TabletItemStackHandler implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public void read() {
         this.entryList.clear();
-        for (NBTBase module : this.stack.getOrCreateSubCompound(ProjectNublar.MODID).getTagList("installed_modules", Constants.NBT.TAG_COMPOUND)) {
+        NBTTagCompound nbt = this.stack.getOrCreateSubCompound(ProjectNublar.MODID);
+        for (NBTBase module : nbt.getTagList("installed_modules", Constants.NBT.TAG_COMPOUND)) {
             String identifier = ((NBTTagCompound) module).getString("identifier");
             TabletModuleType<?> value = ProjectNublar.TABLET_MODULES_REGISTRY.getValue(new ResourceLocation(identifier));
             if(value != null) {
@@ -46,19 +52,32 @@ public class TabletItemStackHandler implements AutoCloseable {
             }
         }
 
+        NBTTagCompound backgroundNBT = nbt.getCompoundTag("background");
+        TabletBackground.Entry<?> entry = TabletBackground.REGISTRY.get(backgroundNBT.getString("identifier"));
+        if(entry != null) {
+            this.background = entry.getBackgroundSupplier().get();
+            this.background.readFromNBT(backgroundNBT.getCompoundTag("storage"));
+        }
     }
 
     public void write() {
+        NBTTagCompound nbt = this.stack.getOrCreateSubCompound(ProjectNublar.MODID);
+
         NBTTagList list = new NBTTagList();
         for (Entry entry : this.entryList) {
-            NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setString("identifier", Objects.requireNonNull(entry.type.getRegistryName()).toString());
+            NBTTagCompound entryNBT = new NBTTagCompound();
+            entryNBT.setString("identifier", Objects.requireNonNull(entry.type.getRegistryName()).toString());
             if(entry.getStorage() != null) {
-                nbt.setTag("storage", entry.getStorage().writeToNBT());
+                entryNBT.setTag("storage", entry.getStorage().writeToNBT());
             }
-            list.appendTag(nbt);
+            list.appendTag(entryNBT);
         }
-        this.stack.getOrCreateSubCompound(ProjectNublar.MODID).setTag("installed_modules", list);
+        nbt.setTag("installed_modules", list);
+
+        NBTTagCompound backgroundNBT = new NBTTagCompound();
+        backgroundNBT.setString("identifier", this.background.identifier());
+        backgroundNBT.setTag("storage", this.background.writeToNBT(new NBTTagCompound()));
+        nbt.setTag("background", backgroundNBT);
     }
 
     public <S extends TabletModuleStorage> void addNew(TabletModuleType<S> type) {

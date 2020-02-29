@@ -2,26 +2,36 @@ package net.dumbcode.projectnublar.client.gui.tablet;
 
 import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+
+import java.io.IOException;
 
 //TabInformationBar
 public abstract class BaseTabletScreen extends GuiScreen {
+    protected static final int HOME_ICON_SIZE = 24;
     protected static final int MAX_SCREEN_WIDTH = 250;
     protected static final float SCREEN_RATIO = 16F/9F;
 
     protected static final int PADDING_SIDES = 50;
 
-
     protected int leftStart;
     protected int tabletWidth;
     protected int topStart;
     protected int tabletHeight;
+
+    protected boolean homeButton = true;
+
+    protected final EnumHand hand;
+
+    protected BaseTabletScreen(EnumHand hand) {
+        this.hand = hand;
+    }
 
     @Override
     public void initGui() {
@@ -55,9 +65,39 @@ public abstract class BaseTabletScreen extends GuiScreen {
             GL11.glDisable(GL11.GL_STENCIL_TEST);
         }
 
+        if(this.homeButton) {
+            this.renderHomePage(mouseX, mouseY);
+        }
+
         this.renderNotificationBar();
         RenderUtils.renderBorderExclusive(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 1, 0xFFFF00FF);
+    }
 
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if(this.homeButton) {
+            int mouseRelX = mouseX - (this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2);
+            int mouseRelY = mouseY - (this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5);
+            if(mouseRelX > 0 && mouseRelX < HOME_ICON_SIZE && mouseRelY > 0 && mouseRelY < HOME_ICON_SIZE) {
+                Minecraft.getMinecraft().displayGuiScreen(new TabletHomeGui(this.hand));
+            }
+        }
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    private void renderHomePage(int mouseX, int mouseY) {
+        GlStateManager.enableBlend();
+        mc.getRenderManager().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"));
+        drawModalRectWithCustomSizedTexture(this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2, this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5, 0, 0, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE);
+
+        int left = this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2;
+        int top = this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5;
+
+        int mouseRelX = mouseX - left;
+        int mouseRelY = mouseY - top;
+        if(mouseRelX > 0 && mouseRelX < HOME_ICON_SIZE && mouseRelY > 0 && mouseRelY < HOME_ICON_SIZE) {
+            drawRect(left, top, left + HOME_ICON_SIZE, top + HOME_ICON_SIZE, 0x44000022);
+        }
     }
 
     private void renderNotificationBar() {

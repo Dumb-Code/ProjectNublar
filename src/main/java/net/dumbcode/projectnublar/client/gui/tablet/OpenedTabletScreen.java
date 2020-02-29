@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
 import lombok.Getter;
-import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.EnumHand;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
@@ -11,6 +11,10 @@ public class OpenedTabletScreen extends BaseTabletScreen {
 
     @Getter
     private TabletScreen screen;
+
+    public OpenedTabletScreen(EnumHand hand) {
+        super(hand);
+    }
 
     public void setScreen(TabletScreen screen) {
         this.screen = screen;

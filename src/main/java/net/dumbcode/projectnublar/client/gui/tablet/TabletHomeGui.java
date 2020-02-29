@@ -10,27 +10,32 @@ import net.dumbcode.projectnublar.server.network.C28ModuleClicked;
 import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 
+import javax.vecmath.Point2i;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 
 public class TabletHomeGui extends BaseTabletScreen {
 
+    private static final int GALLARY_ICON_SIZE = 16;
+
     private static final int ICON_ROWS = 2;
     private static final int ICON_COLUMNS = 4;
 
     private static final int ICONS_PER_PAGE = ICON_ROWS * ICON_COLUMNS;
 
-    private static final int ICON_SIZE = 30; //Icons are square
+    private static final int ICON_SIZE = 32; //Icons are square
 
-    private final EnumHand hand;
     private ItemStack currentStack;
+    private TabletBackground background;
 
     private int page;
 
@@ -42,9 +47,13 @@ public class TabletHomeGui extends BaseTabletScreen {
     private GuiDropdownBox<DropdownBoxEntry> dropdownBox;
     private GuiButton installButton;
 
-    public TabletHomeGui(ItemStack stack, EnumHand hand) {
-        this.hand = hand;
-        this.addIcons(stack);
+    private int galleryIconTicks;
+    private Point2i gallaryIcon;
+
+    public TabletHomeGui(EnumHand hand) {
+        super(hand);
+        this.addIcons(Minecraft.getMinecraft().player.getHeldItem(hand));
+        this.homeButton = false;
     }
 
     private void addIcons(ItemStack stack) {
@@ -53,7 +62,9 @@ public class TabletHomeGui extends BaseTabletScreen {
         this.icons.clear();
         try(TabletItemStackHandler handler = new TabletItemStackHandler(stack)) {
             handler.getEntryList().stream().map(EntryIcon::new).forEach(this.icons::add);
+            this.background = handler.getBackground();
         }
+
         this.icons.add(new InstallIcon());
     }
 
@@ -66,7 +77,6 @@ public class TabletHomeGui extends BaseTabletScreen {
             int yIndex = (i / ICON_COLUMNS) % ICON_ROWS;
 
             Icon icon = this.icons.get(i);
-            icon.setXIndex(xIndex).setYIndex(yIndex);
 
             int middleX = (int) (widthSpace * (xIndex + 0.5F));
             icon.setLeft(this.leftStart + middleX - (ICON_SIZE) / 2);
@@ -91,6 +101,8 @@ public class TabletHomeGui extends BaseTabletScreen {
 
         this.initIcons();
 
+        this.gallaryIcon = new Point2i(this.leftStart + this.tabletWidth - GALLARY_ICON_SIZE - 3, this.topStart + 16);
+
         this.installButton = this.addButton(new GuiButton(509, this.width / 2 - 100, this.height - 40, "Add"));
         this.installButton.enabled = false;
         this.installButton.visible = false;
@@ -111,7 +123,14 @@ public class TabletHomeGui extends BaseTabletScreen {
 
     @Override
     public void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
+        this.background.render(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
         this.forAllIcons(icon -> icon.render(icon.isMouseOver(mouseX, mouseY)));
+
+        mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_background_icon.png"));
+        drawModalRectWithCustomSizedTexture(this.gallaryIcon.x, this.gallaryIcon.y, 0, 0, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE);
+        if(mouseX > this.gallaryIcon.x && mouseX < this.gallaryIcon.x + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.y && mouseY < this.gallaryIcon.y + GALLARY_ICON_SIZE) {
+            drawRect(this.gallaryIcon.x, this.gallaryIcon.y, this.gallaryIcon.x + GALLARY_ICON_SIZE, this.gallaryIcon.y + GALLARY_ICON_SIZE, 0xAA000000);
+        }
 
         if(this.openedInstallPopup) {
             this.installButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
@@ -138,7 +157,7 @@ public class TabletHomeGui extends BaseTabletScreen {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+    protected void keyTyped(char typedChar, int keyCode) {
         if (keyCode == 1) {
             if(this.openedInstallPopup) {
                 this.openedInstallPopup = false;
@@ -160,6 +179,9 @@ public class TabletHomeGui extends BaseTabletScreen {
                     icon.onClicked();
                 }
             });
+            if(mouseX > this.gallaryIcon.x && mouseX < this.gallaryIcon.x + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.y && mouseY < this.gallaryIcon.y + GALLARY_ICON_SIZE) {
+                Minecraft.getMinecraft().displayGuiScreen(new BackgroundTabletScreen(this.hand));
+            }
         }
         if(this.openedInstallPopup) {
             this.dropdownBox.mouseClicked(mouseX, mouseY, mouseButton);
@@ -190,23 +212,6 @@ public class TabletHomeGui extends BaseTabletScreen {
         return false;
     }
 
-    private void scanInventory() {
-        //Hash map is used as a set to get unique elements.
-        Map<TabletModuleType<?>, Integer> typeMaps = new HashMap<>();
-        for (int i = 0; i < this.mc.player.inventory.mainInventory.size(); i++) {
-            ItemStack stack = this.mc.player.inventory.getStackInSlot(i);
-            if(stack.getItem() instanceof ModuleItem) {
-                TabletModuleType<?> type = ((ModuleItem) stack.getItem()).getType();
-                if (this.icons.stream().noneMatch(icon -> icon instanceof EntryIcon && ((EntryIcon) icon).entry.getType() == type)) {
-                    typeMaps.put(type, i);
-                }
-            }
-        }
-
-        this.entries.clear();
-        typeMaps.forEach((type, slot) -> this.entries.add(new DropdownBoxEntry(type, slot)));
-    }
-
     @RequiredArgsConstructor
     private class DropdownBoxEntry implements GuiDropdownBox.SelectListEntry {
 
@@ -227,9 +232,6 @@ public class TabletHomeGui extends BaseTabletScreen {
     @Setter
     @Accessors(chain = true)
     private abstract class Icon {
-        private int xIndex;
-        private int yIndex;
-
         protected int left;
         protected int top;
         protected int width;
@@ -239,7 +241,7 @@ public class TabletHomeGui extends BaseTabletScreen {
 
         abstract void onClicked();
 
-        public boolean isMouseOver(int mouseX, int mouseY) {
+        private boolean isMouseOver(int mouseX, int mouseY) {
             return mouseX >= this.left && mouseX - this.left <= this.width && mouseY >= this.top && mouseY - this.top <= this.height;
         }
     }
@@ -251,13 +253,19 @@ public class TabletHomeGui extends BaseTabletScreen {
 
         @Override
         public void render(boolean mouseOver) {
-            drawRect(this.left, this.top, this.left + this.height, this.top + this.height, mouseOver ? 0xFFFF0000 : 0xFF00FF00);
+            ResourceLocation loc = Objects.requireNonNull(this.entry.getType().getRegistryName());
+            if(mouseOver) {
+                drawRect(this.left, this.top, this.left + this.height, this.top + this.height, 0x44000000);
+            }
+            GlStateManager.color(1F, 1F, 1F, 1F);
+            mc.getRenderManager().renderEngine.bindTexture(new ResourceLocation(loc.getNamespace(), "textures/gui/module_icons/" + loc.getPath() + ".png"));
+            drawModalRectWithCustomSizedTexture(this.left, this.top, 0, 0, this.width, this.height, this.width, this.height);
         }
 
         @Override
         public void onClicked() {
             System.out.println(entry.getType().getRegistryName() + ": clicked");
-            mc.displayGuiScreen(new OpenedTabletScreen());
+            mc.displayGuiScreen(new OpenedTabletScreen(hand));
             ProjectNublar.NETWORK.sendToServer(new C28ModuleClicked(this.entry.getType().getRegistryName(), hand));
         }
     }
@@ -273,6 +281,23 @@ public class TabletHomeGui extends BaseTabletScreen {
         public void onClicked() {
             openedInstallPopup = true;
             scanInventory();
+        }
+
+        private void scanInventory() {
+            //Hash map is used as a set to get unique elements.
+            Map<TabletModuleType<?>, Integer> typeMaps = new HashMap<>();
+            for (int i = 0; i < mc.player.inventory.mainInventory.size(); i++) {
+                ItemStack stack = mc.player.inventory.getStackInSlot(i);
+                if(stack.getItem() instanceof ModuleItem) {
+                    TabletModuleType<?> type = ((ModuleItem) stack.getItem()).getType();
+                    if (icons.stream().noneMatch(icon -> icon instanceof EntryIcon && ((EntryIcon) icon).entry.getType() == type)) {
+                        typeMaps.put(type, i);
+                    }
+                }
+            }
+
+            entries.clear();
+            typeMaps.forEach((type, slot) -> entries.add(new DropdownBoxEntry(type, slot)));
         }
     }
 
