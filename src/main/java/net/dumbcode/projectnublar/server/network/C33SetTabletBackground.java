@@ -29,7 +29,7 @@ public class C33SetTabletBackground implements IMessage {
         String name = ByteBufUtils.readUTF8String(buf);
         TabletBackground.Entry<?> entry = TabletBackground.REGISTRY.get(name);
         if(entry != null) {
-            this.background = entry.getBackgroundSupplier().get();
+            this.background = entry.getBackground();
             this.background.readFromBuf(buf);
             this.hand = EnumHand.values()[buf.readByte() % 2];
         } else {

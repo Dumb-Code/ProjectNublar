@@ -55,7 +55,7 @@ public class TabletItemStackHandler implements AutoCloseable {
         NBTTagCompound backgroundNBT = nbt.getCompoundTag("background");
         TabletBackground.Entry<?> entry = TabletBackground.REGISTRY.get(backgroundNBT.getString("identifier"));
         if(entry != null) {
-            this.background = entry.getBackgroundSupplier().get();
+            this.background = entry.getBackground();
             this.background.readFromNBT(backgroundNBT.getCompoundTag("storage"));
         }
     }

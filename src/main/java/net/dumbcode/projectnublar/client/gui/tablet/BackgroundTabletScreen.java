@@ -1,11 +1,13 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
+import lombok.Getter;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.network.C33SetTabletBackground;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.SetupPage;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SetupPage;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 
@@ -19,6 +21,7 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
 
     private int scroll;
 
+    @Getter
     private SetupPage setupPage = null;
 
     protected BackgroundTabletScreen(EnumHand hand) {
@@ -40,7 +43,7 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
             for (String s : TabletBackground.REGISTRY.keySet()) {
                 int yID = entry % ICONS_PER_COLUMN;
                 int xPos = this.leftStart + 25 + entry/ICONS_PER_COLUMN * (ICON_SIZE + ICON_PADDING);
-                int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*ICON_SIZE + Math.max(yID-1,0)* ICON_PADDING;
+                int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
                 Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/background_icons/" + s + ".png"));
                 drawModalRectWithCustomSizedTexture(xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
@@ -67,10 +70,13 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
             for (String s : TabletBackground.REGISTRY.keySet()) {
                 int yID = entry % ICONS_PER_COLUMN;
                 int xPos = this.leftStart + 25 + entry/ICONS_PER_COLUMN * (ICON_SIZE + ICON_PADDING);
-                int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*ICON_SIZE + Math.max(yID-1,0)* ICON_PADDING;
+                int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
                 if(mouseX > xPos && mouseX < xPos + ICON_SIZE && mouseY > yPos && mouseY < yPos + ICON_SIZE) {
-                    this.setupPage = TabletBackground.REGISTRY.get(s).getSetupPage().get();
+                    this.setupPage = TabletBackground.REGISTRY.get(s).getSetupPage();
+                    int startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2 - 5;
+                    int startY = this.topStart+ this.tabletHeight/2 - this.setupPage.getHeight()/2 - 5;
+                    this.setupPage.initPage(startX, startY);
                 }
 
                 entry++;
@@ -97,5 +103,18 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
             this.setupPage.mouseReleased(startX + 5, startY + 5, mouseX - 5, mouseY - 5, state);
         }
         super.mouseReleased(mouseX, mouseY, state);
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (this.setupPage != null) {
+            this.setupPage.keyTyped(typedChar, keyCode);
+        }
+        super.keyTyped(typedChar, keyCode);
+    }
+
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
     }
 }

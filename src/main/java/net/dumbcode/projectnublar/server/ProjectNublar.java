@@ -261,5 +261,8 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
         NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
         NETWORK.registerMessage(new C33SetTabletBackground.Handler(), C33SetTabletBackground.class, 33, Side.SERVER);
+        NETWORK.registerMessage(new C34UploadImage.Handler(), C34UploadImage.class, 34, Side.SERVER);
+        NETWORK.registerMessage(new C35RequestAllIcons.Handler(), C35RequestAllIcons.class, 35, Side.SERVER);
+        NETWORK.registerMessage(new S36SyncBackgroundIcons.Handler(), S36SyncBackgroundIcons.class, 36, Side.CLIENT);
     }
 }

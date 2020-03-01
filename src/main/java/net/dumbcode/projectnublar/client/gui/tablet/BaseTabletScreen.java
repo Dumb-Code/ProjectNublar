@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.client.gui.tablet;
 import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -16,7 +17,7 @@ import java.io.IOException;
 public abstract class BaseTabletScreen extends GuiScreen {
     protected static final int HOME_ICON_SIZE = 24;
     protected static final int MAX_SCREEN_WIDTH = 250;
-    protected static final float SCREEN_RATIO = 16F/9F;
+    protected static final float SCREEN_RATIO = TabletBGImageHandler.SCREEN_RATIO;
 
     protected static final int PADDING_SIDES = 50;
 
