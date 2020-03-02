@@ -2,41 +2,48 @@ package net.dumbcode.projectnublar.client.gui.tablet;
 
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.dumbcode.projectnublar.server.network.C33SetTabletBackground;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SetupPage;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.network.C33SetTabletBackground;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SetupPage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
 
-public class BackgroundTabletScreen extends BaseTabletScreen {
+public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
 
-    private final int ICONS_PER_COLUMN = 3;
-    private final int ICON_SIZE = 32;
+    private final int ICONS_PER_COLUMN = 1;
+    private final int ICON_SIZE = 128;
     private final int ICON_PADDING = 15;
 
     private int scroll;
 
     @Getter
     private SetupPage setupPage = null;
+    private int startX;
+    private int startY;
 
     protected BackgroundTabletScreen(EnumHand hand) {
         super(hand);
     }
 
     @Override
+    public void initGui() {
+        if(this.setupPage != null) {
+            this.setupPage.initPage(this.startX, this.startY);
+        }
+        super.initGui();
+    }
+
+    @Override
     protected void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
         if(this.setupPage != null) {
-            int startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2 - 5;
-            int startY = this.topStart+ this.tabletHeight/2 - this.setupPage.getHeight()/2 - 5;
             drawRect(this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
-            drawRect(startX, startY, startX + this.setupPage.getWidth() + 10, startY + this.setupPage.getHeight() + 10, 0xFF666666);
-            RenderUtils.renderBorder(startX, startY, startX + this.setupPage.getWidth() + 10, startY + this.setupPage.getHeight() + 10, 2, 0xFFAAAAAA);
-            this.setupPage.render(startX + 5, startY + 5, mouseX - 5, mouseY - 5);
+            drawRect(this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
+            RenderUtils.renderBorder(this.startX - 5, this.startY - 5, this.startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 2, 0xFFAAAAAA);
+            this.setupPage.render(this.startX, this.startY, mouseX, mouseY);
         } else {
             int entry = 0;
             int fullPageIconsHeight = (ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING);
@@ -54,12 +61,18 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
     }
 
     @Override
+    public void updateScreen() {
+        if(this.setupPage != null) {
+            this.setupPage.updatePage(this.startX, this.startY);
+        }
+        super.updateScreen();
+    }
+
+    @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if(this.setupPage != null) {
-            int startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2 - 5;
-            int startY = this.topStart+ this.tabletHeight/2 - this.setupPage.getHeight()/2 - 5;
-            if(mouseX > startX && mouseX < startX +this.setupPage.getWidth() + 10 && mouseY > startY && mouseY < startY + this.setupPage.getHeight() + 10) {
-                this.setupPage.mouseClicked(startX + 5, startY + 5, mouseX - 5, mouseY - 5, mouseButton);
+            if(mouseX > this.startX - 5 && mouseX < this.startX + this.setupPage.getWidth() + 5 && mouseY > this.startY - 5 && mouseY < this.startY + this.setupPage.getHeight() + 5) {
+                this.setupPage.mouseClicked(this.startX, this.startY, mouseX, mouseY, mouseButton);
             } else {
                 ProjectNublar.NETWORK.sendToServer(new C33SetTabletBackground(this.hand, this.setupPage.create()));
                 this.setupPage = null;
@@ -74,9 +87,9 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
 
                 if(mouseX > xPos && mouseX < xPos + ICON_SIZE && mouseY > yPos && mouseY < yPos + ICON_SIZE) {
                     this.setupPage = TabletBackground.REGISTRY.get(s).getSetupPage();
-                    int startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2 - 5;
-                    int startY = this.topStart+ this.tabletHeight/2 - this.setupPage.getHeight()/2 - 5;
-                    this.setupPage.initPage(startX, startY);
+                    this.startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2;
+                    this.startY = this.topStart + this.tabletHeight/2 - this.setupPage.getHeight()/2;
+                    this.setupPage.initPage(this.startX, this.startY);
                 }
 
                 entry++;
@@ -88,9 +101,7 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if(this.setupPage != null) {
-            int startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2 - 5;
-            int startY = this.topStart+ this.tabletHeight/2 - this.setupPage.getHeight()/2 - 5;
-            this.setupPage.mouseClickMove(startX + 5, startY + 5, mouseX - 5, mouseY - 5, clickedMouseButton, timeSinceLastClick);
+            this.setupPage.mouseClickMove(this.startX, this.startY, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         }
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
     }
@@ -98,9 +109,7 @@ public class BackgroundTabletScreen extends BaseTabletScreen {
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) {
         if(this.setupPage != null) {
-            int startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2 - 5;
-            int startY = this.topStart+ this.tabletHeight/2 - this.setupPage.getHeight()/2 - 5;
-            this.setupPage.mouseReleased(startX + 5, startY + 5, mouseX - 5, mouseY - 5, state);
+            this.setupPage.mouseReleased(this.startX, this.startY, mouseX, mouseY, state);
         }
         super.mouseReleased(mouseX, mouseY, state);
     }

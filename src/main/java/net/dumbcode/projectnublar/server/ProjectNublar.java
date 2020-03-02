@@ -264,5 +264,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C34UploadImage.Handler(), C34UploadImage.class, 34, Side.SERVER);
         NETWORK.registerMessage(new C35RequestAllIcons.Handler(), C35RequestAllIcons.class, 35, Side.SERVER);
         NETWORK.registerMessage(new S36SyncBackgroundIcons.Handler(), S36SyncBackgroundIcons.class, 36, Side.CLIENT);
+        NETWORK.registerMessage(new C37RequestImageBackground.Handler(), C37RequestImageBackground.class, 37, Side.SERVER);
+        NETWORK.registerMessage(new S38SyncBackgroundImage.Handler(), S38SyncBackgroundImage.class, 38, Side.CLIENT);
     }
 }

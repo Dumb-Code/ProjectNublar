@@ -86,6 +86,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
         super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
+
     private void renderHomePage(int mouseX, int mouseY) {
         GlStateManager.enableBlend();
         mc.getRenderManager().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"));

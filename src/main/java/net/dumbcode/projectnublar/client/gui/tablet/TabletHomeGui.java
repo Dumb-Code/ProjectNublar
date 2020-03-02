@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class TabletHomeGui extends BaseTabletScreen {
+public class TabletHomeGui extends BaseBackgroundTabletScreen {
 
     private static final int GALLARY_ICON_SIZE = 16;
 
@@ -35,7 +35,6 @@ public class TabletHomeGui extends BaseTabletScreen {
     private static final int ICON_SIZE = 32; //Icons are square
 
     private ItemStack currentStack;
-    private TabletBackground background;
 
     private int page;
 
@@ -62,7 +61,7 @@ public class TabletHomeGui extends BaseTabletScreen {
         this.icons.clear();
         try(TabletItemStackHandler handler = new TabletItemStackHandler(stack)) {
             handler.getEntryList().stream().map(EntryIcon::new).forEach(this.icons::add);
-            this.background = handler.getBackground();
+            this.setBackground(handler.getBackground());
         }
 
         this.icons.add(new InstallIcon());
@@ -123,7 +122,7 @@ public class TabletHomeGui extends BaseTabletScreen {
 
     @Override
     public void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
-        this.background.render(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
+        super.drawTabletScreen(mouseX, mouseY, partialTicks);
         this.forAllIcons(icon -> icon.render(icon.isMouseOver(mouseX, mouseY)));
 
         mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_background_icon.png"));
@@ -180,7 +179,9 @@ public class TabletHomeGui extends BaseTabletScreen {
                 }
             });
             if(mouseX > this.gallaryIcon.x && mouseX < this.gallaryIcon.x + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.y && mouseY < this.gallaryIcon.y + GALLARY_ICON_SIZE) {
-                Minecraft.getMinecraft().displayGuiScreen(new BackgroundTabletScreen(this.hand));
+                BackgroundTabletScreen screen = new BackgroundTabletScreen(this.hand);
+                Minecraft.getMinecraft().displayGuiScreen(screen);
+                screen.setBackground(this.getBackground());
             }
         }
         if(this.openedInstallPopup) {

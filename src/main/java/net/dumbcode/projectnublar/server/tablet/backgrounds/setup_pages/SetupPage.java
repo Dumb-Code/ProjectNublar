@@ -12,7 +12,7 @@ public interface SetupPage<T extends TabletBackground> {
     default void initPage(int x, int y) {
     }
 
-    default void update() {
+    default void updatePage(int x, int y) {
     }
 
     default void mouseClicked(int x, int y, int mouseX, int mouseY, int mouseButton) {

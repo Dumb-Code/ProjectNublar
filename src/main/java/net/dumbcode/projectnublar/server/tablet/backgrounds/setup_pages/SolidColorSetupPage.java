@@ -137,7 +137,7 @@ public class SolidColorSetupPage implements SetupPage<SolidColorBackground>, Gui
     }
 
     @Override
-    public void update() {
+    public void updatePage(int x, int y) {
         this.redField.updateCursorCounter();
         this.greenField.updateCursorCounter();
         this.blueField.updateCursorCounter();

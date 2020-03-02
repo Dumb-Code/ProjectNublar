@@ -3,16 +3,14 @@ package net.dumbcode.projectnublar.server.tablet.backgrounds;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.network.C37RequestImageBackground;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
-import org.lwjgl.opengl.GL11;
 
 @Getter
 @Setter
@@ -20,9 +18,22 @@ public class PhotoBackground implements TabletBackground {
 
     public static final String KEY = "photo";
 
+    private String uploaderUUID = "";
     private String photoHash = "";
-    private ResourceLocation texture;
+    private DynamicTexture texture;
     private boolean requested;
+
+    public void setPhoto(String uploaderUUID, String photoHash) {
+        if(!this.uploaderUUID.equals(uploaderUUID) || !this.photoHash.equals(photoHash)) {
+            if(this.texture != null) {
+                this.texture.deleteGlTexture();
+            }
+            this.texture = null;
+            this.requested = false;
+        }
+        this.uploaderUUID = uploaderUUID;
+        this.photoHash = photoHash;
+    }
 
     @Override
     public String identifier() {
@@ -31,33 +42,36 @@ public class PhotoBackground implements TabletBackground {
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        nbt.setString("uploader_uuid", this.uploaderUUID);
         nbt.setString("photo_hash", this.photoHash);
         return nbt;
     }
 
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
-        this.photoHash = nbt.getString("photo_hash");
+        this.setPhoto(nbt.getString("uploader_uuid"), nbt.getString("photo_hash"));
     }
 
     @Override
     public void writeToBuf(ByteBuf buf) {
+        ByteBufUtils.writeUTF8String(buf, this.uploaderUUID);
         ByteBufUtils.writeUTF8String(buf, this.photoHash);
     }
 
     @Override
     public void readFromBuf(ByteBuf buf) {
-        this.photoHash = ByteBufUtils.readUTF8String(buf);
+        this.setPhoto(ByteBufUtils.readUTF8String(buf), ByteBufUtils.readUTF8String(buf));
     }
 
     @Override
     public void render(int x, int y, int width, int height, int mouseX, int mouseY) {
         if(!this.requested) {
-            //Do request ect
+            this.requested = true;
+            ProjectNublar.NETWORK.sendToServer(new C37RequestImageBackground(this.uploaderUUID, this.photoHash));
         }
 
         if(this.texture != null) {
-            Minecraft.getMinecraft().renderEngine.bindTexture(this.texture);
+            GlStateManager.bindTexture(this.texture.getGlTextureId());
             Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, width, height, width, height);
         }
     }
