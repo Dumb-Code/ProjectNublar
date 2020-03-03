@@ -27,5 +27,8 @@ public interface SetupPage<T extends TabletBackground> {
     default void keyTyped(char typedChar, int keyCode) {
     }
 
+    default void handleMouseInput(int x, int y, int mouseX, int mouseY) {
+    }
+
     T create();
 }

@@ -16,16 +16,16 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class S36SyncBackgroundIcons implements IMessage {
+public class S36RequestBackgroundIconHeaders implements IMessage {
 
     private boolean global;
     private List<TabletBGImageHandler.IconEntry> entryList;
 
-    public S36SyncBackgroundIcons() {
+    public S36RequestBackgroundIconHeaders() {
     }
 
 
-    public S36SyncBackgroundIcons(boolean global, List<TabletBGImageHandler.IconEntry> entryList) {
+    public S36RequestBackgroundIconHeaders(boolean global, List<TabletBGImageHandler.IconEntry> entryList) {
         this.global = global;
         this.entryList = entryList;
     }
@@ -34,35 +34,28 @@ public class S36SyncBackgroundIcons implements IMessage {
     public void fromBytes(ByteBuf buf) {
         this.global = buf.readBoolean();
         this.entryList = new ArrayList<>();
-
         short len = buf.readShort();
         for (int i = 0; i < len; i++) {
             String playerUUID = ByteBufUtils.readUTF8String(buf);
             String imageHash = ByteBufUtils.readUTF8String(buf);
-            byte[] image = new byte[buf.readInt()];
-            buf.readBytes(image);
-
-            this.entryList.add(new TabletBGImageHandler.IconEntry(playerUUID, imageHash, image));
+            this.entryList.add(new TabletBGImageHandler.IconEntry(playerUUID, imageHash));
         }
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeBoolean(this.global);
-
         buf.writeShort(this.entryList.size());
         for (TabletBGImageHandler.IconEntry entry : this.entryList) {
             ByteBufUtils.writeUTF8String(buf, entry.getUploaderUUID());
             ByteBufUtils.writeUTF8String(buf, entry.getImageHash());
-            buf.writeInt(entry.getImageData().length);
-            buf.writeBytes(entry.getImageData());
         }
     }
 
-    public static class Handler extends WorldModificationsMessageHandler<S36SyncBackgroundIcons, S36SyncBackgroundIcons> {
+    public static class Handler extends WorldModificationsMessageHandler<S36RequestBackgroundIconHeaders, S36RequestBackgroundIconHeaders> {
 
         @Override
-        protected void handleMessage(S36SyncBackgroundIcons message, MessageContext ctx, World world, EntityPlayer player) {
+        protected void handleMessage(S36RequestBackgroundIconHeaders message, MessageContext ctx, World world, EntityPlayer player) {
             GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if(screen instanceof BackgroundTabletScreen) {
                 SetupPage page = ((BackgroundTabletScreen) screen).getSetupPage();

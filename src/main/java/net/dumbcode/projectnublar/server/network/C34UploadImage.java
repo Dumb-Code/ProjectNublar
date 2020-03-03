@@ -72,7 +72,7 @@ public class C34UploadImage implements IMessage {
             } catch (IOException e) {
                 DumbLibrary.getLogger().error("Unable to sync image from client", e);
             }
-            ProjectNublar.NETWORK.sendTo(new S36SyncBackgroundIcons(message.global, TabletBGImageHandler.getAllIcons(message.global, player)), (EntityPlayerMP) player);
+            ProjectNublar.NETWORK.sendTo(new S36RequestBackgroundIconHeaders(message.global, TabletBGImageHandler.getAllIcons(message.global, player)), (EntityPlayerMP) player);
         }
 
         private static String hash(byte[] convertme) {

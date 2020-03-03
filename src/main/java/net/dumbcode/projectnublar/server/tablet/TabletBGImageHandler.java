@@ -68,18 +68,14 @@ public class TabletBGImageHandler {
         File[] files = folder.listFiles((dir, name) -> name.endsWith("_icon.png"));
         if(files != null) {
             for (File file : files) {
-                try {
-                    list.add(new IconEntry(folder.getName(), file.getName().substring(0, file.getName().length() - "_icon.png".length()), FileUtils.readFileToByteArray(file)));
-                } catch (IOException e) {
-                    DumbLibrary.getLogger().error("Unable to read image at file " + file, e);
-                }
+                list.add(new IconEntry(folder.getName(), file.getName().substring(0, file.getName().length() - "_icon.png".length())));
             }
         }
         return list;
     }
 
-    public Optional<BufferedImage> getFullImage(World world, String uploaderUUID, String imageHash) {
-        File file = new File(world.getSaveHandler().getWorldDirectory(), "tablet_backgrounds/" + uploaderUUID + File.separator + imageHash + ".png");
+    public Optional<BufferedImage> getFullImage(World world, String uploaderUUID, String imageHash, boolean icon) {
+        File file = new File(world.getSaveHandler().getWorldDirectory(), "tablet_backgrounds/" + uploaderUUID + File.separator + imageHash + (icon ? "_icon" : "") + ".png");
         if(uploaderUUID.isEmpty() || imageHash.isEmpty()) {
             return Optional.empty();
         }
@@ -95,6 +91,5 @@ public class TabletBGImageHandler {
     public static class IconEntry {
         private final String uploaderUUID;
         private final String imageHash;
-        private final byte[] imageData;
     }
 }

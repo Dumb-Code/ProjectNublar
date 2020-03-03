@@ -10,37 +10,41 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class C37RequestImageBackground implements IMessage {
+public class C40RequestBackgroundIcon implements IMessage {
 
+    private boolean global;
     private String uploaderUUID;
     private String imageHash;
 
-    public C37RequestImageBackground() {
+    public C40RequestBackgroundIcon() {
     }
 
-    public C37RequestImageBackground(String uploaderUUID, String imageHash) {
+    public C40RequestBackgroundIcon(String uploaderUUID, String imageHash, boolean global) {
         this.uploaderUUID = uploaderUUID;
         this.imageHash = imageHash;
+        this.global = global;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.uploaderUUID = ByteBufUtils.readUTF8String(buf);
         this.imageHash = ByteBufUtils.readUTF8String(buf);
+        this.global = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         ByteBufUtils.writeUTF8String(buf, this.uploaderUUID);
         ByteBufUtils.writeUTF8String(buf, this.imageHash);
+        buf.writeBoolean(this.global);
     }
 
-    public static class Handler extends WorldModificationsMessageHandler<C37RequestImageBackground, C37RequestImageBackground> {
+    public static class Handler extends WorldModificationsMessageHandler<C40RequestBackgroundIcon, C40RequestBackgroundIcon> {
 
         @Override
-        protected void handleMessage(C37RequestImageBackground message, MessageContext ctx, World world, EntityPlayer player) {
-            TabletBGImageHandler.getFullImage(world, message.uploaderUUID, message.imageHash, false).ifPresent(image ->
-                ProjectNublar.NETWORK.sendTo(new S38SyncBackgroundImage(image), (EntityPlayerMP) player)
+        protected void handleMessage(C40RequestBackgroundIcon message, MessageContext ctx, World world, EntityPlayer player) {
+            TabletBGImageHandler.getFullImage(world, message.uploaderUUID, message.imageHash, true).ifPresent(image ->
+                ProjectNublar.NETWORK.sendTo(new S39SyncBackgroundIcon(message.uploaderUUID, message.imageHash, message.global, image), (EntityPlayerMP) player)
             );
         }
     }

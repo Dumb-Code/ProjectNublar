@@ -9,6 +9,7 @@ import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SetupPag
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
 
@@ -104,6 +105,16 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
             this.setupPage.mouseClickMove(this.startX, this.startY, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         }
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+    }
+
+    @Override
+    public void handleMouseInput() throws IOException {
+        if (this.setupPage != null) {
+            int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
+            int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+            this.setupPage.handleMouseInput(this.startX, this.startY, mouseX, mouseY);
+        }
+        super.handleMouseInput();
     }
 
     @Override

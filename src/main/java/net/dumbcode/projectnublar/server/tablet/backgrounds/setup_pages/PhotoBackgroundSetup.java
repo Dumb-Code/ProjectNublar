@@ -4,11 +4,10 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.TextureUtils;
-import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
-import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C34UploadImage;
 import net.dumbcode.projectnublar.server.network.C35RequestAllIcons;
+import net.dumbcode.projectnublar.server.network.C40RequestBackgroundIcon;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.PhotoBackground;
 import net.minecraft.client.Minecraft;
@@ -17,7 +16,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.TextureUtil;
+import org.lwjgl.input.Mouse;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,7 +24,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,6 +42,8 @@ public class PhotoBackgroundSetup implements SetupPage<PhotoBackground> {
 
     private BGIconEntry selectedEntry;
     private boolean userTab = true;
+
+    private int scroll;
 
     public PhotoBackgroundSetup() {
         ProjectNublar.NETWORK.sendToServer(new C35RequestAllIcons(false));
@@ -68,7 +68,9 @@ public class PhotoBackgroundSetup implements SetupPage<PhotoBackground> {
     public void loadEntries(boolean global, List<TabletBGImageHandler.IconEntry> entries) {
         List<BGIconEntry> list = global ? this.globalEntries : this.userEntries;
         for (BGIconEntry entry : list) {
-            entry.getTexture().deleteGlTexture();
+            if(entry.getTexture() !=  null) {
+                entry.getTexture().deleteGlTexture();
+            }
         }
         list.clear();
         entries.stream().map(BGIconEntry::new).forEach(list::add);
@@ -104,10 +106,17 @@ public class PhotoBackgroundSetup implements SetupPage<PhotoBackground> {
 
         List<BGIconEntry> list = this.userTab ? this.userEntries : this.globalEntries;
         for (BGIconEntry entry : list) {
-            GlStateManager.bindTexture(entry.texture.getGlTextureId());
-            Gui.drawModalRectWithCustomSizedTexture(entry.minX, entry.minY, 0, 0, entry.width, entry.height, entry.width, entry.height);
-            if(entry == this.selectedEntry) {
-                Gui.drawRect(entry.minX - 2, entry.minY - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2, 0x8800BAFD);
+            if(entry.minY + entry.height + this.scroll - 5 < y + this.getHeight() && !entry.requested) {
+                entry.requested = true;
+                ProjectNublar.NETWORK.sendToServer(new C40RequestBackgroundIcon(entry.iconEntry.getUploaderUUID(), entry.iconEntry.getImageHash(), !this.userTab));
+            }
+            if(entry.texture != null) {
+                GlStateManager.bindTexture(entry.texture.getGlTextureId());
+                Gui.drawModalRectWithCustomSizedTexture(entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
+                if(entry == this.selectedEntry) {
+                    Gui.drawRect(entry.minX - 2, entry.minY + this.scroll - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2 + this.scroll, 0x8800BAFD);
+                    GlStateManager.color(1F, 1F, 1F);
+                }
             }
         }
     }
@@ -134,16 +143,21 @@ public class PhotoBackgroundSetup implements SetupPage<PhotoBackground> {
         if(this.globalChangeButton.mousePressed(Minecraft.getMinecraft(), mouseX, mouseY)) {
             this.globalChangeButton.displayString = this.userTab ? "Global" : "User";
             this.userTab = !this.userTab;
-            ProjectNublar.NETWORK.sendToServer(new C35RequestAllIcons(this.userTab));
+            ProjectNublar.NETWORK.sendToServer(new C35RequestAllIcons(!this.userTab));
         }
 
         List<BGIconEntry> list = this.userTab ? this.userEntries : this.globalEntries;
         for (BGIconEntry entry : list) {
-            if(mouseX > entry.minX && mouseX < entry.minX + entry.width && mouseY > entry.minY && mouseY < entry.minY + entry.height) {
+            if(mouseX > entry.minX && mouseX < entry.minX + entry.width && mouseY > entry.minY + this.scroll && mouseY < entry.minY + entry.height + this.scroll) {
                 this.selectedEntry = entry;
                 break;
             }
         }
+    }
+
+    @Override
+    public void handleMouseInput(int x, int y, int mouseX, int mouseY) {
+        this.scroll += Math.signum(Mouse.getDWheel()) * 10;
     }
 
     @Override
@@ -199,8 +213,22 @@ public class PhotoBackgroundSetup implements SetupPage<PhotoBackground> {
         return background;
     }
 
+    public void loadIcon(String uploaderUUID, String imageHash, boolean global, BufferedImage image) {
+        List<BGIconEntry> list = global ? this.globalEntries : this.userEntries;
+        for (BGIconEntry entry : list) {
+            if(entry.iconEntry.getUploaderUUID().equals(uploaderUUID) && entry.iconEntry.getImageHash().equals(imageHash)) {
+                if(entry.texture != null) {
+                    entry.texture.deleteGlTexture();
+                }
+                entry.texture = new DynamicTexture(image);
+                break;
+            }
+        }
+
+    }
+
     @Getter
-    public class BGIconEntry {
+    private class BGIconEntry {
 
         private int minX;
         private int minY;
@@ -210,14 +238,10 @@ public class PhotoBackgroundSetup implements SetupPage<PhotoBackground> {
         private final TabletBGImageHandler.IconEntry iconEntry;
         private DynamicTexture texture;
 
-        public BGIconEntry(TabletBGImageHandler.IconEntry iconEntry) {
+        private boolean requested;
+
+        private BGIconEntry(TabletBGImageHandler.IconEntry iconEntry) {
             this.iconEntry = iconEntry;
-            try {
-                BufferedImage image = ImageIO.read(new ByteArrayInputStream(iconEntry.getImageData()));
-                this.texture = new DynamicTexture(image);
-            } catch (IOException e) {
-                DumbLibrary.getLogger().error("Unable to load icon texture", e);
-            }
         }
     }
 }

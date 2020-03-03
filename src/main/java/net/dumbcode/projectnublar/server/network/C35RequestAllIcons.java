@@ -9,8 +9,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-import java.util.List;
-
 public class C35RequestAllIcons implements IMessage {
 
     private boolean global;
@@ -36,7 +34,7 @@ public class C35RequestAllIcons implements IMessage {
 
         @Override
         protected void handleMessage(C35RequestAllIcons message, MessageContext ctx, World world, EntityPlayer player) {
-            ProjectNublar.NETWORK.sendTo(new S36SyncBackgroundIcons(message.global, TabletBGImageHandler.getAllIcons(message.global, player)), (EntityPlayerMP) player);
+            ProjectNublar.NETWORK.sendTo(new S36RequestBackgroundIconHeaders(message.global, TabletBGImageHandler.getAllIcons(message.global, player)), (EntityPlayerMP) player);
         }
     }
 }
