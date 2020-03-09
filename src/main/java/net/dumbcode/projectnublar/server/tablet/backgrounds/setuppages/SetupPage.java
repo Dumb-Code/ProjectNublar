@@ -1,7 +1,6 @@
-package net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages;
+package net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages;
 
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.minecraft.client.gui.GuiButton;
 
 public interface SetupPage<T extends TabletBackground> {
     int getWidth();

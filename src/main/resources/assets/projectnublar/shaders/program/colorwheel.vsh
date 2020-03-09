@@ -1,7 +1,5 @@
 #version 120
 
-attribute vec4 Position;
-
 varying vec2 texCoord;
 
 void main(){

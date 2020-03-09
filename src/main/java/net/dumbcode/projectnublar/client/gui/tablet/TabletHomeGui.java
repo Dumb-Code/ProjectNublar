@@ -179,9 +179,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
                 }
             });
             if(mouseX > this.gallaryIcon.x && mouseX < this.gallaryIcon.x + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.y && mouseY < this.gallaryIcon.y + GALLARY_ICON_SIZE) {
-                BackgroundTabletScreen screen = new BackgroundTabletScreen(this.hand);
-                Minecraft.getMinecraft().displayGuiScreen(screen);
-                screen.setBackground(this.getBackground());
+                Minecraft.getMinecraft().displayGuiScreen(this.transferBackground(new BackgroundTabletScreen(this.hand)));
             }
         }
         if(this.openedInstallPopup) {

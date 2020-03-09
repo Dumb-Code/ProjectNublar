@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C33SetTabletBackground;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SetupPage;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SetupPage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -40,6 +40,7 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
 
     @Override
     protected void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
+        super.drawTabletScreen(mouseX, mouseY, partialTicks);
         if(this.setupPage != null) {
             drawRect(this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
             drawRect(this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
@@ -75,7 +76,9 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
             if(mouseX > this.startX - 5 && mouseX < this.startX + this.setupPage.getWidth() + 5 && mouseY > this.startY - 5 && mouseY < this.startY + this.setupPage.getHeight() + 5) {
                 this.setupPage.mouseClicked(this.startX, this.startY, mouseX, mouseY, mouseButton);
             } else {
-                ProjectNublar.NETWORK.sendToServer(new C33SetTabletBackground(this.hand, this.setupPage.create()));
+                TabletBackground background = this.setupPage.create();
+                this.setBackground(background);
+                ProjectNublar.NETWORK.sendToServer(new C33SetTabletBackground(this.hand, background));
                 this.setupPage = null;
             }
         } else {

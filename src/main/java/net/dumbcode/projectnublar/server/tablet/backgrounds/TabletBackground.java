@@ -2,9 +2,10 @@ package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
 import io.netty.buffer.ByteBuf;
 import lombok.RequiredArgsConstructor;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.PhotoBackgroundSetup;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SetupPage;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.SolidColorSetupPage;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.PhotoBackgroundSetup;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SetupPage;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.ShaderSetupPage;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SolidColorSetupPage;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.HashMap;
@@ -22,11 +23,15 @@ public interface TabletBackground {
 
     void render(int x, int y, int width, int height, int mouseX, int mouseY);
 
+    default void dispose(){
+    }
+
     HashMap<String, Entry<?>> REGISTRY = new HashMap<>();
 
     static void registerDefaults() {
         REGISTRY.put(SolidColorBackground.KEY, new Entry<>(SolidColorBackground::new, SolidColorSetupPage::new));
         REGISTRY.put(PhotoBackground.KEY, new Entry<>(PhotoBackground::new, PhotoBackgroundSetup::new));
+        REGISTRY.put(ShaderBackground.KEY, new Entry<>(ShaderBackground::new, ShaderSetupPage::new));
     }
 
     @RequiredArgsConstructor

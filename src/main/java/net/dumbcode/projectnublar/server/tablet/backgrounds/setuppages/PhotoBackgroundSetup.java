@@ -1,4 +1,4 @@
-package net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages;
+package net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;

@@ -13,6 +13,9 @@ public abstract class BaseBackgroundTabletScreen extends BaseTabletScreen implem
 
     @Override
     public void setBackground(TabletBackground background) {
+        if(this.background != null) {
+            this.background.dispose();
+        }
         this.background = background;
     }
 
@@ -21,8 +24,29 @@ public abstract class BaseBackgroundTabletScreen extends BaseTabletScreen implem
         return this.background;
     }
 
+    protected  <T extends BaseBackgroundTabletScreen> T transferBackground(T screen) {
+        screen.setBackground(this.background);
+        this.background = null; //We don't want to dispose
+        return screen;
+    }
+
+    @Override
+    public void onGuiClosed() {
+        if(this.background != null) {
+            this.background.dispose();
+        }
+        super.onGuiClosed();
+    }
+
+    @Override
+    public void initGui() {
+        super.initGui();
+    }
+
     @Override
     protected void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
-        this.background.render(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
+        if(this.background != null) {
+            this.background.render(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
+        }
     }
 }

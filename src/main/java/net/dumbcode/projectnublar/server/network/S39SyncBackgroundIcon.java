@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import lombok.Cleanup;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.projectnublar.client.gui.tablet.BackgroundTabletScreen;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setup_pages.PhotoBackgroundSetup;
+import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.PhotoBackgroundSetup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
