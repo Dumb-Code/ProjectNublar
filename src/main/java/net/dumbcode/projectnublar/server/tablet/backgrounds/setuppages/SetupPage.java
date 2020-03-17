@@ -8,6 +8,9 @@ public interface SetupPage<T extends TabletBackground> {
 
     void render(int x, int y, int mouseX, int mouseY);
 
+    default void setupFromPage(T page) {
+    }
+
     default void initPage(int x, int y) {
     }
 

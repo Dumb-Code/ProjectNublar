@@ -33,6 +33,12 @@ projectnublar.gui.tracking.metatlism.food=Food:
 projectnublar.gui.tracking.metatlism.water=Water:
 projectnublar.gui.tracking.mood=Mood: %s
 
+projectnublar.gui.shader.size=Size: %s
+projectnublar.gui.shader.fit_to_screen=Fit to screen
+projectnublar.gui.shader.fit_to_gui=Fit to GUI
+projectnublar.gui.shader.fit_to_gui_low_res=Fit to GUI (low)
+projectnublar.gui.shader.fit_to_gui_lowest_res=Fit to GUI (lowest)
+
 
 projectnublar.mood.stressful.positive=Relaxed
 projectnublar.mood.stressful.negative=Stressed

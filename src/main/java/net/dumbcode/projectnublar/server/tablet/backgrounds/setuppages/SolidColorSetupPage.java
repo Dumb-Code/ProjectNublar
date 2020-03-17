@@ -49,6 +49,14 @@ public class SolidColorSetupPage implements SetupPage<SolidColorBackground>, Gui
     }
 
     @Override
+    public void setupFromPage(SolidColorBackground page) {
+        int color = page.getColor();
+        this.redField.setText(this.convertColorToString((color >> 16) & 255));
+        this.greenField.setText(this.convertColorToString((color >> 8) & 255));
+        this.blueField.setText(this.convertColorToString(color & 255));
+    }
+
+    @Override
     public void initPage(int x, int y) {
         int startX = x + WHEEL_DIAMETER + 30;
         this.redField = new GuiTextField(0, MC.fontRenderer, startX + 7, y + 78, 20, 20);

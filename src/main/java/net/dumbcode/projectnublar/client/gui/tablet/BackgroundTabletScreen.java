@@ -90,7 +90,11 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
                 int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
                 if(mouseX > xPos && mouseX < xPos + ICON_SIZE && mouseY > yPos && mouseY < yPos + ICON_SIZE) {
-                    this.setupPage = TabletBackground.REGISTRY.get(s).getSetupPage();
+                    TabletBackground.Entry<?> e = TabletBackground.REGISTRY.get(s);
+                    this.setupPage = e.getSetupPage();
+                    if(e.getBackground().getClass() == this.getBackground().getClass()) {
+                        this.setupPage.setupFromPage(this.getBackground());
+                    }
                     this.startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2;
                     this.startY = this.topStart + this.tabletHeight/2 - this.setupPage.getHeight()/2;
                     this.setupPage.initPage(this.startX, this.startY);
