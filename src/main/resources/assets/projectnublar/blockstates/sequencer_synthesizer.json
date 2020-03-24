@@ -1,0 +1,24 @@
+{
+	"multipart": [
+	{
+		"when": { "completed": "true" },
+		"apply": { "model": "projectnublar:sequencer.tbl" }
+	},
+	{
+		"when": { "machine_base": "true", "completed": "false" },
+		"apply": { "model": "projectnublar:sequencer_base.tbl" }
+	},
+	{
+		"when": { "computer": "true", "completed": "false" },
+		"apply": { "model": "projectnublar:sequencer_computer.tbl" }
+	},
+	{
+		"when": { "monitor": "true", "completed": "false" },
+		"apply": { "model": "projectnublar:sequencer_monitor.tbl" }
+	},
+	{
+		"when": { "door": "true", "completed": "false" },
+		"apply": { "model": "projectnublar:sequencer_door.tbl" }
+	}
+	]
+}

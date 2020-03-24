@@ -44,6 +44,11 @@ public final class ItemHandler {
 
     public static final Item TRACKING_TABLET = new ItemTrackingTablet();
 
+    public static final Item MACHINE_BASE_PART = new Item();
+    public static final Item COMPUTER_PART = new Item();
+    public static final Item MONITOR_PART = new Item();
+    public static final Item DOOR_PART = new Item();
+
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
@@ -72,7 +77,13 @@ public final class ItemHandler {
             ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB),
             TRACKING_TABLET.setRegistryName("tracking_tablet").setTranslationKey("tracking_tablet").setCreativeTab(TAB),
             TRACKING_MODULE.setRegistryName("tracking_module").setTranslationKey("tracking_module").setCreativeTab(TAB),
-            FLAPPY_DINO_MODULE.setRegistryName("flappy_dino_module").setTranslationKey("flappy_dino_module").setCreativeTab(TAB)
+            FLAPPY_DINO_MODULE.setRegistryName("flappy_dino_module").setTranslationKey("flappy_dino_module").setCreativeTab(TAB),
+
+            MACHINE_BASE_PART.setRegistryName("machine_base_part").setTranslationKey("machine_base_part").setCreativeTab(TAB),
+            COMPUTER_PART.setRegistryName("computer_part").setTranslationKey("computer_part").setCreativeTab(TAB),
+            MONITOR_PART.setRegistryName("monitor_part").setTranslationKey("monitor_part").setCreativeTab(TAB),
+            DOOR_PART.setRegistryName("door_part").setTranslationKey("door_part").setCreativeTab(TAB)
+
         );
 
         UnaryOperator<Item> tab = item -> item.setCreativeTab(TAB);

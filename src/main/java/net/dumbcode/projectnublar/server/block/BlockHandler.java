@@ -30,12 +30,12 @@ public class BlockHandler {
     public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
     public static final BlockTrackingBeacon TRACKING_BEACON = new BlockTrackingBeacon();
 
-    public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, FossilProcessorBlockEntity::new);
-    public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, DrillExtractorBlockEntity::new);
-    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, SequencingSynthesizerBlockEntity::new);
-    public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, EggPrinterBlockEntity::new);
-    public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, IncubatorBlockEntity::new);
-    public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock<>(MachineModule.TEST_MACHINES, CoalGeneratorBlockEntity::new);
+    public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModule.TEST_MACHINES);
+    public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModule.TEST_MACHINES);
+    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModule.MACHINE_BASE, MachineModule.COMPUTER, MachineModule.MONITOR, MachineModule.DOOR);
+    public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock(EggPrinterBlockEntity::new, MachineModule.TEST_MACHINES);
+    public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock(IncubatorBlockEntity::new, MachineModule.TEST_MACHINES);
+    public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModule.TEST_MACHINES);
 
     public static final Map<FossilBlock.FossilType, Map<Dinosaur, FossilBlock>> FOSSIL = new HashMap<>();
 
@@ -44,18 +44,18 @@ public class BlockHandler {
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
         event.getRegistry().registerAll(
-                SKELETAL_BUILDER.setRegistryName("skeletal_builder").setTranslationKey("skeletal_builder").setCreativeTab(TAB),
-                FOSSIL_PROCESSOR.setTranslationKey("fossil_processor").setRegistryName("fossil_processor").setCreativeTab(TAB),
-                DRILL_EXTRACTOR.setTranslationKey("drill_extractor").setRegistryName("drill_extractor").setCreativeTab(TAB),
-                SEQUENCING_SYNTHESIZER.setTranslationKey("sequencer_synthesizer").setRegistryName("sequencer_synthesizer").setCreativeTab(TAB),
-                EGG_PRINTER.setTranslationKey("egg_printer").setRegistryName("egg_printer").setCreativeTab(TAB),
-                INCUBATOR.setTranslationKey("incubator").setRegistryName("incubator").setCreativeTab(TAB),
-                COAL_GENERATOR.setTranslationKey("coal_generator").setRegistryName("coal_generator").setCreativeTab(TAB),
-                LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setTranslationKey("low_security_electric_fence_pole").setCreativeTab(TAB),
-                HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setTranslationKey("high_security_electric_fence_pole").setCreativeTab(TAB),
-                ELECTRIC_FENCE.setRegistryName("electric_fence").setTranslationKey("electric_fence").setCreativeTab(TAB),
-                CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB),
-                TRACKING_BEACON.setRegistryName("tracking_beacon").setTranslationKey("tracking_beacon").setCreativeTab(TAB)
+            SKELETAL_BUILDER.setRegistryName("skeletal_builder").setTranslationKey("skeletal_builder").setCreativeTab(TAB),
+            FOSSIL_PROCESSOR.setTranslationKey("fossil_processor").setRegistryName("fossil_processor").setCreativeTab(TAB),
+            DRILL_EXTRACTOR.setTranslationKey("drill_extractor").setRegistryName("drill_extractor").setCreativeTab(TAB),
+            SEQUENCING_SYNTHESIZER.setTranslationKey("sequencer_synthesizer").setRegistryName("sequencer_synthesizer").setCreativeTab(TAB),
+            EGG_PRINTER.setTranslationKey("egg_printer").setRegistryName("egg_printer").setCreativeTab(TAB),
+            INCUBATOR.setTranslationKey("incubator").setRegistryName("incubator").setCreativeTab(TAB),
+            COAL_GENERATOR.setTranslationKey("coal_generator").setRegistryName("coal_generator").setCreativeTab(TAB),
+            LOW_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("low_security_electric_fence_pole").setTranslationKey("low_security_electric_fence_pole").setCreativeTab(TAB),
+            HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setTranslationKey("high_security_electric_fence_pole").setCreativeTab(TAB),
+            ELECTRIC_FENCE.setRegistryName("electric_fence").setTranslationKey("electric_fence").setCreativeTab(TAB),
+            CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB),
+            TRACKING_BEACON.setRegistryName("tracking_beacon").setTranslationKey("tracking_beacon").setCreativeTab(TAB)
         );
 
         for (FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
