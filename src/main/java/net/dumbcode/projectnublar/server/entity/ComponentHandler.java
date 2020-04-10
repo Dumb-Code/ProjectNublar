@@ -22,6 +22,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class ComponentHandler {
 
     public static final EntityComponentType<DinosaurComponent,?> DINOSAUR = InjectedUtils.injected();
+    public static final EntityComponentType<DinosaurCompatComponent,?> DINOSAUR_COMPAT = InjectedUtils.injected();
     public static final EntityComponentType<AgeComponent,AgeComponent.Storage> AGE = InjectedUtils.injected();
     public static final EntityComponentType<MultipartEntityComponent,?> MULTIPART = InjectedUtils.injected();
     public static final EntityComponentType<WanderComponent,?> WANDER_AI = InjectedUtils.injected();
@@ -45,6 +46,10 @@ public class ComponentHandler {
             SimpleComponentType.builder(DinosaurComponent.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
                 .withConstructor(DinosaurComponent::new)
+                .build(),
+            SimpleComponentType.builder(DinosaurCompatComponent.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "dinosaur_compat"))
+                .withConstructor(DinosaurCompatComponent::new)
                 .build(),
             SimpleComponentType.builder(AgeComponent.class, AgeComponent.Storage.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "age"))

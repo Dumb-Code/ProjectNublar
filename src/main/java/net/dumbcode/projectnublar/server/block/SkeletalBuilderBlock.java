@@ -1,13 +1,14 @@
 package net.dumbcode.projectnublar.server.block;
 
+import net.dumbcode.dumblibrary.DumbLibrary;
+import net.dumbcode.dumblibrary.client.gui.GuiTaxidermy;
 import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
-import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
+import net.dumbcode.dumblibrary.client.gui.GuiModelPoseEdit;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
-import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
@@ -51,17 +52,18 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         ItemStack stack = playerIn.getHeldItem(hand);
         if(tileEntity instanceof SkeletalBuilderBlockEntity) {
-            SkeletalBuilderBlockEntity skeletalBuilder = (SkeletalBuilderBlockEntity) tileEntity;
+            SkeletalBuilderBlockEntity sb = (SkeletalBuilderBlockEntity) tileEntity;
             if(stack.getItem() instanceof FossilItem) {
                 FossilItem item = (FossilItem)stack.getItem();
                 Dinosaur dinosaur = item.getDinosaur();
-                if(!skeletalBuilder.getDinosaur().isPresent()) {
-                    skeletalBuilder.setDinosaur(dinosaur);
+                if(!sb.getDinosaur().isPresent()) {
+                    sb.setDinosaur(dinosaur);
                 }
-                this.setBonesInHandler(skeletalBuilder, dinosaur, stack, item.getVariant());
+                this.setBonesInHandler(sb, dinosaur, stack, item.getVariant());
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
-                if (skeletalBuilder.getDinosaur().isPresent()) {
-                    SidedExecutor.runClient(() -> () -> Minecraft.getMinecraft().displayGuiScreen(new GuiSkeletalBuilder(skeletalBuilder)));
+                if (sb.getDinosaur().isPresent()) {
+                    TextComponentTranslation title = new TextComponentTranslation(ProjectNublar.MODID + ".gui.model_pose_edit.title", sb.getDinosaur().orElse(DinosaurHandler.TYRANNOSAURUS).createNameComponent().getUnformattedText());
+                    SidedExecutor.runClient(() -> () -> Minecraft.getMinecraft().displayGuiScreen(new GuiTaxidermy(sb.getModel(), sb.getTexture(), title, sb)));
                 } else {
                     playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);
                 }

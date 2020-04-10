@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
-import net.dumbcode.dumblibrary.server.ecs.ComponentWriteAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
-import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
@@ -19,7 +17,6 @@ import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.DinosaurInformation;
@@ -87,19 +84,10 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
             c.proposeAnimation(entity, new AnimationLayer.AnimationEntry(AnimationHandler.WALKING)
                             .loop()
                             .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)
-                            .withSpeedFactor(AnimationFactorHandler.LIMB_SWING)
-                    , MOVEMENT_CHANNEL, 20);
+                            .withSpeedFactor(AnimationFactorHandler.LIMB_SWING),
+                MOVEMENT_CHANNEL, 20
+            );
         });
-
-        if(entity instanceof ComponentWriteAccess) {
-            for (EntityComponentAttacher.ComponentPair pair : this.dinosaur.getAttacher().getDefaultConfig().getTypes()) {
-                if(!entity.matchesAll(pair.getType())) {
-                    ProjectNublar.getLogger().info("Attaching un-found component {}", pair.getType().getIdentifier());
-                    pair.attach((ComponentWriteAccess) entity);
-                }
-            }
-        }
-
     }
 
     @Override

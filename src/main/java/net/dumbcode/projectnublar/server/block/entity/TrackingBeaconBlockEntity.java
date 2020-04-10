@@ -2,9 +2,9 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import lombok.Getter;
 import lombok.Value;
+import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;

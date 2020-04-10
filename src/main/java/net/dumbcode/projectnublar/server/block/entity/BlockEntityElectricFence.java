@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Sets;
+import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.nbt.NBTTagCompound;

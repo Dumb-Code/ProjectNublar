@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -19,7 +20,7 @@ import java.util.*;
 //  - change this to allow for an ast tree for the bones, rather than a list of them. For example
 //    when we get to the ribcage, they player should be allowed to either go to the tail, or the neck, rather than always the tail first
 //  - Make this instead of caching the model to look into the model component and get that
-public class SkeletalBuilderComponent extends EntityComponent {
+public class SkeletalBuilderComponent extends EntityComponent implements RenderLocationComponent {
 
     @Getter private List<String> individualBones = Lists.newArrayList();
     @Getter private List<String> boneListed = Lists.newArrayList();
@@ -79,6 +80,13 @@ public class SkeletalBuilderComponent extends EntityComponent {
             boneListed.add(bone);
             boneToModelMap.put(bone, entry.getValue());
         }
+    }
+
+    @Override
+    public void editLocations(ConfigurableLocation texture, ConfigurableLocation fileLocation) {
+        texture.addFileName("skeleton", 100);
+
+        fileLocation.addName("skeleton", 100);
     }
 
     public static class Storage implements EntityComponentStorage<SkeletalBuilderComponent> {

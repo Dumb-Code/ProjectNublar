@@ -1,14 +1,13 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
-import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.ModelComponent;
+import net.dumbcode.dumblibrary.server.taxidermy.TaxidermyBlockEntity;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
-import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalHistory;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
@@ -23,24 +22,19 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemStackHandler;
 
-import javax.vecmath.Vector3f;
-import java.util.Map;
 import java.util.Optional;
 
 import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
 @Getter
 @Setter
-public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITickable {
+public class SkeletalBuilderBlockEntity extends TaxidermyBlockEntity implements ITickable {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
     @SideOnly(Side.CLIENT)
     private SkeletonBuilderScene scene;
 
     private Optional<DinosaurEntity> dinosaurEntity = Optional.empty();
-
-    @Getter private final SkeletalHistory history = new SkeletalHistory();
-
 
     // Not saved to NBT, player-specific only to help with posing
 
@@ -56,8 +50,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         this.dinosaurEntity.ifPresent(d -> nbt.setString("Dinosaur", d.getDinosaur().getRegName().toString()));
         nbt.setTag("Inventory", this.boneHandler.serializeNBT());
-        nbt.setTag("History", history.writeToNBT(new NBTTagCompound()));
-
         // save pose data
         nbt.setTag("SkeletalProperties", this.skeletalProperties.serialize(new NBTTagCompound()));
         return super.writeToNBT(nbt);
@@ -70,7 +62,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
         // load pose data
         this.reassureSize();
-        this.history.readFromNBT(nbt.getCompoundTag("History"));
         this.skeletalProperties.deserialize(nbt.getCompoundTag("SkeletalProperties"));
         super.readFromNBT(nbt);
     }
@@ -88,6 +79,7 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
         return this.dinosaurEntity.map(DinosaurEntity::getDinosaur);
     }
 
+    @Override
     public ResourceLocation getTexture() {
         return this.dinosaurEntity
                 .flatMap(EntityComponentTypes.MODEL)
@@ -98,16 +90,15 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
-            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().getDefaultConfig().withType(ComponentHandler.SKELETAL_BUILDER));
-            entity.get(ComponentHandler.AGE).ifPresent(age -> age.setRawStage(Dinosaur.SKELETON_AGE));
-            entity.finalizeComponents();
+            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().emptyConfiguration().withDefaultTypes(false).withType(ComponentHandler.DINOSAUR, ComponentHandler.SKELETAL_BUILDER, EntityComponentTypes.MODEL));
             this.dinosaurEntity = Optional.of(entity);
         }
-        this.history.clear();
+        this.getHistory().clear();
         this.reassureSize();
     }
 
     @SideOnly(Side.CLIENT)
+    @Override
     public TabulaModel getModel() {
         if(!this.dinosaurEntity.isPresent()) {
             return null;
@@ -123,38 +114,6 @@ public class SkeletalBuilderBlockEntity extends SimpleBlockEntity implements ITi
 
     public ItemStackHandler getBoneHandler() {
         return boneHandler;
-    }
-
-
-    public Map<String, Vector3f> getPoseData() {
-        //todo caching - of fucking what. Wyn, make your todos easier to understand fuckface
-        Map<String, Vector3f> map = Maps.newHashMap();
-
-        this.history.getHistory().forEach(recordList -> recordList.forEach(record -> {
-            if(record.getPart().equals(SkeletalHistory.RESET_NAME)) {
-                map.clear();
-            } else {
-                map.put(record.getPart(), new Vector3f(record.getAngle()));
-            }
-        }));
-
-        for (Map.Entry<String, SkeletalHistory.Edit> entry : this.history.getEditingData().entrySet()) {
-            Vector3f vec = map.computeIfAbsent(entry.getKey(), s -> new Vector3f());
-            SkeletalHistory.Edit edit = entry.getValue();
-            switch (edit.getAxis()) {
-                case X_AXIS:
-                    vec.x = edit.getAngle();
-                    break;
-                case Y_AXIS:
-                    vec.y = edit.getAngle();
-                    break;
-                case Z_AXIS:
-                    vec.z = edit.getAngle();
-                    break;
-            }
-        }
-
-        return map;
     }
 
     @Override

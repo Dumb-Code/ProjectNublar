@@ -424,11 +424,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
     private static void resetScaleForAll(TabulaModel tabulaModel, Predicate<TabulaModelRenderer> predicate) {
         for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
-            if(predicate.test(modelRenderer)) {
-                modelRenderer.setScaleX(1);
-                modelRenderer.setScaleY(1);
-                modelRenderer.setScaleZ(1);
-            }
+            modelRenderer.setHideButShowChildren(!predicate.test(modelRenderer));
         }
     }
 
@@ -445,9 +441,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
 
     private static void resetVisability(TabulaModel tabulaModel) {
         for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
-            modelRenderer.setScaleX(1);
-            modelRenderer.setScaleY(1);
-            modelRenderer.setScaleZ(1);
+            modelRenderer.setHideButShowChildren(false);
         }
     }
 

@@ -1,9 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
 import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
-import net.dumbcode.projectnublar.client.gui.GuiSkeletalBuilder;
 import net.dumbcode.projectnublar.client.gui.GuiTrackingBeacon;
-import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

@@ -7,6 +7,10 @@ import net.dumbcode.dumblibrary.server.ecs.EntityManager;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.dumblibrary.server.network.S5UpdateSkeletalBuilder;
+import net.dumbcode.dumblibrary.server.network.S7HistoryRecord;
+import net.dumbcode.dumblibrary.server.network.S9UpdateHistoryIndex;
+import net.dumbcode.dumblibrary.server.network.S11FullPoseChange;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
@@ -27,7 +31,6 @@ import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
-import net.dumbcode.projectnublar.server.utils.VoidStorage;
 import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -226,14 +229,8 @@ public class ProjectNublar {
     }
 
     private void registerPackets() {
-        NETWORK.registerMessage(new C0MoveSelectedSkeletalPart.Handler(), C0MoveSelectedSkeletalPart.class, 0, Side.SERVER);
-        NETWORK.registerMessage(new S1UpdateSkeletalBuilder.Handler(), S1UpdateSkeletalBuilder.class, 1, Side.CLIENT);
-        NETWORK.registerMessage(new C2SkeletalMovement.Handler(), C2SkeletalMovement.class, 2, Side.SERVER);
-        NETWORK.registerMessage(new S3HistoryRecord.Handler(), S3HistoryRecord.class, 3, Side.CLIENT);
-        NETWORK.registerMessage(new C4MoveInHistory.Handler(), C4MoveInHistory.class, 4, Side.SERVER);
-        NETWORK.registerMessage(new S5UpdateHistoryIndex.Handler(), S5UpdateHistoryIndex.class, 5, Side.CLIENT);
-        NETWORK.registerMessage(new S7FullPoseChange.Handler(), S7FullPoseChange.class, 7, Side.CLIENT);
-        NETWORK.registerMessage(new C8FullPoseChange.Handler(), C8FullPoseChange.class, 8, Side.SERVER);
+
+        //Now you might be asking where the packets 0-8 are, they simply got moved to dumb lib and i don't want to change the packet names
         NETWORK.registerMessage(new C9ChangeGlobalRotation.Handler(), C9ChangeGlobalRotation.class, 9, Side.SERVER);
         NETWORK.registerMessage(new S10ChangeGlobalRotation.Handler(), S10ChangeGlobalRotation.class, 10, Side.CLIENT);
         NETWORK.registerMessage(new C11UpdatePoleList.Handler(), C11UpdatePoleList.class, 11, Side.SERVER);

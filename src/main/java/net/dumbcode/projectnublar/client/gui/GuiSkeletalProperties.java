@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
+import net.dumbcode.dumblibrary.client.gui.GuiModelPoseEdit;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
@@ -16,8 +17,6 @@ import net.minecraft.client.gui.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiSlider;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlider, GuiPageButtonList.GuiResponder {
 
-    private final GuiSkeletalBuilder parent;
+    private final GuiModelPoseEdit parent;
     @Getter private final SkeletalBuilderBlockEntity builder;
     @Getter private final SkeletalProperties properties;
     public final List<PoleEntry> entries = Lists.newLinkedList();
@@ -42,7 +41,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
     private GuiTextField editText = new GuiTextField(5, Minecraft.getMinecraft().fontRenderer, 0, 0, 75, 20);
     private GuiButton editDirection = new GuiButtonExt(1, 0, 0, 75, 20, "");
 
-    public GuiSkeletalProperties(GuiSkeletalBuilder parent, SkeletalBuilderBlockEntity builder) {
+    public GuiSkeletalProperties(GuiModelPoseEdit parent, SkeletalBuilderBlockEntity builder) {
         this.editText.setGuiResponder(this);
         this.parent = parent;
         this.builder = builder;
