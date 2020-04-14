@@ -381,10 +381,11 @@ public class TrackingTabletScreen extends TabletScreen {
         }
 
         @Override
-        public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
             transformation.setIdentity();
             selected = null;
             ProjectNublar.NETWORK.sendToServer(new C30TrackingTabletEntryClicked(this.pos));
+            return true;
         }
     }
 }

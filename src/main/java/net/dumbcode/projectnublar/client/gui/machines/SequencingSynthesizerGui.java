@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
+import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -300,7 +301,7 @@ public class SequencingSynthesizerGui extends TabbedGuiContainer {
         }
     }
 
-    private class DriveEntry implements GuiDropdownBox.SelectListEntry {
+    private class DriveEntry implements SelectListEntry {
 
         private final String key;
         private final String entry;
@@ -326,8 +327,9 @@ public class SequencingSynthesizerGui extends TabbedGuiContainer {
         }
 
         @Override
-        public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
             SequencingSynthesizerGui.this.dirty = true;
+            return true;
         }
     }
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
+import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C27InstallModule;
 import net.dumbcode.projectnublar.server.network.C28ModuleClicked;
@@ -212,7 +213,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
     }
 
     @RequiredArgsConstructor
-    private class DropdownBoxEntry implements GuiDropdownBox.SelectListEntry {
+    private class DropdownBoxEntry implements SelectListEntry {
 
         private final TabletModuleType<?> type;
         private final int slot;

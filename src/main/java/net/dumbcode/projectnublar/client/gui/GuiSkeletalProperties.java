@@ -249,13 +249,14 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         }
 
         @Override
-        public void onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
             if(this.edit.mousePressed(mc, mouseX, mouseY)) {
                 editingPole = this;
                 editText.setText(this.pole.getCubeName());
             } else if(this.delete.mousePressed(mc, mouseX, mouseY)) {
                 this.markedRemoved = true;
             }
+            return true;
         }
     }
 }
