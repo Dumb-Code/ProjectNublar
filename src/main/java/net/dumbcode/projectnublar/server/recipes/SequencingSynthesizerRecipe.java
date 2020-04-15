@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHand
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -55,7 +56,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
 
     @Override
     public int getRecipeTime(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 40;
+        return 12000 - 3600*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override

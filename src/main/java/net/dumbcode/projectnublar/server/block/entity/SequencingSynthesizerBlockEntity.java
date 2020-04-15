@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
@@ -20,6 +21,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.Fluid;
@@ -49,12 +51,18 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         }
     };
 
-    public static final double TOTAL_AMOUNT = 16D;
+    private static final double TOTAL_AMOUNT = 16D;
+    private static final int BASE_TOTAL_CONSUME_TIME = 200;
+
+    @Getter
+    private double totalStorage = TOTAL_AMOUNT;
+    private float inputAmountModifier;
 
     @Getter @Setter private double sugarAmount;
     @Getter @Setter private double boneAmount;
     @Getter @Setter private double plantAmount;
 
+    private int totalConsumeTime;
     private int consumeTimer;
 
     private String selectOneKey = "";
@@ -70,6 +78,25 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.tank.setTileEntity(this);
     }
 
+    @Override
+    public void tiersUpdated() {
+        super.tiersUpdated();
+        float tanks = this.getTierModifier(MachineModuleType.TANKS, 0.5F);
+        this.tank.setCapacity((int) (Fluid.BUCKET_VOLUME * tanks));
+        this.totalStorage = TOTAL_AMOUNT * tanks;
+
+        this.sugarAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
+        this.boneAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
+        this.plantAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
+        FluidStack fluid = this.tank.getFluid();
+        if(fluid != null) {
+            fluid.amount = MathHelper.clamp(fluid.amount, 0, this.tank.getCapacity());
+        }
+
+        this.inputAmountModifier = this.getTierModifier(MachineModuleType.COMPUTER_CHIP, 0.1F);
+
+        this.totalConsumeTime = BASE_TOTAL_CONSUME_TIME - 40*(this.getTier(MachineModuleType.COMPUTER_CHIP));
+    }
 
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
@@ -195,20 +222,20 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.selectThreeAmount = 0D;
         }
 
-        if(this.sugarAmount < TOTAL_AMOUNT) {
-            this.sugarAmount = Math.min(TOTAL_AMOUNT, this.sugarAmount + MachineUtils.getSugarMatter(this.handler.getStackInSlot(2).splitStack(1)));
+        if(this.sugarAmount < this.totalStorage) {
+            this.sugarAmount = Math.min(this.totalStorage, this.sugarAmount + MachineUtils.getSugarMatter(this.handler.getStackInSlot(2).splitStack(1)) * this.inputAmountModifier);
         }
-        if(this.boneAmount < TOTAL_AMOUNT) {
-            this.boneAmount = Math.min(TOTAL_AMOUNT, this.boneAmount + MachineUtils.getBoneMatter(this.handler.getStackInSlot(3).splitStack(1)));
+        if(this.boneAmount < this.totalStorage) {
+            this.boneAmount = Math.min(this.totalStorage, this.boneAmount + MachineUtils.getBoneMatter(this.handler.getStackInSlot(3).splitStack(1)) * this.inputAmountModifier);
         }
-        if(this.plantAmount < TOTAL_AMOUNT) {
-            this.plantAmount = Math.min(TOTAL_AMOUNT, this.plantAmount + MachineUtils.getPlantMatter(this.handler.getStackInSlot(4).splitStack(1), this.world, this.pos));
+        if(this.plantAmount < this.totalStorage) {
+            this.plantAmount = Math.min(this.totalStorage, this.plantAmount + MachineUtils.getPlantMatter(this.handler.getStackInSlot(4).splitStack(1), this.world, this.pos) * this.inputAmountModifier);
         }
 
         if(this.consumeTimer != 0) {
             if(!this.canConsume()) {
                 this.consumeTimer = 0;
-            } else if(this.consumeTimer++ >= 30) {
+            } else if(this.consumeTimer++ >= this.totalConsumeTime) {
                 ItemStack inStack = this.handler.getStackInSlot(5);
                 ItemStack out = inStack.splitStack(1);
 

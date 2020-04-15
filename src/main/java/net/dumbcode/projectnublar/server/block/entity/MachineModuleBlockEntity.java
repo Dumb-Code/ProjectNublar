@@ -7,6 +7,8 @@ import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.item.MachineModulePart;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C18OpenContainer;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.Minecraft;
@@ -46,7 +48,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     private final MachineModuleItemStackWrapper inputWrapper;
     private final MachineModuleItemStackWrapper outputWrapper;
 
-    @Getter @Setter private int stateID;
+    protected final Map<MachineModuleType, Integer> machineStateMap = new HashMap<>();
 
     @Setter private boolean positionDirty;
 
@@ -71,7 +73,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setTag("ItemHandler", this.handler.serializeNBT());
-        compound.setInteger("StateID", this.stateID);
         compound.setInteger("ProcessCount", this.processes.size());
         for (int i = 0; i < this.processes.size(); i++) {
             MachineProcess process = this.processes.get(i);
@@ -84,6 +85,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             nbt.setBoolean("Processing", process.processing); //Is this really needed?
             compound.setTag("Process_" + i, nbt);
         }
+
+        NBTTagCompound stateNBT = new NBTTagCompound();
+        this.machineStateMap.forEach((type, part) -> stateNBT.setInteger(type.getName(), part));
+        compound.setTag("MachineState", stateNBT);
+
         NBTTagCompound energyNBT = new NBTTagCompound();
         energyNBT.setInteger("Amount", energy.getEnergyStored());
         compound.setTag("Energy", energyNBT);
@@ -94,7 +100,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.handler.deserializeNBT(compound.getCompoundTag("ItemHandler"));
-        this.stateID = compound.getInteger("StateID");
         for (int i = 0; i < compound.getInteger("ProcessCount"); i++) {
             MachineProcess<B> process = this.processes.get(i);
             NBTTagCompound nbt = compound.getCompoundTag("Process_" + i);
@@ -103,6 +108,13 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             process.setCurrentRecipe(nbt.hasKey("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
             process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
         }
+
+        this.machineStateMap.clear();
+        NBTTagCompound stateNBT = compound.getCompoundTag("MachineState");
+        for (String s : stateNBT.getKeySet()) {
+            this.machineStateMap.put(new MachineModuleType(s), stateNBT.getInteger(s));
+        }
+        this.tiersUpdated();
 
         NBTTagCompound energyNBT = compound.getCompoundTag("Energy");
         energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInteger("Amount"));
@@ -153,6 +165,21 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return energy.extractEnergy(amountToProvide, true) >= amountToProvide;
     }
 
+    public int getTier(MachineModuleType type) {
+        return this.machineStateMap.getOrDefault(type, 0);
+    }
+
+    public void setTier(MachineModuleType type, int tier) {
+        this.machineStateMap.put(type, tier);
+    }
+
+    protected float getTierModifier(MachineModuleType type, float step) {
+        return this.getTier(type)*step + 1;
+    }
+
+    public void tiersUpdated() {
+    }
+
     /**
      * How much does this machine produce right now ? (in RF/FE per tick)
      * @return
@@ -200,7 +227,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         int neighborCount = neighboringEnergyInterfaces.size();
         neighboringEnergyInterfaces.sort(Comparator.comparing(IEnergyStorage::getEnergyStored));
         for(IEnergyStorage neighbor : neighboringEnergyInterfaces) {
-            // Send some part of your energy to the neighbor
+            // Send some type of your energy to the neighbor
             int energyToSend = getEnergyToSendToNeighbor(neighbor, neighborCount);
             int maxEnergyAbleToSend = energy.extractEnergy(energyToSend, true);
             int maxEnergyAbleToReceive = neighbor.receiveEnergy(maxEnergyAbleToSend, true);

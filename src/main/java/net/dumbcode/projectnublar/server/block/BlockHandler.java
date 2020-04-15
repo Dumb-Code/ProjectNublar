@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.item.MachineModule;
+import net.dumbcode.projectnublar.server.item.MachineModuleParts;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
@@ -30,12 +30,12 @@ public class BlockHandler {
     public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
     public static final BlockTrackingBeacon TRACKING_BEACON = new BlockTrackingBeacon();
 
-    public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModule.TEST_MACHINES);
-    public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModule.TEST_MACHINES);
-    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModule.MACHINE_BASE, MachineModule.COMPUTER, MachineModule.MONITOR, MachineModule.DOOR);
-    public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock(EggPrinterBlockEntity::new, MachineModule.TEST_MACHINES);
-    public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock(IncubatorBlockEntity::new, MachineModule.TEST_MACHINES);
-    public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModule.TEST_MACHINES);
+    public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.TEST_MACHINES);
+    public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.TEST_MACHINES);
+    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new MachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER);
+    public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.TEST_MACHINES);
+    public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.TEST_MACHINES);
+    public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.TEST_MACHINES);
 
     public static final Map<FossilBlock.FossilType, Map<Dinosaur, FossilBlock>> FOSSIL = new HashMap<>();
 

@@ -43,7 +43,7 @@ public class SequencingSynthesizerInputsGui extends TabbedGuiContainer {
         TextureAtlasSprite bone = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.BONE_BLOCK.getDefaultState());
         TextureAtlasSprite leaves = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.LEAVES.getDefaultState());
 
-        double total = SequencingSynthesizerBlockEntity.TOTAL_AMOUNT;
+        double total = this.blockEntity.getTotalStorage();
         MachineUtils.drawTiledTexture(this.guiLeft + 21F, this.guiTop + 5F + 52F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 37F, this.guiTop + 55F, 16, 16, water.getMinU(), water.getMinV(), water.getMaxU(), water.getMaxV());
         MachineUtils.drawTiledTexture(this.guiLeft + 59F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getSugarAmount() / total)), this.guiLeft + 75F, this.guiTop + 55F, 16, 16, sugar.getMinU(), sugar.getMinV(), sugar.getMaxU(), sugar.getMaxV());
         MachineUtils.drawTiledTexture(this.guiLeft + 97F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getBoneAmount() / total)), this.guiLeft + 113F, this.guiTop + 55F, 16, 16, bone.getMinU(), bone.getMinV(), bone.getMaxU(), bone.getMaxV());

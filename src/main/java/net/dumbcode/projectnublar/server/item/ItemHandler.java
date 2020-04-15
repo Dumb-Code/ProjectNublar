@@ -44,10 +44,9 @@ public final class ItemHandler {
 
     public static final Item TRACKING_TABLET = new ItemTrackingTablet();
 
-    public static final Item MACHINE_BASE_PART = new Item();
-    public static final Item COMPUTER_PART = new Item();
-    public static final Item MONITOR_PART = new Item();
-    public static final Item DOOR_PART = new Item();
+    public static final Item COGS_PART = new Item();
+    public static final Item COMPUTER_CHIP_PART = new Item();
+    public static final Item TANKS_PART = new Item();
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
@@ -79,11 +78,9 @@ public final class ItemHandler {
             TRACKING_MODULE.setRegistryName("tracking_module").setTranslationKey("tracking_module").setCreativeTab(TAB),
             FLAPPY_DINO_MODULE.setRegistryName("flappy_dino_module").setTranslationKey("flappy_dino_module").setCreativeTab(TAB),
 
-            MACHINE_BASE_PART.setRegistryName("machine_base_part").setTranslationKey("machine_base_part").setCreativeTab(TAB),
-            COMPUTER_PART.setRegistryName("computer_part").setTranslationKey("computer_part").setCreativeTab(TAB),
-            MONITOR_PART.setRegistryName("monitor_part").setTranslationKey("monitor_part").setCreativeTab(TAB),
-            DOOR_PART.setRegistryName("door_part").setTranslationKey("door_part").setCreativeTab(TAB)
-
+            COGS_PART.setRegistryName("cogs_part").setTranslationKey("cogs_part").setCreativeTab(TAB),
+            COMPUTER_CHIP_PART.setRegistryName("computer_chip_part").setTranslationKey("computer_chip_part").setCreativeTab(TAB),
+            TANKS_PART.setRegistryName("tanks_part").setTranslationKey("tanks_part").setCreativeTab(TAB)
         );
 
         UnaryOperator<Item> tab = item -> item.setCreativeTab(TAB);
