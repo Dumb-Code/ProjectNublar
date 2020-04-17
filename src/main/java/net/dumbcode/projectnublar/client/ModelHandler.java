@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.client.utils.FullAtlasSprite;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.FossilItem;
+import net.dumbcode.projectnublar.server.item.ItemMetaNamed;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -83,20 +84,13 @@ public class ModelHandler {
     }
 
     private static void reg(Item item, ResourceLocation location) {
-        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(location, "inventory"));
-    }
-
-    public static IBakedModel getModel(ResourceLocation resourceLocation, TextureStitchEvent event, VertexFormat format) throws Exception {
-        return ModelLoaderRegistry.getModel(resourceLocation).bake(TRSRTransformation.identity(), format, FullAtlasSprite::new);
-    }
-
-    private static IBakedModel disableAO(IBakedModel model) {
-        return new BakedModelWrapper<IBakedModel>(model) {
-            @Override
-            public boolean isAmbientOcclusion() {
-                return false;
+        if(item instanceof ItemMetaNamed) {
+            for (int i = 0; i < ((ItemMetaNamed) item).getSubTypes(); i++) {
+                ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(new ResourceLocation(location.getNamespace(), location.getPath() + "_" + i), "inventory"));
             }
-        };
+        } else {
+            ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(location, "inventory"));
+        }
     }
 
 }

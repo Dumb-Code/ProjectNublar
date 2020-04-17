@@ -8,7 +8,7 @@ public class MachineModuleType {
     public static final MachineModuleType TEST = new MachineModuleType("test1");
 
     public static final MachineModuleType COMPUTER_CHIP = new MachineModuleType("computer");
-    public static final MachineModuleType TANKS = new MachineModuleType("monitor");
+    public static final MachineModuleType TANKS = new MachineModuleType("tanks");
 
     private final String name;
 }

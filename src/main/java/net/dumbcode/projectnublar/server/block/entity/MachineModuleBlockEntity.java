@@ -171,6 +171,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public void setTier(MachineModuleType type, int tier) {
         this.machineStateMap.put(type, tier);
+        this.tiersUpdated();
     }
 
     protected float getTierModifier(MachineModuleType type, float step) {

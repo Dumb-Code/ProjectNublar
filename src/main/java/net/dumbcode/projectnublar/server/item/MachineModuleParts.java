@@ -10,15 +10,15 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MachineModuleParts {
     public static final MachineModulePart[] TEST_MACHINES = {
-
         simplePartItem(MachineModuleType.TEST, null, () -> Items.APPLE, () -> Items.STICK)
     };
 
     public static final MachineModulePart[] SEQUENCING_SYNTHESIZER = {
-        simplePartItem(MachineModuleType.COMPUTER_CHIP, null, () -> ItemHandler.COMPUTER_CHIP_PART),
+        simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 2, () -> ItemHandler.COMPUTER_CHIP_PART),
         simplePartItem(MachineModuleType.TANKS, null, () -> ItemHandler.TANKS_PART),
     };
 
@@ -29,6 +29,14 @@ public class MachineModuleParts {
             .type(type)
             .dependency(dependency)
             .tiers(Lists.newArrayList(tiers))
+            .build();
+    }
+
+    public static MachineModulePart simplePartItemMeta(MachineModuleType type, @Nullable MachineModuleType dependency, int meta, Supplier<Item> item) {
+        return MachineModulePart.builder()
+            .type(type)
+            .dependency(dependency)
+            .tiers(IntStream.range(0, meta).<Predicate<ItemStack>>mapToObj(i -> stack -> stack.getItem() == item.get() && stack.getMetadata() == i).collect(Collectors.toList()))
             .build();
     }
 

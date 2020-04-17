@@ -20,9 +20,9 @@ public class MachineModulePart {
     @Singular
     private final List<MachineModuleType> dependencies;
 
-    public boolean testDependents(ToIntFunction<MachineModuleType> tierGetter) {
+    public boolean testDependents(int newValue, ToIntFunction<MachineModuleType> tierGetter) {
         for (MachineModuleType dependent : this.dependencies) {
-            if(tierGetter.applyAsInt(dependent) == 0) {
+            if(dependent != null && tierGetter.applyAsInt(dependent) < newValue) {
                 return false;
             }
         }
@@ -32,7 +32,7 @@ public class MachineModulePart {
     public int getTierFromStack(ItemStack stack) {
         for (int i = 0; i < this.tiers.size(); i++) {
             if(this.tiers.get(i).test(stack)) {
-                return i;
+                return i + 1;
             }
         }
         return 0;

@@ -41,7 +41,7 @@ public class MachineModuleBlock extends Block implements IItemBlock{
         this.machineSupplier = machineSupplier;
 
         for (MachineModulePart part : this.values) {
-            this.propertyMap.put(part.getType(), PropertyInteger.create(part.getName(), 0, part.getTiers() - 1));
+            this.propertyMap.put(part.getType(), PropertyInteger.create(part.getName(), 0, part.getTiers()));
         }
 
         //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
@@ -72,16 +72,14 @@ public class MachineModuleBlock extends Block implements IItemBlock{
             MachineModuleBlockEntity<?> blockEntity = (MachineModuleBlockEntity) tileEntity;
             for (MachineModulePart value : this.values) {
                 int tier = blockEntity.getTier(value.getType());
-                if(tier == 0) {
-                    int newTier = value.getTierFromStack(stack);
-                    if(newTier > tier && value.testDependents(blockEntity::getTier)) {
-                        blockEntity.setTier(value.getType(), newTier);
-                        blockEntity.tiersUpdated();
-                        stack.shrink(1);
-                        worldIn.notifyBlockUpdate(pos, state, state, 3);
-                        blockEntity.markDirty();
-                        return true;
-                    }
+                int newTier = value.getTierFromStack(stack);
+                if(newTier > tier && value.testDependents(newTier, blockEntity::getTier)) {
+                    blockEntity.setTier(value.getType(), newTier);
+                    blockEntity.tiersUpdated();
+                    stack.shrink(1);
+                    worldIn.notifyBlockUpdate(pos, state, state, 3);
+                    blockEntity.markDirty();
+                    return true;
                 }
             }
             playerIn.openGui(ProjectNublar.INSTANCE, 0/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
