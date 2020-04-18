@@ -35,6 +35,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> {
 
@@ -51,12 +52,11 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         }
     };
 
-    private static final double TOTAL_AMOUNT = 16D;
+    public static final double DEFAULT_STORAGE = 16D;
     private static final int BASE_TOTAL_CONSUME_TIME = 200;
 
     @Getter
-    private double totalStorage = TOTAL_AMOUNT;
-    private float inputAmountModifier;
+    private double totalStorage = DEFAULT_STORAGE;
 
     @Getter @Setter private double sugarAmount;
     @Getter @Setter private double boneAmount;
@@ -83,17 +83,15 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         super.tiersUpdated();
         float tanks = this.getTierModifier(MachineModuleType.TANKS, 0.5F);
         this.tank.setCapacity((int) (Fluid.BUCKET_VOLUME * tanks));
-        this.totalStorage = TOTAL_AMOUNT * tanks;
+        this.totalStorage = DEFAULT_STORAGE * tanks;
 
         this.sugarAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
-        this.boneAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
-        this.plantAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
+        this.boneAmount = MathHelper.clamp(this.boneAmount, 0, this.totalStorage);
+        this.plantAmount = MathHelper.clamp(this.plantAmount, 0, this.totalStorage);
         FluidStack fluid = this.tank.getFluid();
         if(fluid != null) {
             fluid.amount = MathHelper.clamp(fluid.amount, 0, this.tank.getCapacity());
         }
-
-        this.inputAmountModifier = this.getTierModifier(MachineModuleType.COMPUTER_CHIP, 0.1F);
 
         this.totalConsumeTime = BASE_TOTAL_CONSUME_TIME - 40*(this.getTier(MachineModuleType.COMPUTER_CHIP));
     }
@@ -222,15 +220,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.selectThreeAmount = 0D;
         }
 
-        if(this.sugarAmount < this.totalStorage) {
-            this.sugarAmount = Math.min(this.totalStorage, this.sugarAmount + MachineUtils.getSugarMatter(this.handler.getStackInSlot(2).splitStack(1)) * this.inputAmountModifier);
-        }
-        if(this.boneAmount < this.totalStorage) {
-            this.boneAmount = Math.min(this.totalStorage, this.boneAmount + MachineUtils.getBoneMatter(this.handler.getStackInSlot(3).splitStack(1)) * this.inputAmountModifier);
-        }
-        if(this.plantAmount < this.totalStorage) {
-            this.plantAmount = Math.min(this.totalStorage, this.plantAmount + MachineUtils.getPlantMatter(this.handler.getStackInSlot(4).splitStack(1), this.world, this.pos) * this.inputAmountModifier);
-        }
+        this.sugarAmount = this.updateAmount(this.sugarAmount, this.handler.getStackInSlot(2), MachineUtils::getSugarMatter);
+        this.boneAmount = this.updateAmount(this.boneAmount, this.handler.getStackInSlot(3), MachineUtils::getBoneMatter);
+        this.plantAmount = this.updateAmount(this.plantAmount, this.handler.getStackInSlot(4), stack -> MachineUtils.getPlantMatter(stack, this.world, this.pos));
 
         if(this.consumeTimer != 0) {
             if(!this.canConsume()) {
@@ -252,6 +244,17 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         } else if(this.canConsume()) {
             this.consumeTimer = 1;
         }
+    }
+
+    private double updateAmount(double currentAmount, ItemStack stack, ToDoubleFunction<ItemStack> amountGetter) {
+        if(currentAmount < this.totalStorage && !stack.isEmpty()) {
+            double amount = amountGetter.applyAsDouble(stack);
+            if(amount > 0) {
+                stack.shrink(1);
+                return Math.min(this.totalStorage, currentAmount + amount);
+            }
+        }
+        return currentAmount;
     }
 
     private boolean canConsume() {

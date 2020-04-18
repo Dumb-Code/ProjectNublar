@@ -19,7 +19,7 @@ public class MachineModuleParts {
 
     public static final MachineModulePart[] SEQUENCING_SYNTHESIZER = {
         simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 2, () -> ItemHandler.COMPUTER_CHIP_PART),
-        simplePartItem(MachineModuleType.TANKS, null, () -> ItemHandler.TANKS_PART),
+        simplePartItemMeta(MachineModuleType.TANKS, null, 4, () -> ItemHandler.TANKS_PART),
     };
 
 

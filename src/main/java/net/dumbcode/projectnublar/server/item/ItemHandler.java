@@ -45,7 +45,7 @@ public final class ItemHandler {
     public static final Item TRACKING_TABLET = new ItemTrackingTablet();
 
     public static final Item COMPUTER_CHIP_PART = new ItemMetaNamed(2);
-    public static final Item TANKS_PART = new Item();
+    public static final Item TANKS_PART = new ItemMetaNamed(4);
 
     public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
     public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();

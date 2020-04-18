@@ -9,6 +9,7 @@ import net.minecraft.block.BlockVine;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.entity.item.EntityItem;
@@ -171,6 +172,10 @@ public class MachineUtils {
         return 0;
     }
 
+    @SideOnly(Side.CLIENT)
+    public static void drawTiledTexture(float left, float top, float right, float bottom, TextureAtlasSprite sprite) {
+        drawTiledTexture(left, top, right, bottom, sprite.getIconWidth(), sprite.getIconHeight(), sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV());
+    }
 
     @SideOnly(Side.CLIENT)
     public static void drawTiledTexture(float left, float top, float right, float bottom, int renderWidth, int renderHeight, float minU, float minV, float maxU, float maxV) {

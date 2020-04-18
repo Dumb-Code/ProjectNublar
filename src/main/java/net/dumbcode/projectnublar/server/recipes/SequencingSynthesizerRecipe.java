@@ -32,7 +32,13 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
         ItemStack testTube = handler.getStackInSlot(process.getInputSlot(0));
 
-        if(blockEntity.getTank().getFluidAmount() >= Fluid.BUCKET_VOLUME / 6 && blockEntity.getPlantAmount() >= 1 && blockEntity.getBoneAmount() >= 1 && blockEntity.getSugarAmount() >= 1 && testTube.getItem() == ItemHandler.EMPTY_TEST_TUBE) {
+        double storageSize = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE;
+
+        if(blockEntity.getTank().getFluidAmount() >= Fluid.BUCKET_VOLUME / 2 &&
+                blockEntity.getPlantAmount() >= storageSize / 2 &&
+                blockEntity.getBoneAmount() >= storageSize / 2 &&
+                blockEntity.getSugarAmount() >= storageSize / 2 &&
+                testTube.getItem() == ItemHandler.EMPTY_TEST_TUBE) {
             NBTTagCompound nbt = handler.getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
 
             Map<String, Double> amountMap = Maps.newHashMap();
@@ -63,14 +69,15 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     public void onRecipeFinished(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
         handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
-
-        blockEntity.getTank().drainInternal(Fluid.BUCKET_VOLUME / 6, true);
-
         handler.insertOutputItem(process.getOutputSlot(0), this.createStack(blockEntity, false), false);
 
-        blockEntity.setBoneAmount(0);
-        blockEntity.setPlantAmount(0);
-        blockEntity.setSugarAmount(0);
+
+        double storageSize = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE;
+
+        blockEntity.getTank().drainInternal(Fluid.BUCKET_VOLUME / 2, true);
+        blockEntity.setBoneAmount(blockEntity.getBoneAmount() - storageSize / 2);
+        blockEntity.setPlantAmount(blockEntity.getPlantAmount() - storageSize / 2);
+        blockEntity.setSugarAmount(blockEntity.getSugarAmount() - storageSize / 2);
 
     }
 

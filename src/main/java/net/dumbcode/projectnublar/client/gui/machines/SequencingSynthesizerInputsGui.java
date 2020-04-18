@@ -5,12 +5,17 @@ import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.Optional;
 
 public class SequencingSynthesizerInputsGui extends TabbedGuiContainer {
 
@@ -26,6 +31,36 @@ public class SequencingSynthesizerInputsGui extends TabbedGuiContainer {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
+
+        GlStateManager.disableBlend();
+        GlStateManager.color(1f, 1f, 1f, 1f);
+
+        this.zLevel = 100;
+        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
+        this.drawTexturedModalRect(this.guiLeft + 21F, this.guiTop + 5F, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 59F, this.guiTop + 5F, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 97F, this.guiTop + 5F, 176, 0, 16, 52);
+        this.drawTexturedModalRect(this.guiLeft + 135F, this.guiTop + 5F, 176, 0, 16, 52);
+
+        this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        BlockModelShapes shapes = mc.getBlockRendererDispatcher().getBlockModelShapes();
+        this.zLevel = 0;
+        String waterTooltip = this.drawTankWithTooltip(mouseX, mouseY, 21, (float) this.blockEntity.getTank().getFluidAmount() / this.blockEntity.getTank().getCapacity(), shapes.getTexture(Blocks.WATER.getDefaultState()));
+        String sugarTooltip = this.drawTankWithTooltip(mouseX, mouseY, 59, this.blockEntity.getSugarAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.REEDS.getDefaultState()));
+        String boneTooltip = this.drawTankWithTooltip(mouseX, mouseY, 97, this.blockEntity.getBoneAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.BONE_BLOCK.getDefaultState()));
+        GlStateManager.color(0.0941F, 0.7098F, 0.2823F, 1f);
+        String plantTooltip = this.drawTankWithTooltip(mouseX, mouseY, 135, this.blockEntity.getPlantAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.LEAVES.getDefaultState()));
+
+        if(waterTooltip != null) {
+            this.drawHoveringText(waterTooltip, mouseX, mouseY);
+        } else if(sugarTooltip != null) {
+            this.drawHoveringText(sugarTooltip, mouseX, mouseY);
+        } else if(boneTooltip != null) {
+            this.drawHoveringText(boneTooltip, mouseX, mouseY);
+        } else if(plantTooltip != null) {
+            this.drawHoveringText(plantTooltip, mouseX, mouseY);
+        }
+
         this.renderHoveredToolTip(mouseX, mouseY);
     }
 
@@ -34,27 +69,14 @@ public class SequencingSynthesizerInputsGui extends TabbedGuiContainer {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/sequencing_synthesizer_inputs.png"));
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+    }
 
-        GlStateManager.disableBlend();
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        TextureAtlasSprite water = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.WATER.getDefaultState());
-        TextureAtlasSprite sugar = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.REEDS.getDefaultState());
-        TextureAtlasSprite bone = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.BONE_BLOCK.getDefaultState());
-        TextureAtlasSprite leaves = mc.getBlockRendererDispatcher().getBlockModelShapes().getTexture(Blocks.LEAVES.getDefaultState());
-
-        double total = this.blockEntity.getTotalStorage();
-        MachineUtils.drawTiledTexture(this.guiLeft + 21F, this.guiTop + 5F + 52F * (1F - this.blockEntity.getTank().getFluidAmount() / (float)this.blockEntity.getTank().getCapacity()), this.guiLeft + 37F, this.guiTop + 55F, 16, 16, water.getMinU(), water.getMinV(), water.getMaxU(), water.getMaxV());
-        MachineUtils.drawTiledTexture(this.guiLeft + 59F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getSugarAmount() / total)), this.guiLeft + 75F, this.guiTop + 55F, 16, 16, sugar.getMinU(), sugar.getMinV(), sugar.getMaxU(), sugar.getMaxV());
-        MachineUtils.drawTiledTexture(this.guiLeft + 97F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getBoneAmount() / total)), this.guiLeft + 113F, this.guiTop + 55F, 16, 16, bone.getMinU(), bone.getMinV(), bone.getMaxU(), bone.getMaxV());
-        GlStateManager.color(0.0941F, 0.7098F, 0.2823F, 1f);
-        MachineUtils.drawTiledTexture(this.guiLeft + 135F, (float) (this.guiTop + 5F + 52F * (1F - this.blockEntity.getPlantAmount() / total)), this.guiLeft + 151F, this.guiTop + 55F, 16, 16, leaves.getMinU(), leaves.getMinV(), leaves.getMaxU(), leaves.getMaxV());
-        GlStateManager.color(1f, 1f, 1f, 1f);
-
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-        this.drawTexturedModalRect(this.guiLeft + 21F, this.guiTop + 5F, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 59F, this.guiTop + 5F, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 97F, this.guiTop + 5F, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 135F, this.guiTop + 5F, 176, 0, 16, 52);
+    private String drawTankWithTooltip(int mouseX, int mouseY, int left, double value, TextureAtlasSprite sprite) {
+        GlStateManager.enableDepth();
+        MachineUtils.drawTiledTexture(this.guiLeft + left, (float) (this.guiTop + 5F + 52F * (1F - value)), this.guiLeft + left + 16F, this.guiTop + 55F, sprite);
+        if(mouseX > this.guiLeft + left && mouseX < this.guiLeft + left + 16F && mouseY > this.guiTop + 5 && mouseY < this.guiTop + 55F) {
+            return Math.round(value * 100F) + "%";
+        }
+        return null;
     }
 }
