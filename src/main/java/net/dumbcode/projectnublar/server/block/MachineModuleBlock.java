@@ -73,7 +73,7 @@ public class MachineModuleBlock extends Block implements IItemBlock{
             for (MachineModulePart value : this.values) {
                 int tier = blockEntity.getTier(value.getType());
                 int newTier = value.getTierFromStack(stack);
-                if(newTier > tier && value.testDependents(newTier, blockEntity::getTier)) {
+                if(newTier == tier+1 && value.testDependents(newTier, blockEntity::getTier)) {
                     blockEntity.setTier(value.getType(), newTier);
                     blockEntity.tiersUpdated();
                     stack.shrink(1);
