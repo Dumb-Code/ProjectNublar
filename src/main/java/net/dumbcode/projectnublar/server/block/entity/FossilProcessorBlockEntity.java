@@ -92,6 +92,11 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
         return super.isItemValidFor(slot, stack);
     }
 
+    @Override
+    public int[] constantInputSlots() {
+        return new int[] { 0, 2, 3 };
+    }
+
     private int layer;
 
     @Override

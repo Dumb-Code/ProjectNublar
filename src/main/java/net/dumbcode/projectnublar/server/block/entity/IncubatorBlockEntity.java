@@ -98,6 +98,11 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
+    public int[] constantInputSlots() {
+        return new int[] { 0 };
+    }
+
+    @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
         if(slot == 0) {
             return MachineUtils.getPlantMatter(stack, this.world, this.pos) > 0;

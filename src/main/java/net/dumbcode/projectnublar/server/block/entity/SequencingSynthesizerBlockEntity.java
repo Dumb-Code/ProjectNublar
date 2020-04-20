@@ -246,6 +246,11 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         }
     }
 
+    @Override
+    public int[] constantInputSlots() {
+        return new int[] { 0, 1, 2, 3, 4, 5 };
+    }
+
     private double updateAmount(double currentAmount, ItemStack stack, ToDoubleFunction<ItemStack> amountGetter) {
         if(currentAmount < this.totalStorage && !stack.isEmpty()) {
             double amount = amountGetter.applyAsDouble(stack);

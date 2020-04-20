@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
@@ -15,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -36,13 +38,14 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements ITickable {
 
     public final Collection<MachineRecipe<B>> recipes = Collections.unmodifiableCollection(this.getAllRecipes());
     private final B asB = asB();
 
-    @Getter protected final MachineModuleItemStackHandler handler = new MachineModuleItemStackHandler<>(this, this.getInventorySize());
+    @Getter protected final MachineModuleItemStackHandler<B> handler = new MachineModuleItemStackHandler<>(this, this.getInventorySize());
     private final List<MachineProcess<B>> processes = this.createProcessList();
 
     private final MachineModuleItemStackWrapper inputWrapper;
@@ -57,16 +60,18 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public MachineModuleBlockEntity() {
         this.energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed());
-        this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots);
-        this.outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots);
+        this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots, this.constantInputSlots());
+        this.outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots, this.constantOutputSlots());
     }
 
-    private MachineModuleItemStackWrapper getFromProcesses(Function<MachineProcess<B>, int[]> func) {
+    private MachineModuleItemStackWrapper getFromProcesses(Function<MachineProcess<B>, int[]> func, int[] constantSlots) {
         return new MachineModuleItemStackWrapper(this.handler,
+            IntStream.concat(
                 this.processes.stream()
-                        .map(func)
-                        .flatMapToInt(Arrays::stream)
-                        .toArray()
+                    .map(func)
+                    .flatMapToInt(Arrays::stream),
+                Arrays.stream(constantSlots)
+            ).toArray()
         );
     }
 
@@ -179,6 +184,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     public void tiersUpdated() {
+    }
+
+    public int[] constantInputSlots() {
+        return new int[0];
+    }
+
+    public int[] constantOutputSlots() {
+        return new int[0];
     }
 
     /**
