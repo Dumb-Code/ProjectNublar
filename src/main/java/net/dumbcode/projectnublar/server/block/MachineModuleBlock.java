@@ -100,6 +100,15 @@ public class MachineModuleBlock extends Block implements IItemBlock{
     }
 
     @Override
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if(tileEntity instanceof MachineModuleBlockEntity) {
+            ((MachineModuleBlockEntity<?>) tileEntity).dropEmStacks();
+        }
+        super.breakBlock(worldIn, pos, state);
+    }
+
+    @Override
     public boolean hasTileEntity(IBlockState state) {
         return true;
     }

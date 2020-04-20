@@ -281,6 +281,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return null;
     }
 
+    public void dropEmStacks() {
+        for (int i = 0; i < this.handler.getSlots(); i++) {
+            InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), this.handler.getStackInSlot(i));
+        }
+    }
+
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
     {
