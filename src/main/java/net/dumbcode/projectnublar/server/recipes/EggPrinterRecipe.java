@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHand
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -36,8 +37,10 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
         boolean brokenEgg = blockEntity.getTier(MachineModuleType.LEVELING_SENSORS) == 0 && blockEntity.getWorld().rand.nextFloat() > 0.1F;
 
         handler.insertOutputItem(process.getOutputSlot(1), new ItemStack(ItemHandler.EMPTY_SYRINGE), false);
-        handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(brokenEgg ? ItemHandler.BROKEN_ARTIFICIAL_EGG : ItemHandler.ARTIFICIAL_EGG), false);
-
+        ItemStack remaining = handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(brokenEgg ? ItemHandler.BROKEN_ARTIFICIAL_EGG : ItemHandler.ARTIFICIAL_EGG), false);
+        if(!remaining.isEmpty()) {
+            InventoryHelper.spawnItemStack(blockEntity.getWorld(), blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ(), remaining);
+        }
 
         handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
         handler.getStackInSlot(process.getInputSlot(1)).shrink(5);
