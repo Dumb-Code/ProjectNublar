@@ -76,9 +76,9 @@ Effects the number of eggs that can be incubated at once on a single incubator.
  - Default -> 3 eggs
  - 1 -> 6 eggs
  - 2 -> 9 eggs
-## Coal Generator
+## Generator
 ### Turbines
-Effects the amount of energy (FE) a tick.
+Effects the amount of energy (FE) a tick from burning items.
  - Default -> 2000
  - 1 -> 3000
  - 2 -> 4000
