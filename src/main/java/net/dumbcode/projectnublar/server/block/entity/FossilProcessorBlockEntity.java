@@ -5,7 +5,9 @@ import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.dumbcode.projectnublar.server.item.FilterItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.recipes.FossilProcessorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
@@ -30,7 +32,8 @@ import java.util.List;
 
 public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilProcessorBlockEntity> {
 
-    private final FluidTank tank = new FluidTank(Fluid.BUCKET_VOLUME * 5) {
+    private static final int DEFAULT_CAPACITY = Fluid.BUCKET_VOLUME * 2;
+    private final FluidTank tank = new FluidTank(DEFAULT_CAPACITY) {
 
         @Override
         public boolean canFillFluidType(FluidStack fluid) {
@@ -47,7 +50,6 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
         this.tank.setTileEntity(this);
     }
 
-
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
     {
@@ -63,6 +65,11 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
             return (T) this.tank;
         }
         return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public void tiersUpdated() {
+        this.tank.setCapacity((int) (DEFAULT_CAPACITY * this.getTierModifier(MachineModuleType.TANKS, 0.5F)));
     }
 
     @Override
@@ -87,9 +94,17 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
         switch (slot) {
             case 0: return MachineUtils.getWaterAmount(stack) != -1;
             case 2: return stack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
-            case 3: return stack.getItem() == ItemHandler.FILTER;
+            case 3: return stack.getItem() instanceof FilterItem;
         }
         return super.isItemValidFor(slot, stack);
+    }
+
+    @Override
+    public int slotSize(int slot) {
+        if(slot == 3) { //Filter
+            return 1;
+        }
+        return super.slotSize(slot);
     }
 
     @Override
@@ -138,7 +153,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 84, 176,
+        return new MachineModuleContainer(player, 83, 176,
                 new MachineModuleSlot(this, 0, 8, 61), //water
                 new MachineModuleSlot(this, 1, 67, 12), //fossil
                 new MachineModuleSlot(this, 2, 67, 52), //test tub

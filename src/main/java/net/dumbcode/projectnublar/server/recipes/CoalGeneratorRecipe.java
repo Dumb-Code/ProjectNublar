@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.recipes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.CoalGeneratorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -53,6 +54,6 @@ public enum CoalGeneratorRecipe implements MachineRecipe<CoalGeneratorBlockEntit
 
     @Override
     public int getCurrentProductionPerTick(CoalGeneratorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 2000;
+        return (int) (2000*blockEntity.getTierModifier(MachineModuleType.TURBINES, 0.5F));
     }
 }

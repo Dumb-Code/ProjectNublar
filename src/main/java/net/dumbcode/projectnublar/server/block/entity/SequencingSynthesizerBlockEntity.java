@@ -9,7 +9,7 @@ import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.DriveItem;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
@@ -53,7 +53,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     };
 
     public static final double DEFAULT_STORAGE = 16D;
-    private static final int BASE_TOTAL_CONSUME_TIME = 200;
+    private static final int HDD_TOTAL_CONSUME_TIME = 200;
+    private static final int SSD_TOTAL_CONSUME_TIME = HDD_TOTAL_CONSUME_TIME / 2;
 
     @Getter
     private double totalStorage = DEFAULT_STORAGE;
@@ -92,8 +93,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         if(fluid != null) {
             fluid.amount = MathHelper.clamp(fluid.amount, 0, this.tank.getCapacity());
         }
-
-        this.totalConsumeTime = BASE_TOTAL_CONSUME_TIME - 40*(this.getTier(MachineModuleType.COMPUTER_CHIP));
     }
 
     @Override
@@ -180,7 +179,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     public boolean isItemValidFor(int slot, ItemStack stack) {
         switch (slot) {
-            case 0: return stack.getItem() == ItemHandler.HARD_DRIVE;
+            case 0: return stack.getItem() instanceof DriveItem;
             case 1: return MachineUtils.getWaterAmount(stack) != -1;
             case 2: return MachineUtils.getSugarMatter(stack) > 0;
             case 3: return MachineUtils.getBoneMatter(stack) > 0;
@@ -198,6 +197,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.layer++;
             this.handler.setStackInSlot(slot, MachineUtils.fillTank(this.handler.getStackInSlot(slot), this.tank));
             this.layer--;
+        }
+        if(slot == 0) {
+            ItemStack stack = this.handler.getStackInSlot(slot);
+            if(!stack.isEmpty() && stack.getItem() instanceof DriveItem) {
+                this.totalConsumeTime = ((DriveItem) stack.getItem()).isSsd() ? SSD_TOTAL_CONSUME_TIME : HDD_TOTAL_CONSUME_TIME;
+            }
         }
         super.onSlotChanged(slot);
     }
@@ -264,7 +269,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     private boolean canConsume() {
         ItemStack in = this.handler.getStackInSlot(5);
-        if(in.getItem() instanceof DriveUtils.DriveInformation && this.handler.getStackInSlot(0).getItem() == ItemHandler.HARD_DRIVE && DriveUtils.canAdd(this.handler.getStackInSlot(0), in)) {
+        if(in.getItem() instanceof DriveUtils.DriveInformation && this.handler.getStackInSlot(0).getItem() instanceof DriveItem && DriveUtils.canAdd(this.handler.getStackInSlot(0), in)) {
             ItemStack out = ((DriveUtils.DriveInformation) in.getItem()).getOutItem(in);
             return out.isEmpty() || this.handler.insertOutputItem(6, out, true).isEmpty();
         }

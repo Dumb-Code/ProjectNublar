@@ -1,10 +1,13 @@
 package net.dumbcode.projectnublar.server.recipes;
 
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.item.DinosaurGeneticMaterialItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.ItemStackHandler;
@@ -28,7 +31,7 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
 
     @Override
     public int getRecipeTime(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 20;
+        return 7200 - 600*blockEntity.getTier(MachineModuleType.DRILL_BIT);
     }
 
     @Override
@@ -38,6 +41,7 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
         for (int i : process.getOutputSlots()) {
             if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE) {
                 ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom()));
+                DinosaurGeneticMaterialItem.setSize(stack, MathUtils.getWeightedResult(blockEntity.getTier(MachineModuleType.DRILL_BIT) + 1, 0.5));
                 if(!blockEntity.getWorld().isRemote) {
                     handler.setStackInSlot(i, stack);
                     inSlot.shrink(1);

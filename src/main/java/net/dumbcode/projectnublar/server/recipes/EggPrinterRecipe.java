@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -26,15 +27,16 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
 
     @Override
     public int getRecipeTime(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 50;
+        return 12000 - 2400*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override
     public void onRecipeFinished(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
+        boolean brokenEgg = blockEntity.getTier(MachineModuleType.LEVELING_SENSORS) == 0 && blockEntity.getWorld().rand.nextFloat() > 0.1F;
 
         handler.insertOutputItem(process.getOutputSlot(1), new ItemStack(ItemHandler.EMPTY_SYRINGE), false);
-        handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.ARTIFICIAL_EGG), false);
+        handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(brokenEgg ? ItemHandler.BROKEN_ARTIFICIAL_EGG : ItemHandler.ARTIFICIAL_EGG), false);
 
 
         handler.getStackInSlot(process.getInputSlot(0)).shrink(1);

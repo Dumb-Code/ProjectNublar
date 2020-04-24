@@ -1,21 +1,14 @@
 package net.dumbcode.projectnublar.server.recipes;
 
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.DrillExtractorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
-import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
-import net.dumbcode.projectnublar.server.item.DinosaurProvider;
-import net.dumbcode.projectnublar.server.item.FossilItem;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.items.ItemStackHandler;
-
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockEntity> {
 
@@ -27,22 +20,29 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
         Item item = inSlot.getItem();
         return item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item)
-                && handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur())), true).isEmpty();
+            && handler.getStackInSlot(3).getItem() instanceof FilterItem && handler.getStackInSlot(process.getOutputSlot(0)).isEmpty();
     }
 
     @Override
     public int getRecipeTime(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 30;
+        return 4800 - 1200*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override
     public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        MachineModuleItemStackHandler itemStackHandler = blockEntity.getHandler();
-        ItemStack inputStack = itemStackHandler.getStackInSlot(process.getInputSlot(0));
+        MachineModuleItemStackHandler handler = blockEntity.getHandler();
+        ItemStack inputStack = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack filter = handler.getStackInSlot(3);
+        float efficiency = ((FilterItem)filter.getItem()).getEfficiency(filter);
         inputStack.shrink(1);
+        if (filter.attemptDamageItem(1, blockEntity.getWorld().rand, null)) {
+            filter.shrink(1);
+        }
         Item item = inputStack.getItem();
         if(item instanceof DinosaurProvider) {
-            itemStackHandler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur())), false);
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()));
+            DinosaurGeneticMaterialItem.setSize(stack, MathUtils.getWeightedResult(5*efficiency, 0.5F-efficiency/2F));
+            handler.insertOutputItem(process.getOutputSlot(0), stack, false);
         }
     }
 

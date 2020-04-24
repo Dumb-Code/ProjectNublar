@@ -179,7 +179,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         this.tiersUpdated();
     }
 
-    protected float getTierModifier(MachineModuleType type, float step) {
+    public float getTierModifier(MachineModuleType type, float step) {
         return this.getTier(type)*step + 1;
     }
 

@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.recipes.IncubatorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
@@ -26,7 +27,7 @@ import java.util.List;
 
 public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBlockEntity> {
 
-    public static final int TOTAL_PLANT_MATTER = 100;
+    public static final int DEFAULT_PLANT_MATTER = 100;
 
     @SideOnly(Side.CLIENT)
     public float movementTicks;
@@ -50,6 +51,14 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     @Setter
     private double plantMatter;
 
+    @Getter
+    private double totalPlantMatter;
+
+    @Override
+    public void tiersUpdated() {
+        this.totalPlantMatter = DEFAULT_PLANT_MATTER * this.getTierModifier(MachineModuleType.TANKS, 0.5F);
+    }
+
     @Override
     protected int getInventorySize() {
         return 7;
@@ -68,8 +77,8 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     @Override
     public void update() {
         super.update();
-        if(this.plantMatter < TOTAL_PLANT_MATTER) {
-            this.plantMatter = Math.min(TOTAL_PLANT_MATTER, this.plantMatter + MachineUtils.getPlantMatter(this.handler.getStackInSlot(0).splitStack(1), this.world, this.pos));
+        if(this.plantMatter < this.totalPlantMatter) {
+            this.plantMatter = Math.min(this.totalPlantMatter, this.plantMatter + MachineUtils.getPlantMatter(this.handler.getStackInSlot(0).splitStack(1), this.world, this.pos));
         }
     }
 

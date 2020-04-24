@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.server.item;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -11,7 +13,11 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class DriveItem extends Item {
+
+    @Getter
+    private final boolean ssd;
 
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {

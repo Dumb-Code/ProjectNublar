@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
 import net.dumbcode.projectnublar.server.item.DinosaurProvider;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -14,19 +15,15 @@ import net.minecraft.util.ResourceLocation;
 public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     INSTANCE;
 
-    private static final int TIME_SECONDS = 120;
-    private static final int TIME_TICKS = TIME_SECONDS * 20;
-    private static final int TIME_PER_PERCENT = TIME_TICKS / 100;
-
     @Override
     public boolean accepts(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         Item item = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0)).getItem();
-        return blockEntity.getPlantMatter() == IncubatorBlockEntity.TOTAL_PLANT_MATTER && item instanceof BasicDinosaurItem && ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(item);
+        return blockEntity.getPlantMatter() >= IncubatorBlockEntity.DEFAULT_PLANT_MATTER && item instanceof BasicDinosaurItem && ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(item);
     }
 
     @Override
     public int getRecipeTime(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return TIME_PER_PERCENT;
+        return 360 - 60*blockEntity.getTier(MachineModuleType.BULB);//30 minutes total, 18 seconds per %
     }
 
     @Override

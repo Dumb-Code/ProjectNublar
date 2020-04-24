@@ -17,11 +17,34 @@ public class MachineModuleParts {
         simplePartItem(MachineModuleType.TEST, null, () -> Items.APPLE, () -> Items.STICK)
     };
 
+    public static final MachineModulePart[] DRILL_EXTRACTOR = {
+        simplePartItemMeta(MachineModuleType.DRILL_BIT, null, 5, () -> ItemHandler.DRILL_BIT_PART)
+    };
+
+    public static final MachineModulePart[] FOSSIL_PROCESSOR = {
+        simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 3, () -> ItemHandler.COMPUTER_CHIP_PART),
+        simplePartItemMeta(MachineModuleType.TANKS, null, 2, () -> ItemHandler.TANKS_PART),
+    };
+
     public static final MachineModulePart[] SEQUENCING_SYNTHESIZER = {
         simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 2, () -> ItemHandler.COMPUTER_CHIP_PART),
         simplePartItemMeta(MachineModuleType.TANKS, null, 4, () -> ItemHandler.TANKS_PART),
     };
 
+    public static final MachineModulePart[] EGG_PRINTER = {
+        simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 3, () -> ItemHandler.COMPUTER_CHIP_PART),
+        simplePartItem(MachineModuleType.LEVELING_SENSORS, null, () -> ItemHandler.LEVELLING_SENSOR_PART),
+    };
+
+    public static final MachineModulePart[] INCUBATOR = {
+        simplePartItemMeta(MachineModuleType.BULB, null, 3, () -> ItemHandler.BULB_PART),
+        simplePartItemMeta(MachineModuleType.CONTAINER, null, 2, () -> ItemHandler.CONTAINER_PART), //todo: implement this
+        simplePartItemMeta(MachineModuleType.TANKS, null, 2, () -> ItemHandler.TANKS_PART),
+    };
+
+    public static final MachineModulePart[] COAL_GENERATOR = {
+        simplePartItemMeta(MachineModuleType.TURBINES, null, 2, () -> ItemHandler.TURBINES_PART)
+    };
 
     @SafeVarargs
     public static MachineModulePart simplePart(MachineModuleType type, @Nullable MachineModuleType dependency, Predicate<ItemStack>... tiers) {
@@ -45,11 +68,7 @@ public class MachineModuleParts {
         return MachineModulePart.builder()
             .type(type)
             .dependency(dependency)
-            .tiers(Arrays.stream(tiers).map(MachineModuleParts::convert).collect(Collectors.toList()))
+            .tiers(Arrays.stream(tiers).<Predicate<ItemStack>>map(itemSupplier -> stack -> stack.getItem() == itemSupplier.get()).collect(Collectors.toList()))
             .build();
-    }
-
-    private static Predicate<ItemStack> convert(Supplier<Item> itemSupplier) {
-        return stack -> stack.getItem() == itemSupplier.get();
     }
 }
