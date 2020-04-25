@@ -1,0 +1,19 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "projectnublar:fossil_processor_base.tbl" }
+    },
+    {
+      "when": { "tanks": "0" },
+      "apply": { "model": "projectnublar:fossil_processor_tanks_0.tbl" }
+    },
+    {
+      "when": { "tanks": "1" },
+      "apply": { "model": "projectnublar:fossil_processor_tanks_1.tbl" }
+    },
+    {
+      "when": { "tanks": "2" },
+      "apply": { "model": "projectnublar:fossil_processor_tanks_2.tbl" }
+    }
+  ]
+}
