@@ -23,19 +23,21 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
 
     @Override
     public int getRecipeTime(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 360 - 60*blockEntity.getTier(MachineModuleType.BULB);//30 minutes total, 18 seconds per %
+        return 36000 - 6000*blockEntity.getTier(MachineModuleType.BULB);//30 minutes total, 18 seconds per %
+    }
+
+    @Override
+    public void onRecipeTick(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+        ItemStack out = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0));
+        NBTTagCompound nbt = out.getOrCreateSubCompound(ProjectNublar.MODID);
+        nbt.setInteger("AmountDone", Math.round(100F * process.getTime() / (float)process.getTotalTime()));
+
     }
 
     @Override
     public void onRecipeFinished(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         ItemStack out = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0));
-        Item item = out.getItem();
-        NBTTagCompound nbt = out.getOrCreateSubCompound(ProjectNublar.MODID);
-        if(nbt.getInteger("AmountDone") < 99) {
-            nbt.setInteger("AmountDone", nbt.getInteger("AmountDone") + 1);
-        } else if(item instanceof DinosaurProvider) {
-            blockEntity.getHandler().setStackInSlot(process.getOutputSlot(0), new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) item).getDinosaur())));
-        }
+        blockEntity.getHandler().setStackInSlot(process.getOutputSlot(0), new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) out.getItem()).getDinosaur())));
     }
 
     @Override

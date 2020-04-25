@@ -471,6 +471,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         public void tick() {
             this.time++;
+            if(currentRecipe != null) {
+                this.totalTime = currentRecipe.getRecipeTime(machine.asB, this);
+                currentRecipe.onRecipeTick(machine.asB, this);
+            }
         }
 
         public boolean isFinished() {
