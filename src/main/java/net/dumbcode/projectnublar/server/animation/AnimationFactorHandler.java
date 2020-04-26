@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.animation;
 
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationFactor;
+import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -21,15 +22,18 @@ public class AnimationFactorHandler {
     @SubscribeEvent
     public static void onAnimationFactorRegister(RegistryEvent.Register<AnimationFactor> event) {
         event.getRegistry().registerAll(
-                new AnimationFactor((access, type, partialTicks) -> {
-                    Entity entity = (Entity) access;
-                    double speed = access.get(EntityComponentTypes.SPEED_TRACKING)
+                new AnimationFactor((entity, type, partialTicks) -> {
+                    if(entity instanceof ComponentAccess) {
+                        ComponentAccess access = (ComponentAccess) entity;
+                        double speed = access.get(EntityComponentTypes.SPEED_TRACKING)
                             .map(comp -> comp.getPreviousSpeed() + (comp.getSpeed() - comp.getPreviousSpeed()) * partialTicks)
                             .orElse(Math.sqrt(entity.motionX*entity.motionX + entity.motionZ*entity.motionZ)) * 12F;
-                    if(type.isAngle()) {
-                        speed = Math.min(speed, 1.0F);
+                        if(type.isAngle()) {
+                            speed = Math.min(speed, 1.0F);
+                        }
+                        return (float)speed;
                     }
-                    return (float)speed;
+                    return 1F;
                 }).setRegistryName("limb_swing")
         );
     }

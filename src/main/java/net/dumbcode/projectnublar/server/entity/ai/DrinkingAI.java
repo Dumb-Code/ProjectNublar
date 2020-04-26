@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.ai;
 
 import net.dumbcode.dumblibrary.DumbLibrary;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
@@ -104,7 +105,7 @@ public class DrinkingAI extends EntityAIBase {
             this.entity.getLookHelper().setLookPosition(position.x, position.y, position.z, this.entity.getHorizontalFaceSpeed(), this.entity.getVerticalFaceSpeed());
             if(this.drinkingTicks == 0) {
                 this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a ->
-                    a.playAnimation(this.access, new AnimationLayer.AnimationEntry(AnimationHandler.DRINKING), MetabolismComponent.METABOLISM_CHANNEL)
+                    a.playAnimation(this.access, new AnimationEntry(AnimationHandler.DRINKING), MetabolismComponent.METABOLISM_CHANNEL)
                 );
             }
             if(this.drinkingTicks++ >= this.metabolism.getWaterTicks()) {

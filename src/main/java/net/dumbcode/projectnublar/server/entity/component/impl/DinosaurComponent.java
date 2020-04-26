@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.entity.component.impl;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
@@ -81,7 +82,7 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
         entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
             c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).orElse(AgeStage.MISSING).getName()));
 
-            c.proposeAnimation(entity, new AnimationLayer.AnimationEntry(AnimationHandler.WALKING)
+            c.proposeAnimation(entity, new AnimationEntry(AnimationHandler.WALKING)
                             .loop()
                             .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)
                             .withSpeedFactor(AnimationFactorHandler.LIMB_SWING),

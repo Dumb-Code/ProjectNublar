@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimatableCube;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.EntityFamily;
@@ -73,11 +74,11 @@ public class MultipartSystem implements EntitySystem {
         Matrix4d entityRotate = new Matrix4d();
         entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
 
-        Function<String, AnimationLayer.AnimatableCube> function = layer.getAnicubeRef();
+        Function<String, AnimatableCube> function = layer.getAnicubeRef();
         for (MultipartEntityComponent.LinkedEntity cube : multipart.getEntities()) {
             for (Entity e : entity.world.loadedEntityList) {
                 if(e instanceof EntityPart && e.getUniqueID().equals(cube.getEntityUUID())) {
-                    AnimationLayer.AnimatableCube animatableCube = function.apply(cube.getCubeName());
+                    AnimatableCube animatableCube = function.apply(cube.getCubeName());
                     if (animatableCube != null && e.ticksExisted > 1) {
                         EntityPart cubeEntity = (EntityPart) e;
                         Point3d sp = null;

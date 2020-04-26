@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.entity.ai;
 
 import lombok.ToString;
 import net.dumbcode.dumblibrary.DumbLibrary;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
@@ -99,7 +100,7 @@ public class FeedingAI extends EntityAIBase {
                 this.entityLiving.getLookHelper().setLookPosition(position.x, position.y, position.z, this.entityLiving.getHorizontalFaceSpeed(), this.entityLiving.getVerticalFaceSpeed());
                 if(this.eatingTicks == 0) {
                     this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a ->
-                        a.playAnimation(this.access, new AnimationLayer.AnimationEntry(AnimationHandler.EATING), MetabolismComponent.METABOLISM_CHANNEL)
+                        a.playAnimation(this.access, new AnimationEntry(AnimationHandler.EATING), MetabolismComponent.METABOLISM_CHANNEL)
                     );
                 }
                 if(this.eatingTicks++ >= this.metabolism.getFoodTicks()) {
