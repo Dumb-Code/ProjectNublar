@@ -12,29 +12,17 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
-@GameRegistry.ObjectHolder(ProjectNublar.MODID)
 public class AnimationFactorHandler {
 
     private AnimationFactorHandler() {}
 
-    public static final AnimationFactor LIMB_SWING = InjectedUtils.injected();
-
-    @SubscribeEvent
-    public static void onAnimationFactorRegister(RegistryEvent.Register<AnimationFactor> event) {
-        event.getRegistry().registerAll(
-                new AnimationFactor((entity, type, partialTicks) -> {
-                    if(entity instanceof ComponentAccess) {
-                        ComponentAccess access = (ComponentAccess) entity;
-                        double speed = access.get(EntityComponentTypes.SPEED_TRACKING)
-                            .map(comp -> comp.getPreviousSpeed() + (comp.getSpeed() - comp.getPreviousSpeed()) * partialTicks)
-                            .orElse(Math.sqrt(entity.motionX*entity.motionX + entity.motionZ*entity.motionZ)) * 12F;
-                        if(type.isAngle()) {
-                            speed = Math.min(speed, 1.0F);
-                        }
-                        return (float)speed;
-                    }
-                    return 1F;
-                }).setRegistryName("limb_swing")
-        );
-    }
+    public static final AnimationFactor<ComponentAccess> LIMB_SWING = new AnimationFactor<>("limb_swing", ComponentAccess.class, (access, type, partialTicks) -> {
+        double speed = access.get(EntityComponentTypes.SPEED_TRACKING)
+            .map(comp -> comp.getPreviousSpeed() + (comp.getSpeed() - comp.getPreviousSpeed()) * partialTicks)
+            .orElse(1D/12D) * 12F;
+        if(type.isAngle()) {
+            speed = Math.min(speed, 1.0F);
+        }
+        return (float)speed;
+    });
 }
