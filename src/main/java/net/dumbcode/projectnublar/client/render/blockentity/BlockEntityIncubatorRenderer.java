@@ -5,6 +5,7 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
@@ -30,7 +31,13 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import javax.xml.ws.Holder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<IncubatorBlockEntity> {
 
@@ -85,24 +92,23 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
         this.renderArm(te, partialTicks);
 
-        Vec3d look = Minecraft.getMinecraft().player.getLookVec();
-
-        for (IncubatorBlockEntity.Egg egg : Lists.newArrayList(te.getEggList())) {
-            this.renderEgg(egg);
+        for (IncubatorBlockEntity.Egg egg : te.getEggList()) {
+            if(egg != null) {
+                this.renderEgg(egg);
+            }
         }
 
         GlStateManager.popMatrix();
     }
 
     private void renderArm(IncubatorBlockEntity te, float partialTicks) {
-//        GlStateManager.disableTexture2D();
         this.bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
 
         GlStateManager.pushMatrix();
         this.doTabulaTransforms();
 
         this.updateEgg(te, partialTicks);
-        this.setAngles(te.activeEgg, te.movementTicks, te.snapshot, partialTicks);
+        this.setAngles(te.activeEgg != -1 ? te.getEggList()[te.activeEgg] : null, te.movementTicks, te.snapshot, partialTicks);
 
         this.armModel.renderBoxes(1/16F);
 
@@ -112,12 +118,12 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
     private void renderEgg(IncubatorBlockEntity.Egg egg) {
         if(egg.getEggType() == DinosaurEggType.EMPTY) {
-//            return;
+            return;
         }
         DinosaurEggType type = egg.getEggType();
+        MC.renderEngine.bindTexture(type.getTexture());
 
         GlStateManager.pushMatrix();
-        GlStateManager.disableTexture2D();
 
         Vec3d eggEnd = egg.getEggPosition();
         Vec3d normal = egg.getPickupDirection().normalize();
@@ -125,7 +131,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         double eggRotationZ = Math.atan2(normal.y, this.xzDistance(Vec3d.ZERO, normal));
 
         double eggLength = type.getEggLength();
-        float scale = type.getScale() *2;
+        float scale = type.getScale()*2;
 
         GlStateManager.translate(eggEnd.x, eggEnd.y, eggEnd.z);
 
@@ -144,8 +150,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             this.drawDebugLines(0, 0, 0);
         }
         GlStateManager.translate(0, -1.5, 0);
-        type.getEggModel().render(null, 0F, 0F, 0F, 0F, 0F, 1/16F);
-        GlStateManager.enableTexture2D();
+        type.getEggModel().renderBoxes(1/16F);
 
         GlStateManager.popMatrix();
     }
@@ -181,23 +186,33 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     }
 
     private void updateEgg(IncubatorBlockEntity blockEntity, float partialTicks) {
-        blockEntity.getEggList().forEach(egg -> egg.setTicksSinceTurned(egg.getTicksSinceTurned() + partialTicks));
-        boolean doneSpin = blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN + TICKS_WAIT_AFTER_SPIN;
-        Holder<Boolean> holder = new Holder<>(false);
-        if((blockEntity.activeEgg == null && blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_COOLDOWN) || doneSpin) {
-            //Get all the eggs that haven't been turned around for a minute
-            //then shuffle the stream with a comparator that returns a between -1 and 1 on random.
-            //Without the shuffling, #findAny will mean some eggs at the start of the list have more chance of being picked
-            blockEntity.getEggList().stream().filter(egg -> egg.getTicksSinceTurned() - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN - TICKS_TO_SPIN> 1200).sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2)).findAny().ifPresent(egg -> {
-                blockEntity.activeEgg = egg;
-                blockEntity.movementTicks = 0;
-                egg.setTicksSinceTurned(0);
-                holder.value = true;
-                this.createSnapshot(blockEntity);
-            });
+        for (IncubatorBlockEntity.Egg egg : blockEntity.getEggList()) {
+            if(egg != null) {
+                egg.setTicksSinceTurned(egg.getTicksSinceTurned() + partialTicks);
+            }
         }
-        if(doneSpin && !holder.value) {
-            blockEntity.activeEgg = null;
+        if(blockEntity.activeEgg != -1 && blockEntity.getEggList()[blockEntity.activeEgg] == null) {
+            blockEntity.activeEgg = -1;
+        }
+        boolean doneSpin = blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN + TICKS_WAIT_AFTER_SPIN;
+        boolean foundNewEgg = false;
+        if((blockEntity.activeEgg == -1 && blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_COOLDOWN) || doneSpin) {
+            //Get all the eggs that haven't been turned around for a minute
+            foundNewEgg = IntStream.range(0, 9)
+                .filter(i -> blockEntity.getEggList()[i] != null && blockEntity.getEggList()[i].getTicksSinceTurned() - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN - TICKS_TO_SPIN > 500)
+                .boxed()
+                .collect(IOCollectors.shuffler(getWorld().rand))
+                .findAny()
+                .map(i -> {
+                    blockEntity.activeEgg = i;
+                    blockEntity.movementTicks = 0;
+                    blockEntity.getEggList()[i].setTicksSinceTurned(0);
+                    this.createSnapshot(blockEntity);
+                    return true;
+                }).orElse(false);
+        }
+        if(doneSpin && !foundNewEgg) {
+            blockEntity.activeEgg = -1;
             blockEntity.movementTicks = 0;
             this.createSnapshot(blockEntity);
         }

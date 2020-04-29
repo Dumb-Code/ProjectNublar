@@ -2,14 +2,17 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
+import net.dumbcode.projectnublar.server.entity.ComponentHandler;
+import net.dumbcode.projectnublar.server.item.DinosaurProvider;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.recipes.IncubatorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
@@ -19,33 +22,32 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBlockEntity> {
 
     public static final int DEFAULT_PLANT_MATTER = 100;
+    public static final int EGG_SIZE = 16;
+    public static final int EGG_PADDING = 10;
 
     @SideOnly(Side.CLIENT)
     public float movementTicks;
     @SideOnly(Side.CLIENT)
     public float[] snapshot = new float[7];
     @SideOnly(Side.CLIENT)
-    public Egg activeEgg = null;
+    public int activeEgg = -1;
     @Getter
     @SideOnly(Side.CLIENT)
-    private final List<Egg> eggList = Lists.newArrayList(
-            new Egg(new Vec3d(11.0 / 16, 22.3/16, 2.9/16), new Vec3d(1, 0, 1)),
-            new Egg(new Vec3d(7.0 / 16, 22.2/16, 7.0/16), new Vec3d(0.8, 0, -0.4)),
-            new Egg(new Vec3d(5.0 / 16, 22.2/16, 3.0/16), new Vec3d(0.26, 0.5, 0.91)),
-            new Egg(new Vec3d(1.0 / 16, 22.2/16, 5.0/16), new Vec3d(1, 0, 0)),
-            new Egg(new Vec3d(10.5 / 16, 22.2/16, 8.5/16), new Vec3d(0, 1, 0)),
-            new Egg(new Vec3d(13.0 / 16, 22.2/16, 13.0/16), new Vec3d(-0.9, 0.1, -0.5)),
-            new Egg(new Vec3d(6.0 / 16, 22.2/16, 13.0/16), new Vec3d(0.9, -0.1, 0.3))
-    );
+    private final Egg[] eggList = new Egg[9];
 
     @Getter
     @Setter
@@ -61,7 +63,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     protected int getInventorySize() {
-        return 7;
+        return 10;
     }
 
     @Override
@@ -82,27 +84,115 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
         }
     }
 
+    public List<Egg> getCollidingEggs(int x, int y) {
+        List<Egg> eggs = new ArrayList<>();
+        for (Egg egg : this.eggList) {
+            if(egg != null && egg.xPos - EGG_PADDING < x + EGG_SIZE && egg.xPos + EGG_SIZE + EGG_PADDING > x &&
+                egg.yPos - EGG_PADDING < y + EGG_SIZE && egg.yPos + EGG_SIZE + EGG_PADDING > y) {
+                eggs.add(egg);
+            }
+        }
+        return eggs;
+    }
+
+    public boolean canPlaceEggAt(int x, int y) {
+        int amount = 0;
+        for (Egg egg : this.eggList) {
+            if(egg != null) {
+                amount++;
+            }
+        }
+        return this.getCollidingEggs(x, y).isEmpty() && amount < 3*(this.getTier(MachineModuleType.CONTAINER)+1);
+    }
+
+    public void placeEgg(int x, int y, ItemStack stack) {
+        if(this.canPlaceEggAt(x, y) && stack.getItem() instanceof DinosaurProvider) {
+            List<DinosaurEggType> eggTypes = ((DinosaurProvider) stack.getItem()).getDinosaur().getAttacher().getStorage(ComponentHandler.DINOSAUR_EGG_LAYING).getEggTypes();
+            DinosaurEggType type = eggTypes.get(this.world.rand.nextInt(eggTypes.size()));
+
+            Vec3d armPos = new Vec3d(1.6, 1.4, 0.5);
+            Vec3d position = new Vec3d(1D + 14D*x/100D, 22.2, 1D + 14D*y/100D).scale(1/16F);
+
+
+            double handLength = 4 / 16F; // BlockEntityIncubatorRenderer#HAND_JOIN.length
+
+            Vec3d normal;
+            do {
+                normal = armPos.subtract(position.x, 1.4 - (0.2+this.world.rand.nextFloat()*0.85), position.z)
+                    .rotateYaw((float) ((this.world.rand.nextFloat()-0.5D)*4D*Math.PI)).normalize();
+            } while(armPos.distanceTo(position.add(normal.scale(handLength))) > 1.35);
+
+            for (int i = 0; i < this.eggList.length; i++) {
+                if(this.eggList[i] == null) {
+                    this.eggList[i] = new Egg(x, y, position, normal, type);
+                    this.handler.setStackInSlot(i + 1, stack.splitStack(1));
+                    break;
+                }
+            }
+
+        }
+    }
+
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setDouble("PlantMatter", this.plantMatter);
+        NBTTagList list = new NBTTagList();
+        for (int i = 0; i < this.eggList.length; i++) {
+            Egg egg = this.eggList[i];
+            if(egg != null) {
+                NBTTagCompound nbt = new NBTTagCompound();
+
+                nbt.setByte("Slot", (byte) i);
+
+                nbt.setByte("XPos", (byte) egg.xPos);
+                nbt.setByte("YPos", (byte) egg.yPos);
+
+                nbt.setDouble("EggPositionX", egg.eggPosition.x);
+                nbt.setDouble("EggPositionY", egg.eggPosition.y);
+                nbt.setDouble("EggPositionZ", egg.eggPosition.z);
+
+                nbt.setDouble("PickupDirectionX", egg.pickupDirection.x);
+                nbt.setDouble("PickupDirectionY", egg.pickupDirection.y);
+                nbt.setDouble("PickupDirectionZ", egg.pickupDirection.z);
+
+                nbt.setTag("EggType", DinosaurEggType.writeToNBT(egg.eggType));
+
+                list.appendTag(nbt);
+            }
+        }
+        compound.setTag("Eggs", list);
         return super.writeToNBT(compound);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         this.plantMatter = compound.getDouble("PlantMatter");
+
+        NBTTagList eggs = compound.getTagList("Eggs", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < eggs.tagCount(); i++) {
+            NBTTagCompound t = eggs.getCompoundTagAt(i);
+            this.eggList[t.getByte("Slot")] = new Egg(
+                t.getByte("XPos"), t.getByte("YPos"),
+                new Vec3d(t.getDouble("EggPositionX"), t.getDouble("EggPositionY"), t.getDouble("EggPositionZ")),
+                new Vec3d(t.getDouble("PickupDirectionX"), t.getDouble("PickupDirectionY"), t.getDouble("PickupDirectionZ")),
+                DinosaurEggType.readFromNBT(t.getCompoundTag("EggType"))
+            );
+        }
         super.readFromNBT(compound);
     }
 
     @Override
     protected List<MachineProcess<IncubatorBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(this, new int[]{1}, new int[]{1}),
-                new MachineProcess<>(this, new int[]{2}, new int[]{2}),
-                new MachineProcess<>(this, new int[]{3}, new int[]{3}),
-                new MachineProcess<>(this, new int[]{4}, new int[]{4}),
-                new MachineProcess<>(this, new int[]{5}, new int[]{5}),
-                new MachineProcess<>(this, new int[]{6}, new int[]{6})
+            new MachineProcess<>(this, new int[]{1}, new int[]{1}),
+            new MachineProcess<>(this, new int[]{2}, new int[]{2}),
+            new MachineProcess<>(this, new int[]{3}, new int[]{3}),
+            new MachineProcess<>(this, new int[]{4}, new int[]{4}),
+            new MachineProcess<>(this, new int[]{5}, new int[]{5}),
+            new MachineProcess<>(this, new int[]{6}, new int[]{6}),
+            new MachineProcess<>(this, new int[]{7}, new int[]{7}),
+            new MachineProcess<>(this, new int[]{8}, new int[]{8}),
+            new MachineProcess<>(this, new int[]{9}, new int[]{9})
         );
     }
 
@@ -120,6 +210,22 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
+    public int slotSize(int slot) {
+        if(slot > 0) {
+            return 1; //Eggs
+        }
+        return super.slotSize(slot);
+    }
+
+    @Override
+    protected void onSlotChanged(int slot) {
+        if(slot > 0 && this.handler.getStackInSlot(slot).isEmpty()) {
+            this.eggList[slot-1] = null;
+        }
+        super.onSlotChanged(slot);
+    }
+
+    @Override
     @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
         return new IncubatorGuiScreen(player, this, info, tab);
@@ -127,14 +233,18 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 84, 176,
-                new MachineModuleSlot(this, 0, 80, 35),
-                new MachineModuleSlot(this, 1, 109, 34),
-                new MachineModuleSlot(this, 2, 93, 59),
-                new MachineModuleSlot(this, 2, 64, 59),
-                new MachineModuleSlot(this, 4, 50, 34),
-                new MachineModuleSlot(this, 5, 65, 9),
-                new MachineModuleSlot(this, 6, 94, 9));
+        return new MachineModuleContainer(player, 117, 176,
+            new MachineModuleSlot(this, 0, 8, 96),
+            new MachineModuleSlot(this, 1, 0, 0),
+            new MachineModuleSlot(this, 2, 0, 0),
+            new MachineModuleSlot(this, 3, 0, 0),
+            new MachineModuleSlot(this, 4, 0, 0),
+            new MachineModuleSlot(this, 5, 0, 0),
+            new MachineModuleSlot(this, 6, 0, 0),
+            new MachineModuleSlot(this, 7, 0, 0),
+            new MachineModuleSlot(this, 8, 0, 0),
+            new MachineModuleSlot(this, 9, 0, 0)
+        );
     }
 
     // TODO: Change for balance, values are just for testing
@@ -166,10 +276,12 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     @Getter
     @Setter
     @RequiredArgsConstructor
-    public class Egg {
+    public static class Egg {
+        private final int xPos;
+        private final int yPos;
         private final Vec3d eggPosition;
         private final Vec3d pickupDirection;
-        @NonNull private DinosaurEggType eggType = DinosaurEggType.EMPTY;
+        private final DinosaurEggType eggType;
         private float rotation;
         private float ticksSinceTurned;
     }
