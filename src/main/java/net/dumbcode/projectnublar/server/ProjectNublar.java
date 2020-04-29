@@ -12,6 +12,7 @@ import net.dumbcode.dumblibrary.server.network.S7HistoryRecord;
 import net.dumbcode.dumblibrary.server.network.S9UpdateHistoryIndex;
 import net.dumbcode.dumblibrary.server.network.S11FullPoseChange;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
+import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
@@ -110,6 +111,7 @@ public class ProjectNublar {
         DataSerializerHandler.register();
         EnumWeatherIcons.register();
         TabletBackground.registerDefaults();
+        AnimationFactorHandler.register();
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
             ResourceLocation regName = dinosaur.getRegName();

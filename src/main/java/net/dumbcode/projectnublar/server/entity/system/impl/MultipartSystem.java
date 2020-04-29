@@ -68,7 +68,7 @@ public class MultipartSystem implements EntitySystem {
             for (String cubeName : layer.getCubeNames()) {
                 layer.getAnicubeRef().apply(cubeName).reset();
             }
-            layer.animate(entity.ticksExisted);
+            layer.animate(1);
         }
 
         Matrix4d entityRotate = new Matrix4d();
