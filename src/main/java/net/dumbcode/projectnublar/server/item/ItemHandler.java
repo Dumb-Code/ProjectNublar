@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -105,7 +106,7 @@ public final class ItemHandler {
         populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
         populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", DinosaurGeneticMaterialItem::new, tab.andThen(i -> i.setMaxStackSize(1)));
         populateMap(event, TEST_TUBES_DNA, "%s_test_tube", BasicDinosaurItem::new);
-        populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(stack.getOrCreateSubCompound(ProjectNublar.MODID).getInteger("AmountDone") + "%")));
+        populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(MathUtils.ensureTrailingZeros(stack.getOrCreateSubCompound(ProjectNublar.MODID).getFloat("AmountDone"), 1) + "%")));
         populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
 
         populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(ComponentHandler.ITEM_DROPS).getFossilList(), FossilItem::new, "%s_fossil_%s", tab);
