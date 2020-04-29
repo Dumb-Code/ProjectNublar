@@ -199,7 +199,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         if((blockEntity.activeEgg == -1 && blockEntity.movementTicks > TICKS_TO_MOVE + TICKS_COOLDOWN) || doneSpin) {
             //Get all the eggs that haven't been turned around for a minute
             foundNewEgg = IntStream.range(0, 9)
-                .filter(i -> blockEntity.getEggList()[i] != null && blockEntity.getEggList()[i].getTicksSinceTurned() - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN - TICKS_TO_SPIN > 500)
+                .filter(i -> blockEntity.getEggList()[i] != null && blockEntity.getEggList()[i].getTicksSinceTurned() - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN - TICKS_TO_SPIN > 1200)
                 .boxed()
                 .collect(IOCollectors.shuffler(getWorld().rand))
                 .findAny()
