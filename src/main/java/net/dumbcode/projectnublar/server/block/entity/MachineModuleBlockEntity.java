@@ -127,40 +127,41 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     @Override
     public void update() {
-        updateEnergyNetwork();
-        if(energy.extractEnergy(getBaseEnergyConsumption(), false) < getBaseEnergyConsumption())
-            return;
-        for (MachineProcess<B> process : this.processes) {
-            if( ! canProvideEnergyForProcess(process)) {
-                this.getInterruptAction(process).processConsumer.accept(process);
-                continue;
-            }
-            if(this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
-                if(process.isProcessing() || this.searchForRecipes(process)) {
-                    if(process.isFinished()) {
-                        MachineRecipe<B> recipe = process.getCurrentRecipe();
-                        if(recipe != null) {
-                            recipe.onRecipeFinished(this.asB, process);
-                            process.setTime(0);
-                            if(!recipe.accepts(this.asB, process)) {
-                                process.setProcessing(false);
-                                process.setCurrentRecipe(null);
-                                this.searchForRecipes(process);
+        if(!this.world.isRemote) {
+            updateEnergyNetwork();
+            boolean hasPower = energy.extractEnergy(getBaseEnergyConsumption(), false) >= getBaseEnergyConsumption();
+            for (MachineProcess<B> process : this.processes) {
+                if (!canProvideEnergyForProcess(process)) {
+                    this.getInterruptAction(process).processConsumer.accept(process);
+                    continue;
+                }
+                if (hasPower && this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
+                    if (process.isProcessing() || this.searchForRecipes(process)) {
+                        if (process.isFinished()) {
+                            MachineRecipe<B> recipe = process.getCurrentRecipe();
+                            if (recipe != null) {
+                                recipe.onRecipeFinished(this.asB, process);
+                                process.setTime(0);
+                                if (!recipe.accepts(this.asB, process)) {
+                                    process.setProcessing(false);
+                                    process.setCurrentRecipe(null);
+                                    this.searchForRecipes(process);
+                                } else {
+                                    recipe.onRecipeStarted(asB(), process);
+                                }
                             } else {
-                                recipe.onRecipeStarted(asB(), process);
+                                ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
                             }
                         } else {
-                            ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
+                            energy.extractEnergy(process.getCurrentConsumptionPerTick(), false); // consume energy for process
+                            energy.receiveEnergy(process.getCurrentProductionPerTick(), false);
+                            process.tick();
                         }
-                    } else {
-                        energy.extractEnergy(process.getCurrentConsumptionPerTick(), false); // consume energy for process
-                        energy.receiveEnergy(process.getCurrentProductionPerTick(), false);
-                        process.tick();
+                        this.markDirty();
                     }
-                    this.markDirty();
+                } else if (process.isProcessing()) {
+                    this.getInterruptAction(process).processConsumer.accept(process);
                 }
-            } else if(process.isProcessing()) {
-                this.getInterruptAction(process).processConsumer.accept(process);
             }
         }
     }
@@ -269,16 +270,18 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     public boolean searchForRecipes(MachineProcess<B> process) {
-        for (MachineRecipe<B> recipe : this.recipes) {
-            if(recipe.accepts(this.asB, process) && this.canProcess(process)) {
-                process.setCurrentRecipe(recipe);
-                if(!process.isProcessing()) {
-                    recipe.onRecipeStarted(asB(), process);
+        if(!this.world.isRemote) {
+            for (MachineRecipe<B> recipe : this.recipes) {
+                if(recipe.accepts(this.asB, process) && this.canProcess(process)) {
+                    process.setCurrentRecipe(recipe);
+                    if(!process.isProcessing()) {
+                        recipe.onRecipeStarted(asB(), process);
+                    }
+                    process.setProcessing(true);
+                    process.setTotalTime(recipe.getRecipeTime(this.asB, process));
+                    this.markDirty();
+                    return true;
                 }
-                process.setProcessing(true);
-                process.setTotalTime(recipe.getRecipeTime(this.asB, process));
-                this.markDirty();
-                return true;
             }
         }
         return false;
