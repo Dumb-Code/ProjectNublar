@@ -54,7 +54,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     private double plantMatter;
 
     @Getter
-    private double totalPlantMatter;
+    private double totalPlantMatter = DEFAULT_PLANT_MATTER;
 
     @Override
     public void tiersUpdated() {
