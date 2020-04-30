@@ -27,7 +27,7 @@ public class ItemMetaNamed extends Item {
 
     @Override
     public int getMetadata(int damage) {
-        return MathHelper.clamp(damage, 0, this.subTypes);
+        return MathHelper.clamp(damage, 0, this.subTypes - 1);
     }
 
     @Override
