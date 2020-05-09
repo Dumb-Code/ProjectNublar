@@ -197,6 +197,7 @@ public class ProjectNublar {
         event.registerSystem(new TrackingSystem());
         event.registerSystem(new MetabolismSystem());
         event.registerSystem(new MoodSystem());
+        event.registerSystem(new DefenseSystem());
     }
 
     @EventHandler

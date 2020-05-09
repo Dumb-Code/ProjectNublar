@@ -92,6 +92,7 @@ public class Dilophosaurus extends Dinosaur {
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addComponent(ComponentHandler.WANDER_AI);
         this.addComponent(ComponentHandler.ATTACK_AI);
+        this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(2D);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
                 .initializeMap(

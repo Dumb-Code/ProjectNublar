@@ -97,14 +97,13 @@ public class SkeletalBuilderComponent extends EntityComponent implements RenderL
         @Getter private Map<String, List<String>> boneToModelMap = Maps.newHashMap();
 
         @Override
-        public SkeletalBuilderComponent constructTo(SkeletalBuilderComponent component) {
+        public void constructTo(SkeletalBuilderComponent component) {
 
             component.individualBones = this.individualBones;
             component.boneListed = this.boneListed;
             component.boneToModelMap = this.boneToModelMap;
 
 
-            return component;
         }
 
         //Currently, if a cube dosnt have a parent (or the parents parents ect...) linked with a bone, it dosnt render at all. TODO: fix that

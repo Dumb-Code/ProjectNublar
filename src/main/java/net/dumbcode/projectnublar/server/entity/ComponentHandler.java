@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.*;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackFenceComponent;
+import net.dumbcode.projectnublar.server.entity.component.impl.ai.DefenseComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
 import net.dumbcode.projectnublar.server.plants.component.PlantComponent;
 import net.minecraft.util.ResourceLocation;
@@ -32,6 +33,7 @@ public class ComponentHandler {
     public static final EntityComponentType<DinosaurEggLayingComponent, DinosaurEggLayingComponent.Storage> DINOSAUR_EGG_LAYING = InjectedUtils.injected();
     public static final EntityComponentType<TrackingComponent, ?> TRACKING_DATA = InjectedUtils.injected();
     public static final EntityComponentType<BasicEntityInformationComponent, ?> BASIC_ENTITY_INFORMATION = InjectedUtils.injected();
+    public static final EntityComponentType<DefenseComponent, DefenseComponent.Storage> DEFENSE = InjectedUtils.injected();
 
     public static final EntityComponentType<MoodComponent, ?> MOOD = InjectedUtils.injected();
     public static final EntityComponentType<AttackFenceComponent, ?> ATTACK_FENCE_AI = InjectedUtils.injected();

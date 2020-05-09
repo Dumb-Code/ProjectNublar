@@ -87,6 +87,7 @@ public class Tyrannosaurus extends Dinosaur {
 
         this.addComponent(ComponentHandler.WANDER_AI);
         this.addComponent(ComponentHandler.ATTACK_AI);
+        this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(3D);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
             .initializeMap(

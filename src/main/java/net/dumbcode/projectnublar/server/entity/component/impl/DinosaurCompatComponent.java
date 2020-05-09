@@ -13,7 +13,7 @@ public class DinosaurCompatComponent extends EntityComponent implements Finaliza
     public void finalizeAdditiveComponent(ComponentAccess entity) {
         entity.get(ComponentHandler.DINOSAUR).ifPresent(dinosaurComponent -> {
             if(entity instanceof ComponentWriteAccess) {
-                for (EntityComponentAttacher.ComponentPair pair : dinosaurComponent.getDinosaur().getAttacher().getDefaultConfig().getTypes()) {
+                for (EntityComponentAttacher.ComponentPair<?, ?> pair : dinosaurComponent.getDinosaur().getAttacher().getDefaultConfig().getTypes()) {
                     if(!entity.matchesAll(pair.getType())) {
                         ProjectNublar.getLogger().info("Attaching un-found component {}", pair.getType().getIdentifier());
                         pair.attach((ComponentWriteAccess) entity);

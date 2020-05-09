@@ -1,30 +1,40 @@
 package net.dumbcode.projectnublar.server.entity.ai;
 
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
+import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.function.Predicate;
 
 public class EntityAttackAI extends EntityAIAttackMelee {
 
+    public static final Animation ATTACK_ANIMATION = new Animation(new ResourceLocation(ProjectNublar.MODID,"attack"));
+
+
     private final EntityCreature attacker;
     private final Predicate<EntityLivingBase> enemyPredicate;
+    private final AttackComponent component;
 
     private World world;
 
-    public EntityAttackAI(EntityCreature entity, Predicate<EntityLivingBase> enemyPredicate) {
-        this(entity, enemyPredicate, entity.getAIMoveSpeed());
-    }
-
-    public EntityAttackAI(EntityCreature entity, Predicate<EntityLivingBase> enemyPredicate, double speed) {
-        super(entity, speed, false);
+    public EntityAttackAI(EntityCreature entity, Predicate<EntityLivingBase> enemyPredicate, AttackComponent component) {
+        super(entity, component.getSpeed(), false);
         this.attacker = entity;
         this.enemyPredicate = enemyPredicate;
         this.world = entity.world;
+        this.component = component;
     }
 
     @Override
@@ -51,5 +61,27 @@ public class EntityAttackAI extends EntityAIAttackMelee {
             }
         }
         return false;
+    }
+
+    @Override
+    protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
+        double d0 = this.getAttackReachSqr(enemy);
+        if (distToEnemySqr <= d0 && this.attackTick <= 0) {
+            this.attackTick = 20;
+            this.attacker.swingArm(EnumHand.MAIN_HAND);
+            this.attacker.attackEntityAsMob(enemy);
+
+            if(this.attacker.isEntityAlive() && enemy.isEntityAlive()) {
+                this.attacker.attackEntityFrom(DamageSource.causeMobDamage(enemy), this.component.getAttackDamage().getIntValue());
+                if(this.attacker instanceof ComponentAccess) {
+                    ComponentAccess access = (ComponentAccess) this.attacker;
+                    access.get(EntityComponentTypes.ANIMATION).ifPresent(component ->
+                        component.playAnimation(access, ATTACK_ANIMATION, AttackComponent.ATTACK_CHANNEL)
+                    );
+
+                }
+            }
+
+        }
     }
 }

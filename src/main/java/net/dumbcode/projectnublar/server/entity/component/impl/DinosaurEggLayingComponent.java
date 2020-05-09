@@ -76,7 +76,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
             Optional<GeneticEntry<?>> entryOptional = otherComponent.findEntry(genetic.getIdentifier());
             if(entryOptional.isPresent()) {
                 GeneticEntry<?> entry = entryOptional.get();
-                float newValue = genetic.getType().getCombiner().apply(entry.getModifier(), genetic.getModifier());
+                float newValue = genetic.getType().getDataHandler().combine(entry.getModifier(), genetic.getModifier());
                 combinedGenetics.add(entry.copy().setModifier(newValue));
 
                 handledGenetics.add(genetic.getIdentifier());
@@ -152,13 +152,12 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
 
 
         @Override
-        public DinosaurEggLayingComponent constructTo(DinosaurEggLayingComponent component) {
+        public void constructTo(DinosaurEggLayingComponent component) {
             component.eggTypes.addAll(this.eggTypes);
             component.eggAmount = this.eggAmount;
             component.eggModifier = this.eggModifier;
             component.ticksPregnancy = this.ticksPregnancy;
             component.ticksEggHatch = this.ticksEggHatch;
-            return component;
         }
 
         @Override

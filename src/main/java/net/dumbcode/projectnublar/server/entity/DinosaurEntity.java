@@ -38,19 +38,6 @@ public class DinosaurEntity extends ComposableCreatureEntity {
     }
 
     @Override
-    public boolean attackEntityAsMob(Entity entity) {
-        if(this.isEntityAlive() && entity.isEntityAlive()) {
-            entity.attackEntityFrom(DamageSource.causeMobDamage(this), 1);
-            if(this.getComponentMap().get(EntityComponentTypes.ANIMATION).isPresent()) {
-                Animation animation = new Animation(new ResourceLocation(ProjectNublar.MODID,"attack"));
-                AnimationEntry entry = new AnimationEntry(animation);
-                this.getComponentMap().get(EntityComponentTypes.ANIMATION).get().playAnimation(this, entry, 1);
-            }
-        }
-        return super.attackEntityAsMob(entity);
-    }
-
-    @Override
     public boolean isOnLadder() {
         return getDinosaur().getDinosaurInfomation().isCanClimb() && super.isOnLadder();
     }

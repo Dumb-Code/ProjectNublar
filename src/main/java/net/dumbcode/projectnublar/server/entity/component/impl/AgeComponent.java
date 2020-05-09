@@ -166,7 +166,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         private String defaultStageName = "";
 
         @Override
-        public AgeComponent constructTo(AgeComponent component) {
+        public void constructTo(AgeComponent component) {
             component.orderedAges = this.orderedAges;
             component.stage = this.orderedAges.stream().filter(s -> s.getName().equals(this.defaultStageName)).findFirst().orElse(this.orderedAges.get(0));
 
@@ -177,7 +177,6 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
                 component.ageInTicks += age.getTime();
             }
 
-            return component;
         }
 
         public Storage addStage(AgeStage stage) {
