@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.entity.ai;
 import lombok.ToString;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.utils.BlockStateWorker;

@@ -9,8 +9,8 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.EnumPlantType;
 
-import static net.minecraftforge.common.BiomeDictionary.Type.JUNGLE;
 import static net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher.create;
+import static net.minecraftforge.common.BiomeDictionary.Type.JUNGLE;
 
 
 public class SerennaVeriformans extends Plant {

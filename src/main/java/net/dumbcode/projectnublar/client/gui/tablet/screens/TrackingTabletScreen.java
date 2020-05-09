@@ -31,8 +31,8 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector4f;
 import java.awt.*;
 import java.nio.FloatBuffer;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 

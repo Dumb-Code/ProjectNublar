@@ -10,7 +10,6 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
-import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.ai.DrinkingAI;
 import net.dumbcode.projectnublar.server.entity.ai.FeedingAI;

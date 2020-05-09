@@ -11,7 +11,6 @@ import net.dumbcode.projectnublar.server.network.C28ModuleClicked;
 import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;

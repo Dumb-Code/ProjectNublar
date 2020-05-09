@@ -1,9 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
-import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.gui.GuiTaxidermy;
 import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
-import net.dumbcode.dumblibrary.client.gui.GuiModelPoseEdit;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;

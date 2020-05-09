@@ -6,8 +6,6 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldSavedData;

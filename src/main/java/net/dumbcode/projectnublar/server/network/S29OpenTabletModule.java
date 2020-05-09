@@ -8,15 +8,12 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 public class S29OpenTabletModule implements IMessage {
 

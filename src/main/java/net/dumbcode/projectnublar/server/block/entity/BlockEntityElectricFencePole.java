@@ -22,7 +22,10 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity, ITickable {
 

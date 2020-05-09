@@ -11,7 +11,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class FeedingDiet {
     private final Map<IBlockState, FeedingResult> blocks = new HashMap<>();

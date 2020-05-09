@@ -2,25 +2,17 @@ package net.dumbcode.projectnublar.server.recipes;
 
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
-import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
-import net.dumbcode.projectnublar.server.item.data.DriveUtils;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynthesizerBlockEntity>{
     INSTANCE;

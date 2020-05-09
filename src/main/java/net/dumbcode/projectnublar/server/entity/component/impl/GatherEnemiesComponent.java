@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 
 import java.util.function.Consumer;

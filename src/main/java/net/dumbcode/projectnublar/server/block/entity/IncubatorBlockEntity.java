@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
-import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -29,9 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBlockEntity> {
 

@@ -1,14 +1,12 @@
 package net.dumbcode.projectnublar.server.entity.ai;
 
 import net.dumbcode.dumblibrary.server.animation.objects.Animation;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.util.DamageSource;

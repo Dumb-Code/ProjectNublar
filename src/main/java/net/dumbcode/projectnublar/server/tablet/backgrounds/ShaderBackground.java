@@ -12,7 +12,6 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 @Getter
 public class ShaderBackground implements TabletBackground {

@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.network;
 import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.client.gui.GuiSkeletalProperties;
-import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;

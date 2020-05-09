@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import lombok.Getter;
 import lombok.Setter;

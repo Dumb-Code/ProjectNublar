@@ -18,8 +18,6 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEggEntity;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
-import net.minecraftforge.client.event.ClientChatEvent;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;

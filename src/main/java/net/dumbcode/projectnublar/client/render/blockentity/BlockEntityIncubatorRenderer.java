@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import com.google.common.collect.Lists;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
@@ -9,7 +8,6 @@ import net.dumbcode.dumblibrary.server.utils.IOCollectors;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
-import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -30,14 +28,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import javax.xml.ws.Holder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<IncubatorBlockEntity> {
 

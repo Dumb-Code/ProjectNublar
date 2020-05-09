@@ -4,7 +4,6 @@ import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.ComposableCreatureEntity;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
-import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.ai.EntityAttackFenceAI;
 import net.minecraft.nbt.NBTTagCompound;
 

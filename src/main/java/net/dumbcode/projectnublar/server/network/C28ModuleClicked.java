@@ -2,11 +2,9 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;

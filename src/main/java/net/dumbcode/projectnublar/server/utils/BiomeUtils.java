@@ -1,11 +1,8 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.common.BiomeManager;
 
 import java.util.Set;
 

@@ -5,12 +5,9 @@ import net.dumbcode.projectnublar.server.network.C13VehicleInputStateUpdated;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.util.MovementInput;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.function.Function;
 
 public abstract class AbstractVehicle<E extends Enum> extends Entity {
 

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.world.structures.network.StructureNetwork;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;

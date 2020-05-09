@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.mood;
 
-import net.dumbcode.dumblibrary.server.attributes.ModifiableFieldModifier;
 import net.dumbcode.dumblibrary.server.attributes.ModOp;
+import net.dumbcode.dumblibrary.server.attributes.ModifiableFieldModifier;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.SleepingComponent;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;

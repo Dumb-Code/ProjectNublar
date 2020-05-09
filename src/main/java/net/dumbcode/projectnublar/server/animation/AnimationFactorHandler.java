@@ -3,13 +3,6 @@ package net.dumbcode.projectnublar.server.animation;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationFactor;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
-import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.entity.Entity;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class AnimationFactorHandler {
 

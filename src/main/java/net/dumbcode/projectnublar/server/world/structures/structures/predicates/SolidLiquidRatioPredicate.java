@@ -2,8 +2,6 @@ package net.dumbcode.projectnublar.server.world.structures.structures.predicates
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.utils.ValueRange;
-import net.minecraft.block.BlockLeaves;
-import net.minecraft.init.Blocks;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.concurrent.atomic.AtomicInteger;

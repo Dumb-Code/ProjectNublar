@@ -1,15 +1,15 @@
 package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Keyboard;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class FlappyDinoScreen extends TabletScreen {
 

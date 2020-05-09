@@ -11,14 +11,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class IncubatorGuiScreen extends TabbedGuiContainer {
 

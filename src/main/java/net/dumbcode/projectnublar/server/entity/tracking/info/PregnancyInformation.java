@@ -3,12 +3,10 @@ package net.dumbcode.projectnublar.server.entity.tracking.info;
 import io.netty.buffer.ByteBuf;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
-import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 @Value

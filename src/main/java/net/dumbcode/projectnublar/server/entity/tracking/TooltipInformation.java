@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.entity.tracking;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 
 import javax.annotation.Nonnull;
 import java.awt.*;

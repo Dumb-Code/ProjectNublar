@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.client.gui;
 
-import com.google.common.primitives.Floats;
 import com.google.common.primitives.Ints;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
@@ -9,7 +8,6 @@ import net.minecraft.client.gui.GuiPageButtonList;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.util.math.BlockPos;
-import org.apache.logging.log4j.core.util.Integers;
 
 import java.io.IOException;
 

@@ -5,17 +5,13 @@ import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
-
-import java.util.Optional;
 
 public class SequencingSynthesizerInputsGui extends TabbedGuiContainer {
 

@@ -8,7 +8,6 @@ import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;

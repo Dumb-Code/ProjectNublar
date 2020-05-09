@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.C23ConfirmTrackingTablet;
 import net.dumbcode.projectnublar.server.network.C25StopTrackingTablet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;

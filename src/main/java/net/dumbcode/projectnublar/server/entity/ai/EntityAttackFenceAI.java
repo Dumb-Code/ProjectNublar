@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.entity.ai;
 import net.dumbcode.dumblibrary.server.utils.AIUtils;
 import net.dumbcode.projectnublar.server.block.BlockElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
-import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;

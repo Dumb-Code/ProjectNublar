@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;

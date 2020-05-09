@@ -8,7 +8,6 @@ import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.PredicateTraverser;
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.StructurePredicate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 

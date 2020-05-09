@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.entity.system.impl;
 
 import net.dumbcode.dumblibrary.server.ecs.EntityFamily;
 import net.dumbcode.dumblibrary.server.ecs.EntityManager;
-import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;

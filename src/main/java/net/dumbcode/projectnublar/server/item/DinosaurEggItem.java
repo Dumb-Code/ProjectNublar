@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.item;
 
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;

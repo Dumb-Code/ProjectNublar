@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.minecraft.client.Minecraft;

@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.item;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.item.EntityItem;

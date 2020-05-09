@@ -2,20 +2,16 @@ package net.dumbcode.projectnublar.server.entity.tracking;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Value;
-import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.info.*;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.Vec2f;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class TrackingDataInformation {

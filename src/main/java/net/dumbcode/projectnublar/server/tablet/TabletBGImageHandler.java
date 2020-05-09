@@ -7,7 +7,6 @@ import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
