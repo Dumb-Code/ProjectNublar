@@ -104,6 +104,11 @@ public class ComponentHandler {
             SimpleComponentType.builder(BasicEntityInformationComponent.class)
                 .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "basic_entity_information"))
                 .withConstructor(BasicEntityInformationComponent::new)
+                .build(),
+            SimpleComponentType.builder(DefenseComponent.class, DefenseComponent.Storage.class)
+                .withIdentifier(new ResourceLocation(ProjectNublar.MODID, "defense"))
+                .withConstructor(DefenseComponent::new)
+                .withStorage(DefenseComponent.Storage::new)
                 .build()
 
         );
