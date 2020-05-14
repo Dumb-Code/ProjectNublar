@@ -9,6 +9,7 @@ import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.RenderAdjustmentsComponent;
+import net.dumbcode.dumblibrary.server.taxidermy.TaxidermyHistory;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -126,13 +127,11 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         GlStateManager.enableCull();
     }
 
-    private void setBoxRotations(TabulaModel model, Map<String, Vector3f> poseData) {
+    private void setBoxRotations(TabulaModel model, Map<String, TaxidermyHistory.CubeProps> poseData) {
         for(TabulaModelRenderer box : model.getAllCubes()) {
-            Vector3f rotations = poseData.get(box.boxName);
-            if(rotations != null) {
-                box.rotateAngleX = rotations.x;
-                box.rotateAngleY = rotations.y;
-                box.rotateAngleZ = rotations.z;
+            TaxidermyHistory.CubeProps cube = poseData.get(box.boxName);
+            if(cube != null) {
+                cube.applyTo(box);
             } else {
                 box.resetRotations();
             }

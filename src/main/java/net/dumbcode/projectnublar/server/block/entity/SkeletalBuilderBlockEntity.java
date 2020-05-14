@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.ModelComponent;
-import net.dumbcode.dumblibrary.server.taxidermy.TaxidermyBlockEntity;
+import net.dumbcode.dumblibrary.server.taxidermy.BaseTaxidermyBlockEntity;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -28,7 +28,7 @@ import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
 @Getter
 @Setter
-public class SkeletalBuilderBlockEntity extends TaxidermyBlockEntity implements ITickable {
+public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity implements ITickable {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
     @SideOnly(Side.CLIENT)

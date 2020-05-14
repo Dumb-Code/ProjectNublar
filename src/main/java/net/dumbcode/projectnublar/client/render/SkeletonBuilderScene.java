@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.render;
 
 import lombok.Getter;
+import net.dumbcode.dumblibrary.server.taxidermy.TaxidermyHistory;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelRenderer;
@@ -59,14 +60,12 @@ public class SkeletonBuilderScene {
 
         if(te.getDinosaurEntity().isPresent()) {
             Minecraft.getMinecraft().getTextureManager().bindTexture(te.getTexture());
-            Map<String, Vector3f> poseData = te.getPoseData();
+            Map<String, TaxidermyHistory.CubeProps> poseData = te.getPoseData();
             if(te.getModel() != null) {
                 for (ModelRenderer box : te.getModel().boxList) {
-                    Vector3f rotations = poseData.get(box.boxName);
-                    if (rotations != null) {
-                        box.rotateAngleX = rotations.x;
-                        box.rotateAngleY = rotations.y;
-                        box.rotateAngleZ = rotations.z;
+                    TaxidermyHistory.CubeProps cube = poseData.get(box.boxName);
+                    if (cube != null) {
+                        cube.applyTo(box);
                     }
                 }
                 te.getDinosaurEntity().ifPresent(e -> te.getModel().render(e, 0f, 0f, 100f, 0f, 0f, 1f / 16f));
