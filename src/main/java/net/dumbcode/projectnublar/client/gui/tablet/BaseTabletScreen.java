@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
 import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
@@ -54,8 +55,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
         boolean stencil = this.allowStenciling();
 
         if(stencil) {
-            GL11.glEnable(GL11.GL_STENCIL_TEST);
-            RenderUtils.renderSquareStencil(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, true, 1, GL11.GL_LEQUAL);
+            StencilStack.pushSquareStencil(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight);
         }
 
         drawRect(0, 0, this.width, this.height, -1);
@@ -63,7 +63,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
         this.drawTabletScreen(mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
 
         if(stencil) {
-            GL11.glDisable(GL11.GL_STENCIL_TEST);
+            StencilStack.popStencil();
         }
 
         if(this.homeButton) {

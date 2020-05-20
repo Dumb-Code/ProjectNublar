@@ -34,6 +34,10 @@ public class DriveUtils {
         return out;
     }
 
+    public static int getAmount(ItemStack drive, String key) {
+        return drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(key).getInteger("amount");
+    }
+
     public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
         if (!(inItem.getItem() instanceof DriveInformation)) {
             return;

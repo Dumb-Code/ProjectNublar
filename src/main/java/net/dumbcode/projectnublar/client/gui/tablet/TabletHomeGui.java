@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.input.Mouse;
 
 import javax.vecmath.Point2i;
 import java.io.IOException;

@@ -1,9 +1,11 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerGui;
+import net.dumbcode.projectnublar.client.gui.machines.DnaEditingGui;
+import net.dumbcode.projectnublar.client.gui.machines.SequencingGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -20,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.capabilities.Capability;
@@ -36,6 +39,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.IntStream;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> {
 
@@ -53,6 +57,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     };
 
     public static final double DEFAULT_STORAGE = 16D;
+
+    public static final int TOTAL_SLOTS = 9;
+    public static final int SLOTS_AT_50 = 3;
+    private static final float SLOTS_GRADIENT = (TOTAL_SLOTS - SLOTS_AT_50) / 0.5F;
+    private static final float SLOTS_OFFSET = 2*SLOTS_AT_50 - TOTAL_SLOTS;
+
     private static final int HDD_TOTAL_CONSUME_TIME = 200;
     private static final int SSD_TOTAL_CONSUME_TIME = HDD_TOTAL_CONSUME_TIME / 2;
 
@@ -66,17 +76,22 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private int totalConsumeTime;
     private int consumeTimer;
 
-    private String selectOneKey = "";
-    private double selectOneAmount;
+//    private String selectOneKey = "";
+//    private double selectOneAmount;
+//
+//    private String selectTwoKey = "";
+//    private double selectTwoAmount;
+//
+//    private String selectThreeKey = "";
+//    private double selectThreeAmount;
 
-    private String selectTwoKey = "";
-    private double selectTwoAmount;
-
-    private String selectThreeKey = "";
-    private double selectThreeAmount;
+    private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 
     public SequencingSynthesizerBlockEntity() {
         this.tank.setTileEntity(this);
+        for (int i = 0; i < this.selectedDNAs.length; i++) {
+            this.selectedDNAs[i] = new SelectedDnaEntry();
+        }
     }
 
     @Override
@@ -118,14 +133,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.tank.readFromNBT(compound.getCompoundTag("FluidTank"));
         this.consumeTimer = compound.getInteger("ConsumeTimer");
 
-        this.selectOneKey = compound.getString("SelectOneKey");
-        this.selectOneAmount = compound.getDouble("SelectOneAmount");
-
-        this.selectTwoKey = compound.getString("SelectTwoKey");
-        this.selectTwoAmount = compound.getDouble("SelectTwoAmount");
-
-        this.selectThreeKey = compound.getString("SelectThreeKey");
-        this.selectThreeAmount = compound.getDouble("SelectThreeAmount");
+        NBTTagList list = compound.getTagList("SelectedDnaList", 10);
+        for (int i = 0; i < this.selectedDNAs.length; i++) {
+            NBTTagCompound tag = list.getCompoundTagAt(i);
+            this.selectedDNAs[i].setKey(tag.getString("Key"));
+            this.selectedDNAs[i].setAmount(tag.getDouble("Amount"));
+        }
 
         this.sugarAmount = compound.getDouble("SugarAmount");
         this.boneAmount = compound.getDouble("BoneAmount");
@@ -138,14 +151,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         compound.setTag("FluidTank", this.tank.writeToNBT(new NBTTagCompound()));
         compound.setInteger("ConsumeTimer", this.consumeTimer);
 
-        compound.setString("SelectOneKey", this.selectOneKey);
-        compound.setDouble("SelectOneAmount", this.selectOneAmount);
-
-        compound.setString("SelectTwoKey", this.selectTwoKey);
-        compound.setDouble("SelectTwoAmount", this.selectTwoAmount);
-
-        compound.setString("SelectThreeKey", this.selectThreeKey);
-        compound.setDouble("SelectThreeAmount", this.selectThreeAmount);
+        NBTTagList list = new NBTTagList();
+        for (int i = 0; i < this.selectedDNAs.length; i++) {
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setString("Key", this.selectedDNAs[i].getKey());
+            tag.setDouble("Amount", this.selectedDNAs[i].getAmount());
+            list.appendTag(tag);
+        }
+        compound.setTag("SelectedDnaList", list);
 
         compound.setDouble("SugarAmount", this.sugarAmount);
         compound.setDouble("BoneAmount", this.boneAmount);
@@ -212,17 +225,11 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         super.update();
 
         NBTTagCompound testNbt = this.handler.getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
-        if((!this.selectOneKey.isEmpty() && !testNbt.hasKey(this.selectOneKey, Constants.NBT.TAG_COMPOUND)) || this.selectOneAmount == 0 != this.selectOneKey.isEmpty()) {
-            this.selectOneKey = "";
-            this.selectOneAmount = 0D;
-        }
-        if((!this.selectTwoKey.isEmpty() && !testNbt.hasKey(this.selectTwoKey, Constants.NBT.TAG_COMPOUND)) || this.selectTwoAmount == 0 != this.selectTwoKey.isEmpty()) {
-            this.selectTwoKey = "";
-            this.selectTwoAmount = 0D;
-        }
-        if((!this.selectThreeKey.isEmpty() && !testNbt.hasKey(this.selectThreeKey, Constants.NBT.TAG_COMPOUND)) || this.selectThreeAmount == 0 != this.selectThreeKey.isEmpty()) {
-            this.selectThreeKey = "";
-            this.selectThreeAmount = 0D;
+        for (SelectedDnaEntry dna : this.selectedDNAs) {
+            if((!dna.getKey().isEmpty() && !testNbt.hasKey(dna.getKey(), Constants.NBT.TAG_COMPOUND)) || dna.getAmount() == 0 != dna.getKey().isEmpty()) {
+                dna.setKey("");
+                dna.setAmount(0);
+            }
         }
 
         this.sugarAmount = this.updateAmount(this.sugarAmount, this.handler.getStackInSlot(2), MachineUtils::getSugarMatter);
@@ -282,81 +289,89 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     public void setSelect(int ID, String key, double amount) {
-        switch (ID) {
-            case 1:
-                this.selectOneKey = key;
-                this.selectOneAmount = amount;
-                break;
-            case 2:
-                this.selectTwoKey = key;
-                this.selectTwoAmount = amount;
-                break;
-            case 3:
-                this.selectThreeKey = key;
-                this.selectThreeAmount = amount;
-                break;
+        if(ID >= 0 && ID < this.selectedDNAs.length) {
+            this.selectedDNAs[ID].setKey(key);
+            this.selectedDNAs[ID].setAmount(amount);
         }
     }
 
     public double getSelectAmount(int ID) {
-        switch (ID) {
-            case 1: return this.selectOneAmount;
-            case 2: return this.selectTwoAmount;
-            case 3: return this.selectThreeAmount;
+        if(ID >= 0 && ID < this.selectedDNAs.length) {
+            return this.selectedDNAs[ID].getAmount();
         }
         return 0;
     }
 
     public String getSelectKey(int ID) {
-        switch (ID) {
-            case 1: return this.selectOneKey;
-            case 2: return this.selectTwoKey;
-            case 3: return this.selectThreeKey;
+        if(ID >= 0 && ID < this.selectedDNAs.length) {
+            return this.selectedDNAs[ID].getKey();
         }
         return "";
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
-        return tab != 0 ? new SequencingSynthesizerInputsGui(player, this, info, tab) : new SequencingSynthesizerGui(player, this, info, tab);
     }
 
     @Override
     protected void addTabs(List<TabInformationBar.Tab> tabList) {
         tabList.add(new DefaultTab(0));
         tabList.add(new DefaultTab(1));
+        tabList.add(new DefaultTab(2));
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
+        switch (tab) {
+            case 0:
+                return new SequencingGui(player, this, info, tab);
+            case 1:
+                return new DnaEditingGui(player, this, info, tab);
+            default:
+                return new SequencingSynthesizerInputsGui(player, this, info, tab);
+
+        }
     }
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        boolean input = tab != 0;
-        return input ?
-                new MachineModuleContainer(player, 84, 176,
-                        new MachineModuleSlot(this, 0, 78, 6) {
-                            @Nullable
-                            @Override
-                            public String getSlotTexture() {
-                                return ProjectNublar.MODID + ":items/hard_drive";
-                            }
-                        },
-                        new MachineModuleSlot(this, 1, 21, 58),
-                        new MachineModuleSlot(this, 2, 59, 58),
-                        new MachineModuleSlot(this, 3, 97, 58),
-                        new MachineModuleSlot(this, 4, 135, 58)
-                ) :
-                new MachineModuleContainer(player, 110, 208,
-                        new MachineModuleSlot(this, 0, 187, 5) {
-                            @Nullable
-                            @Override
-                            public String getSlotTexture() {
-                                return ProjectNublar.MODID + ":items/hard_drive";
-                            }
-                        },
-                        new MachineModuleSlot(this, 5, 60, 90),
-                        new MachineModuleSlot(this, 6, 40, 90),
-                        new MachineModuleSlot(this, 7, 118, 90),
-                        new MachineModuleSlot(this, 8, 167, 90));
+        switch (tab) {
+            case 0:
+                return new MachineModuleContainer(player, 110, 208,
+                    new MachineModuleSlot(this, 0, 187, 5) {
+                        @Nullable
+                        @Override
+                        public String getSlotTexture() {
+                            return ProjectNublar.MODID + ":items/hard_drive";
+                        }
+                    },
+                    new MachineModuleSlot(this, 5, 60, 90),
+                    new MachineModuleSlot(this, 6, 40, 90),
+                    new MachineModuleSlot(this, 7, 118, 90),
+                    new MachineModuleSlot(this, 8, 167, 90)
+                );
+            case 1:
+                return new MachineModuleContainer(player, -1, 208,
+                    new MachineModuleSlot(this, 0, 187, 5) {
+                        @Nullable
+                        @Override
+                        public String getSlotTexture() {
+                            return ProjectNublar.MODID + ":items/hard_drive";
+                        }
+                    }
+                );
+            default:
+                return new MachineModuleContainer(player, 84, 176,
+                    new MachineModuleSlot(this, 0, 78, 6) {
+                        @Nullable
+                        @Override
+                        public String getSlotTexture() {
+                            return ProjectNublar.MODID + ":items/hard_drive";
+                        }
+                    },
+                    new MachineModuleSlot(this, 1, 21, 58),
+                    new MachineModuleSlot(this, 2, 59, 58),
+                    new MachineModuleSlot(this, 3, 97, 58),
+                    new MachineModuleSlot(this, 4, 135, 58)
+                );
+        }
     }
 
     // TODO: Change for balance, values are just for testing
@@ -383,6 +398,20 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     public int getEnergyMaxExtractSpeed() {
         return 50;
+    }
+
+    @Data
+    public static class SelectedDnaEntry {
+        private String key = "";
+        private double amount;
+    }
+
+    public static int getSlots(float percentage) {
+        return MathHelper.floor(MathHelper.clamp(percentage, 0.5, 1.0)*SLOTS_GRADIENT + SLOTS_OFFSET);
+    }
+
+    public static double getPercentageForSlot(int slots) {
+        return Math.round(MathHelper.clamp((slots - SLOTS_OFFSET) / SLOTS_GRADIENT, 0.5, 1) * 100D);
     }
 
 }
