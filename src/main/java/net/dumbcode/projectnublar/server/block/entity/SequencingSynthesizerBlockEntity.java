@@ -20,6 +20,7 @@ import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -41,7 +42,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 
-public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> {
+public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> implements DyableBlockEntity {
 
     private final FluidTank tank = new FluidTank(Fluid.BUCKET_VOLUME) {
 
@@ -75,6 +76,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     private int totalConsumeTime;
     private int consumeTimer;
+
+    @Getter @Setter private EnumDyeColor dye = EnumDyeColor.WHITE;
 
 //    private String selectOneKey = "";
 //    private double selectOneAmount;
@@ -131,6 +134,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.tank.readFromNBT(compound.getCompoundTag("FluidTank"));
+        this.dye = EnumDyeColor.byMetadata(compound.getInteger("Dye"));
         this.consumeTimer = compound.getInteger("ConsumeTimer");
 
         NBTTagList list = compound.getTagList("SelectedDnaList", 10);
@@ -149,13 +153,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setTag("FluidTank", this.tank.writeToNBT(new NBTTagCompound()));
+        compound.setInteger("Dye", this.dye.getMetadata());
         compound.setInteger("ConsumeTimer", this.consumeTimer);
 
         NBTTagList list = new NBTTagList();
-        for (int i = 0; i < this.selectedDNAs.length; i++) {
+        for (SelectedDnaEntry selectedDNA : this.selectedDNAs) {
             NBTTagCompound tag = new NBTTagCompound();
-            tag.setString("Key", this.selectedDNAs[i].getKey());
-            tag.setDouble("Amount", this.selectedDNAs[i].getAmount());
+            tag.setString("Key", selectedDNA.getKey());
+            tag.setDouble("Amount", selectedDNA.getAmount());
             list.appendTag(tag);
         }
         compound.setTag("SelectedDnaList", list);

@@ -16,6 +16,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -31,10 +32,10 @@ public class MachineModuleBlock extends Block implements IItemBlock{
 
     private final List<MachineModulePart> values; //Not needed
     private final Map<MachineModuleType, PropertyInteger> propertyMap = Maps.newHashMap();
-    private final Supplier<? extends MachineModuleBlockEntity> machineSupplier;
+    private final Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier;
     private final BlockStateContainer blockState;
 
-    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity> machineSupplier, MachineModulePart... values) {
+    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart... values) {
         super(Material.IRON);
         this.values = Lists.newArrayList(values);
         this.machineSupplier = machineSupplier;
@@ -84,6 +85,11 @@ public class MachineModuleBlock extends Block implements IItemBlock{
             playerIn.openGui(ProjectNublar.INSTANCE, 0/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
+    }
+
+    @Override
+    public BlockRenderLayer getRenderLayer() {
+        return BlockRenderLayer.CUTOUT;
     }
 
     @Override

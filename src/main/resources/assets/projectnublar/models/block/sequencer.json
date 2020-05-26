@@ -1,4 +1,29 @@
 {
   "parent": "block/cube_all",
-  "tabula": "projectnublar:models/block/sequencer"
+  "textures": {
+    "layer0": "projectnublar:blocks/sequencer_base",
+    "layer1": "projectnublar:blocks/sequencer_overlay"
+  },
+  "tabula": "projectnublar:models/block/sequencer",
+  "texture_data": {
+    "layer0": { "type": "blacklist", "cubes": [ "cornerpiece1", "Angledcorner2", "Angledcorner3", "computerfront", "computerbeveledge1", "computerfrontside1", "computerfrontside2", "computerbeveledge1" ]},
+    "layer1": { "type": "whitelist", "cubes": [ "mainbody", "cornerpiece1", "Angledcorner2", "Angledcorner3", "computerfront", "computerbeveledge1", "computerfrontside1", "computerfrontside2", "computerbeveledge1" ]}
+  },
+  "direct_cube_tint": [{
+    "layer": "layer0",
+    "tint": 2,
+    "cubes": [{
+        "cube_name": "coollightstrip",
+        "faces": [ "north", "south" ]
+      }]
+  }],
+  "lightup_data": [
+    {
+      "layers_applied": ["layer0"],
+      "cubes_lit": [{
+        "cube_name": "coollightstrip",
+        "faces": [ "north", "south" ]
+      }]
+    }
+  ]
 }
