@@ -34,7 +34,7 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     @Override
     public void onRecipeFinished(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
         MachineModuleItemStackHandler handler = blockEntity.getHandler();
-        boolean brokenEgg = blockEntity.getTier(MachineModuleType.LEVELING_SENSORS) == 0 && blockEntity.getWorld().rand.nextFloat() > 0.1F;
+        boolean brokenEgg = blockEntity.getTier(MachineModuleType.LEVELING_SENSORS) == 0 && blockEntity.getWorld().rand.nextFloat() < 0.1F;
 
         handler.insertOutputItem(process.getOutputSlot(1), new ItemStack(ItemHandler.EMPTY_SYRINGE), false);
         ItemStack remaining = handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(brokenEgg ? ItemHandler.BROKEN_ARTIFICIAL_EGG : ItemHandler.ARTIFICIAL_EGG), false);
