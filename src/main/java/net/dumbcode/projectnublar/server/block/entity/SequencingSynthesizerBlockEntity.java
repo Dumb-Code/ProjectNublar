@@ -339,7 +339,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public Container createContainer(EntityPlayer player, int tab) {
         switch (tab) {
             case 0:
-                return new MachineModuleContainer(player, 110, 208,
+                return new MachineModuleContainer(this, player, 110, 208,
                     new MachineModuleSlot(this, 0, 187, 5) {
                         @Nullable
                         @Override
@@ -353,7 +353,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     new MachineModuleSlot(this, 8, 167, 90)
                 );
             case 1:
-                return new MachineModuleContainer(player, -1, 208,
+                return new MachineModuleContainer(this, player, -1, 208,
                     new MachineModuleSlot(this, 0, 187, 5) {
                         @Nullable
                         @Override
@@ -363,7 +363,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     }
                 );
             default:
-                return new MachineModuleContainer(player, 84, 176,
+                return new MachineModuleContainer(this, player, 84, 176,
                     new MachineModuleSlot(this, 0, 78, 6) {
                         @Nullable
                         @Override

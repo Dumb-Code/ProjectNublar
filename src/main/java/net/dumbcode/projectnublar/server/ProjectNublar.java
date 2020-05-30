@@ -263,5 +263,6 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C41PlaceIncubatorEgg.Handler(), C41PlaceIncubatorEgg.class, 41, Side.SERVER);
         NETWORK.registerMessage(new S42SyncMachineProcesses.Handler(), S42SyncMachineProcesses.class, 42, Side.CLIENT);
         NETWORK.registerMessage(new S43SyncMachineStack.Handler(), S43SyncMachineStack.class, 43, Side.CLIENT);
+        NETWORK.registerMessage(new S44SyncOpenedUsers.Handler(), S44SyncOpenedUsers.class, 44, Side.CLIENT);
     }
 }

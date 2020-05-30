@@ -1,7 +1,11 @@
 package net.dumbcode.projectnublar.server.containers.machines;
 
 import lombok.NonNull;
+import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -13,9 +17,10 @@ import java.util.function.IntPredicate;
 public class MachineModuleContainer extends Container {
 
     private IntPredicate predicate = i -> true;
+    private final MachineModuleBlockEntity<?> blockEntity;
 
-
-    public MachineModuleContainer(EntityPlayer player, int playerOffset, int xSize, MachineModuleSlot... slots) {
+    public MachineModuleContainer(MachineModuleBlockEntity<?> blockEntity, EntityPlayer player, int playerOffset, int xSize, MachineModuleSlot... slots) {
+        this.blockEntity = blockEntity;
         for (MachineModuleSlot slot : slots) {
             this.addSlotToContainer(slot);
         }
@@ -23,10 +28,16 @@ public class MachineModuleContainer extends Container {
         if(playerOffset >= 0) {
             this.addPlayerSlots(player, playerOffset, xSize);
         }
+
+        if(!player.world.isRemote) {
+            this.blockEntity.getOpenedUsers().add(player.getUniqueID());
+            ProjectNublar.NETWORK.sendToDimension(new S44SyncOpenedUsers(this.blockEntity), player.world.provider.getDimension());
+        }
     }
 
-    public void setPredicate(@NonNull IntPredicate predicate) {
+    public MachineModuleContainer setPredicate(@NonNull IntPredicate predicate) {
         this.predicate = predicate;
+        return this;
     }
 
     protected void addPlayerSlots(EntityPlayer player, int yOffet, int xSize) {
@@ -43,6 +54,15 @@ public class MachineModuleContainer extends Container {
         for (int i = 0; i < 9; ++i) {
             this.addSlotToContainer(new Slot(playerInventory, i, xStart + i * 18, yOffet + 58));
         }
+    }
+
+    @Override
+    public void onContainerClosed(EntityPlayer playerIn) {
+        if(!playerIn.world.isRemote) {
+            this.blockEntity.getOpenedUsers().remove(playerIn.getUniqueID());
+            ProjectNublar.NETWORK.sendToDimension(new S44SyncOpenedUsers(this.blockEntity), playerIn.world.provider.getDimension());
+        }
+        super.onContainerClosed(playerIn);
     }
 
     @Override

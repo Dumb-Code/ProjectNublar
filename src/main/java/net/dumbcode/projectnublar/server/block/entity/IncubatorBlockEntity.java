@@ -229,7 +229,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 117, 176,
+        return new MachineModuleContainer(this, player, 117, 176,
             new MachineModuleSlot(this, 0, 8, 96),
             new MachineModuleSlot(this, 1, 0, 0),
             new MachineModuleSlot(this, 2, 0, 0),

@@ -73,7 +73,7 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
 
     @Override
     public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(player, 84, 176,
+        return new MachineModuleContainer(this, player, 84, 176,
                 new MachineModuleSlot(this, 0, 78, 33)
         );
     }

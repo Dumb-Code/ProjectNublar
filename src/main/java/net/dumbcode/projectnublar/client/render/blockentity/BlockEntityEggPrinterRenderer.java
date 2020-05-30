@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
+import net.dumbcode.dumblibrary.client.shader.GlslSandboxShader;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
@@ -20,6 +21,7 @@ import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,21 +30,22 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
 
     private static final Minecraft MC = Minecraft.getMinecraft();
 
-    private static final ResourceLocation RAILS_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_rails.tbl");
-    private static final ResourceLocation RAILS_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer.png");
+    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.tbl");
+    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer.png");
 
     private static final DinosaurEggType EGG_TYPE = EnumDinosaurEggTypes.ROUND.getType();
     private static final String NEEDLE_Z_MOVEMENT = "PrinterNeedleHolder";
-    private static float NEEDLE_START_HEIGHT = (24F-6.6F-2F)/16F;
-    private static float PLATFORM_START_HEIGHT = (24F-13.7F)/16F;
+    private static final int MOVEMENT_TICKS = 10;
 
     private static final Map<TabulaModel, TabulaModelClipPlane> MODEL_TO_CLIP_PLANE = new HashMap<>();
 
-    private TabulaModel railsModel;
+    private static final float[] TARGET_ANIMATION = new float[4];
+
+    private TabulaModel model;
 
 
     public BlockEntityEggPrinterRenderer() {
-        ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> this.railsModel = TabulaUtils.getModel(RAILS_MODEL_LOCATION));
+        ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> this.model = TabulaUtils.getModel(MODEL_LOCATION));
     }
 
     @Override
@@ -52,16 +55,19 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
 
-        this.setupLightmap(te.getPos());
+        GlStateManager.disableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-        this.renderRails(te, partialTicks);
+        this.setupLightmap(te.getPos());
+        this.renderPrinterParts(te, partialTicks);
+
+        GlStateManager.disableBlend();
 
         GlStateManager.popMatrix();
 
     }
 
-    private void renderRails(EggPrinterBlockEntity te, float partialTicks) {
-        this.bindTexture(RAILS_TEXTURE_LOCATION);
+    private void renderPrinterParts(EggPrinterBlockEntity te, float partialTicks) {
 
         GlStateManager.pushMatrix();
         this.doTabulaTransforms();
@@ -69,78 +75,112 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
         GlStateManager.pushMatrix();
         MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
 
-        boolean active = process.isProcessing() && process.isHasPower() && !process.isFinished();
-        boolean doPlatform = process.getTotalTime() != 0;
-        float[] target = new float[3];
-        float[] renderSnapshot = te.getRenderSnapshot();
+        float recipeProgress = process.getTotalTime() == 0 ? 0 : (process.getTime() + partialTicks) / process.getTotalTime();
+        boolean platformMove = process.getTotalTime() != 0;
 
-        float f = process.getTotalTime() == 0 ? 0 : (process.getTime() + partialTicks) / process.getTotalTime();
-
-        int moveTicks = 10;
-
-        TabulaModelRenderer platform = this.railsModel.getCube("platform");
-        if(!doPlatform) {
-            ItemStack inSlot = te.getHandler().getStackInSlot(process.getOutputSlot(0));
-            if(!inSlot.isEmpty() && (inSlot.getItem() == ItemHandler.ARTIFICIAL_EGG || inSlot.getItem() == ItemHandler.BROKEN_ARTIFICIAL_EGG)) {
-                doPlatform = true;
-                f = 1;
-            }
-        }
-        if(doPlatform) {
-            target[0] = 16*f*EGG_TYPE.getEggLength();
-        } else {
-            target[0] = 4;
-        }
-        if(doPlatform != te.getPreviousStates()[1]) {
-            te.getPreviousStates()[1] = active;
-            renderSnapshot[0] = te.getPrevSnapshot()[0];
-            te.getMovementTicksLeft()[1] = moveTicks;
-        } else if(te.getMovementTicksLeft()[1] > 0) {
-            float perc = (te.getMovementTicksLeft()[1]-partialTicks)/moveTicks;
-            target[0] = target[0] + (renderSnapshot[0] - target[0])*perc;
+        this.animateNeedle(te, partialTicks);
+        this.animateLid(te, partialTicks);
+        if(this.animatePlatform(te, platformMove, recipeProgress, partialTicks)) {
+            platformMove = true;
+            recipeProgress = 1F;
         }
 
-        if(active) {
-            float ticksPerRowX = 5;
-            float ticksPerRowZ = 1;
-            float rowX = (process.getTime()+partialTicks)/ticksPerRowX;
-            float rowZ = (process.getTime()+partialTicks)/ticksPerRowZ;
-            float size = 12F/16F;
+        this.renderEgg(platformMove, recipeProgress*EGG_TYPE.getEggLength());
 
-            target[1] = MathUtils.bounce(-1, 1, rowX)*size;
-            target[2] = MathUtils.bounce(-1, 1, rowZ)*size;
-        }
-        if(active != te.getPreviousStates()[0]) {
-            te.getPreviousStates()[0] = active;
-            renderSnapshot[1] = te.getPrevSnapshot()[1];
-            renderSnapshot[2] = te.getPrevSnapshot()[2];
-            te.getMovementTicksLeft()[0] = moveTicks;
-        } else if(te.getMovementTicksLeft()[0] > 0) {
-            float perc = (te.getMovementTicksLeft()[0]-partialTicks)/moveTicks;
-            target[1] = target[1] + (renderSnapshot[1] - target[1])*perc;
-            target[2] = target[2] + (renderSnapshot[2] - target[2])*perc;
-        }
+        this.applyAnimations();
 
-        platform.resetRotationPoint();
-        platform.rotationPointY += target[0];
+        System.arraycopy(TARGET_ANIMATION, 0, te.getSnapshot(), 4, 4);
 
-        TabulaModelRenderer xCube = this.railsModel.getCube("printingRail1");
-        xCube.resetRotationPoint();
-        xCube.rotationPointX += target[1];
-
-        TabulaModelRenderer zCube = this.railsModel.getCube(NEEDLE_Z_MOVEMENT);
-        zCube.resetRotationPoint();
-        zCube.rotationPointZ += target[2];
-
-        System.arraycopy(target, 0, te.getPrevSnapshot(), 0, 3);
-
-        this.railsModel.renderBoxes(1/16F);
+        this.bindTexture(TEXTURE_LOCATION);
+        this.model.renderBoxes(1/16F);
+        GlStateManager.enableBlend();
+        this.bindTexture( new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer_glass.png"));
+        this.model.renderBoxes(1/16F);
         GlStateManager.popMatrix();
 
-        this.renderEgg(doPlatform, f*EGG_TYPE.getEggLength());
 
         GlStateManager.popMatrix();
         GlStateManager.enableTexture2D();
+    }
+
+    private void applyAnimations() {
+        TabulaModelRenderer platform = this.model.getCube("platform");
+        platform.resetRotationPoint();
+        platform.rotationPointY += TARGET_ANIMATION[0];
+
+        TabulaModelRenderer xCube = this.model.getCube("printingRail1");
+        xCube.resetRotationPoint();
+        xCube.rotationPointX += TARGET_ANIMATION[1];
+
+        TabulaModelRenderer zCube = this.model.getCube(NEEDLE_Z_MOVEMENT);
+        zCube.resetRotationPoint();
+        zCube.rotationPointZ += TARGET_ANIMATION[2];
+
+        TabulaModelRenderer lidPart = this.model.getCube("lidrotatehelper");
+        lidPart.resetRotations();
+        lidPart.rotateAngleX += TARGET_ANIMATION[3];
+
+    }
+
+    private void animateLid(EggPrinterBlockEntity te, float partialTicks) {
+        this.animatePart(te, !te.getOpenedUsers().isEmpty(), 2, 3, partialTicks, (float) (-60F * Math.PI/180F), 0);
+    }
+
+    private void animateNeedle(EggPrinterBlockEntity te, float partialTicks) {
+        MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
+
+        float ticksPerRowX = 5;
+        float ticksPerRowZ = 1;
+        float rowX = (process.getTime()+partialTicks)/ticksPerRowX;
+        float rowZ = (process.getTime()+partialTicks)/ticksPerRowZ;
+        float size = 2;
+
+        this.animatePart(
+            te, process.isProcessing() && process.isHasPower() && !process.isFinished(), 1, 1, partialTicks,
+            MathUtils.bounce(-1, 1, rowX)*size, MathUtils.bounce(-1, 1, rowZ)*size, 0, 0
+        );
+    }
+
+    private boolean animatePlatform(EggPrinterBlockEntity te, boolean platformMove, float recipeProgress, float partialTicks) {
+        MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
+
+        boolean ret = false;
+        if(!platformMove) {
+            ItemStack inSlot = te.getHandler().getStackInSlot(process.getOutputSlot(0));
+            if(!inSlot.isEmpty() && (inSlot.getItem() == ItemHandler.ARTIFICIAL_EGG || inSlot.getItem() == ItemHandler.BROKEN_ARTIFICIAL_EGG)) {
+                platformMove = true;
+                recipeProgress = 1;
+                ret = true;
+            }
+        }
+        this.animatePart(te, platformMove, 0, 0, partialTicks, 16*recipeProgress*EGG_TYPE.getEggLength(), 4);
+        return ret;
+    }
+
+    private void animatePart(EggPrinterBlockEntity te, boolean active, int stateID, int partOffset, float partialTicks, float... data) {
+        float[] snapshot = te.getSnapshot();
+        int length = data.length / 2;
+
+        if(active) {
+            System.arraycopy(data, 0, TARGET_ANIMATION, partOffset, length);
+        } else {
+            System.arraycopy(data, length, TARGET_ANIMATION, partOffset, length);
+        }
+
+        if(active != te.getPreviousStates()[stateID]) {
+            te.getPreviousStates()[stateID] = active;
+            for (int i = 0; i < length; i++) {
+                snapshot[partOffset+i] = snapshot[4+partOffset+i];
+            }
+            te.getMovementTicksLeft()[stateID] = MOVEMENT_TICKS;
+        } else if(te.getMovementTicksLeft()[stateID] > 0) {
+            float perc = (te.getMovementTicksLeft()[stateID]-partialTicks)/MOVEMENT_TICKS;
+            for (int i = 0; i < length; i++) {
+                int id = partOffset+i;
+                TARGET_ANIMATION[id] = TARGET_ANIMATION[id] + (snapshot[id] - TARGET_ANIMATION[id])*perc;
+            }
+        }
+
     }
 
     private void renderEgg(boolean doPlatform, float eggLength) {
@@ -149,7 +189,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
         this.bindTexture(EGG_TYPE.getTexture());
 
         if(doPlatform) {
-            GlStateManager.translate(0, -NEEDLE_START_HEIGHT + eggLength, 0);
+            GlStateManager.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);
             MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), TabulaModelClipPlane::new).render(-1.5 + eggLength, 0xFFF7F1DD);
         } else {
             EGG_TYPE.getEggModel().renderBoxes(1/16F);
