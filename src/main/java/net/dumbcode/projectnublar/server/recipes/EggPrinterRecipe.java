@@ -28,7 +28,7 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
 
     @Override
     public int getRecipeTime(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        return 12000 - 2400*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
+        return 10*20;//12000 - 2400*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override

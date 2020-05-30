@@ -44,7 +44,7 @@ public class TabulaModelClipPlane {
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;
-        double[] plane = new double[]{0,-1,0,dist};
+        double[] plane = new double[]{0,1,0,dist};
 
         DoubleBuffer db = BufferUtils.createDoubleBuffer(8).put(plane);
         db.flip();
@@ -63,7 +63,7 @@ public class TabulaModelClipPlane {
                 Vec3d[] rawPoints = entry.getValue();
                 Vec3d[] points = new Vec3d[8];
                 for (int i = 0; i < rawPoints.length; i++) {
-                    points[i] = rawPoints[i].subtract(0, plane[3], 0);
+                    points[i] = rawPoints[i].add(0, plane[3], 0);
                 }
                 getCheckPlaneCross(points, outlist, 0b100, 0b101, 0b111, 0b110);
                 getCheckPlaneCross(points, outlist, 0b000, 0b001, 0b011, 0b010);
@@ -85,7 +85,7 @@ public class TabulaModelClipPlane {
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
                     for (int coord : new int[]{0, 1, 3, 2, 1, 0, 2, 3}) {
                         Vec3d vec = outlist.get(coord);
-                        buff.pos(vec.x, vec.y + plane[3], vec.z).color(r, g, b, 255).endVertex();
+                        buff.pos(vec.x, vec.y - plane[3], vec.z).color(r, g, b, 255).endVertex();
                     }
                     Tessellator.getInstance().draw();
                 }

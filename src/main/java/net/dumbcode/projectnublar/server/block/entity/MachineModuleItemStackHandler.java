@@ -38,7 +38,7 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
 
     @Override
     protected void onContentsChanged(int slot) {
-        MachineModuleBlockEntity.MachineProcess<B> process = this.blockEntity.getProcess(slot);
+        MachineModuleBlockEntity.MachineProcess<B> process = this.blockEntity.getProcessFromSlot(slot);
         if(process != null) {
             if(!process.isProcessing()) {
                 this.blockEntity.searchForRecipes(process);

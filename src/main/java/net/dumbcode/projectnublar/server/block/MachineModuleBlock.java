@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.item.MachineModulePart;
@@ -26,6 +27,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class MachineModuleBlock extends Block implements IItemBlock{
@@ -34,9 +36,14 @@ public class MachineModuleBlock extends Block implements IItemBlock{
     private final Map<MachineModuleType, PropertyInteger> propertyMap = Maps.newHashMap();
     private final Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier;
     private final BlockStateContainer blockState;
+    private final Set<BlockRenderLayer> renderLayers;
 
-    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart... values) {
+    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, BlockRenderLayer... renderLayers) {
         super(Material.IRON);
+        this.renderLayers = Sets.newHashSet(renderLayers);
+        if(this.renderLayers.isEmpty()) {
+            this.renderLayers.add(BlockRenderLayer.SOLID);
+        }
         this.values = Lists.newArrayList(values);
         this.machineSupplier = machineSupplier;
 
@@ -88,8 +95,8 @@ public class MachineModuleBlock extends Block implements IItemBlock{
     }
 
     @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
+        return this.renderLayers.contains(layer);
     }
 
     @Override

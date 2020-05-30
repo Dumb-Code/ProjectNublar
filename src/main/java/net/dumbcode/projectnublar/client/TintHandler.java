@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.tileentity.TileEntity;
@@ -31,5 +32,15 @@ public class TintHandler {
             }
             return -1;
         }, BlockHandler.SEQUENCING_SYNTHESIZER);
+
+        colors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> {
+            if(worldIn != null && pos != null && tintIndex == 1) {
+                TileEntity te = worldIn.getTileEntity(pos);
+                if(te instanceof EggPrinterBlockEntity) {
+                    return ((EggPrinterBlockEntity) te).getDye().getColorValue();
+                }
+            }
+            return -1;
+        }, BlockHandler.EGG_PRINTER);
     }
 }

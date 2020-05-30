@@ -1,23 +1,18 @@
 package net.dumbcode.projectnublar.client.render.model;
 
 import net.dumbcode.dumblibrary.client.component.ComponentRenderer;
-import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFencePoleRenderer;
-import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityElectricFenceRenderer;
-import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
-import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
+import net.dumbcode.projectnublar.client.render.blockentity.*;
 import net.dumbcode.projectnublar.client.render.entity.DinosaurEggRenderer;
 import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
-import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
-import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.DinosaurEggEntity;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
+import net.dumbcode.projectnublar.server.recipes.EggPrinterRecipe;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -39,6 +34,7 @@ public class DinosaurModelHandler {
         ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFencePole.class, new BlockEntityElectricFencePoleRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFence.class, new BlockEntityElectricFenceRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(IncubatorBlockEntity.class, new BlockEntityIncubatorRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(EggPrinterBlockEntity.class, new BlockEntityEggPrinterRenderer());
 
         EnumDinosaurEggTypes.registerResourceReload();
     }

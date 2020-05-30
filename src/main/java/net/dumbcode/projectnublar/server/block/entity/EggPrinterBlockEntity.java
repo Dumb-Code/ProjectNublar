@@ -1,21 +1,35 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import lombok.Getter;
+import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.EggPrinterGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.recipes.EggPrinterRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
-public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBlockEntity> {
+@Getter
+@Setter
+public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBlockEntity> implements DyableBlockEntity {
+    private EnumDyeColor dye = EnumDyeColor.WHITE;
+    private final float[] prevSnapshot = new float[3];
+    private final float[] renderSnapshot = new float[3];
+    private final int[] movementTicksLeft = new int[2];
+    private final boolean[] previousStates = new boolean[2];
+
+
     @Override
     protected int getInventorySize() {
         return 4;
@@ -34,7 +48,7 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     @Override
     protected List<MachineProcess<EggPrinterBlockEntity>> createProcessList() {
         return Lists.newArrayList(
-                new MachineProcess<>(this, new int[]{0, 1}, new int[]{3, 4})
+                new MachineProcess<>(this, new int[]{0, 1}, new int[]{2, 3})
         );
     }
 
@@ -52,6 +66,21 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
                 new MachineModuleSlot(this, 2, 129, 24),
                 new MachineModuleSlot(this, 3, 129, 42)
         );
+    }
+
+    @Override
+    public void update() {
+        super.update();
+        for (int i = 0; i < this.movementTicksLeft.length; i++) {
+            if(this.movementTicksLeft[i] >= 0) {
+                this.movementTicksLeft[i]--;
+            }
+        }
+    }
+
+    @Override
+    protected ProcessInterruptAction getInterruptAction(MachineProcess process) {
+        return ProcessInterruptAction.PAUSE;
     }
 
     // TODO: Change for balance, values are just for testing

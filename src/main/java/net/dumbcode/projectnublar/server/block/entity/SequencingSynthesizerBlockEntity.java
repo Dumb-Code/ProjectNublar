@@ -77,7 +77,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private int totalConsumeTime;
     private int consumeTimer;
 
-    @Getter @Setter private EnumDyeColor dye = EnumDyeColor.WHITE;
+    @Getter @Setter private EnumDyeColor dye = EnumDyeColor.BLACK;
 
 //    private String selectOneKey = "";
 //    private double selectOneAmount;

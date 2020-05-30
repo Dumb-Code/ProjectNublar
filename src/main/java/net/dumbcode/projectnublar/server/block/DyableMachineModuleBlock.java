@@ -9,6 +9,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -17,8 +18,9 @@ import net.minecraft.world.World;
 import java.util.function.Supplier;
 
 public class DyableMachineModuleBlock extends MachineModuleBlock {
-    public DyableMachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart... values) {
-        super(machineSupplier, values);
+
+    public DyableMachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, BlockRenderLayer... renderLayers) {
+        super(machineSupplier, values, renderLayers);
     }
 
     @Override

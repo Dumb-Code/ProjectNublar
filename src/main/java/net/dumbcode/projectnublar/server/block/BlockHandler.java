@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -32,8 +33,8 @@ public class BlockHandler {
 
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR);
-    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER);
-    public static final MachineModuleBlock EGG_PRINTER = new MachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER);
+    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER,  BlockRenderLayer.CUTOUT);
+    public static final MachineModuleBlock EGG_PRINTER = new DyableMachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER, BlockRenderLayer.CUTOUT, BlockRenderLayer.TRANSLUCENT);
     public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.INCUBATOR);
     public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR);
 

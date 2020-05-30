@@ -9,6 +9,8 @@ import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C18OpenContainer;
+import net.dumbcode.projectnublar.server.network.S42SyncMachineProcesses;
+import net.dumbcode.projectnublar.server.network.S43SyncMachineStack;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -130,9 +132,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             boolean hasPower = energy.extractEnergy(getBaseEnergyConsumption(), false) >= getBaseEnergyConsumption();
             for (MachineProcess<B> process : this.processes) {
                 if (!canProvideEnergyForProcess(process)) {
+                    process.setHasPower(false);
                     this.getInterruptAction(process).processConsumer.accept(process);
                     continue;
                 }
+                process.setHasPower(true);
                 if (hasPower && this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
                     if (process.isProcessing() || this.searchForRecipes(process)) {
                         if (process.isFinished()) {
@@ -142,6 +146,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                                 process.setTime(0);
                                 if (!recipe.accepts(this.asB, process)) {
                                     process.setProcessing(false);
+                                    process.setTotalTime(0);
+                                    process.setTime(0);
                                     process.setCurrentRecipe(null);
                                     this.searchForRecipes(process);
                                 } else {
@@ -159,6 +165,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                     }
                 } else if (process.isProcessing()) {
                     this.getInterruptAction(process).processConsumer.accept(process);
+                }
+            }
+            //todo: only sync when needed
+            ProjectNublar.NETWORK.sendToDimension(new S42SyncMachineProcesses(this), this.world.provider.getDimension());
+        } else {
+            for (MachineProcess<B> process : this.processes) {
+                if(process.isProcessing() && !process.isFinished()) {
+                    process.setTime(process.getTime() + 1);
                 }
             }
         }
@@ -256,7 +270,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     @Nullable
-    public MachineProcess<B> getProcess(int slot) {
+    public MachineProcess<B> getProcessFromSlot(int slot) {
         for (MachineProcess<B> process : this.processes) {
             for (int i : process.getInputSlots()) {
                 if(i == slot) {
@@ -265,6 +279,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             }
         }
         return null;
+    }
+
+    public int getProcessCount() {
+        return this.processes.size();
+    }
+
+    public MachineProcess<B> getProcess(int id) {
+        return this.processes.get(id);
     }
 
     public boolean searchForRecipes(MachineProcess<B> process) {
@@ -334,7 +356,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return ProcessInterruptAction.RESET;
     }
 
-    protected void onSlotChanged(int slot) {}
+    protected void onSlotChanged(int slot) {
+        if(!this.world.isRemote) {
+            ProjectNublar.NETWORK.sendToDimension(new S43SyncMachineStack(this, slot), this.world.provider.getDimension());
+        }
+    }
 
     protected abstract int getInventorySize();
 
@@ -438,6 +464,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         @Nullable
         MachineRecipe<B> currentRecipe;
         boolean processing;
+        boolean hasPower;
 
         public MachineProcess(MachineModuleBlockEntity<B> machine, int[] inputSlots, int[] outputSlots) {
             this.inputSlots = inputSlots;
