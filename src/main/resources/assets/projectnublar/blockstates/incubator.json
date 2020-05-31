@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "test1=false": { "model": "projectnublar:incubator.tbl" },
-    "test1=true": { "model": "projectnublar:incubator.tbl" }
-
-  }
+  "multipart": [
+    {
+      "apply": { "model": "projectnublar:incubator.tbl" }
+    }
+  ]
 }

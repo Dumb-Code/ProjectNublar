@@ -34,7 +34,7 @@ public class BlockHandler {
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR);
     public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER,  BlockRenderLayer.CUTOUT);
-    public static final MachineModuleBlock EGG_PRINTER = new DyableMachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER, BlockRenderLayer.CUTOUT, BlockRenderLayer.TRANSLUCENT);
+    public static final MachineModuleBlock EGG_PRINTER = new DyableMachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER, BlockRenderLayer.CUTOUT);
     public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.INCUBATOR);
     public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR);
 

@@ -31,8 +31,8 @@ public class C41PlaceIncubatorEgg implements IMessage {
     @Override
     public void fromBytes(ByteBuf buf) {
         this.pos = BlockPos.fromLong(buf.readLong());
-        this.xPos = MathHelper.clamp(buf.readInt(), 0, 100-IncubatorBlockEntity.EGG_SIZE);
-        this.yPos = MathHelper.clamp(buf.readInt(), 0, 100-IncubatorBlockEntity.EGG_SIZE);
+        this.xPos = MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, 100-IncubatorBlockEntity.HALF_EGG_SIZE);
+        this.yPos = MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, 100-IncubatorBlockEntity.HALF_EGG_SIZE);
     }
 
     @Override

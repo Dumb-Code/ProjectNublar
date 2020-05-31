@@ -1,19 +1,7 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/egg_printer",
-    "layer1": "projectnublar:blocks/egg_printer_glass"
-  },
-  "texture_data": {
-    "layer1": { "type": "whitelist", "cubes": [ "lid1", "lid2", "lid3" ]}
-  },
-  "render_layers": {
-    "cutout": {
-      "layers": ["layer0"]
-    },
-    "translucent": {
-      "layers": ["layer1"]
-    }
+    "layer0": "projectnublar:blocks/egg_printer"
   },
   "tabula": "projectnublar:models/block/egg_printer"
 }

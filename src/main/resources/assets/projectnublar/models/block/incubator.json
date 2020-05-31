@@ -1,4 +1,7 @@
 {
   "parent": "block/cube_all",
-  "tabula": "projectnublar:models/block/incubator_base"
+  "textures": {
+    "layer0": "projectnublar:blocks/incubator"
+  },
+  "tabula": "projectnublar:models/block/incubator"
 }

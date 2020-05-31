@@ -45,8 +45,8 @@ public class IncubatorGuiScreen extends TabbedGuiContainer {
                 MachineModuleSlot slot = (MachineModuleSlot) slotRaw;
                 IncubatorBlockEntity.Egg egg = this.blockEntity.getEggList()[i];
                 if(egg != null) {
-                    slot.xPos = egg.getXPos() + left-this.guiLeft;
-                    slot.yPos = egg.getYPos() + top-this.guiTop;
+                    slot.xPos = egg.getXPos() + left-this.guiLeft - 8;
+                    slot.yPos = egg.getYPos() + top-this.guiTop - 8;
                     slot.setEnabled(true);
                 } else { //Should always be true
                     slot.setEnabled(false);
@@ -59,7 +59,7 @@ public class IncubatorGuiScreen extends TabbedGuiContainer {
         ItemStack stack = Minecraft.getMinecraft().player.inventory.getItemStack();
         int color = 0xFF000000;
         boolean holdingEgg = ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(stack.getItem());
-        List<IncubatorBlockEntity.Egg> eggs = this.blockEntity.getCollidingEggs(mouseX - left - 8, mouseY - top - 8);
+        List<IncubatorBlockEntity.Egg> eggs = this.blockEntity.getCollidingEggs(mouseX - left, mouseY - top);
         if(mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom && holdingEgg) {
             color = eggs.isEmpty() ? 0xFF00FF00 : 0xFFFF0000;
         }
@@ -67,10 +67,10 @@ public class IncubatorGuiScreen extends TabbedGuiContainer {
         if(holdingEgg) {
             for (IncubatorBlockEntity.Egg egg : eggs) {
                 Gui.drawRect(
-                    Math.max(left + egg.getXPos() - IncubatorBlockEntity.EGG_PADDING, left),
-                    Math.max(top + egg.getYPos() - IncubatorBlockEntity.EGG_PADDING, top),
-                    Math.min(left + egg.getXPos() + IncubatorBlockEntity.EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, right),
-                    Math.min(top + egg.getYPos() + IncubatorBlockEntity.EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, bottom),
+                    Math.max(left + egg.getXPos() - IncubatorBlockEntity.HALF_EGG_SIZE - IncubatorBlockEntity.EGG_PADDING, left),
+                    Math.max(top + egg.getYPos() - IncubatorBlockEntity.HALF_EGG_SIZE - IncubatorBlockEntity.EGG_PADDING, top),
+                    Math.min(left + egg.getXPos() + IncubatorBlockEntity.HALF_EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, right),
+                    Math.min(top + egg.getYPos() + IncubatorBlockEntity.HALF_EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, bottom),
                     -1
                 );
             }
@@ -88,7 +88,7 @@ public class IncubatorGuiScreen extends TabbedGuiContainer {
 
         ItemStack stack = Minecraft.getMinecraft().player.inventory.getItemStack();
         if(mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom && ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(stack.getItem())) {
-            ProjectNublar.NETWORK.sendToServer(new C41PlaceIncubatorEgg(this.blockEntity.getPos(), mouseX - left - 8, mouseY - top - 8));
+            ProjectNublar.NETWORK.sendToServer(new C41PlaceIncubatorEgg(this.blockEntity.getPos(), mouseX - left, mouseY - top));
             this.justClickedEggPlacement = true;
         }
         super.mouseClicked(mouseX, mouseY, state);
@@ -108,14 +108,5 @@ public class IncubatorGuiScreen extends TabbedGuiContainer {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"));
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-
-        ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
-        Minecraft.getMinecraft().renderEngine.bindTexture(slotLocation);
-        for (int i = 0; i < 9; i++) {
-            Slot slot = this.inventorySlots.getSlot(i + 1);
-            if(slot.isEnabled()) {
-                this.drawTexturedModalRect(this.guiLeft + slot.xPos - 1, this.guiTop + slot.yPos - 1, 7, 17, 18, 18);
-            }
-        }
     }
 }

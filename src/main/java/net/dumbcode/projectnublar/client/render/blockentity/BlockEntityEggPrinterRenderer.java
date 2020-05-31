@@ -75,15 +75,19 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
         GlStateManager.pushMatrix();
         MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
 
+        ItemStack outSlot = te.getHandler().getStackInSlot(process.getOutputSlot(0));
         float recipeProgress = process.getTotalTime() == 0 ? 0 : (process.getTime() + partialTicks) / process.getTotalTime();
+        boolean outputSlot = !outSlot.isEmpty() && (outSlot.getItem() == ItemHandler.ARTIFICIAL_EGG || outSlot.getItem() == ItemHandler.BROKEN_ARTIFICIAL_EGG);
         boolean platformMove = process.getTotalTime() != 0;
 
-        this.animateNeedle(te, partialTicks);
-        this.animateLid(te, partialTicks);
-        if(this.animatePlatform(te, platformMove, recipeProgress, partialTicks)) {
+        if(outputSlot) {
+            recipeProgress = 1;
             platformMove = true;
-            recipeProgress = 1F;
         }
+
+        this.animateNeedle(te, partialTicks);
+        this.animateLid(te, partialTicks, outputSlot);
+        this.animatePlatform(te, platformMove, recipeProgress, partialTicks);
 
         this.renderEgg(platformMove, recipeProgress*EGG_TYPE.getEggLength());
 
@@ -122,8 +126,8 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
 
     }
 
-    private void animateLid(EggPrinterBlockEntity te, float partialTicks) {
-        this.animatePart(te, !te.getOpenedUsers().isEmpty(), 2, 3, partialTicks, (float) (-60F * Math.PI/180F), 0);
+    private void animateLid(EggPrinterBlockEntity te, float partialTicks, boolean outputSlot) {
+        this.animatePart(te, !te.getOpenedUsers().isEmpty() || outputSlot, 2, 3, partialTicks, (float) (-60F * Math.PI/180F), 0);
     }
 
     private void animateNeedle(EggPrinterBlockEntity te, float partialTicks) {
@@ -141,20 +145,8 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
         );
     }
 
-    private boolean animatePlatform(EggPrinterBlockEntity te, boolean platformMove, float recipeProgress, float partialTicks) {
-        MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
-
-        boolean ret = false;
-        if(!platformMove) {
-            ItemStack inSlot = te.getHandler().getStackInSlot(process.getOutputSlot(0));
-            if(!inSlot.isEmpty() && (inSlot.getItem() == ItemHandler.ARTIFICIAL_EGG || inSlot.getItem() == ItemHandler.BROKEN_ARTIFICIAL_EGG)) {
-                platformMove = true;
-                recipeProgress = 1;
-                ret = true;
-            }
-        }
+    private void animatePlatform(EggPrinterBlockEntity te, boolean platformMove, float recipeProgress, float partialTicks) {
         this.animatePart(te, platformMove, 0, 0, partialTicks, 16*recipeProgress*EGG_TYPE.getEggLength(), 4);
-        return ret;
     }
 
     private void animatePart(EggPrinterBlockEntity te, boolean active, int stateID, int partOffset, float partialTicks, float... data) {

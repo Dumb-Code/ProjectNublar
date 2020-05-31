@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
@@ -32,18 +33,17 @@ import java.util.List;
 public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBlockEntity> {
 
     public static final int DEFAULT_PLANT_MATTER = 100;
-    public static final int EGG_SIZE = 16;
-    public static final int EGG_PADDING = 10;
+    public static final int HALF_EGG_SIZE = 8;
+    public static final int EGG_PADDING = 15;
 
-    @SideOnly(Side.CLIENT)
+    public static final int TICKS_TO_OPEN = 10;
+    public static final int TICKS_LID_WAIT_TO_CLOSE = 5;
+
     public float movementTicks;
-    @SideOnly(Side.CLIENT)
+    public int[] lidTicks = new int[3];
     public float[] snapshot = new float[7];
-    @SideOnly(Side.CLIENT)
     public int activeEgg = -1;
-    @Getter
-    @SideOnly(Side.CLIENT)
-    private final Egg[] eggList = new Egg[9];
+    @Getter private final Egg[] eggList = new Egg[9];
 
     @Getter
     @Setter
@@ -78,13 +78,26 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
         if(this.plantMatter < this.totalPlantMatter) {
             this.plantMatter = Math.min(this.totalPlantMatter, this.plantMatter + MachineUtils.getPlantMatter(this.handler.getStackInSlot(0).splitStack(1), this.world, this.pos));
         }
+
+        this.movementTicks++;
+
+        this.lidTicks[1] = this.lidTicks[0];
+        if (!this.getOpenedUsers().isEmpty() || this.activeEgg != -1 || this.lidTicks[2]-- >= 0) {
+            if(this.lidTicks[0] < TICKS_TO_OPEN) {
+                this.lidTicks[0]++;
+            }
+            if(this.activeEgg != -1) {
+                this.lidTicks[2] = TICKS_LID_WAIT_TO_CLOSE;
+            }
+        } else if(this.lidTicks[0] > 0) {
+            this.lidTicks[0]--;
+        }
     }
 
     public List<Egg> getCollidingEggs(int x, int y) {
         List<Egg> eggs = new ArrayList<>();
         for (Egg egg : this.eggList) {
-            if(egg != null && egg.xPos - EGG_PADDING < x + EGG_SIZE && egg.xPos + EGG_SIZE + EGG_PADDING > x &&
-                egg.yPos - EGG_PADDING < y + EGG_SIZE && egg.yPos + EGG_SIZE + EGG_PADDING > y) {
+            if(egg != null && Math.abs(egg.xPos - x) < 2*(HALF_EGG_SIZE)+EGG_PADDING/2 && Math.abs(egg.yPos - y) < 2*(HALF_EGG_SIZE)+EGG_PADDING/2) {
                 eggs.add(egg);
             }
         }
@@ -107,17 +120,21 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
             DinosaurEggType type = eggTypes.get(this.world.rand.nextInt(eggTypes.size()));
 
             Vec3d armPos = new Vec3d(1.6, 1.4, 0.5);
-            Vec3d position = new Vec3d(1D + 14D*x/100D, 22.2, 1D + 14D*y/100D).scale(1/16F);
-
+            Vec3d position = new Vec3d(4D + 12D*x/100D, 22.2, 2D + 12D*y/100D).scale(1/16F);
 
             double handLength = 4 / 16F; // BlockEntityIncubatorRenderer#HAND_JOIN.length
 
             Vec3d normal;
+            int times = 0;
             do {
                 normal = armPos.subtract(position.x, 1.4 - (0.2+this.world.rand.nextFloat()*0.85), position.z)
                     .rotateYaw((float) ((this.world.rand.nextFloat()-0.5D)*4D*Math.PI)).normalize();
-            } while(armPos.distanceTo(position.add(normal.scale(handLength))) > 1.35);
+            } while(armPos.distanceTo(position.add(normal.scale(handLength))) > 1.1 && times++ < 5000);
 
+            if(times >= 5000) {
+                ProjectNublar.getLogger().warn("Invalid placement position for egg. Contact DumbCode and tell them to adjust the distance limit.");
+                return;
+            }
             for (int i = 0; i < this.eggList.length; i++) {
                 if(this.eggList[i] == null) {
                     this.eggList[i] = new Egg(x, y, position, normal, type);
@@ -279,6 +296,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
         private final Vec3d pickupDirection;
         private final DinosaurEggType eggType;
         private float rotation;
+        private float rotationStart;
         private float ticksSinceTurned;
     }
 
