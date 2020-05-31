@@ -286,12 +286,12 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         if(movementTicks < TICKS_TO_MOVE) {
             HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6],Math.PI/2D, movementInterp);
         } else if(movementTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN){
-            float spinTicks = (float) (2*Math.PI * (movementTicks - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN)/TICKS_TO_SPIN);
+            float spinTicks = (float) ( Math.PI/2D + Math.PI * (movementTicks - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN)/TICKS_TO_SPIN);
             if(movementTicks < TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN) {
                 HAND_JOINT.getBox().rotateAngleY = spinTicks;
                 egg.setRotation(egg.getRotationStart() + spinTicks);
             } else {
-                HAND_JOINT.getBox().rotateAngleY = 0;
+                HAND_JOINT.getBox().rotateAngleY = (float) (3*Math.PI/2D);
             }
         }
     }
