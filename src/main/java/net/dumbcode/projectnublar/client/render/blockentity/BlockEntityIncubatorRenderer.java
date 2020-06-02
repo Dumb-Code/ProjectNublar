@@ -2,22 +2,37 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import com.google.common.collect.Sets;
 import lombok.Value;
+import mezz.jei.util.ReflectionUtil;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
+import net.dumbcode.dumblibrary.server.TickHandler;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.MatrixUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.World;
+import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.model.TRSRTransformation;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -29,41 +44,62 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
     private static final Minecraft MC = Minecraft.getMinecraft();
 
+    private static final float TICKS_TO_ROTATE = 20F;
+    private static final float TICKS_WOBBLE = 15F;
     private static final float TICKS_TO_MOVE = 20F;
     private static final float TICKS_WAIT_BEFORE_SPIN = 10F;
     private static final float TICKS_TO_SPIN = 50F;
     private static final float TICKS_WAIT_AFTER_SPIN = 10F;
     private static final float TICKS_COOLDOWN = 20F;
 
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_animateables.tbl");
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_animateables.png");
-    private static final ResourceLocation TRANSLUCENT_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_animateables_translucent.png");
+    private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.tbl");
+    private static final ResourceLocation ARM_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_arm.png");
 
-    private static final Set<String> TRANSLUCENT_TEXTURES = Sets.newHashSet("TopLid1", "TopLid2", "TopLid3", "TopLid4", "GlassDome1", "GlassDome2", "GlassDome3");
-    private final Arm BASE_ROTATION = new Arm("ArmBase1", 2.5 / 16F);
+    private static final ResourceLocation LID_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.tbl");
+    private static final ResourceLocation TRANS_LID_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans.tbl");
+
+    private final Arm BASE_ROTATION = new Arm("ArmBase1", 3 / 16F);
     private final Arm FIRST_ARM = new Arm("Arm1", 8.5 / 16F);
     private final Arm LAST_ARM = new Arm("Arm2Base", 7 / 16F);
     private final Arm HAND_JOINT = new Arm("ClawNeck2", 4 / 16F);
     private final Arm HAND_JOINT_ROTATE = new Arm("ClawNeck1", 0); //Used for fixing parenting
 
-    private TabulaModel incubatorModel;
-    private final Set<String> translucentRenderCubes = new HashSet<>();
+    private TabulaModel armModel;
+
+    private IModel lidIModel;
+    private IModel translucentLidIModel;
+    private IBakedModel lidModel;
+    private IBakedModel translucentLidModel;
 
     public BlockEntityIncubatorRenderer() {
-        ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> {
-            this.incubatorModel = TabulaUtils.getModel(MODEL_LOCATION);
-            this.translucentRenderCubes.clear();
-
-            for (String texture : TRANSLUCENT_TEXTURES) {
-                TabulaModelRenderer cube = this.incubatorModel.getCube(texture);
-                while(cube != null) {
-                    this.translucentRenderCubes.add(cube.boxName);
-                    cube = cube.getParent();
-                }
-            }
-        });
+        ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> this.armModel = TabulaUtils.getModel(ARM_MODEL_LOCATION));
         MinecraftForge.EVENT_BUS.register(this);
     }
+
+    @SubscribeEvent
+    public void onTextureStitch(TextureStitchEvent.Pre event) {
+        try {
+            this.lidIModel = ModelLoaderRegistry.getModel(LID_LOCATION);
+            this.translucentLidIModel = ModelLoaderRegistry.getModel(TRANS_LID_LOCATION);
+        } catch (Exception e) {
+            ProjectNublar.getLogger().error("Unable to get lid models at " + LID_LOCATION + " and " + TRANS_LID_LOCATION, e);
+            this.lidIModel = ModelLoaderRegistry.getMissingModel();
+            this.translucentLidIModel = ModelLoaderRegistry.getMissingModel();
+        }
+        for (ResourceLocation texture : this.lidIModel.getTextures()) {
+            event.getMap().registerSprite(texture);
+        }
+        for (ResourceLocation texture : this.translucentLidIModel.getTextures()) {
+            event.getMap().registerSprite(texture);
+        }
+    }
+
+    @SubscribeEvent
+    public void onModelBake(ModelBakeEvent event) {
+        this.lidModel = this.lidIModel.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, location -> MC.getTextureMapBlocks().getAtlasSprite(location.toString()));
+        this.translucentLidModel = this.translucentLidIModel.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, location -> MC.getTextureMapBlocks().getAtlasSprite(location.toString()));
+    }
+
 
     @Override
     public void render(IncubatorBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -71,11 +107,19 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
-        GlStateManager.disableCull();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-        this.setupLightmap(te.getPos());
+        GlStateManager.disableCull();
+        GlStateManager.enableAlpha();
+
+        this.armModel.resetAnimations();
+
+        float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D);
+
+        int worldLight = this.getWorld().getCombinedLight(te.getPos().up(), 0);
+        int blockLight = worldLight % 65536;
+        int skyLight = worldLight / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, Math.max(blockLight, 7*16), skyLight);
+        GlStateManager.color(1F, 1F, 1F, 1F);
 
         for (IncubatorBlockEntity.Egg egg : te.getEggList()) {
             if(egg != null) {
@@ -83,51 +127,73 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             }
         }
 
-        this.renderIncubatorParts(te, partialTicks);
+        this.armModel.setOnRenderCallback(cube -> {
+            float lightStart = -0.7F;
+
+           Vec3d vec3d = TabulaUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) MathHelper.clamp((-vec3d.x/lightStart + 1)*16*10, blockLight, 240F), skyLight);
+        });
+
+        this.renderIncubatorParts(te, lidHeight, partialTicks);
+
+        GlStateManager.translate(0, lidHeight, 0);
+        this.renderLid(te.getWorld(), te.getPos());
+
 
         GlStateManager.popMatrix();
     }
 
-    private void renderIncubatorParts(IncubatorBlockEntity te, float partialTicks) {
+    private void renderLid(World world, BlockPos pos) {
+        this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        GlStateManager.pushMatrix();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buff = tessellator.getBuffer();
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.enableBlend();
+        GlStateManager.disableCull();
+
+        if (Minecraft.isAmbientOcclusionEnabled()) {
+            GlStateManager.shadeModel(GL11.GL_SMOOTH);
+        } else {
+            GlStateManager.shadeModel(GL11.GL_FLAT);
+        }
+
+        buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
+
+        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, this.lidModel, world.getBlockState(pos), pos, buff, false);
+        tessellator.draw();
+
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
+        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, this.translucentLidModel, world.getBlockState(pos), pos, buff, false);
+        buff.sortVertexData(0, 0, 0);
+        tessellator.draw();
+
+        buff.setTranslation(0, 0, 0);
+
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
+
+    private void renderIncubatorParts(IncubatorBlockEntity te, float lidHeight, float partialTicks) {
         GlStateManager.pushMatrix();
         this.doTabulaTransforms();
 
+        this.setArmAngles(te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
         this.updateEgg(te, partialTicks);
-        this.setArmAngles(te.activeEgg != -1 ? te.getEggList()[te.activeEgg] : null, te.movementTicks + partialTicks, te.snapshot, partialTicks);
-        this.setLidHeight(te, partialTicks);
 
-        this.bindTexture(TEXTURE_LOCATION);
-        this.incubatorModel.renderBoxes(1/16F);
-
-        this.renderTranslucentTexture();
+        this.bindTexture(ARM_TEXTURE_LOCATION);
+        GlStateManager.enableAlpha();
+        this.armModel.renderBoxes(1/16F);
 
         GlStateManager.popMatrix();
         GlStateManager.enableTexture2D();
     }
 
-    //As we can't sort the TabulaModel, if we just render the translucent glass texture after the solid textures it'll
-    //look fine and not have any visable blending issues. However, to optimize, we should only render the cubes that
-    //actually have the translucent texture. The following code hides all unrelated cubes, and sets `hideButShowChildren`
-    //to true on the cubes that affect the position of the translucent cubes.
-    private void renderTranslucentTexture() {
-        for (TabulaModelRenderer cube : this.incubatorModel.getAllCubes()) {
-            if(!this.translucentRenderCubes.contains(cube.boxName)) {
-                cube.isHidden = true;
-                continue;
-            }
-            if(!TRANSLUCENT_TEXTURES.contains(cube.boxName)) {
-                cube.setHideButShowChildren(true);
-            }
-        }
-
-        this.bindTexture(TRANSLUCENT_TEXTURE_LOCATION);
-        this.incubatorModel.renderBoxes(1/16F);
-
-        for (TabulaModelRenderer cube : this.incubatorModel.getAllCubes()) {
-            cube.setHideButShowChildren(false);
-            cube.isHidden = false;
-        }
-    }
 
     private void renderEgg(IncubatorBlockEntity.Egg egg) {
         if(egg.getEggType() == DinosaurEggType.EMPTY) {
@@ -179,34 +245,37 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
                 egg.setTicksSinceTurned(egg.getTicksSinceTurned() + partialTicks);
             }
         }
-        if(blockEntity.activeEgg != -1 && blockEntity.getEggList()[blockEntity.activeEgg] == null) {
-            blockEntity.activeEgg = -1;
+        if(blockEntity.activeEgg[0] != -1 && blockEntity.getEggList()[blockEntity.activeEgg[0]] == null) {
+            blockEntity.activeEgg[0] = -1;
+            blockEntity.activeEgg[1] = 0;
             blockEntity.movementTicks = 0;
             this.createSnapshot(blockEntity);
         }
-        boolean doneSpin = blockEntity.movementTicks + partialTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN + TICKS_WAIT_AFTER_SPIN;
+        boolean doneSpin = blockEntity.movementTicks + partialTicks > TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN + TICKS_WAIT_AFTER_SPIN;
         boolean foundNewEgg = false;
-        if((blockEntity.activeEgg == -1 && blockEntity.movementTicks + partialTicks > TICKS_TO_MOVE + TICKS_COOLDOWN) || doneSpin) {
+        if((blockEntity.activeEgg[0] == -1 && blockEntity.movementTicks + partialTicks > TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE + TICKS_COOLDOWN) || doneSpin) {
             //Get all the eggs that haven't been turned around for 5 minutes
             foundNewEgg = IntStream.range(0, 9)
                 .filter(i ->
                     blockEntity.getEggList()[i] != null &&
-                    blockEntity.getEggList()[i].getTicksSinceTurned() - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN - TICKS_TO_SPIN > 1200 /*6000*/ &&
+                    blockEntity.getEggList()[i].getTicksSinceTurned() > 1200 /*6000*/ &&
                     blockEntity.getProcess(i).isHasPower() && blockEntity.getProcess(i).isProcessing()
                 )
                 .boxed()
                 .collect(IOCollectors.randomPicker(getWorld().rand))
                 .map(i -> {
-                    blockEntity.activeEgg = i;
+                    blockEntity.activeEgg[1]++;
+                    blockEntity.activeEgg[0] = i;
                     blockEntity.getEggList()[i].setRotationStart(blockEntity.getEggList()[i].getRotation());
-                    blockEntity.movementTicks = 0;
+                    blockEntity.movementTicks = blockEntity.activeEgg[1] == 1 ? 0 : TICKS_TO_ROTATE + TICKS_WOBBLE;
                     blockEntity.getEggList()[i].setTicksSinceTurned(0);
                     this.createSnapshot(blockEntity);
                     return true;
                 }).orElse(false);
         }
-        if(doneSpin && !foundNewEgg && blockEntity.activeEgg != -1) {
-            blockEntity.activeEgg = -1;
+        if(doneSpin && !foundNewEgg && blockEntity.activeEgg[0] != -1) {
+            blockEntity.activeEgg[0] = -1;
+            blockEntity.activeEgg[1] = 0;
             blockEntity.movementTicks = 0;
             this.createSnapshot(blockEntity);
         }
@@ -214,6 +283,8 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
     private void createSnapshot(IncubatorBlockEntity blockEntity) {
         float[] snapshot = blockEntity.snapshot;
+
+        TabulaModelRenderer box = BASE_ROTATION.getBox();
 
         snapshot[0] = BASE_ROTATION.getBox().rotateAngleY;
         snapshot[1] = FIRST_ARM.getBox().rotateAngleZ;
@@ -224,32 +295,34 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         snapshot[6] = HAND_JOINT.getBox().rotateAngleY;
     }
 
-    private void setLidHeight(IncubatorBlockEntity te, float partialTicks) {
-        float p = (te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN;
-
-        TabulaModelRenderer cube = this.incubatorModel.getCube("liftArm1");
-        cube.resetRotationPoint();
-        cube.rotationPointY -= 12.5F * p;
-    }
-
-    private void setArmAngles(@Nullable IncubatorBlockEntity.Egg egg, float movementTicks, float[] snapshot, float partialTicks) {
-        float movementInterp = movementTicks / TICKS_TO_MOVE;
+    private void setArmAngles(@Nullable IncubatorBlockEntity.Egg egg, float movementTicks, float[] snapshot, int eggMoveAmount) {
+        float rotateInterp = movementTicks / TICKS_TO_ROTATE;
         if(egg == null) {
+            float movementInterp = (movementTicks - TICKS_TO_ROTATE) / TICKS_TO_MOVE;
+
             BASE_ROTATION.getBox().rotateAngleY = this.interpolate(snapshot[0], BASE_ROTATION.getBox().getDefaultRotation()[1], movementInterp);
-            FIRST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[1], FIRST_ARM.getBox().getDefaultRotation()[2], movementInterp);
-            LAST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[2], LAST_ARM.getBox().getDefaultRotation()[2], movementInterp);
+            FIRST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[1], FIRST_ARM.getBox().getDefaultRotation()[2], rotateInterp);
+            LAST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[2], LAST_ARM.getBox().getDefaultRotation()[2], rotateInterp);
 
-            HAND_JOINT_ROTATE.getBox().rotateAngleZ = this.interpolate(snapshot[3], HAND_JOINT_ROTATE.getBox().getDefaultRotation()[2], movementInterp);
-            HAND_JOINT_ROTATE.getBox().rotateAngleY = this.interpolate(snapshot[4], HAND_JOINT_ROTATE.getBox().getDefaultRotation()[1] + Math.PI, movementInterp);
+            HAND_JOINT_ROTATE.getBox().rotateAngleZ = this.interpolate(snapshot[3], HAND_JOINT_ROTATE.getBox().getDefaultRotation()[2], rotateInterp);
+            HAND_JOINT_ROTATE.getBox().rotateAngleY = this.interpolate(snapshot[4], HAND_JOINT_ROTATE.getBox().getDefaultRotation()[1] + Math.PI, rotateInterp);
 
+            HAND_JOINT.getBox().rotateAngleZ = this.interpolate(snapshot[5], HAND_JOINT.getBox().getDefaultRotation()[2], rotateInterp);
+            HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6], HAND_JOINT.getBox().getDefaultRotation()[1], rotateInterp);
 
-            HAND_JOINT.getBox().rotateAngleZ = this.interpolate(snapshot[5], HAND_JOINT.getBox().getDefaultRotation()[2], movementInterp);
-            HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6], HAND_JOINT.getBox().getDefaultRotation()[1], movementInterp);
+            if(movementTicks > TICKS_TO_MOVE + TICKS_TO_ROTATE) {
+                BASE_ROTATION.getBox().rotateAngleY += this.wobble((movementTicks - TICKS_TO_MOVE - TICKS_TO_ROTATE) / TICKS_WOBBLE);
+            }
 
             return;
         }
+        float movementInterp = (movementTicks - TICKS_TO_ROTATE - TICKS_WOBBLE) / TICKS_TO_MOVE;
 
-        Vec3d origin = new Vec3d(1.6, 1.4, 0.5);
+        if(eggMoveAmount > 1) {
+            rotateInterp = movementInterp;
+        }
+
+        Vec3d origin = new Vec3d(1.5, 1.4, 0.5);
         Vec3d target = egg.getEggPosition();
         Vec3d normal = egg.getPickupDirection().normalize();
         Vec3d handJointTarget = target.add(normal.scale(HAND_JOINT.length));
@@ -272,7 +345,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             this.doTabulaTransforms();
         }
 
-        BASE_ROTATION.getBox().rotateAngleY = this.interpolate(snapshot[0], baseYRotation, movementInterp);
+        BASE_ROTATION.getBox().rotateAngleY = this.interpolate(snapshot[0], baseYRotation, rotateInterp);
         FIRST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[1], angleFirstArm, movementInterp);
         LAST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[2], angleLastArm, movementInterp);
 
@@ -283,17 +356,28 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
         HAND_JOINT.getBox().rotateAngleZ = this.interpolate(snapshot[5], -(handRotZ + Math.PI/2D), movementInterp);
 
-        if(movementTicks < TICKS_TO_MOVE) {
-            HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6],Math.PI/2D, movementInterp);
-        } else if(movementTicks > TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN){
-            float spinTicks = (float) ( Math.PI/2D + Math.PI * (movementTicks - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN)/TICKS_TO_SPIN);
-            if(movementTicks < TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN) {
-                HAND_JOINT.getBox().rotateAngleY = spinTicks;
+        if(eggMoveAmount == 1 && movementTicks > TICKS_TO_ROTATE && movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE) {
+            BASE_ROTATION.getBox().rotateAngleY += this.wobble((movementTicks - TICKS_TO_ROTATE) / TICKS_WOBBLE);
+        }
+
+        int directionModifier = ((eggMoveAmount % 2) * 2) - 1;
+        if(movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE) {
+            HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6],directionModifier * Math.PI/2D, movementInterp);
+        } else if(movementTicks > TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN){
+            float spinTicks = (float) (Math.PI * (movementTicks - TICKS_TO_ROTATE - TICKS_WOBBLE - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN)/TICKS_TO_SPIN);
+            if(movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN) {
+                HAND_JOINT.getBox().rotateAngleY = (float) (directionModifier*Math.PI/2D + spinTicks);
                 egg.setRotation(egg.getRotationStart() + spinTicks);
             } else {
-                HAND_JOINT.getBox().rotateAngleY = (float) (3*Math.PI/2D);
+                HAND_JOINT.getBox().rotateAngleY = (float) (directionModifier*Math.PI/2D + Math.PI);
             }
+        } else {
+            HAND_JOINT.getBox().rotateAngleY = (float) (directionModifier * Math.PI/2D);
         }
+    }
+
+    private float wobble(float interp) {
+        return (float) (Math.PI/30 * Math.sin(8*interp*Math.PI) * Math.max((0.5-interp), 0));
     }
 
     private float interpolate(double from, double to, double partialTicks) {
@@ -329,15 +413,6 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         return (float) (from + (to - from) * partialTicks);
     }
 
-    private void setupLightmap(BlockPos pos) {
-        RenderHelper.enableStandardItemLighting();
-        int i = this.getWorld().getCombinedLight(pos.up(), 0);
-        int j = i % 65536;
-        int k = i / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-    }
-
     private double cosineRule(double opposite, double sideA, double sideB) {
         return Math.acos((sideA*sideA + sideB*sideB - opposite*opposite) / (2D * sideA * sideB));
     }
@@ -349,6 +424,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     private void drawDebugRenderers(Vec3d origin, Vec3d target, Vec3d handJointTarget, double baseYRotation, Vec3d baseJoinTarget, double angleFirstArm, double angleLastArm) {
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
 
+        GlStateManager.disableLighting();
         GlStateManager.pushMatrix();
         buff.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
         buff.pos(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z).color(0F, 1F, 0F, 1F).endVertex();
@@ -370,20 +446,32 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         GlStateManager.translate(0, LAST_ARM.length, 0);
         this.drawDebugLines(0, 0, 0);
         GlStateManager.popMatrix();
+        GlStateManager.enableLighting();
     }
 
     private void drawDebugLines(double x, double y, double z) {
+        this.setLightmapDisabled(true);
+        GlStateManager.disableFog();
+        GlStateManager.disableLighting();
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.color(1F, 1F, 1F);
+        GlStateManager.glLineWidth(1F);
         GlStateManager.pushMatrix();
+        GlStateManager.disableLighting();
         GlStateManager.translate(x, y, z);
         BufferBuilder buff = Tessellator.getInstance().getBuffer();
         buff.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-        buff.pos(0.2, 0, 0).color(1F, 0F, 0F, 1F).endVertex();
+        buff.pos(0.3, 0, 0).color(1F, 0F, 0F, 1F).endVertex();
         buff.pos(0, 0, 0).color(1F, 1F, 0F, 1F).endVertex();
-        buff.pos(0, 0.2, 0).color(0F, 1F, 0F, 1F).endVertex();
-        buff.pos(0, 0, 0.2).color(0F, 0F, 1F, 0F).endVertex();
+        buff.pos(0, 0.3, 0).color(0F, 1F, 0F, 1F).endVertex();
+        buff.pos(0, 0, 0.3).color(0F, 0F, 1F, 0F).endVertex();
         buff.pos(0, 0, 0).color(0F, 0F, 1F, 1F).endVertex();
-
         Tessellator.getInstance().draw();
+        GlStateManager.enableLighting();
+        this.setLightmapDisabled(false);
+
         GlStateManager.popMatrix();
     }
 
@@ -393,7 +481,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         double length;
 
         TabulaModelRenderer getBox() {
-            return BlockEntityIncubatorRenderer.this.incubatorModel.getCube(this.armName);
+            return BlockEntityIncubatorRenderer.this.armModel.getCube(this.armName);
         }
     }
 }

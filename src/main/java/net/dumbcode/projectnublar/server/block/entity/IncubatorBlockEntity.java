@@ -36,13 +36,13 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     public static final int HALF_EGG_SIZE = 8;
     public static final int EGG_PADDING = 15;
 
-    public static final int TICKS_TO_OPEN = 10;
-    public static final int TICKS_LID_WAIT_TO_CLOSE = 5;
+    public static final int TICKS_TO_OPEN = 20;
+    public static final int TICKS_LID_WAIT_TO_CLOSE = 30;
 
-    public float movementTicks;
+    public float movementTicks = 100000;
     public int[] lidTicks = new int[3];
     public float[] snapshot = new float[7];
-    public int activeEgg = -1;
+    public int[] activeEgg = { -1, 0 };
     @Getter private final Egg[] eggList = new Egg[9];
 
     @Getter
@@ -82,11 +82,11 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
         this.movementTicks++;
 
         this.lidTicks[1] = this.lidTicks[0];
-        if (!this.getOpenedUsers().isEmpty() || this.activeEgg != -1 || this.lidTicks[2]-- >= 0) {
+        if (!this.getOpenedUsers().isEmpty() || this.activeEgg[0] != -1 || this.lidTicks[2]-- > 0) {
             if(this.lidTicks[0] < TICKS_TO_OPEN) {
                 this.lidTicks[0]++;
             }
-            if(this.activeEgg != -1) {
+            if(this.activeEgg[0] != -1) {
                 this.lidTicks[2] = TICKS_LID_WAIT_TO_CLOSE;
             }
         } else if(this.lidTicks[0] > 0) {

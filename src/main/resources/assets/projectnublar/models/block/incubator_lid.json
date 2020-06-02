@@ -1,0 +1,169 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "layer0": "projectnublar:blocks/incubator_lid"
+  },
+  "tabula": "projectnublar:models/block/incubator_lid",
+  "lightup_data": [
+    {
+      "smooth_cubes": [{
+        "cube_name": "Light",
+        "origin": "down",
+        "size_block": 8,
+        "size_sky": 0
+      }],
+      "block_light": 15,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "DomeTop1",
+        "origin": "down",
+        "size_block": 12,
+        "size_sky": 0
+      }],
+      "block_light": 7,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "DomeTop2",
+        "origin": "down",
+        "size_block": 6,
+        "size_sky": 0
+      }],
+      "block_light": 5,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "GlassDome3",
+        "origin": "up",
+        "size_block": 1,
+        "size_sky": 0
+      }],
+      "block_light": 15,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "GlassDome2",
+        "origin": "up",
+        "size_block": 1,
+        "size_sky": 0
+      }],
+      "block_light": 14,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "GlassDome1",
+        "origin": "up",
+        "size_block": 2,
+        "size_sky": 0
+      }],
+      "block_light": 13,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "TopLid1",
+        "origin": "up",
+        "size_block": 2,
+        "size_sky": 0
+      }],
+      "block_light": 11,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [
+        {
+          "cube_name": "CareBase14",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase15",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase16",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase17",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        }
+      ],
+      "block_light": 9,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [
+        {
+          "cube_name": "CareBase10",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase11",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase12",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase13",
+          "origin": "up",
+          "size_block": 2,
+          "size_sky": 0
+        }
+      ],
+      "block_light": 8,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [
+        {
+          "cube_name": "CareBase10",
+          "origin": "up",
+          "size_block": 4,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase11",
+          "origin": "up",
+          "size_block": 4,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase12",
+          "origin": "up",
+          "size_block": 4,
+          "size_sky": 0
+        },
+        {
+          "cube_name": "CareBase13",
+          "origin": "up",
+          "size_block": 4,
+          "size_sky": 0
+        }
+      ],
+      "block_light": 9,
+      "sky_light": 0
+    }
+  ]
+}
