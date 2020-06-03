@@ -13,10 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MachineModuleParts {
-    public static final MachineModulePart[] TEST_MACHINES = {
-        simplePartItem(MachineModuleType.TEST, null, () -> Items.APPLE, () -> Items.STICK)
-    };
-
     public static final MachineModulePart[] DRILL_EXTRACTOR = {
         simplePartItemMeta(MachineModuleType.DRILL_BIT, null, 5, () -> ItemHandler.DRILL_BIT_PART)
     };

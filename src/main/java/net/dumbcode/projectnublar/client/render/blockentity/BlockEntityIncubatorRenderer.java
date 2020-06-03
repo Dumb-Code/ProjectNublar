@@ -1,20 +1,17 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import com.google.common.collect.Sets;
 import lombok.Value;
-import mezz.jei.util.ReflectionUtil;
+import net.dumbcode.dumblibrary.client.BakedModelResolver;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
-import net.dumbcode.dumblibrary.server.TickHandler;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.utils.IOCollectors;
-import net.dumbcode.dumblibrary.server.utils.MatrixUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
+import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -23,21 +20,16 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.model.TRSRTransformation;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<IncubatorBlockEntity> {
@@ -55,8 +47,11 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.tbl");
     private static final ResourceLocation ARM_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_arm.png");
 
-    private static final ResourceLocation LID_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.tbl");
-    private static final ResourceLocation TRANS_LID_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans.tbl");
+    private static final BakedModelResolver LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.tbl"));
+    private static final BakedModelResolver TRANSLUCENT_LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans.tbl"));
+    private static final BakedModelResolver[] LIGHT_MODELS = IntStream.range(0, 4) //4 is the amount of incubator bulb upgrades + 1
+        .mapToObj(i -> new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_light_" + i + ".tbl")))
+        .toArray(BakedModelResolver[]::new);
 
     private final Arm BASE_ROTATION = new Arm("ArmBase1", 3 / 16F);
     private final Arm FIRST_ARM = new Arm("Arm1", 8.5 / 16F);
@@ -66,40 +61,12 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
     private TabulaModel armModel;
 
-    private IModel lidIModel;
-    private IModel translucentLidIModel;
-    private IBakedModel lidModel;
-    private IBakedModel translucentLidModel;
+
 
     public BlockEntityIncubatorRenderer() {
         ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> this.armModel = TabulaUtils.getModel(ARM_MODEL_LOCATION));
         MinecraftForge.EVENT_BUS.register(this);
     }
-
-    @SubscribeEvent
-    public void onTextureStitch(TextureStitchEvent.Pre event) {
-        try {
-            this.lidIModel = ModelLoaderRegistry.getModel(LID_LOCATION);
-            this.translucentLidIModel = ModelLoaderRegistry.getModel(TRANS_LID_LOCATION);
-        } catch (Exception e) {
-            ProjectNublar.getLogger().error("Unable to get lid models at " + LID_LOCATION + " and " + TRANS_LID_LOCATION, e);
-            this.lidIModel = ModelLoaderRegistry.getMissingModel();
-            this.translucentLidIModel = ModelLoaderRegistry.getMissingModel();
-        }
-        for (ResourceLocation texture : this.lidIModel.getTextures()) {
-            event.getMap().registerSprite(texture);
-        }
-        for (ResourceLocation texture : this.translucentLidIModel.getTextures()) {
-            event.getMap().registerSprite(texture);
-        }
-    }
-
-    @SubscribeEvent
-    public void onModelBake(ModelBakeEvent event) {
-        this.lidModel = this.lidIModel.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, location -> MC.getTextureMapBlocks().getAtlasSprite(location.toString()));
-        this.translucentLidModel = this.translucentLidIModel.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, location -> MC.getTextureMapBlocks().getAtlasSprite(location.toString()));
-    }
-
 
     @Override
     public void render(IncubatorBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -113,7 +80,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
         this.armModel.resetAnimations();
 
-        float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D);
+        float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D) * 12.5F/16F;
 
         int worldLight = this.getWorld().getCombinedLight(te.getPos().up(), 0);
         int blockLight = worldLight % 65536;
@@ -134,16 +101,16 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) MathHelper.clamp((-vec3d.x/lightStart + 1)*16*10, blockLight, 240F), skyLight);
         });
 
-        this.renderIncubatorParts(te, lidHeight, partialTicks);
+        this.renderIncubatorParts(te, partialTicks);
 
         GlStateManager.translate(0, lidHeight, 0);
-        this.renderLid(te.getWorld(), te.getPos());
+        this.renderLid(te.getWorld(), te.getPos(), te.getTier(MachineModuleType.BULB));
 
 
         GlStateManager.popMatrix();
     }
 
-    private void renderLid(World world, BlockPos pos) {
+    private void renderLid(World world, BlockPos pos, int bulbTier) {
         this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         GlStateManager.pushMatrix();
         Tessellator tessellator = Tessellator.getInstance();
@@ -162,14 +129,15 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
 
         buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, this.lidModel, world.getBlockState(pos), pos, buff, false);
+        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, LID_MODEL.getModel(), world.getBlockState(pos), pos, buff, false);
+        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, LIGHT_MODELS[bulbTier].getModel(), world.getBlockState(pos), pos, buff, false);
         tessellator.draw();
 
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, this.translucentLidModel, world.getBlockState(pos), pos, buff, false);
+        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, TRANSLUCENT_LID_MODEL.getModel(), world.getBlockState(pos), pos, buff, false);
         buff.sortVertexData(0, 0, 0);
         tessellator.draw();
 
@@ -179,7 +147,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         GlStateManager.popMatrix();
     }
 
-    private void renderIncubatorParts(IncubatorBlockEntity te, float lidHeight, float partialTicks) {
+    private void renderIncubatorParts(IncubatorBlockEntity te, float partialTicks) {
         GlStateManager.pushMatrix();
         this.doTabulaTransforms();
 

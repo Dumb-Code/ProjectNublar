@@ -22,6 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
@@ -207,6 +208,11 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
             new MachineProcess<>(this, new int[]{8}, new int[]{8}),
             new MachineProcess<>(this, new int[]{9}, new int[]{9})
         );
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        return new AxisAlignedBB(this.getPos()).grow(1, 0, 1).expand(0, 2, 0);
     }
 
     @Override
