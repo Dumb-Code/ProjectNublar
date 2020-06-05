@@ -65,8 +65,6 @@ public class PylonHeadConnectionRenderer {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
-        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
-//        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
         for (PylonHeadBlockEntity.Connection connection : connections) {
             Vec3d from = new Vec3d(connection.getFrom()).add(0.5, 0.5, 0.5);
             Vec3d to = new Vec3d(connection.getTo()).add(0.5, 0.5, 0.5);
@@ -78,8 +76,8 @@ public class PylonHeadConnectionRenderer {
                 float current = (float) i / iterations;
                 float next = (float) (i+1) / iterations;
 
-                Vec3d cPos = new Vec3d(from.x + (to.x - from.x) * current, connection.beizerCurve(current), from.z + (to.z - from.z) * current);
-                Vec3d nPos = new Vec3d(from.x + (to.x - from.x) * next, connection.beizerCurve(next), from.z + (to.z - from.z) * next);
+                Vec3d cPos = new Vec3d(from.x + (to.x - from.x) * current, connection.beizerCurve(current)+0.5, from.z + (to.z - from.z) * current);
+                Vec3d nPos = new Vec3d(from.x + (to.x - from.x) * next, connection.beizerCurve(next)+0.5, from.z + (to.z - from.z) * next);
 
                 DirVec c = DirVec.get(connection.beizerCurveGradient(current), diff, 0.025F);
                 DirVec n = DirVec.get(connection.beizerCurveGradient(next), diff, 0.025F);
@@ -114,7 +112,6 @@ public class PylonHeadConnectionRenderer {
             }
         }
 
-//        Tessellator.getInstance().draw();
         GlStateManager.popMatrix();
 
         GlStateManager.enableDepth();
