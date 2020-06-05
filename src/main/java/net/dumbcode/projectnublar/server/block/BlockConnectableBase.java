@@ -8,6 +8,7 @@ import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -128,14 +129,14 @@ public class BlockConnectableBase extends Block {
                         for (int i = 0; i < times; i++) {
                             for (int i1 = 0; i1 < 5; i1++) {
                                 ProjectNublar.spawnParticles(ParticleType.SPARKS, worldIn,
-                                        center.x + (other.x - center.x) * worldIn.rand.nextGaussian() * 0.5F,
-                                        center.y + (other.y - center.y) * worldIn.rand.nextGaussian() * 0.5F,
-                                        center.z + (other.z - center.z) * worldIn.rand.nextGaussian() * 0.5F,
+                                    center.x + (other.x - center.x) * worldIn.rand.nextGaussian() * 0.5F,
+                                    center.y + (other.y - center.y) * worldIn.rand.nextGaussian() * 0.5F,
+                                    center.z + (other.z - center.z) * worldIn.rand.nextGaussian() * 0.5F,
 
 
-                                        worldIn.rand.nextGaussian() * 1.5F,
-                                        worldIn.rand.nextGaussian() * 1.5F,
-                                        worldIn.rand.nextGaussian() * 1.5F, 3);
+                                    worldIn.rand.nextGaussian() * 1.5F,
+                                    worldIn.rand.nextGaussian() * 1.5F,
+                                    worldIn.rand.nextGaussian() * 1.5F, 3);
                             }
                         }
                     }
@@ -544,7 +545,7 @@ public class BlockConnectableBase extends Block {
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         World world = event.getWorld();
         EnumFacing side = event.getFace();
-        if(side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+        if(side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == ItemHandler.WIRE_SPOOL) {
             TileEntity tile = world.getTileEntity(event.getPos().offset(side));
             if(tile instanceof ConnectableBlockEntity) {
                 ConnectableBlockEntity cb = (ConnectableBlockEntity) tile;
@@ -587,7 +588,7 @@ public class BlockConnectableBase extends Block {
     public static void setCollidableServer(boolean server) {
         collidableServer = server;
     }
-    
+
     @Value
     public static class HitChunk {AxisAlignedBB aabb; Connection connection; EnumFacing dir; RotatedRayBox.Result result;}
 

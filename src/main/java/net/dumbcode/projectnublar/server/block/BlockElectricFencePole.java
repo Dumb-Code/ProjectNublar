@@ -6,6 +6,7 @@ import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFencePole;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
@@ -193,7 +194,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                     }
                     return true;
                 }
-            } else if(stack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) { //Move to item class ?
+            } else if(stack.getItem() == ItemHandler.WIRE_SPOOL) { //Move to item class ?
                 NBTTagCompound nbt = stack.getOrCreateSubCompound(ProjectNublar.MODID);
                 if(nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
                     BlockPos other = BlockPos.fromLong(nbt.getLong("fence_position"));
@@ -221,7 +222,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                         itemAmount -= stack.getCount();
 
                         for (ItemStack itemStack : playerIn.inventory.mainInventory) {
-                            if (itemStack != stack && itemStack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
+                            if (itemStack != stack && itemStack.getItem() == ItemHandler.WIRE_SPOOL) {
                                 if (itemAmount <= itemStack.getCount()) {
                                     total += itemAmount;
                                     stacksFound.add(Pair.of(itemStack, itemAmount));

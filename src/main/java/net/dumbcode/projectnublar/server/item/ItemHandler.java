@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.item;
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
@@ -43,6 +44,7 @@ public final class ItemHandler {
     public static final Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
     public static final Item ARTIFICIAL_EGG = new Item();
     public static final Item BROKEN_ARTIFICIAL_EGG = new Item();
+    public static final Item WIRE_SPOOL = new WireSpoolItem(BlockHandler.ELECTRIC_FENCE);
 
     public static final Item TRACKING_MODULE = new BasicModuleItem(() -> TabletModuleHandler.TRACKING_TABLET);
     public static final Item FLAPPY_DINO_MODULE = new BasicModuleItem(() -> TabletModuleHandler.FLAPPY_DINO);
@@ -87,6 +89,7 @@ public final class ItemHandler {
             CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setTranslationKey("creative_fence_remover").setCreativeTab(TAB),
             ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB),
             BROKEN_ARTIFICIAL_EGG.setRegistryName("broken_artificial_egg").setTranslationKey("broken_artificial_egg").setCreativeTab(TAB),
+            WIRE_SPOOL.setRegistryName("wire_spool").setTranslationKey("wire_spool").setCreativeTab(TAB),
             TRACKING_TABLET.setRegistryName("tracking_tablet").setTranslationKey("tracking_tablet").setCreativeTab(TAB),
             TRACKING_MODULE.setRegistryName("tracking_module").setTranslationKey("tracking_module").setCreativeTab(TAB),
             FLAPPY_DINO_MODULE.setRegistryName("flappy_dino_module").setTranslationKey("flappy_dino_module").setCreativeTab(TAB),

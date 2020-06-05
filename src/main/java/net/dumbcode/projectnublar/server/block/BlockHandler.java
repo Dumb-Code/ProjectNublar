@@ -30,6 +30,7 @@ public class BlockHandler {
     public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
     public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
     public static final BlockTrackingBeacon TRACKING_BEACON = new BlockTrackingBeacon();
+    public static final BlockPylonHead PYLON_HEAD = new BlockPylonHead();
 
     public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR);
     public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR);
@@ -56,7 +57,8 @@ public class BlockHandler {
             HIGH_SECURITY_ELECTRIC_FENCE_POLE.setRegistryName("high_security_electric_fence_pole").setTranslationKey("high_security_electric_fence_pole").setCreativeTab(TAB),
             ELECTRIC_FENCE.setRegistryName("electric_fence").setTranslationKey("electric_fence").setCreativeTab(TAB),
             CREATIVE_POWER_SOURCE.setRegistryName("creative_power").setTranslationKey("creative_power").setCreativeTab(TAB),
-            TRACKING_BEACON.setRegistryName("tracking_beacon").setTranslationKey("tracking_beacon").setCreativeTab(TAB)
+            TRACKING_BEACON.setRegistryName("tracking_beacon").setTranslationKey("tracking_beacon").setCreativeTab(TAB),
+            PYLON_HEAD.setRegistryName("pylon_head").setTranslationKey("pylon_head").setCreativeTab(TAB)
         );
 
         for (FossilBlock.FossilType value : FossilBlock.FossilType.values()) {

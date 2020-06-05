@@ -285,12 +285,12 @@ public class Connection {
         RenderUtils.drawSpacedCube(
                 ct[0], ytop + yThick, ct[1],
                 ct[2], ybot + yThick, ct[3],
-                ct[4], ybot + yThick, ct[5],
                 ct[6], ytop + yThick, ct[7],
+                ct[4], ybot + yThick, ct[5],
                 cb[0], ytop - yThick, cb[1],
                 cb[2], ybot - yThick, cb[3],
-                cb[4], ybot - yThick, cb[5],
                 cb[6], ytop - yThick, cb[7],
+                cb[4], ybot - yThick, cb[5],
                 uvs[0], uvs[1],
                 uvs[2], uvs[3],
                 uvs[4], uvs[5],
@@ -319,13 +319,13 @@ public class Connection {
             RenderUtils.drawSpacedCube(
                     ct[0] + point.x, ycenter + yThick + point.y, ct[1] + point.z,
                     ct[0], ycenter + yThick, ct[1],
-                    ct[6], ycenter + yThick, ct[7],
                     ct[6] + point.x, ycenter + yThick + point.y, ct[7] + point.z,
+                    ct[6],  ycenter + yThick, ct[7],
 
                     cb[0] + point.x, ycenter - yThick + point.y, cb[1] + point.z,
                     cb[0], ycenter - yThick, cb[1],
+                cb[6] + point.x, ycenter - yThick + point.y, cb[7] + point.z,
                     cb[6], ycenter - yThick, cb[7],
-                    cb[6] + point.x, ycenter - yThick + point.y, cb[7] + point.z,
 
                     uvs[0], uvs[1],
                     uvs[2], uvs[3],
@@ -340,13 +340,13 @@ public class Connection {
             RenderUtils.drawSpacedCube(
                     ct[2], ycenter + yThick, ct[3],
                     ct[2] + point.x, ycenter + yThick + point.y, ct[3] + point.z,
-                    ct[4] + point.x, ycenter + yThick + point.y, ct[5] + point.z,
                     ct[4], ycenter + yThick, ct[5],
+                ct[4] + point.x, ycenter + yThick + point.y, ct[5] + point.z,
 
                     cb[2], ycenter - yThick, cb[3],
                     cb[2] + point.x, ycenter - yThick + point.y, cb[3] + point.z,
-                    cb[4] + point.x, ycenter - yThick + point.y, cb[5] + point.z,
                     cb[4], ycenter - yThick, cb[5],
+                cb[4] + point.x, ycenter - yThick + point.y, cb[5] + point.z,
 
                     uvs[0], uvs[1],
                     uvs[2], uvs[3],
@@ -364,12 +364,12 @@ public class Connection {
         RenderUtils.drawSpacedCube(
                 ct[0], ytop + yThick, ct[1],
                 ct[2], ybot + yThick, ct[3],
-                ct[4], ybot + yThick, ct[5],
                 ct[6], ytop + yThick, ct[7],
+                ct[4], ybot + yThick, ct[5],
                 cb[0], ytop - yThick, cb[1],
                 cb[2], ybot - yThick, cb[3],
-                cb[4], ybot - yThick, cb[5],
                 cb[6], ytop - yThick, cb[7],
+                cb[4], ybot - yThick, cb[5],
                 uvs[0], uvs[1],
                 uvs[2], uvs[3],
                 uvs[4], uvs[5],

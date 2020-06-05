@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.dumbcode.projectnublar.server.item.WireSpoolItem;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.block.Block;
@@ -29,7 +30,7 @@ import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
 import java.util.Random;
 
-public class BlockElectricFence extends BlockConnectableBase implements IItemBlock {
+public class BlockElectricFence extends BlockConnectableBase {
 
     public static final int ITEM_FOLD = 20;
 
@@ -94,73 +95,6 @@ public class BlockElectricFence extends BlockConnectableBase implements IItemBlo
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
         return new BlockEntityElectricFence();
-    }
-
-    @Override
-    public Item createItem() {
-        return new FenceItemBlock();
-    }
-
-    public class FenceItemBlock extends ItemBlock {
-
-        public FenceItemBlock() {
-            super(BlockElectricFence.this);
-            this.addPropertyOverride(new ResourceLocation(ProjectNublar.MODID, "distance"), (stack, worldIn, entityIn) -> {
-                if(entityIn instanceof EntityPlayer) {
-                    EntityPlayer player = (EntityPlayer) entityIn;
-                    ItemStack istack = entityIn.getHeldItemMainhand();
-                    if (istack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
-                        NBTTagCompound nbt = istack.getOrCreateSubCompound(ProjectNublar.MODID);
-                        if (nbt.hasKey("fence_position", Constants.NBT.TAG_LONG)) {
-                            BlockPos pos = BlockPos.fromLong(nbt.getLong("fence_position"));
-                            Block block = entityIn.world.getBlockState(pos).getBlock();
-                            int multiplier = 1;
-                            if(block instanceof BlockElectricFencePole) {
-                                multiplier = ((BlockElectricFencePole) block).getType().getHeight();
-                            }
-                            double dist = player.getPositionVector().distanceTo(new Vec3d(pos)) * multiplier;
-                            for (ItemStack itemStack : player.inventory.mainInventory) {
-                                if (itemStack.getItem() == Item.getItemFromBlock(BlockHandler.ELECTRIC_FENCE)) {
-                                    if (itemStack == stack) {
-                                        if (dist <= ITEM_FOLD * stack.getCount()) {
-                                            return (float) dist / (ITEM_FOLD * stack.getCount());
-                                        } else {
-                                            return 1F;
-                                        }
-                                    }
-                                    dist -= ITEM_FOLD * stack.getCount();
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return 0F;
-            });
-        }
-
-        @Override
-        public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
-            RayTraceResult result = ForgeHooks.rayTraceEyes(player, 7);
-            if(result != null && result.hitInfo instanceof BlockConnectableBase.HitChunk) {
-                BlockConnectableBase.HitChunk chunk = (BlockConnectableBase.HitChunk) result.hitInfo;
-                EnumFacing dir = chunk.getDir();
-                //Make sure that if its placed on the east/west side (the ends of the cables) to place the block on the previous/next positions
-                if(dir == EnumFacing.EAST) {
-                    pos = chunk.getConnection().getNext();
-                } else if(dir == EnumFacing.WEST) {
-                    pos = chunk.getConnection().getPrevious();
-                }
-            }
-            boolean out = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
-            if(world.getBlockState(pos).getBlock() == this.block) {
-                TileEntity te = world.getTileEntity(pos);
-                if (te instanceof ConnectableBlockEntity && result != null && (result.hitInfo instanceof HitChunk || result.hitInfo == null)) {
-                    generateConnections(world, pos, (ConnectableBlockEntity) te, (HitChunk) result.hitInfo, side);
-                }
-            }
-            return out;
-        }
     }
 
 }

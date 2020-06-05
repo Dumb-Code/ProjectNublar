@@ -129,6 +129,7 @@ public class ProjectNublar {
         GameRegistry.registerTileEntity(BlockEntityElectricFence.class, new ResourceLocation(MODID, "electric_fence"));
         GameRegistry.registerTileEntity(BlockCreativePowerSource.TileEntityCreativePowerSource.class, new ResourceLocation(MODID, "creative_power"));
         GameRegistry.registerTileEntity(TrackingBeaconBlockEntity.class, new ResourceLocation(MODID, "tracking_beacon"));
+        GameRegistry.registerTileEntity(PylonHeadBlockEntity.class, new ResourceLocation(MODID, "pylon_head"));
 
         for (Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
             Dinosaur dino = entry.getKey();

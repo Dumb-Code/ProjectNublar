@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.client.render.FenceStateMapper;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.FossilItem;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemMetaNamed;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -39,7 +40,7 @@ public class ModelHandler {
         TabulaModelHandler.INSTANCE.allow(ProjectNublar.MODID);
 
         reg(AMBER, HARD_DRIVE, EMPTY_SYRINGE, EMBRYO_FILLED_SYRINGE, DNA_FILLED_SYRINGE, EMPTY_TEST_TUBE, Item.getItemFromBlock(HIGH_SECURITY_ELECTRIC_FENCE_POLE),
-                Item.getItemFromBlock(LOW_SECURITY_ELECTRIC_FENCE_POLE), Item.getItemFromBlock(ELECTRIC_FENCE), Item.getItemFromBlock(CREATIVE_POWER_SOURCE));
+                Item.getItemFromBlock(LOW_SECURITY_ELECTRIC_FENCE_POLE), ItemHandler.WIRE_SPOOL, Item.getItemFromBlock(CREATIVE_POWER_SOURCE));
         reg(TEST_TUBES_GENETIC_MATERIAL, "test_tube_genetic_material");
 
 
