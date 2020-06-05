@@ -17,7 +17,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.BreedingResultComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.GeneticComponent;
 import net.dumbcode.dumblibrary.server.utils.GaussianValue;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
@@ -101,7 +101,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         compound.setTag("ticks_pregnancy", GaussianValue.writeToNBT(this.ticksPregnancy));
         compound.setTag("ticks_egg_hatch", GaussianValue.writeToNBT(this.ticksEggHatch));
 
-        compound.setTag("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToNBT).collect(IOCollectors.toNBTTagList()));
+        compound.setTag("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToNBT).collect(CollectorUtils.toNBTTagList()));
         return super.serialize(compound);
     }
 
@@ -167,7 +167,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
             json.add("ticks_pregnancy", GaussianValue.writeToJson(this.ticksPregnancy));
             json.add("ticks_egg_hatch", GaussianValue.writeToJson(this.ticksEggHatch));
 
-            json.add("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToJson).collect(IOCollectors.toJsonArray()));
+            json.add("egg_types", this.eggTypes.stream().map(DinosaurEggType::writeToJson).collect(CollectorUtils.toJsonArray()));
         }
 
         @Override

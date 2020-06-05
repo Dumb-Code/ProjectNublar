@@ -5,7 +5,7 @@ import lombok.Getter;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.dumblibrary.server.ecs.FamilySavedData;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -128,7 +128,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound nbt) {
-        nbt.setTag("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new NBTTagCompound())).collect(IOCollectors.toNBTTagList()));
+        nbt.setTag("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new NBTTagCompound())).collect(CollectorUtils.toNBTTagList()));
         nbt.setString("dinosaur", this.dinosaur.getRegName().toString());
         nbt.setFloat("random_scale", this.randomScaleAdjustment);
         nbt.setTag("egg_type", DinosaurEggType.writeToNBT(this.type));

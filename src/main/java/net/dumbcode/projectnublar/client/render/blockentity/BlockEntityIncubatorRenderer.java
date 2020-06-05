@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.client.BakedModelResolver;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
@@ -21,12 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.model.TRSRTransformation;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -230,7 +225,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
                     blockEntity.getProcess(i).isHasPower() && blockEntity.getProcess(i).isProcessing()
                 )
                 .boxed()
-                .collect(IOCollectors.randomPicker(getWorld().rand))
+                .collect(CollectorUtils.randomPicker(getWorld().rand))
                 .map(i -> {
                     blockEntity.activeEgg[1]++;
                     blockEntity.activeEgg[0] = i;

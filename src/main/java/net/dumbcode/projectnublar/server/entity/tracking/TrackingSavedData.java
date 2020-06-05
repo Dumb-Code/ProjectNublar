@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.entity.tracking;
 import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.Vec3d;
@@ -45,7 +45,7 @@ public class TrackingSavedData extends WorldSavedData {
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        nbt.setTag("entries", this.entries.stream().map(DataEntry::serialize).collect(IOCollectors.toNBTTagList()));
+        nbt.setTag("entries", this.entries.stream().map(DataEntry::serialize).collect(CollectorUtils.toNBTTagList()));
         return nbt;
     }
 
@@ -74,7 +74,7 @@ public class TrackingSavedData extends WorldSavedData {
             compound.setDouble("position_x", info.position.x);
             compound.setDouble("position_y", info.position.y);
             compound.setDouble("position_z", info.position.z);
-            compound.setTag("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new NBTTagCompound(), d)).collect(IOCollectors.toNBTTagList()));
+            compound.setTag("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new NBTTagCompound(), d)).collect(CollectorUtils.toNBTTagList()));
             return compound;
         }
 

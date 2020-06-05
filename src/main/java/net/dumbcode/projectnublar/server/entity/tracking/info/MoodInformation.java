@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.entity.tracking.info;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.resources.I18n;
@@ -42,7 +42,7 @@ public class MoodInformation extends TooltipInformation {
 
     public static void encodeNBT(NBTTagCompound nbt, MoodInformation info) {
         nbt.setString("mood", info.mood);
-        nbt.setTag("reasons", info.reasons.stream().collect(IOCollectors.toNBTList(NBTTagString::new)));
+        nbt.setTag("reasons", info.reasons.stream().collect(CollectorUtils.toNBTList(NBTTagString::new)));
     }
 
     public static MoodInformation decodeNBT(NBTTagCompound nbt) {

@@ -8,7 +8,7 @@ import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.dumblibrary.client.model.ModelMissing;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -69,7 +69,7 @@ public class DinosaurEggType {
         nbt.setFloat("length", type.eggLength);
         nbt.setFloat("scale", type.scale);
         nbt.setString("model_location", type.modelLocation.toString());
-        nbt.setTag("textures", Arrays.stream(type.texture).map(r -> new NBTTagString(r.toString())).collect(IOCollectors.toNBTTagList()));
+        nbt.setTag("textures", Arrays.stream(type.texture).map(r -> new NBTTagString(r.toString())).collect(CollectorUtils.toNBTTagList()));
         return nbt;
     }
 
@@ -87,7 +87,7 @@ public class DinosaurEggType {
         json.addProperty("length", type.eggLength);
         json.addProperty("scale", type.scale);
         json.addProperty("model_location", type.modelLocation.toString());
-        json.add("textures", Arrays.stream(type.texture).map(ResourceLocation::toString).collect(IOCollectors.toJsonArrayString()));
+        json.add("textures", Arrays.stream(type.texture).map(ResourceLocation::toString).collect(CollectorUtils.toJsonArrayString()));
         return json;
     }
 

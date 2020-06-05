@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.world.structures.structures;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
-import net.dumbcode.dumblibrary.server.utils.IOCollectors;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.WorldUtils;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
@@ -190,7 +190,7 @@ public class Digsite extends Structure {
                     if (!mergedDrops.isEmpty()) {
                         IntStream.range(0, chest.getSizeInventory())
                             .boxed()
-                            .collect(IOCollectors.shuffler(random))
+                            .collect(CollectorUtils.shuffler(random))
                             .filter(slot -> chest.getStackInSlot(slot).isEmpty())
                             .limit(random.nextInt(3) + 2)
                             .forEach(slot -> {
