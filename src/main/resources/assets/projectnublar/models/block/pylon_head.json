@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "layer0": "projectnublar:blocks/pylon_head"
+  },
+  "tabula": "projectnublar:models/block/pylon_head"
+}

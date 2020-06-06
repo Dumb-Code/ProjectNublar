@@ -1,27 +1,49 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
+import net.dumbcode.projectnublar.server.utils.PylonNetworkSavedData;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
+@Setter
 public class PylonHeadBlockEntity extends SimpleBlockEntity {
 
     public static final double WEIGHT_PER_BLOCK = 0.1D;
 
     private final Set<Connection> connections = new HashSet<>();
+    private UUID networkUUID = UUID.randomUUID();
+
 
     public void addConnection(Connection connection) {
         this.connections.add(connection);
         this.syncToClient();
+        this.markDirty();
+    }
+
+    public Set<BlockPos> gatherAllNetworkLocations(Set<BlockPos> set) {
+        if(!set.contains(this.getPos())) {
+            set.add(this.getPos());
+            for (Connection connection : this.connections) {
+                BlockPos other = connection.getOther(this.pos);
+                TileEntity entity = this.world.getTileEntity(other);
+                if(entity instanceof PylonHeadBlockEntity) {
+                    ((PylonHeadBlockEntity) entity).gatherAllNetworkLocations(set);
+                }
+            }
+        }
+        return set;
     }
 
     @Override
@@ -30,6 +52,7 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
             tag.setLong("FromPos", connection.getFrom().toLong());
             tag.setLong("ToPos", connection.getTo().toLong());
         })).collect(CollectorUtils.toNBTTagList()));
+        compound.setUniqueId("NetworkID", this.networkUUID);
         return super.writeToNBT(compound);
     }
 
@@ -40,6 +63,7 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
             .map(NBTTagCompound.class::cast)
             .map(t -> new Connection(BlockPos.fromLong(t.getLong("FromPos")), BlockPos.fromLong(t.getLong("ToPos"))))
             .forEach(this.connections::add);
+        this.networkUUID = compound.getUniqueId("NetworkID");
         super.readFromNBT(compound);
     }
 
@@ -75,6 +99,10 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
             this.a = s - 2*m + e;
             this.b = -2*s + 2*m;
             this.c = s;
+        }
+
+        public BlockPos getOther(BlockPos pos) {
+            return this.from.equals(pos) ? this.to : this.from;
         }
 
         public double beizerCurve(double t) {

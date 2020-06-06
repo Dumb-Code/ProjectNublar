@@ -117,10 +117,12 @@ public final class ItemHandler {
 
         for (Block block : ForgeRegistries.BLOCKS) {
             if(block instanceof IItemBlock) {
-                event.getRegistry().register(((IItemBlock)block).createItem()
-                        .setRegistryName(Objects.requireNonNull(block.getRegistryName()))
-                        .setTranslationKey(block.getTranslationKey().substring("tile.".length()))
-                        .setCreativeTab(block.getCreativeTab()));
+                Item item = ((IItemBlock) block).createItem()
+                    .setRegistryName(Objects.requireNonNull(block.getRegistryName()))
+                    .setTranslationKey(block.getTranslationKey().substring("tile.".length()))
+                    .setCreativeTab(block.getCreativeTab());
+
+                event.getRegistry().register(item);
             }
         }
 

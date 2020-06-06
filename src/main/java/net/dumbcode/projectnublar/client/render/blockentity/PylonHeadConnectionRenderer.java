@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import javax.vecmath.*;
 import javax.vecmath.Vector3d;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
@@ -66,6 +67,7 @@ public class PylonHeadConnectionRenderer {
         GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
         for (PylonHeadBlockEntity.Connection connection : connections) {
+            TileEntity entity = MC.world.getTileEntity(connection.getFrom());
             Vec3d from = new Vec3d(connection.getFrom()).add(0.5, 0.5, 0.5);
             Vec3d to = new Vec3d(connection.getTo()).add(0.5, 0.5, 0.5);
             Vec3d diff = to.subtract(from);
@@ -103,6 +105,12 @@ public class PylonHeadConnectionRenderer {
                 int s = light % 65536;
                 int b = light / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, s, b);
+
+                if(ProjectNublar.DEBUG) {
+                    Random testRandom = new Random(entity instanceof PylonHeadBlockEntity ? ((PylonHeadBlockEntity) entity).getNetworkUUID().getLeastSignificantBits() : 0);
+                    GlStateManager.color(testRandom.nextFloat(), testRandom.nextFloat(), testRandom.nextFloat(), 1F);
+                }
+
 
                 RenderUtils.drawSpacedCube(
                     points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7],

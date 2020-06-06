@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=up": { "model": "projectnublar:pylon_head.tbl" },
+    "facing=down": { "model": "projectnublar:pylon_head.tbl", "x": 180},
+    "facing=north": { "model": "projectnublar:pylon_head.tbl", "x": 90},
+    "facing=east": { "model": "projectnublar:pylon_head.tbl", "x": 90, "y": 90},
+    "facing=south": { "model": "projectnublar:pylon_head.tbl", "x": 270 },
+    "facing=west": { "model": "projectnublar:pylon_head.tbl", "x": 90, "y": 270 }
+  }
+}
