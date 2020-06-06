@@ -107,6 +107,6 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
 
     @Override
     public int getEnergyMaxExtractSpeed() {
-        return 50;
+        return 0;
     }
 }

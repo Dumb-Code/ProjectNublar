@@ -80,6 +80,6 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
 
     @Override
     public int getEnergyMaxExtractSpeed() {
-        return 50;
+        return 0;
     }
 }

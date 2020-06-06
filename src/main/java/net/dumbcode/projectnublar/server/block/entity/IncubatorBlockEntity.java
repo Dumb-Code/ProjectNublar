@@ -289,7 +289,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public int getEnergyMaxExtractSpeed() {
-        return 50;
+        return 0;
     }
 
     @Getter
