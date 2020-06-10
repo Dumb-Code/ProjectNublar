@@ -7,7 +7,7 @@ import net.dumbcode.dumblibrary.server.ecs.ComposableCreatureEntity;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.projectnublar.server.entity.ai.EntityAttackAI;
-import net.dumbcode.projectnublar.server.entity.component.impl.GatherEnemiesComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.GatherEnemiesComponent;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -21,11 +21,12 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
     public static final int ATTACK_CHANNEL = 62;
 
     private final int priority = 1;
-    private final double speed = 0.7D;
+    private final double speed = 0.65D;
     private final ModifiableField attackDamage = new ModifiableField();
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
+        this.attackDamage.setBaseValue(2);
         List<Predicate<EntityLivingBase>> enemyPredicates = new ArrayList<>();
 
         for (EntityComponent component : entity.getAllComponents()) {
@@ -34,7 +35,7 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
             }
         }
         if(entity instanceof ComposableCreatureEntity) {
-            enemyPredicates.stream().reduce(Predicate::and).ifPresent(predicate -> {
+            enemyPredicates.stream().reduce(Predicate::or).ifPresent(predicate -> {
                 ComposableCreatureEntity creature = (ComposableCreatureEntity) entity;
                 creature.tasks.addTask(this.priority, new EntityAttackAI(creature, predicate, this));
             });

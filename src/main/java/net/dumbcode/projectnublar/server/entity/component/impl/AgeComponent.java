@@ -76,6 +76,8 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
             ageTag.setInteger("Time", age.getTime());
             ageTag.setString("ModelStage", age.getModelStage());
 
+            ageTag.setBoolean("CanBreed", age.isCanBreed());
+
             ages.appendTag(ageTag);
         }
 
@@ -93,7 +95,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         NBTTagList ages = compound.getTagList("OrderedAges", Constants.NBT.TAG_COMPOUND);
         for (NBTBase base : ages) {
             NBTTagCompound ageTag = (NBTTagCompound) base;
-            this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time"), ageTag.getString("ModelStage")));
+            this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time"), ageTag.getString("ModelStage")).setCanBreed(ageTag.getBoolean("CanBreed")));
         }
 
         this.setRawStage(compound.getString("CurrentAge"));
@@ -107,6 +109,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
             ByteBufUtils.writeUTF8String(buf, s.getName());
             buf.writeInt(s.getTime());
             ByteBufUtils.writeUTF8String(buf, s.getModelStage());
+            buf.writeBoolean(s.isCanBreed());
         }
         buf.writeInt(this.orderedAges.indexOf(this.stage));
 
@@ -118,7 +121,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         this.orderedAges.clear();
         short size = buf.readShort();
         for (int i = 0; i < size; i++) {
-            this.orderedAges.add(new AgeStage(ByteBufUtils.readUTF8String(buf), buf.readInt(), ByteBufUtils.readUTF8String(buf)));
+            this.orderedAges.add(new AgeStage(ByteBufUtils.readUTF8String(buf), buf.readInt(), ByteBufUtils.readUTF8String(buf)).setCanBreed(buf.readBoolean()));
         }
         this.stage = this.orderedAges.get(buf.readInt());
 

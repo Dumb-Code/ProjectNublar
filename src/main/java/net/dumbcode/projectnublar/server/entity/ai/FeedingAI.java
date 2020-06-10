@@ -2,7 +2,9 @@ package net.dumbcode.projectnublar.server.entity.ai;
 
 import lombok.ToString;
 import net.dumbcode.dumblibrary.DumbLibrary;
+import net.dumbcode.dumblibrary.server.animation.objects.Animation;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
+import net.dumbcode.dumblibrary.server.animation.objects.AnimationWrap;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.utils.BlockStateWorker;
@@ -11,8 +13,10 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismCompone
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -32,7 +36,7 @@ public class FeedingAI extends EntityAIBase {
     private FeedingProcess process = null;
     private int eatingTicks;
 
-    public  FeedingAI(ComponentAccess access, EntityLiving entityLiving, MetabolismComponent metabolism) {
+    public FeedingAI(ComponentAccess access, EntityLiving entityLiving, MetabolismComponent metabolism) {
         this.access = access;
         this.entityLiving = entityLiving;
         this.metabolism = metabolism;
@@ -41,7 +45,7 @@ public class FeedingAI extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.metabolism.getFood() <= 3600) {
+        if (this.metabolism.getFood() <= 7500) {
             if (this.process == null) {
                 World world = this.entityLiving.world;
                 //Search entities first
@@ -97,11 +101,14 @@ public class FeedingAI extends EntityAIBase {
             if(this.entityLiving.getPositionVector().squareDistanceTo(position) <= 2*2) {
                 this.entityLiving.getNavigator().setPath(null, 0F);
                 this.entityLiving.getLookHelper().setLookPosition(position.x, position.y, position.z, this.entityLiving.getHorizontalFaceSpeed(), this.entityLiving.getVerticalFaceSpeed());
-                if(this.eatingTicks == 0) {
-                    this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a ->
-                        a.playAnimation(this.access, new AnimationEntry(AnimationHandler.EATING), MetabolismComponent.METABOLISM_CHANNEL)
-                    );
-                }
+                this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> {
+                    Animation animation = this.process.getAnimation();
+                    AnimationWrap wrap = a.getWrap(MetabolismComponent.METABOLISM_CHANNEL);
+                    if(wrap ==  null || wrap.isInvalidated() || (wrap.getEntry().getAnimation() != animation)) {
+                        a.playAnimation(this.access, new AnimationEntry(animation), MetabolismComponent.METABOLISM_CHANNEL);
+                    }
+                });
+                this.process.tick();
                 if(this.eatingTicks++ >= this.metabolism.getFoodTicks()) {
                     FeedingResult result = this.process.consume();
                     this.metabolism.setFood(this.metabolism.getFood() + result.getFood());
@@ -109,7 +116,7 @@ public class FeedingAI extends EntityAIBase {
                     this.eatingTicks = 0;
                 }
             } else {
-                this.entityLiving.getNavigator().tryMoveToXYZ(position.x, position.y, position.z, 0.4D);
+                this.entityLiving.getNavigator().tryMoveToXYZ(position.x, position.y, position.z, 0.5D);
             }
         }
         super.updateTask();
@@ -130,6 +137,12 @@ public class FeedingAI extends EntityAIBase {
 
     public interface FeedingProcess {
         boolean active();
+
+        default void tick() {};
+
+        default Animation getAnimation() {
+            return AnimationHandler.EATING;
+        }
 
         Vec3d position();
 
@@ -181,6 +194,18 @@ public class FeedingAI extends EntityAIBase {
         @Override
         public Vec3d position() {
             return this.entity.getPositionVector();
+        }
+
+        @Override
+        public void tick() {
+            if(this.entity instanceof EntityLivingBase) {
+                this.entity.attackEntityFrom(DamageSource.causeMobDamage(entityLiving), 3F);
+            }
+        }
+
+        @Override
+        public Animation getAnimation() {
+            return AnimationHandler.ATTACK;
         }
 
         @Override

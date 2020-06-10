@@ -132,7 +132,7 @@ public class VillagerHandler {
     public static EntityVillager.ITradeList pickedTradeList(int min, int max, EntityVillager.ITradeList... recipes) {
         List<EntityVillager.ITradeList> possible = new ArrayList<>(Arrays.asList(recipes));
         return (merchant, recipeList, random) -> {
-            int amount = min + random.nextInt(max-min);
+            int amount = min + random.nextInt(max-min+1);
 
             List<Integer> ids = IntStream.range(0, possible.size()).boxed().collect(Collectors.toList());
             Collections.shuffle(ids, random);

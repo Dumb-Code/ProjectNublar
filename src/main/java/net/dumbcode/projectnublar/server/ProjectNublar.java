@@ -113,7 +113,7 @@ public class ProjectNublar {
                 Map<String, AnimationContainer> container = dinosaur.getModelContainer();
 
                 container.computeIfAbsent(orderedAge.getModelStage(),
-                    s -> new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "_" + s)));
+                    s -> new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "/" + s)));
 
             }
         }
@@ -193,6 +193,7 @@ public class ProjectNublar {
         event.registerSystem(new MetabolismSystem());
         event.registerSystem(new MoodSystem());
         event.registerSystem(new DefenseSystem());
+        event.registerSystem(new DinosaurMovementSystem());
     }
 
     @EventHandler

@@ -31,8 +31,6 @@ import java.util.function.Supplier;
 @Setter
 public class DinosaurComponent extends EntityComponent implements RenderLocationComponent, FinalizableComponent, CanBreedComponent, TrackingDataComponent {
 
-    private static final int MOVEMENT_CHANNEL = 60;
-
     private Dinosaur dinosaur = DinosaurHandler.TYRANNOSAURUS;
 
     @Override
@@ -78,16 +76,9 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
-            c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).orElse(AgeStage.MISSING).getName()));
-
-            c.proposeAnimation(entity, new AnimationEntry(AnimationHandler.WALKING)
-                            .loop()
-                            .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)
-                            .withSpeedFactor(AnimationFactorHandler.LIMB_SWING),
-                MOVEMENT_CHANNEL, 20
-            );
-        });
+        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c ->
+            c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).orElse(AgeStage.MISSING).getName()))
+        );
     }
 
     @Override

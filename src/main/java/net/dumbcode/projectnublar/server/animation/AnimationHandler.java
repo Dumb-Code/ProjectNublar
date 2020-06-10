@@ -20,4 +20,6 @@ public class AnimationHandler {
     public static final Animation RUNNING = new Animation(ProjectNublar.MODID, "running");
     public static final Animation SNIFF_AIR = new Animation(ProjectNublar.MODID, "sniff_air");
     public static final Animation SNIFF_GROUND = new Animation(ProjectNublar.MODID, "sniff_groun");
+    public static final Animation SWIMMING = new Animation(ProjectNublar.MODID, "swimming");
+
 }

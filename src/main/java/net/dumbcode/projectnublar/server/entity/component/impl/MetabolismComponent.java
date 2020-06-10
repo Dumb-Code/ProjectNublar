@@ -156,7 +156,7 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
             component.foodSmellDistance = this.distanceSmellFood;
             component.hydrateAmountPerTick = this.hydrateAmountPerTick;
 
-            component.diet = this.diet;
+            this.diet.copyInto(component.diet);
         }
 
         @Override

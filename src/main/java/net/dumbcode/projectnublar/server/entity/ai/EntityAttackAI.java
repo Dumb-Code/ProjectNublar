@@ -9,11 +9,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 public class EntityAttackAI extends EntityAIAttackMelee {
@@ -52,9 +56,14 @@ public class EntityAttackAI extends EntityAIAttackMelee {
     private boolean findNewTarget() {
         if(attacker.getAttackTarget() == null || !attacker.getAttackTarget().isEntityAlive()) {
             for(Entity entity : world.loadedEntityList) {
+                if(entity instanceof EntityCow) {
+                    entity.isInWater();
+                }
                 if(entity instanceof EntityLivingBase && entity.isEntityAlive() && this.enemyPredicate.test((EntityLivingBase) entity) && entity != this.attacker) {
-                    attacker.setAttackTarget((EntityLivingBase) entity);
-                    return true;
+                    if(!(entity instanceof EntityPlayer) || (!((EntityPlayer) entity).isSpectator() && !((EntityPlayer) entity).isCreative())) {
+                        attacker.setAttackTarget((EntityLivingBase) entity);
+                        return true;
+                    }
                 }
             }
         }
@@ -65,12 +74,12 @@ public class EntityAttackAI extends EntityAIAttackMelee {
     protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
         double d0 = this.getAttackReachSqr(enemy);
         if (distToEnemySqr <= d0 && this.attackTick <= 0) {
-            this.attackTick = 20;
+            this.attackTick = 15;
             this.attacker.swingArm(EnumHand.MAIN_HAND);
             this.attacker.attackEntityAsMob(enemy);
 
             if(this.attacker.isEntityAlive() && enemy.isEntityAlive()) {
-                this.attacker.attackEntityFrom(DamageSource.causeMobDamage(enemy), this.component.getAttackDamage().getIntValue());
+                enemy.attackEntityFrom(new UnchangeableEntityDamageSource(this.attacker), this.component.getAttackDamage().getIntValue());
                 if(this.attacker instanceof ComponentAccess) {
                     ComponentAccess access = (ComponentAccess) this.attacker;
                     access.get(EntityComponentTypes.ANIMATION).ifPresent(component ->
@@ -80,6 +89,18 @@ public class EntityAttackAI extends EntityAIAttackMelee {
                 }
             }
 
+        }
+    }
+
+    private static class UnchangeableEntityDamageSource extends EntityDamageSource {
+
+        public UnchangeableEntityDamageSource(@Nullable Entity damageSourceEntityIn) {
+            super("mob", damageSourceEntityIn);
+        }
+
+        @Override
+        public boolean isDifficultyScaled() {
+            return false;
         }
     }
 }

@@ -1,12 +1,14 @@
 package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Lists;
+import net.dumbcode.dumblibrary.server.utils.JavaUtils;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
+import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
@@ -19,10 +21,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -112,7 +111,10 @@ public final class ItemHandler {
         populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(MathUtils.ensureTrailingZeros(stack.getOrCreateSubCompound(ProjectNublar.MODID).getFloat("AmountDone"), 1) + "%")));
         populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
 
-        populateNestedMap(event, FOSSIL_ITEMS, dino -> dino.getAttacher().getStorage(ComponentHandler.ITEM_DROPS).getFossilList(), FossilItem::new, "%s_fossil_%s", tab);
+        populateNestedMap(event, FOSSIL_ITEMS,
+            dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS), DinosaurDropsComponent.Storage::getFossilList),
+            FossilItem::new, "%s_fossil_%s", tab
+        );
 
 
         for (Block block : ForgeRegistries.BLOCKS) {
@@ -173,16 +175,21 @@ public final class ItemHandler {
 
     private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
-            for (S s : getterFunction.apply(dinosaur)) {
-                T item = creationFunc.apply(dinosaur, s);
-                String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
-                item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-                item.setTranslationKey(name);
-                if(initializer != null) {
-                    item = runInitilizer(item, initializer);
+            Collection<S> collection = getterFunction.apply(dinosaur);
+            if(collection != null) {
+                for (S s : collection) {
+                    T item = creationFunc.apply(dinosaur, s);
+                    String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
+                    item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
+                    item.setTranslationKey(name);
+                    if(initializer != null) {
+                        item = runInitilizer(item, initializer);
+                    }
+                    itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
+                    event.getRegistry().register(item);
                 }
-                itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
-                event.getRegistry().register(item);
+            } else {
+                itemMap.put(dinosaur, new HashMap<>());
             }
         }
     }

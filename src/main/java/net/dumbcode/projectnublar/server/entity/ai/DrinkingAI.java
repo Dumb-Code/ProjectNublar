@@ -33,7 +33,7 @@ public class DrinkingAI extends EntityAIBase {
 
     private Path path;
 
-    private static final int WATER_THRESHOLD = 3600; // TODO: Vary
+    private static final int WATER_THRESHOLD = 3500; // TODO: Vary
 
     public DrinkingAI(ComponentAccess access, EntityLiving entity, MetabolismComponent metabolism) {
         this.access = access;

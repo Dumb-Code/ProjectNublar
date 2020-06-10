@@ -84,6 +84,19 @@ public class FeedingDiet {
         return this;
     }
 
+    public FeedingDiet copyInto(FeedingDiet diet) {
+        diet.blocks.clear();
+        diet.blocks.putAll(this.blocks);
+
+        diet.items.clear();
+        diet.items.putAll(this.items);
+
+        diet.entities.clear();
+        diet.entities.putAll(this.entities);
+
+        return diet;
+    }
+
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         NBTTagList blocks = new NBTTagList();
@@ -106,7 +119,7 @@ public class FeedingDiet {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setTag("classname", new NBTTagString(entityClass.getName()));
             compound.setTag("result", FeedingResult.writeToNBT(new NBTTagCompound(), result));
-            items.appendTag(compound);
+            entities.appendTag(compound);
         });
 
         nbt.setTag("blocks", blocks);

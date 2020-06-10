@@ -57,7 +57,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
                     this.heldEggs.add(new EggEntry(
                         this.eggModifier.getRandomValue(RANDOM),
                         this.eggTypes.get(RANDOM.nextInt(this.eggTypes.size())),
-                        pregnancyTime, //Set to 100 for debugging
+                        100, //Set to 100 for debugging
                         (int) this.ticksEggHatch.getRandomValue(RANDOM),
                         this.generateCombinedGenetics(thisGenetics.get(), otherGenetics.get())
                     ));
