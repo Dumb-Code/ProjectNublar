@@ -52,14 +52,33 @@ public class FeedingAI extends EntityAIBase {
             if (this.process == null) {
                 World world = this.entityLiving.world;
                 //Search entities first
+                Entity targetEntity = null;
+                boolean isTargetItem = false;
                 for (Entity entity : world.loadedEntityList) {
-                    if (entity.getDistanceSq(this.entityLiving) < this.metabolism.getFoodSmellDistance() * this.metabolism.getFoodSmellDistance()) {
-                        if (entity instanceof EntityItem && this.metabolism.getDiet().getResult(((EntityItem) entity).getItem()).isPresent()) {
+                    double dist = entity.getDistanceSq(this.entityLiving);
+                    if (dist < this.metabolism.getFoodSmellDistance() * this.metabolism.getFoodSmellDistance()) {
+                        boolean isEntityItem = entity instanceof EntityItem && this.metabolism.getDiet().getResult(((EntityItem) entity).getItem()).isPresent();
+                        boolean isNormalEntity = this.metabolism.getDiet().getResult(entity).isPresent();
+
+                        boolean closer = targetEntity == null || targetEntity.getDistanceSq(this.entityLiving) < dist;
+
+                        //If we've found not an item and we're targeting an item
+                        if(isTargetItem && !isEntityItem) {
+                            continue;
+                        }
+
+                        //If the target entity isn't an item and we've found an item:
+                        if(isEntityItem && (!isTargetItem || closer)) {
                             this.process = new ItemStackProcess((EntityItem) entity);
-                            break;
-                        } else if (this.metabolism.getDiet().getResult(entity).isPresent()) {
+                            targetEntity = entity;
+                            isTargetItem = true;
+                            continue;
+                        }
+
+                        if(closer && isNormalEntity) {
                             this.process = new EntityProcess(entity);
-                            break;
+                            targetEntity = entity;
+                            isTargetItem = false;
                         }
                     }
                 }
