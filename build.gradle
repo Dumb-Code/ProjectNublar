@@ -73,7 +73,7 @@ sonarqube {
 }
 
 def setDebugCommitVersion() {
-    def version = "debug-" + System.getenv("TRAVIS_BUILD_NUMBER") + "-" + System.getenv("TRAVIS_COMMIT").substring(0, 7)
+    def version = "debug-159-3c04fdd"
 
     def prefix = 'public static final String VERSION = "'
     def file = file("src/main/java/net/dumbcode/projectnublar/server/ProjectNublar.java")

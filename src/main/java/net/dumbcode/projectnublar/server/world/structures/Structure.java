@@ -17,7 +17,7 @@ import java.util.Random;
 @Getter
 @Setter
 @Accessors(chain = true)
-public abstract class Structure implements IResourceManagerReloadListener {
+public abstract class Structure {
 
     private final int weight;
     private final int children;
@@ -38,10 +38,6 @@ public abstract class Structure implements IResourceManagerReloadListener {
     @Nullable
     public BlockPos attemptSize() {
         return null;
-    }
-
-    @Override
-    public void onResourceManagerReload(IResourceManager resourceManager) {
     }
 
 }
