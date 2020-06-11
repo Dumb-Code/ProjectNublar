@@ -109,9 +109,13 @@ public class EntityAttackAI extends EntityAIAttackMelee {
             if(this.attacker.isEntityAlive() && enemy.isEntityAlive()) {
                 if(this.attacker instanceof ComponentAccess) {
                     ComponentAccess access = (ComponentAccess) this.attacker;
+                    boolean b = this.attacker.getRNG().nextFloat() < 0.3;
                     access.get(EntityComponentTypes.ANIMATION).ifPresent(component ->
-                        component.playAnimation(access, this.attacker.getRNG().nextFloat() < 0.2 ? AnimationHandler.POUNCE.createEntry() : AnimationHandler.ATTACK.createEntry().withSpeed(1.2F), AttackComponent.ATTACK_CHANNEL)
+                        component.playAnimation(access, b ? AnimationHandler.POUNCE.createEntry() : AnimationHandler.ATTACK.createEntry().withSpeed(1.2F), AttackComponent.ATTACK_CHANNEL)
                     );
+                    if(b) {
+                        this.attacker.motionY += 0.3;
+                    }
                 }
             }
 

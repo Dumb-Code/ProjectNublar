@@ -20,7 +20,7 @@ public class AnimationHandler {
     public static final Animation RIGHT_CLAW = new Animation(ProjectNublar.MODID, "right_claw");
     public static final Animation LOOK_LEFT = new Animation(ProjectNublar.MODID, "look_left");
     public static final Animation LOOK_RIGHT = new Animation(ProjectNublar.MODID, "look_right");
-    public static final Animation RESTING = new Animation(ProjectNublar.MODID, "resting");
+    public static final Animation SITTING = new Animation(ProjectNublar.MODID, "sitting");
     public static final Animation ROARING = new Animation(ProjectNublar.MODID, "roaring");
     public static final Animation RUNNING = new Animation(ProjectNublar.MODID, "running");
     public static final Animation SNIFF_AIR = new Animation(ProjectNublar.MODID, "sniff_air");

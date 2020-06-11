@@ -137,8 +137,9 @@ public class VelociraptorJP extends Dinosaur {
 
         this.addComponent(ComponentHandler.TRACKING_DATA);
         this.addComponent(EntityComponentTypes.IDLE_ACTION)
-            .setIdleAnimation(() -> AnimationHandler.SCRATCHING)
-            .setMovementAnimations(Lists.newArrayList(() -> AnimationHandler.LEFT_CLAW, () -> AnimationHandler.RIGHT_CLAW, () -> AnimationHandler.LOOK_LEFT, () -> AnimationHandler.LOOK_RIGHT));
+            .setIdleAnimation(() -> AnimationHandler.LOOK_AROUND)
+            .setSittingAnimation(() -> AnimationHandler.SITTING)
+            .setMovementAnimations(Lists.newArrayList(() -> AnimationHandler.LEFT_CLAW, () -> AnimationHandler.RIGHT_CLAW, () -> AnimationHandler.LOOK_LEFT, () -> AnimationHandler.LOOK_RIGHT, () -> AnimationHandler.SCRATCHING));
         this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
         this.addComponent(EntityComponentTypes.CLOSE_PROXIMITY_ANGRY)
             .setRange(3)
