@@ -76,6 +76,20 @@ public class EntityAttackAI extends EntityAIAttackMelee {
     }
 
     @Override
+    public void startExecuting() {
+        super.startExecuting();
+        if(this.attacker instanceof ComponentAccess) {
+            ComponentAccess access = (ComponentAccess) this.attacker;
+            access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.CALLING).ifPresent(e ->
+                this.attacker.world.playSound(null, this.attacker.posX, this.attacker.posY, this.attacker.posZ, e, SoundCategory.AMBIENT, this.attacker.getRNG().nextFloat()*0.25F+1.25F, this.attacker.getRNG().nextFloat()*0.5F+0.75F)
+            );
+            access.get(EntityComponentTypes.ANIMATION).ifPresent(component ->
+                component.playAnimation(access, AnimationHandler.CALL_SHORT, AttackComponent.ATTACK_CHANNEL)
+            );
+        }
+    }
+
+    @Override
     protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
         double d0 = this.getAttackReachSqr(enemy);
         if(this.attackTick == 15-7) {
