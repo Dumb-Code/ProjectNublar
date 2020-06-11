@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -58,7 +59,7 @@ public class PylonHeadConnectionRenderer {
 
         RenderHelper.enableStandardItemLighting();
         MC.entityRenderer.enableLightmap();
-        MC.renderEngine.bindTexture(TextureManager.RESOURCE_LOCATION_EMPTY);
+        MC.renderEngine.bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
         GlStateManager.glLineWidth(2);
