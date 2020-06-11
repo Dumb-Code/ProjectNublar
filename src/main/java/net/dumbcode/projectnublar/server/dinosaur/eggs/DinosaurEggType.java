@@ -18,13 +18,15 @@ import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
 @Getter
 public class DinosaurEggType {
-    public static final DinosaurEggType EMPTY = new DinosaurEggType(0F, 0F, TextureMap.LOCATION_MISSING_TEXTURE, TextureMap.LOCATION_MISSING_TEXTURE);
+    public static final DinosaurEggType EMPTY = new DinosaurEggType(0F, 0F, new ResourceLocation("missingno"), new ResourceLocation("missingno"));
 
     private final float eggLength; //Used for incubator
     private final float scale; //Used for incubator
@@ -34,6 +36,7 @@ public class DinosaurEggType {
     @Getter(AccessLevel.NONE)
     private ResourceLocation cachedTexture;
 
+    @SideOnly(Side.CLIENT)
     private TabulaModel eggModel;
 
     public DinosaurEggType(float eggLength, float scale, ResourceLocation modelLocation, ResourceLocation... texture) {
@@ -43,6 +46,7 @@ public class DinosaurEggType {
         this.texture = texture;
     }
 
+    @SideOnly(Side.CLIENT)
     public TabulaModel getEggModel() {
         if(this.eggModel != null) {
             return this.eggModel;

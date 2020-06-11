@@ -64,7 +64,7 @@ public class VelociraptorJP extends Dinosaur {
             .setHydrateAmountPerTick(500)
 
             .setFoodTicks(100)
-            .setWaterTicks(100);
+            .setWaterTicks(190);
 
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .addCubesForAge(ADULT_AGE,
@@ -131,7 +131,7 @@ public class VelociraptorJP extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.SLEEPING)
             .setSleepingAnimation(new ResourceLocation(ProjectNublar.MODID, "sleeping"))
-            .setWakeupTime(1000)
+            .setWakeupTime(0)
             .setSleepTime(13000);
 
 

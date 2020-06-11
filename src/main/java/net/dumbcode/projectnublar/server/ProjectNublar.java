@@ -6,6 +6,7 @@ import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
@@ -67,7 +68,7 @@ public class ProjectNublar {
     public static final String VERSION = "0.0.22";
     public static final String DUMBLIBRARY_VERSION = "0.2.4";
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;
@@ -103,8 +104,10 @@ public class ProjectNublar {
     public void init(FMLInitializationEvent event) {
 
         DataSerializerHandler.register();
-        EnumWeatherIcons.register();
-        TabletBackground.registerDefaults();
+        if(SidedExecutor.CLIENT) {
+            EnumWeatherIcons.register();
+            TabletBackground.registerDefaults();
+        }
         AnimationFactorHandler.register();
 
         for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {

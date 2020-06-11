@@ -78,7 +78,7 @@ public class BasicEntityInformation extends TooltipInformation {
 
         if(relativeMouseX >= startX && relativeMouseY != -1) {
             GuiUtils.drawHoveringText(ItemStack.EMPTY, Collections.singletonList((Math.round(this.health * 10) / 10F) + "/" + (Math.round(this.maxHealth * 10) / 10F)),
-                x + relativeMouseX, y + relativeMouseY, Integer.MAX_VALUE, Integer.MAX_VALUE, -1, FONT_RENDERER
+                x + relativeMouseX, y + relativeMouseY, Integer.MAX_VALUE, Integer.MAX_VALUE, -1, Minecraft.getMinecraft().fontRenderer
             );
         }
     }

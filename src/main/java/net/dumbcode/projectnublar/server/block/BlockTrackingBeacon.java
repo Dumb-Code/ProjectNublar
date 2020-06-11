@@ -13,6 +13,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -42,8 +44,13 @@ public class BlockTrackingBeacon extends Block implements IItemBlock {
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntity te = worldIn.getTileEntity(pos);
         if(te instanceof TrackingBeaconBlockEntity && te.getWorld().isRemote) {
-            SidedExecutor.runClient(() -> () -> Minecraft.getMinecraft().displayGuiScreen(new GuiTrackingBeacon((TrackingBeaconBlockEntity)te)));
+            this.displayGui((TrackingBeaconBlockEntity) te);
         }
         return true;
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void displayGui(TrackingBeaconBlockEntity te) {
+        Minecraft.getMinecraft().displayGuiScreen(new GuiTrackingBeacon(te));
     }
 }

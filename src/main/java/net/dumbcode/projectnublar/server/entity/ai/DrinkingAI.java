@@ -12,6 +12,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismCompone
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.SoundCategory;
@@ -108,9 +109,14 @@ public class DrinkingAI extends EntityAIBase {
                 this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a ->
                     a.playAnimation(this.access, new AnimationEntry(AnimationHandler.DRINKING), MetabolismComponent.METABOLISM_CHANNEL)
                 );
+            }
+            if(this.drinkingTicks == 102 || this.drinkingTicks == 132) {
                 this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.DRINKING).ifPresent(e ->
                     this.entity.world.playSound(null, this.entity.posX, this.entity.posY, this.entity.posZ, e, SoundCategory.AMBIENT, 1F, 1F)
                 );
+            }
+            if(this.drinkingTicks == 160) {
+                this.entity.world.playSound(null, this.entity.posX, this.entity.posY, this.entity.posZ, SoundEvents.ENTITY_WOLF_SHAKE, SoundCategory.AMBIENT, 1F, 1F);
             }
             if(this.drinkingTicks++ >= this.metabolism.getWaterTicks()) {
                 this.drinkingTicks = 0;

@@ -16,6 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 import javax.vecmath.*;
@@ -24,7 +25,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
+@Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class PylonHeadConnectionRenderer {
 
     private static final Minecraft MC = Minecraft.getMinecraft();

@@ -21,7 +21,7 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
     public static final int ATTACK_CHANNEL = 62;
 
     private final int priority = 1;
-    private final double speed = 0.65D;
+    private final double speed = 0.75D;
     private final ModifiableField attackDamage = new ModifiableField();
 
     @Override

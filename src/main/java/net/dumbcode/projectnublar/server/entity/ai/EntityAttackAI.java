@@ -5,6 +5,7 @@ import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSound;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.SleepingComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.minecraft.entity.Entity;
@@ -23,7 +24,6 @@ public class EntityAttackAI extends EntityAIAttackMelee {
 
     public static final Animation ATTACK_ANIMATION = new Animation(new ResourceLocation(ProjectNublar.MODID,"attack"));
 
-
     private final EntityCreature attacker;
     private final Predicate<EntityLivingBase> enemyPredicate;
     private final AttackComponent component;
@@ -40,6 +40,10 @@ public class EntityAttackAI extends EntityAIAttackMelee {
 
     @Override
     public boolean shouldExecute() {
+        //TODO-stream: remove this, this'll be solved with the new ai system.
+        if(this.attacker instanceof ComponentAccess && ((ComponentAccess)this.attacker).get(EntityComponentTypes.SLEEPING).map(SleepingComponent::isSleeping).orElse(false)) {
+            return false;
+        }
         if(attacker.getAttackTarget() != null && attacker.getAttackTarget().isEntityAlive()) {
             return super.shouldExecute();
         } else {

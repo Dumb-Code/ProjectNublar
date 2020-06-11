@@ -33,8 +33,6 @@ public class MetabolismInformation extends TooltipInformation {
     private final float maxWater;
     private final RepeatingIconDisplay waterDisplay;
 
-    private final TextureAtlasSprite BOTTLE_SPRITE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/potion_bottle_drinkable");
-    private final TextureAtlasSprite BOTTLE_WATER_SPRITE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/potion_overlay");
 
     public MetabolismInformation(float food, float maxFood, float water, float maxWater) {
         this.food = food;
@@ -68,11 +66,14 @@ public class MetabolismInformation extends TooltipInformation {
 
     private void renderWaterIcon(int x, int y, float size) {
         GlStateManager.color(1F, 1F, 1F, 1F);
-        RenderUtils.drawTextureAtlasSprite(x, y, BOTTLE_SPRITE, 11, 16D, 4D, 0D, 15D, 16D);
+        TextureAtlasSprite bottle = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/potion_bottle_drinkable");
+        TextureAtlasSprite water = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/potion_overlay");
+
+        RenderUtils.drawTextureAtlasSprite(x, y, bottle, 11, 16D, 4D, 0D, 15D, 16D);
         if(size > 0) {
             float endY = 6 + 6 * (1 - size);
             GlStateManager.color(66F / 255F, 135 / 255F, 245 / 255F, 1F);
-            RenderUtils.drawTextureAtlasSprite(x, y + endY, BOTTLE_WATER_SPRITE, 11, 16 - endY, 4, endY, 15, 16);
+            RenderUtils.drawTextureAtlasSprite(x, y + endY, water, 11, 16 - endY, 4, endY, 15, 16);
 
         }
     }

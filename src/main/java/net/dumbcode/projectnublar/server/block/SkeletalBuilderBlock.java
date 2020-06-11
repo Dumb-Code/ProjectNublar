@@ -26,10 +26,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock {
 
@@ -60,14 +63,21 @@ public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock
                 this.setBonesInHandler(sb, dinosaur, stack, item.getVariant());
             } else if(playerIn.getHeldItem(hand).isEmpty()) {
                 if (sb.getDinosaur().isPresent()) {
-                    TextComponentTranslation title = new TextComponentTranslation(ProjectNublar.MODID + ".gui.model_pose_edit.title", sb.getDinosaur().orElse(DinosaurHandler.TYRANNOSAURUS).createNameComponent().getUnformattedText());
-                    SidedExecutor.runClient(() -> () -> Minecraft.getMinecraft().displayGuiScreen(new GuiTaxidermy(sb.getModel(), sb.getTexture(), title, sb)));
+                    if(worldIn.isRemote) {
+                        displayGui(sb);
+                    }
                 } else {
                     playerIn.sendStatusMessage(NO_DINOSAUR_TO_DISPLAY_TEXT, true);
                 }
             }
         }
         return true;
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void displayGui(SkeletalBuilderBlockEntity sb) {
+        TextComponentTranslation title = new TextComponentTranslation(ProjectNublar.MODID + ".gui.model_pose_edit.title", sb.getDinosaur().orElse(DinosaurHandler.TYRANNOSAURUS).createNameComponent().getUnformattedText());
+        Minecraft.getMinecraft().displayGuiScreen(new GuiTaxidermy(sb.getModel(), sb.getTexture(), title, sb));
     }
 
     private void setBonesInHandler(SkeletalBuilderBlockEntity skeletalBuilder, Dinosaur dinosaur, ItemStack stack, String variant) {

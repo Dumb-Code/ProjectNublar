@@ -18,8 +18,6 @@ import java.util.List;
 @Value
 public class DinosaurInformation extends TooltipInformation {
 
-    private final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-
     public static final String KEY = "dinosaur_info";
 
     private Dinosaur dinosaur;

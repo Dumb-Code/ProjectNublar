@@ -2,7 +2,9 @@ package net.dumbcode.projectnublar.server.entity;
 
 import net.dumbcode.dumblibrary.server.ecs.ComposableCreatureEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ai.SlowMoveHelper;
+import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.world.World;
 
@@ -30,7 +32,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
      * @return Dinosaur class.
      */
     public Dinosaur getDinosaur() {
-        return this.getOrExcept(ComponentHandler.DINOSAUR).getDinosaur();
+        return this.get(ComponentHandler.DINOSAUR).map(DinosaurComponent::getDinosaur).orElse(DinosaurHandler.TYRANNOSAURUS);
     }
 
     @Override
