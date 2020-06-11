@@ -79,7 +79,7 @@ def setDebugCommitVersion() {
     def file = file("src/main/java/net/dumbcode/projectnublar/server/ProjectNublar.java")
     def text = file.text
 
-    file.withWriter { w -> w << text.replaceAll("\\Q$prefix\\E.+\"", prefix + version + '"').replaceAll("\\Qpublic static final boolean DEBUG = false\\E", "public static final boolean DEBUG = true") }
+    file.withWriter { w -> w << text.replaceAll("\\Q$prefix\\E.+\"", prefix + version + '"') }
     return version
 }
 
