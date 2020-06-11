@@ -16,6 +16,10 @@ public class AnimationHandler {
     public static final Animation EATING = new Animation(ProjectNublar.MODID, "eating");
     public static final Animation INJURED = new Animation(ProjectNublar.MODID, "injured");
     public static final Animation LOOK_AROUND = new Animation(ProjectNublar.MODID, "look_around");
+    public static final Animation LEFT_CLAW = new Animation(ProjectNublar.MODID, "left_claw");
+    public static final Animation RIGHT_CLAW = new Animation(ProjectNublar.MODID, "right_claw");
+    public static final Animation LOOK_LEFT = new Animation(ProjectNublar.MODID, "look_left");
+    public static final Animation LOOK_RIGHT = new Animation(ProjectNublar.MODID, "look_right");
     public static final Animation RESTING = new Animation(ProjectNublar.MODID, "resting");
     public static final Animation ROARING = new Animation(ProjectNublar.MODID, "roaring");
     public static final Animation RUNNING = new Animation(ProjectNublar.MODID, "running");
@@ -23,5 +27,7 @@ public class AnimationHandler {
     public static final Animation SNIFF_GROUND = new Animation(ProjectNublar.MODID, "sniff_groun");
     public static final Animation SWIMMING = new Animation(ProjectNublar.MODID, "swimming");
     public static final Animation BREATHING = new Animation(ProjectNublar.MODID, "breathing");//todo-stream
+    public static final Animation SCRATCHING = new Animation(ProjectNublar.MODID, "scratching");
+
 
 }

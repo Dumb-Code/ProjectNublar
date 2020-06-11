@@ -45,7 +45,9 @@ public class GyrosphereRenderer extends Render<GyrosphereVehicle> {
         GlStateManager.translate(x, y, z);
         GlStateManager.translate(0, entity.height / 2, 0);
 
-        GlStateManager.rotate(slerp(entity.prevRotation, entity.rotation, partialTicks));
+        if(entity.prevRotation != null && entity.rotation != null) {
+            GlStateManager.rotate(slerp(entity.prevRotation, entity.rotation, partialTicks));
+        }
 
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png"));
         GlStateManager.scale(entity.width/2F,entity.width/2F,entity.width/2F);
