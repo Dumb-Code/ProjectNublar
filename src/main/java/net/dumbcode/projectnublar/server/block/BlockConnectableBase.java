@@ -119,8 +119,8 @@ public class BlockConnectableBase extends Block {
                     vec.sub(box.getConnection().getCenter());
                     vec.normalize();
 
-                    Vec3d center = box.offset(pos).getCenter();
-                    Vec3d other = entityBox.getCenter();
+                    Vec3d center = this.center(box.offset(pos));
+                    Vec3d other = this.center(entityBox);
                     if(!worldIn.isRemote) {
 
                         entityIn.attackEntityFrom(DamageSourceHandler.FENCE_ELECTRIC, 1F);
@@ -154,6 +154,10 @@ public class BlockConnectableBase extends Block {
                 }
             }
         }
+    }
+
+    private Vec3d center(AxisAlignedBB box) {
+        return new Vec3d(box.minX + (box.maxX - box.minX) * 0.5D, box.minY + (box.maxY - box.minY) * 0.5D, box.minZ + (box.maxZ - box.minZ) * 0.5D);
     }
 
     @SubscribeEvent
