@@ -63,7 +63,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     private EnergyStorage energy;
 
     public MachineModuleBlockEntity() {
-        this.energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed());
+        this.energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), 50);//getEnergyMaxExtractSpeed()
         this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots, this.constantInputSlots());
         this.outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots, this.constantOutputSlots());
     }
