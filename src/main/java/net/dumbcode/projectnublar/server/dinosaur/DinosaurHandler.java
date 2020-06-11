@@ -19,6 +19,7 @@ public class DinosaurHandler {
         event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
         event.getRegistry().register(new Dilophosaurus().setRegistryName("projectnublar:dilophosaurus"));
         event.getRegistry().register(new VelociraptorJP().setRegistryName("projectnublar:velociraptor_jp"));
+        event.getRegistry().register(new VelociraptorJP().setRegistryName("projectnublar:velociraptor_jp3"));
     }
 
 }
