@@ -139,7 +139,7 @@ public class FeedingAI extends EntityAIBase {
                             this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
                         );
                     }
-                    if(this.eatingTicks == 60 || this.eatingTicks == 95) {
+                    if(this.eatingTicks == 65 || this.eatingTicks == 97) {
                         this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_CRUNCH).ifPresent(e ->
                             this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
                         );
@@ -168,7 +168,7 @@ public class FeedingAI extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.process != null && this.process.active() && this.eatingTicks < this.metabolism.getFoodTicks();
+        return this.process != null && this.process.active() && this.eatingTicks < this.metabolism.getFoodTicks()+3;
     }
 
     @Override
