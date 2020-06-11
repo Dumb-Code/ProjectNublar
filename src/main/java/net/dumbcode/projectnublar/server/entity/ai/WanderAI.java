@@ -15,6 +15,7 @@ public class WanderAI extends EntityAIWander {
     public WanderAI(EntityCreature creatureIn, WanderComponent component) {
         super(creatureIn, component.getSpeed(), component.getChance());
         this.component = component;
+        this.setMutexBits(1);
     }
 
     @Nullable

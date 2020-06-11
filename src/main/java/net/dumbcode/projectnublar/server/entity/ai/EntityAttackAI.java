@@ -7,7 +7,9 @@ import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSound;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.SleepingComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
+import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
@@ -22,7 +24,7 @@ import java.util.function.Predicate;
 
 public class EntityAttackAI extends EntityAIAttackMelee {
 
-    public static final Animation ATTACK_ANIMATION = new Animation(new ResourceLocation(ProjectNublar.MODID,"attack"));
+//    public static final Animation ATTACK_ANIMATION = new Animation(new ResourceLocation(ProjectNublar.MODID,"attack"));
 
     private final EntityCreature attacker;
     private final Predicate<EntityLivingBase> enemyPredicate;
@@ -76,7 +78,7 @@ public class EntityAttackAI extends EntityAIAttackMelee {
     @Override
     protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
         double d0 = this.getAttackReachSqr(enemy);
-        if(this.attackTick == 15-11) {
+        if(this.attackTick == 15-7) {
             enemy.attackEntityFrom(new UnchangeableEntityDamageSource(this.attacker), this.component.getAttackDamage().getIntValue());
             if(this.attacker instanceof ComponentAccess) {
                 ComponentAccess access = (ComponentAccess) this.attacker;
@@ -94,7 +96,7 @@ public class EntityAttackAI extends EntityAIAttackMelee {
                 if(this.attacker instanceof ComponentAccess) {
                     ComponentAccess access = (ComponentAccess) this.attacker;
                     access.get(EntityComponentTypes.ANIMATION).ifPresent(component ->
-                        component.playAnimation(access, ATTACK_ANIMATION, AttackComponent.ATTACK_CHANNEL)
+                        component.playAnimation(access, this.attacker.getRNG().nextFloat() < 0.2 ? AnimationHandler.POUNCE.createEntry() : AnimationHandler.ATTACK.createEntry().withSpeed(1.2F), AttackComponent.ATTACK_CHANNEL)
                     );
                 }
             }

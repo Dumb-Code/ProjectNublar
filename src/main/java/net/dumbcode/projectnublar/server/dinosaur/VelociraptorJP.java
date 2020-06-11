@@ -147,7 +147,7 @@ public class VelociraptorJP extends Dinosaur {
             .addSound(ECSSounds.EATING_CRUNCH, () -> SoundHandler.VELOCIRAPTOR_FLESH_CRUNCH)
             .addSound(ECSSounds.EATING_RIP, () -> SoundHandler.VELOCIRAPTOR_FLESH_RIP)
             .addSound(ECSSounds.DRINKING, () -> SoundHandler.VELOCIRAPTOR_DRINK)
-            .addSound(ECSSounds.ATTACKING, () -> SoundHandler.VELOCIRAPTOR_BITE)
+            .addSound(ECSSounds.ATTACKING, () -> SoundHandler.VELOCIRAPTOR_BITE, () -> SoundHandler.VELOCIRAPTOR_BITE, () -> SoundHandler.VELOCIRAPTOR_BITE, () -> SoundHandler.VELOCIRAPTOR_SCREECH, () -> SoundHandler.VELOCIRAPTOR_CALL)
             .addSound(ECSSounds.IDLE, () -> SoundHandler.VELOCIRAPTOR_IDLE);
     }
 }

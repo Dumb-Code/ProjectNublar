@@ -33,13 +33,13 @@ public class FloatAi extends EntityAIBase {
             AxisAlignedBB box = this.entity.getEntityBoundingBox();
             if (this.entity.world.handleMaterialAcceleration(box.contract(0, box.minY-box.maxY, 0).shrink(0.001D), material, this.entity)) {
                 if (this.entity.getRNG().nextFloat() < 0.8F) {
-                    this.entity.motionY =+ 0.3;
+                    this.entity.motionY =+ 0.25;
                     return;
                 }
             }
         }
-        if (this.entity.onGround) {
-            this.entity.motionY =+ 0.3;
+        if (this.entity.onGround && this.entity.getRNG().nextFloat() < 0.8F) {
+            this.entity.motionY =+ 0.25;
         }
 
     }

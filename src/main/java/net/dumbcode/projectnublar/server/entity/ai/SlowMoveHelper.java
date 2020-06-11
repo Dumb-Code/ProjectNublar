@@ -10,6 +10,6 @@ public class SlowMoveHelper extends EntityMoveHelper {
 
     @Override
     protected float limitAngle(float sourceAngle, float targetAngle, float maximumChange) {
-        return super.limitAngle(sourceAngle, targetAngle, Math.min(maximumChange, 30F));
+        return super.limitAngle(sourceAngle, targetAngle, Math.min(maximumChange, 20F));
     }
 }

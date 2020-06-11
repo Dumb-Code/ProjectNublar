@@ -9,6 +9,7 @@ public class AnimationHandler {
 
     public static final Animation WALKING = new Animation(ProjectNublar.MODID, "walking");
     public static final Animation ATTACK = new Animation(ProjectNublar.MODID, "attack");
+    public static final Animation POUNCE = new Animation(ProjectNublar.MODID, "pouncing");
     public static final Animation CALL_SHORT = new Animation(ProjectNublar.MODID, "call_short");
     public static final Animation CALLING = new Animation(ProjectNublar.MODID, "calling");
     public static final Animation DRINKING = new Animation(ProjectNublar.MODID, "drinking");

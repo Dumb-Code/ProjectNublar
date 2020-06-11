@@ -65,10 +65,10 @@ public class ProjectNublar {
 
     public static final String MODID = "projectnublar";
     public static final String NAME = "Project Nublar";
-    public static final String VERSION = "0.0.22";
+    public static final String VERSION = "0.1.25";
     public static final String DUMBLIBRARY_VERSION = "0.2.4";
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;

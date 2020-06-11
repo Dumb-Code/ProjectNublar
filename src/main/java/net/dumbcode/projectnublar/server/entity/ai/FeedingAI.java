@@ -168,7 +168,7 @@ public class FeedingAI extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.process != null && this.process.active() && this.metabolism.getFood() < (this.metabolism.getMaxFood().getValue() / 4) * 3;
+        return this.process != null && this.process.active() && this.eatingTicks < this.metabolism.getFoodTicks();
     }
 
     @Override

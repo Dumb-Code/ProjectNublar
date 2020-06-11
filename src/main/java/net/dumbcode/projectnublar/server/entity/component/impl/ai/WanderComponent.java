@@ -29,7 +29,7 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
 
     private boolean avoidWater = true;
 
-    private int priority = 3;
+    private int priority = 5;
     private double speed = 0.4D;
     private int chance = 50;
 

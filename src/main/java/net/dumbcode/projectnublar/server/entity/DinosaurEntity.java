@@ -5,8 +5,12 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ai.SlowMoveHelper;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
+import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
 
 public class DinosaurEntity extends ComposableCreatureEntity {
 
@@ -38,5 +42,11 @@ public class DinosaurEntity extends ComposableCreatureEntity {
     @Override
     public boolean isOnLadder() {
         return getDinosaur().getDinosaurInfomation().isCanClimb() && super.isOnLadder();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundHandler.VELOCIRAPTOR_DEATH;
     }
 }

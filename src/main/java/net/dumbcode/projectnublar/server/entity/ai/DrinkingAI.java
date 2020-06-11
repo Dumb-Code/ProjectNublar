@@ -82,7 +82,10 @@ public class DrinkingAI extends EntityAIBase {
         if(this.path == null) {
             boolean foundPath = false;
             for (int i = 0; i < 15; i++) {
-                BlockPos foundPos = this.foundPositions.get(0);
+                if(this.foundPositions.isEmpty()) {
+                   return;
+                }
+                BlockPos foundPos = this.foundPositions.get(0).up();
                 this.path = this.entity.getNavigator().getPathToPos(foundPos);
                 if(this.path != null) {
                     PathPoint finalPoint = this.path.getFinalPathPoint();
@@ -118,13 +121,11 @@ public class DrinkingAI extends EntityAIBase {
             if(this.drinkingTicks == 160) {
                 this.entity.world.playSound(null, this.entity.posX, this.entity.posY, this.entity.posZ, SoundEvents.ENTITY_WOLF_SHAKE, SoundCategory.AMBIENT, 1F, 1F);
             }
-            if(this.drinkingTicks++ >= this.metabolism.getWaterTicks()) {
-                this.drinkingTicks = 0;
-            } else {
-                this.metabolism.setWater(this.metabolism.getWater() + this.metabolism.getHydrateAmountPerTick());
-            }
+            this.drinkingTicks++;
+            this.metabolism.setWater(this.metabolism.getWater() + this.metabolism.getHydrateAmountPerTick());
+
         } else {
-            this.entity.getNavigator().setPath(this.path, 0.5F);
+            this.entity.getNavigator().setPath(this.path, 0.7F);
         }
 
         super.updateTask();
@@ -142,8 +143,9 @@ public class DrinkingAI extends EntityAIBase {
         if(this.foundPositions.isEmpty() || this.path == null) {
             return false;
         }
-        BlockPos foundPos = this.foundPositions.get(0);
-        Vec3d position = new Vec3d(foundPos.getX() + 0.5D, foundPos.getY() + 0.5D, foundPos.getZ() + 0.5D);
-        return (this.entity.getNavigator().getPath() == this.path || this.entity.getPositionVector().squareDistanceTo(position) <= 2*2) && this.entity.world.getBlockState(foundPos).getMaterial() == Material.WATER && this.metabolism.getWater() < (this.metabolism.getMaxWater().getValue() / 4) * 3;
+//        BlockPos foundPos = this.foundPositions.get(0);
+//        Vec3d position = new Vec3d(foundPos.getX() + 0.5D, foundPos.getY() + 0.5D, foundPos.getZ() + 0.5D);
+//        return (this.entity.getNavigator().getPath() == this.path || this.entity.getPositionVector().squareDistanceTo(position) <= 2*2) && this.entity.world.getBlockState(foundPos).getMaterial() == Material.WATER && this.metabolism.getWater() < (this.metabolism.getMaxWater().getValue() / 4) * 3;
+        return this.drinkingTicks < this.metabolism.getWaterTicks();
     }
 }
