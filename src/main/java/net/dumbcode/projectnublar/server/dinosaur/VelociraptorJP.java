@@ -78,9 +78,9 @@ public class VelociraptorJP extends Dinosaur {
         this.addComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
-            .setScaleX(1F)
-            .setScaleY(1F)
-            .setScaleZ(1F);
+            .setScaleX(0.75F)
+            .setScaleY(0.75F)
+            .setScaleZ(0.75F);
 
         this.addComponent(EntityComponentTypes.GENDER);
         this.addComponent(ComponentHandler.AGE)
