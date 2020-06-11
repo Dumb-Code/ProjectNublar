@@ -26,7 +26,7 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        this.attackDamage.setBaseValue(2);
+        this.attackDamage.setBaseValue(6);
         List<Predicate<EntityLivingBase>> enemyPredicates = new ArrayList<>();
 
         for (EntityComponent component : entity.getAllComponents()) {
