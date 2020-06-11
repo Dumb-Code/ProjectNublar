@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -24,6 +25,7 @@ import javax.vecmath.Vector3d;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = ProjectNublar.MODID)
 public class PylonHeadConnectionRenderer {
@@ -60,7 +62,7 @@ public class PylonHeadConnectionRenderer {
 
         RenderHelper.enableStandardItemLighting();
         MC.entityRenderer.enableLightmap();
-        MC.renderEngine.bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
+        MC.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png"));
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
         GlStateManager.glLineWidth(2);
@@ -108,17 +110,19 @@ public class PylonHeadConnectionRenderer {
                 int b = light / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, s, b);
 
+                //TODO: cache
+                Random random = new Random(entity instanceof PylonHeadBlockEntity ? ((PylonHeadBlockEntity) entity).getNetworkUUID().getLeastSignificantBits() : 0);
                 if(ProjectNublar.DEBUG) {
-                    Random testRandom = new Random(entity instanceof PylonHeadBlockEntity ? ((PylonHeadBlockEntity) entity).getNetworkUUID().getLeastSignificantBits() : 0);
-                    GlStateManager.color(testRandom.nextFloat(), testRandom.nextFloat(), testRandom.nextFloat(), 1F);
+                    GlStateManager.color(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1F);
                 }
 
+                double[] uvs = IntStream.range(0, 12).mapToDouble(o -> random.nextInt(16)/16F).toArray();
 
                 RenderUtils.drawSpacedCube(
                     points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7],
                     points[8], points[9], points[10], points[11], points[12], points[13], points[14], points[15],
                     points[16], points[17], points[18], points[19], points[20], points[21], points[22], points[23],
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
+                    uvs[0], uvs[1], uvs[2], uvs[3], uvs[4], uvs[5], uvs[6], uvs[7], uvs[8], uvs[9], uvs[10], uvs[11], Math.round(diff.length())/16F, 1/16F, 1/16F);
             }
         }
 

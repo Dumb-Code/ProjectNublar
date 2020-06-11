@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.vehicles;
 
+import lombok.Value;
 import net.dumbcode.projectnublar.server.utils.InterpValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -19,8 +20,10 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     private final InterpValue xMotion = new InterpValue(this, 0.1D);
     private final InterpValue zMotion = new InterpValue(this, 0.1D);
 
-    public Quaternion rotation = new Quaternion();
-    public Quaternion prevRotation = new Quaternion();
+    @SideOnly(Side.CLIENT)
+    public Quaternion rotation;
+    @SideOnly(Side.CLIENT)
+    public Quaternion prevRotation;
 
     public GyrosphereVehicle(World worldIn) {
         super(worldIn, DefaultInput.values());
@@ -29,26 +32,16 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbt) {
-        this.rotation = new Quaternion(
-                nbt.getFloat("BallRotationX"),
-                nbt.getFloat("BallRotationY"),
-                nbt.getFloat("BallRotationZ"),
-                nbt.getFloat("BallRotationW")
-        );
-    }
-
-    @Override
-    protected void writeEntityToNBT(NBTTagCompound nbt) {
-        nbt.setFloat("BallRotationX", this.rotation.x);
-        nbt.setFloat("BallRotationY", this.rotation.y);
-        nbt.setFloat("BallRotationZ", this.rotation.z);
-        nbt.setFloat("BallRotationW", this.rotation.w);
-    }
-
-    @Override
     public boolean canBePushed() {
         return true;
+    }
+
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound compound) {
+    }
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound compound) {
     }
 
     @Override
@@ -92,6 +85,18 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
 
         this.motionY -= this.inWater ? 0.01F : 0.15F; //TODO: check no gravity
 
+        if(this.world.isRemote) {
+            this.runClientMovement();
+        }
+
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void runClientMovement() {
+        if(this.rotation == null) {
+            this.rotation = new Quaternion(1, 0, 0, 0);
+            this.prevRotation = new Quaternion(1, 0, 0, 0);
+        }
         Quaternion quatX = new Quaternion();
         quatX.setFromAxisAngle(new Vector4f(1f, 0f, 0f, (float) (this.motionZ * this.width * Math.PI * 0.017453292F)));
         quatX.normalise();
