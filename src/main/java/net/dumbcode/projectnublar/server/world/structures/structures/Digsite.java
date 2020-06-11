@@ -28,7 +28,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import org.lwjgl.util.vector.Vector4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -83,7 +82,7 @@ public class Digsite extends Structure {
             }
         }
 
-        return new Instance(world, pos.add(minx, 0, minz), overallsize, circles, totalLayers, new Vector4f(minx, maxx, minz, maxz), this);
+        return new Instance(world, pos.add(minx, 0, minz), overallsize, circles, totalLayers, new float[] {minx, maxx, minz, maxz}, this);
     }
 
     @AllArgsConstructor
@@ -96,12 +95,12 @@ public class Digsite extends Structure {
         private final int totalLayers;
         private final BlockPos centralPosition;
 
-        public Instance(World world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, Vector4f dims, Digsite structure) {
-            super(world, position, (int) (dims.y - dims.x), (int) (dims.w - dims.x), structure);
+        public Instance(World world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, float[] dims, Digsite structure) {
+            super(world, position, (int) (dims[1] - dims[0]), (int) (dims[3] - dims[2]), structure);
             this.overallsize = overallsize;
             this.circles = circles;
             this.totalLayers = totalLayers;
-            this.centralPosition =  BlockUtils.getTopSolid(world, new BlockPos(position.getX() - dims.x, 257, position.getZ() - dims.z));
+            this.centralPosition =  BlockUtils.getTopSolid(world, new BlockPos(position.getX() - dims[0], 257, position.getZ() - dims[2]));
         }
 
         @Override
