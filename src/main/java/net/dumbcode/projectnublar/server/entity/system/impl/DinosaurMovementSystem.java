@@ -22,6 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class DinosaurMovementSystem implements EntitySystem {
 
     private static final int MOVEMENT_CHANNEL = 60;
+    private static final int BREATHING_CHANNEL = 69;
 
     private Entity[] entities = new Entity[0];
     private AnimationComponent<?>[] components = new AnimationComponent[0];
@@ -59,6 +60,10 @@ public class DinosaurMovementSystem implements EntitySystem {
                     //TODO-stream: YIKES, Don't do this, (or maybe do)
                     wrap.getEntry().setAnimation(animation);
                 }
+            }
+
+            if(!component.isChannelActive(BREATHING_CHANNEL)) {
+                component.playAnimation((ComponentAccess) entity, AnimationHandler.BREATHING.createEntry().loop(), BREATHING_CHANNEL);
             }
         }
     }

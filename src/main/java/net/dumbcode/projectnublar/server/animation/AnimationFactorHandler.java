@@ -9,11 +9,14 @@ public class AnimationFactorHandler {
     public static final AnimationFactor<ComponentAccess> LIMB_SWING = new AnimationFactor<>("limb_swing", ComponentAccess.class, (access, type, partialTicks) -> {
         double speed = access.get(EntityComponentTypes.SPEED_TRACKING)
             .map(comp -> comp.getPreviousSpeed() + (comp.getSpeed() - comp.getPreviousSpeed()) * partialTicks)
-            .orElse(1D/15D) * 15F;
+            .orElse(1D/11D) * 11F;
         if(type.isAngle()) {
-            speed = Math.min(speed, 1.0F);
+            return (float) Math.min(speed, 1.0F);
         }
-        return (float)speed;
+        if(type.isSpeed()) {
+//            return (float) speed;
+        }
+        return 1F;
     });
 
     public static void register() {

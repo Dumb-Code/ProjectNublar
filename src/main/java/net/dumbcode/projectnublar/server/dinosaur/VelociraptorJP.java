@@ -3,9 +3,11 @@ package net.dumbcode.projectnublar.server.dinosaur;
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.utils.GaussianValue;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
@@ -13,9 +15,9 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
+import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.minecraft.entity.passive.*;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
 
@@ -57,12 +59,12 @@ public class VelociraptorJP extends Dinosaur {
                 .add(150, 15, Items.CHICKEN, Items.COOKED_CHICKEN, Items.RABBIT, Items.COOKED_RABBIT)
             )
             .setMaxFood(18000)
-            .setMaxWater(18000)
+            .setMaxWater(10000)
 
             .setHydrateAmountPerTick(500)
 
-            .setFoodTicks(45)
-            .setWaterTicks(30);
+            .setFoodTicks(100)
+            .setWaterTicks(100);
 
         this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .addCubesForAge(ADULT_AGE,
@@ -97,7 +99,7 @@ public class VelociraptorJP extends Dinosaur {
         this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(2D);
 
         this.addComponent(EntityComponentTypes.GENETICS)
-                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", 0, 0.75F);
+                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", -1, 0.2F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
             .addLayer("body", "base", "belly")
@@ -134,9 +136,18 @@ public class VelociraptorJP extends Dinosaur {
 
 
         this.addComponent(ComponentHandler.TRACKING_DATA);
+        this.addComponent(EntityComponentTypes.IDLE_ACTION)
+            .setIdleAnimation(() -> AnimationHandler.LOOK_AROUND);
         this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
         this.addComponent(EntityComponentTypes.CLOSE_PROXIMITY_ANGRY)
             .setRange(3)
             .add(DinosaurEntity.class);
+
+        this.addComponent(EntityComponentTypes.SOUND_STORAGE)
+            .addSound(ECSSounds.EATING_CRUNCH, () -> SoundHandler.VELOCIRAPTOR_FLESH_CRUNCH)
+            .addSound(ECSSounds.EATING_RIP, () -> SoundHandler.VELOCIRAPTOR_FLESH_RIP)
+            .addSound(ECSSounds.DRINKING, () -> SoundHandler.VELOCIRAPTOR_DRINK)
+            .addSound(ECSSounds.ATTACKING, () -> SoundHandler.VELOCIRAPTOR_BITE)
+            .addSound(ECSSounds.IDLE, () -> SoundHandler.VELOCIRAPTOR_IDLE);
     }
 }

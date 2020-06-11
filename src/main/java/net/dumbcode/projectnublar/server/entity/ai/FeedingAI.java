@@ -7,6 +7,8 @@ import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationWrap;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSound;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
 import net.dumbcode.dumblibrary.server.utils.BlockStateWorker;
 import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
@@ -17,6 +19,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -108,7 +111,29 @@ public class FeedingAI extends EntityAIBase {
                         a.playAnimation(this.access, new AnimationEntry(animation), MetabolismComponent.METABOLISM_CHANNEL);
                     }
                 });
-                this.process.tick();
+
+                //TODO-stream: don't have this directly. THIS IS JUST FOR THE VELOCIRAPTOR
+                //What I should do is have an animation, then also have an "audio timeline" that plays spefic events at times.
+                if (!(this.process instanceof EntityProcess)) {
+                    if(this.eatingTicks == 41 || this.eatingTicks == 77) {
+                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_RIP).ifPresent(e ->
+                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
+                        );
+                    }
+                    if(this.eatingTicks == 60 || this.eatingTicks == 95) {
+                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_CRUNCH).ifPresent(e ->
+                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
+                        );
+                    }
+                    this.process.tick();
+                } else {
+                    if(this.eatingTicks == 11) {
+                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.ATTACKING).ifPresent(e ->
+                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
+                        );
+                        this.process.tick();
+                    }
+                }
                 if(this.eatingTicks++ >= this.metabolism.getFoodTicks()) {
                     FeedingResult result = this.process.consume();
                     this.metabolism.setFood(this.metabolism.getFood() + result.getFood());
@@ -116,7 +141,7 @@ public class FeedingAI extends EntityAIBase {
                     this.eatingTicks = 0;
                 }
             } else {
-                this.entityLiving.getNavigator().tryMoveToXYZ(position.x, position.y, position.z, 0.5D);
+                this.entityLiving.getNavigator().tryMoveToXYZ(position.x, position.y, position.z, 0.65D);
             }
         }
         super.updateTask();
@@ -199,7 +224,7 @@ public class FeedingAI extends EntityAIBase {
         @Override
         public void tick() {
             if(this.entity instanceof EntityLivingBase) {
-                this.entity.attackEntityFrom(DamageSource.causeMobDamage(entityLiving), 3F);
+                this.entity.attackEntityFrom(DamageSource.causeMobDamage(entityLiving), 6F);
             }
         }
 

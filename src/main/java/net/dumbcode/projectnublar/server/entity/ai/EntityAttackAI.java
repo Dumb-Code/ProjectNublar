@@ -3,6 +3,8 @@ package net.dumbcode.projectnublar.server.entity.ai;
 import net.dumbcode.dumblibrary.server.animation.objects.Animation;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSound;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.minecraft.entity.Entity;
@@ -11,10 +13,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -73,19 +72,26 @@ public class EntityAttackAI extends EntityAIAttackMelee {
     @Override
     protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
         double d0 = this.getAttackReachSqr(enemy);
+        if(this.attackTick == 15-11) {
+            enemy.attackEntityFrom(new UnchangeableEntityDamageSource(this.attacker), this.component.getAttackDamage().getIntValue());
+            if(this.attacker instanceof ComponentAccess) {
+                ComponentAccess access = (ComponentAccess) this.attacker;
+                access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.ATTACKING).ifPresent(e ->
+                    this.attacker.world.playSound(null, this.attacker.posX, this.attacker.posY, this.attacker.posZ, e, SoundCategory.AMBIENT, this.attacker.getRNG().nextFloat()*0.25F+0.875F, this.attacker.getRNG().nextFloat()*0.5F+0.75F)
+                );
+            }
+        }
         if (distToEnemySqr <= d0 && this.attackTick <= 0) {
             this.attackTick = 15;
             this.attacker.swingArm(EnumHand.MAIN_HAND);
             this.attacker.attackEntityAsMob(enemy);
 
             if(this.attacker.isEntityAlive() && enemy.isEntityAlive()) {
-                enemy.attackEntityFrom(new UnchangeableEntityDamageSource(this.attacker), this.component.getAttackDamage().getIntValue());
                 if(this.attacker instanceof ComponentAccess) {
                     ComponentAccess access = (ComponentAccess) this.attacker;
                     access.get(EntityComponentTypes.ANIMATION).ifPresent(component ->
                         component.playAnimation(access, ATTACK_ANIMATION, AttackComponent.ATTACK_CHANNEL)
                     );
-
                 }
             }
 

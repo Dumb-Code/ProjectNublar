@@ -19,7 +19,6 @@ public class DinosaurEggRenderer extends Render<DinosaurEggEntity> {
     public void doRender(DinosaurEggEntity entity, double x, double y, double z, float entityYaw, float partialTicks) {
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
 
-        GlStateManager.enableBlend();
         bindTexture(this.getEntityTexture(entity));
 
         GlStateManager.pushMatrix();

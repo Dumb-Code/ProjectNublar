@@ -10,6 +10,7 @@ public class CommandProjectNublar extends CommandTreeBase {
         this.addSubcommand(new AnimateCommand());
         this.addSubcommand(new RegenFenceCacheCommand());
         this.addSubcommand(new GenerateCommand());
+        this.addSubcommand(new EditDinosaurDataCommand());
     }
 
 

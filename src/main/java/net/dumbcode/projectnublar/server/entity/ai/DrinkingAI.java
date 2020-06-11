@@ -4,6 +4,8 @@ import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSound;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
 import net.dumbcode.dumblibrary.server.utils.BlockStateWorker;
 import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
@@ -12,6 +14,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -105,6 +108,9 @@ public class DrinkingAI extends EntityAIBase {
                 this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a ->
                     a.playAnimation(this.access, new AnimationEntry(AnimationHandler.DRINKING), MetabolismComponent.METABOLISM_CHANNEL)
                 );
+                this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.DRINKING).ifPresent(e ->
+                    this.entity.world.playSound(null, this.entity.posX, this.entity.posY, this.entity.posZ, e, SoundCategory.AMBIENT, 1F, 1F)
+                );
             }
             if(this.drinkingTicks++ >= this.metabolism.getWaterTicks()) {
                 this.drinkingTicks = 0;
@@ -122,7 +128,7 @@ public class DrinkingAI extends EntityAIBase {
     public void resetTask() {
         this.drinkingTicks = 0;
         this.foundPositions.clear();
-        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(this.entity, MetabolismComponent.METABOLISM_CHANNEL));
+//        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(this.entity, MetabolismComponent.METABOLISM_CHANNEL));
     }
 
     @Override

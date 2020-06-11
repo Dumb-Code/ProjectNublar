@@ -38,6 +38,7 @@ item.meat_dinosaur_tyrannosaurus_cooked.name=Cooked Tyrannosaurus meat
 
 projectnublar.dino.tyrannosaurus.name=Tyrannosaurus
 projectnublar.dino.dilophosaurus.name=Dilophosaurus
+projectnublar.dino.velociraptor_jp.name=Velociraptor (JP)
 projectnublar.dino.missing.name=<!Missing Dinosaur!>
 
 projectnublar.fences.length.toolong=%sm is too long. The max distance is %sm

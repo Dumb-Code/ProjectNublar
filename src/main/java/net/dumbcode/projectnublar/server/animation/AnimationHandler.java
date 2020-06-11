@@ -21,5 +21,6 @@ public class AnimationHandler {
     public static final Animation SNIFF_AIR = new Animation(ProjectNublar.MODID, "sniff_air");
     public static final Animation SNIFF_GROUND = new Animation(ProjectNublar.MODID, "sniff_groun");
     public static final Animation SWIMMING = new Animation(ProjectNublar.MODID, "swimming");
+    public static final Animation BREATHING = new Animation(ProjectNublar.MODID, "breathing");//todo-stream
 
 }

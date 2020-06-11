@@ -23,8 +23,12 @@ import net.dumbcode.projectnublar.server.entity.tracking.info.MetabolismInformat
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -59,7 +63,6 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
         compound.setTag("max_food", this.maxFood.writeToNBT());
         compound.setTag("max_water", this.maxWater.writeToNBT());
 
-
         compound.setTag("food_rate", this.foodRate.writeToNBT());
         compound.setTag("water_rate", this.waterRate.writeToNBT());
 
@@ -67,6 +70,7 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
         compound.setInteger("water_ticks", this.waterTicks);
 
         compound.setInteger("food_smell_distance", this.foodSmellDistance);
+        compound.setInteger("hydrate_amount_per_tick", this.hydrateAmountPerTick);
 
         compound.setTag("diet", this.diet.writeToNBT(new NBTTagCompound()));
         return super.serialize(compound);
@@ -88,6 +92,7 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
         this.waterTicks = compound.getInteger("water_ticks");
 
         this.foodSmellDistance = compound.getInteger("food_smell_distance");
+        this.hydrateAmountPerTick = compound.getInteger("hydrate_amount_per_tick");
 
         this.diet.fromNBT(compound.getCompoundTag("diet"));
     }
@@ -131,6 +136,7 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
         // Max Food and water that the ecs can have.
         private int maxFood;
         private int maxWater;
+
         // Rate that the food and water decrease every second
         private int waterRate = 1;
         private int foodRate = 1;

@@ -1,0 +1,123 @@
+{
+  "velociraptor_bite": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/bite/bite_1",
+      "projectnublar:dinosaur/velociraptor/bite/bite_2",
+      "projectnublar:dinosaur/velociraptor/bite/bite_3"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.bite"
+  },
+  "velociraptor_call": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/call/call_1",
+      "projectnublar:dinosaur/velociraptor/call/call_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.call"
+  },
+  "velociraptor_charge_breath": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/charge_breath/charge_breath_1",
+      "projectnublar:dinosaur/velociraptor/charge_breath/charge_breath_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.charge_breath"
+  },
+  "velociraptor_death": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/death/death_1",
+      "projectnublar:dinosaur/velociraptor/death/death_2",
+      "projectnublar:dinosaur/velociraptor/death/death_3",
+      "projectnublar:dinosaur/velociraptor/death/death_4"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.death"
+  },
+  "velociraptor_exhale": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/exhale/exhale_1",
+      "projectnublar:dinosaur/velociraptor/exhale/exhale_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.exhale"
+  },
+  "velociraptor_growl": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/growl/growl_1"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.growl"
+  },
+  "velociraptor_hiss": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/hiss/hiss_1"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.hiss"
+  },
+  "velociraptor_hurt": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/hurt/hurt_1",
+      "projectnublar:dinosaur/velociraptor/hurt/hurt_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.hurt"
+  },
+  "velociraptor_laugh": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/laugh/laugh_1",
+      "projectnublar:dinosaur/velociraptor/laugh/laugh_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.laugh"
+  },
+  "velociraptor_screech": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/screech/screech_1",
+      "projectnublar:dinosaur/velociraptor/screech/screech_2",
+      "projectnublar:dinosaur/velociraptor/screech/screech_3",
+      "projectnublar:dinosaur/velociraptor/screech/screech_4"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.screech"
+  },
+  "velociraptor_snore": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/snore/snore_1"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.snore"
+  },
+  "velociraptor_snort": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/snort/snort_1",
+      "projectnublar:dinosaur/velociraptor/snort/snort_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.snort"
+  },
+  "velociraptor_drink": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/drink/drink_1",
+      "projectnublar:dinosaur/velociraptor/drink/drink_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.drink"
+  },
+  "velociraptor_flesh_crunch": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/flesh_crunch/flesh_crunch_1",
+      "projectnublar:dinosaur/velociraptor/flesh_crunch/flesh_crunch_2"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.flesh_crunch"
+  },
+  "velociraptor_flesh_rip": {
+    "sounds": [
+      "projectnublar:dinosaur/velociraptor/flesh_rip/flesh_rip_1"
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.flesh_rip"
+  },
+  "velociraptor_idle": {
+    "sounds": [
+      {
+        "name":  "projectnublar:velociraptor_snort",
+        "type": "event",
+        "weight": 7
+      },
+      {
+        "name":  "projectnublar:velociraptor_laugh",
+        "type": "event",
+        "weight": 3
+      }
+    ],
+    "subtitle": "projectnublar.subtitles.dinosaur.velociraptor.idle"
+  }
+}
