@@ -22,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class StructureNetwork {
         List<Runnable> generations = Lists.newArrayList();
 
         BuilderNode.Entry<Structure> rootEntry = getWeightedChoice(random, this.rootNodes);
-        StructureInstance instance = this.instantiate(world, pos, random, rootEntry);
+        StructureInstance instance = this.instantiate(null, world, pos, random, rootEntry);
 
         prepGeneration(world, pos, random, Sets.newHashSet(), instance, this.chooseChildren(random, rootEntry, instance), pathPositions, generations, constantDecision,0, 0);
         long prepTime = System.currentTimeMillis();
@@ -92,8 +93,8 @@ public class StructureNetwork {
         }
     }
 
-    private StructureInstance instantiate(World world, BlockPos pos, Random random, BuilderNode.Entry<Structure> entry) {
-        StructureInstance instance = entry.getElement().createInstance(world, pos, random);
+    private StructureInstance instantiate(@Nullable StructureInstance parent, World world, BlockPos pos, Random random, BuilderNode.Entry<Structure> entry) {
+        StructureInstance instance = entry.getElement().createInstance(parent, world, pos, random);
         instance.getGlobalPredicates().stream().filter(this.globalPredicates::containsKey).map(this.globalPredicates::get).forEach(instance.getPredicates()::addAll);
         return instance;
     }
@@ -128,7 +129,7 @@ public class StructureNetwork {
                 int offz = (int) (Math.cos(theta) * (startOffZ + tries / 2D) + baseoffZ);
 
 
-                StructureInstance childInstance = this.instantiate(world, pos.add(offx, 0, offz), random, child);
+                StructureInstance childInstance = this.instantiate(instance, world, pos.add(offx, 0, offz), random, child);
 
                 if(this.doesStructureIntersect(childInstance, offx, offz, placedEntries) || !childInstance.canBuild()) {
                     continue;

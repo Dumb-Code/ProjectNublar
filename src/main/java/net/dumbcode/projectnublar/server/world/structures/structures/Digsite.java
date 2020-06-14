@@ -29,6 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -46,7 +47,7 @@ public class Digsite extends Structure {
     }
 
     @Override
-    public StructureInstance createInstance(World world, BlockPos pos, Random random) {
+    public StructureInstance createInstance(@Nullable StructureInstance parent, World world, BlockPos pos, Random random) {
         int overallsize = (int) Math.abs(random.nextGaussian()) + this.size;
         int totalLayers = 2 + random.nextInt(2);
         Circle[][] circles = new Circle[totalLayers][];
@@ -82,7 +83,7 @@ public class Digsite extends Structure {
             }
         }
 
-        return new Instance(world, pos.add(minx, 0, minz), overallsize, circles, totalLayers, new float[] {minx, maxx, minz, maxz}, this);
+        return new Instance(parent, world, pos.add(minx, 0, minz), overallsize, circles, totalLayers, new float[] {minx, maxx, minz, maxz}, this);
     }
 
     @AllArgsConstructor
@@ -95,8 +96,8 @@ public class Digsite extends Structure {
         private final int totalLayers;
         private final BlockPos centralPosition;
 
-        public Instance(World world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, float[] dims, Digsite structure) {
-            super(world, position, (int) (dims[1] - dims[0]), (int) (dims[3] - dims[2]), structure);
+        public Instance(@Nullable StructureInstance parent, World world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, float[] dims, Digsite structure) {
+            super(parent, world, position, (int) (dims[1] - dims[0]), (int) (dims[3] - dims[2]), structure);
             this.overallsize = overallsize;
             this.circles = circles;
             this.totalLayers = totalLayers;

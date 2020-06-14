@@ -33,7 +33,7 @@ public abstract class Structure {
         return this;
     }
 
-    public abstract StructureInstance createInstance(World world, BlockPos pos, Random random);
+    public abstract StructureInstance createInstance(@Nullable StructureInstance parent, World world, BlockPos pos, Random random);
 
     @Nullable
     public BlockPos attemptSize() {

@@ -14,7 +14,7 @@ public class HeightRangePredicate implements StructurePredicate {
     private final ValueRange range;
 
     @Override
-    public void setupTraversers(Consumer<PredicateTraverser> registry) {
+    public void setupTraversers(Consumer<PredicateTraverser<?>> registry) {
         registry.accept(new PredicateTraverser<>(
             Pair.of(new AtomicInteger(Integer.MAX_VALUE), new AtomicInteger(Integer.MIN_VALUE)), //min, max
             (instance, pos, pair) -> {

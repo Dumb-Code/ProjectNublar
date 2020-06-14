@@ -13,7 +13,7 @@ public class SolidLiquidRatioPredicate implements StructurePredicate {
     private final ValueRange solidRange;
 
     @Override
-    public void setupTraversers(Consumer<PredicateTraverser> registry) {
+    public void setupTraversers(Consumer<PredicateTraverser<?>> registry) {
         registry.accept(new PredicateTraverser<>(
                 Pair.of(new AtomicInteger(), new AtomicInteger()), //solids, liquids
                 (instance, pos, pair) -> {

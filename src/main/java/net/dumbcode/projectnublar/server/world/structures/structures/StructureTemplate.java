@@ -30,11 +30,12 @@ public class StructureTemplate extends Structure {
     }
 
     @Override
-    public StructureInstance createInstance(World world, BlockPos pos, Random random) {
+    public StructureInstance createInstance(@Nullable StructureInstance parent, World world, BlockPos pos, Random random) {
         PlacementSettings.Decision decision = this.settings.makeDecision(random);
         BlockPos range = this.template.transformedBlockPosAround(this.template.getRange(), 0, 0, decision);
 
         return new Instance(
+            parent,
             world,
             pos.add(-Math.abs(range.getX())/2, 0, -Math.abs(range.getZ())/2),
             this, decision,
@@ -62,8 +63,8 @@ public class StructureTemplate extends Structure {
 
         private final PlacementSettings.Decision decision;
 
-        public Instance(World world, BlockPos position, StructureTemplate template, PlacementSettings.Decision decision, int xSize, int zSize) {
-            super(world, position, xSize, zSize, template);
+        public Instance(@Nullable StructureInstance parent, World world, BlockPos position, StructureTemplate template, PlacementSettings.Decision decision, int xSize, int zSize) {
+            super(parent, world, position, xSize, zSize, template);
             this.decision = decision;
         }
 

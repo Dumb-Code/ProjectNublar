@@ -11,6 +11,7 @@ import net.dumbcode.projectnublar.server.world.structures.structures.template.da
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,6 +20,8 @@ import java.util.function.Consumer;
 @Getter
 public abstract class StructureInstance {
 
+    @Nullable
+    protected final StructureInstance parent;
     protected final World world;
     protected final BlockPos position;
 
@@ -33,7 +36,8 @@ public abstract class StructureInstance {
 
     protected Boolean cachedBuildResult;
 
-    public StructureInstance(World world, BlockPos position, int xSize, int zSize, Structure structure, StructurePredicate... predicates) {
+    public StructureInstance(@Nullable StructureInstance parent, World world, BlockPos position, int xSize, int zSize, Structure structure, StructurePredicate... predicates) {
+        this.parent = parent;
         this.world = world;
         this.children = structure.getChildren();
         this.position = BlockUtils.getTopSolid(world, new BlockPos(position.getX(), 257, position.getZ()));
@@ -50,13 +54,13 @@ public abstract class StructureInstance {
             }
         }
 
-        List<PredicateTraverser> traversers = new ArrayList<>();
+        List<PredicateTraverser<?>> traversers = new ArrayList<>();
         for (StructurePredicate predicate : this.predicates) {
             predicate.setupTraversers(traversers::add);
         }
         this.traverseTopdown(pos -> traversers.forEach(t -> t.onTraverse(this, pos)));
 
-        for (PredicateTraverser traverser : traversers) {
+        for (PredicateTraverser<?> traverser : traversers) {
             if(!traverser.acceptable()) {
                 return false;
             }

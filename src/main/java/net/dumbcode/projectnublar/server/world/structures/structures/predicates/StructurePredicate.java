@@ -9,7 +9,7 @@ public interface StructurePredicate {
         return true;
     }
 
-    default void setupTraversers(Consumer<PredicateTraverser> registry) {
+    default void setupTraversers(Consumer<PredicateTraverser<?>> registry) {
         //To be optional overridden
     }
 }

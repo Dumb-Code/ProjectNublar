@@ -13,7 +13,11 @@ public class HeightDeviationPredicate implements StructurePredicate {
     private final ValueRange range;
 
     @Override
-    public void setupTraversers(Consumer<PredicateTraverser> registry) {
-        registry.accept(new PredicateTraverser<>(new ArrayList<Integer>(), (instance, pos, ints) -> ints.add(pos.getY()), integers -> this.range.inRange(MathUtils.meanDeviation(integers))));
+    public void setupTraversers(Consumer<PredicateTraverser<?>> registry) {
+        registry.accept(new PredicateTraverser<>(
+            new ArrayList<Integer>(),
+            (instance, pos, ints) -> ints.add(pos.getY()),
+            integers -> this.range.inRange(MathUtils.meanDeviation(integers))))
+        ;
     }
 }
