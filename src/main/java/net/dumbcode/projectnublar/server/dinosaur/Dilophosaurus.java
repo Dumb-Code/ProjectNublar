@@ -110,11 +110,12 @@ public class Dilophosaurus extends Dinosaur {
             .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed",0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("base", "base")
-            .addLayer("belly", "belly")
-            .addLayer("overlays", "frills", "patterns", "outlines", "spots");
+            .addLayer("base",0F, "base")
+            .addLayer("belly", 0.1F, "belly")
+            .addLayer("overlays", 0.2F, "frills", "patterns", "outlines", "spots");
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
+            .setIndex(1F)
             .staticLayer("claws", 5F)
             .staticLayer("mouth", 5F)
             .staticLayer("nostrils", 5F)

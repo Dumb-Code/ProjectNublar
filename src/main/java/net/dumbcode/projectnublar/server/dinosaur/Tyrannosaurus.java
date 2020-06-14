@@ -105,10 +105,11 @@ public class Tyrannosaurus extends Dinosaur {
                 .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", 0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-                .addLayer("body", "body")
-                .addLayer("stripes", "stripes");
+                .addLayer("body", 0F, "body")
+                .addLayer("stripes", 0.5F, "stripes");
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
+                .setIndex(1F)
                 .staticLayer("claws", 5F)
                 .staticLayer("mouth", 5F)
                 .staticLayer("nostrils", 5F)

@@ -102,10 +102,12 @@ public class VelociraptorJP extends Dinosaur {
                 .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", -1, 0.2F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("body", "base", "belly")
-            .addLayer("stripes", "stripes");
+            .addLayer("body", 0F, "base")
+            .addLayer("belly", 0.1F, "belly")
+            .addLayer("stripes", 0.2F, "stripes");
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
+            .setIndex(1F)
             .staticLayer("claws", 5F)
             .staticLayer("base_extra", 5F)
             .staticLayer("mouth", 5F);
