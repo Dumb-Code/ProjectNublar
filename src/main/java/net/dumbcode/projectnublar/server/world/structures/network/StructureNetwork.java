@@ -41,7 +41,7 @@ public class StructureNetwork {
     public Stats generate(World world, BlockPos pos, Random random) {
         long startTime = System.currentTimeMillis();
 
-        StructureConstants.Decision constantDecision = this.constants.createDesicion(random);
+        StructureConstants.Decision constantDecision = this.constants.createDecision(random);
 
         Set<BlockPos> pathPositions = Sets.newHashSet();
         List<Runnable> generations = Lists.newArrayList();
