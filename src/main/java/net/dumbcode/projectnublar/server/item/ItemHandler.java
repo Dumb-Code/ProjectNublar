@@ -47,6 +47,7 @@ public final class ItemHandler {
 
     public static final Item TRACKING_MODULE = new BasicModuleItem(() -> TabletModuleHandler.TRACKING_TABLET);
     public static final Item FLAPPY_DINO_MODULE = new BasicModuleItem(() -> TabletModuleHandler.FLAPPY_DINO);
+    public static final Item ENCYCLOPEDIA_MODULE = new BasicModuleItem(() -> TabletModuleHandler.ENCYCLOPEDIA);
 
     public static final Item TRACKING_TABLET = new ItemTrackingTablet();
 
@@ -92,6 +93,7 @@ public final class ItemHandler {
             TRACKING_TABLET.setRegistryName("tracking_tablet").setTranslationKey("tracking_tablet").setCreativeTab(TAB),
             TRACKING_MODULE.setRegistryName("tracking_module").setTranslationKey("tracking_module").setCreativeTab(TAB),
             FLAPPY_DINO_MODULE.setRegistryName("flappy_dino_module").setTranslationKey("flappy_dino_module").setCreativeTab(TAB),
+            ENCYCLOPEDIA_MODULE.setRegistryName("encyclopedia_module").setTranslationKey("encyclopedia_module").setCreativeTab(TAB),
 
             COMPUTER_CHIP_PART.setRegistryName("computer_chip_part").setTranslationKey("computer_chip_part").setCreativeTab(TAB),
             TANKS_PART.setRegistryName("tanks_part").setTranslationKey("tanks_part").setCreativeTab(TAB),

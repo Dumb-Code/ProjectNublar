@@ -21,22 +21,26 @@ public class S29OpenTabletModule implements IMessage {
     private Consumer<ByteBuf> bufConsumerWrite;
 
     private TabletScreen screen;
-
+    private String route;
+    
     public S29OpenTabletModule() {
     }
 
-    public S29OpenTabletModule(TabletModuleType<?> module, Consumer<ByteBuf> bufConsumerWrite) {
+    public S29OpenTabletModule(TabletModuleType<?> module, String route, Consumer<ByteBuf> bufConsumerWrite) {
         this.module = module;
+        this.route = route;
         this.bufConsumerWrite = bufConsumerWrite;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
+    	this.route = ByteBufUtils.readUTF8String(buf);
         this.screen = ByteBufUtils.readRegistryEntry(buf, ProjectNublar.TABLET_MODULES_REGISTRY).getScreenCreator().apply(buf);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
+    	ByteBufUtils.writeUTF8String(buf, this.route);
         ByteBufUtils.writeRegistryEntry(buf, this.module);
         this.bufConsumerWrite.accept(buf);
     }
@@ -49,7 +53,7 @@ public class S29OpenTabletModule implements IMessage {
                 GuiScreen screen = Minecraft.getMinecraft().currentScreen;
                 if(screen instanceof OpenedTabletScreen) {
                     message.screen.onSetAsCurrentScreen();
-                    ((OpenedTabletScreen) screen).setScreen(message.screen);
+                    ((OpenedTabletScreen) screen).setScreen(message.screen, message.route);
                 }
             }
         }

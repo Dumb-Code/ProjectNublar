@@ -7,7 +7,7 @@ import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
 import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C27InstallModule;
-import net.dumbcode.projectnublar.server.network.C28ModuleClicked;
+import net.dumbcode.projectnublar.server.network.C28LinkClicked;
 import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
@@ -49,6 +49,8 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
 
     private int galleryIconTicks;
     private Point2i gallaryIcon;
+    
+    private String route = "";
 
     public TabletHomeGui(EnumHand hand) {
         super(hand);
@@ -133,9 +135,9 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         }
 
         if(this.openedInstallPopup) {
-            this.installButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
             //Copied from #drawWorldBackground
             this.drawGradientRect(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, -1072689136, -804253680);
+            this.installButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
             this.dropdownBox.render(mouseX, mouseY);
         }
     }
@@ -266,7 +268,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         public void onClicked() {
             System.out.println(entry.getType().getRegistryName() + ": clicked");
             mc.displayGuiScreen(new OpenedTabletScreen(hand));
-            ProjectNublar.NETWORK.sendToServer(new C28ModuleClicked(this.entry.getType().getRegistryName(), hand));
+            ProjectNublar.NETWORK.sendToServer(new C28LinkClicked(this.entry.getType().getRegistryName(), hand));
         }
     }
 
