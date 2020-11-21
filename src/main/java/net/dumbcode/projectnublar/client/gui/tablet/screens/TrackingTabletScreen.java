@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class TrackingTabletScreen extends TabletScreen {
+public class TrackingTabletScreen extends TabletPage {
 
     private GuiScrollBox<ScrollEntry> scrollBox;
     private final List<ScrollEntry> scrollEntries;
@@ -66,8 +66,8 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
-    public void setData(int xSize, int ySize) {
-        super.setData(xSize, ySize);
+    public void setData(int xSize, int ySize, String route) {
+        super.setData(xSize, ySize, route);
         this.scrollBox = new GuiScrollBox<>(this.xSize - 100, 20, 100, 15, (this.ySize - 30) / 15, () -> this.scrollEntries);
     }
 
@@ -91,7 +91,7 @@ public class TrackingTabletScreen extends TabletScreen {
 
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks, String route) {
         if(this.textureID != -1) {
 
             GlStateManager.pushMatrix();

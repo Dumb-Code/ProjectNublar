@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.client.gui.tablet.OpenedTabletScreen;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.minecraft.client.Minecraft;
@@ -20,7 +20,7 @@ public class S29OpenTabletModule implements IMessage {
     private TabletModuleType<?> module;
     private Consumer<ByteBuf> bufConsumerWrite;
 
-    private TabletScreen screen;
+    private TabletPage screen;
     private String route;
     
     public S29OpenTabletModule() {

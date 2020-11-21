@@ -10,13 +10,13 @@ import java.io.IOException;
 public class OpenedTabletScreen extends BaseTabletScreen {
 
     @Getter
-    private TabletScreen screen;
+    private TabletPage screen;
 
     public OpenedTabletScreen(EnumHand hand) {
         super(hand);
     }
 
-    public void setScreen(TabletScreen screen, String route) {
+    public void setScreen(TabletPage screen, String route) {
         this.screen = screen;
         this.route = route;
         this.screen.setData(this.tabletWidth, this.tabletHeight, route);

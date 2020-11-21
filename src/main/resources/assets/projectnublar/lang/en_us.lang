@@ -44,3 +44,16 @@ projectnublar.dino.missing.name=<!Missing Dinosaur!>
 projectnublar.fences.length.toolong=%sm is too long. The max distance is %sm
 projectnublar.fences.length.notenough=Not enough cable. Need a total of %s cable. (You have %s)
 
+
+projectnublar.gui.encyclopedia.name=Name: %s
+projectnublar.gui.encyclopedia.scientific_name=Scientific Name: %s%s
+projectnublar.gui.encyclopedia.age=Age: %s
+projectnublar.gui.encyclopedia.biomes=Biomes fossils are found: %s
+projectnublar.gui.encyclopedia.rarity=Rarity: %s%s
+projectnublar.gui.encyclopedia.diet=Diet: %s
+projectnublar.gui.encyclopedia.size=Average size: %s 
+projectnublar.gui.encyclopedia.genome_percent=Genome sequenced: %s%s
+projectnublar.gui.encyclopedia.cloned_assets=Cloned assets: %s
+projectnublar.gui.encyclopedia.rarity.common=Common
+projectnublar.gui.encyclopedia.rarity.uncommon=Uncommon
+projectnublar.gui.encyclopedia.rarity.rare=Rare

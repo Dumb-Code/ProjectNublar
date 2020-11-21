@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.client.gui.tablet.OpenedTabletScreen;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -63,7 +63,7 @@ public class S24TrackingTabletUpdateChunk implements IMessage {
         protected void handleMessage(S24TrackingTabletUpdateChunk message, MessageContext ctx, World world, EntityPlayer player) {
             GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if(screen instanceof OpenedTabletScreen) {
-                TabletScreen tabletScreen = ((OpenedTabletScreen) screen).getScreen();
+                TabletPage tabletScreen = ((OpenedTabletScreen) screen).getScreen();
                 if(tabletScreen instanceof TrackingTabletScreen) {
                     ((TrackingTabletScreen) tabletScreen).setRGB(message.startX, message.startZ, message.endX - message.startX + 1, message.endZ - message.startZ + 1, message.data);
                 }

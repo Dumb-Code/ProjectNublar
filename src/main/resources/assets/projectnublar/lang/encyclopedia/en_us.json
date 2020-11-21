@@ -1,0 +1,9 @@
+{
+	"mosasaurus": {
+		"name": "Mosasaurus",
+		"scientificName": "Mosasaurus conodon",
+		"age": "Around 70 years",
+		"biomes": "Beach; Ocean;",
+		"size": "21-36 meters long"
+	}
+}

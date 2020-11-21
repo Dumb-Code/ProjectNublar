@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.client.gui.tablet.OpenedTabletScreen;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ public class S32SetTrackingDataList implements IMessage {
         protected void handleMessage(S32SetTrackingDataList message, MessageContext ctx, World world, EntityPlayer player) {
             GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if(screen instanceof OpenedTabletScreen) {
-                TabletScreen tabletScreen = ((OpenedTabletScreen) screen).getScreen();
+                TabletPage tabletScreen = ((OpenedTabletScreen) screen).getScreen();
                 if(tabletScreen instanceof TrackingTabletScreen) {
                     ((TrackingTabletScreen) tabletScreen).setTrackingData(message.entries);
                 }

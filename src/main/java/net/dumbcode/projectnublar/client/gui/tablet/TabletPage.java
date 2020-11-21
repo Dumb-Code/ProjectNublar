@@ -6,7 +6,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 
-public class TabletScreen {
+public class TabletPage {
     protected static final Minecraft MC = Minecraft.getMinecraft();
     protected int xSize;
     protected int ySize;

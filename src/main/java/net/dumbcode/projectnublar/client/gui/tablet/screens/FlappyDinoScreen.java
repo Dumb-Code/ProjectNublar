@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
 import lombok.RequiredArgsConstructor;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class FlappyDinoScreen extends TabletScreen {
+public class FlappyDinoScreen extends TabletPage {
 
     private static final int HALF_PIPE_WIDTH = 25;
     private static final int TICKS_BETWEEN_PIPES = 30;
@@ -32,7 +32,7 @@ public class FlappyDinoScreen extends TabletScreen {
     private final Player player = new Player();
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks, String route) {
         for (Pipe pipe : this.pipes) {
             int xPos = (int) (pipe.xPosition - PIPE_PIXELS_PER_TICK * partialTicks);
 
