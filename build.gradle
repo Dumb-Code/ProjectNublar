@@ -1,172 +1,174 @@
-import net.dumbcode.gradlehook.tasks.form.FieldObject
-import net.dumbcode.gradlehook.tasks.form.PostForm
-
-import java.time.Instant
-import java.time.ZoneOffset
-
 buildscript {
     repositories {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
-        maven { url = "https://plugins.gradle.org/m2/" }
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath "net.dumbcode.gradlehook:GradleHook:1.2.1"
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.8"
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
     }
 }
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: "net.dumbcode.gradlehook"
-apply plugin: "org.sonarqube"
+version = '1.0'
+group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'modid'
 
-//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
-version = "1.12.2-${getDirectVersion()}"
-group = "net.dumbcode.projectnublar" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "projectnublar" //MODID
-
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
-
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    version = "1.12.2-14.23.4.2705"
-    runDir = "run"
-    mappings = "stable_39"
+    // The mappings can be changed at any time, and must be in the following format.
+    // Channel:   Version:
+    // snapshot   YYYYMMDD   Snapshot are built nightly.
+    // stable     #          Stables are built at the discretion of the MCP team.
+    // official   MCVersion  Official field/method names from Mojang mapping files
+    //
+    // You must be aware of the Mojang license when using the 'official' mappings.
+    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'official', version: '1.16.5'
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be changed as needed. 
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be changed as needed. 
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be changed as needed. 
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url = "https://maven.mcmoddev.com"
-    }
-    maven {
-        url = "http://dvs1.progwml6.com/files/maven"
-    }
-    maven {
-        name = "CurseForge"
-        url = "https://minecraft.curseforge.com/api/maven/"
-    }
-}
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_1.12.2:4.9.1.187:api"
-    runtime "mezz.jei:jei_1.12.2:4.9.1.187"
-    compile 'org.projectlombok:lombok:1.18.12'
-    compile project('dumb_library')
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
+
+    // You may put jars on which you depend on in ./libs or you may define them like so..
+    // compile "some.group:artifact:version:classifier"
+    // compile "some.group:artifact:version"
+
+    // Real examples
+    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // These dependencies get remapped to your current MCP mappings
+    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
 }
 
-sonarqube {
-    properties {
-        property "sonar.projectName", "ProjectNublar"
-        property "sonar.projectKey", "net.dumbcode.projectnublar"
-
-        property "sonar.links.homepage", "https://github.com/Dumb-Code/ProjectNublar"
-        property "sonar.links.ci", "https://travis-ci.com/Dumb-Code/ProjectNublar"
-        property "sonar.links.scm", "https://github.com/Dumb-Code/ProjectNublar"
-        property "sonar.links.issue", "https://github.com/Dumb-Code/ProjectNublar/issues"
-
+// Example for how to get properties into the manifest for reading by the runtime..
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "examplemod",
+            "Specification-Vendor": "examplemodsareus",
+            "Specification-Version": "1", // We are version 1 of ourselves
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"examplemodsareus",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
 
-def setDebugCommitVersion() {
-    def version = "debug-" + System.getenv("TRAVIS_BUILD_NUMBER") + "-" + System.getenv("TRAVIS_COMMIT").substring(0, 7)
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar') 
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+//publish.dependsOn('reobfJar')
 
-    def prefix = 'public static final String VERSION = "'
-    def file = file("src/main/java/net/dumbcode/projectnublar/server/ProjectNublar.java")
-    def text = file.text
-
-    file.withWriter { w -> w << text.replaceAll("\\Q$prefix\\E.+\"", prefix + version + '"').replaceAll("\\Qpublic static final boolean DEBUG = false\\E", "public static final boolean DEBUG = true") }
-    return version
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = "sources"
-    from sourceSets.main.allSource
-}
-
-task devJar(type: Jar) {
-    classifier = "dev"
-    from sourceSets.main.output
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = "javadoc"
-    from javadoc.getDestinationDir()
-}
-
-artifacts {
-    archives sourcesJar
-    archives devJar
-    archives javadocJar
-}
-
-String getDirectVersion() {
-    if(System.getenv("TRAVIS")) {
-        return setDebugCommitVersion()
-    }
-    def major = "0"
-    def revision = "0"
-    def patch = "0"
-    def prefix = "public static final String VERSION = \""
-    def file = file("src/main/java/net/dumbcode/projectnublar/server/ProjectNublar.java")
-    file.eachLine { String s ->
-        s = s.trim()
-        if (s.startsWith(prefix)) {
-            s = s.substring(prefix.length(), s.length() - 2)
-            def pts = s.split("\\.")
-            if(pts.length != 3) {
-                return s
-            }
-            major = pts[0]
-            revision = pts[1]
-            patch = pts[2]
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
         }
     }
-
-    return "$major.$revision.$patch"
-}
-
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-task notifyIfError (group: "upload", description: "Checks to see if travis has errored, and if so sends a webhook") {
-    doLast {
-        if(System.getenv("TRAVIS_TEST_RESULT") == "1") {
-            println "Build has errored. Deploying webhook"
-
-            def buildVersion = System.getenv("TRAVIS_BUILD_NUMBER")?: "???"
-            def url = System.getenv("TRAVIS_BUILD_WEB_URL")?: "???"
-            def datetime = Instant.now().atZone(ZoneOffset.UTC).toString()
-
-            def form = new PostForm(System.getenv('WEBHOOK_URL'))
-            form.addObject(new FieldObject("payload_json", "{ \"embeds\": [{ \"title\":\"Build $buildVersion has errored - ${System.getenv('TRAVIS_COMMIT_MESSAGE')}\", \"color\": 9306112,  \"url\": \"$url\", \"timestamp\":\"$datetime\"}] }"))
-            def result = form.send()
-
-            println "Webhook uploaded with response code $result.responseCode"
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
-}
-gradlehook {
-    urlToken System.getenv('WEBHOOK_URL')
-    addField 'payload_json', '{ "embeds": [{ "title":"' + System.getenv('TRAVIS_COMMIT_MESSAGE') + " - " + System.getenv("COMMITTER_NAME") + '", "timestamp": "{{datetime}}" }] }'
-    addArtifact jar
 }
