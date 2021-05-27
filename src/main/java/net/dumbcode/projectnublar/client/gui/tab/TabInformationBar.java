@@ -1,9 +1,9 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public class TabInformationBar {
         }
     }
 
-    public void render(int guiLeft, int guiWidth, int guiTop) {
+    public void render(MatrixStack stack, int guiLeft, int guiWidth, int guiTop) {
         int nextSize = 20;
 
         int fitAmount = (guiWidth - nextSize - nextSize - this.tabPadding) / (this.tabWidth + this.tabPadding);
@@ -56,34 +56,32 @@ public class TabInformationBar {
 
         for (int i = 0; i < fitAmount && i + this.pageOffset < this.cache.size(); i++) {
             int xStart = offset + (this.tabWidth + this.tabPadding) * i;
-            this.drawTab(xStart, guiTop, this.selectedIndex == i + this.pageOffset);
+            this.drawTab(stack, xStart, guiTop, this.selectedIndex == i + this.pageOffset);
         }
-        FontRenderer font = Minecraft.getMinecraft().fontRenderer;
+        FontRenderer font = Minecraft.getInstance().font;
         String text = String.format("Page %s/%s", this.pageOffset / fitAmount + 1, Math.round(this.cache.size() / (float)fitAmount)); // TODO: 11/11/2018 localize
-        font.drawString(text, guiLeft + (guiWidth - font.getStringWidth(text)) / 2, guiTop - this.tabHeight - font.FONT_HEIGHT - 2, -1);
+        font.draw(stack, text, guiLeft + (guiWidth - font.width(text)) / 2F, guiTop - this.tabHeight - font.lineHeight - 2, -1);
 
         int top = guiTop - this.tabHeight + (this.tabHeight - nextSize) / 2;
         if(this.pageOffset != 0) {
-            Gui.drawRect(guiLeft, top, guiLeft + nextSize, top + nextSize, -1);
+            AbstractGui.fill(stack, guiLeft, top, guiLeft + nextSize, top + nextSize, -1);
         }
         if(this.pageOffset + fitAmount < this.cache.size()) {
-            Gui.drawRect(guiLeft + guiWidth - nextSize, top, guiLeft + guiWidth, top + nextSize, -1);
+            AbstractGui.fill(stack, guiLeft + guiWidth - nextSize, top, guiLeft + guiWidth, top + nextSize, -1);
         }
     }
 
-    protected void drawTab(int xStart, int yStart, boolean selected) {
+    protected void drawTab(MatrixStack stack, int xStart, int yStart, boolean selected) {
         int tabExtension = selected ? 5 : 1;
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        GlStateManager.disableLighting();
-        Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("textures/gui/container/creative_inventory/tabs.png"));
-        Gui.drawModalRectWithCustomSizedTexture(xStart, yStart - this.tabHeight - 1, 28, selected ? 32 : 0, this.tabWidth, this.tabHeight + tabExtension, 256, 256);
+        Minecraft.getInstance().textureManager.bind(new ResourceLocation("textures/gui/container/creative_inventory/tabs.png"));
+        AbstractGui.blit(stack, xStart, yStart - this.tabHeight - 1, 28, selected ? 32 : 0, this.tabWidth, this.tabHeight + tabExtension, 256, 256);
 //      Gui.drawRect(xStart, guiTop - this.tabHeight, xStart + this.tabWidth, guiTop + 5, 0xFF000000 | new Random((i + this.pageOffset) << 21).nextInt());
 //      if(mouseY > guiTop - this.tabHeight && mouseY < guiTop + tabExtension && mouseX > xStart && mouseX < xStart + this.tabWidth) {
 //          Gui.drawRect(xStart, guiTop - this.tabHeight, xStart + this.tabWidth, guiTop + tabExtension, 0x6A0063FF); TODO: Remove this?
 //      }
     }
 
-    public void mouseClicked(int guiLeft, int guiWidth, int guiTop, int mouseX, int mouseY, int mouseButton) {
+    public void mouseClicked(int guiLeft, int guiWidth, int guiTop, double mouseX, double mouseY, int mouseButton) {
         if(mouseButton == 0) {
             int nextSize = 20;
 
@@ -102,8 +100,8 @@ public class TabInformationBar {
 
             int top = guiTop - this.tabHeight + (this.tabHeight - nextSize) / 2;
 
-            int relX = mouseX - guiLeft;
-            int relY = mouseY - top;
+            double relX = mouseX - guiLeft;
+            double relY = mouseY - top;
 
             if(this.pageOffset != 0 && relX > 0 && relX < nextSize && relY > 0 && relY < nextSize) {
                 this.pageOffset -= fitAmount;

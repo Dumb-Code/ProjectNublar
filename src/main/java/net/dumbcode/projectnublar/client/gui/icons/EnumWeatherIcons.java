@@ -12,18 +12,18 @@ import java.util.function.BiPredicate;
 public enum EnumWeatherIcons implements WeatherIcon {
     DAY_NORMAL(999, (world, biome) -> true),
 
-    NIGHT_NORMAL(100, (world, biome) -> world.getWorldTime() % 24000 >= 12000),
+    NIGHT_NORMAL(100, (world, biome) -> world.getDayTime() % 24000 >= 12000),
 
-    CLOUDY(90, (world, biome) -> world.isRaining() || world.getRainStrength(1F) > 0F),
+    CLOUDY(90, (world, biome) -> world.isRaining() || world.getRainLevel(1F) > 0F),
 
-    RAIN_LIGHT(80, (world, biome) -> biome.canRain() && world.isRaining()),
-    RAIN_HEAVY(75, (world, biome) -> biome.canRain() && world.isRaining() && world.getRainStrength(1F) > 0.75F),
+    RAIN_LIGHT(80, (world, biome) -> biome.getPrecipitation() == Biome.RainType.RAIN && world.isRaining()),
+    RAIN_HEAVY(75, (world, biome) -> biome.getPrecipitation() == Biome.RainType.RAIN && world.isRaining() && world.getRainLevel(1F) > 0.75F),
 
-    SNOW_LIGHT(70, (world, biome) -> biome.getEnableSnow() && world.isRaining()),
-    SNOW_HEAVY(65, (world, biome) -> biome.getEnableSnow() && world.isRaining() && world.getRainStrength(1F) > 0.75F),
+    SNOW_LIGHT(70, (world, biome) -> biome.getPrecipitation() == Biome.RainType.SNOW && world.isRaining()),
+    SNOW_HEAVY(65, (world, biome) -> biome.getPrecipitation() == Biome.RainType.SNOW && world.isRaining() && world.getRainLevel(1F) > 0.75F),
 
-    THUNDERSTORM(50, (world, biome) -> biome.canRain() && world.isThundering()),
-    SNOWSTORM(40, (world, biome) -> biome.getEnableSnow() && world.isThundering());
+    THUNDERSTORM(50, (world, biome) -> biome.getPrecipitation() == Biome.RainType.RAIN && world.isThundering()),
+    SNOWSTORM(40, (world, biome) -> biome.getPrecipitation() == Biome.RainType.SNOW && world.isThundering());
 
     private final float priority;
     private final ResourceLocation location = new ResourceLocation(ProjectNublar.MODID, "textures/gui/weather_icons.png");

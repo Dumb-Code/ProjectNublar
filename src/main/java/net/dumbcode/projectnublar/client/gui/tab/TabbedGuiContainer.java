@@ -1,24 +1,26 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.inventory.Container;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.util.text.TranslationTextComponent;
 
-import java.io.IOException;
-
-public abstract class TabbedGuiContainer extends GuiContainer {
+public abstract class TabbedGuiContainer<T extends Container> extends ContainerScreen<T> {
 
     private final TabInformationBar info;
 
-    public TabbedGuiContainer(Container inventorySlotsIn, TabInformationBar list) {
-        super(inventorySlotsIn);
+    public TabbedGuiContainer(T inventorySlotsIn, PlayerInventory playerInventory, String containerName, TabInformationBar list) {
+        super(inventorySlotsIn, playerInventory, new TranslationTextComponent(ProjectNublar.MODID + "." + containerName + ".name"));
         this.info = list;
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
-        this.info.configurePageSelect(this.xSize);
-        this.guiTop += this.getOffset();
+    public void init() {
+        super.init();
+        this.info.configurePageSelect(this.width);
+        this.topPos += this.getOffset();
     }
 
     protected int getOffset() {
@@ -26,22 +28,25 @@ public abstract class TabbedGuiContainer extends GuiContainer {
     }
 
     @Override
-    public void updateScreen() {
-        super.updateScreen();
+    public void tick() {
+        super.tick();
         this.info.update();
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawScreen(mouseX, mouseY, partialTicks);
-        this.info.render(this.guiLeft, this.xSize, this.guiTop);
+    public void render(MatrixStack p_230430_1_, int p_230430_2_, int p_230430_3_, float p_230430_4_) {
+        super.render(p_230430_1_, p_230430_2_, p_230430_3_, p_230430_4_);
+        this.info.render(p_230430_1_, this.leftPos, this.width, this.topPos);
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.info.mouseClicked(this.guiLeft, this.xSize, this.guiTop, mouseX, mouseY, mouseButton);
+        this.info.mouseClicked(this.leftPos, this.width, this.topPos, mouseX, mouseY, mouseButton);
+
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
+
 
     public TabInformationBar getInfo() {
         return info;

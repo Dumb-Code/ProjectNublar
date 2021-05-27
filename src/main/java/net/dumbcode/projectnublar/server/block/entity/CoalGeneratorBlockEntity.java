@@ -9,6 +9,7 @@ import net.dumbcode.projectnublar.server.recipes.CoalGeneratorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Container;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -67,12 +68,12 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
+    public GuiScreen createScreen(PlayerEntity player, TabInformationBar info, int tab) {
         return new CoalGeneratorGui(player, this, info, tab);
     }
 
     @Override
-    public Container createContainer(EntityPlayer player, int tab) {
+    public Container createContainer(PlayerEntity player, int tab) {
         return new MachineModuleContainer(this, player, 84, 176,
                 new MachineModuleSlot(this, 0, 78, 33)
         );

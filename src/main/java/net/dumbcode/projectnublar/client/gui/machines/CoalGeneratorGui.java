@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.block.entity.CoalGeneratorBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 
@@ -14,7 +15,7 @@ public class CoalGeneratorGui extends TabbedGuiContainer {
 
     private final CoalGeneratorBlockEntity blockEntity;
 
-    public CoalGeneratorGui(EntityPlayer player, CoalGeneratorBlockEntity blockEntity, TabInformationBar info, int tab) {
+    public CoalGeneratorGui(PlayerEntity player, CoalGeneratorBlockEntity blockEntity, TabInformationBar info, int tab) {
         super(blockEntity.createContainer(player, tab), info);
         this.blockEntity = blockEntity;
     }
