@@ -1,1 +1,3 @@
 include 'dumb_library'
+include 'studio_jar'
+project(':studio_jar').projectDir = file('dumb_library/studio_jar/')
