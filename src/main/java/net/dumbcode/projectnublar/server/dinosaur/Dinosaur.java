@@ -15,11 +15,11 @@ import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,7 +30,7 @@ import java.util.Random;
 
 @Getter
 @Setter
-public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
+public class Dinosaur extends ForgeRegistryEntry<Dinosaur> {
 
     public static final String CHILD_AGE = "child";
     public static final String ADULT_AGE = "adult";
@@ -102,8 +102,8 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         return this.getRegistryName();
     }
 
-    public TextComponentTranslation createNameComponent() {
-        return new TextComponentTranslation(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
+    public TranslationTextComponent createNameComponent() {
+        return new TranslationTextComponent(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
     }
 
     public void attachDefaultComponents() {
@@ -116,7 +116,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
      * @return random dinosaur.
      */
     public static Dinosaur getRandom() {
-        Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection();
+        Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValues();
         int i = RANDOM.nextInt(from.size());
         return from.toArray(new Dinosaur[0])[i];
 
@@ -128,7 +128,7 @@ public class Dinosaur extends IForgeRegistryEntry.Impl<Dinosaur> {
         public Dinosaur deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
             Dinosaur dinosaur = new Dinosaur();
             JsonObject object = element.getAsJsonObject();
-            dinosaur.attacher.readFromJson(JsonUtils.getJsonArray(object, "entity_info"));
+            dinosaur.attacher.readFromJson(JSONUtils.getAsJsonArray(object, "entity_info"));
             return dinosaur;
         }
 

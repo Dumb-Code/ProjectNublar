@@ -64,4 +64,8 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
             }
         }
     }
+
+    public MachineModuleBlockEntity<B> getBlockEntity() {
+        return blockEntity;
+    }
 }

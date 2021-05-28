@@ -10,8 +10,8 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
-import net.dumbcode.projectnublar.server.network.C11UpdatePoleList;
-import net.dumbcode.projectnublar.server.network.C9ChangeGlobalRotation;
+import net.dumbcode.projectnublar.server.network.BUpdatePoleList;
+import net.dumbcode.projectnublar.server.network.BChangeGlobalRotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.util.math.MathHelper;
@@ -144,7 +144,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
 
     private void sync() {
         this.updateList();
-        ProjectNublar.NETWORK.sendToServer(new C11UpdatePoleList(this.builder, this.entries.stream().map(p -> p.pole).collect(Collectors.toList())));
+        ProjectNublar.NETWORK.sendToServer(new BUpdatePoleList(this.builder, this.entries.stream().map(p -> p.pole).collect(Collectors.toList())));
     }
 
     public void updateList() {
@@ -165,7 +165,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
             float val = (float)this.globalRotation.getValue();
             if(this.previousRot != val) {
                 this.previousRot = val;
-                ProjectNublar.NETWORK.sendToServer(new C9ChangeGlobalRotation(this.builder, (float)slider.getValue()));
+                ProjectNublar.NETWORK.sendToServer(new BChangeGlobalRotation(this.builder, (float)slider.getValue()));
             }
         }
     }

@@ -3,20 +3,28 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.CoalGeneratorGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.CoalGeneratorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.container.Slot;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Collections;
 import java.util.List;
 
 public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGeneratorBlockEntity> {
+
+    public static final ContainerInfo<CoalGeneratorBlockEntity> INFO = new ContainerInfo<>(
+        84, 176,
+        inv -> new Slot[] { new MachineModuleSlot(inv, 0, 78, 33) }
+    );
+
     @Override
     public int getBaseEnergyProduction() {
         return 0;
@@ -49,7 +57,7 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
 
     @Override
     protected List<MachineRecipe<CoalGeneratorBlockEntity>> getAllRecipes() {
-        return Lists.newArrayList(
+        return Collections.singletonList(
             CoalGeneratorRecipe.INSTANCE
         );
     }
@@ -67,6 +75,11 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
     }
 
     @Override
+    public String getTranslationKey(int tab) {
+        return ProjectNublar.MODID + ".container.coalgenerator";
+    }
+
+    @Override
     @SideOnly(Side.CLIENT)
     public GuiScreen createScreen(PlayerEntity player, TabInformationBar info, int tab) {
         return new CoalGeneratorGui(player, this, info, tab);
@@ -75,7 +88,8 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
     @Override
     public Container createContainer(PlayerEntity player, int tab) {
         return new MachineModuleContainer(this, player, 84, 176,
-                new MachineModuleSlot(this, 0, 78, 33)
+
         );
     }
+
 }

@@ -8,25 +8,23 @@ import net.dumbcode.dumblibrary.server.ecs.blocks.BlockPropertyAccess;
 import net.dumbcode.dumblibrary.server.ecs.blocks.BlockstateComponentProperty;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.Property;
+import net.minecraft.state.StateContainer;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class Plant extends IForgeRegistryEntry.Impl<Plant> {
+public class Plant extends ForgeRegistryEntry<Plant> {
     protected final EntityComponentAttacher baseAttacher = new EntityComponentAttacher();
     protected final Map<String, Map<String, EntityComponentAttacher>> states = new HashMap<>();
 
-    public Block createBlock() {
-        return new BlockPlant();
+    public Block createBlock(AbstractBlock.Properties properties) {
+        return new BlockPlant(properties, this.createOverrideProperty());
     }
 
     public BlockstateComponentProperty[] createOverrideProperty() {
@@ -60,7 +58,7 @@ public class Plant extends IForgeRegistryEntry.Impl<Plant> {
     }
 
     @RequiredArgsConstructor
-    protected class StateAttacher {
+    protected static class StateAttacher {
         private final Map<String, EntityComponentAttacher> stateOverrides;
 
         protected StateAttacher attachOverride(String overrideName, Consumer<EntityComponentAttacher> onAttach) {
@@ -72,39 +70,28 @@ public class Plant extends IForgeRegistryEntry.Impl<Plant> {
     }
 
     //todo: move to own class
-    public class BlockPlant extends Block implements BlockPropertyAccess, IItemBlock {
+    public static class BlockPlant extends Block implements BlockPropertyAccess, IItemBlock {
 
-        private BlockstateComponentProperty[] property;
+        protected final StateContainer<Block, BlockState> stateDefinition;
+        private final BlockstateComponentProperty[] properties;
 
-        public BlockPlant() {
-            super(Material.PLANTS);
+        public BlockPlant(Properties p_i48440_1_, BlockstateComponentProperty[] properties) {
+            super(p_i48440_1_);
+            this.properties = properties;
+            StateContainer.Builder<Block, BlockState> builder = new StateContainer.Builder<>(this);
+            builder.add(properties);
+            this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
+            this.registerDefaultState(this.stateDefinition.any());
         }
 
         @Override
-        protected BlockStateContainer createBlockState() {
-            return new BlockStateContainer(this, this.getComponentProperties());
+        public StateContainer<Block, BlockState> getStateDefinition() {
+            return this.stateDefinition;
         }
 
         @Override
-        public IBlockState getStateFromMeta(int meta) {
-            ArrayList<IBlockState> states = new ArrayList<>(this.getBlockState().getValidStates());
-            states.sort(Comparator.comparing(Object::toString));
-            return states.get(meta);
-        }
-
-        @Override
-        public int getMetaFromState(IBlockState state) {
-            ArrayList<IBlockState> states = new ArrayList<>(this.getBlockState().getValidStates());
-            states.sort(Comparator.comparing(Object::toString));
-            return states.indexOf(state);
-        }
-
-        @Override
-        public IProperty<? extends ComponentAccess>[] getComponentProperties() {
-            if(this.property == null) {
-                this.property = Plant.this.createOverrideProperty();
-            }
-            return this.property;
+        public Property<? extends ComponentAccess>[] getComponentProperties() {
+            return this.properties;
         }
     }
 }

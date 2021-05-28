@@ -61,6 +61,11 @@ public class MachineModuleItemStackWrapper implements IItemHandlerModifiable {
         return 0;
     }
 
+    @Override
+    public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        return true;
+    }
+
     private boolean checkSlot(int slot) {
         return slot >= 0 && slot < this.slots.length;
     }

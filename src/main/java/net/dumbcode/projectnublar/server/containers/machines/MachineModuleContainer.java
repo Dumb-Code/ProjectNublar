@@ -1,88 +1,95 @@
 package net.dumbcode.projectnublar.server.containers.machines;
 
+import com.mojang.datafixers.util.Either;
 import lombok.NonNull;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.items.wrapper.EmptyHandler;
 
+import javax.annotation.Nullable;
 import java.util.function.IntPredicate;
 
-public class MachineModuleContainer extends Container {
+public class MachineModuleContainer<B extends MachineModuleBlockEntity<B>> extends Container {
 
     private IntPredicate predicate = i -> true;
-    private final MachineModuleBlockEntity<?> blockEntity;
 
-    public MachineModuleContainer(MachineModuleBlockEntity<?> blockEntity, EntityPlayer player, int playerOffset, int xSize, MachineModuleSlot... slots) {
+    @Nullable
+    private final B blockEntity;
+
+    public MachineModuleContainer(ContainerType<?> type, PlayerInventory inventory, int id, MachineModuleBlockEntity.ContainerInfo<B> info) {
+        this(type, inventory, id, info, null);
+    }
+
+    public MachineModuleContainer(ContainerType<?> type, PlayerInventory inventory, int id, MachineModuleBlockEntity.ContainerInfo<B> info, @Nullable B blockEntity) {
+        super(type, id);
         this.blockEntity = blockEntity;
-        for (MachineModuleSlot slot : slots) {
-            this.addSlotToContainer(slot);
+        for (Slot slot : info.getSlotGenerator().apply(blockEntity == null ? Either.left(new EmptyHandler()) : Either.right(blockEntity))) {
+            this.addSlot(slot);
         }
 
-        if(playerOffset >= 0) {
-            this.addPlayerSlots(player, playerOffset, xSize);
-        }
-
-        if(!player.world.isRemote) {
-            this.blockEntity.getOpenedUsers().add(player.getUniqueID());
-            ProjectNublar.NETWORK.sendToDimension(new S44SyncOpenedUsers(this.blockEntity), player.world.provider.getDimension());
+        if(info.getPlayerOffset() >= 0) {
+            this.addPlayerSlots(inventory, info.getPlayerOffset(), info.getXSize());
         }
     }
 
-    public MachineModuleContainer setPredicate(@NonNull IntPredicate predicate) {
+
+    public MachineModuleContainer<B> setPredicate(@NonNull IntPredicate predicate) {
         this.predicate = predicate;
         return this;
     }
 
-    protected void addPlayerSlots(EntityPlayer player, int yOffet, int xSize) {
-        InventoryPlayer playerInventory = player.inventory;
-
+    protected void addPlayerSlots(PlayerInventory playerInventory, int yOffet, int xSize) {
         int xStart = (xSize - 162) / 2 + 1;
 
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.addSlotToContainer(new Slot(playerInventory, j + i * 9 + 9, xStart + j * 18, yOffet + i * 18));
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, xStart + j * 18, yOffet + i * 18));
             }
         }
 
         for (int i = 0; i < 9; ++i) {
-            this.addSlotToContainer(new Slot(playerInventory, i, xStart + i * 18, yOffet + 58));
+            this.addSlot(new Slot(playerInventory, i, xStart + i * 18, yOffet + 58));
         }
     }
 
+
+
     @Override
-    public void onContainerClosed(EntityPlayer playerIn) {
-        if(!playerIn.world.isRemote) {
-            this.blockEntity.getOpenedUsers().remove(playerIn.getUniqueID());
-            ProjectNublar.NETWORK.sendToDimension(new S44SyncOpenedUsers(this.blockEntity), playerIn.world.provider.getDimension());
+    public void removed(PlayerEntity playerIn) {
+        if(!playerIn.level.isClientSide) {
+            this.blockEntity.getOpenedUsers().remove(playerIn.getUUID());
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(playerIn.level::dimension), new S44SyncOpenedUsers(this.blockEntity));
         }
-        super.onContainerClosed(playerIn);
+        super.removed(playerIn);
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true; //TODO ?
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex) {
+    public ItemStack quickMoveStack(PlayerEntity player, int slotIndex) {
         ItemStack transferred = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(slotIndex);
+        Slot slot = this.slots.get(slotIndex);
 
-        int otherSlots = this.inventorySlots.size() - 36;
+        int otherSlots = this.slots.size() - 36;
 
-        if (slot != null && slot.getHasStack()) {
-            ItemStack current = slot.getStack();
+        if (slot != null && slot.hasItem()) {
+            ItemStack current = slot.getItem();
             transferred = current.copy();
 
             if (slotIndex < otherSlots) {
-                if (!this.mergeItemStack(current, otherSlots, this.inventorySlots.size(), true)) {
+                if (!this.moveItemStackTo(current, otherSlots, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             } else {
@@ -92,7 +99,7 @@ public class MachineModuleContainer extends Container {
                         if(current.isEmpty()) {
                             break;
                         }
-                        flag |= this.mergeItemStack(current, i, i + 1, false);
+                        flag |= this.moveItemStackTo(current, i, i + 1, false);
 
                     }
                 }
@@ -102,9 +109,9 @@ public class MachineModuleContainer extends Container {
             }
 
             if (current.getCount() == 0) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
         }
 

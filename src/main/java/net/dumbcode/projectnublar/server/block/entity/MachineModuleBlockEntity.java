@@ -1,37 +1,41 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Either;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C18OpenContainer;
 import net.dumbcode.projectnublar.server.network.S42SyncMachineProcesses;
 import net.dumbcode.projectnublar.server.network.S43SyncMachineStack;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.block.BlockState;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
@@ -39,9 +43,10 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements ITickable {
+public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements ITickableTileEntity {
 
     public final Collection<MachineRecipe<B>> recipes = Collections.unmodifiableCollection(this.getAllRecipes());
     private final B asB = asB();
@@ -49,8 +54,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Getter protected final MachineModuleItemStackHandler<B> handler = new MachineModuleItemStackHandler<>(this, this.getInventorySize());
     private final List<MachineProcess<B>> processes = this.createProcessList();
 
-    private final MachineModuleItemStackWrapper inputWrapper;
-    private final MachineModuleItemStackWrapper outputWrapper;
+    private final MachineModuleItemStackWrapper inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots, this.constantInputSlots());
+    private final MachineModuleItemStackWrapper outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots, this.constantOutputSlots());
+
+    private final LazyOptional<IItemHandler> inputCapability = LazyOptional.of(() -> this.inputWrapper);
+    private final LazyOptional<IItemHandler> outputCapability = LazyOptional.of(() -> this.outputWrapper);
+
 
     protected final Map<MachineModuleType, Integer> machineStateMap = new HashMap<>();
 
@@ -62,10 +71,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     @Getter
     private EnergyStorage energy;
 
-    public MachineModuleBlockEntity() {
+    private final LazyOptional<EnergyStorage> energyCapability = LazyOptional.of(() -> this.energy);
+
+
+    public MachineModuleBlockEntity(TileEntityType<?> type) {
+        super(type);
         this.energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), 50);//getEnergyMaxExtractSpeed()
-        this.inputWrapper = this.getFromProcesses(MachineProcess::getInputSlots, this.constantInputSlots());
-        this.outputWrapper = this.getFromProcesses(MachineProcess::getOutputSlots, this.constantOutputSlots());
     }
 
     private MachineModuleItemStackWrapper getFromProcesses(Function<MachineProcess<B>, int[]> func, int[] constantSlots) {
@@ -80,58 +91,59 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setTag("ItemHandler", this.handler.serializeNBT());
-        compound.setInteger("ProcessCount", this.processes.size());
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.put("ItemHandler", this.handler.serializeNBT());
+        compound.putInt("ProcessCount", this.processes.size());
         for (int i = 0; i < this.processes.size(); i++) {
-            MachineProcess process = this.processes.get(i);
-            NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setInteger("Time", process.time);
-            nbt.setInteger("TotalTime", process.totalTime);
+            MachineProcess<B> process = this.processes.get(i);
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putInt("Time", process.time);
+            nbt.putInt("TotalTime", process.totalTime);
             if(process.currentRecipe != null) {
-                nbt.setString("Recipe", process.currentRecipe.getRegistryName().toString());
+                nbt.putString("Recipe", process.currentRecipe.getRegistryName().toString());
             }
-            nbt.setBoolean("Processing", process.processing); //Is this really needed?
-            compound.setTag("Process_" + i, nbt);
+            nbt.putBoolean("Processing", process.processing); //Is this really needed?
+            compound.put("Process_" + i, nbt);
         }
 
-        NBTTagCompound stateNBT = new NBTTagCompound();
-        this.machineStateMap.forEach((type, part) -> stateNBT.setInteger(type.getName(), part));
-        compound.setTag("MachineState", stateNBT);
+        CompoundNBT stateNBT = new CompoundNBT();
+        this.machineStateMap.forEach((type, part) -> stateNBT.putInt(type.getName(), part));
+        compound.put("MachineState", stateNBT);
 
-        NBTTagCompound energyNBT = new NBTTagCompound();
-        energyNBT.setInteger("Amount", energy.getEnergyStored());
-        compound.setTag("Energy", energyNBT);
-        return super.writeToNBT(compound);
+        CompoundNBT energyNBT = new CompoundNBT();
+        energyNBT.putInt("Amount", energy.getEnergyStored());
+        compound.put("Energy", energyNBT);
+        return super.save(compound);
     }
 
+
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.handler.deserializeNBT(compound.getCompoundTag("ItemHandler"));
-        for (int i = 0; i < compound.getInteger("ProcessCount"); i++) {
+    public void load(BlockState state, CompoundNBT compound) {
+        super.load(state, compound);
+        this.handler.deserializeNBT(compound.getCompound("ItemHandler"));
+        for (int i = 0; i < compound.getInt("ProcessCount"); i++) {
             MachineProcess<B> process = this.processes.get(i);
-            NBTTagCompound nbt = compound.getCompoundTag("Process_" + i);
-            process.setTime(nbt.getInteger("Time"));
-            process.setTotalTime(nbt.getInteger("TotalTime"));
-            process.setCurrentRecipe(nbt.hasKey("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
+            CompoundNBT nbt = compound.getCompound("Process_" + i);
+            process.setTime(nbt.getInt("Time"));
+            process.setTotalTime(nbt.getInt("TotalTime"));
+            process.setCurrentRecipe(nbt.contains("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
             process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
         }
 
         this.machineStateMap.clear();
-        NBTTagCompound stateNBT = compound.getCompoundTag("MachineState");
-        for (String s : stateNBT.getKeySet()) {
-            this.machineStateMap.put(new MachineModuleType(s), stateNBT.getInteger(s));
+        CompoundNBT stateNBT = compound.getCompound("MachineState");
+        for (String s : stateNBT.getAllKeys()) {
+            this.machineStateMap.put(new MachineModuleType(s), stateNBT.getInt(s));
         }
         this.tiersUpdated();
 
-        NBTTagCompound energyNBT = compound.getCompoundTag("Energy");
-        energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInteger("Amount"));
+        CompoundNBT energyNBT = compound.getCompound("Energy");
+        energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInt("Amount"));
     }
 
     @Override
-    public void update() {
-        if(!this.world.isRemote) {
+    public void tick() {
+        if(this.level != null && !this.level.isClientSide) {
             updateEnergyNetwork();
             boolean hasPower = energy.extractEnergy(getBaseEnergyConsumption(), false) >= getBaseEnergyConsumption();
             for (MachineProcess<B> process : this.processes) {
@@ -165,14 +177,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                             energy.receiveEnergy(process.getCurrentProductionPerTick(), false);
                             process.tick();
                         }
-                        this.markDirty();
+                        this.setChanged();
                     }
                 } else if (process.isProcessing()) {
                     this.getInterruptAction(process).processConsumer.accept(process);
                 }
             }
             //todo: only sync when needed
-            ProjectNublar.NETWORK.sendToDimension(new S42SyncMachineProcesses(this), this.world.provider.getDimension());
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S42SyncMachineProcesses(this));
         } else {
             for (MachineProcess<B> process : this.processes) {
                 if(process.isProcessing() && !process.isFinished()) {
@@ -240,10 +252,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     private List<IEnergyStorage> getEnergyNeighbors() {
         List<IEnergyStorage> result = new LinkedList<>();
-        for(EnumFacing facing : EnumFacing.values()) {
-            TileEntity te = world.getTileEntity(pos.offset(facing));
-            if(te != null && te.hasCapability(CapabilityEnergy.ENERGY, facing.getOpposite())) {
-                result.add(te.getCapability(CapabilityEnergy.ENERGY, facing.getOpposite()));
+        for(Direction facing : Direction.values()) {
+            TileEntity te = level.getBlockEntity(this.worldPosition.relative(facing));
+            if(te != null) {
+                te.getCapability(CapabilityEnergy.ENERGY, facing.getOpposite()).ifPresent(result::add);
             }
         }
         return result;
@@ -294,7 +306,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     public boolean searchForRecipes(MachineProcess<B> process) {
-        if(!this.world.isRemote) {
+        if(!this.level.isClientSide) {
             for (MachineRecipe<B> recipe : this.recipes) {
                 if(recipe.accepts(this.asB, process) && this.canProcess(process)) {
                     process.setCurrentRecipe(recipe);
@@ -303,7 +315,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                     }
                     process.setProcessing(true);
                     process.setTotalTime(recipe.getRecipeTime(this.asB, process));
-                    this.markDirty();
+                    this.setChanged();
                     return true;
                 }
             }
@@ -323,33 +335,23 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     public void dropEmStacks() {
         for (int i = 0; i < this.handler.getSlots(); i++) {
-            InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), this.handler.getStackInSlot(i));
+            InventoryHelper.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), this.handler.getStackInSlot(i));
         }
     }
 
+    @Nonnull
     @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
-    {
-        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || capability == CapabilityEnergy.ENERGY
-                || super.hasCapability(capability, facing);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Nullable
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
-    {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            if(facing == EnumFacing.DOWN) {
-                return (T) this.outputWrapper;
-            } else {
-                return (T) this.inputWrapper;
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if(cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            if(side == Direction.DOWN) {
+                return this.outputCapability.cast();
             }
+            return this.inputCapability.cast();
         }
-        if(capability == CapabilityEnergy.ENERGY) {
-            return (T) energy;
+        if(cap == CapabilityEnergy.ENERGY) {
+            return this.energyCapability.cast();
         }
-        return super.getCapability(capability, facing);
+        return super.getCapability(cap, side);
     }
 
     protected boolean canProcess(MachineProcess process) {
@@ -361,8 +363,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     protected void onSlotChanged(int slot) {
-        if(!this.world.isRemote) {
-            ProjectNublar.NETWORK.sendToDimension(new S43SyncMachineStack(this, slot), this.world.provider.getDimension());
+        if(!this.level.isClientSide) {
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S43SyncMachineStack(this, slot));
         }
     }
 
@@ -415,32 +417,32 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     private List<TabInformationBar.Tab> createTabList() {
         List<TabInformationBar.Tab> tabs = Lists.newArrayList();
-        for (MachineModuleBlockEntity blockEntity : this.getSurroundings(Lists.newArrayList())) {
+        for (MachineModuleBlockEntity<?> blockEntity : this.getSurroundings(Lists.newArrayList())) {
             blockEntity.addTabs(tabs);
         }
         return tabs;
     }
 
-    private List<MachineModuleBlockEntity> getSurroundings(List<MachineModuleBlockEntity> list) {
+    private List<MachineModuleBlockEntity<?>> getSurroundings(List<MachineModuleBlockEntity<?>> list) {
         list.add(this);
-        for (EnumFacing facing : EnumFacing.values()) {
-            TileEntity te = world.getTileEntity(this.pos.offset(facing));
+        for (Direction facing : Direction.values()) {
+            TileEntity te = level.getBlockEntity(this.worldPosition.relative(facing));
             if (te instanceof MachineModuleBlockEntity && !list.contains(te)) {
-                ((MachineModuleBlockEntity)te).getSurroundings(list);
+                ((MachineModuleBlockEntity<?>)te).getSurroundings(list);
             }
         }
         return list;
     }
 
     @Override
-    public void invalidate() {
-        super.invalidate();
+    public void setRemoved() {
+        super.setRemoved();
         this.positionDirty = true;
     }
 
     @Override
-    public void validate() {
-        super.validate();
+    public void clearRemoved() {
+        super.clearRemoved();
         this.positionDirty = true;
     }
 
@@ -449,10 +451,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     //tab - used to split the same gui into diffrent tabs. Not used for grouping diffrent guis together with tabs
-    @SideOnly(Side.CLIENT)
-    public abstract GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab);
+//    @SideOnly(Side.CLIENT)
+//    public abstract GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab);
 
-    public abstract Container createContainer(EntityPlayer player, int tab);
+    public abstract String getTranslationKey(int tab);
+
+    public abstract ContainerType<? extends MachineModuleContainer> getContainerType(int tab);
 
     @Setter
     @Getter
@@ -545,14 +549,15 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         @Override
         public void onClicked() {
-            TabInformationBar info;
-            if(Minecraft.getMinecraft().currentScreen instanceof TabbedGuiContainer) {
-                info = ((TabbedGuiContainer) Minecraft.getMinecraft().currentScreen).getInfo();
-            } else {
-                info = MachineModuleBlockEntity.this.createInfo();
-            }
-            Minecraft.getMinecraft().displayGuiScreen(MachineModuleBlockEntity.this.createScreen(Minecraft.getMinecraft().player, info, this.tab));
-            ProjectNublar.NETWORK.sendToServer(new C18OpenContainer(this.tab, MachineModuleBlockEntity.this.pos));
+            ProjectNublar.NETWORK.sendToServer(new C18OpenContainer(this.tab, MachineModuleBlockEntity.this.worldPosition));
         }
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class ContainerInfo<B extends MachineModuleBlockEntity<B>> {
+        private final int playerOffset;
+        private final int xSize;
+        private final Function<Either<IItemHandler, B>, Slot[]> slotGenerator;
     }
 }

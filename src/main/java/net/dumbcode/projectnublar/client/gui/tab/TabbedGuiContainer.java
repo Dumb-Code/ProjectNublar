@@ -2,16 +2,17 @@ package net.dumbcode.projectnublar.client.gui.tab;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.minecraft.client.gui.IHasContainer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.util.text.TranslationTextComponent;
 
-public abstract class TabbedGuiContainer<T extends Container> extends ContainerScreen<T> {
+public abstract class TabbedGuiContainer<T extends Container> extends ContainerScreen<T> implements IHasContainer<T> {
 
     private final TabInformationBar info;
 
-    public TabbedGuiContainer(T inventorySlotsIn, PlayerInventory playerInventory, String containerName, TabInformationBar list) {
+    public TabbedGuiContainer(T inventorySlotsIn, PlayerInventory playerInventory, String containerName) {
         super(inventorySlotsIn, playerInventory, new TranslationTextComponent(ProjectNublar.MODID + "." + containerName + ".name"));
         this.info = list;
     }

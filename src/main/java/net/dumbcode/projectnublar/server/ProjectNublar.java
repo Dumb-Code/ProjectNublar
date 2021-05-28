@@ -6,37 +6,30 @@ import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
-import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.entity.*;
-import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
-import net.dumbcode.projectnublar.server.item.ItemDinosaurMeat;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.plants.Plant;
-import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
-import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
-import net.dumbcode.projectnublar.server.world.gen.WorldGenerator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -46,11 +39,18 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
@@ -59,7 +59,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
-@Mod(modid = ProjectNublar.MODID, name = ProjectNublar.NAME, version = ProjectNublar.VERSION, dependencies = "required-after:dumblibrary")
+@Mod(ProjectNublar.MODID)
 public class ProjectNublar {
 
 
@@ -75,42 +75,39 @@ public class ProjectNublar {
 
     public static IForgeRegistry<TabletModuleType<?>> TABLET_MODULES_REGISTRY;
 
-    private static Logger logger;
+    private static Logger logger = LogManager.getLogger(MODID);
 
-    @Mod.Instance(MODID)
-    public static ProjectNublar INSTANCE;
 
-    public static final  SimpleNetworkWrapper NETWORK = new SimpleNetworkWrapper(MODID);
+    private static final String PROTOCOL_VERSION = "1";
+    public static final SimpleChannel NETWORK = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION,
+        PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals
+    );
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        logger = event.getModLog();
+    public ProjectNublar() {
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
-        MinecraftForge.EVENT_BUS.post(new RegisterDinosaurEvent(DINOSAUR_REGISTRY));
-        MinecraftForge.EVENT_BUS.post(new RegisterPlantEvent(PLANT_REGISTRY));
+        bus.addListener(this::preInit);
 
-        registerJsonDinosaurs();
+    }
+
+    public void preInit(FMLCommonSetupEvent event) {
+//        registerJsonDinosaurs();
 
         DINOSAUR_REGISTRY.forEach(Dinosaur::attachDefaultComponents);
         PLANT_REGISTRY.forEach(Plant::attachComponents);
 
-        NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler.INSTANCE);
         registerPackets();
 
-        GameRegistry.registerWorldGenerator(WorldGenerator.INSTANCE, 0);
-    }
-
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
-
         DataSerializerHandler.register();
-        if(SidedExecutor.CLIENT) {
+        if(FMLEnvironment.dist.isClient()) {
             EnumWeatherIcons.register();
             TabletBackground.registerDefaults();
         }
         AnimationFactorHandler.register();
 
-        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValuesCollection()) {
+        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValues()) {
             ResourceLocation regName = dinosaur.getRegName();
             for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(ComponentHandler.AGE).getOrderedAges()) {
                 Map<String, AnimationContainer> container = dinosaur.getModelContainer();
@@ -134,27 +131,13 @@ public class ProjectNublar {
         GameRegistry.registerTileEntity(TrackingBeaconBlockEntity.class, new ResourceLocation(MODID, "tracking_beacon"));
         GameRegistry.registerTileEntity(PylonHeadBlockEntity.class, new ResourceLocation(MODID, "pylon_head"));
 
-        for (Map.Entry<Dinosaur, ItemDinosaurMeat> entry : ItemHandler.RAW_MEAT_ITEMS.entrySet()) {
-            Dinosaur dino = entry.getKey();
-            ItemDinosaurMeat referenceRawMeat = entry.getValue();
-            ItemDinosaurMeat referenceCookedMeat = ItemHandler.COOKED_MEAT_ITEMS.get(dino);
-            if (referenceCookedMeat == null) {
-                continue;
-            }
-
-            // handle all items linked to the most specific name
-            NonNullList<ItemStack> rawMeats = OreDictionary.getOres(referenceRawMeat.getMostSpecificOreName());
-            for (ItemStack rawMeat : rawMeats) {
-                FurnaceRecipes.instance().addSmeltingRecipe(rawMeat, new ItemStack(referenceCookedMeat), dino.getItemProperties().getCookingExperience());
-            }
-        }
 
         // TODO: Remove, debug only
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
         JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
-        DINOSAUR_REGISTRY.getValuesCollection().forEach(dino -> {
+        DINOSAUR_REGISTRY.getValues().forEach(dino -> {
             File jsonFile = new File("./mods/projectnublar/debug/" + dino.getRegName().getPath() + ".json");
             if (!jsonFile.getParentFile().exists()) {
                 jsonFile.getParentFile().mkdirs();
@@ -199,18 +182,13 @@ public class ProjectNublar {
         event.registerSystem(new DinosaurMovementSystem());
     }
 
-    @EventHandler
-    public void onServerStart(FMLServerStartingEvent event) {
-        event.registerServerCommand(new CommandProjectNublar());
-    }
-
     public static void spawnParticles(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int amount, int... data) {
-        if (world.isRemote) {
+        if (world.isClientSide) {
             for (int i = 0; i < amount; i++) {
                 spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
             }
         } else {
-            NETWORK.sendToDimension(new S21SpawnParticle(type, xPos, yPos, zPos, xMotion, yMotion, zMotion, amount, data), world.provider.getDimension());
+            NETWORK.send(PacketDistributor.DIMENSION.with(world::dimension), new S21SpawnParticle(type, xPos, yPos, zPos, xMotion, yMotion, zMotion, amount, data));
         }
     }
 
@@ -218,9 +196,8 @@ public class ProjectNublar {
         return logger;
     }
 
-    @SideOnly(Side.CLIENT)
     private static void spawnParticle0(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int... data) {
-        Minecraft.getMinecraft().effectRenderer.addEffect(type.getParticleSupplier().get().createParticle(world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data));
+        Minecraft.getInstance().particleEngine.add(type.getParticleSupplier().get().createParticle(world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data));
     }
 
     private static void registerJsonDinosaurs() {
@@ -233,12 +210,12 @@ public class ProjectNublar {
     private void registerPackets() {
 
         //Now you might be asking where the packets 0-8 are, they simply got moved to dumb lib and i don't want to change the packet names
-        NETWORK.registerMessage(new C9ChangeGlobalRotation.Handler(), C9ChangeGlobalRotation.class, 9, Side.SERVER);
+        NETWORK.registerMessage(new BChangeGlobalRotation.Handler(), BChangeGlobalRotation.class, 9, Side.SERVER);
         NETWORK.registerMessage(new S10ChangeGlobalRotation.Handler(), S10ChangeGlobalRotation.class, 10, Side.CLIENT);
-        NETWORK.registerMessage(new C11UpdatePoleList.Handler(), C11UpdatePoleList.class, 11, Side.SERVER);
+        NETWORK.registerMessage(new BUpdatePoleList.Handler(), BUpdatePoleList.class, 11, Side.SERVER);
         NETWORK.registerMessage(new S12UpdatePoleList.Handler(), S12UpdatePoleList.class, 12, Side.CLIENT);
-        NETWORK.registerMessage(new C13VehicleInputStateUpdated.Handler(), C13VehicleInputStateUpdated.class, 13, Side.SERVER);
-        NETWORK.registerMessage(new C14SequencingSynthesizerSelectChange.Handler(), C14SequencingSynthesizerSelectChange.class, 14, Side.SERVER);
+        NETWORK.registerMessage(new C2SVehicleInputStateUpdated.Handler(), C2SVehicleInputStateUpdated.class, 13, Side.SERVER);
+        NETWORK.registerMessage(new C2SSequencingSynthesizerSelectChange.Handler(), C2SSequencingSynthesizerSelectChange.class, 14, Side.SERVER);
         NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
         NETWORK.registerMessage(new C16DisplayTabbedGui.Handler(), C16DisplayTabbedGui.class, 16, Side.SERVER);
         NETWORK.registerMessage(new S17MachinePositionDirty.Handler(), S17MachinePositionDirty.class, 17, Side.CLIENT);

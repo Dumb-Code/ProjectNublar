@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class C18OpenContainer implements IMessage {
+public class C18OpenContainer {
 
     private int ID;
     private BlockPos pos;
@@ -39,7 +39,6 @@ public class C18OpenContainer implements IMessage {
 
         @Override
         protected void handleMessage(C18OpenContainer message, MessageContext ctx, World world, EntityPlayer player) {
-            GuiHandler.INSTANCE.openAndSyncContainer(message.ID, (EntityPlayerMP) player, world, message.pos.getX(), message.pos.getY(), message.pos.getZ());
         }
     }
 }

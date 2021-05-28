@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.vehicles;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.C13VehicleInputStateUpdated;
+import net.dumbcode.projectnublar.server.network.C2SVehicleInputStateUpdated;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class AbstractVehicle<E extends Enum> extends Entity {
+public abstract class AbstractVehicle<E extends Enum<E>> extends Entity {
 
     private final E[] values;
     public int inputState;
@@ -75,7 +75,7 @@ public abstract class AbstractVehicle<E extends Enum> extends Entity {
             this.setInput(e, this.isActive(player, e));
         }
         if(this.getControlState() != previousState) {
-            ProjectNublar.NETWORK.sendToServer(new C13VehicleInputStateUpdated(this, this.getControlState()));
+            ProjectNublar.NETWORK.sendToServer(new C2SVehicleInputStateUpdated(this, this.getControlState()));
         }
     }
 

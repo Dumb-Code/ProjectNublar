@@ -2,17 +2,15 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.client.StencilStack;
-import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
-import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
-import net.dumbcode.projectnublar.server.network.C14SequencingSynthesizerSelectChange;
+import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerSelectChange;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,13 +21,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.DoubleFunction;
 
 public class DnaEditingGui extends TabbedGuiContainer {
 
@@ -268,7 +263,7 @@ public class DnaEditingGui extends TabbedGuiContainer {
         for (int i = 0; i < this.slotList.size(); i++) {
             DnaSelectModule module = this.slotList.get(i);
             if(module.drive != null) {
-                ProjectNublar.NETWORK.sendToServer(new C14SequencingSynthesizerSelectChange(
+                ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
                     this.blockEntity.getPos(), i, module.drive.getKey(), module.slider.sliderValue)
                 );
             }
