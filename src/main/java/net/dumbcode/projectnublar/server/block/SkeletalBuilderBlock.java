@@ -9,6 +9,7 @@ import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.item.FossilItem;
 import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.DirectionalBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -34,13 +35,14 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class SkeletalBuilderBlock extends BlockDirectional implements IItemBlock {
+public class SkeletalBuilderBlock extends DirectionalBlock implements IItemBlock {
 
     public static final TextComponentTranslation NO_DINOSAUR_TO_DISPLAY_TEXT = new TextComponentTranslation(ProjectNublar.MODID+".action.skeletal_builder.no_dino_to_display");
 
-    public SkeletalBuilderBlock() {
-        super(Material.IRON);
+    protected SkeletalBuilderBlock(Properties properties) {
+        super(properties);
     }
+
 
     @Nullable
     @Override

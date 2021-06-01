@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 //TODO: move to a simple classs
-public class FossilBlock extends Block implements DinosaurProvider, IItemBlock {
+public class FossilBlock extends DinosaurBaseBlock, IItemBlock {
 
     @Getter private final Dinosaur dinosaur;
 

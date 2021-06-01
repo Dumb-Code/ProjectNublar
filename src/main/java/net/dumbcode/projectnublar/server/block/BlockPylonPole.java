@@ -24,9 +24,8 @@ public class BlockPylonPole extends Block implements IItemBlock {
 
     public static final PropertyEnum<EnumFacing.Axis> AXIS = PropertyEnum.create("axis", EnumFacing.Axis.class, axis -> axis != null && axis.isHorizontal());
 
-
-    public BlockPylonPole() {
-        super(Material.IRON);
+    public BlockPylonPole(Properties p_i48440_1_) {
+        super(p_i48440_1_);
     }
 
     @Override

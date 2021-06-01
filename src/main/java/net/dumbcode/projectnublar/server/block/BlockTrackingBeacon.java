@@ -19,8 +19,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 public class BlockTrackingBeacon extends Block implements IItemBlock {
-    public BlockTrackingBeacon() {
-        super(Material.IRON);
+
+    public BlockTrackingBeacon(Properties p_i48440_1_) {
+        super(p_i48440_1_);
     }
 
     @Override

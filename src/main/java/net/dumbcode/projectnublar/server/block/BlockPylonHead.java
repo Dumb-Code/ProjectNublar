@@ -32,8 +32,8 @@ public class BlockPylonHead extends Block implements IItemBlock {
 
     public static final PropertyDirection FACING = PropertyDirection.create("facing");
 
-    public BlockPylonHead() {
-        super(Material.IRON);
+    public BlockPylonHead(Properties p_i48440_1_) {
+        super(p_i48440_1_);
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(FACING, EnumFacing.UP));
     }
 

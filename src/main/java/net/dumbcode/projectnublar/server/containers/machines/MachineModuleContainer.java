@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import lombok.NonNull;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,31 +19,28 @@ import net.minecraftforge.items.wrapper.EmptyHandler;
 import javax.annotation.Nullable;
 import java.util.function.IntPredicate;
 
-public class MachineModuleContainer<B extends MachineModuleBlockEntity<B>> extends Container {
+public class MachineModuleContainer extends Container {
 
     private IntPredicate predicate = i -> true;
 
-    @Nullable
-    private final B blockEntity;
+    private final int tab;
+    private final MachineModuleBlockEntity<?> blockEntity;
 
-    public MachineModuleContainer(ContainerType<?> type, PlayerInventory inventory, int id, MachineModuleBlockEntity.ContainerInfo<B> info) {
-        this(type, inventory, id, info, null);
-    }
-
-    public MachineModuleContainer(ContainerType<?> type, PlayerInventory inventory, int id, MachineModuleBlockEntity.ContainerInfo<B> info, @Nullable B blockEntity) {
-        super(type, id);
+    public MachineModuleContainer(int id, MachineModuleBlockEntity<?> blockEntity, PlayerInventory inventory, int tab, int playerOffset, int xSize, MachineModuleSlot... slots) {
+        super(ProjectNublarContainers.MACHINE_MODULES.get(), id);
         this.blockEntity = blockEntity;
-        for (Slot slot : info.getSlotGenerator().apply(blockEntity == null ? Either.left(new EmptyHandler()) : Either.right(blockEntity))) {
+        this.tab = tab;
+        for (Slot slot : slots) {
             this.addSlot(slot);
         }
 
-        if(info.getPlayerOffset() >= 0) {
-            this.addPlayerSlots(inventory, info.getPlayerOffset(), info.getXSize());
+        if(playerOffset >= 0) {
+            this.addPlayerSlots(inventory, playerOffset, xSize);
         }
     }
 
 
-    public MachineModuleContainer<B> setPredicate(@NonNull IntPredicate predicate) {
+    public MachineModuleContainer setPredicate(@NonNull IntPredicate predicate) {
         this.predicate = predicate;
         return this;
     }
@@ -116,5 +114,13 @@ public class MachineModuleContainer<B extends MachineModuleBlockEntity<B>> exten
         }
 
         return transferred;
+    }
+
+    public int getTab() {
+        return tab;
+    }
+
+    public MachineModuleBlockEntity<?> getBlockEntity() {
+        return blockEntity;
     }
 }

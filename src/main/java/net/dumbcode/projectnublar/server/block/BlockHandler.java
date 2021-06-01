@@ -8,13 +8,20 @@ import net.dumbcode.projectnublar.server.item.MachineModuleParts;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import static net.minecraft.block.AbstractBlock.Properties.of;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,21 +31,24 @@ import java.util.function.Function;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class BlockHandler {
-    public static final SkeletalBuilderBlock SKELETAL_BUILDER = new SkeletalBuilderBlock();
-    public static final BlockElectricFencePole LOW_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(EnumConnectionType.LOW_SECURITY);
-    public static final BlockElectricFencePole HIGH_SECURITY_ELECTRIC_FENCE_POLE = new BlockElectricFencePole(EnumConnectionType.HIGH_SECURITY);
-    public static final BlockElectricFence ELECTRIC_FENCE = new BlockElectricFence();
-    public static final BlockCreativePowerSource CREATIVE_POWER_SOURCE = new BlockCreativePowerSource();
-    public static final BlockTrackingBeacon TRACKING_BEACON = new BlockTrackingBeacon();
-    public static final BlockPylonHead PYLON_HEAD = new BlockPylonHead();
-    public static final BlockPylonPole PYLON_POLE = new BlockPylonPole();
 
-    public static final MachineModuleBlock FOSSIL_PROCESSOR = new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR);
-    public static final MachineModuleBlock DRILL_EXTRACTOR = new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR);
-    public static final MachineModuleBlock SEQUENCING_SYNTHESIZER = new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER,  BlockRenderLayer.CUTOUT);
-    public static final MachineModuleBlock EGG_PRINTER = new DyableMachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER, BlockRenderLayer.CUTOUT);
-    public static final MachineModuleBlock INCUBATOR = new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.INCUBATOR);
-    public static final MachineModuleBlock COAL_GENERATOR = new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR);
+    public static final DeferredRegister<Block> REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, ProjectNublar.MODID);
+
+    public static final RegistryObject<BlockElectricFencePole> LOW_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("low_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.LOW_SECURITY));
+    public static final RegistryObject<BlockElectricFencePole> HIGH_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("high_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.HIGH_SECURITY);
+    public static final RegistryObject<BlockElectricFence> ELECTRIC_FENCE = REGISTER.register("electric_fence", () -> new BlockElectricFence(of(Material.HEAVY_METAL)));
+    public static final RegistryObject<BlockCreativePowerSource> CREATIVE_POWER_SOURCE = REGISTER.register("creative_power", () -> new BlockCreativePowerSource(of(Material.HEAVY_METAL)));
+    public static final RegistryObject<BlockTrackingBeacon> TRACKING_BEACON = REGISTER.register("tracking_beacon", () -> new BlockTrackingBeacon(of(Material.HEAVY_METAL)));
+    public static final RegistryObject<BlockPylonHead> PYLON_HEAD = REGISTER.register("pylon_head", () -> new BlockPylonHead(of(Material.HEAVY_METAL)));
+    public static final RegistryObject<BlockPylonPole> PYLON_POLE = REGISTER.register("pylon_pole", () -> new BlockPylonPole(of(Material.HEAVY_METAL)));
+
+    public static final RegistryObject<SkeletalBuilderBlock> SKELETAL_BUILDER = REGISTER.register("skeletal_builder", () -> new SkeletalBuilderBlock(of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> FOSSIL_PROCESSOR = REGISTER.register("fossil_processor", () -> new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> DRILL_EXTRACTOR = REGISTER.register("drill_extractor", () -> new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> SEQUENCING_SYNTHESIZER = REGISTER.register("sequencer_synthesizer", () -> new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> EGG_PRINTER = REGISTER.register("egg_printer", () -> new DyableMachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> INCUBATOR = REGISTER.register("incubator", () -> new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.INCUBATOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
 
     public static final Map<FossilBlock.FossilType, Map<Dinosaur, FossilBlock>> FOSSIL = new HashMap<>();
 
@@ -73,19 +83,7 @@ public class BlockHandler {
             event.getRegistry().register(plant.createBlock().setRegistryName(plant.getRegistryName()).setTranslationKey(plant.getRegistryName().getPath()));
         }
     }
-
-    private static <T extends Block> void populateMap(RegistryEvent.Register<Block> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier) {
-        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
-            T item = supplier.apply(dinosaur);
-            String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
-            item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-            item.setTranslationKey(name);
-            item.setCreativeTab(TAB);
-            itemMap.put(dinosaur, item);
-            event.getRegistry().register(item);
-        }
-    }
-
+    
     private static <T extends Block, S> void populateNestedMap(RegistryEvent.Register<Block> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
         populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname);
     }

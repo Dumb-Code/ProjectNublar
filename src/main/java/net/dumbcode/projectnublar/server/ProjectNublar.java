@@ -7,9 +7,13 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
+import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.block.DinosaurBaseBlock;
 import net.dumbcode.projectnublar.server.block.entity.*;
+import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
@@ -17,19 +21,20 @@ import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.network.*;
-import net.dumbcode.projectnublar.server.particles.ParticleType;
+import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
-import net.minecraft.client.Minecraft;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -43,7 +48,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -90,10 +94,21 @@ public class ProjectNublar {
 
         bus.addListener(this::preInit);
 
+        BlockHandler.REGISTER.register(bus);
+        ProjectNublarBlockEntities.REGISTER.register(bus);
+        ProjectNublarContainers.REGISTER.register(bus);
+        ProjectNublarParticles.REGISTER.register(bus);
+
+        forgeBus.addGenericListener(Dinosaur.class, EventPriority.LOWEST, DinosaurBaseBlock::onDinosaurRegistryFinished);
+
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> {
+            bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
+        });
     }
 
     public void preInit(FMLCommonSetupEvent event) {
 //        registerJsonDinosaurs();
+
 
         DINOSAUR_REGISTRY.forEach(Dinosaur::attachDefaultComponents);
         PLANT_REGISTRY.forEach(Plant::attachComponents);
@@ -182,23 +197,10 @@ public class ProjectNublar {
         event.registerSystem(new DinosaurMovementSystem());
     }
 
-    public static void spawnParticles(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int amount, int... data) {
-        if (world.isClientSide) {
-            for (int i = 0; i < amount; i++) {
-                spawnParticle0(type, world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data);
-            }
-        } else {
-            NETWORK.send(PacketDistributor.DIMENSION.with(world::dimension), new S21SpawnParticle(type, xPos, yPos, zPos, xMotion, yMotion, zMotion, amount, data));
-        }
-    }
-
     public static Logger getLogger() {
         return logger;
     }
 
-    private static void spawnParticle0(ParticleType type, World world, double xPos, double yPos, double zPos, double xMotion, double yMotion, double zMotion, int... data) {
-        Minecraft.getInstance().particleEngine.add(type.getParticleSupplier().get().createParticle(world, xPos, yPos, zPos, xMotion, yMotion, zMotion, data));
-    }
 
     private static void registerJsonDinosaurs() {
         GsonBuilder builder = new GsonBuilder();

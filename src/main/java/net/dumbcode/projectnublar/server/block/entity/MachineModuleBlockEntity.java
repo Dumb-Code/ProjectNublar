@@ -2,22 +2,31 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
+import com.mojang.realmsclient.dto.PlayerInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
+import net.dumbcode.projectnublar.client.gui.machines.EggPrinterGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C18OpenContainer;
 import net.dumbcode.projectnublar.server.network.S42SyncMachineProcesses;
 import net.dumbcode.projectnublar.server.network.S43SyncMachineStack;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.gui.IHasContainer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -27,12 +36,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -454,10 +465,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 //    @SideOnly(Side.CLIENT)
 //    public abstract GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab);
 
-    public abstract String getTranslationKey(int tab);
+    public abstract TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab);
 
-    public abstract ContainerType<? extends MachineModuleContainer> getContainerType(int tab);
-
+    public abstract MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab);
     @Setter
     @Getter
     public static class MachineProcess<B extends MachineModuleBlockEntity<B>> {
@@ -551,13 +561,5 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         public void onClicked() {
             ProjectNublar.NETWORK.sendToServer(new C18OpenContainer(this.tab, MachineModuleBlockEntity.this.worldPosition));
         }
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class ContainerInfo<B extends MachineModuleBlockEntity<B>> {
-        private final int playerOffset;
-        private final int xSize;
-        private final Function<Either<IItemHandler, B>, Slot[]> slotGenerator;
     }
 }

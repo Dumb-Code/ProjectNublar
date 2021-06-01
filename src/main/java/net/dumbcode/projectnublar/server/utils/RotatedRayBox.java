@@ -6,11 +6,19 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.dispenser.IPosition;
+import net.minecraft.util.Direction;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.IPosWrapper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -23,11 +31,11 @@ import java.util.List;
 public class RotatedRayBox {
 
     private final AxisAlignedBB box;
-    private final Vec3d origin;
-    private final Matrix4d forward;
-    private final Matrix4d backwards;
+    private final Vector3f origin;
+    private final Matrix4f forward;
+    private final Matrix4f backwards;
 
-    public RotatedRayBox(AxisAlignedBB box, Vec3d origin, Matrix4d forward, Matrix4d backwards) {
+    public RotatedRayBox(AxisAlignedBB box, Vector3f origin, Matrix4f forward, Matrix4f backwards) {
         this.box = box;
         this.origin = origin;
         this.forward = forward;
@@ -35,11 +43,12 @@ public class RotatedRayBox {
     }
 
     @Nullable
-    public Result rayTrace(Vec3d startIn, Vec3d endIn) {
-        Vector3d start = new Vector3d(startIn.x - this.origin.x, startIn.y - this.origin.y, startIn.z - this.origin.z);
-        Vector3d end = new Vector3d(endIn.x - this.origin.x, endIn.y - this.origin.y, endIn.z - this.origin.z);
-        this.forward.transform(start);
-        this.forward.transform(end);
+    public Result rayTrace(IPosition startIn, IPosition endIn) {
+        Vector3f start = new Vector3f((float)(startIn.x() - this.origin.x()), (float)(startIn.y() - this.origin.y()), (float)(startIn.z() - this.origin.z()));
+        Vector3f end = new Vector3f((float)(endIn.x() - this.origin.x()), (float)(endIn.y() - this.origin.y()), (float)(endIn.z() - this.origin.z()));
+
+        this.transform(start, this.forward);
+        this.transform(end, this.forward);
 
         Vec3d sv = new Vec3d(start.x, start.y, start.z);
         Vec3d ev = new Vec3d(end.x, end.y, end.z);
@@ -72,6 +81,12 @@ public class RotatedRayBox {
             return new Result(this, result, hitDir, start, end, startIn, endIn, hit, dist);
         }
         return null;
+    }
+
+    private void transform(Vector3f vec, Matrix4f mat) {
+        Vector4f v = new Vector4f(vec);
+        v.transform(mat);
+        vec.set(v.x(), v.y(), v.z());
     }
 
     public Vector3d[] points() {
@@ -137,8 +152,8 @@ public class RotatedRayBox {
     @Value
     public class Result {
         private final RotatedRayBox parent;
-        private final RayTraceResult result;
-        private final EnumFacing hitDir;
+        private final BlockRayTraceResult result;
+        private final Direction hitDir;
         private final Vector3d startRotated;
         private final Vector3d endRotated;
         private final Vec3d start;

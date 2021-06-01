@@ -15,8 +15,10 @@ import net.minecraftforge.energy.IEnergyStorage;
 import javax.annotation.Nullable;
 
 public class BlockCreativePowerSource extends Block implements IItemBlock {
-    public BlockCreativePowerSource() {
-        super(Material.IRON);
+
+
+    public BlockCreativePowerSource(Properties p_i48440_1_) {
+        super(p_i48440_1_);
     }
 
     @Override

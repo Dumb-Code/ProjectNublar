@@ -19,8 +19,8 @@ import java.util.function.Supplier;
 
 public class DyableMachineModuleBlock extends MachineModuleBlock {
 
-    public DyableMachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, BlockRenderLayer... renderLayers) {
-        super(machineSupplier, values, renderLayers);
+    public DyableMachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, Properties properties) {
+        super(machineSupplier, values, properties);
     }
 
     @Override

@@ -30,7 +30,7 @@ import java.util.Random;
 
 @Getter
 @Setter
-public class Dinosaur extends ForgeRegistryEntry<Dinosaur> {
+public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable<Dinosaur> {
 
     public static final String CHILD_AGE = "child";
     public static final String ADULT_AGE = "adult";
@@ -120,6 +120,11 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> {
         int i = RANDOM.nextInt(from.size());
         return from.toArray(new Dinosaur[0])[i];
 
+    }
+
+    @Override
+    public int compareTo(Dinosaur o) {
+        return this.getRegistryName().compareTo(o.getRegistryName());
     }
 
     public static class JsonAdapter implements JsonSerializer<Dinosaur>, JsonDeserializer<Dinosaur> {

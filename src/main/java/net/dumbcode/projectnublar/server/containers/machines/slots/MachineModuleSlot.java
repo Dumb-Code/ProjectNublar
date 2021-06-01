@@ -18,19 +18,15 @@ public class MachineModuleSlot extends SlotItemHandler {
     @Getter
     private boolean enabled = true;
 
-    @Nullable
     private final MachineModuleBlockEntity<?> blockEntity;
 
-    public MachineModuleSlot(Either<IItemHandler, ? extends MachineModuleBlockEntity<?>> inv, int index, int xPosition, int yPosition) {
-        super(inv.map(i -> i, MachineModuleBlockEntity::getHandler), index, xPosition, yPosition);
-        this.blockEntity = inv.right().orElse(null);
+    public MachineModuleSlot(MachineModuleBlockEntity<?> blockEntity, int index, int xPosition, int yPosition) {
+        super(blockEntity.getHandler(), index, xPosition, yPosition);
+        this.blockEntity = blockEntity;
     }
 
     @Override
     public boolean mayPlace(@Nonnull ItemStack stack) {
-        if(this.blockEntity != null) {
-            return this.blockEntity.isItemValidFor(this.getSlotIndex(), stack);
-        }
-        return super.mayPlace(stack);
+        return this.blockEntity.isItemValidFor(this.getSlotIndex(), stack);
     }
 }

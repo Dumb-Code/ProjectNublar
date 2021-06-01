@@ -41,8 +41,8 @@ public class MachineModuleBlock extends Block implements IItemBlock{
     private final BlockStateContainer blockState;
     private final Set<BlockRenderLayer> renderLayers;
 
-    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, BlockRenderLayer... renderLayers) {
-        super(Material.IRON);
+    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, Properties properties) {
+        super(properties);
         this.renderLayers = Sets.newHashSet(renderLayers);
         if(this.renderLayers.isEmpty()) {
             this.renderLayers.add(BlockRenderLayer.SOLID);

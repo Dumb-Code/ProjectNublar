@@ -11,6 +11,7 @@ import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.material.Material;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -23,8 +24,8 @@ public class Plant extends ForgeRegistryEntry<Plant> {
     protected final EntityComponentAttacher baseAttacher = new EntityComponentAttacher();
     protected final Map<String, Map<String, EntityComponentAttacher>> states = new HashMap<>();
 
-    public Block createBlock(AbstractBlock.Properties properties) {
-        return new BlockPlant(properties, this.createOverrideProperty());
+    public Block createBlock() {
+        return new BlockPlant(AbstractBlock.Properties.of(Material.PLANT), this.createOverrideProperty());
     }
 
     public BlockstateComponentProperty[] createOverrideProperty() {

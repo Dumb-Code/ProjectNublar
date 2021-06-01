@@ -49,8 +49,8 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
 
     public static final int LIMIT = 15;
 
-    public BlockElectricFencePole(ConnectionType type) {
-        super(Material.IRON, MapColor.IRON);
+    public BlockElectricFencePole(Properties properties, ConnectionType type) {
+        super(properties);
         this.type = type;
         INDEX_PROPERTY = PropertyInteger.create("index", 0, type.getHeight() - 1);
         this.blockState = new BlockStateContainer(this, INDEX_PROPERTY, ROTATION_PROPERTY, POWERED_PROPERTY);

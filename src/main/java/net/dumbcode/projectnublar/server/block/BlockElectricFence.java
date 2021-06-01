@@ -3,28 +3,18 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.BlockEntityElectricFence;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
-import net.dumbcode.projectnublar.server.item.WireSpoolItem;
-import net.dumbcode.projectnublar.server.particles.ParticleType;
 import net.dumbcode.projectnublar.server.utils.Connection;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector3d;
@@ -34,9 +24,10 @@ public class BlockElectricFence extends BlockConnectableBase {
 
     public static final int ITEM_FOLD = 20;
 
-    public BlockElectricFence() {
-        super(Material.IRON, MapColor.IRON);
+    public BlockElectricFence(Properties properties) {
+        super(properties);
     }
+
 
     @Override
     public void randomDisplayTick(IBlockState stateIn, World world, BlockPos pos, Random rand) {

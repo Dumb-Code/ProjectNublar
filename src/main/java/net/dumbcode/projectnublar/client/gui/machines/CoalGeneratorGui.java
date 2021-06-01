@@ -6,19 +6,15 @@ import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.CoalGeneratorBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 
-public class CoalGeneratorGui extends TabbedGuiContainer<MachineModuleContainer<CoalGeneratorBlockEntity>> {
+public class CoalGeneratorGui extends TabbedGuiContainer<MachineModuleContainer> {
 
-    public CoalGeneratorGui(MachineModuleContainer<CoalGeneratorBlockEntity> inventorySlotsIn, PlayerInventory playerInventory, String containerName) {
-        super(inventorySlotsIn, playerInventory, containerName);
+    public CoalGeneratorGui(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+        super(inventorySlotsIn, playerInventory, title, bar);
     }
 
     @Override

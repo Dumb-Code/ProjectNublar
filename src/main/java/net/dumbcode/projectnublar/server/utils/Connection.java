@@ -14,7 +14,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import org.apache.commons.lang3.tuple.Pair;
@@ -181,8 +183,8 @@ public class Connection {
         return this.compared >= 0 ? this.to : this.from;
     }
 
-    public boolean brokenSide(World world, boolean next) {
-        TileEntity te = world.getTileEntity(next == this.compared < 0 ? this.previous : this.next);
+    public boolean brokenSide(IBlockReader world, boolean next) {
+        TileEntity te = world.getBlockEntity(next == this.compared < 0 ? this.previous : this.next);
         if(te instanceof ConnectableBlockEntity) {
             ConnectableBlockEntity fe = (ConnectableBlockEntity) te;
             for (Connection fenceConnection : fe.getConnections()) {
@@ -195,7 +197,7 @@ public class Connection {
         return true;
     }
 
-    public boolean isPowered(IBlockAccess world) {
+    public boolean isPowered(IBlockReader world) {
         for (BlockPos pos : LineUtils.getBlocksInbetween(this.from, this.to, this.offset)) {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof ConnectableBlockEntity) {
