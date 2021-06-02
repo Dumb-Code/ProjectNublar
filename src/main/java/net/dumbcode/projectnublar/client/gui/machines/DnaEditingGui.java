@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
@@ -9,24 +10,21 @@ import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
+import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerSelectChange;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.client.config.GuiSlider;
-import net.minecraftforge.fml.client.config.GuiUtils;
-import org.lwjgl.input.Mouse;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.client.gui.widget.Slider;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class DnaEditingGui extends TabbedGuiContainer {
+public class DnaEditingGui extends TabbedGuiContainer<MachineModuleContainer> {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
@@ -49,21 +47,19 @@ public class DnaEditingGui extends TabbedGuiContainer {
 
     private String hoveringText;
 
-    public DnaEditingGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, TabInformationBar info, int tab) {
-        super(blockEntity.createContainer(player, tab), info);
+    public DnaEditingGui(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+        super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
-        this.xSize = 208;
-        this.ySize =  192;
-        this.updateList();
     }
 
-    @Override
-    public void initGui() {
-        super.initGui();
 
-        this.scrollBox = new GuiScrollBox<>(
-            this.guiLeft + 23, this.guiTop + 10, 162, 30, 5, () -> this.slotList
-        );
+    @Override
+    public void init() {
+        super.init();
+
+        this.scrollBox = this.addWidget(new GuiScrollBox<>(
+            this.leftPos + 23, this.topPos + 10, 162, 30, 5, () -> this.slotList
+        ));
         this.scrollBox.setHighlightColor(0);
 
         this.slotList.clear();
@@ -71,7 +67,7 @@ public class DnaEditingGui extends TabbedGuiContainer {
             this.slotList.add(new DnaSelectModule(this.slotList.size()));
         }
 
-        this.popupSelection = new GuiScrollBox<>(this.guiLeft + 54, this.guiTop + 30, 100, 20, 5, () -> {
+        this.popupSelection = this.addWidget(new GuiScrollBox<>(this.leftPos + 54, this.topPos + 30, 100, 20, 5, () -> {
             if(this.dropdownSelectionId == -1) {
                 return Collections.emptyList();
             } else if(this.dropdownSelectionId == 0) {
@@ -79,7 +75,7 @@ public class DnaEditingGui extends TabbedGuiContainer {
             } else {
                 return this.filteredEntryList;
             }
-        });
+        }));
 
         for (DriveEntry driveEntry : this.dinosaurList) {
             if(driveEntry.getKey().equals(this.blockEntity.getSelectKey(0))) {
@@ -103,9 +99,10 @@ public class DnaEditingGui extends TabbedGuiContainer {
         return 15;
     }
 
+
     @Override
-    public void updateScreen() {
-        super.updateScreen();
+    public void tick() {
+        super.tick();
         this.updateList();
 
         for (DnaSelectModule module : this.slotList) {
@@ -174,20 +171,20 @@ public class DnaEditingGui extends TabbedGuiContainer {
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if(this.dropdownSelectionId == -1) {
-            this.drawDefaultBackground();
+            this.renderBackground(stack);
         }
         this.hoveringText = null;
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(stack, mouseX, mouseY, partialTicks);
 
-        int xStart = this.guiLeft + 23;
-        int yStart = this.guiTop + 165;
+        int xStart = this.leftPos + 23;
+        int yStart = this.topPos + 165;
 
         int w = 163;
         int yEnd = yStart + 16;
 
-        Gui.drawRect(xStart-1, yStart-1, xStart+w, yEnd+1, -1);
+        fill(stack, xStart-1, yStart-1, xStart+w, yEnd+1, -1);
 
         int start = 0;
         for (DnaSelectModule module : this.slotList) {
@@ -195,67 +192,56 @@ public class DnaEditingGui extends TabbedGuiContainer {
                 continue;
             }
             int value = (int) Math.round(w * Math.round(module.slider.sliderValue * 100D) / 100D);
-            Gui.drawRect(xStart + start, yStart, xStart + start + value-1, yEnd, 0xFF000000|this.colors[module.id]);
+            fill(stack, xStart + start, yStart, xStart + start + value-1, yEnd, 0xFF000000|this.colors[module.id]);
             if(module.drive != null && mouseX >= xStart + start && mouseX < xStart + start + value && mouseY >= yStart && mouseY < yEnd) {
                 this.hoveringText = module.drive.getSearch();
             }
             start += value;
 
         }
-        Gui.drawRect(xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
+        fill(stack, xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
 
-        this.scrollBox.render(mouseX, mouseY);
+        this.scrollBox.render(stack, mouseX, mouseY, partialTicks);
 
         if(this.dropdownSelectionId != -1) {
-            this.drawDefaultBackground();
-            this.popupSelection.render(mouseX, mouseY);
+            this.renderBackground(stack);
+            this.popupSelection.render(stack, mouseX, mouseY, partialTicks);
         } else {
             if(this.hoveringText != null) {
-                this.drawHoveringText(this.hoveringText, mouseX, mouseY);
+                drawString(stack, minecraft.font, this.hoveringText, mouseX, mouseY, -1);
             }
-            this.renderHoveredToolTip(mouseX, mouseY);
-        }
-    }
-
-    @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-        if(this.dropdownSelectionId != -1) {
-            this.popupSelection.handleMouseInput();
-        } else {
-            this.scrollBox.handleMouseInput();
-
+            renderTooltip(stack, mouseX, mouseY);
         }
     }
 
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if(this.dropdownSelectionId != -1) {
             if(this.popupSelection.isMouseOver(mouseX, mouseY, this.popupSelection.getTotalSize())) {
                 this.popupSelection.mouseClicked(mouseX, mouseY, mouseButton);
             } else {
                 this.dropdownSelectionId = -1;
+                return true;
             }
         } else {
             this.scrollBox.mouseClicked(mouseX, mouseY, mouseButton);
         }
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        super.mouseReleased(mouseX, mouseY, state);
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
         for (DnaSelectModule module : this.slotList) {
-            module.slider.mouseReleased(mouseX, mouseY);
+            module.slider.mouseReleased(mouseX, mouseY, state);
         }
+        return super.mouseReleased(mouseX, mouseY, state);
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/dna_editing.png"));
-        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+        this.minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/dna_editing.png"));
+        blit(stack, this.leftPos, this.topPos, 0, 0, this.width, this.height);
     }
 
     private void sync() {
@@ -264,7 +250,7 @@ public class DnaEditingGui extends TabbedGuiContainer {
             DnaSelectModule module = this.slotList.get(i);
             if(module.drive != null) {
                 ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
-                    this.blockEntity.getPos(), i, module.drive.getKey(), module.slider.sliderValue)
+                    i, module.drive.getKey(), module.slider.sliderValue)
                 );
             }
         }
@@ -282,23 +268,23 @@ public class DnaEditingGui extends TabbedGuiContainer {
         }
 
         @Override
-        public void draw(int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
             this.slider.x = x + 80;
             this.slider.y = y + 5;
 
             boolean enabled = this.id < slots;
-            this.slider.enabled = enabled;
+            this.slider.active = enabled;
             if(this.drive != null && !enabled) {
                 this.setDrive(null);
             }
 
-            StencilStack.pushSquareStencil(x, y + 5, x+75, y+20);
-            Gui.drawRect(x, y, x+75, y+25, enabled ? 0xFF000000 : 0xFF4A0000);
+            StencilStack.pushSquareStencil(stack, x, y + 5, x+75, y+20);
+            fill(stack, x, y, x+75, y+25, enabled ? 0xFF000000 : 0xFF4A0000);
             if(this.drive != null) {
-                this.drive.draw(x, y+5, mouseX, mouseY, mouseOver);
+                this.drive.draw(stack, x, y+5, mouseX, mouseY, mouseOver);
             }
             StencilStack.popStencil();
-            this.slider.drawButton(mc, mouseX, mouseY, 1F);
+            this.slider.render(stack, mouseX, mouseY, 1F);
 
             if(!enabled && mouseOver) {
                 hoveringText = "Need " + SequencingSynthesizerBlockEntity.getPercentageForSlot(this.id+1) + " % of dino to use";//todo: localize
@@ -318,7 +304,7 @@ public class DnaEditingGui extends TabbedGuiContainer {
         }
 
         @Override
-        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
             if(relMouseX > 0 && relMouseX < 75 && relMouseY > 0 && relMouseY < 20) {
                 dropdownSelectionId = this.id;
                 popupSelection.setScroll(0);
@@ -327,8 +313,8 @@ public class DnaEditingGui extends TabbedGuiContainer {
         }
 
         @Override
-        public boolean globalClicked(int mouseX, int mouseY, int mouseButton) {
-            this.slider.mousePressed(mc, mouseX, mouseY);
+        public boolean globalClicked(double mouseX, double mouseY, int mouseButton) {
+            this.slider.mouseClicked(mouseX, mouseY, mouseButton);
             return false;
         }
     }
@@ -340,12 +326,12 @@ public class DnaEditingGui extends TabbedGuiContainer {
 
         private DriveEntry(String key, String entry) {
             this.key = key;
-            this.entry = I18n.format(entry);
+            this.entry = I18n.get(entry);
         }
 
         @Override
-        public void draw(int x, int y, int mouseX, int mouseY) {
-            Minecraft.getMinecraft().fontRenderer.drawString(this.entry, x + 2, y + 5, -1);
+        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+            drawString(stack, minecraft.font, this.entry, x + 2, y + 5, -1);
         }
 
         public String getKey() {
@@ -359,7 +345,7 @@ public class DnaEditingGui extends TabbedGuiContainer {
         }
 
         @Override
-        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
             DnaEditingGui.this.dirty = true;
             if(dropdownSelectionId != -1) {
                 slotList.get(dropdownSelectionId).setDrive(this);
@@ -369,13 +355,13 @@ public class DnaEditingGui extends TabbedGuiContainer {
         }
     }
 
-    private class ClampedGuiSlider extends GuiSlider {
+    private class ClampedGuiSlider extends Slider {
 
         private final int id;
         private final DnaSelectModule module;
 
         ClampedGuiSlider(int id, DnaSelectModule module) {
-            super(0, 0, 0, 79, 20, "", "%", 0D, 100D, DnaEditingGui.this.blockEntity.getSelectAmount(id), false, true);
+            super(0, 0, 79, 20, new StringTextComponent(""), new StringTextComponent("%"), 0D, 100D, DnaEditingGui.this.blockEntity.getSelectAmount(id), false, true, p_onPress_1_ -> {});
             this.id = id;
             this.module = module;
         }

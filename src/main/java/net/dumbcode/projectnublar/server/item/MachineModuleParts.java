@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Lists;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -10,36 +9,38 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class MachineModuleParts {
     public static final MachineModulePart[] DRILL_EXTRACTOR = {
-        simplePartItemMeta(MachineModuleType.DRILL_BIT, null, 5, () -> ItemHandler.DRILL_BIT_PART)
+        simplePartItem(MachineModuleType.DRILL_BIT, null, ItemHandler.DRILL_BIT_PART_1,
+            ItemHandler.DRILL_BIT_PART_2, ItemHandler.DRILL_BIT_PART_3,
+            ItemHandler.DRILL_BIT_PART_4, ItemHandler.DRILL_BIT_PART_5
+        )
     };
 
     public static final MachineModulePart[] FOSSIL_PROCESSOR = {
-        simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 3, () -> ItemHandler.COMPUTER_CHIP_PART),
-        simplePartItemMeta(MachineModuleType.TANKS, null, 2, () -> ItemHandler.TANKS_PART),
+        simplePartItem(MachineModuleType.COMPUTER_CHIP, null, ItemHandler.COMPUTER_CHIP_PART_1, ItemHandler.COMPUTER_CHIP_PART_2, ItemHandler.COMPUTER_CHIP_PART_3),
+        simplePartItem(MachineModuleType.TANKS, null, ItemHandler.TANKS_PART_1, ItemHandler.TANKS_PART_2),
     };
 
     public static final MachineModulePart[] SEQUENCING_SYNTHESIZER = {
-        simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 2, () -> ItemHandler.COMPUTER_CHIP_PART),
-        simplePartItemMeta(MachineModuleType.TANKS, null, 4, () -> ItemHandler.TANKS_PART),
+        simplePartItem(MachineModuleType.COMPUTER_CHIP, null, ItemHandler.COMPUTER_CHIP_PART_1, ItemHandler.COMPUTER_CHIP_PART_2),
+        simplePartItem(MachineModuleType.TANKS, null, ItemHandler.TANKS_PART_1, ItemHandler.TANKS_PART_2, ItemHandler.TANKS_PART_3, ItemHandler.TANKS_PART_4),
     };
 
     public static final MachineModulePart[] EGG_PRINTER = {
-        simplePartItemMeta(MachineModuleType.COMPUTER_CHIP, null, 3, () -> ItemHandler.COMPUTER_CHIP_PART),
-        simplePartItem(MachineModuleType.LEVELING_SENSORS, null, () -> ItemHandler.LEVELLING_SENSOR_PART),
+        simplePartItem(MachineModuleType.COMPUTER_CHIP, null, ItemHandler.COMPUTER_CHIP_PART_1, ItemHandler.COMPUTER_CHIP_PART_2, ItemHandler.COMPUTER_CHIP_PART_3),
+        simplePartItem(MachineModuleType.LEVELING_SENSORS, null, ItemHandler.LEVELLING_SENSOR_PART),
     };
 
     public static final MachineModulePart[] INCUBATOR = {
-        simplePartItemMeta(MachineModuleType.BULB, null, 3, () -> ItemHandler.BULB_PART),
-        simplePartItemMeta(MachineModuleType.CONTAINER, null, 2, () -> ItemHandler.CONTAINER_PART), //todo: implement this
-        simplePartItemMeta(MachineModuleType.TANKS, null, 2, () -> ItemHandler.TANKS_PART),
+        simplePartItem(MachineModuleType.BULB, null, ItemHandler.BULB_PART_1, ItemHandler.BULB_PART_2, ItemHandler.BULB_PART_3),
+        simplePartItem(MachineModuleType.CONTAINER, null, ItemHandler.CONTAINER_PART_1, ItemHandler.CONTAINER_PART_2, ItemHandler.CONTAINER_PART_3), //todo: implement this
+        simplePartItem(MachineModuleType.TANKS, null, ItemHandler.TANKS_PART_1, ItemHandler.TANKS_PART_2),
     };
 
     public static final MachineModulePart[] COAL_GENERATOR = {
-        simplePartItemMeta(MachineModuleType.TURBINES, null, 2, () -> ItemHandler.TURBINES_PART)
+        simplePartItem(MachineModuleType.TURBINES, null, ItemHandler.TURBINES_PART_1, ItemHandler.TURBINES_PART_2)
     };
 
     @SafeVarargs
@@ -48,14 +49,6 @@ public class MachineModuleParts {
             .type(type)
             .dependency(dependency)
             .tiers(Lists.newArrayList(tiers))
-            .build();
-    }
-
-    public static MachineModulePart simplePartItemMeta(MachineModuleType type, @Nullable MachineModuleType dependency, int meta, Supplier<Item> item) {
-        return MachineModulePart.builder()
-            .type(type)
-            .dependency(dependency)
-            .tiers(IntStream.range(0, meta).<Predicate<ItemStack>>mapToObj(i -> stack -> stack.getItem() == item.get() && stack.getMetadata() == i).collect(Collectors.toList()))
             .build();
     }
 

@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -11,10 +10,10 @@ import net.minecraft.block.BlockFence;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -22,13 +21,11 @@ import net.minecraft.world.World;
 
 import java.util.Locale;
 
-public class DinosaurSpawnEgg extends Item implements DinosaurProvider {
+public class DinosaurSpawnEgg extends BasicDinosaurItem {
 
-    @Getter
-    private final Dinosaur dinosaur;
 
-    public DinosaurSpawnEgg(Dinosaur dinosaur) {
-        this.dinosaur = dinosaur;
+    public DinosaurSpawnEgg(Dinosaur dinosaur, Properties properties) {
+        super(dinosaur, properties);
     }
 
     @Override

@@ -1,28 +1,23 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Getter;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.*;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.*;
-import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Vector3d;
 import java.util.Collections;
-import java.util.List;
 
 @Getter
 public class RotatedRayBox {
@@ -72,7 +67,6 @@ public class RotatedRayBox {
 
 
             result = new BlockRayTraceResult(new Vector3d(hitVec), Direction.getNearest(sidevec.x(), sidevec.y(), sidevec.z()), BlockPos.ZERO, true);
-            result.hitInfo = dist;
 
             return new Result(this, result, hitDir, start, end, startIn, endIn, hit, dist);
         }
@@ -114,52 +108,40 @@ public class RotatedRayBox {
 
     public static class Builder {
         private final AxisAlignedBB box;
-        private Vec3d origin = Vec3d.ZERO;
-        private Matrix4d matrix = new Matrix4d();
-
-        private List<AxisAngle4d> backwards = Lists.newLinkedList();
+        private Vector3f origin = new Vector3f(0, 0, 0);
+        private MatrixStack matrix = new MatrixStack();
 
         public Builder(AxisAlignedBB box) {
             this.box = box;
-            this.matrix.setIdentity();
         }
 
-        public Builder origin(double x, double y, double z) {
-            this.origin = new Vec3d(x, y, z);
+        public Builder origin(float x, float y, float z) {
+            this.origin = new Vector3f(x, y, z);
             return this;
         }
 
-        public Builder rotate(double angle, double x, double y, double z) {
-            Matrix4d diff = new Matrix4d();
-            diff.setIdentity();
-            diff.setRotation(new AxisAngle4d(x, y, z, angle));
-            this.backwards.add(new AxisAngle4d(x, y, z, -angle));
-            this.matrix.mul(diff);
+        public Builder rotate(float angle, float x, float y, float z) {
+            this.matrix.mulPose(new Vector3f(x, y, z).rotation(angle));
             return this;
         }
 
         public RotatedRayBox build() {
-            Matrix4d backwards = new Matrix4d();
-            backwards.setIdentity();
-            for (int i = this.backwards.size() - 1; i >= 0; i--) {
-                Matrix4d diff = new Matrix4d();
-                diff.setIdentity();
-                diff.setRotation(this.backwards.get(i));
-                backwards.mul(diff);
-            }
-            return new RotatedRayBox(this.box, this.origin, this.matrix, backwards);
+            Matrix4f pose = this.matrix.last().pose();
+            Matrix4f backwards = new Matrix4f(pose);
+            backwards.invert();
+            return new RotatedRayBox(this.box, this.origin, pose, backwards);
         }
     }
 
     @Value
-    public class Result {
+    public static class Result {
         private final RotatedRayBox parent;
         private final BlockRayTraceResult result;
         private final Direction hitDir;
-        private final Vector3d startRotated;
-        private final Vector3d endRotated;
-        private final Vector3d start;
-        private final Vector3d end;
+        private final Vector3f startRotated;
+        private final Vector3f endRotated;
+        private final IPosition start;
+        private final IPosition end;
         private final Vector3d hitRotated;
         private final double distance;
 
@@ -168,8 +150,8 @@ public class RotatedRayBox {
             Matrix4f pose = stack.last().pose();
 
 
-            Vector3d sv = new Vector3d(this.startRotated.x, this.startRotated.y, this.startRotated.z);
-            Vector3d ev = new Vector3d(this.endRotated.x, this.endRotated.y, this.endRotated.z);
+            Vector3d sv = new Vector3d(this.startRotated.x(), this.startRotated.y(), this.startRotated.z());
+            Vector3d ev = new Vector3d(this.endRotated.x(), this.endRotated.y(), this.endRotated.z());
 
             Vector3d diff = sv.subtract(ev);
 

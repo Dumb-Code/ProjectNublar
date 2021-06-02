@@ -1,76 +1,85 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
+import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.BlockModelShapes;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 
-public class SequencingSynthesizerInputsGui extends TabbedGuiContainer {
+public class SequencingSynthesizerInputsGui extends TabbedGuiContainer<MachineModuleContainer> {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
-    public SequencingSynthesizerInputsGui(EntityPlayer player, SequencingSynthesizerBlockEntity blockEntity, TabInformationBar info, int tab) {
-        super(blockEntity.createContainer(player, tab), info);
+    public SequencingSynthesizerInputsGui(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, ITextComponent title, TabInformationBar bar, PlayerInventory playerInventory) {
+        super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
     }
 
-
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack stack, int mouseX, int mouseY, float state) {
+        this.renderBackground(stack);
+        super.render(stack, mouseX, mouseY, state);
+        RenderSystem.color4f(1F, 1F, 1F, 1f);
 
-        GlStateManager.disableBlend();
-        GlStateManager.color(1f, 1f, 1f, 1f);
+        this.setBlitOffset(100);
+        minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
+        blit(stack, this.leftPos + 21, this.topPos + 5, 176, 0, 16, 52);
+        blit(stack,this.leftPos + 59, this.topPos + 5, 176, 0, 16, 52);
+        blit(stack,this.leftPos + 97, this.topPos + 5, 176, 0, 16, 52);
+        blit(stack,this.leftPos + 135, this.topPos + 5, 176, 0, 16, 52);
+        this.setBlitOffset(0);
 
-        this.zLevel = 100;
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-        this.drawTexturedModalRect(this.guiLeft + 21F, this.guiTop + 5F, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 59F, this.guiTop + 5F, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 97F, this.guiTop + 5F, 176, 0, 16, 52);
-        this.drawTexturedModalRect(this.guiLeft + 135F, this.guiTop + 5F, 176, 0, 16, 52);
+        minecraft.textureManager.bind(PlayerContainer.BLOCK_ATLAS);
+        BlockModelShapes shapes = minecraft.getBlockRenderer().getBlockModelShaper();
+        RenderSystem.color4f(0.247058824F, 0.462745098F, 0.894117647F, 1F);
+        String waterTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 21, (float) this.blockEntity.getTank().getFluidAmount() / this.blockEntity.getTank().getCapacity(), shapes.getTexture(Blocks.WATER.defaultBlockState(), minecraft.level, BlockPos.ZERO));
 
-        this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        BlockModelShapes shapes = mc.getBlockRendererDispatcher().getBlockModelShapes();
-        this.zLevel = 0;
-        String waterTooltip = this.drawTankWithTooltip(mouseX, mouseY, 21, (float) this.blockEntity.getTank().getFluidAmount() / this.blockEntity.getTank().getCapacity(), shapes.getTexture(Blocks.WATER.getDefaultState()));
-        String sugarTooltip = this.drawTankWithTooltip(mouseX, mouseY, 59, this.blockEntity.getSugarAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.REEDS.getDefaultState()));
-        String boneTooltip = this.drawTankWithTooltip(mouseX, mouseY, 97, this.blockEntity.getBoneAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.BONE_BLOCK.getDefaultState()));
-        GlStateManager.color(0.0941F, 0.7098F, 0.2823F, 1f);
-        String plantTooltip = this.drawTankWithTooltip(mouseX, mouseY, 135, this.blockEntity.getPlantAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.LEAVES.getDefaultState()));
+        RenderSystem.color4f(1F, 1F, 1F, 1f);
+        String sugarTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 59, this.blockEntity.getSugarAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.SUGAR_CANE.defaultBlockState(), minecraft.level, BlockPos.ZERO));
+        String boneTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 97, this.blockEntity.getBoneAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.BONE_BLOCK.defaultBlockState(), minecraft.level, BlockPos.ZERO));
+
+        RenderSystem.color4f(0.0941F, 0.7098F, 0.2823F, 1f);
+        String plantTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 135, this.blockEntity.getPlantAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.OAK_LEAVES.defaultBlockState(), minecraft.level, BlockPos.ZERO));
 
         if(waterTooltip != null) {
-            this.drawHoveringText(waterTooltip, mouseX, mouseY);
+            drawString(stack, minecraft.font, waterTooltip, mouseX, mouseY, -1);
         } else if(sugarTooltip != null) {
-            this.drawHoveringText(sugarTooltip, mouseX, mouseY);
+            drawString(stack, minecraft.font, sugarTooltip, mouseX, mouseY, -1);
         } else if(boneTooltip != null) {
-            this.drawHoveringText(boneTooltip, mouseX, mouseY);
+            drawString(stack, minecraft.font, boneTooltip, mouseX, mouseY, -1);
         } else if(plantTooltip != null) {
-            this.drawHoveringText(plantTooltip, mouseX, mouseY);
+            drawString(stack, minecraft.font, plantTooltip, mouseX, mouseY, -1);
         }
-
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.renderTooltip(stack, mouseX, mouseY);
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/sequencing_synthesizer_inputs.png"));
-        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+        this.minecraft.getTextureManager().bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/sequencing_synthesizer_inputs.png"));
+        blit(stack, this.leftPos, this.topPos, 0, 0, this.width, this.height);
+
+        ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
+        this.minecraft.textureManager.bind(slotLocation);
+        for(Slot slot : this.menu.slots) {
+            blit(stack, this.leftPos + slot.x - 1, this.topPos + slot.y- 1, 7, 17, 18, 18);
+        }
     }
 
-    private String drawTankWithTooltip(int mouseX, int mouseY, int left, double value, TextureAtlasSprite sprite) {
-        GlStateManager.enableDepth();
-        MachineUtils.drawTiledTexture(this.guiLeft + left, (float) (this.guiTop + 5F + 52F * (1F - value)), this.guiLeft + left + 16F, this.guiTop + 55F, sprite);
-        if(mouseX > this.guiLeft + left && mouseX < this.guiLeft + left + 16F && mouseY > this.guiTop + 5 && mouseY < this.guiTop + 55F) {
+    private String drawTankWithTooltip(MatrixStack stack, int mouseX, int mouseY, int left, double value, TextureAtlasSprite sprite) {
+        MachineUtils.drawTiledTexture(stack, this.leftPos + left, (float) (this.topPos + 5F + 52F * (1F - value)), this.leftPos + left + 16F, this.topPos + 55F, sprite);
+        if(mouseX > this.leftPos + left && mouseX < this.leftPos + left + 16F && mouseY > this.topPos + 5 && mouseY < this.topPos + 55F) {
             return Math.round(value * 100F) + "%";
         }
         return null;

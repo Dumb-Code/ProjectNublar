@@ -45,7 +45,6 @@ public class ProjectNublarContainers {
 
     public static void registerScreens() {
         ScreenManager.register(MACHINE_MODULES.get(), (container, inventory, title) -> {
-            //Should never occur.
             MachineModuleBlockEntity<?> be = container.getBlockEntity();
             Screen screen = Minecraft.getInstance().screen;
             TabInformationBar bar;

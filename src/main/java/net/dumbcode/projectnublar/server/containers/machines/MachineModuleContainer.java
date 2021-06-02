@@ -4,11 +4,13 @@ import com.mojang.datafixers.util.Either;
 import lombok.NonNull;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
@@ -17,6 +19,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.function.IntPredicate;
 
 public class MachineModuleContainer extends Container {
@@ -122,5 +125,15 @@ public class MachineModuleContainer extends Container {
 
     public MachineModuleBlockEntity<?> getBlockEntity() {
         return blockEntity;
+    }
+
+    public static <T extends MachineModuleBlockEntity<T>> Optional<T> getFromMenu(Class<T> expected, @Nullable ServerPlayerEntity player) {
+        if(player != null && player.containerMenu instanceof MachineModuleContainer) {
+            MachineModuleContainer container = (MachineModuleContainer) player.containerMenu;
+            if(expected.isInstance(container.getBlockEntity())) {
+                return Optional.of(expected.cast(container.getBlockEntity()));
+            }
+        }
+        return Optional.empty();
     }
 }

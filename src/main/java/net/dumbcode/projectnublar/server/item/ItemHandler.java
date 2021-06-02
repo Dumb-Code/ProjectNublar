@@ -1,8 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
-import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.utils.JavaUtils;
-import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
@@ -12,194 +10,157 @@ import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComp
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Food;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemGroup;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
 
-    public static final Item EMPTY_TEST_TUBE = new Item().setMaxStackSize(1);
-    public static final Item IRON_FILTER = new FilterItem(0.25F);
-    public static final Item GOLD_FILTER = new FilterItem(0.5F);
-    public static final Item DIAMOND_FILTER = new FilterItem(1.0F);
-    public static final Item AMBER = new Item();
-    public static final Item HARD_DRIVE = new DriveItem(false);
-    public static final Item SOLID_STATE_DRIVE = new DriveItem(true);
-    public static final Item EMPTY_SYRINGE = new ItemSyringe(ItemSyringe.Type.EMPTY);
-    public static final Item DNA_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_DNA);
-    public static final Item EMBRYO_FILLED_SYRINGE = new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO);
-    public static final Item FENCE_REMOVER = new ItemFenceRemover();
-    public static final Item CREATIVE_FENCE_REMOVER = new CreativeFenceRemovers();
-    public static final Item ARTIFICIAL_EGG = new Item();
-    public static final Item BROKEN_ARTIFICIAL_EGG = new Item();
-    public static final Item WIRE_SPOOL = new WireSpoolItem(BlockHandler.ELECTRIC_FENCE);
+    private static final ItemGroup TAB = TabHandler.TAB;
 
-    public static final Item TRACKING_MODULE = new BasicModuleItem(() -> TabletModuleHandler.TRACKING_TABLET);
-    public static final Item FLAPPY_DINO_MODULE = new BasicModuleItem(() -> TabletModuleHandler.FLAPPY_DINO);
+    private static final Supplier<Item> BASIC_ITEM = () -> new Item(new Item.Properties().tab(TAB));
+    
+    public static DeferredRegister<Item> REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, ProjectNublar.MODID);
 
-    public static final Item TRACKING_TABLET = new ItemTrackingTablet();
+    public static final RegistryObject<Item> EMPTY_TEST_TUBE = REGISTER.register("test_tube", () -> new Item(new Item.Properties().stacksTo(1).tab(TAB)));
+    public static final RegistryObject<Item> IRON_FILTER = REGISTER.register("iron_filter", () -> new FilterItem(0.25F, new Item.Properties().durability(150).tab(TAB)));
+    public static final RegistryObject<Item> GOLD_FILTER = REGISTER.register("gold_filter", () -> new FilterItem(0.5F, new Item.Properties().durability(250).tab(TAB)));
+    public static final RegistryObject<Item> DIAMOND_FILTER = REGISTER.register("diamond_filter", () -> new FilterItem(1.0F, new Item.Properties().durability(500).tab(TAB)));
+    public static final RegistryObject<Item> AMBER = REGISTER.register("amber", BASIC_ITEM);
+    public static final RegistryObject<Item> HARD_DRIVE = REGISTER.register("hard_drive", () -> new DriveItem(false, new Item.Properties().stacksTo(1).tab(TAB)));
+    public static final RegistryObject<Item> SOLID_STATE_DRIVE = REGISTER.register("solid_state_drive", () -> new DriveItem(true, new Item.Properties().stacksTo(1).tab(TAB)));
+    public static final RegistryObject<Item> EMPTY_SYRINGE = REGISTER.register("empty_syringe", () -> new ItemSyringe(ItemSyringe.Type.EMPTY, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> DNA_FILLED_SYRINGE = REGISTER.register("dna_filled_syringe", () -> new ItemSyringe(ItemSyringe.Type.FILLED_DNA, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> EMBRYO_FILLED_SYRINGE = REGISTER.register("embryo_filled_syringe", () -> new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> FENCE_REMOVER = REGISTER.register("fence_remover", () -> new ItemFenceRemover(new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> CREATIVE_FENCE_REMOVER = REGISTER.register("creative_fence_remover", () -> new CreativeFenceRemovers(new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> ARTIFICIAL_EGG = REGISTER.register("artificial_egg", BASIC_ITEM);
+    public static final RegistryObject<Item> BROKEN_ARTIFICIAL_EGG = REGISTER.register("broken_artificial_egg", () ->new Item(new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> WIRE_SPOOL = REGISTER.register("wire_spool", () -> new WireSpoolItem(BlockHandler.ELECTRIC_FENCE.get(), new Item.Properties()));
 
-    public static final Item COMPUTER_CHIP_PART = new ItemMetaNamed(3);
-    public static final Item TANKS_PART = new ItemMetaNamed(4);
-    public static final Item DRILL_BIT_PART = new ItemMetaNamed(5);
-    public static final Item LEVELLING_SENSOR_PART = new Item();
-    public static final Item BULB_PART = new ItemMetaNamed(3);
-    public static final Item CONTAINER_PART = new ItemMetaNamed(2);
-    public static final Item TURBINES_PART = new ItemMetaNamed(2);
+    public static final RegistryObject<Item> TRACKING_TABLET = REGISTER.register("tracking_tablet", () -> new ItemTrackingTablet(new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> TRACKING_MODULE = REGISTER.register("tracking_module", () -> new BasicModuleItem(TabletModuleHandler.TRACKING_TABLET, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> FLAPPY_DINO_MODULE = REGISTER.register("flappy_dino_module", () -> new BasicModuleItem(TabletModuleHandler.FLAPPY_DINO, new Item.Properties().tab(TAB)));
 
-    public static final Map<Dinosaur, ItemDinosaurMeat> RAW_MEAT_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, ItemDinosaurMeat> COOKED_MEAT_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, DinosaurSpawnEgg> SPAWN_EGG_ITEMS = new HashMap<>();
-    public static final Map<Dinosaur, DinosaurGeneticMaterialItem> TEST_TUBES_GENETIC_MATERIAL = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem>  TEST_TUBES_DNA = new HashMap<>();
-    public static final Map<Dinosaur, DinosaurTooltipItem> DINOSAUR_UNINCUBATED_EGG = new HashMap<>();
-    public static final Map<Dinosaur, BasicDinosaurItem> DINOSAUR_INCUBATED_EGG = new HashMap<>();
+    public static final RegistryObject<Item> COMPUTER_CHIP_PART_1 = REGISTER.register("computer_chip_part_1", BASIC_ITEM);
+    public static final RegistryObject<Item> COMPUTER_CHIP_PART_2 = REGISTER.register("computer_chip_part_2", BASIC_ITEM);
+    public static final RegistryObject<Item> COMPUTER_CHIP_PART_3 = REGISTER.register("computer_chip_part_3", BASIC_ITEM);
 
-    public static final Map<Dinosaur, Map<String, FossilItem>> FOSSIL_ITEMS = new HashMap<>();
+    public static final RegistryObject<Item> TANKS_PART_1 = REGISTER.register("tanks_part_1", BASIC_ITEM);
+    public static final RegistryObject<Item> TANKS_PART_2 = REGISTER.register("tanks_part_2", BASIC_ITEM);
+    public static final RegistryObject<Item> TANKS_PART_3 = REGISTER.register("tanks_part_3", BASIC_ITEM);
+    public static final RegistryObject<Item> TANKS_PART_4 = REGISTER.register("tanks_part_4", BASIC_ITEM);
 
-    private static final CreativeTabs TAB = TabHandler.TAB;
+    public static final RegistryObject<Item> DRILL_BIT_PART_1 = REGISTER.register("drill_bit_part_1", BASIC_ITEM);
+    public static final RegistryObject<Item> DRILL_BIT_PART_2 = REGISTER.register("drill_bit_part_2", BASIC_ITEM);
+    public static final RegistryObject<Item> DRILL_BIT_PART_3 = REGISTER.register("drill_bit_part_3", BASIC_ITEM);
+    public static final RegistryObject<Item> DRILL_BIT_PART_4 = REGISTER.register("drill_bit_part_4", BASIC_ITEM);
+    public static final RegistryObject<Item> DRILL_BIT_PART_5 = REGISTER.register("drill_bit_part_5", BASIC_ITEM);
 
-    @SubscribeEvent
-    public static void onItemRegistry(RegistryEvent.Register<Item> event) {
+    public static final RegistryObject<Item> LEVELLING_SENSOR_PART = REGISTER.register("levelling_sensor_part", BASIC_ITEM);
 
-        event.getRegistry().registerAll(
-            EMPTY_TEST_TUBE.setRegistryName("test_tube").setTranslationKey("test_tube").setCreativeTab(TAB),
-            IRON_FILTER.setRegistryName("iron_filter").setTranslationKey("iron_filter").setCreativeTab(TAB).setMaxDamage(150),
-            GOLD_FILTER.setRegistryName("gold_filter").setTranslationKey("gold_filter").setCreativeTab(TAB).setMaxDamage(250),
-            DIAMOND_FILTER.setRegistryName("diamond_filter").setTranslationKey("diamond_filter").setCreativeTab(TAB).setMaxDamage(500),
-            AMBER.setRegistryName("amber").setTranslationKey("amber").setCreativeTab(TAB),
-            HARD_DRIVE.setRegistryName("hard_drive").setTranslationKey("hard_drive").setCreativeTab(TAB).setMaxStackSize(1),
-            SOLID_STATE_DRIVE.setRegistryName("solid_state_drive").setTranslationKey("solid_state_drive").setCreativeTab(TAB).setMaxStackSize(1),
-            EMPTY_SYRINGE.setRegistryName("empty_syringe").setTranslationKey("empty_syringe").setCreativeTab(TAB),
-            DNA_FILLED_SYRINGE.setRegistryName("dna_filled_syringe").setTranslationKey("dna_filled_syringe").setCreativeTab(TAB),
-            EMBRYO_FILLED_SYRINGE.setRegistryName("embryo_filled_syringe").setTranslationKey("embryo_filled_syringe").setCreativeTab(TAB),
-            FENCE_REMOVER.setRegistryName("fence_remover").setTranslationKey("fence_remover").setCreativeTab(TAB),
-            CREATIVE_FENCE_REMOVER.setRegistryName("creative_fence_remover").setTranslationKey("creative_fence_remover").setCreativeTab(TAB),
-            ARTIFICIAL_EGG.setRegistryName("artificial_egg").setTranslationKey("artificial_egg").setCreativeTab(TAB),
-            BROKEN_ARTIFICIAL_EGG.setRegistryName("broken_artificial_egg").setTranslationKey("broken_artificial_egg").setCreativeTab(TAB),
-            WIRE_SPOOL.setRegistryName("wire_spool").setTranslationKey("wire_spool").setCreativeTab(TAB),
-            TRACKING_TABLET.setRegistryName("tracking_tablet").setTranslationKey("tracking_tablet").setCreativeTab(TAB),
-            TRACKING_MODULE.setRegistryName("tracking_module").setTranslationKey("tracking_module").setCreativeTab(TAB),
-            FLAPPY_DINO_MODULE.setRegistryName("flappy_dino_module").setTranslationKey("flappy_dino_module").setCreativeTab(TAB),
+    public static final RegistryObject<Item> BULB_PART_1 = REGISTER.register("bulb_part_1", BASIC_ITEM);
+    public static final RegistryObject<Item> BULB_PART_2 = REGISTER.register("bulb_part_2", BASIC_ITEM);
+    public static final RegistryObject<Item> BULB_PART_3 = REGISTER.register("bulb_part_3", BASIC_ITEM);
 
-            COMPUTER_CHIP_PART.setRegistryName("computer_chip_part").setTranslationKey("computer_chip_part").setCreativeTab(TAB),
-            TANKS_PART.setRegistryName("tanks_part").setTranslationKey("tanks_part").setCreativeTab(TAB),
-            DRILL_BIT_PART.setRegistryName("drill_bit_part").setTranslationKey("drill_bit_part").setCreativeTab(TAB),
-            LEVELLING_SENSOR_PART.setRegistryName("levelling_sensor_part").setTranslationKey("levelling_sensor_part").setCreativeTab(TAB),
-            BULB_PART.setRegistryName("bulb_part").setTranslationKey("bulb_part").setCreativeTab(TAB),
-            CONTAINER_PART.setRegistryName("container_part").setTranslationKey("container_part").setCreativeTab(TAB)
+    public static final RegistryObject<Item> CONTAINER_PART_1 = REGISTER.register("container_part_1", BASIC_ITEM);
+    public static final RegistryObject<Item> CONTAINER_PART_2 = REGISTER.register("container_part_2", BASIC_ITEM);
+    public static final RegistryObject<Item> CONTAINER_PART_3 = REGISTER.register("container_part_3", BASIC_ITEM);
+
+    public static final RegistryObject<Item> TURBINES_PART_1 = REGISTER.register("turbines_part_1", BASIC_ITEM);
+    public static final RegistryObject<Item> TURBINES_PART_2 = REGISTER.register("turbines_part_2", BASIC_ITEM);
+
+    public static final Map<Dinosaur, RegistryObject<Item>> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
+        new BasicDinosaurItem(d, new Item.Properties().food(new Food.Builder()
+            .nutrition(d.getItemProperties().getRawMeatHealAmount())
+            .saturationMod(d.getItemProperties().getRawMeatSaturation())
+            .build()
+        ))
+    );
+    public static final Map<Dinosaur, RegistryObject<Item>> COOKED_MEAT_ITEMS = createMap("%s_cooked_meat", d ->
+        new BasicDinosaurItem(d, new Item.Properties().food(new Food.Builder()
+            .nutrition(d.getItemProperties().getRawMeatHealAmount())
+            .saturationMod(d.getItemProperties().getRawMeatSaturation())
+            .build()
+        ))
+    );
+
+    public static final Map<Dinosaur, RegistryObject<Item>> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new BasicDinosaurItem(d, new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, new Item.Properties()));
+
+    public static final Map<Dinosaur, Map<String, RegistryObject<Item>>> FOSSIL_ITEMS = createNestedMap(
+        "%s_fossil_%s",
+        dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS), DinosaurDropsComponent.Storage::getFossilList),
+        (dinosaur, fossil) -> new FossilItem(dinosaur, fossil, new Item.Properties())
         );
 
-        UnaryOperator<Item> tab = item -> item.setCreativeTab(TAB);
-
-        populateMap(event, RAW_MEAT_ITEMS, "%s_meat_dinosaur_raw", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.RAW), tab);
-        populateMap(event, COOKED_MEAT_ITEMS, "%s_meat_dinosaur_cooked", d -> new ItemDinosaurMeat(d, ItemDinosaurMeat.CookState.COOKED), tab);
-        populateMap(event, SPAWN_EGG_ITEMS, "%s_spawn_egg", DinosaurSpawnEgg::new, tab);
-        populateMap(event, TEST_TUBES_GENETIC_MATERIAL, "%s_genetic_material_test_tube", DinosaurGeneticMaterialItem::new, tab.andThen(i -> i.setMaxStackSize(1)));
-        populateMap(event, TEST_TUBES_DNA, "%s_test_tube", BasicDinosaurItem::new);
-        populateMap(event, DINOSAUR_UNINCUBATED_EGG, "%s_unincubated_egg", d -> new DinosaurTooltipItem(d, stack -> Lists.newArrayList(MathUtils.ensureTrailingZeros(stack.getOrCreateSubCompound(ProjectNublar.MODID).getFloat("AmountDone"), 1) + "%")));
-        populateMap(event, DINOSAUR_INCUBATED_EGG, "%s_incubated_egg", DinosaurEggItem::new);
-
-        populateNestedMap(event, FOSSIL_ITEMS,
-            dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS), DinosaurDropsComponent.Storage::getFossilList),
-            FossilItem::new, "%s_fossil_%s", tab
-        );
-
-
-        for (Block block : ForgeRegistries.BLOCKS) {
+    public static void registerAllItemBlocks(RegistryEvent.Register<Item> event) {
+        for (RegistryObject<Block> entry : BlockHandler.REGISTER.getEntries()) {
+            Block block = entry.get();
             if(block instanceof IItemBlock) {
-                Item item = ((IItemBlock) block).createItem()
-                    .setRegistryName(Objects.requireNonNull(block.getRegistryName()))
-                    .setTranslationKey(block.getTranslationKey().substring("tile.".length()))
-                    .setCreativeTab(block.getCreativeTab());
-
+                Item item = ((IItemBlock) block).createItem(new Item.Properties().tab(TAB));
+                item.setRegistryName(Objects.requireNonNull(block.getRegistryName()));
                 event.getRegistry().register(item);
             }
         }
-
-        //TODO: iterate through all items, and check the cast
-        registerOreNames(RAW_MEAT_ITEMS);
-        registerOreNames(COOKED_MEAT_ITEMS);
-        FOSSIL_ITEMS.values().forEach(ItemHandler::registerOreNames);
     }
 
-    /**
-     * Needs to be called **after** registering all the items
-     * @param items
-     */
-    private static void registerOreNames(Map<?, ? extends Item> items) {
-        items.values().stream()
-                .filter(ItemWithOreName.class::isInstance)
-                .map(ItemWithOreName.class::cast)
-                .forEach(ItemWithOreName::registerOreNames);
-    }
-
-    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier) {
-        populateMap(event, itemMap, dinosaurRegname, supplier, null);
-    }
-
-    private static <T extends Item> void populateMap(RegistryEvent.Register<Item> event, Map<Dinosaur, T> itemMap, String dinosaurRegname, Function<Dinosaur, T> supplier, @Nullable Function<Item, Item> initializer) {
+    private static <T extends Item> Map<Dinosaur, RegistryObject<T>> createMap(String format, Function<Dinosaur, T> supplier) {
+        Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
-
-            T item = supplier.apply(dinosaur);
-            String name = String.format(dinosaurRegname, dinosaur.getFormattedName());
-            item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-            item.setTranslationKey(name);
-            if(initializer != null) {
-                item = runInitilizer(item, initializer);
-            }
-            itemMap.put(dinosaur, item);
-            event.getRegistry().register(item);
+            map.put(dinosaur, REGISTER.register(
+                String.format(format, dinosaur.getFormattedName()),
+                () -> supplier.apply(dinosaur)
+            ));
         }
+        return map;
     }
 
-    @Deprecated
-    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname) {
-        populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname, null);
+    private static <T extends Item, S> Map<Dinosaur, Map<S, RegistryObject<T>>> createNestedMap(
+        String format,
+        Function<Dinosaur, Collection<S>> getterFunction,
+        BiFunction<Dinosaur, S, T> creationFunc
+    ) {
+        return createNestedMap(format, getterFunction, Object::toString, creationFunc);
     }
 
-    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {
-        populateNestedMap(event, itemMap, getterFunction, Object::toString, creationFunc, dinosaurRegname, initializer);
-    }
-
-    private static <T extends Item, S> void populateNestedMap(RegistryEvent.Register<Item> event, Map<Dinosaur, Map<S, T>> itemMap, Function<Dinosaur, Collection<S>> getterFunction, Function<S, String> toStringFunction, BiFunction<Dinosaur, S, T> creationFunc, String dinosaurRegname, @Nullable Function<Item, Item> initializer) {
+    private static <T extends Item, S> Map<Dinosaur, Map<S, RegistryObject<T>>> createNestedMap(
+        String format,
+        Function<Dinosaur, Collection<S>> getterFunction,
+        Function<S, String> toStringFunction,
+        BiFunction<Dinosaur, S, T> creationFunc
+    ) {
+        Map<Dinosaur, Map<S, RegistryObject<T>>> map = new HashMap<>();
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
             Collection<S> collection = getterFunction.apply(dinosaur);
-            if(collection != null) {
+            if (collection != null) {
                 for (S s : collection) {
-                    T item = creationFunc.apply(dinosaur, s);
-                    String name = String.format(dinosaurRegname, dinosaur.getFormattedName(), toStringFunction.apply(s));
-                    item.setRegistryName(new ResourceLocation(ProjectNublar.MODID, name));
-                    item.setTranslationKey(name);
-                    if(initializer != null) {
-                        item = runInitilizer(item, initializer);
-                    }
-                    itemMap.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, item);
-                    event.getRegistry().register(item);
+                    map.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, REGISTER.register(
+                        String.format(format, dinosaur.getFormattedName(), toStringFunction.apply(s)),
+                        () -> creationFunc.apply(dinosaur, s)
+                    ));
                 }
             } else {
-                itemMap.put(dinosaur, new HashMap<>());
+                map.put(dinosaur, new HashMap<>());
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Item> T runInitilizer(T item, Function<Item, Item> initializer) {
-        Item initializedItem = initializer.apply(item);
-        if(!item.getClass().isInstance(initializedItem)) {
-            throw new RuntimeException("Initialized class did not give same as (of subclass of) initial class. Initial: " + item.getClass() + " Initialized: " + initializedItem.getClass());
-        }
-        return (T) initializedItem;
+        return map;
     }
 }

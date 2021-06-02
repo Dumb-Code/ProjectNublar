@@ -4,96 +4,95 @@ import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntityChicken;
-import net.minecraft.entity.passive.EntityParrot;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.ChickenEntity;
+import net.minecraft.entity.passive.ParrotEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 
 public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     private final Type type;
 
-    public ItemSyringe(Type type) {
+    public ItemSyringe(Type type, Properties properties) {
+        super(properties);
         this.type = type;
     }
 
     @Override
-    public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if(!this.type.filled) {
             ItemStack out;
-            if((entity instanceof EntityChicken || entity instanceof EntityParrot) && ((EntityAnimal) entity).isInLove()) {
-                out = new ItemStack(ItemHandler.EMBRYO_FILLED_SYRINGE);
-                out.getOrCreateSubCompound(ProjectNublar.MODID).setString("ContainedType", Objects.requireNonNull(EntityList.getEntityString(entity)));
+            if((entity instanceof ChickenEntity || entity instanceof ParrotEntity) && ((AnimalEntity) entity).isInLove()) {
+                out = new ItemStack(ItemHandler.EMBRYO_FILLED_SYRINGE.get());
+                out.getOrCreateTagElement(ProjectNublar.MODID).putString("ContainedType", entity.getType().getDescriptionId());
             } else {
-                out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE);
-                NBTTagCompound nbt = out.getOrCreateSubCompound(ProjectNublar.MODID);
-                String s = EntityList.getEntityString(entity);
-                if(s == null) {
-                    s = "generic";//Shouldn't happen, but its how vanilla handles it
-                }
-                nbt.setString("ContainedType", s);
-                nbt.setInteger("ContainedSize", MathUtils.getWeightedResult(10, 5));
+                out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE.get());
+                CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
+                nbt.putString("ContainedType", entity.getType().getDescriptionId());
+                nbt.putInt("ContainedSize", MathUtils.getWeightedResult(10, 5));
             }
             stack.shrink(1);
             if(stack.isEmpty()) {
-                player.setHeldItem(EnumHand.MAIN_HAND, out);
+                player.setItemInHand(Hand.MAIN_HAND, out);
             } else {
                 MachineUtils.giveToInventory(player, out);
             }
         }
-        return false;
+        return super.interactLivingEntity(stack, player, entity, hand);
     }
+
 
     @Override
     public int getSize(ItemStack stack) {
-        return stack.getOrCreateSubCompound(ProjectNublar.MODID).getInteger("ContainedSize");
+        return stack.getOrCreateTagElement(ProjectNublar.MODID).getInt("ContainedSize");
     }
 
     @Override
     public String getKey(ItemStack stack) {
-        return stack.getOrCreateSubCompound(ProjectNublar.MODID).getString("ContainedType");
+        return stack.getOrCreateTagElement(ProjectNublar.MODID).getString("ContainedType");
     }
 
     @Override
-    public String getTranslationKey(ItemStack stack) {
-        return "entity." + this.getKey(stack);
+    public String getDescriptionId(ItemStack stack) {
+        return this.getKey(stack);
     }
 
     @Override
     public String getDriveTranslationKey(ItemStack stack) {
-        return this.getTranslationKey(stack) + ".name";
+        return this.getDescriptionId(stack) + ".name";
     }
 
     @Override
     public boolean hasInformation(ItemStack stack) {
-        return this.type == Type.FILLED_DNA && stack.getOrCreateSubCompound(ProjectNublar.MODID).hasKey("ContainedType", Constants.NBT.TAG_STRING);
+        return this.type == Type.FILLED_DNA && stack.getOrCreateTagElement(ProjectNublar.MODID).contains("ContainedType", Constants.NBT.TAG_STRING);
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         if(this.type.filled) {
-            tooltip.add(I18n.format(this.getTranslationKey(stack)));
+            tooltip.add(new TranslationTextComponent(this.getDescriptionId(stack)));
         }
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+        super.appendHoverText(stack, world, tooltip, flagIn);
     }
+
 
     @Override
     public ItemStack getOutItem(ItemStack stack) {
-        return new ItemStack(ItemHandler.EMPTY_SYRINGE);
+        return new ItemStack(ItemHandler.EMPTY_SYRINGE.get());
     }
 
     public enum Type {

@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.blocks.BlockPropertyAccess;
 import net.dumbcode.dumblibrary.server.ecs.blocks.BlockstateComponentProperty;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -14,6 +15,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import java.util.HashMap;
@@ -93,6 +95,12 @@ public class Plant extends ForgeRegistryEntry<Plant> {
         @Override
         public Property<? extends ComponentAccess>[] getComponentProperties() {
             return this.properties;
+        }
+    }
+
+    public static void registerBlocks(RegistryEvent.Register<Block> event) {
+        for (Plant plant : ProjectNublar.PLANT_REGISTRY) {
+            event.getRegistry().register(plant.createBlock().setRegistryName(plant.getRegistryName()));
         }
     }
 }

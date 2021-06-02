@@ -6,12 +6,11 @@ import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
-import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
-import net.dumbcode.projectnublar.server.block.DinosaurBaseBlock;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -20,18 +19,21 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.plants.Plant;
-import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
+import net.dumbcode.projectnublar.server.registry.EarlyRegistryEvent;
+import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -43,7 +45,6 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -66,7 +67,6 @@ import java.util.Map;
 @Mod(ProjectNublar.MODID)
 public class ProjectNublar {
 
-
     public static final String MODID = "projectnublar";
     public static final String NAME = "Project Nublar";
     public static final String VERSION = "0.1.25";
@@ -77,7 +77,6 @@ public class ProjectNublar {
     public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
     public static IForgeRegistry<Plant> PLANT_REGISTRY;
 
-    public static IForgeRegistry<TabletModuleType<?>> TABLET_MODULES_REGISTRY;
 
     private static Logger logger = LogManager.getLogger(MODID);
 
@@ -98,11 +97,18 @@ public class ProjectNublar {
         ProjectNublarBlockEntities.REGISTER.register(bus);
         ProjectNublarContainers.REGISTER.register(bus);
         ProjectNublarParticles.REGISTER.register(bus);
+        TabletModuleHandler.DR.register(bus);
 
-        forgeBus.addGenericListener(Dinosaur.class, EventPriority.LOWEST, DinosaurBaseBlock::onDinosaurRegistryFinished);
+        bus.addGenericListener(Block.class, Plant::registerBlocks);
+        bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
+
+//        forgeBus.addGenericListener(Dinosaur.class, EventPriority.LOWEST, DinosaurBaseBlock::onDinosaurRegistryFinished);
 
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> {
             bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
+
+            forgeBus.addListener(ProjectNublarBlockRenderLayers::setRenderLayers);
+
         });
     }
 
@@ -119,6 +125,7 @@ public class ProjectNublar {
         if(FMLEnvironment.dist.isClient()) {
             EnumWeatherIcons.register();
             TabletBackground.registerDefaults();
+            ProjectNublarContainers.registerScreens();
         }
         AnimationFactorHandler.register();
 
@@ -133,18 +140,18 @@ public class ProjectNublar {
             }
         }
 
-        GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
-        GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
-        GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
-        GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
-        GameRegistry.registerTileEntity(EggPrinterBlockEntity.class, new ResourceLocation(MODID, "egg_printer"));
-        GameRegistry.registerTileEntity(IncubatorBlockEntity.class, new ResourceLocation(MODID, "incubator"));
-        GameRegistry.registerTileEntity(CoalGeneratorBlockEntity.class, new ResourceLocation(MODID, "coal_generator"));
-        GameRegistry.registerTileEntity(BlockEntityElectricFencePole.class, new ResourceLocation(MODID, "electric_fence_pole"));
-        GameRegistry.registerTileEntity(BlockEntityElectricFence.class, new ResourceLocation(MODID, "electric_fence"));
-        GameRegistry.registerTileEntity(BlockCreativePowerSource.TileEntityCreativePowerSource.class, new ResourceLocation(MODID, "creative_power"));
-        GameRegistry.registerTileEntity(TrackingBeaconBlockEntity.class, new ResourceLocation(MODID, "tracking_beacon"));
-        GameRegistry.registerTileEntity(PylonHeadBlockEntity.class, new ResourceLocation(MODID, "pylon_head"));
+//        GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
+//        GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
+//        GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
+//        GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
+//        GameRegistry.registerTileEntity(EggPrinterBlockEntity.class, new ResourceLocation(MODID, "egg_printer"));
+//        GameRegistry.registerTileEntity(IncubatorBlockEntity.class, new ResourceLocation(MODID, "incubator"));
+//        GameRegistry.registerTileEntity(CoalGeneratorBlockEntity.class, new ResourceLocation(MODID, "coal_generator"));
+//        GameRegistry.registerTileEntity(BlockEntityElectricFencePole.class, new ResourceLocation(MODID, "electric_fence_pole"));
+//        GameRegistry.registerTileEntity(BlockEntityElectricFence.class, new ResourceLocation(MODID, "electric_fence"));
+//        GameRegistry.registerTileEntity(BlockCreativePowerSource.TileEntityCreativePowerSource.class, new ResourceLocation(MODID, "creative_power"));
+//        GameRegistry.registerTileEntity(TrackingBeaconBlockEntity.class, new ResourceLocation(MODID, "tracking_beacon"));
+//        GameRegistry.registerTileEntity(PylonHeadBlockEntity.class, new ResourceLocation(MODID, "pylon_head"));
 
 
         // TODO: Remove, debug only
@@ -165,6 +172,7 @@ public class ProjectNublar {
         });
     }
 
+    //TODO: move these to deferred register.
     @SubscribeEvent
     public static void createRegistries(RegistryEvent.NewRegistry event) {
         DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
@@ -179,10 +187,9 @@ public class ProjectNublar {
                 .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
                 .create();
 
-        TABLET_MODULES_REGISTRY = new RegistryBuilder<TabletModuleType<?>>()
-                .setType(TabletModuleType.getWildcardType())
-                .setName(new ResourceLocation(MODID, "module_type"))
-                .create();
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.post(new EarlyRegistryEvent<>(DINOSAUR_REGISTRY));
+        bus.post(new EarlyRegistryEvent<>(PLANT_REGISTRY));
     }
 
     @SubscribeEvent
@@ -229,7 +236,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C23ConfirmTrackingTablet.Handler(), C23ConfirmTrackingTablet.class, 23, Side.SERVER);
         NETWORK.registerMessage(new S24TrackingTabletUpdateChunk.Handler(), S24TrackingTabletUpdateChunk.class, 24, Side.CLIENT);
         NETWORK.registerMessage(new C25StopTrackingTablet.Handler(), C25StopTrackingTablet.class, 25, Side.SERVER);
-        NETWORK.registerMessage(new S26OpenTablet.Handler(), S26OpenTablet.class, 26, Side.CLIENT);
+        NETWORK.registerMessage(new S2COpenTablet.Handler(), S2COpenTablet.class, 26, Side.CLIENT);
         NETWORK.registerMessage(new C27InstallModule.Handler(), C27InstallModule.class, 27, Side.SERVER);
         NETWORK.registerMessage(new C28ModuleClicked.Handler(), C28ModuleClicked.class, 28, Side.SERVER);
         NETWORK.registerMessage(new S29OpenTabletModule.Handler(), S29OpenTabletModule.class, 29, Side.CLIENT);
@@ -244,7 +251,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new S38SyncBackgroundImage.Handler(), S38SyncBackgroundImage.class, 38, Side.CLIENT);
         NETWORK.registerMessage(new S39SyncBackgroundIcon.Handler(), S39SyncBackgroundIcon.class, 39, Side.CLIENT);
         NETWORK.registerMessage(new C40RequestBackgroundIcon.Handler(), C40RequestBackgroundIcon.class, 40, Side.SERVER);
-        NETWORK.registerMessage(new C41PlaceIncubatorEgg.Handler(), C41PlaceIncubatorEgg.class, 41, Side.SERVER);
+        NETWORK.registerMessage(new C2SPlaceIncubatorEgg.Handler(), C2SPlaceIncubatorEgg.class, 41, Side.SERVER);
         NETWORK.registerMessage(new S42SyncMachineProcesses.Handler(), S42SyncMachineProcesses.class, 42, Side.CLIENT);
         NETWORK.registerMessage(new S43SyncMachineStack.Handler(), S43SyncMachineStack.class, 43, Side.CLIENT);
         NETWORK.registerMessage(new S44SyncOpenedUsers.Handler(), S44SyncOpenedUsers.class, 44, Side.CLIENT);

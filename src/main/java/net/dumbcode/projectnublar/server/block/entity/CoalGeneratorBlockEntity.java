@@ -20,7 +20,7 @@ import java.util.List;
 public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGeneratorBlockEntity> {
 
     public CoalGeneratorBlockEntity() {
-        super(type);
+        super(ProjectNublarBlockEntities.COAL_GENERATOR.get());
     }
 
     @Override

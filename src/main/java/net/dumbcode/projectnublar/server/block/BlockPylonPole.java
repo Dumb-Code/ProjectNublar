@@ -106,7 +106,7 @@ public class BlockPylonPole extends Block implements IItemBlock {
     }
 
     @Override
-    public Item createItem() {
+    public Item createItem(Item.Properties properties) {
         return new ItemPylonPole();
     }
 

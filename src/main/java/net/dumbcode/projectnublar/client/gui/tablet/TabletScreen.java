@@ -1,46 +1,48 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.INestedGuiEventHandler;
 
-public  class TabletScreen {
-    protected static final Minecraft MC = Minecraft.getMinecraft();
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TabletScreen implements INestedGuiEventHandler {
+    protected static final Minecraft MC = Minecraft.getInstance();
     protected int xSize;
     protected int ySize;
+    private final List<IGuiEventListener> children = new ArrayList<>();
+
+    @Nullable
+    @Getter @Setter private IGuiEventListener focused;
+
+    @Getter @Setter private boolean dragging;
 
     public void setData(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
     }
 
-    public void onSetAsCurrentScreen() {
+    protected <T extends IGuiEventListener> T add(T t) {
+        this.children.add(t);
+        return t;
     }
 
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void onSetAsCurrentScreen() { }
+
+    public void onClosed() { }
+
+    public void updateScreen() {  }
+
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {}
+
+
+    @Override
+    public List<? extends IGuiEventListener> children() {
+        return this.children;
     }
-
-    public void updateScreen() {
-    }
-
-    public void onMouseInput(int mouseX, int mouseY) {
-    }
-
-    public void onMouseClicked(int mouseX, int mouseY, int mouseButton) {
-    }
-
-    public void onMouseReleased(int mouseX, int mouseY, int state) {
-    }
-
-    public void onMouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-    }
-
-    public void onKeyInput() {
-    }
-
-    public void onKeyTyped(char typedChar, int keyCode) {
-    }
-
-    public void onClosed() {
-    }
-
-
 }

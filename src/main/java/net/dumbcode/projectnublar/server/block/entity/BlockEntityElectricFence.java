@@ -57,7 +57,7 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
                 this.fenceConnections.add(connection);
             }
         }
-        requestModelDataUpdate();
+        this.requestModelDataUpdate();
     }
 
     @Override
@@ -73,7 +73,8 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     @Override
     public void addConnection(Connection connection) {
         this.fenceConnections.add(connection);
-        requestModelDataUpdate();
+        this.requestModelDataUpdate();
+        this.setChanged();
     }
 
     @Nonnull

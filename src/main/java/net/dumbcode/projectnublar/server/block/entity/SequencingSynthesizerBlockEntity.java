@@ -33,6 +33,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -40,7 +41,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
-import java.util.stream.IntStream;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> implements DyableBlockEntity {
 
@@ -330,7 +330,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             case 1:
                 return new DnaEditingGui(player, this, info, tab);
             default:
-                return new SequencingSynthesizerInputsGui(player, this, info, tab);
+                return new SequencingSynthesizerInputsGui(blockEntity, player, info, tab, this);
 
         }
     }

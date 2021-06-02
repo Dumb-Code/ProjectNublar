@@ -107,25 +107,18 @@ public class BlockConnectableBase extends Block {
 
                     Vector3d center = this.center(box.move(pos));
                     Vector3d other = this.center(entityBox);
-                    if (!worldIn.isClientSide) {
+                    if (worldIn instanceof ServerWorld) {
                         entityIn.hurt(DamageSourceHandler.FENCE_ELECTRIC, 1F);
 
-                        int times = 3;
-                        for (int i = 0; i < times; i++) {
-                            for (int i1 = 0; i1 < 5; i1++) {
-                                for (int count = 0; count < 3; count++) {
-                                    worldIn.addParticle(ProjectNublarParticles.SPARK.get(),
+                        int count = 30;
+                        ((ServerWorld) worldIn).sendParticles(ProjectNublarParticles.SPARK.get(),
+                            center.x, center.y, center.z, count,
+                            (other.x - center.x) * 0.5F,
+                            (other.y - center.y) * 0.5F,
+                            (other.z - center.z) * 0.5F,
+                            1.5F
+                        );
 
-                                        center.x + (other.x - center.x) * worldIn.random.nextGaussian() * 0.5F,
-                                        center.y + (other.y - center.y) * worldIn.random.nextGaussian() * 0.5F,
-                                        center.z + (other.z - center.z) * worldIn.random.nextGaussian() * 0.5F,
-
-                                        worldIn.random.nextGaussian() * 1.5F,
-                                        worldIn.random.nextGaussian() * 1.5F,
-                                        worldIn.random.nextGaussian() * 1.5F);
-                                }
-                            }
-                        }
                     }
 
                     if (!entityIn.isOnGround()) {
@@ -256,10 +249,16 @@ public class BlockConnectableBase extends Block {
     //TODO: revisit this.
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-        return new DelegateVoxelShape(super.getShape(state, world, pos, context), (from, to, offset, fallback) -> {
-            BlockRayTraceResult traceResult = fallback.get();
-            traceResult.hitInfo = getHitChunk(world, pos, from, to);
-            return traceResult;
+        return this.createDelegateShape(super.getShape(state, world, pos, context), world);
+    }
+
+    protected VoxelShape createDelegateShape(VoxelShape shape, IBlockReader world) {
+        return new DelegateVoxelShape(shape, (from, to, offset, fallback) -> {
+            BlockRayTraceResult result = getRaytraceResult(world, offset, from, to);
+            if(result != null) {
+                return result;
+            }
+            return fallback.get();
         });
     }
 
@@ -273,14 +272,18 @@ public class BlockConnectableBase extends Block {
         if (!(pick instanceof BlockRayTraceResult)) {
             return null;
         }
-        return getHitChunk(viewer.level, ((BlockRayTraceResult) pick).getBlockPos(), start, end);
+        BlockRayTraceResult result = getRaytraceResult(viewer.level, ((BlockRayTraceResult) pick).getBlockPos(), start, end);
+        if(result != null && result.hitInfo instanceof HitChunk) {
+            return (HitChunk) result.hitInfo;
+        }
+        return null;
     }
 
 
     @Nullable
-    public static HitChunk getHitChunk(IBlockReader world, BlockPos pos, Vector3d start, Vector3d end) {
+    public static BlockRayTraceResult getRaytraceResult(IBlockReader world, BlockPos pos, Vector3d start, Vector3d end) {
         double hitDist = Double.MAX_VALUE;
-        HitChunk resultOut = null;
+        BlockRayTraceResult resultOut = null;
         Set<BlockConnectableBase.ChunkedInfo> set = getOutlines(world, pos);
 
         for (BlockConnectableBase.ChunkedInfo chunk : set) {
@@ -315,8 +318,8 @@ public class BlockConnectableBase extends Block {
                     }
                     double dist = result.getDistance();
                     if (dist < hitDist) {
-                        resultOut = new BlockConnectableBase.HitChunk(chunk.getAabb(), chunk.getConnection(), result.getHitDir(), result);
-
+                        resultOut = result.getResult();
+                        resultOut.hitInfo = new BlockConnectableBase.HitChunk(chunk.getAabb(), chunk.getConnection(), result.getHitDir(), result);
                         hitDist = dist;
                     }
                 }

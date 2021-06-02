@@ -11,25 +11,27 @@ import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.*;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.tuple.Pair;
@@ -71,41 +73,21 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
     public StateContainer<Block, BlockState> getStateDefinition() {
         return this.stateDefinition;
     }
-    
 
     @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        double rotation = (state.getActualState(source, pos).getValue(ROTATION_PROPERTY) + (90 - this.type.getRotationOffset())) / 180D * Math.PI;
-        float t = this.type.getHalfSize();
-        double x = Math.sin(rotation) * this.type.getRadius();
-        double z = Math.cos(rotation) * this.type.getRadius();
-        return new AxisAlignedBB(x-t, 0, z-t, x+t, 1, z+t).offset(0.5, 0, 0.5);
-    }
-
-    @Nullable
-    @Override
-    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
-        RayTraceResult trace = this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos));
-        if(trace != null) {
-            return trace;
+    public VoxelShape getInteractionShape(BlockState state, IBlockReader world, BlockPos pos) {
+        TileEntity entity = world.getBlockEntity(pos);
+        if(entity instanceof BlockEntityElectricFencePole) {
+            return ((BlockEntityElectricFencePole) entity).getCachedShape();
         }
-        TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof ConnectableBlockEntity && ((ConnectableBlockEntity) te).getConnections().isEmpty()) {
-            return null;
-        }
-        return super.collisionRayTrace(blockState, worldIn, pos, start, end);
+        return super.getInteractionShape(state, world, pos);
     }
 
     @Override
-    public BlockStateContainer getBlockState() {
-        return this.blockState;
-    }
-
-    @Override
-    public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
+    public boolean canSurvive(BlockState state, IWorldReader world, BlockPos pos) {
         boolean flag = true;
         for (int i = 0; i < this.type.getHeight(); i++) {
-            flag &= worldIn.getBlockState(pos.up(i)).getBlock().isReplaceable(worldIn, pos.up(i));
+            flag &= world.getBlockState(pos.above(i)).getBlock().canBeReplaced(state, Fluids.EMPTY);
         }
         return flag;
     }
@@ -145,16 +127,16 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                     }
                     return ActionResultType.SUCCESS;
                 }
-            } else if(stack.getItem() == ItemHandler.WIRE_SPOOL) { //Move to item class ?
+            } else if(stack.getItem() == ItemHandler.WIRE_SPOOL.get()) { //Move to item class ?
                 CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
-                if(nbt.contains("fence_position", Constants.NBT.TAG_LONG)) {
-                    BlockPos other = BlockPos.of(nbt.getLong("fence_position"));
+                if(nbt.contains("fence_position", Constants.NBT.TAG_COMPOUND)) {
+                    BlockPos other = NBTUtil.readBlockPos(nbt.getCompound("fence_position"));
                     double dist = Math.sqrt(other.distSqr(pos));
                     if(dist > LIMIT) {
                         if(!world.isClientSide) {
                             player.displayClientMessage(new TranslationTextComponent("projectnublar.fences.length.toolong", Math.round(dist), LIMIT), true);
                         }
-                        nbt.putLong("fence_position", pos.asLong());
+                        nbt.put("fence_position", NBTUtil.writeBlockPos(pos));
                     } else if(world.getBlockState(other).getBlock() == this && !other.equals(pos)) {
                         int itemMax;
                         int itemAmount = itemMax = MathHelper.ceil(dist / BlockElectricFence.ITEM_FOLD*this.type.getHeight());
@@ -172,8 +154,8 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                         }
                         itemAmount -= stack.getCount();
 
-                        for (ItemStack itemStack : player.inventory.mainInventory) {
-                            if (itemStack != stack && itemStack.getItem() == ItemHandler.WIRE_SPOOL) {
+                        for (ItemStack itemStack : player.inventory.items) {
+                            if (itemStack != stack && itemStack.getItem() == ItemHandler.WIRE_SPOOL.get()) {
                                 if (itemAmount <= itemStack.getCount()) {
                                     total += itemAmount;
                                     stacksFound.add(Pair.of(itemStack, itemAmount));
@@ -187,8 +169,8 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                             }
                         }
                         if(!full) {
-                            if(!world.isRemote) {
-                                player.sendStatusMessage(new TextComponentTranslation("projectnublar.fences.length.notenough", itemMax, total), true);
+                            if(!world.isClientSide) {
+                                player.displayClientMessage(new TranslationTextComponent("projectnublar.fences.length.notenough", itemMax, total), true);
                             }
                         } else {
                             if(!player.isCreative()) {
@@ -197,53 +179,51 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                             for (double offset : this.type.getOffsets()) {
                                 List<BlockPos> positions = LineUtils.getBlocksInbetween(pos, other, offset);
                                 for (int i = 0; i < this.type.getHeight(); i++) {
-                                    BlockPos pos1 = pos.up(i);
-                                    BlockPos other1 = other.up(i);
+                                    BlockPos pos1 = pos.above(i);
+                                    BlockPos other1 = other.above(i);
                                     for (int i1 = 0; i1 < positions.size(); i1++) {
-                                        BlockPos position = positions.get(i1).up(i);
-                                        if (world.isAirBlock(position) || world.getBlockState(position).getBlock().isReplaceable(world, position)) {
-                                            world.setBlockState(position, BlockHandler.ELECTRIC_FENCE.getDefaultState());
+                                        BlockPos position = positions.get(i1).above(i);
+                                        if (world.getBlockState(position).isAir() || world.getBlockState(position).canBeReplaced(Fluids.EMPTY)) {
+                                            world.setBlock(position, BlockHandler.ELECTRIC_FENCE.get().defaultBlockState(), 3);
                                         }
-                                        TileEntity fencete = world.getTileEntity(position);
+                                        TileEntity fencete = world.getBlockEntity(position);
                                         if (fencete instanceof ConnectableBlockEntity) {
-                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.min(i1 + 1, positions.size() - 1)).up(i), positions.get(Math.max(i1 - 1, 0)).up(i), position));
-                                            fencete.markDirty();
-                                            world.notifyBlockUpdate(position, world.getBlockState(position), world.getBlockState(position), 3);
+                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.min(i1 + 1, positions.size() - 1)).above(i), positions.get(Math.max(i1 - 1, 0)).above(i), position));
                                         }
                                     }
                                 }
                             }
                         }
-                        nbt.setLong("fence_position", pos.toLong());
+                        nbt.put("fence_position", NBTUtil.writeBlockPos(pos));
                     } else {
-                        nbt.removeTag("fence_position");
+                        nbt.remove("fence_position");
                     }
                 } else {
-                    nbt.setLong("fence_position", pos.toLong());
+                    nbt.put("fence_position", NBTUtil.writeBlockPos(pos));
                 }
-                return true;
+                return ActionResultType.SUCCESS;
             }
-        } else if (world.getBlockState(pos.down(index)).getBlock() == this) {
-            return this.onBlockActivated(world, pos.down(index), world.getBlockState(pos.down(index)), player, hand, facing, hitX, hitY, hitZ);
+        } else if (world.getBlockState(pos.below(index)).getBlock() == this) {
+            return this.use(world.getBlockState(pos.below(index)), world, pos.below(index), player, hand, ray);
         }
-        return super.onBlockActivated(world, pos, state, player, hand, facing, hitX, hitY, hitZ);
+        return super.use(state, world, pos, player, hand, ray);
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
+    public void destroy(IWorld world, BlockPos pos, BlockState state) {
+        TileEntity tileEntity = world.getBlockEntity(pos);
         if(tileEntity instanceof BlockEntityElectricFencePole) {
             for (Connection connection : ((BlockEntityElectricFencePole) tileEntity).getConnections()) {
                 BlockPos blockpos = connection.getFrom();
                 if(blockpos.equals(pos)) {
                     blockpos = connection.getTo();
                 }
-                if(worldIn.getBlockState(blockpos).getBlock() != this) {
+                if(world.getBlockState(blockpos).getBlock() != this) {
                     for (BlockPos blockPos : LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset())) {
                         if(blockPos.equals(connection.getTo()) || blockPos.equals(connection.getFrom())) {
                             continue;
                         }
-                        TileEntity te = worldIn.getTileEntity(blockPos);
+                        TileEntity te = world.getBlockEntity(blockPos);
                         if(te instanceof ConnectableBlockEntity) {
                             boolean left = false;
                             for (Connection bitcon : ((ConnectableBlockEntity) te).getConnections()) {
@@ -253,7 +233,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                                 left |= !bitcon.isBroken();
                             }
                             if(!left) {
-                                worldIn.setBlockToAir(blockPos);
+                                world.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
                             }
                         }
                     }
@@ -261,68 +241,35 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
 
             }
         }
-        super.breakBlock(worldIn, pos, state);
+        super.destroy(world, pos, state);
         if(!destroying) {
             destroying = true;
             int index = state.getValue(indexProperty);
             for (int i = 1; i < index+1; i++) {
-                worldIn.setBlockToAir(pos.down(i)); //TODO: verify if our block?
+                world.setBlock(pos.below(i), Blocks.AIR.defaultBlockState(), 3); //TODO: verify if our block?
             }
             for (int i = 1; i < this.type.getHeight()-index; i++) {
-                worldIn.setBlockToAir(pos.up(i));
+                world.setBlock(pos.above(i), Blocks.AIR.defaultBlockState(), 3);
             }
             destroying = false;
         }
+        super.destroy(world, pos, state);
     }
 
     @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
         return state.getValue(POWERED_PROPERTY) && state.getValue(indexProperty) == this.type.getHeight()-1 ? this.type.getLightLevel() : 0;
     }
 
     @Override
-    public int getLightOpacity(IBlockState state) {
-        return super.getLightOpacity(state);
-    }
-
-    @Override
-    public boolean isFullBlock(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(indexProperty, meta);
-    }
-
-    @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
-    }
-
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(indexProperty);
-    }
-
-    @Override
-    public boolean hasTileEntity(IBlockState state) {
+    public boolean hasTileEntity(BlockState state) {
         return true;
     }
 
+
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return new BlockEntityElectricFencePole();
     }
 }

@@ -1,11 +1,11 @@
 package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.client.gui.AbstractGui;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,25 +31,28 @@ public class FlappyDinoScreen extends TabletScreen {
     private final List<Pipe> pipes = new ArrayList<>();
     private final Player player = new Player();
 
+
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         for (Pipe pipe : this.pipes) {
             int xPos = (int) (pipe.xPosition - PIPE_PIXELS_PER_TICK * partialTicks);
 
-            Gui.drawRect(xPos - HALF_PIPE_WIDTH, 0, xPos + HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening - HALF_PIPE_OPENING_WIDTH, 0xFF000000);
-            Gui.drawRect(xPos - HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening + HALF_PIPE_OPENING_WIDTH, xPos + HALF_PIPE_WIDTH, this.ySize, 0xFF000000);
+            AbstractGui.fill(stack, xPos - HALF_PIPE_WIDTH, 0, xPos + HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening - HALF_PIPE_OPENING_WIDTH, 0xFF000000);
+            AbstractGui.fill(stack, xPos - HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening + HALF_PIPE_OPENING_WIDTH, xPos + HALF_PIPE_WIDTH, this.ySize, 0xFF000000);
         }
 
         int playerY = (int) (this.player.prevYPosition + (this.player.yPosition - this.player.prevYPosition) * partialTicks);
-        Gui.drawRect(PLAYER_X_COORD - HALF_PLAYER_WIDTH, this.ySize - playerY - HALF_PLAYER_WIDTH, PLAYER_X_COORD + HALF_PLAYER_WIDTH, this.ySize - playerY + HALF_PLAYER_WIDTH, 0xFF00FF00);
+        AbstractGui.fill(stack, PLAYER_X_COORD - HALF_PLAYER_WIDTH, this.ySize - playerY - HALF_PLAYER_WIDTH, PLAYER_X_COORD + HALF_PLAYER_WIDTH, this.ySize - playerY + HALF_PLAYER_WIDTH, 0xFF00FF00);
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(this.xSize / 2F, 20, 0);
-        GlStateManager.scale(3F, 3F, 3F);
+        stack.pushPose();
+        stack.translate(this.xSize / 2F, 20, 0);
+        stack.scale(3F, 3F, 3F);
         String text = String.valueOf(this.counter);
-        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, -Minecraft.getMinecraft().fontRenderer.getStringWidth(text) / 2F, 0, 0xBCBCBC);
-        GlStateManager.popMatrix();
+        Minecraft.getInstance().font.drawShadow(stack, text, -Minecraft.getInstance().font.width(text) / 2F, 0, 0xBCBCBC);
+        stack.popPose();
     }
+
+
 
     @Override
     public void updateScreen() {
@@ -100,17 +103,18 @@ public class FlappyDinoScreen extends TabletScreen {
     }
 
     @Override
-    public void onMouseClicked(int mouseX, int mouseY, int mouseButton) {
+    public boolean mouseClicked(double p_231044_1_, double p_231044_3_, int p_231044_5_) {
         this.jump();
-        super.onMouseClicked(mouseX, mouseY, mouseButton);
+        return true;
     }
 
     @Override
-    public void onKeyTyped(char typedChar, int keyCode) {
-        if(keyCode == Keyboard.KEY_SPACE) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(keyCode == GLFW.GLFW_KEY_SPACE) {
             this.jump();
+            return true;
         }
-        super.onKeyTyped(typedChar, keyCode);
+        return false;
     }
 
     private void jump() {

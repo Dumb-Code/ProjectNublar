@@ -1,16 +1,19 @@
 package net.dumbcode.projectnublar.server.item;
 
-import lombok.RequiredArgsConstructor;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Enchantments;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-@RequiredArgsConstructor
 public class FilterItem extends Item {
 
     private final float efficiency;
+
+    public FilterItem(float efficiency, Properties properties) {
+        super(properties);
+        this.efficiency = efficiency;
+    }
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
@@ -18,14 +21,14 @@ public class FilterItem extends Item {
     }
 
     public float getEfficiency(ItemStack stack) {
-        return this.efficiency * (1F - (0.75F * (float)stack.getItemDamage()/stack.getMaxDamage()));
+        return this.efficiency * (1F - (0.75F * (float)stack.getDamageValue()/stack.getMaxDamage()));
     }
 
     @Override
-    public boolean onEntityItemUpdate(EntityItem entityItem) {
-        if(entityItem.isInWater()) {
-            entityItem.getItem().setItemDamage(0);
+    public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
+        if(entity.isInWater()) {
+            stack.setDamageValue(0);
         }
-        return super.onEntityItemUpdate(entityItem);
+        return false;
     }
 }

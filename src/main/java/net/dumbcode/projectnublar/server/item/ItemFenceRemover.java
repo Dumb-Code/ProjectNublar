@@ -4,43 +4,43 @@ import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
 public class ItemFenceRemover extends Item {
 
+    public ItemFenceRemover(Properties p_i48487_1_) {
+        super(p_i48487_1_);
+    }
+
     @Override
-    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        RayTraceResult result = ForgeHooks.rayTraceEyes(player, 7);
-        if(result != null && result.hitInfo instanceof BlockConnectableBase.HitChunk) {
-            Connection connection = ((BlockConnectableBase.HitChunk) result.hitInfo).getConnection();
+    public ActionResultType useOn(ItemUseContext context) {
+        Object info = context.hitResult.hitInfo;
+        if(info instanceof BlockConnectableBase.HitChunk) {
+            Connection connection = ((BlockConnectableBase.HitChunk) info).getConnection();
             for (BlockPos blockPos : LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset())) {
-                TileEntity te = worldIn.getTileEntity(blockPos);
-                if(te instanceof ConnectableBlockEntity) {
+                TileEntity te = context.getLevel().getBlockEntity(blockPos);
+                if (te instanceof ConnectableBlockEntity) {
                     boolean left = false;
                     for (Connection c : ((ConnectableBlockEntity) te).getConnections()) {
-                        if(connection.lazyEquals(c)) {
+                        if (connection.lazyEquals(c)) {
                             c.setBroken(true);
                         } else {
                             left |= !c.isBroken();
                         }
                     }
-                    if(!left && ((ConnectableBlockEntity) te).removedByFenceRemovers()) {
-                        worldIn.setBlockToAir(blockPos);
+                    if (!left && ((ConnectableBlockEntity) te).removedByFenceRemovers()) {
+                        context.getLevel().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
                     }
                 }
             }
-            return EnumActionResult.SUCCESS;
+            return ActionResultType.SUCCESS;
         }
-        return super.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+        return super.useOn(context);
     }
 
 }

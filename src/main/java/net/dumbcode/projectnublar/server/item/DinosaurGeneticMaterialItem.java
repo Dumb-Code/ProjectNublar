@@ -11,10 +11,11 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
 
     private final String key;
 
-    public DinosaurGeneticMaterialItem(Dinosaur dinosaur) {
-        super(dinosaur);
+    public DinosaurGeneticMaterialItem(Dinosaur dinosaur, Properties properties) {
+        super(dinosaur, properties);
         this.key = dinosaur.getRegName().toString();
     }
+
 
     @Override
     public int getSize(ItemStack stack) {

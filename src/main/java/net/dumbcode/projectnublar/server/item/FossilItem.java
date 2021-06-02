@@ -4,25 +4,23 @@ import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
-public class FossilItem extends Item implements DinosaurProvider {
+public class FossilItem extends BasicDinosaurItem {
 
-    @Getter
-    private final Dinosaur dinosaur;
     @Getter
     private final String variant;
-    private final TextComponentTranslation stackDisplayName;
+    private final TranslationTextComponent stackDisplayName;
 
-    public FossilItem(Dinosaur dinosaur, String variant) {
-        this.dinosaur = dinosaur;
+    public FossilItem(Dinosaur dinosaur, String variant, Item.Properties properties) {
+        super(dinosaur, properties);
         this.variant = variant;
-        this.stackDisplayName = new TextComponentTranslation(ProjectNublar.MODID + ".item.fossil.name", this.dinosaur.createNameComponent(), this.variant);
+        this.stackDisplayName = new TranslationTextComponent(ProjectNublar.MODID + ".item.fossil.name", this.dinosaur.createNameComponent(), this.variant);
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
-        return stackDisplayName.getUnformattedText();
+    public ITextComponent getDescription() {
+        return this.stackDisplayName;
     }
 }

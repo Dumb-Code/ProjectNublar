@@ -3,32 +3,37 @@ package net.dumbcode.projectnublar.server.item;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class DinosaurEggItem extends BasicDinosaurItem {
-    public DinosaurEggItem(Dinosaur dinosaur) {
-        super(dinosaur);
+
+    public DinosaurEggItem(Dinosaur dinosaur, Properties properties) {
+        super(dinosaur, properties);
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if(!worldIn.isRemote) {
-            DinosaurEntity entity = this.getDinosaur().createEntity(worldIn);
+    public ActionResultType useOn(ItemUseContext context) {
+        PlayerEntity player = context.getPlayer();
+        World world = player.level;
+        Vector3d location = context.getClickLocation();
+        BlockPos pos = context.getClickedPos();
+        if(!world.isClientSide) {
+            DinosaurEntity entity = this.getDinosaur().createEntity(world);
 
-            entity.get(EntityComponentTypes.GENDER).ifPresent(c -> c.male = worldIn.rand.nextBoolean());
+            entity.get(EntityComponentTypes.GENDER).ifPresent(c -> c.male = world.random.nextBoolean());
 
-            entity.setLocationAndAngles(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
-            entity.rotationYawHead = entity.rotationYaw;
-            entity.renderYawOffset = entity.rotationYaw;
+            entity.setPos(pos.getX() + location.x, pos.getY() + location.y, pos.getZ() + location.z);
+            entity.xRot = 0;
+            entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
 
-            worldIn.spawnEntity(entity);
+            world.addFreshEntity(entity);
         }
-        return EnumActionResult.SUCCESS;
+        return ActionResultType.SUCCESS;
     }
 }

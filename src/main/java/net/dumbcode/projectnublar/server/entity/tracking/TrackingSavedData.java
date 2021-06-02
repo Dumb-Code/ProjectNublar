@@ -7,6 +7,7 @@ import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
@@ -64,7 +65,7 @@ public class TrackingSavedData extends WorldSavedData {
     public static class DataEntry {
         private final UUID uuid;
         @EqualsAndHashCode.Exclude
-        private final Vec3d position;
+        private final Vector3d position;
         @EqualsAndHashCode.Exclude
         private final List<TrackingDataInformation> information = new ArrayList<>();
 

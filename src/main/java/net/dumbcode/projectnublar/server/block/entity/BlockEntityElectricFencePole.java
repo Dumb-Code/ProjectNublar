@@ -7,12 +7,16 @@ import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.render.model.ProjectNublarModelData;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.capabilities.Capability;
@@ -30,6 +34,11 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
 
     @Getter
     private boolean flippedAround;
+
+    @Getter
+    private VoxelShape cachedShape = VoxelShapes.block();
+
+    private double cachedRotation = 90;
 
     private final MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
     private final LazyOptional<MachineModuleEnergyStorage> energyCap = LazyOptional.of(() -> this.energy);
@@ -88,7 +97,6 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
             update = true;
         }
 
-
         this.energy.extractRaw(10);
         BlockState state = this.level.getBlockState(this.getBlockPos());
         if (state.getBlock() instanceof BlockElectricFencePole && state.getValue(((BlockElectricFencePole) state.getBlock()).indexProperty) == 0) {
@@ -121,12 +129,32 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
         }
     }
 
+
+
+    @Override
+    public void requestModelDataUpdate() {
+        this.cachedRotation = this.computeRotation();
+
+        BlockState state = this.level.getBlockState(this.getBlockPos());
+        if (state.getBlock() instanceof BlockElectricFencePole) {
+            ConnectionType type = ((BlockElectricFencePole) state.getBlock()).getType();
+
+            float t = type.getHalfSize();
+            double x = Math.sin(this.cachedRotation) * type.getRadius();
+            double z = Math.cos(this.cachedRotation) * type.getRadius();
+            this.cachedShape = VoxelShapes.box(x-t, 0, z-t, x+t, 1, z+t).move(0.5, 0, 0.5);
+        }
+
+        super.requestModelDataUpdate();
+
+    }
+
     @Nonnull
     @Override
     public IModelData getModelData() {
         return new ModelDataMap.Builder()
             .withInitial(ProjectNublarModelData.CONNECTIONS, this.compiledRenderData())
-            .withInitial(ProjectNublarModelData.FENCE_POLE_ROTATION_DEGS, this.computeRotation())
+            .withInitial(ProjectNublarModelData.FENCE_POLE_ROTATION_DEGS, this.cachedRotation)
             .build();
     }
 
