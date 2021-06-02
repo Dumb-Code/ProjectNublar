@@ -3,85 +3,55 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.Getter;
-import lombok.Setter;
-import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
+import net.dumbcode.dumblibrary.server.utils.MathUtils;
+import net.dumbcode.projectnublar.client.render.model.ProjectNublarModelData;
 import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
-public class BlockEntityElectricFencePole extends SimpleBlockEntity implements ConnectableBlockEntity, ITickable {
+public class BlockEntityElectricFencePole extends BlockEntityElectricFence implements ConnectableBlockEntity, ITickableTileEntity {
 
-    private Set<Connection> fenceConnections = Sets.newLinkedHashSet();
+    @Getter
+    private boolean flippedAround;
 
-    @Getter @Setter
-    private boolean rotatedAround = false;
+    private final MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
+    private final LazyOptional<MachineModuleEnergyStorage> energyCap = LazyOptional.of(() -> this.energy);
 
-    private MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
-    
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        NBTTagList nbt = new NBTTagList();
-        for (Connection connection : this.fenceConnections) {
-            nbt.appendTag(connection.writeToNBT(new NBTTagCompound()));
-        }
-        compound.setTag("connections", nbt);
-        compound.setBoolean("rotated", this.rotatedAround);
-
-        NBTTagCompound energyNBT = new NBTTagCompound();
-        energyNBT.setInteger("Amount", this.energy.getEnergyStored());
-        compound.setTag("Energy", energyNBT);
-
-        return super.writeToNBT(compound);
+    public BlockEntityElectricFencePole() {
+        super(ProjectNublarBlockEntities.ELECTRIC_FENCE_POLE.get());
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.rotatedAround = compound.getBoolean("rotated");
-        this.fenceConnections.clear();
-        NBTTagList nbt = compound.getTagList("connections", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < nbt.tagCount(); i++) {
-            Connection connection = Connection.fromNBT(nbt.getCompoundTagAt(i), this);
-            if(connection.isValid()) {
-                this.fenceConnections.add(connection);
-            }
-        }
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.putBoolean("rotation_flipped", this.flippedAround);
+        compound.putInt("energy", this.energy.getEnergyStored());
 
-        NBTTagCompound energyNBT = compound.getCompoundTag("Energy");
-        this.energy = new MachineModuleEnergyStorage(350, 350, 250, energyNBT.getInteger("Amount"));
+        return super.save(compound);
     }
 
-    @Override
-    public double getMaxRenderDistanceSquared() {
-        return Double.MAX_VALUE;
-    }
 
     @Override
-    public void addConnection(Connection connection) {
-        this.fenceConnections.add(connection);
-    }
-
-    @Override
-    public Set<Connection> getConnections() {
-        return this.fenceConnections;
+    public void load(BlockState state, CompoundNBT compound) {
+        super.load(state, compound);
+        this.flippedAround = compound.getBoolean("rotation_flipped");
+        this.energy.setEnergy(compound.getInt("energy"));
     }
 
     @Override
@@ -89,63 +59,55 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
         return false;
     }
 
+
+    public void setFlippedAround(boolean flippedAround) {
+        this.flippedAround = flippedAround;
+        this.requestModelDataUpdate();
+    }
+
+    @Nonnull
     @Override
-    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-        if(capability == CapabilityEnergy.ENERGY) {
-            IBlockState state = this.world.getBlockState(this.pos);
-            if(state.getBlock() instanceof BlockElectricFencePole) {
-                TileEntity base = this.world.getTileEntity(this.pos.down(state.getValue(((BlockElectricFencePole) state.getBlock()).INDEX_PROPERTY)));
-                if(base instanceof BlockEntityElectricFencePole) {
-                    return true;
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityEnergy.ENERGY) {
+            BlockState state = this.level.getBlockState(this.getBlockPos());
+            if (state.getBlock() instanceof BlockElectricFencePole) {
+                TileEntity base = this.level.getBlockEntity(this.getBlockPos().below(state.getValue(((BlockElectricFencePole) state.getBlock()).indexProperty)));
+                if (base instanceof BlockEntityElectricFencePole) {
+                    return ((BlockEntityElectricFencePole) base).energyCap.cast();
                 }
             }
         }
-        return super.hasCapability(capability, facing);
-    }
-
-    @Nullable
-    @Override
-    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if(capability == CapabilityEnergy.ENERGY) {
-            IBlockState state = this.world.getBlockState(this.pos);
-            if(state.getBlock() instanceof BlockElectricFencePole) {
-                TileEntity base = this.world.getTileEntity(this.pos.down(state.getValue(((BlockElectricFencePole) state.getBlock()).INDEX_PROPERTY)));
-                if(base instanceof BlockEntityElectricFencePole) {
-                    return CapabilityEnergy.ENERGY.cast(((BlockEntityElectricFencePole) base).energy);
-                }
-            }
-        }
-        return super.getCapability(capability, facing);
+        return super.getCapability(cap, side);
     }
 
     @Override
-    public void update() {
+    public void tick() {
         boolean powered = this.energy.getEnergyStored() > 0;
         boolean update = false;
-        if(this.world.getBlockState(this.pos).getValue(BlockElectricFencePole.POWERED_PROPERTY) != powered) {
+        if (this.level.getBlockState(this.getBlockPos()).getValue(BlockElectricFencePole.POWERED_PROPERTY) != powered) {
             update = true;
         }
 
 
         this.energy.extractRaw(10);
-        IBlockState state = this.world.getBlockState(this.pos);
-        if(state.getBlock() instanceof BlockElectricFencePole && state.getValue(((BlockElectricFencePole) state.getBlock()).INDEX_PROPERTY) == 0) {
-            if(update) {
+        BlockState state = this.level.getBlockState(this.getBlockPos());
+        if (state.getBlock() instanceof BlockElectricFencePole && state.getValue(((BlockElectricFencePole) state.getBlock()).indexProperty) == 0) {
+            if (update) {
                 for (int y = 0; y < ((BlockElectricFencePole) state.getBlock()).getType().getHeight(); y++) {
-                    BlockPos pos = this.pos.up(y);
-                    IBlockState s =this.world.getBlockState(pos);
-                    if(s.getBlock() == state.getBlock()) { //When placing the blocks can be air
-                        this.world.setBlockState(pos, s.withProperty(BlockElectricFencePole.POWERED_PROPERTY, powered));
+                    BlockPos pos = this.getBlockPos().above(y);
+                    BlockState s = this.level.getBlockState(pos);
+                    if (s.getBlock() == state.getBlock()) { //When placing the blocks can be air
+                        this.level.setBlock(pos, s.setValue(BlockElectricFencePole.POWERED_PROPERTY, powered), 3);
                     }
                 }
             }
             //Pass power to other poles connected to this.
-            if(this.energy.getEnergyStored() > 300) {
+            if (this.energy.getEnergyStored() > 300) {
                 Set<IEnergyStorage> storages = Sets.newLinkedHashSet();
-                for (Connection connection : this.fenceConnections) {
-                    TileEntity te = this.world.getTileEntity(connection.getPosition().equals(connection.getFrom()) ? connection.getTo() : connection.getFrom());
-                    if(te != null && te.hasCapability(CapabilityEnergy.ENERGY, null)) {
-                        storages.add(Objects.requireNonNull(te.getCapability(CapabilityEnergy.ENERGY, null)));
+                for (Connection connection : this.getConnections()) {
+                    TileEntity te = this.level.getBlockEntity(connection.getPosition().equals(connection.getFrom()) ? connection.getTo() : connection.getFrom());
+                    if (te != null) {
+                        te.getCapability(CapabilityEnergy.ENERGY).ifPresent(storages::add);
                     }
                 }
                 List<IEnergyStorage> list = Lists.newArrayList(storages);
@@ -159,13 +121,67 @@ public class BlockEntityElectricFencePole extends SimpleBlockEntity implements C
         }
     }
 
+    @Nonnull
     @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
-        return oldState.getBlock() != newSate.getBlock();
+    public IModelData getModelData() {
+        return new ModelDataMap.Builder()
+            .withInitial(ProjectNublarModelData.CONNECTIONS, this.compiledRenderData())
+            .withInitial(ProjectNublarModelData.FENCE_POLE_ROTATION_DEGS, this.computeRotation())
+            .build();
     }
 
-    @Override
-    public AxisAlignedBB getRenderBoundingBox() {
-        return new AxisAlignedBB(this.pos.add(-1, -1, -1), this.pos.add(1, 1, 1));
+    private double computeRotation() {
+        double rotation = 90F;
+        BlockState state = this.level.getBlockState(this.getBlockPos());
+        if (state.getBlock() instanceof BlockElectricFencePole) {
+            BlockElectricFencePole pole = (BlockElectricFencePole) state.getBlock();
+            TileEntity te = this.level.getBlockEntity(this.getBlockPos().below(state.getValue((pole).indexProperty)));
+            if (te instanceof BlockEntityElectricFencePole) {
+
+                BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
+                if (!ef.getConnections().isEmpty()) {
+
+                    List<Connection> differingConnections = Lists.newArrayList();
+                    for (Connection connection : ef.getConnections()) {
+                        boolean has = false;
+                        for (Connection dc : differingConnections) {
+                            if (connection.getFrom().equals(dc.getFrom()) && connection.getTo().equals(dc.getTo())) {
+                                has = true;
+                                break;
+                            }
+                        }
+                        if (!has) {
+                            differingConnections.add(connection);
+                        }
+                    }
+
+                    if (differingConnections.size() == 1) {
+                        Connection connection = differingConnections.get(0);
+                        double[] in = connection.getIn();
+                        rotation += (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0]))) + 90F;
+                    } else {
+                        Connection connection1 = differingConnections.get(0);
+                        Connection connection2 = differingConnections.get(1);
+
+                        double[] in1 = connection1.getIn();
+                        double[] in2 = connection2.getIn();
+
+                        double angle1 = MathUtils.horizontalDegree(in1[1] - in1[0], in1[2] - in1[3], connection1.getPosition().equals(connection1.getMin()));
+                        double angle2 = MathUtils.horizontalDegree(in2[1] - in2[0], in2[2] - in2[3], connection2.getPosition().equals(connection2.getMin()));
+
+                        rotation += (float) (angle1 + (angle2 - angle1) / 2D);
+                    }
+                }
+
+                rotation += pole.getType().getRotationOffset() + 90F;
+                if (ef.isFlippedAround()) {
+                    rotation += 180;
+                }
+            }
+            while (rotation < 0) {
+                rotation += 360;
+            }
+        }
+        return rotation;
     }
 }

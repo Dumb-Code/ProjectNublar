@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Getter;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.RenderUtils;
@@ -9,22 +11,17 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.IPosWrapper;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.util.math.vector.*;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -50,32 +47,31 @@ public class RotatedRayBox {
         this.transform(start, this.forward);
         this.transform(end, this.forward);
 
-        Vec3d sv = new Vec3d(start.x, start.y, start.z);
-        Vec3d ev = new Vec3d(end.x, end.y, end.z);
+        Vector3d sv = new Vector3d(start);
+        Vector3d ev = new Vector3d(end);
 
-        Vec3d diff = sv.subtract(ev);
+        Vector3d diff = sv.subtract(ev);
 
         //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
         sv = sv.add(diff.x*100, diff.y*100, diff.z*100);
         ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
 
-        RayTraceResult result = this.box.calculateIntercept(sv, ev);
+        BlockRayTraceResult result = AxisAlignedBB.clip(Collections.singleton(this.box), sv, ev, BlockPos.ZERO);
         if(result != null) {
-            EnumFacing hitDir = result.sideHit;
-            Vec3d hit = result.hitVec;
-            double dist = hit.squareDistanceTo(start.x, start.y, start.z);
+            Direction hitDir = result.getDirection();
+            Vector3d hit = result.getLocation();
+            double dist = hit.distanceToSqr(start.x(), start.y(), start.z());
 
-            Vector3d hitvec = new Vector3d(hit.x, hit.y, hit.z);
-            this.backwards.transform(hitvec);
-
-
-            Vec3i vec = result.sideHit.getDirectionVec();
-            Vector3d sidevec = new Vector3d(vec.getX(), vec.getY(), vec.getZ());
-            this.backwards.transform(sidevec);
+            Vector3f hitVec = new Vector3f(hit);
+            this.transform(hitVec, this.backwards);
 
 
+            Vector3i vec = result.getDirection().getNormal();
+            Vector3f sidevec = new Vector3f(vec.getX(), vec.getY(), vec.getZ());
+            this.transform(sidevec, this.backwards);
 
-            result = new RayTraceResult(new Vec3d(hitvec.x, hitvec.y, hitvec.z), EnumFacing.getFacingFromVector((float) sidevec.x, (float) sidevec.y, (float) sidevec.z));
+
+            result = new BlockRayTraceResult(new Vector3d(hitVec), Direction.getNearest(sidevec.x(), sidevec.y(), sidevec.z()), BlockPos.ZERO, true);
             result.hitInfo = dist;
 
             return new Result(this, result, hitDir, start, end, startIn, endIn, hit, dist);
@@ -89,23 +85,29 @@ public class RotatedRayBox {
         vec.set(v.x(), v.y(), v.z());
     }
 
-    public Vector3d[] points() {
-        return points(RotatedRayBox.this.box);
+    public Vector3f[] points() {
+        return points(RotatedRayBox.this.box, 0, 0, 0);
     }
 
-    public Vector3d[] points(AxisAlignedBB box) {
+    public Vector3f[] points(AxisAlignedBB box, double x, double y, double z) {
         int[] values = new int[] {0, 1};
-        Vector3d[] points = new Vector3d[8];
+        Vector3f[] points = new Vector3f[8];
 
         for (int xb : values) {
             for (int yb : values) {
                 for (int zb : values) {
-                    points[(xb << 2) + (yb << 1) + zb] = new Vector3d(xb == 1 ? box.maxX : box.minX, yb == 1 ? box.maxY : box.minY, zb == 1 ? box.maxZ : box.minZ);
+                    points[(xb << 2) + (yb << 1) + zb] = new Vector3f(
+                        new Vector3d(
+                            xb == 1 ? box.maxX : box.minX,
+                            yb == 1 ? box.maxY : box.minY,
+                            zb == 1 ? box.maxZ : box.minZ
+                        ).add(x, y, z)
+                    );
                 }
             }
         }
-        for (Vector3d point : points) {
-            RotatedRayBox.this.backwards.transform(point);
+        for (Vector3f point : points) {
+            RotatedRayBox.this.transform(point, RotatedRayBox.this.backwards);
         }
         return points;
     }
@@ -156,58 +158,47 @@ public class RotatedRayBox {
         private final Direction hitDir;
         private final Vector3d startRotated;
         private final Vector3d endRotated;
-        private final Vec3d start;
-        private final Vec3d end;
-        private final Vec3d hitRotated;
+        private final Vector3d start;
+        private final Vector3d end;
+        private final Vector3d hitRotated;
         private final double distance;
 
-        public void debugRender() {
+        public void debugRender(MatrixStack stack, IRenderTypeBuffer buffers, double x, double y, double z) {
+            stack.translate(x + this.parent.origin.x(), y + this.parent.origin.y(), z + this.parent.origin.z());
+            Matrix4f pose = stack.last().pose();
 
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(this.parent.origin.x, this.parent.origin.y, this.parent.origin.z);
-            GlStateManager.shadeModel(GL11.GL_SMOOTH);
-            GlStateManager.depthMask(true);
 
-            BufferBuilder buff = Tessellator.getInstance().getBuffer();
+            Vector3d sv = new Vector3d(this.startRotated.x, this.startRotated.y, this.startRotated.z);
+            Vector3d ev = new Vector3d(this.endRotated.x, this.endRotated.y, this.endRotated.z);
 
-            Vec3d sv = new Vec3d(this.startRotated.x, this.startRotated.y, this.startRotated.z);
-            Vec3d ev = new Vec3d(this.endRotated.x, this.endRotated.y, this.endRotated.z);
-
-            Vec3d diff = sv.subtract(ev);
+            Vector3d diff = sv.subtract(ev);
 
             //Due to the calculations, the points can appear inside the aabb, meaning the aabb calcualtion is wrong. This is just to extend both points a substantial amount to make it work
-            sv = sv.add(diff.x*100, diff.y*100, diff.z*100);
-            ev = ev.subtract(diff.x*100, diff.y*100, diff.z*100);
+            sv = sv.add(diff.x()*100, diff.y()*100, diff.z()*100);
+            ev = ev.subtract(diff.x()*100, diff.y()*100, diff.z()*100);
 
             //Draw a line from the where the players eyes are, and where theyre looking in transformed space
-            buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-            buff.pos(sv.x, sv.y, sv.z).color(1f, 0, 0, 1).endVertex();
-            buff.pos(ev.x, ev.y, ev.z).color(0f, 1f, 0f, 1f).endVertex();
-            Tessellator.getInstance().draw();
+            IVertexBuilder buff = buffers.getBuffer(RenderType.lines());
+            buff.vertex(pose, (float) sv.x, (float) sv.y, (float) sv.z).color(1f, 0, 0, 1).endVertex();
+            buff.vertex(pose, (float) ev.x, (float) ev.y, (float) ev.z).color(0f, 1f, 0f, 1f).endVertex();
 
             //Draw a light blue line where the vector is hit in transformed space
-            buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-            buff.pos(this.hitRotated.x, this.hitRotated.y, this.hitRotated.z).color(0f, 1f, 1, 1F).endVertex();
-            buff.pos(this.hitRotated.x, this.hitRotated.y+0.25, this.hitRotated.z).color(0f, 1f, 1f, 1F).endVertex();
-            Tessellator.getInstance().draw();
+            buff.vertex(pose, (float) this.hitRotated.x, (float) this.hitRotated.y, (float) this.hitRotated.z).color(0f, 1f, 1, 1F).endVertex();
+            buff.vertex(pose, (float) this.hitRotated.x, (float) this.hitRotated.y+0.25F, (float) this.hitRotated.z).color(0f, 1f, 1f, 1F).endVertex();
 
             //Draw a yellow line where the vector is hit in real space (should be right in front of the mouse)
-            buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-            buff.pos(result.hitVec.x, result.hitVec.y, result.hitVec.z).color(1f, 1f, 0, 1F).endVertex();
-            buff.pos(result.hitVec.x, result.hitVec.y+0.25, result.hitVec.z).color(1f, 1f, 0f, 1F).endVertex();
-            Tessellator.getInstance().draw();
-
+            Vector3d hitVec = result.getLocation();
+            buff.vertex(pose, (float) hitVec.x, (float) hitVec.y, (float) hitVec.z).color(1f, 1f, 0, 1F).endVertex();
+            buff.vertex(pose, (float) hitVec.x, (float) hitVec.y+0.25F, (float) hitVec.z).color(1f, 1f, 0f, 1F).endVertex();
 
             //Draw a cubeoid of the transformed collision box
-            RenderHelper.enableStandardItemLighting();
-            GlStateManager.color(1,1,1,1);
+            RenderHelper.setupForFlatItems();
             AxisAlignedBB aabb = this.parent.box;
-            RenderUtils.drawCubeoid(new Vec3d(aabb.minX, aabb.minY, aabb.minZ), new Vec3d(aabb.maxX, aabb.maxY, aabb.maxZ));
-            GlStateManager.disableLighting();
-            RenderGlobal.drawSelectionBoundingBox(aabb, 1,0,0,1F);
+            RenderUtils.drawCubeoid(stack, new Vector3d(aabb.minX, aabb.minY, aabb.minZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ), buffers.getBuffer(RenderType.waterMask()));
 
-            GlStateManager.popMatrix();
+            WorldRenderer.renderLineBox(stack, buff, aabb, 1, 0, 0, 1F);
 
+            stack.popPose();
         }
     }
 }

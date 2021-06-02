@@ -2,6 +2,8 @@ package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Getter;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.RenderUtils;
@@ -11,62 +13,51 @@ import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.utils.Connection;
+import net.dumbcode.projectnublar.server.utils.DelegateVoxelShape;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.dumbcode.projectnublar.server.utils.RotatedRayBox;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
-import net.minecraft.particles.ParticleType;
-import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.common.ForgeConfig;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
-import javax.vecmath.Vector3d;
 import java.util.List;
 import java.util.Set;
 
+@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public class BlockConnectableBase extends Block {
 
     //Set this at your own will, just remember to set it back to true after collection
@@ -77,22 +68,10 @@ public class BlockConnectableBase extends Block {
         super(properties);
     }
 
-    @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
-        if(worldIn.isRemote ? collidableClient : collidableServer) {
-            TileEntity te = worldIn.getTileEntity(pos);
-            if(te instanceof ConnectableBlockEntity) {
-                for (AxisAlignedBB bb : this.createBoundingBox(((ConnectableBlockEntity) te).getConnections(), pos)) {
-                    addCollisionBoxToList(pos, entityBox, collidingBoxes, bb);
-                }
-                return;
-            }
-        }
-    }
 
     @Override
     public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
-        if(!ForgeConfig.SERVER.fullBoundingBoxLadders.get()) {
+        if (!ForgeConfig.SERVER.fullBoundingBoxLadders.get()) {
             ForgeConfig.SERVER.fullBoundingBoxLadders.set(true);
         }
         TileEntity te = world.getBlockEntity(pos);
@@ -104,7 +83,7 @@ public class BlockConnectableBase extends Block {
                 AxisAlignedBB box = boxIn.move(pos);
                 if (enityxzbox.intersects(box) && (!entityBox.inflate(0, 0.025D, 0).intersects(box) || !entityBox.inflate(0, -0.025D, 0).intersects(box))) {
                     intersect = true;
-                    if(boxIn.getConnection().isPowered(world)) {
+                    if (boxIn.getConnection().isPowered(world)) {
                         return false;
                     }
                 }
@@ -117,18 +96,18 @@ public class BlockConnectableBase extends Block {
     public void entityInside(BlockState state, World worldIn, BlockPos pos, Entity entityIn) {
         TileEntity te = worldIn.getBlockEntity(pos);
         AxisAlignedBB entityBox = entityIn.getBoundingBox();
-        if(te instanceof ConnectableBlockEntity) {
+        if (te instanceof ConnectableBlockEntity) {
             entityBox = entityBox.inflate(0.1D);
             for (ConnectionAxisAlignedBB box : this.createBoundingBox(((ConnectableBlockEntity) te).getConnections(), pos)) {
                 if (entityBox.intersects(box.move(pos)) && box.getConnection().isPowered(worldIn)) {
 
-                    Vector3d vec = new Vector3d((entityBox.maxX+entityBox.minX)/2, (entityBox.maxY+entityBox.minY)/2, (entityBox.maxZ+entityBox.minZ)/2);
+                    Vector3d vec = new Vector3d((entityBox.maxX + entityBox.minX) / 2, (entityBox.maxY + entityBox.minY) / 2, (entityBox.maxZ + entityBox.minZ) / 2);
                     vec.subtract(box.getConnection().getCenter());
                     vec.normalize();
 
                     Vector3d center = this.center(box.move(pos));
                     Vector3d other = this.center(entityBox);
-                    if(!worldIn.isClientSide) {
+                    if (!worldIn.isClientSide) {
                         entityIn.hurt(DamageSourceHandler.FENCE_ELECTRIC, 1F);
 
                         int times = 3;
@@ -149,7 +128,7 @@ public class BlockConnectableBase extends Block {
                         }
                     }
 
-                    if(!entityIn.isOnGround()) {
+                    if (!entityIn.isOnGround()) {
                         vec = vec.scale(0.4D);
                     }
 
@@ -171,7 +150,11 @@ public class BlockConnectableBase extends Block {
         return new Vector3d(box.minX + (box.maxX - box.minX) * 0.5D, box.minY + (box.maxY - box.minY) * 0.5D, box.minZ + (box.maxZ - box.minZ) * 0.5D);
     }
 
+    @SubscribeEvent
     public static void onDrawBlock(DrawHighlightEvent.HighlightBlock event) {
+        IRenderTypeBuffer buffers = event.getBuffers();
+        MatrixStack stack = event.getMatrix();
+        IVertexBuilder buffer = buffers.getBuffer(RenderType.lines());
         BlockRayTraceResult target = event.getTarget();
         if (target.getType() == RayTraceResult.Type.BLOCK && target.hitInfo instanceof BlockConnectableBase.HitChunk) {
             World world = Minecraft.getInstance().level;
@@ -185,135 +168,138 @@ public class BlockConnectableBase extends Block {
                 double d4 = player.yOld + (player.yo - player.yOld) * (double) event.getPartialTicks();
                 double d5 = player.zOld + (player.zo - player.zOld) * (double) event.getPartialTicks();
 
-//                GlStateManager.enableBlend();
-//                GlStateManager.enableAlpha();
-//                GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-//                GlStateManager.glLineWidth(2.0F);
-//                GlStateManager.disableTexture2D();
-//                GlStateManager.depthMask(false);
-
                 Connection connection = chunk.getConnection();
                 double[] in = connection.getIn();
 
-                Tessellator.getInstance().getBuffer().setTranslation(-d3, -d4, -d5);
-
                 if (ProjectNublar.DEBUG) {
-                    chunk.getResult().debugRender();
+                    chunk.getResult().debugRender(stack, buffers, -d3, -d4, -d5);
                 }
 
-                Tessellator.getInstance().getBuffer().setTranslation(-d3 + in[0], -d4 + in[4], -d5 + in[2]);
+                double x = -d3 + in[0];
+                double y = -d4 + in[4];
+                double z = -d5 + in[2];
+
 
                 boolean pb = connection.brokenSide(world, false);
                 boolean nb = connection.brokenSide(world, true);
 
                 if (nb || pb) {
-                    Vec3d center = chunk.getAabb().getCenter();
+                    Vector3d center = chunk.getAabb().getCenter();
                     double ycent = (chunk.getAabb().maxY - chunk.getAabb().minY) / 2;
                     double zcent = (chunk.getAabb().maxZ - chunk.getAabb().minZ) / 2;
 
                     if (nb) {
-                        Vector3d[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
+                        Vector3f[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent), x, y, z);
                         for (int i = 0; i < 4; i++) {
                             bases[i + 4].add(connection.getNextCache().getPoint());
                         }
-                        RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
+                        RenderUtils.renderBoxLines(stack, buffer, bases, Direction.SOUTH);
                     }
                     if (pb) {
-                        Vector3d[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent));
+                        Vector3f[] bases = connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, center.x, center.y + ycent, center.z + zcent), x, y, z);
                         for (int i = 0; i < 4; i++) {
                             bases[i + 4].add(connection.getPrevCache().getPoint());
                         }
-                        RenderUtils.renderBoxLines(bases, EnumFacing.SOUTH);
+                        RenderUtils.renderBoxLines(stack, buffer, bases, Direction.SOUTH);
                     }
                     if (nb != pb) {
                         if (nb) {
-                            RenderUtils.renderBoxLines(connection.getRayBox().points(new AxisAlignedBB(chunk.getAabb().minX, chunk.getAabb().minY, chunk.getAabb().minZ, center.x, center.y + ycent, center.z + zcent)), EnumFacing.NORTH);
+                            RenderUtils.renderBoxLines(stack, buffer, connection.getRayBox().points(new AxisAlignedBB(chunk.getAabb().minX, chunk.getAabb().minY, chunk.getAabb().minZ, center.x, center.y + ycent, center.z + zcent), x, y, z), Direction.NORTH);
                         } else {
-                            RenderUtils.renderBoxLines(connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, chunk.getAabb().maxX, chunk.getAabb().maxY, chunk.getAabb().maxZ)), EnumFacing.SOUTH);
+                            RenderUtils.renderBoxLines(stack, buffer, connection.getRayBox().points(new AxisAlignedBB(center.x, center.y - ycent, center.z - zcent, chunk.getAabb().maxX, chunk.getAabb().maxY, chunk.getAabb().maxZ), x, y, z), Direction.SOUTH);
                         }
                     }
                 } else {
-                    RenderUtils.renderBoxLines(connection.getRayBox().points());
+                    RenderUtils.renderBoxLines(stack, buffer, connection.getRayBox().points());
                 }
-
-
-                Tessellator.getInstance().getBuffer().setTranslation(0, 0, 0);
-
-                GlStateManager.depthMask(false);
-                GlStateManager.enableTexture2D();
-                GlStateManager.disableBlend();
-
-
             }
         }
     }
 
+    //    @Override
+//    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos) {
+//        TileEntity te = worldIn.getTileEntity(pos);
+//        if(te instanceof ConnectableBlockEntity) {
+//            double minX = Double.MAX_VALUE;
+//            double minY = Double.MAX_VALUE;
+//            double minZ = Double.MAX_VALUE;
+//
+//            double maxX = -Double.MAX_VALUE;
+//            double maxY = -Double.MAX_VALUE;
+//            double maxZ = -Double.MAX_VALUE;
+//
+//            boolean set = false;
+//
+//            for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
+//                if(!connection.isBroken()) {
+//                    double[] in = connection.getIn();
+//                    set = true;
+//
+//                    minX = Math.min(minX, in[0]);
+//                    maxX = Math.max(maxX, in[1]);
+//
+//                    minZ = Math.min(minZ, in[2]);
+//                    maxZ = Math.max(maxZ, in[3]);
+//
+//                    minY = Math.min(minY, in[4]);
+//                    maxY = Math.max(maxY, in[5]);
+//                }
+//            }
+//            if(set) {
+//                return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ).grow(1/16F);
+//            }
+//        }
+//        return super.getSelectedBoundingBox(state, worldIn, pos);
+//    }
+
+
+    //TODO: revisit this.
     @Override
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos) {
-        TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof ConnectableBlockEntity) {
-            double minX = Double.MAX_VALUE;
-            double minY = Double.MAX_VALUE;
-            double minZ = Double.MAX_VALUE;
-
-            double maxX = -Double.MAX_VALUE;
-            double maxY = -Double.MAX_VALUE;
-            double maxZ = -Double.MAX_VALUE;
-
-            boolean set = false;
-
-            for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
-                if(!connection.isBroken()) {
-                    double[] in = connection.getIn();
-                    set = true;
-
-                    minX = Math.min(minX, in[0]);
-                    maxX = Math.max(maxX, in[1]);
-
-                    minZ = Math.min(minZ, in[2]);
-                    maxZ = Math.max(maxZ, in[3]);
-
-                    minY = Math.min(minY, in[4]);
-                    maxY = Math.max(maxY, in[5]);
-                }
-            }
-            if(set) {
-                return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ).grow(1/16F);
-            }
-        }
-        return super.getSelectedBoundingBox(state, worldIn, pos);
+    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+        return new DelegateVoxelShape(super.getShape(state, world, pos, context), (from, to, offset, fallback) -> {
+            BlockRayTraceResult traceResult = fallback.get();
+            traceResult.hitInfo = getHitChunk(world, pos, from, to);
+            return traceResult;
+        });
     }
+
 
     @Nullable
-    public HitChunk getHitChunk(PlayerEntity viewer) {
-        double hitDist = Double.MAX_VALUE;
-        HitChunk resultOut = null;
+    public static HitChunk getHitChunk(PlayerEntity viewer) {
         Vector3d start = viewer.getEyePosition(1F);
         Vector3d vec = viewer.getViewVector(1F);
         Vector3d end = start.add(vec.x * 20, vec.y * 20, vec.z * 20);
         RayTraceResult pick = viewer.pick(20, 1F, false);
-        if(!(pick instanceof BlockRayTraceResult)) {
+        if (!(pick instanceof BlockRayTraceResult)) {
             return null;
         }
-        Set<BlockConnectableBase.ChunkedInfo> set = this.getOutlines(viewer.level, ((BlockRayTraceResult) pick).getBlockPos());
+        return getHitChunk(viewer.level, ((BlockRayTraceResult) pick).getBlockPos(), start, end);
+    }
+
+
+    @Nullable
+    public static HitChunk getHitChunk(IBlockReader world, BlockPos pos, Vector3d start, Vector3d end) {
+        double hitDist = Double.MAX_VALUE;
+        HitChunk resultOut = null;
+        Set<BlockConnectableBase.ChunkedInfo> set = getOutlines(world, pos);
 
         for (BlockConnectableBase.ChunkedInfo chunk : set) {
             Connection connection = chunk.getConnection();
-            boolean pb = connection.brokenSide(viewer.level, false);
-            boolean nb = connection.brokenSide(viewer.level, true);
+            boolean pb = connection.brokenSide(world, false);
+            boolean nb = connection.brokenSide(world, true);
 
             List<RotatedRayBox.Result> results = Lists.newArrayList();
-            if(nb || pb) {
-                if(nb) {
+            if (nb || pb) {
+                if (nb) {
                     results.add(connection.getNextCache().getRotatedBox().rayTrace(start, end));
-                    if(!pb) {
+                    if (!pb) {
                         results.add(connection.getNextCache().getFixedBox().rayTrace(start, end));
                     }
                 }
 
-                if(pb) {
+                if (pb) {
                     results.add(connection.getPrevCache().getRotatedBox().rayTrace(start, end));
-                    if(!nb) {
+                    if (!nb) {
                         results.add(connection.getPrevCache().getFixedBox().rayTrace(start, end));
                     }
                 }
@@ -322,13 +308,13 @@ public class BlockConnectableBase extends Block {
                 results.add(connection.getRayBox().rayTrace(start, end));
             }
 
-            if(!results.isEmpty()) {
+            if (!results.isEmpty()) {
                 for (RotatedRayBox.Result result : results) {
-                    if(result == null) {
+                    if (result == null) {
                         continue;
                     }
                     double dist = result.getDistance();
-                    if(dist < hitDist) {
+                    if (dist < hitDist) {
                         resultOut = new BlockConnectableBase.HitChunk(chunk.getAabb(), chunk.getConnection(), result.getHitDir(), result);
 
                         hitDist = dist;
@@ -339,14 +325,14 @@ public class BlockConnectableBase extends Block {
         return resultOut;
     }
 
-    public Set<ChunkedInfo> getOutlines(IBlockReader world, BlockPos pos) {
+    public static Set<ChunkedInfo> getOutlines(IBlockReader world, BlockPos pos) {
         Set<ChunkedInfo> set = Sets.newLinkedHashSet();
         TileEntity tileEntity = world.getBlockEntity(pos);
-        if(tileEntity instanceof ConnectableBlockEntity) {
+        if (tileEntity instanceof ConnectableBlockEntity) {
             for (Connection connection : ((ConnectableBlockEntity) tileEntity).getConnections()) {
-                if(!connection.isBroken()) {
+                if (!connection.isBroken()) {
                     double w = connection.getType().getCableWidth();
-                    set.add(new ChunkedInfo(new AxisAlignedBB(0,-w,-w, -connection.getFullLen(), w, w), connection));
+                    set.add(new ChunkedInfo(new AxisAlignedBB(0, -w, -w, -connection.getFullLen(), w, w), connection));
 
                 }
             }
@@ -366,7 +352,11 @@ public class BlockConnectableBase extends Block {
 
             for (int i = 0; i < amount; i++) {
                 int next = i + 1;
-                out.add(new ConnectionAxisAlignedBB(new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next).offset(intersect[0] - pos.getX(), intersect[4] - pos.getY(), intersect[2] - pos.getZ()).grow(0,  connection.getType().getCableWidth()/2D, 0), connection));
+                out.add(new ConnectionAxisAlignedBB(
+                    new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next)
+                        .move(intersect[0] - pos.getX(), intersect[4] - pos.getY(), intersect[2] - pos.getZ())
+                        .inflate(0, connection.getType().getCableWidth() / 2D, 0), connection)
+                );
             }
         }
         return out;
@@ -374,7 +364,7 @@ public class BlockConnectableBase extends Block {
 
 
     @Getter
-    public class ConnectionAxisAlignedBB extends AxisAlignedBB {
+    public static class ConnectionAxisAlignedBB extends AxisAlignedBB {
 
         private final Connection connection;
 
@@ -385,9 +375,9 @@ public class BlockConnectableBase extends Block {
     }
 
     public static void placeEffect(PlayerEntity player, Hand hand, World worldIn, BlockPos pos) {
-        if(player != null) {
+        if (player != null) {
             player.swing(hand);
-            if(!player.isCreative()) {
+            if (!player.isCreative()) {
                 player.getItemInHand(hand).shrink(1);
             }
         }
@@ -401,13 +391,13 @@ public class BlockConnectableBase extends Block {
 
     @Override
     public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
-        HitChunk chunk = this.getHitChunk(player);
-        if(chunk != null) {
+        HitChunk chunk = getHitChunk(player);
+        if (chunk != null) {
             chunk.getConnection().setBroken(true);
             TileEntity te = world.getBlockEntity(pos);
-            if(te instanceof ConnectableBlockEntity) {
+            if (te instanceof ConnectableBlockEntity) {
                 for (Connection connection : ((ConnectableBlockEntity) te).getConnections()) {
-                    if(!connection.isBroken()) {
+                    if (!connection.isBroken()) {
                         breakEffect(world, pos);
                         return false;
                     }
@@ -419,78 +409,76 @@ public class BlockConnectableBase extends Block {
         return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
     }
 
-
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        RayTraceResult result = ForgeHooks.rayTraceEyes(playerIn, 7);
-        TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof ConnectableBlockEntity) {
-            ConnectableBlockEntity be = (ConnectableBlockEntity) te;
-            if(result != null && result.hitInfo instanceof HitChunk) {
-                HitChunk chunk = (HitChunk) result.hitInfo;
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult ray) {
+        if (ray.hitInfo instanceof HitChunk) {
+            HitChunk chunk = (HitChunk) ray.hitInfo;
+            TileEntity te = world.getBlockEntity(pos);
+            if (te instanceof ConnectableBlockEntity) {
+                ConnectableBlockEntity be = (ConnectableBlockEntity) te;
                 Connection con = chunk.getConnection();
                 double off = chunk.getConnection().getFrom().getY() + chunk.getConnection().getOffset();
-                if(chunk.getDir().getAxis() == EnumFacing.Axis.Y) {
+                if (chunk.getDir().getAxis() == Direction.Axis.Y) {
                     Connection ref = null;
-                    double yref = chunk.getDir() == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
+                    double yref = chunk.getDir() == Direction.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
                     for (Connection connection : be.getConnections()) {
                         double yoff = connection.getOffset() + connection.getFrom().getY();
-                        if(chunk.getDir() == EnumFacing.DOWN) {
-                            if(yoff < off && yoff > yref) {
+                        if (chunk.getDir() == Direction.DOWN) {
+                            if (yoff < off && yoff > yref) {
                                 yref = yoff;
                                 ref = connection;
                             }
                         } else {
-                            if(yoff > off && yoff < yref) {
+                            if (yoff > off && yoff < yref) {
                                 yref = yoff;
                                 ref = connection;
                             }
                         }
                     }
-                    if(ref != null && ref.isBroken()) {
+                    if (ref != null && ref.isBroken()) {
                         ref.setBroken(false);
-                        te.markDirty();
-                        placeEffect(playerIn, hand, worldIn, pos);
-                        return true;
+                        te.setChanged();
+                        placeEffect(player, hand, world, pos);
+                        return ActionResultType.SUCCESS;
                     }
-                } else if(chunk.getDir().getAxis() == EnumFacing.Axis.X) {
-                    BlockPos nextPos = chunk.getDir() == EnumFacing.WEST == chunk.connection.getCompared() < 0 ? con.getNext() : con.getPrevious();
-                    TileEntity nextTe = worldIn.getTileEntity(nextPos);
-                    if(!(nextTe instanceof ConnectableBlockEntity)) {
-                        if(worldIn.getBlockState(nextPos).getBlock().isReplaceable(worldIn, nextPos)) {
-                            worldIn.setBlockState(nextPos, this.getDefaultState());
-                            nextTe = worldIn.getTileEntity(nextPos);
-                            if(nextTe instanceof ConnectableBlockEntity && generateConnections(worldIn, nextPos, (ConnectableBlockEntity) nextTe, chunk, null)) {
-                                placeEffect(playerIn, hand, worldIn, pos);
+                } else if (chunk.getDir().getAxis() == Direction.Axis.X) {
+                    BlockPos nextPos = chunk.getDir() == Direction.WEST == chunk.connection.getCompared() < 0 ? con.getNext() : con.getPrevious();
+                    TileEntity nextTe = world.getBlockEntity(nextPos);
+                    if (!(nextTe instanceof ConnectableBlockEntity)) {
+                        if (world.getBlockState(nextPos).canBeReplaced(Fluids.EMPTY)) {
+                            world.setBlock(nextPos, this.defaultBlockState(), 3);
+                            nextTe = world.getBlockEntity(nextPos);
+                            if (nextTe instanceof ConnectableBlockEntity && generateConnections(world, nextPos, (ConnectableBlockEntity) nextTe, chunk, null)) {
+                                placeEffect(player, hand, world, pos);
                             }
 
                         }
                     }
-                    if(nextTe instanceof ConnectableBlockEntity) {
+                    if (nextTe instanceof ConnectableBlockEntity) {
                         for (Connection connection : ((ConnectableBlockEntity) nextTe).getConnections()) {
-                            if(connection.lazyEquals(chunk.getConnection())) {
+                            if (connection.lazyEquals(chunk.getConnection())) {
                                 connection.setBroken(false);
-                                placeEffect(playerIn, hand, worldIn, pos);
-                                nextTe.markDirty();
-                                return true;
+                                placeEffect(player, hand, world, pos);
+                                nextTe.setChanged();
+                                return ActionResultType.SUCCESS;
                             }
                         }
                     }
                 }
-                if(playerIn.getHeldItem(hand).getItem() == Item.getItemFromBlock(this)) {
-                    return false;
+                if (player.getItemInHand(hand).getItem() == Item.byBlock(this)) {
+                    return ActionResultType.CONSUME;
                 }
                 con.setSign(!con.isSign());
-                te.markDirty();
+                te.setChanged();
             }
-
         }
-        return true;
+        return ActionResultType.SUCCESS;
     }
 
-    public static boolean generateConnections(World worldIn, BlockPos pos, ConnectableBlockEntity be, @Nullable HitChunk chunk, @Nullable EnumFacing side) {
+
+    public static boolean generateConnections(World worldIn, BlockPos pos, ConnectableBlockEntity be, @Nullable HitChunk chunk, @Nullable Direction side) {
         Set<Connection> newConnections = Sets.newLinkedHashSet();
-        double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
+        double yRef = side == Direction.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
         Connection ref = null;
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
@@ -498,7 +486,7 @@ public class BlockConnectableBase extends Block {
                     if (x == 0 && y == 0 && z == 0) {
                         continue;
                     }
-                    TileEntity tileentity = worldIn.getTileEntity(pos.add(x, y, z));
+                    TileEntity tileentity = worldIn.getBlockEntity(pos.offset(x, y, z));
                     if (tileentity instanceof ConnectableBlockEntity) {
                         ConnectableBlockEntity cbe = (ConnectableBlockEntity) tileentity;
                         for (Connection connection : cbe.getConnections()) {
@@ -509,7 +497,7 @@ public class BlockConnectableBase extends Block {
                                         Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.min(i + 1, positions.size() - 1)), positions.get(Math.max(i - 1, 0)), pos);
                                         double[] in = con.getIn();
                                         double yin = (in[4] + in[5]) / 2D;
-                                        if (side == EnumFacing.DOWN == yin > yRef) {
+                                        if (side == Direction.DOWN == yin > yRef) {
                                             yRef = yin;
                                             ref = con;
                                         }
@@ -524,14 +512,14 @@ public class BlockConnectableBase extends Block {
             }
         }
 
-        if(chunk != null) {
-            EnumFacing face = chunk.getDir();
-            if(chunk.getConnection().getCompared() < 0) {
+        if (chunk != null) {
+            Direction face = chunk.getDir();
+            if (chunk.getConnection().getCompared() < 0) {
                 face = face.getOpposite();
             }
-            if(face.getAxis() == EnumFacing.Axis.X) {
+            if (face.getAxis() == Direction.Axis.X) {
                 for (Connection connection : newConnections) {
-                    if(chunk.getConnection().lazyEquals(connection)) {
+                    if (chunk.getConnection().lazyEquals(connection)) {
                         ref = connection;
                     }
                 }
@@ -542,17 +530,17 @@ public class BlockConnectableBase extends Block {
             connection.setBroken(!connection.lazyEquals(ref));
             be.addConnection(connection);
         }
-        if(be instanceof TileEntity) {
-            ((TileEntity)be).markDirty();
+        if (be instanceof TileEntity) {
+            ((TileEntity) be).setChanged();
         }
         return ref != null;
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-        if(world instanceof ServerWorld ? collidableServer : collidableClient) {
+        if (world instanceof ServerWorld ? collidableServer : collidableClient) {
             TileEntity te = world.getBlockEntity(pos);
-            if(te instanceof ConnectableBlockEntity) {
+            if (te instanceof ConnectableBlockEntity) {
                 VoxelShape shape = VoxelShapes.empty();
                 for (ConnectionAxisAlignedBB bb : this.createBoundingBox(((ConnectableBlockEntity) te).getConnections(), pos)) {
                     shape = VoxelShapes.or(shape, VoxelShapes.create(bb));
@@ -563,50 +551,39 @@ public class BlockConnectableBase extends Block {
         return VoxelShapes.empty();
     }
 
-    //    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
-//        if(worldIn.isRemote ? collidableClient : collidableServer) {
-//            TileEntity te = worldIn.getTileEntity(pos);
-//            if(te instanceof ConnectableBlockEntity) {
-//                for (AxisAlignedBB bb : this.createBoundingBox(((ConnectableBlockEntity) te).getConnections(), pos)) {
-//                    addCollisionBoxToList(pos, entityBox, collidingBoxes, bb);
-//                }
-//                return;
-//            }
-//        }
-//    }
 
     @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         World world = event.getWorld();
-        EnumFacing side = event.getFace();
-        if(side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == ItemHandler.WIRE_SPOOL) {
-            TileEntity tile = world.getTileEntity(event.getPos().offset(side));
-            if(tile instanceof ConnectableBlockEntity) {
+        Direction side = event.getFace();
+        if (side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == ItemHandler.WIRE_SPOOL) {
+            TileEntity tile = world.getBlockEntity(event.getPos().relative(side));
+            if (tile instanceof ConnectableBlockEntity) {
                 ConnectableBlockEntity cb = (ConnectableBlockEntity) tile;
-                if(side.getAxis() == EnumFacing.Axis.Y) {
-                    double yRef = side == EnumFacing.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
+                if (side.getAxis() == Direction.Axis.Y) {
+                    double yRef = side == Direction.DOWN ? Double.MIN_VALUE : Double.MAX_VALUE;
                     Connection ref = null;
                     for (Connection connection : cb.getConnections()) {
-                        if(connection.isBroken()) {
+                        if (connection.isBroken()) {
                             double[] in = connection.getIn();
                             double yin = (in[4] + in[5]) / 2D;
-                            if (side == EnumFacing.DOWN == yin > yRef) {
+                            if (side == Direction.DOWN == yin > yRef) {
                                 yRef = yin;
                                 ref = connection;
                             }
                         }
                     }
-                    if(ref != null) {
+                    if (ref != null) {
                         ref.setBroken(false);
                         event.setCanceled(true);
-                        placeEffect(event.getEntityPlayer(), event.getHand(), event.getWorld(), event.getPos());
+                        placeEffect(event.getPlayer(), event.getHand(), event.getWorld(), event.getPos());
                     }
                 } else {
                     for (Connection connection : cb.getConnections()) {
-                        if(connection.isBroken()) {
+                        if (connection.isBroken()) {
                             connection.setBroken(false);
                             event.setCanceled(true);
-                            placeEffect(event.getEntityPlayer(), event.getHand(), event.getWorld(), event.getPos());
+                            placeEffect(event.getPlayer(), event.getHand(), event.getWorld(), event.getPos());
                             break;
                         }
                     }
@@ -624,7 +601,16 @@ public class BlockConnectableBase extends Block {
     }
 
     @Value
-    public static class HitChunk {AxisAlignedBB aabb; Connection connection; Direction dir; RotatedRayBox.Result result;}
+    public static class HitChunk {
+        AxisAlignedBB aabb;
+        Connection connection;
+        Direction dir;
+        RotatedRayBox.Result result;
+    }
 
-    @Value public static class ChunkedInfo {AxisAlignedBB aabb; Connection connection;}
+    @Value
+    public static class ChunkedInfo {
+        AxisAlignedBB aabb;
+        Connection connection;
+    }
 }

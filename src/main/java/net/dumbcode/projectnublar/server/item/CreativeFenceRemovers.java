@@ -35,7 +35,7 @@ public class CreativeFenceRemovers extends Item {
                 baseState = worldIn.getBlockState(origin);
             }
             if(baseState.getBlock() instanceof BlockElectricFencePole) {
-                BlockPos o = pos.down(baseState.getValue(((BlockElectricFencePole) baseState.getBlock()).INDEX_PROPERTY));
+                BlockPos o = pos.down(baseState.getValue(((BlockElectricFencePole) baseState.getBlock()).indexProperty));
                 Set<ConnectableBlockEntity> set = Sets.newHashSet();
                 for (int i = 0; i < ((BlockElectricFencePole) baseState.getBlock()).getType().getHeight(); i++) {
                     listConnections(worldIn.getTileEntity(o.up(i)), set);

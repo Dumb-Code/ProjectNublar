@@ -19,6 +19,10 @@ public class MachineModuleEnergyStorage extends EnergyStorage {
         super(capacity, maxReceive, maxExtract, energy);
     }
 
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
     public void extractRaw(int amount) {
         this.energy -= Math.min(this.energy, amount);
     }
