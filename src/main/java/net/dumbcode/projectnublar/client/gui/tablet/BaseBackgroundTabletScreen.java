@@ -1,13 +1,14 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 
 public abstract class BaseBackgroundTabletScreen extends BaseTabletScreen implements BackgroundableScreen {
 
     private TabletBackground background;
 
-    protected BaseBackgroundTabletScreen(EnumHand hand) {
+    protected BaseBackgroundTabletScreen(Hand hand) {
         super(hand);
     }
 
@@ -31,22 +32,17 @@ public abstract class BaseBackgroundTabletScreen extends BaseTabletScreen implem
     }
 
     @Override
-    public void onGuiClosed() {
+    public void onClose() {
         if(this.background != null) {
             this.background.dispose();
         }
-        super.onGuiClosed();
+        super.onClose();
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
-    }
-
-    @Override
-    protected void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
+    protected void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if(this.background != null) {
-            this.background.render(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
+            this.background.render(stack, this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
         }
     }
 }

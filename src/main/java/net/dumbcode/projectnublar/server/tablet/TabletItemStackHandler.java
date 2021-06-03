@@ -1,17 +1,17 @@
 package net.dumbcode.projectnublar.server.tablet;
 
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.SolidColorBackground;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
@@ -37,14 +37,14 @@ public class TabletItemStackHandler implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public void read() {
         this.entryList.clear();
-        NBTTagCompound nbt = this.stack.getOrCreateSubCompound(ProjectNublar.MODID);
-        for (NBTBase module : nbt.getTagList("installed_modules", Constants.NBT.TAG_COMPOUND)) {
-            String identifier = ((NBTTagCompound) module).getString("identifier");
-            TabletModuleType<?> value = ProjectNublar.TABLET_MODULES_REGISTRY.getValue(new ResourceLocation(identifier));
+        CompoundNBT nbt = this.stack.getOrCreateTagElement(ProjectNublar.MODID);
+        for (INBT module : nbt.getList("installed_modules", Constants.NBT.TAG_COMPOUND)) {
+            String identifier = ((CompoundNBT) module).getString("identifier");
+            TabletModuleType<?> value = TabletModuleHandler.REGISTRY.get().getValue(new ResourceLocation(identifier));
             if(value != null) {
                 TabletModuleStorage storage = value.getStorageCreator().get();
                 if(storage != null) {
-                    storage.readFromNBT(((NBTTagCompound) module).getCompoundTag("storage"));
+                    storage.readFromNBT(((CompoundNBT) module).getCompound("storage"));
                 }
                 this.entryList.add(new Entry(value, storage));
             } else {
@@ -52,32 +52,32 @@ public class TabletItemStackHandler implements AutoCloseable {
             }
         }
 
-        NBTTagCompound backgroundNBT = nbt.getCompoundTag("background");
+        CompoundNBT backgroundNBT = nbt.getCompound("background");
         TabletBackground.Entry<?> entry = TabletBackground.REGISTRY.get(backgroundNBT.getString("identifier"));
         if(entry != null) {
             this.background = entry.getBackground();
-            this.background.readFromNBT(backgroundNBT.getCompoundTag("storage"));
+            this.background.readFromNBT(backgroundNBT.getCompound("storage"));
         }
     }
 
     public void write() {
-        NBTTagCompound nbt = this.stack.getOrCreateSubCompound(ProjectNublar.MODID);
+        CompoundNBT nbt = this.stack.getOrCreateTagElement(ProjectNublar.MODID);
 
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (Entry entry : this.entryList) {
-            NBTTagCompound entryNBT = new NBTTagCompound();
-            entryNBT.setString("identifier", Objects.requireNonNull(entry.type.getRegistryName()).toString());
+            CompoundNBT entryNBT = new CompoundNBT();
+            entryNBT.putString("identifier", Objects.requireNonNull(entry.type.getRegistryName()).toString());
             if(entry.getStorage() != null) {
-                entryNBT.setTag("storage", entry.getStorage().writeToNBT());
+                entryNBT.put("storage", entry.getStorage().writeToNBT());
             }
-            list.appendTag(entryNBT);
+            list.add(entryNBT);
         }
-        nbt.setTag("installed_modules", list);
+        nbt.put("installed_modules", list);
 
-        NBTTagCompound backgroundNBT = new NBTTagCompound();
-        backgroundNBT.setString("identifier", this.background.identifier());
-        backgroundNBT.setTag("storage", this.background.writeToNBT(new NBTTagCompound()));
-        nbt.setTag("background", backgroundNBT);
+        CompoundNBT backgroundNBT = new CompoundNBT();
+        backgroundNBT.putString("identifier", this.background.identifier());
+        backgroundNBT.put("storage", this.background.writeToNBT(new CompoundNBT()));
+        nbt.put("background", backgroundNBT);
     }
 
     public <S extends TabletModuleStorage> void addNew(TabletModuleType<S> type) {
@@ -94,7 +94,7 @@ public class TabletItemStackHandler implements AutoCloseable {
         TabletModuleType<S> type;
         S storage;
 
-        public Consumer<ByteBuf> onOpenScreen(EntityPlayerMP player) {
+        public Consumer<PacketBuffer> onOpenScreen(ServerPlayerEntity player) {
             return buf -> this.type.getScreenData().accept(this.storage, player, buf);
         }
     }

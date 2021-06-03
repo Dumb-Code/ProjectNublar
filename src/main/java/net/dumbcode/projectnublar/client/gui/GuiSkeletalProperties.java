@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.gui.GuiModelPoseEdit;
@@ -10,52 +11,52 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
-import net.dumbcode.projectnublar.server.network.BUpdatePoleList;
 import net.dumbcode.projectnublar.server.network.BChangeGlobalRotation;
+import net.dumbcode.projectnublar.server.network.BUpdatePoleList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.client.config.GuiButtonExt;
-import net.minecraftforge.fml.client.config.GuiSlider;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
+import net.minecraftforge.fml.client.gui.widget.Slider;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlider, GuiPageButtonList.GuiResponder {
+public class GuiSkeletalProperties extends Screen {
 
     private final GuiModelPoseEdit parent;
     @Getter private final SkeletalBuilderBlockEntity builder;
     @Getter private final SkeletalProperties properties;
     public final List<PoleEntry> entries = Lists.newLinkedList();
 
-    private GuiSlider globalRotation = new GuiSlider(0, 0, 0, 200, 20, "rotaion", "",0, 360, 0.0, true, true, this);
-    private GuiButton addButton = new GuiButton(121, 0, 0, 20, 20, "+");
     private float previousRot;
 
     private GuiScrollBox<PoleEntry> scrollBox = new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries);
 
+    private Slider globalRotation;
+    private Button editDirection;
+
     @Getter @Setter
     private PoleEntry editingPole;
 
-    private GuiTextField editText = new GuiTextField(5, Minecraft.getMinecraft().fontRenderer, 0, 0, 75, 20);
-    private GuiButton editDirection = new GuiButtonExt(1, 0, 0, 75, 20, "");
+    private TextFieldWidget editText;
 
     public GuiSkeletalProperties(GuiModelPoseEdit parent, SkeletalBuilderBlockEntity builder) {
-        this.editText.setGuiResponder(this);
+        super(new StringTextComponent("bruh"));
         this.parent = parent;
         this.builder = builder;
         this.properties = builder.getSkeletalProperties();
-        this.globalRotation.setValue(this.properties.getRotation());
     }
 
     @Override
-    public void initGui() {
-
+    public void init() {
         this.updateList();
 
-        this.scrollBox = new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries);
-
+        this.scrollBox = this.addButton(new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries));
 
         int diff = 0;
 
@@ -69,117 +70,86 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
             bottom += diff = this.height/2 - (bottom + top)/2;
         }
 
-        this.globalRotation.x = (this.width-this.globalRotation.width)/2;
-        this.globalRotation.y = 30 + diff;
+        this.globalRotation = this.addButton(new Slider( (this.width-200)/2, 30 + diff, 200, 20, new StringTextComponent("rotaion"), new StringTextComponent(""),0, 360, 0.0, true, true, p -> {}, s -> {
+            float val = (float) s.getValue();
+            if(this.previousRot != val) {
+                this.previousRot = val;
+                ProjectNublar.NETWORK.sendToServer(new BChangeGlobalRotation(this.builder.getBlockPos(), (float)s.getValue()));
+            }
+        }));
+        this.globalRotation.setValue(this.properties.getRotation());
 
-        this.addButton.x = this.width / 2 + 70;
-        this.addButton.y = 60 + diff;
-
-        this.editText.x = this.width/2 - 100;
-        this.editText.y = bottom + 40;
-
-        this.editDirection.x = this.width/2 + 25;
-        this.editDirection.y = bottom + 40;
-
-        this.addButton(this.globalRotation);
-        this.addButton(this.addButton);
-
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
-        super.drawScreen(mouseX, mouseY, partialTicks);
-
-
-        FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
-        String poleliststr = "Pole List";  //todo: localize
-        fr.drawString(poleliststr, (this.width-fr.getStringWidth(poleliststr))/2, 65, 0xAAAAAA);
-
-        this.scrollBox.render(mouseX, mouseY);
-
-        if(this.editingPole != null) {
-            this.editText.drawTextBox();
-            this.editDirection.drawButton(mc, mouseX, mouseY, partialTicks);
-        }
-    }
-
-    @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        super.keyTyped(typedChar, keyCode);
-        if(this.editingPole != null) {
-            this.editText.textboxKeyTyped(typedChar, keyCode);
-        }
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        super.actionPerformed(button);
-        if(button == this.addButton) {
+        this.addButton(new ExtendedButton(this.width / 2 + 70, 60 + diff, 20, 20, new StringTextComponent("+"), p -> {
             this.builder.getSkeletalProperties().getPoles().add(new SkeletalProperties.Pole("", PoleFacing.NONE));
             this.sync();
             this.editingPole = this.entries.get(this.entries.size()-1);
-        }
-        if(button == this.editDirection && this.editingPole != null) {
-            this.editingPole.pole.setFacing(this.editingPole.pole.getFacing().cycle());
+            this.editText.active = true;
+            this.editDirection.active = true;
+        }));
+
+        this.editText = this.addWidget(new TextFieldWidget(Minecraft.getInstance().font, this.width/2 - 100, bottom + 40, 75, 20, new StringTextComponent("")));
+        this.editText.setResponder(value -> {
+            this.editingPole.pole.setCubeName(value);
             this.sync();
+        });
+        this.editDirection = this.addWidget(new ExtendedButton(this.width/2 + 25, bottom + 40, 75, 20, new StringTextComponent(""), p -> {
+            if(this.editingPole != null) {
+                this.editingPole.pole.setFacing(this.editingPole.pole.getFacing().cycle());
+                this.sync();
+            }
+        }));
+
+        this.editText.active = this.editingPole != null;
+        this.editDirection.active = this.editingPole != null;
+
+    }
+
+
+    @Override
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(stack);
+        super.render(stack, mouseX, mouseY, partialTicks);
+
+        FontRenderer fr = minecraft.font;
+        String poleliststr = "Pole List";  //todo: localize
+        fr.draw(stack, poleliststr, (this.width-fr.width(poleliststr))/2F, 65, 0xAAAAAA);
+
+        if(this.editingPole != null) {
+            this.editText.render(stack, mouseX, mouseY, partialTicks);
+            this.editDirection.render(stack, mouseX, mouseY, partialTicks);
         }
     }
 
     @Override
-    public void updateScreen() {
+    public void tick() {
         this.globalRotation.updateSlider();
-        if(Minecraft.getMinecraft().isGamePaused()) { //Update cause the tickable wont
+        if (Minecraft.getInstance().isPaused()) { //Update cause the tickable wont
             this.builder.getSkeletalProperties().setPrevRotation(this.builder.getSkeletalProperties().getRotation());
         }
-        if(this.editingPole != null) {
-            this.editDirection.displayString = this.editingPole.pole.getFacing().name(); //todo localize
+        if (this.editingPole != null) {
+            this.editDirection.setMessage(new StringTextComponent(this.editingPole.pole.getFacing().name())); //todo localize
         }
-    }
-
-    @Override
-    public boolean doesGuiPauseGame() {
-        return super.doesGuiPauseGame();
     }
 
     private void sync() {
         this.updateList();
-        ProjectNublar.NETWORK.sendToServer(new BUpdatePoleList(this.builder, this.entries.stream().map(p -> p.pole).collect(Collectors.toList())));
+        ProjectNublar.NETWORK.sendToServer(new BUpdatePoleList(this.builder.getBlockPos(), this.entries.stream().map(p -> p.pole).collect(Collectors.toList())));
     }
 
     public void updateList() {
         this.entries.clear();
         this.builder.getSkeletalProperties().getPoles().stream().map(PoleEntry::new).forEach(this.entries::add);
-
     }
 
     @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-        this.scrollBox.handleMouseInput();
-    }
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+        this.children.add(this.editDirection);
+        boolean ret = super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.children.remove(this.editDirection);
 
-    @Override
-    public void onChangeSliderValue(GuiSlider slider) {
-        if(slider == this.globalRotation) {
-            float val = (float)this.globalRotation.getValue();
-            if(this.previousRot != val) {
-                this.previousRot = val;
-                ProjectNublar.NETWORK.sendToServer(new BChangeGlobalRotation(this.builder, (float)slider.getValue()));
-            }
+        if(ret) {
+            return true;
         }
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        this.buttonList.add(this.editDirection);
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.buttonList.remove(this.editDirection);
-
-        if(mouseButton == 1) {
-            this.globalRotation.mousePressed(Minecraft.getMinecraft(), mouseX, mouseY);
-        }
-        this.scrollBox.mouseClicked(mouseX, mouseY, mouseButton);
 
         boolean hasRemoved = false;
         for (PoleEntry entry : this.entries) {
@@ -192,15 +162,7 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         if(hasRemoved) {
             this.sync();
         }
-        if(this.editingPole != null) {
-            this.editText.mouseClicked(mouseX, mouseY, mouseButton);
-        }
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        super.mouseReleased(mouseX, mouseY, state);
-        this.globalRotation.mouseReleased(mouseX, mouseY);
+        return false;
     }
 
     public void setRotation(float rot) {
@@ -208,55 +170,44 @@ public class GuiSkeletalProperties extends GuiScreen implements GuiSlider.ISlide
         this.globalRotation.setValue(rot);
     }
 
-    @Override
-    public void setEntryValue(int id, boolean value) {
-    }
-
-    @Override
-    public void setEntryValue(int id, float value) {
-    }
-
-    @Override
-    public void setEntryValue(int id, String value) {
-        this.editingPole.pole.setCubeName(value);
-        this.sync();
-    }
-
     public class PoleEntry implements GuiScrollboxEntry {
         @Getter private final SkeletalProperties.Pole pole;
 
-        private final GuiButton edit = new GuiButton(-1, 0, 0, 20, 20, ""); //todo localize
-        private final GuiButton delete = new GuiButton(-1, 0, 0, 20, 20, ""); //todo localize
+        private final Button edit;
+        private final Button delete;
 
         private boolean markedRemoved;
 
         private PoleEntry(SkeletalProperties.Pole pole) {
             this.pole = pole;
+
+            this.edit = new ExtendedButton(0, 0, 20, 20, new StringTextComponent(""), p -> {
+                editingPole = this;
+                editText.setValue(this.pole.getCubeName());
+            }); //todo localize
+
+            this.delete = new ExtendedButton(0, 0, 20, 20, new StringTextComponent(""), p -> {
+                this.markedRemoved = true;
+            });
         }
 
         @Override
-        public void draw(int x, int y, int mouseX, int mouseY) {
+        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
             y += 12;
-            mc.fontRenderer.drawString(pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
+            minecraft.font.draw(stack, pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
 
             this.edit.x = width/2+40;
             this.edit.y = y - 10;
-            this.edit.drawButton(mc, mouseX, mouseY, 1f);
+            this.edit.render(stack, mouseX, mouseY, 1f);
 
             this.delete.x = width/2+70;
             this.delete.y = y - 10;
-            this.delete.drawButton(mc, mouseX, mouseY, 1f);
+            this.delete.render(stack, mouseX, mouseY, 1f);
         }
 
         @Override
-        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
-            if(this.edit.mousePressed(mc, mouseX, mouseY)) {
-                editingPole = this;
-                editText.setText(this.pole.getCubeName());
-            } else if(this.delete.mousePressed(mc, mouseX, mouseY)) {
-                this.markedRemoved = true;
-            }
-            return true;
+        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
+            return this.edit.mouseClicked(mouseX, mouseY, 0) || this.delete.mouseClicked(mouseX, mouseY, 0);
         }
     }
 }

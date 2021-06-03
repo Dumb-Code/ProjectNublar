@@ -1,17 +1,15 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.C33SetTabletBackground;
+import net.dumbcode.projectnublar.server.network.C2SSetTabletBackground;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SetupPage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.input.Mouse;
-
-import java.io.IOException;
 
 public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
 
@@ -26,61 +24,62 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
     private int startX;
     private int startY;
 
-    protected BackgroundTabletScreen(EnumHand hand) {
+    protected BackgroundTabletScreen(Hand hand) {
         super(hand);
     }
 
     @Override
-    public void initGui() {
+    public void init() {
         if(this.setupPage != null) {
             this.setupPage.initPage(this.startX, this.startY);
         }
-        super.initGui();
+        super.init();
     }
 
     @Override
-    protected void drawTabletScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawTabletScreen(mouseX, mouseY, partialTicks);
+    protected void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        super.drawTabletScreen(stack, mouseX, mouseY, partialTicks);
         if(this.setupPage != null) {
-            drawRect(this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
-            drawRect(this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
-            RenderUtils.renderBorder(this.startX - 5, this.startY - 5, this.startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 2, 0xFFAAAAAA);
+            fill(stack, this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
+            fill(stack, this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
+            RenderUtils.renderBorder(stack,this.startX - 5, this.startY - 5, this.startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 2, 0xFFAAAAAA);
             this.setupPage.render(this.startX, this.startY, mouseX, mouseY);
         } else {
             int entry = 0;
-            int fullPageIconsHeight = (ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING);
+            int fullPageIconsHeight = ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING;
             for (String s : TabletBackground.REGISTRY.keySet()) {
                 int yID = entry % ICONS_PER_COLUMN;
                 int xPos = this.leftStart + 25 + entry/ICONS_PER_COLUMN * (ICON_SIZE + ICON_PADDING);
                 int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
-                Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/background_icons/" + s + ".png"));
-                drawModalRectWithCustomSizedTexture(xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
-                this.fontRenderer.drawString(s, xPos + ICON_SIZE/2 - this.fontRenderer.getStringWidth(s)/2, yPos + ICON_SIZE + 2, 0xFF888888);
+                Minecraft.getInstance().textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/background_icons/" + s + ".png"));
+                blit(stack, xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+                minecraft.font.draw(stack, s, xPos + ICON_SIZE/2F - minecraft.font.width(s)/2F, yPos + ICON_SIZE + 2, 0xFF888888);
                 entry++;
             }
         }
     }
 
     @Override
-    public void updateScreen() {
+    public void tick() {
         if(this.setupPage != null) {
             this.setupPage.updatePage(this.startX, this.startY);
         }
-        super.updateScreen();
+        super.tick();
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if(this.setupPage != null) {
             if(mouseX > this.startX - 5 && mouseX < this.startX + this.setupPage.getWidth() + 5 && mouseY > this.startY - 5 && mouseY < this.startY + this.setupPage.getHeight() + 5) {
                 this.setupPage.mouseClicked(this.startX, this.startY, mouseX, mouseY, mouseButton);
             } else {
                 TabletBackground background = this.setupPage.create();
                 this.setBackground(background);
-                ProjectNublar.NETWORK.sendToServer(new C33SetTabletBackground(this.hand, background));
+                ProjectNublar.NETWORK.sendToServer(new C2SSetTabletBackground(this.hand, background));
                 this.setupPage = null;
             }
+            return true;
         } else {
             int entry = 0;
             int fullPageIconsHeight = (ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING);
@@ -103,45 +102,47 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
                 entry++;
             }
         }
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double changeX, double changeY) {
         if(this.setupPage != null) {
-            this.setupPage.mouseClickMove(this.startX, this.startY, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            this.setupPage.mouseDragged(this.startX, this.startY, (int) mouseX, (int) mouseY, clickedMouseButton, changeX, changeY);
+            return true;
         }
-        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, changeX, changeY);
     }
 
     @Override
-    public void handleMouseInput() throws IOException {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
         if (this.setupPage != null) {
-            int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
-            int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
-            this.setupPage.handleMouseInput(this.startX, this.startY, mouseX, mouseY);
+            this.setupPage.mouseScrolled(this.startX, this.startY, mouseX, mouseY, scroll);
+            return true;
         }
-        super.handleMouseInput();
+        return super.mouseScrolled(mouseX, mouseY, scroll);
     }
 
     @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
         if(this.setupPage != null) {
             this.setupPage.mouseReleased(this.startX, this.startY, mouseX, mouseY, state);
+            return true;
         }
-        super.mouseReleased(mouseX, mouseY, state);
+        return super.mouseReleased(mouseX, mouseY, state);
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (this.setupPage != null) {
-            this.setupPage.keyTyped(typedChar, keyCode);
+    public boolean keyPressed(int keyCode, int scanCode, int modifier) {
+        if(this.setupPage != null) {
+            this.setupPage.keyPressed(keyCode, scanCode, modifier);
+            return true;
         }
-        super.keyTyped(typedChar, keyCode);
+        return super.keyPressed(keyCode, scanCode, modifier);
     }
 
     @Override
-    public boolean doesGuiPauseGame() {
+    public boolean isPauseScreen() {
         return false;
     }
 }

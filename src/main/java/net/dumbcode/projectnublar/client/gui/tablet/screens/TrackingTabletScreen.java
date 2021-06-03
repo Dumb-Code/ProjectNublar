@@ -16,29 +16,19 @@ import net.dumbcode.projectnublar.server.network.C25StopTrackingTablet;
 import net.dumbcode.projectnublar.server.network.C30TrackingTabletEntryClicked;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector2f;
-import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector4f;
 import java.awt.*;
-import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
@@ -57,9 +47,6 @@ public class TrackingTabletScreen extends TabletScreen {
 
     private DynamicTexture texture;
 
-    private int prevClickedX;
-    private int prevClickedY;
-
     private final Matrix4f transformation = new Matrix4f();
 
     private List<TrackingSavedData.DataEntry> trackingData = new ArrayList<>();
@@ -71,9 +58,9 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
-    public void setData(int xSize, int ySize) {
-        super.setData(xSize, ySize);
-        this.scrollBox = new GuiScrollBox<>(this.xSize - 100, 20, 100, 15, (this.ySize - 30) / 15, () -> this.scrollEntries);
+    public void setData(int left, int top, int xSize, int ySize) {
+        super.setData(left, top, xSize, ySize);
+        this.scrollBox = this.add(new GuiScrollBox<>(this.left + this.xSize - 100, this.top + 20, 100, 15, (this.ySize - 30) / 15, () -> this.scrollEntries));
     }
 
     public void initializeSize(int startX, int startZ, int textureWidth, int textureHeight) {
@@ -117,7 +104,7 @@ public class TrackingTabletScreen extends TabletScreen {
                 datum.getInformation().forEach(i -> i.renderMap((int) point.x, (int) point.y));
             }
             if(this.selected != null) {
-                this.renderTooltip(stack, mouseX, mouseY);
+                this.renderTooltip(stack, mouseX - left, mouseY - top);
             }
         }
 
@@ -136,8 +123,8 @@ public class TrackingTabletScreen extends TabletScreen {
         double yCoord = 15D + padding;
         for (TrackingDataInformation info : this.selected.getInformation()) {
             Dimension d = info.getInfoDimensions();
-            int relx = mouseX - padding;
-            int rely = mouseY - (int) yCoord;
+            int relx = mouseX - padding - left;
+            int rely = mouseY - (int) yCoord - top;
             boolean over = MathUtils.inBetween(relx, 0, d.width) && MathUtils.inBetween(rely, 0, d.height);
             if(d.height != 0) {
                 info.renderInfo(padding, (int) yCoord, over ? relx : -1, over ? rely : -1);
@@ -147,13 +134,16 @@ public class TrackingTabletScreen extends TabletScreen {
         }
     }
 
-    private Optional<TrackingSavedData.DataEntry> getEntryUnder(int x, int y, int maxDistFromPoint) {
+    private Optional<TrackingSavedData.DataEntry> getEntryUnder(double x, double y, int maxDistFromPoint) {
         TrackingSavedData.DataEntry nearest = null;
-        float nearestDist = Integer.MAX_VALUE;
+        double nearestDist = Integer.MAX_VALUE;
+
+        x -= left;
+        y -= top;
 
         for (TrackingSavedData.DataEntry datum : this.trackingData) {
             Vector2f point = this.getPoint(datum);
-            float dist = (point.x - x)*(point.x - x) + (point.y - y)*(point.y - y);
+            double dist = (point.x - x)*(point.x - x) + (point.y - y)*(point.y - y);
             if(dist < nearestDist) {
                 nearestDist = dist;
                 nearest = datum;
@@ -168,31 +158,6 @@ public class TrackingTabletScreen extends TabletScreen {
         float y = (float) ((entry.getPosition().z - this.startZ) / this.textureHeight * this.xSize);
 
         return this.getTransformedPoint(x, y, this.transformation);
-    }
-
-    private void putInFloat() {
-//        this.buffer.rewind();
-//        this.buffer.put(this.transformation.m00);
-//        this.buffer.put(this.transformation.m10);
-//        this.buffer.put(this.transformation.m20);
-//        this.buffer.put(this.transformation.m30);
-//
-//        this.buffer.put(this.transformation.m01);
-//        this.buffer.put(this.transformation.m11);
-//        this.buffer.put(this.transformation.m21);
-//        this.buffer.put(this.transformation.m31);
-//
-//        this.buffer.put(this.transformation.m02);
-//        this.buffer.put(this.transformation.m12);
-//        this.buffer.put(this.transformation.m22);
-//        this.buffer.put(this.transformation.m32);
-//
-//        this.buffer.put(this.transformation.m03);
-//        this.buffer.put(this.transformation.m13);
-//        this.buffer.put(this.transformation.m23);
-//        this.buffer.put(this.transformation.m33);
-//
-//        this.buffer.rewind();
     }
 
     @Override
@@ -228,33 +193,22 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
-    public void onMouseClicked(do mouseX, int mouseY, int mouseButton) {
-        this.prevClickedX = mouseX;
-        this.prevClickedY = mouseY;
-
-        this.scrollBox.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public void onMouseReleased(int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
         if(!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize())) {
             this.selected = this.selected != null ? null : this.getEntryUnder(mouseX, mouseY, 10).orElse(null);
         }
-        this.scrollBox.mouseReleased(mouseX, mouseX, state);
-        super.onMouseReleased(mouseX, mouseY, state);
+        return super.mouseReleased(mouseX, mouseY, state);
     }
 
     @Override
-    public void onMouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double changeX, double changeY) {
         if(!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize()) && clickedMouseButton == 0 && this.selected == null) {
-            this.tryMulMatrix(matrix4f -> matrix4f.setTranslation(mouseX - this.prevClickedX, 0, 0), fail -> {});
-            this.tryMulMatrix(matrix4f -> matrix4f.setTranslation(0, mouseY - this.prevClickedY, 0), fail -> {});
+            this.tryMulMatrix(matrix4f -> matrix4f.setTranslation((float) changeX, 0, 0), fail -> {});
+            this.tryMulMatrix(matrix4f -> matrix4f.setTranslation(0, (float) changeY, 0), fail -> {});
         }
 
-        this.prevClickedX = mouseX;
-        this.prevClickedY = mouseY;
+        return false;
     }
-
     private void translateWithZoom(Consumer<Matrix4f> mat) {
         float modifier = 0.75F;
         this.tryMulMatrix(mat, fail -> {
@@ -264,64 +218,57 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
-    public void onMouseInput(int mouseX, int mouseY) {
-        if (this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize())) {
-            this.scrollBox.mouseScrolled();
-        } else {
-            int wheel = Mouse.getDWheel();
-            if(wheel != 0) {
-                float modifier = 0.75F;
-                float mod = wheel < 0 ? modifier : 1F/modifier;
+    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
+        if (!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize())) {
+            float mod = (float) Math.exp(scroll);
 
-                //Ignore disgusting code below. In the future maybe remove the matrix stuff, it don't really be needed
-                this.tryMulMatrix(matrix4f -> matrix4f.setScale(mod), fail -> {
-                    if(this.selected != null || wheel > 0) {
-                        return;
+            //Ignore disgusting code below. In the future maybe remove the matrix stuff, it don't really be needed
+            this.tryMulMatrix(matrix4f -> matrix4f.multiply(Matrix4f.createScaleMatrix(mod, mod, mod)), fail -> {
+                if(this.selected != null || scroll > 0) {
+                    return;
+                }
+                boolean leftOut = fail.x() > 0;
+                boolean rightOut = fail.z() < this.xSize;
+
+                boolean topOut = fail.y() > 0;
+                boolean bottomOut = fail.w() < this.ySize;
+
+
+                float xOffset = 0;
+                if(leftOut != rightOut) {
+                    if(leftOut) {
+                        xOffset = -fail.x();
+                    } else {
+                        xOffset = this.xSize - fail.z();
                     }
-                    boolean leftOut = fail.x > 0;
-                    boolean rightOut = fail.z < this.xSize;
+                }
 
-                    boolean topOut = fail.y > 0;
-                    boolean bottomOut = fail.w < this.ySize;
-
-
-                    float xOffset = 0;
-                    if(leftOut != rightOut) {
-                        if(leftOut) {
-                            xOffset = -fail.x;
-                        } else {
-                            xOffset = this.xSize - fail.z;
-                        }
+                float yOffset = 0;
+                if(topOut != bottomOut) {
+                    if(topOut) {
+                        yOffset = -fail.y();
+                    } else {
+                        yOffset = this.ySize - fail.z();
                     }
+                }
 
-                    float yOffset = 0;
-                    if(topOut != bottomOut) {
-                        if(topOut) {
-                            yOffset = -fail.y;
-                        } else {
-                            yOffset = this.ySize - fail.z;
-                        }
-                    }
+                float finalXOff = xOffset;
+                float finalYOff = yOffset;
 
-                    float finalXOff = xOffset;
-                    float finalYOff = yOffset;
+                this.tryMulMatrix(matrix4f -> {
+                    Matrix4f scale = Matrix4f.createScaleMatrix(mod, mod, mod);
 
-                    this.tryMulMatrix(matrix4f -> {
-                        Matrix4f scale = new Matrix4f();
-                        scale.setIdentity();
-                        scale.setScale(mod);
+                    Matrix4f translation = Matrix4f.createTranslateMatrix(finalXOff, finalYOff, 0);
 
-                        Matrix4f translation = new Matrix4f();
-                        translation.setIdentity();
-                        translation.m03 = finalXOff;
-                        translation.m13 = finalYOff;
-
-                        matrix4f.mul(translation, scale);
-                    }, failImpossible -> { /*Throw something?*/ });
-                });
-            }
+                    matrix4f.set(translation);
+                    matrix4f.multiply(scale);
+                }, failImpossible -> { /*Throw something?*/ });
+            });
+            return true;
         }
+        return false;
     }
+
 
     private void tryMulMatrix(Consumer<Matrix4f> mat, Consumer<Vector4f> onFail) {
         Matrix4f newTransformation = new Matrix4f();
@@ -329,7 +276,8 @@ public class TrackingTabletScreen extends TabletScreen {
         mat.accept(newTransformation);
 
         Matrix4f finishedTransformation = new Matrix4f();
-        finishedTransformation.mul(newTransformation, this.transformation);
+        finishedTransformation.set(newTransformation);
+        finishedTransformation.multiply(this.transformation);
 
         // (x, y)
         //
@@ -338,17 +286,17 @@ public class TrackingTabletScreen extends TabletScreen {
         boolean legal = true;
 
         for (int i = 0; i < 4; i++) {
-            Vec2f point = this.getTransformedPoint((i & 1) == 0 ? 0 : this.xSize, (i & 2) == 0 ? 0 : this.xSize, finishedTransformation);
+            Vector2f point = this.getTransformedPoint((i & 1) == 0 ? 0 : this.xSize, (i & 2) == 0 ? 0 : this.xSize, finishedTransformation);
             legal &= this.isInBound(point.x, point.y);
 
             if(i == 0) {
-                fail.x = point.x;
-                fail.y = point.y;
+                fail.setX(point.x);
+                fail.setY(point.y);
             }
 
             if(i == 3) {
-                fail.z = point.x;
-                fail.w = point.y;
+                fail.setZ(point.x);
+                fail.setW(point.y);
             }
         }
 
@@ -364,9 +312,9 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     private Vector2f getTransformedPoint(float x, float y, Matrix4f transformation) {
-        Point3f point = new Point3f( x - this.xSize / 2, y - this.xSize / 2, 0);
-        transformation.transform(point);
-        return new Vector2f(point.x + this.xSize / 2F, point.y + this.ySize / 2F);
+        Vector4f point = new Vector4f( x - this.xSize / 2F, y - this.xSize / 2F, 0, 1);
+        point.transform(transformation);
+        return new Vector2f(point.x() + this.xSize / 2F, point.y() + this.ySize / 2F);
     }
 
     @RequiredArgsConstructor
@@ -376,29 +324,30 @@ public class TrackingTabletScreen extends TabletScreen {
         private final String name;
 
         @Override
-        public void draw(int x, int y, int mouseX, int mouseY) {
-            Minecraft.getMinecraft().fontRenderer.drawString(this.name, x + 5, y + 4, -1);
+        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+            Minecraft.getInstance().font.draw(stack, this.name, x + 5, y + 4, -1);
         }
 
         @Override
-        public void postDraw(int x, int y, int mouseX, int mouseY) {
+        public void postDraw(MatrixStack stack, int x, int y, int mouseX, int mouseY) {
             if(mouseX - x >= 0 && mouseX - x <= 100 && mouseY - y >= 0 && mouseY - y <= 15) {
                 GL11.glDisable(GL11.GL_STENCIL_TEST);
-                GlStateManager.enableDepth();
-                GuiUtils.drawHoveringText(ItemStack.EMPTY, Collections.singletonList(this.pos.getX() + ", " + this.pos.getY() + ", " + this.pos.getZ()), mouseX, mouseY, xSize, ySize, -1, Minecraft.getMinecraft().fontRenderer);
-                GlStateManager.enableDepth();
+                RenderSystem.enableDepthTest();
+                GuiUtils.drawHoveringText(stack, Collections.singletonList(new StringTextComponent(this.pos.getX() + ", " + this.pos.getY() + ", " + this.pos.getZ())), mouseX, mouseY, xSize, ySize, -1, Minecraft.getInstance().font);
+                RenderSystem.enableDepthTest();
                 GL11.glEnable(GL11.GL_STENCIL_TEST);
-                RenderHelper.enableGUIStandardItemLighting();
-                GlStateManager.color(1F, 1F, 1F,1F);
+                RenderHelper.setupForFlatItems();
+                RenderSystem.color4f(1F, 1F, 1F,1F);
             }
         }
 
         @Override
-        public boolean onClicked(int relMouseX, int relMouseY, int mouseX, int mouseY) {
+        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
             transformation.setIdentity();
             selected = null;
             ProjectNublar.NETWORK.sendToServer(new C30TrackingTabletEntryClicked(this.pos));
             return true;
         }
+
     }
 }

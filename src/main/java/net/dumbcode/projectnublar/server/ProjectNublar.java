@@ -237,13 +237,13 @@ public class ProjectNublar {
         NETWORK.registerMessage(new S24TrackingTabletUpdateChunk.Handler(), S24TrackingTabletUpdateChunk.class, 24, Side.CLIENT);
         NETWORK.registerMessage(new C25StopTrackingTablet.Handler(), C25StopTrackingTablet.class, 25, Side.SERVER);
         NETWORK.registerMessage(new S2COpenTablet.Handler(), S2COpenTablet.class, 26, Side.CLIENT);
-        NETWORK.registerMessage(new C27InstallModule.Handler(), C27InstallModule.class, 27, Side.SERVER);
-        NETWORK.registerMessage(new C28ModuleClicked.Handler(), C28ModuleClicked.class, 28, Side.SERVER);
-        NETWORK.registerMessage(new S29OpenTabletModule.Handler(), S29OpenTabletModule.class, 29, Side.CLIENT);
+        NETWORK.registerMessage(new C2SInstallModule.Handler(), C2SInstallModule.class, 27, Side.SERVER);
+        NETWORK.registerMessage(new C2STabletModuleClicked.Handler(), C2STabletModuleClicked.class, 28, Side.SERVER);
+        NETWORK.registerMessage(new S2COpenTabletModule.Handler(), S2COpenTabletModule.class, 29, Side.CLIENT);
         NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
         NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
         NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
-        NETWORK.registerMessage(new C33SetTabletBackground.Handler(), C33SetTabletBackground.class, 33, Side.SERVER);
+        NETWORK.registerMessage(new C2SSetTabletBackground.Handler(), C2SSetTabletBackground.class, 33, Side.SERVER);
         NETWORK.registerMessage(new C34UploadImage.Handler(), C34UploadImage.class, 34, Side.SERVER);
         NETWORK.registerMessage(new C35RequestAllIcons.Handler(), C35RequestAllIcons.class, 35, Side.SERVER);
         NETWORK.registerMessage(new S36RequestBackgroundIconHeaders.Handler(), S36RequestBackgroundIconHeaders.class, 36, Side.CLIENT);

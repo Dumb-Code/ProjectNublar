@@ -1,21 +1,24 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.EnumHand;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
-
 //TabInformationBar
-public abstract class BaseTabletScreen extends GuiScreen {
+public abstract class BaseTabletScreen extends Screen {
     protected static final int HOME_ICON_SIZE = 24;
     protected static final int MAX_SCREEN_WIDTH = 250;
     protected static final float SCREEN_RATIO = TabletBGImageHandler.SCREEN_RATIO;
@@ -29,68 +32,70 @@ public abstract class BaseTabletScreen extends GuiScreen {
 
     protected boolean homeButton = true;
 
-    protected final EnumHand hand;
+    protected final Hand hand;
 
-    protected BaseTabletScreen(EnumHand hand) {
+    protected BaseTabletScreen(Hand hand) {
+        super(new StringTextComponent("If you see this let me know I need to add it"));
         this.hand = hand;
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
+    public void init() {
+        super.init();
 
         this.leftStart = Math.max(PADDING_SIDES, this.width / 2 - MAX_SCREEN_WIDTH);
         this.tabletWidth = this.width - leftStart * 2;
 
         this.tabletHeight = (int) (this.tabletWidth / SCREEN_RATIO);
         this.topStart = this.height / 2 - this.tabletHeight / 2;
-
     }
 
     @Override
-    public final void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawDefaultBackground();
-
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(stack);
+        super.render(stack, mouseX, mouseY, partialTicks);
         boolean stencil = this.allowStenciling();
 
         if(stencil) {
-            StencilStack.pushSquareStencil(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight);
+            StencilStack.pushSquareStencil(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight);
         }
 
-        drawRect(0, 0, this.width, this.height, -1);
+        fill(stack,0, 0, this.width, this.height, -1);
 
-        this.drawTabletScreen(mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
+        this.drawTabletScreen(stack, mouseX, mouseY, Minecraft.getInstance().getDeltaFrameTime());
 
         if(stencil) {
             StencilStack.popStencil();
         }
 
         if(this.homeButton) {
-            this.renderHomePage(mouseX, mouseY);
+            this.renderHomePage(stack, mouseX, mouseY);
         }
 
-        this.renderNotificationBar();
-        RenderUtils.renderBorderExclusive(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 1, 0xFFFF00FF);
+        this.renderNotificationBar(stack);
+        RenderUtils.renderBorderExclusive(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 1, 0xFFFF00FF);
+
     }
+
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if(this.homeButton) {
-            int mouseRelX = mouseX - (this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2);
-            int mouseRelY = mouseY - (this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5);
+            double mouseRelX = mouseX - (this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2F);
+            double mouseRelY = mouseY - (this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5);
             if(mouseRelX > 0 && mouseRelX < HOME_ICON_SIZE && mouseRelY > 0 && mouseRelY < HOME_ICON_SIZE) {
-                Minecraft.getMinecraft().displayGuiScreen(new TabletHomeGui(this.hand));
+                Minecraft.getInstance().setScreen(new TabletHomeGui(this.hand));
+                return true;
             }
         }
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
 
-    private void renderHomePage(int mouseX, int mouseY) {
-        GlStateManager.enableBlend();
-        mc.getRenderManager().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"));
-        drawModalRectWithCustomSizedTexture(this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2, this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5, 0, 0, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE);
+    private void renderHomePage(MatrixStack stack, int mouseX, int mouseY) {
+        RenderSystem.enableBlend();
+        minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"));
+        blit(stack,this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2, this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5, 0, 0, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE);
 
         int left = this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2;
         int top = this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5;
@@ -98,22 +103,26 @@ public abstract class BaseTabletScreen extends GuiScreen {
         int mouseRelX = mouseX - left;
         int mouseRelY = mouseY - top;
         if(mouseRelX > 0 && mouseRelX < HOME_ICON_SIZE && mouseRelY > 0 && mouseRelY < HOME_ICON_SIZE) {
-            drawRect(left, top, left + HOME_ICON_SIZE, top + HOME_ICON_SIZE, 0x44000022);
+            fill(stack, left, top, left + HOME_ICON_SIZE, top + HOME_ICON_SIZE, 0x44000022);
         }
     }
 
-    private void renderNotificationBar() {
-        GlStateManager.color(1F , 1F, 1F, 1F);
+    private void renderNotificationBar(MatrixStack stack) {
+        RenderSystem.color4f(1F , 1F, 1F, 1F);
 
-        this.drawGradientRect(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16, -1072689136, -804253680);
+        fillGradient(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16, -1072689136, -804253680);
 
-        long time = (this.mc.world.getWorldTime() + 6000) % 24000;
-        this.mc.fontRenderer.drawString(this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
+        long time = (this.minecraft.level.getDayTime() + 6000) % 24000;
+        this.minecraft.font.draw(stack, this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
 
-        WeatherIcon icon = WeatherIcon.guess(this.mc.world, this.mc.player.getPosition());
+        WeatherIcon icon = WeatherIcon.guess(this.minecraft.level, this.minecraft.player.blockPosition());
         float[] uv = icon.getUV();
-        this.mc.renderEngine.bindTexture(icon.getLocation());
-        RenderUtils.drawTexturedQuad(this.leftStart + this.tabletWidth - 16F, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16F, uv[0], uv[1], uv[2], uv[3], this.zLevel);
+        this.minecraft.textureManager.bind(icon.getLocation());
+
+        BufferBuilder builder = Tessellator.getInstance().getBuilder();
+        builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        RenderUtils.drawTexturedQuad(stack, builder, this.leftStart + this.tabletWidth - 16F, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16F, uv[0], uv[1], uv[2], uv[3], this.getBlitOffset());
+        Tessellator.getInstance().end();
     }
 
     private String thicken(Number number) {
@@ -121,7 +130,7 @@ public abstract class BaseTabletScreen extends GuiScreen {
         return (num < 10 ? "0" : "") + num;
     }
 
-    protected abstract void drawTabletScreen(int mouseX, int mouseY, float partialTicks);
+    protected abstract void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks);
 
     protected boolean allowStenciling() {
         return true;

@@ -1,90 +1,64 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.primitives.Ints;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
 import net.dumbcode.projectnublar.server.network.C31TrackingBeaconDataChanged;
-import net.minecraft.client.gui.GuiPageButtonList;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
-import java.io.IOException;
-
-public class GuiTrackingBeacon extends GuiScreen implements GuiPageButtonList.GuiResponder {
+public class GuiTrackingBeacon extends Screen {
 
     private final BlockPos pos;
     private String name;
     private int radius;
 
-    private GuiTextField nameField;
-    private GuiTextField radiusField;
+    private TextFieldWidget nameField;
+    private TextFieldWidget radiusField;
 
     public GuiTrackingBeacon(TrackingBeaconBlockEntity te) {
-        this.pos = te.getPos();
+        super(new TranslationTextComponent(ProjectNublar.MODID + ".gui.trackingbeacon.title"));
+        this.pos = te.getBlockPos();
         this.name = te.getName();
         this.radius = te.getRadius();
     }
 
     @Override
-    public void initGui() {
-        this.nameField = new GuiTextField(0, mc.fontRenderer, this.width / 4, this.height / 2 - 50, this.width / 2, 20);
-        this.nameField.setText(this.name);
-        this.nameField.setFocused(true);
-        this.nameField.setGuiResponder(this);
+    public void init() {
+        this.nameField = this.addButton(new TextFieldWidget(minecraft.font, this.width / 4, this.height / 2 - 50, this.width / 2, 20, new StringTextComponent("")));
+        this.nameField.setValue(this.name);
+        this.nameField.setFocus(true);
+        this.nameField.setResponder(s -> {
+            this.name = s;
+            ProjectNublar.NETWORK.sendToServer(new C31TrackingBeaconDataChanged(this.pos, this.name, this.radius));
+        });
 
-        this.radiusField = new GuiTextField(1, mc.fontRenderer, this.width / 2 - 25, this.height / 2, 50, 20);
-        this.radiusField.setText(String.valueOf(this.radius));
-        this.radiusField.setGuiResponder(this);
-        this.radiusField.setValidator(input -> input != null && (input.isEmpty() || Ints.tryParse(input) != null));
-        super.initGui();
+        this.radiusField = this.addButton(new TextFieldWidget(minecraft.font, this.width / 2 - 25, this.height / 2, 50, 20, new StringTextComponent("")));
+        this.radiusField.setValue(String.valueOf(this.radius));
+        this.radiusField.setResponder(s -> {
+            this.radius = s.isEmpty() ? 0 : Integer.parseInt(s);
+            ProjectNublar.NETWORK.sendToServer(new C31TrackingBeaconDataChanged(this.pos, this.name, this.radius));
+
+        });
+        this.radiusField.setFilter(input -> input != null && (input.isEmpty() || Ints.tryParse(input) != null));
+        super.init();
+    }
+
+
+    @Override
+    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+        this.renderBackground(stack);
+        super.render(stack, mouseX, mouseY, ticks);
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
-        this.nameField.drawTextBox();
-        this.radiusField.drawTextBox();
-        super.drawScreen(mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    public void updateScreen() {
-        this.nameField.updateCursorCounter();
-        this.radiusField.updateCursorCounter();
-        super.updateScreen();
-    }
-
-    @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        this.nameField.textboxKeyTyped(typedChar, keyCode);
-        this.radiusField.textboxKeyTyped(typedChar, keyCode);
-        super.keyTyped(typedChar, keyCode);
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        this.nameField.mouseClicked(mouseX, mouseY, mouseButton);
-        this.radiusField.mouseClicked(mouseX, mouseY, mouseButton);
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public void setEntryValue(int id, String value) {
-        if(id == 0) {
-            this.name = value;
-        }
-        if(id == 1) {
-            this.radius = value.isEmpty() ? 0 : Integer.parseInt(value);
-        }
-        ProjectNublar.NETWORK.sendToServer(new C31TrackingBeaconDataChanged(this.pos, this.name, this.radius));
-    }
-
-    @Override
-    public void setEntryValue(int id, boolean value) {
-    }
-
-    @Override
-    public void setEntryValue(int id, float value) {
+    public void tick() {
+        this.nameField.tick();
+        this.radiusField.tick();
+        super.tick();
     }
 }

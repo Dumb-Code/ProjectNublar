@@ -17,19 +17,19 @@ public interface SetupPage<T extends TabletBackground> {
     default void updatePage(int x, int y) {
     }
 
-    default void mouseClicked(int x, int y, int mouseX, int mouseY, int mouseButton) {
+    default void mouseClicked(int x, int y, double mouseX, double mouseY, int mouseButton) {
     }
 
-    default void mouseClickMove(int x, int y, int mouseX, int mouseY, int mouseButton, long timeSinceLastClick) {
+    default void mouseDragged(int x, int y, double mouseX, double mouseY, int mouseButton, double changeX, double changeY) {
     }
 
-    default void mouseReleased(int x, int y, int mouseX, int mouseY, int mouseButton) {
+    default void mouseReleased(int x, int y, double mouseX, double mouseY, int mouseButton) {
     }
 
-    default void keyTyped(char typedChar, int keyCode) {
+    default void keyPressed(int keyCode, int scanCode, int modifiers) {
     }
 
-    default void handleMouseInput(int x, int y, int mouseX, int mouseY) {
+    default void mouseScrolled(int x, int y, double mouseX, double mouseY, double scroll) {
     }
 
     T create();

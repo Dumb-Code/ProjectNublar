@@ -13,6 +13,8 @@ import java.util.List;
 
 public class TabletScreen implements INestedGuiEventHandler {
     protected static final Minecraft MC = Minecraft.getInstance();
+    protected int left;
+    protected int top;
     protected int xSize;
     protected int ySize;
     private final List<IGuiEventListener> children = new ArrayList<>();
@@ -22,7 +24,9 @@ public class TabletScreen implements INestedGuiEventHandler {
 
     @Getter @Setter private boolean dragging;
 
-    public void setData(int xSize, int ySize) {
+    public void setData(int left, int top, int xSize, int ySize) {
+        this.left = left;
+        this.top = top;
         this.xSize = xSize;
         this.ySize = ySize;
     }

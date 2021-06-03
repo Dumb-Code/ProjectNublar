@@ -1,21 +1,21 @@
 package net.dumbcode.projectnublar.server.tablet;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 public interface TabletModuleStorage {
-    void readFromNBT(NBTTagCompound compound);
+    void readFromNBT(CompoundNBT compound);
 
-    NBTTagCompound writeToNBT();
+    CompoundNBT writeToNBT();
 
     class Empty implements TabletModuleStorage {
 
         @Override
-        public void readFromNBT(NBTTagCompound compound) {
+        public void readFromNBT(CompoundNBT compound) {
         }
 
         @Override
-        public NBTTagCompound writeToNBT() {
-            return new NBTTagCompound();
+        public CompoundNBT writeToNBT() {
+            return new CompoundNBT();
         }
     }
 }
