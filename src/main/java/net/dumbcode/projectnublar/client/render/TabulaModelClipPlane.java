@@ -54,7 +54,7 @@ public class TabulaModelClipPlane {
         GL11.glClipPlane(GL11.GL_CLIP_PLANE0, db);
         GL11.glEnable(GL11.GL_CLIP_PLANE0);
 
-        this.model.renderBoxes(stack, light, texture);
+        this.model.renderImmediate(stack, light, texture);
 
         GL11.glDisable(GL11.GL_CLIP_PLANE0);
 

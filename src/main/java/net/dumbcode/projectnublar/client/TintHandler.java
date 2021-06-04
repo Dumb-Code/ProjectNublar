@@ -6,20 +6,20 @@ import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID, value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = ProjectNublar.MODID, value = Dist.CLIENT)
 public class TintHandler {
 
     @SubscribeEvent
     public static void onBlockColors(ColorHandlerEvent.Block event) {
         BlockColors colors = event.getBlockColors();
-        colors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> {
+        colors.register((state, worldIn, pos, tintIndex) -> {
             if(worldIn != null && pos != null) {
-                TileEntity te = worldIn.getTileEntity(pos);
+                TileEntity te = worldIn.getBlockEntity(pos);
                 if(te instanceof SequencingSynthesizerBlockEntity) {
                     SequencingSynthesizerBlockEntity entity = (SequencingSynthesizerBlockEntity) te;
                     switch (tintIndex) {
@@ -31,16 +31,16 @@ public class TintHandler {
                 }
             }
             return -1;
-        }, BlockHandler.SEQUENCING_SYNTHESIZER);
+        }, BlockHandler.SEQUENCING_SYNTHESIZER.get());
 
-        colors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> {
+        colors.register((state, worldIn, pos, tintIndex) -> {
             if(worldIn != null && pos != null && tintIndex == 1) {
-                TileEntity te = worldIn.getTileEntity(pos);
+                TileEntity te = worldIn.getBlockEntity(pos);
                 if(te instanceof EggPrinterBlockEntity) {
                     return ((EggPrinterBlockEntity) te).getDye().getColorValue();
                 }
             }
             return -1;
-        }, BlockHandler.EGG_PRINTER);
+        }, BlockHandler.EGG_PRINTER.get());
     }
 }

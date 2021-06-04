@@ -1,7 +1,6 @@
 package net.dumbcode.projectnublar.client;
 
 import net.dumbcode.dumblibrary.client.model.tabula.baked.TabulaModelHandler;
-import net.dumbcode.projectnublar.client.render.FenceStateMapper;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.FossilItem;

@@ -20,6 +20,7 @@ import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -77,7 +78,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private int totalConsumeTime;
     private int consumeTimer;
 
-    @Getter @Setter private EnumDyeColor dye = EnumDyeColor.BLACK;
+    @Getter @Setter private DyeColor dye = DyeColor.BLACK;
 
 //    private String selectOneKey = "";
 //    private double selectOneAmount;

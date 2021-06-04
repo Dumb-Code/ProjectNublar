@@ -82,15 +82,15 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         this.animateLid(te, partialTicks, outputSlot);
         this.animatePlatform(te, platformMove, recipeProgress, partialTicks);
 
-        this.renderEgg(stack, light, platformMove, recipeProgress*EGG_TYPE.getEggLength());
+        this.renderEgg(stack, buffers, light, platformMove, recipeProgress*EGG_TYPE.getEggLength());
 
         this.applyAnimations();
 
         System.arraycopy(TARGET_ANIMATION, 0, te.getSnapshot(), 4, 4);
 
-        this.model.renderBoxes(stack, light, TEXTURE_LOCATION);
+        this.model.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
         RenderSystem.enableBlend();
-        this.model.renderBoxes(stack, light, EGG_PRINTER_GLASS);
+        this.model.renderBoxes(stack, light, buffers, EGG_PRINTER_GLASS);
 
         stack.popPose();
     }
@@ -163,13 +163,13 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
     }
 
-    private void renderEgg(MatrixStack stack, int light, boolean doPlatform, float eggLength) {
+    private void renderEgg(MatrixStack stack, IRenderTypeBuffer buffers, int light, boolean doPlatform, float eggLength) {
 
         if(doPlatform) {
             stack.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);
             MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), TabulaModelClipPlane::new).render(stack, light, EGG_TYPE.getTexture(), -1.5 + eggLength, 0xFFF7F1DD);
         } else {
-            EGG_TYPE.getEggModel().renderBoxes(stack, light, EGG_TYPE.getTexture());
+            EGG_TYPE.getEggModel().renderBoxes(stack, light, buffers, EGG_TYPE.getTexture());
         }
 
     }

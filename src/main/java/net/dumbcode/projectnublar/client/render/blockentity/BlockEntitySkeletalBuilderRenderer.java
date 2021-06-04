@@ -98,7 +98,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
 
         this.setupDinosaurGlState(rotationDetails.getLeft(), stack, teRot, entity);
         this.setBoxRotations(model, te.getPoseData());
-        this.renderDinosaurModel(entity, model, stack, light, buffers.getBuffer(RenderType.entitySolid(te.getTexture())));
+        this.renderDinosaurModel(entity, model, stack, light, buffers, te.getTexture());
         this.resetDinosaurGlState();
 
         stack.popPose();
@@ -129,9 +129,9 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         }
     }
 
-    private void renderDinosaurModel(ComponentAccess entity, DCMModel model, MatrixStack stack, int light, IVertexBuilder buff) {
+    private void renderDinosaurModel(ComponentAccess entity, DCMModel model, MatrixStack stack, int light, IRenderTypeBuffer buffs, ResourceLocation texture) {
         setVisibility(entity, model);
-        model.renderBoxes(stack, light, buff);
+        model.renderBoxes(stack, light, buffs, texture);
         resetVisibility(model);
     }
 

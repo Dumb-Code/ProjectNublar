@@ -124,7 +124,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         this.setArmAngles(te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, stack, buffers, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
         this.updateEgg(te, partialTicks);
 
-        this.armModel.renderBoxes(stack, light, ARM_TEXTURE_LOCATION);
+        this.armModel.renderBoxes(stack, light, buffers, ARM_TEXTURE_LOCATION);
     }
 
 
@@ -162,7 +162,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
             this.drawDebugLines(stack, lines, 0, 0, 0);
         }
         stack.translate(0, -1.5, 0);
-        type.getEggModel().renderBoxes(stack, light, type.getTexture());
+        type.getEggModel().renderBoxes(stack, light, buffers, type.getTexture());
 
         stack.popPose();
     }

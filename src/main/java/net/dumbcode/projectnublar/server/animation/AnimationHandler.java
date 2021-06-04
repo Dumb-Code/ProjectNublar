@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.animation;
 
-import net.dumbcode.dumblibrary.server.animation.objects.Animation;
+import net.dumbcode.dumblibrary.server.animation.Animation;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraftforge.fml.common.Mod;
 

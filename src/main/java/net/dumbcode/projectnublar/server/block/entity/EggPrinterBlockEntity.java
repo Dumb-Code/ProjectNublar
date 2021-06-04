@@ -13,6 +13,7 @@ import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
@@ -23,7 +24,7 @@ import java.util.List;
 @Getter
 @Setter
 public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBlockEntity> implements DyableBlockEntity {
-    private EnumDyeColor dye = EnumDyeColor.WHITE;
+    private DyeColor dye = DyeColor.WHITE;
 
     //The following is stuff for the animations
     private final float[] snapshot = new float[8];
