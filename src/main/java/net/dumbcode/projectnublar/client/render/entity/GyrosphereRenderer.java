@@ -2,18 +2,13 @@ package net.dumbcode.projectnublar.client.render.entity;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.dumbcode.projectnublar.client.render.model.ProjectNublarModelHandler;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.SpriteAwareVertexBuilder;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix3f;
@@ -26,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
+
+    private static final ResourceLocation TEXTURE = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
 
     private static List<GyrosphereSphere.Vertex> sphere;
 
@@ -55,7 +52,7 @@ public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
         MatrixStack.Entry last = stack.last();
         Matrix4f pose = last.pose();
         Matrix3f normal = last.normal();
-        IVertexBuilder buffer = new SpriteAwareVertexBuilder(buffers.getBuffer(RenderType.translucent()), ProjectNublarModelHandler.gyrosphereTexture);
+        IVertexBuilder buffer = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
         Map<BlockPos, Integer> lightValueCache = new HashMap<>();
         for (GyrosphereSphere.Vertex vertex : getSphere()) {
             Vector4f vec = new Vector4f(vertex.x, vertex.y, vertex.z, 1.0F);

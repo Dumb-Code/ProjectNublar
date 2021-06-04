@@ -34,15 +34,12 @@ public class ProjectNublarModelHandler {
     private static final ResourceLocation ELECTRIC_FENCE_WARNING_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
     private static TextureAtlasSprite electricFenceWarning;
 
-    private static final ResourceLocation GYROSPHERE_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
-    public static TextureAtlasSprite gyrosphereTexture;
 
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if(PlayerContainer.BLOCK_ATLAS.equals(event.getMap().location())) {
             event.addSprite(ELECTRIC_FENCE_LOCATION);
             event.addSprite(ELECTRIC_FENCE_WARNING_LOCATION);
-            event.addSprite(GYROSPHERE_TEXTURE_LOCATION);
         }
     }
 
@@ -51,7 +48,6 @@ public class ProjectNublarModelHandler {
         if(PlayerContainer.BLOCK_ATLAS.equals(event.getMap().location())) {
             electricFence = event.getMap().getSprite(ELECTRIC_FENCE_LOCATION);
             electricFenceWarning = event.getMap().getSprite(ELECTRIC_FENCE_WARNING_LOCATION);
-            gyrosphereTexture = event.getMap().getSprite(GYROSPHERE_TEXTURE_LOCATION);
         }
     }
 
