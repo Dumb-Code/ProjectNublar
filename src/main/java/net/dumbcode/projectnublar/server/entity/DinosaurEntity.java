@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ai.SlowMoveHelper;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
@@ -14,8 +15,8 @@ import javax.annotation.Nullable;
 
 public class DinosaurEntity extends ComposableCreatureEntity {
 
-    public DinosaurEntity(World worldIn) {
-        super(worldIn);
+    public DinosaurEntity(EntityType<? extends DinosaurEntity> type, World worldIn) {
+        super(type, worldIn);
 
         //TODO-stream: move to a component
         this.moveHelper = new SlowMoveHelper(this);

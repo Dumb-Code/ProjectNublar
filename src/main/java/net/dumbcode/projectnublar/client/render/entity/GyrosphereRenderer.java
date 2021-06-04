@@ -1,64 +1,80 @@
 package net.dumbcode.projectnublar.client.render.entity;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.dumbcode.projectnublar.client.render.model.ProjectNublarModelHandler;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SpriteAwareVertexBuilder;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
-import org.lwjgl.util.glu.Sphere;
-import org.lwjgl.util.vector.Quaternion;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Matrix3f;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector4f;
 
-import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class GyrosphereRenderer extends Render<GyrosphereVehicle> {
+public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
 
-    private static int sphereID = -1;
+    private static List<GyrosphereSphere.Vertex> sphere;
 
-    public GyrosphereRenderer(RenderManager renderManager) {
-        super(renderManager);
+    public GyrosphereRenderer(EntityRendererManager manager) {
+        super(manager);
     }
 
-    private static int getSphereID() {
-        if(sphereID == -1) {
-            Sphere sphere = new Sphere();
-            sphere.setTextureFlag(true);
-            sphere.setDrawStyle(GLU.GLU_FILL);
-            sphere.setNormals(GLU.GLU_SMOOTH);
-            sphereID = GlStateManager.glGenLists(1);
-            GlStateManager.glNewList(sphereID, GL11.GL_COMPILE);
-            sphere.draw(1, 15, 15); //TODO: configurable slices and stacks
-            sphere.setOrientation(GLU.GLU_INSIDE);
-            sphere.draw(1, 15, 15);
-            GlStateManager.glEndList();
+    private static List<GyrosphereSphere.Vertex> getSphere() {
+        if(sphere == null) {
+            sphere = GyrosphereSphere.generate();
         }
-        return sphereID;
+        return sphere;
     }
 
     @Override
-    public void doRender(GyrosphereVehicle entity, double x, double y, double z, float entityYaw, float partialTicks) {
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, z);
-        GlStateManager.translate(0, entity.height / 2, 0);
+    public void render(GyrosphereVehicle entity, float entityYaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light) {
+        super.render(entity, entityYaw, partialTicks, stack, buffers, light);
+        stack.pushPose();
+        stack.translate(0, entity.getType().getHeight() / 2F, 0);
 
         if(entity.prevRotation != null && entity.rotation != null) {
-            GlStateManager.rotate(slerp(entity.prevRotation, entity.rotation, partialTicks));
+            stack.mulPose(slerp(entity.prevRotation, entity.rotation, partialTicks));
         }
 
-        Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png"));
-        GlStateManager.scale(entity.width/2F,entity.width/2F,entity.width/2F);
-        GlStateManager.callList(getSphereID());
-        GlStateManager.popMatrix();
+        stack.scale(entity.getBbWidth()/2F, entity.getBbWidth()/2F, entity.getBbWidth()/2F);
+
+        MatrixStack.Entry last = stack.last();
+        Matrix4f pose = last.pose();
+        Matrix3f normal = last.normal();
+        IVertexBuilder buffer = new SpriteAwareVertexBuilder(buffers.getBuffer(RenderType.translucent()), ProjectNublarModelHandler.gyrosphereTexture);
+        Map<BlockPos, Integer> lightValueCache = new HashMap<>();
+        for (GyrosphereSphere.Vertex vertex : getSphere()) {
+            Vector4f vec = new Vector4f(vertex.x, vertex.y, vertex.z, 1.0F);
+            vec.transform(pose);
+            int l = lightValueCache.computeIfAbsent(new BlockPos(vec.x(), vec.y(), vec.z()), pos -> WorldRenderer.getLightColor(entity.level, pos));
+            buffer.vertex(vec.x(), vec.y(), vec.z())
+                .uv(vertex.u, vertex.v)
+                .uv2(l)
+                .normal(normal, vertex.nx, vertex.ny, vertex.nz)
+                .endVertex();
+        }
+
+
     }
 
     //Adapted from https://github.com/JOML-CI/JOML/blob/master/src/org/joml/Quaternionf.java
     private static Quaternion slerp(Quaternion current, Quaternion target, float partialTicks) {
-        Quaternion dest = new Quaternion();
-        float cosom = current.x * target.x + current.y * target.y + current.z * target.z + current.w * target.w;
+        Quaternion dest = new Quaternion(0, 0, 0, 0);
+        float cosom = current.i() * target.i() + current.j() * target.j() + current.k() * target.k() + current.r() * target.r();
         float absCosom = Math.abs(cosom);
         float scale0, scale1;
         if (1.0f - absCosom > 1E-6f) {
@@ -72,16 +88,17 @@ public class GyrosphereRenderer extends Render<GyrosphereVehicle> {
             scale1 = partialTicks;
         }
         scale1 = cosom >= 0.0f ? scale1 : -scale1;
-        dest.x = scale0 * current.x + scale1 * target.x;
-        dest.y = scale0 * current.y + scale1 * target.y;
-        dest.z = scale0 * current.z + scale1 * target.z;
-        dest.w = scale0 * current.w + scale1 * target.w;
+        dest.set(
+            scale0 * current.i() + scale1 * target.i(),
+            scale0 * current.j() + scale1 * target.j(),
+            scale0 * current.k() + scale1 * target.k(),
+            scale0 * current.r() + scale1 * target.r()
+        );
         return dest;
     }
 
-    @Nullable
     @Override
-    protected ResourceLocation getEntityTexture(GyrosphereVehicle entity) {
+    public ResourceLocation getTextureLocation(GyrosphereVehicle p_110775_1_) {
         return new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png");
     }
 }

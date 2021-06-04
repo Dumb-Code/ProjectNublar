@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SVehicleInputStateUpdated;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -14,8 +15,8 @@ public abstract class AbstractVehicle<E extends Enum<E>> extends Entity {
     private final E[] values;
     public int inputState;
 
-    public AbstractVehicle(World worldIn, E[] values) {
-        super(worldIn);
+    public AbstractVehicle(EntityType<?> type, World worldIn, E[] values) {
+        super(type, worldIn);
         this.values = values;
     }
 

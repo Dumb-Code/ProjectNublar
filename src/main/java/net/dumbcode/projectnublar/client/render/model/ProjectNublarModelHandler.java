@@ -1,8 +1,13 @@
 package net.dumbcode.projectnublar.client.render.model;
 
+import net.dumbcode.dumblibrary.client.component.ComponentRenderer;
+import net.dumbcode.projectnublar.client.render.entity.DinosaurEggRenderer;
+import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
+import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
+import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -15,6 +20,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Map;
@@ -28,11 +34,15 @@ public class ProjectNublarModelHandler {
     private static final ResourceLocation ELECTRIC_FENCE_WARNING_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
     private static TextureAtlasSprite electricFenceWarning;
 
+    private static final ResourceLocation GYROSPHERE_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
+    public static TextureAtlasSprite gyrosphereTexture;
+
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if(PlayerContainer.BLOCK_ATLAS.equals(event.getMap().location())) {
             event.addSprite(ELECTRIC_FENCE_LOCATION);
             event.addSprite(ELECTRIC_FENCE_WARNING_LOCATION);
+            event.addSprite(GYROSPHERE_TEXTURE_LOCATION);
         }
     }
 
@@ -41,15 +51,16 @@ public class ProjectNublarModelHandler {
         if(PlayerContainer.BLOCK_ATLAS.equals(event.getMap().location())) {
             electricFence = event.getMap().getSprite(ELECTRIC_FENCE_LOCATION);
             electricFenceWarning = event.getMap().getSprite(ELECTRIC_FENCE_WARNING_LOCATION);
+            gyrosphereTexture = event.getMap().getSprite(GYROSPHERE_TEXTURE_LOCATION);
         }
     }
 
     @SubscribeEvent
     public static void onModelReady(ModelRegistryEvent event) {
-//        RenderingRegistry.registerEntityRenderingHandler(DinosaurEntity.class, ComponentRenderer::new);
-//        RenderingRegistry.registerEntityRenderingHandler(GyrosphereVehicle.class, GyrosphereRenderer::new);
-//        RenderingRegistry.registerEntityRenderingHandler(EntityPart.class, EntityPartRenderer::new);
-//        RenderingRegistry.registerEntityRenderingHandler(DinosaurEggEntity.class, DinosaurEggRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityHandler.DINOSAUR.get(), ComponentRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityHandler.GYROSPHERE.get(), GyrosphereRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityHandler.DUMMY_PART.get(), EntityPartRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityHandler.DINOSAUR_EGG.get(), DinosaurEggRenderer::new);
 //
 //        ClientRegistry.bindTileEntitySpecialRenderer(SkeletalBuilderBlockEntity.class, new BlockEntitySkeletalBuilderRenderer());
 //        ClientRegistry.bindTileEntitySpecialRenderer(BlockEntityElectricFencePole.class, new BlockEntityElectricFencePoleRenderer());

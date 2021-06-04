@@ -11,6 +11,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -35,13 +36,12 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     private UUID familyUUID;
     private int hatchingTicks;
 
-    public DinosaurEggEntity(World world) {
-        super(world);
-        this.randomRotation = world.rand.nextFloat() * 360F;
+    public DinosaurEggEntity(EntityType<?> type, World world) {
+        super(type, world);
     }
 
     public DinosaurEggEntity(World world, List<GeneticEntry<?>> combinedGenetics, Dinosaur dinosaur, DinosaurEggType type, float randomScaleAdjustment, UUID familyUUID, int hatchingTicks) {
-        this(world);
+        this(EntityHandler.DINOSAUR_EGG.get(), world);
         this.combinedGenetics.addAll(combinedGenetics);
         this.dinosaur = dinosaur;
         this.type = type;

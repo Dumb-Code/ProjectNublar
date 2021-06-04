@@ -1,14 +1,20 @@
 package net.dumbcode.projectnublar.server.entity.vehicles;
 
 import lombok.Value;
+import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.utils.InterpValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.MovementInput;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector4f;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -20,15 +26,15 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     private final InterpValue xMotion = new InterpValue(this, 0.1D);
     private final InterpValue zMotion = new InterpValue(this, 0.1D);
 
-    @SideOnly(Side.CLIENT)
     public Quaternion rotation;
-    @SideOnly(Side.CLIENT)
     public Quaternion prevRotation;
 
     public GyrosphereVehicle(World worldIn) {
-        super(worldIn, DefaultInput.values());
-        this.setSize(4, 4);
-        this.stepHeight = this.height/2;
+        this(EntityHandler.GYROSPHERE.get(), worldIn);
+    }
+    public GyrosphereVehicle(EntityType<?> type, World worldIn) {
+        super(type, worldIn, DefaultInput.values());
+        this.maxUpStep = this.getType().getHeight() / 2;
     }
 
     @Override
@@ -76,35 +82,37 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
         this.xMotion.setTarget(velX * cos - velZ * sin);
         this.zMotion.setTarget(velX * sin + velZ * cos);
 
-        this.motionX += this.xMotion.getCurrent();
-        this.motionZ += this.zMotion.getCurrent();
+        Vector3d movement = this.getDeltaMovement();
+        double motionX = movement.x;
+        double motionY = movement.y;
+        double motionZ = movement.z;
+        motionX += this.xMotion.getCurrent();
+        motionZ += this.zMotion.getCurrent();
 
-        float friction = this.inWater ? 0.8F : 0.95F;
-        this.motionX *= friction;
-        this.motionZ *= friction;
+        float friction = this.isInWater() ? 0.8F : 0.95F;
+        motionX *= friction;
+        motionZ *= friction;
 
-        this.motionY -= this.inWater ? 0.01F : 0.15F; //TODO: check no gravity
+        motionY -= this.isInWater() ? 0.01F : 0.15F; //TODO: check no gravity
 
-        if(this.world.isRemote) {
+        this.setDeltaMovement(motionX, motionY, motionZ);
+        if(this.level.isClientSide) {
             this.runClientMovement();
         }
 
     }
 
-    @SideOnly(Side.CLIENT)
     private void runClientMovement() {
         if(this.rotation == null) {
             this.rotation = new Quaternion(1, 0, 0, 0);
             this.prevRotation = new Quaternion(1, 0, 0, 0);
         }
-        Quaternion quatX = new Quaternion();
-        quatX.setFromAxisAngle(new Vector4f(1f, 0f, 0f, (float) (this.motionZ * this.width * Math.PI * 0.017453292F)));
-        quatX.normalise();
-        Quaternion quatZ = new Quaternion();
-        quatZ.setFromAxisAngle(new Vector4f(0f, 0f, 1f, (float) (-this.motionX * this.width * Math.PI * 0.017453292F)));
-        quatZ.normalise();
+        Quaternion quatX = Vector3f.XP.rotation((float) (this.getDeltaMovement().z * this.getBbWidth() * Math.PI * 0.017453292F));
+        Quaternion quatZ = Vector3f.ZP.rotation((float) (-this.getDeltaMovement().x * this.getBbWidth() * Math.PI * 0.017453292F));
         this.prevRotation = this.rotation;
-        this.rotation = Quaternion.mul(Quaternion.mul(quatX, quatZ, null), this.rotation, null);
+
+        this.rotation = new Quaternion(quatX);
+        this.rotation.mul(quatZ);
     }
 
     @Override

@@ -17,6 +17,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
+import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.gui.GuiHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -98,6 +99,7 @@ public class ProjectNublar {
         ProjectNublarContainers.REGISTER.register(bus);
         ProjectNublarParticles.REGISTER.register(bus);
         TabletModuleHandler.DR.register(bus);
+        EntityHandler.REGISTER.register(bus);
 
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
