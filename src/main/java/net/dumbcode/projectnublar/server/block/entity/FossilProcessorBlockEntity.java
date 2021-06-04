@@ -3,6 +3,8 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.FilterItem;
@@ -11,21 +13,23 @@ import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.recipes.FossilProcessorRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,39 +37,29 @@ import java.util.List;
 
 public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilProcessorBlockEntity> {
 
-    private static final int DEFAULT_CAPACITY = Fluid.BUCKET_VOLUME * 2;
-    private final FluidTank tank = new FluidTank(DEFAULT_CAPACITY) {
+    private static final int DEFAULT_CAPACITY = FluidAttributes.BUCKET_VOLUME * 2;
+    private final FluidTank tank = new FluidTank(DEFAULT_CAPACITY, s -> s.getFluid() == Fluids.WATER) {
 
+        @Nonnull
         @Override
-        public boolean canFillFluidType(FluidStack fluid) {
-            return fluid.getFluid() == FluidRegistry.WATER;
-        }
-
-        @Override
-        public boolean canDrain() {
-            return false;
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return FluidStack.EMPTY;
         }
     };
 
+    private final LazyOptional<FluidTank> capability = LazyOptional.of(() -> this.tank);
+
     public FossilProcessorBlockEntity() {
-        this.tank.setTileEntity(this);
+        super(ProjectNublarBlockEntities.FOSSIL_PROCESSOR.get());
     }
 
+    @Nonnull
     @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
-    {
-        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Nullable
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
-    {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return (T) this.tank;
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if(cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            return this.capability.cast();
         }
-        return super.getCapability(capability, facing);
+        return super.getCapability(cap, side);
     }
 
     @Override
@@ -74,15 +68,17 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.tank.readFromNBT(compound.getCompoundTag("FluidTank"));
+    public void load(BlockState state, CompoundNBT compound) {
+        super.load(state, compound);
+        this.tank.readFromNBT(compound.getCompound("FluidTank"));
+
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setTag("FluidTank", this.tank.writeToNBT(new NBTTagCompound()));
-        return super.writeToNBT(compound);
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.put("FluidTank", this.tank.writeToNBT(new CompoundNBT()));
+
+        return super.save(compound);
     }
 
     @Override
@@ -94,7 +90,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     public boolean isItemValidFor(int slot, ItemStack stack) {
         switch (slot) {
             case 0: return MachineUtils.getWaterAmount(stack) != -1;
-            case 2: return stack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
+            case 2: return stack.getItem() == ItemHandler.EMPTY_TEST_TUBE.get();
             case 3: return stack.getItem() instanceof FilterItem;
         }
         return super.isItemValidFor(slot, stack);
@@ -147,19 +143,25 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
-        return new FossilProcessorGui(player, this, info, tab, tank);
+    @OnlyIn(Dist.CLIENT)
+    public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
+        return new FossilProcessorGui(container, inventory, title, info, this.tank);
     }
 
     @Override
-    public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(this, player, 83, 176,
-                new MachineModuleSlot(this, 0, 8, 61), //water
-                new MachineModuleSlot(this, 1, 67, 12), //fossil
-                new MachineModuleSlot(this, 2, 67, 52), //test tub
-                new MachineModuleSlot(this, 3, 67, 32), //Filter
-                new MachineModuleSlot(this, 4, 126, 32)); //output
+    public MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab) {
+        return new MachineModuleContainer(windowId, this, player.inventory, tab, 83, 176,
+            new MachineModuleSlot(this, 0, 8, 61), //water
+            new MachineModuleSlot(this, 1, 67, 12), //fossil
+            new MachineModuleSlot(this, 2, 67, 52), //test tub
+            new MachineModuleSlot(this, 3, 67, 32), //Filter
+            new MachineModuleSlot(this, 4, 126, 32) //output
+        );
+    }
+
+    @Override
+    public ITextComponent createTitle(int tab) {
+        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.fossil_processor.title");
     }
 
     // TODO: Change for balance, values are just for testing

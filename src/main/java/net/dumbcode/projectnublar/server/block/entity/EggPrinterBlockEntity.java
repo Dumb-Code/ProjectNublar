@@ -5,19 +5,19 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.client.gui.machines.EggPrinterGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
-import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.recipes.EggPrinterRecipe;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.DyeColor;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -31,6 +31,9 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     private final int[] movementTicksLeft = new int[3];
     private final boolean[] previousStates = new boolean[3];
 
+    public EggPrinterBlockEntity() {
+        super(ProjectNublarBlockEntities.EGG_PRINTER.get());
+    }
 
     @Override
     protected int getInventorySize() {
@@ -55,24 +58,30 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
-        return new EggPrinterGui(player, this, info, tab);
+    @OnlyIn(Dist.CLIENT)
+    public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
+        return new EggPrinterGui(container, inventory, title, info);
     }
 
     @Override
-    public Container createContainer(EntityPlayer player, int tab) {
-        return new MachineModuleContainer(this, player, 84, 176,
-                new MachineModuleSlot(this, 0, 29, 24),
-                new MachineModuleSlot(this, 1, 29, 42),
-                new MachineModuleSlot(this, 2, 129, 24),
-                new MachineModuleSlot(this, 3, 129, 42)
+    public MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab) {
+        return new MachineModuleContainer(windowId, this, player.inventory, tab, 84, 176,
+            new MachineModuleSlot(this, 0, 29, 24),
+            new MachineModuleSlot(this, 1, 29, 42),
+            new MachineModuleSlot(this, 2, 129, 24),
+            new MachineModuleSlot(this, 3, 129, 42)
         );
     }
 
     @Override
-    public void update() {
-        super.update();
+    public ITextComponent createTitle(int tab) {
+        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.egg_printer.title");
+    }
+
+
+    @Override
+    public void tick() {
+        super.tick();
         for (int i = 0; i < this.movementTicksLeft.length; i++) {
             if(this.movementTicksLeft[i] >= 0) {
                 this.movementTicksLeft[i]--;

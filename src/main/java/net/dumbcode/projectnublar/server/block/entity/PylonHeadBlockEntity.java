@@ -6,8 +6,9 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.dumbcode.projectnublar.server.utils.PylonNetworkSavedData;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
@@ -25,19 +26,23 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
     private final Set<Connection> connections = new HashSet<>();
     private UUID networkUUID = UUID.randomUUID();
 
+    public PylonHeadBlockEntity() {
+        super(ProjectNublarBlockEntities.PYLON_HEAD.get());
+    }
+
 
     public void addConnection(Connection connection) {
         this.connections.add(connection);
         this.syncToClient();
-        this.markDirty();
+        this.setChanged();
     }
 
     public Set<BlockPos> gatherAllNetworkLocations(Set<BlockPos> set) {
-        if(!set.contains(this.getPos())) {
-            set.add(this.getPos());
+        if(!set.contains(this.worldPosition)) {
+            set.add(this.worldPosition);
             for (Connection connection : this.connections) {
-                BlockPos other = connection.getOther(this.pos);
-                TileEntity entity = this.world.getTileEntity(other);
+                BlockPos other = connection.getOther(this.worldPosition);
+                TileEntity entity = this.level.getBlockEntity(other);
                 if(entity instanceof PylonHeadBlockEntity) {
                     ((PylonHeadBlockEntity) entity).gatherAllNetworkLocations(set);
                 }
@@ -47,24 +52,24 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setTag("Connections", this.connections.stream().collect(CollectorUtils.functionMapper(NBTTagCompound::new, (connection, tag) -> {
-            tag.setLong("FromPos", connection.getFrom().toLong());
-            tag.setLong("ToPos", connection.getTo().toLong());
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.put("Connections", this.connections.stream().collect(CollectorUtils.functionMapper(CompoundNBT::new, (connection, tag) -> {
+            tag.put("FromPos", NBTUtil.writeBlockPos(connection.getFrom()));
+            tag.put("ToPos", NBTUtil.writeBlockPos(connection.getTo()));
         })).collect(CollectorUtils.toNBTTagList()));
-        compound.setUniqueId("NetworkID", this.networkUUID);
-        return super.writeToNBT(compound);
+        compound.putUUID("NetworkID", this.networkUUID);
+        return super.save(compound);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
+    public void load(BlockState state, CompoundNBT compound) {
         this.connections.clear();
-        StreamUtils.stream(compound.getTagList("Connections", Constants.NBT.TAG_COMPOUND))
-            .map(NBTTagCompound.class::cast)
-            .map(t -> new Connection(BlockPos.fromLong(t.getLong("FromPos")), BlockPos.fromLong(t.getLong("ToPos"))))
+        StreamUtils.stream(compound.getList("Connections", Constants.NBT.TAG_COMPOUND))
+            .map(t -> (CompoundNBT) t)
+            .map(t -> new Connection(NBTUtil.readBlockPos(t.getCompound("FromPos")), NBTUtil.readBlockPos(t.getCompound("ToPos"))))
             .forEach(this.connections::add);
-        this.networkUUID = compound.getUniqueId("NetworkID");
-        super.readFromNBT(compound);
+        this.networkUUID = compound.getUUID("NetworkID");
+        super.load(state, compound);
     }
 
     @Value
@@ -78,7 +83,7 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
             this.from = from;
             this.to = to;
 
-            double dist = Math.sqrt(from.distanceSq(to));
+            double dist = Math.sqrt(from.distSqr(to));
 
             double s = from.getY();                                            //beizer start
             double m = (from.getY() + to.getY()) / 2D - WEIGHT_PER_BLOCK*dist; //beizer middle

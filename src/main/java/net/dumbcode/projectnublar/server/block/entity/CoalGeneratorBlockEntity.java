@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.client.gui.machines.CoalGeneratorGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.recipes.CoalGeneratorRecipe;
@@ -13,6 +14,10 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +78,7 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
         return new CoalGeneratorGui(container, inventory, title, info);
     }
@@ -85,4 +91,8 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
         );
     }
 
+    @Override
+    public ITextComponent createTitle(int tab) {
+        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.coalgenerator.title");
+    }
 }

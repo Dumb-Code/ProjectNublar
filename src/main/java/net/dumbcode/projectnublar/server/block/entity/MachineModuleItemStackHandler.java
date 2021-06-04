@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -45,12 +45,12 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
             }
         }
         this.blockEntity.onSlotChanged(slot);
-        this.blockEntity.markDirty();
+        this.blockEntity.setChanged();
         super.onContentsChanged(slot);
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
         if(this.stacks.size() != this.decidedSize) {
             if(this.stacks.size() < this.decidedSize) {

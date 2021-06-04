@@ -13,6 +13,17 @@ public class ProjectNublarBlockEntities {
 
     public static final RegistryObject<TileEntityType<CoalGeneratorBlockEntity>> COAL_GENERATOR
         = REGISTER.register("coal_generator", () -> TileEntityType.Builder.of(CoalGeneratorBlockEntity::new, BlockHandler.COAL_GENERATOR.get()).build(new EmptyPart()));
+    public static final RegistryObject<TileEntityType<DrillExtractorBlockEntity>> DRILL_EXTRACTOR
+        = REGISTER.register("drill_extractor", () -> TileEntityType.Builder.of(DrillExtractorBlockEntity::new, BlockHandler.DRILL_EXTRACTOR.get()).build(new EmptyPart()));
+    public static final RegistryObject<TileEntityType<EggPrinterBlockEntity>> EGG_PRINTER
+        = REGISTER.register("egg_printer", () -> TileEntityType.Builder.of(EggPrinterBlockEntity::new, BlockHandler.EGG_PRINTER.get()).build(new EmptyPart()));
+    public static final RegistryObject<TileEntityType<FossilProcessorBlockEntity>> FOSSIL_PROCESSOR
+        = REGISTER.register("fossil_processor", () -> TileEntityType.Builder.of(FossilProcessorBlockEntity::new, BlockHandler.FOSSIL_PROCESSOR.get()).build(new EmptyPart()));
+    public static final RegistryObject<TileEntityType<IncubatorBlockEntity>> INCUBATOR
+        = REGISTER.register("incubator", () -> TileEntityType.Builder.of(IncubatorBlockEntity::new, BlockHandler.INCUBATOR.get()).build(new EmptyPart()));
+
+    public static final RegistryObject<TileEntityType<PylonHeadBlockEntity>> PYLON_HEAD
+        = REGISTER.register("pylon_head", () -> TileEntityType.Builder.of(PylonHeadBlockEntity::new, BlockHandler.INCUBATOR.get()).build(new EmptyPart()));
 
     public static final RegistryObject<TileEntityType<BlockEntityElectricFence>> ELECTRIC_FENCE
         = REGISTER.register("electric_fence", () -> TileEntityType.Builder.of(BlockEntityElectricFence::new, BlockHandler.ELECTRIC_FENCE.get()).build(new EmptyPart()));
