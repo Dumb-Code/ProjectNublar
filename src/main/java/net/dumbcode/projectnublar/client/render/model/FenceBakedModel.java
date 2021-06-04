@@ -5,9 +5,11 @@ import net.dumbcode.dumblibrary.client.BakedQuadGenerator;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
@@ -53,7 +55,7 @@ public class FenceBakedModel implements IDynamicBakedModel {
     }
 
     private static void renderData(float[] data, BakedQuadGenerator generator) {
-        RenderUtils.drawSpacedCube(EMPTY_STACK, generator,
+        RenderUtils.drawSpacedCube(EMPTY_STACK, generator, 1, 1, 1, 1, 0x00F000F0, OverlayTexture.NO_OVERLAY,
             data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9],
             data[10], data[11], data[12], data[13], data[14], data[15], data[16], data[17], data[18],
             data[19], data[20], data[21], data[22], data[23], data[24], data[25], data[26], data[27],

@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
@@ -18,6 +19,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemStackHandler;
@@ -97,19 +100,15 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
         this.reassureSize();
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public TabulaModel getModel() {
+    public DCMModel getModel() {
         if(!this.dinosaurEntity.isPresent()) {
             return null;
         }
         DinosaurEntity de = this.dinosaurEntity.get();
 
-        ModelBase modelCache = de.getOrExcept(EntityComponentTypes.MODEL).getModelCache();
-        if(modelCache instanceof TabulaModel) {
-            return (TabulaModel) modelCache;
-        }
-        return null;
+        return de.getOrExcept(EntityComponentTypes.MODEL).getModelCache();
     }
 
     public ItemStackHandler getBoneHandler() {

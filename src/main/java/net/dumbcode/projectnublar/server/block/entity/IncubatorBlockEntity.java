@@ -24,6 +24,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -298,8 +299,8 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     public static class Egg {
         private final int xPos;
         private final int yPos;
-        private final Vec3d eggPosition;
-        private final Vec3d pickupDirection;
+        private final Vector3d eggPosition;
+        private final Vector3d pickupDirection;
         private final DinosaurEggType eggType;
         private float rotation;
         private float rotationStart;

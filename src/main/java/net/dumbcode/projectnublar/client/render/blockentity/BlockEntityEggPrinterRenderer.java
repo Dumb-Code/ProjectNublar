@@ -1,9 +1,11 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
-import net.dumbcode.dumblibrary.client.shader.GlslSandboxShader;
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
+import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -13,71 +15,62 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
+import net.minecraft.profiler.IProfiler;
+import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
-public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<EggPrinterBlockEntity> {
-
-    private static final Minecraft MC = Minecraft.getMinecraft();
+public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> implements IFutureReloadListener {
 
     private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.tbl");
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer.png");
+    private static final ResourceLocation EGG_PRINTER_GLASS = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer_glass.png");
 
     private static final DinosaurEggType EGG_TYPE = EnumDinosaurEggTypes.ROUND.getType();
     private static final String NEEDLE_Z_MOVEMENT = "PrinterNeedleHolder";
     private static final int MOVEMENT_TICKS = 10;
 
-    private static final Map<TabulaModel, TabulaModelClipPlane> MODEL_TO_CLIP_PLANE = new HashMap<>();
+    private static final Map<DCMModel, TabulaModelClipPlane> MODEL_TO_CLIP_PLANE = new HashMap<>();
 
     private static final float[] TARGET_ANIMATION = new float[4];
 
-    private TabulaModel model;
+    private DCMModel model;
 
 
-    public BlockEntityEggPrinterRenderer() {
-        ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> this.model = TabulaUtils.getModel(MODEL_LOCATION));
+    public BlockEntityEggPrinterRenderer(TileEntityRendererDispatcher renderer) {
+        super(renderer);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
     }
 
     @Override
-    public void render(EggPrinterBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-        super.render(te, x, y, z, partialTicks, destroyStage, alpha);
+    public void render(EggPrinterBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
+        RenderSystem.disableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, z);
+        light = WorldRenderer.getLightColor(te.getLevel(), te.getBlockPos().above());
 
-        GlStateManager.disableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-        this.setupLightmap(te.getPos());
-        this.renderPrinterParts(te, partialTicks);
-
-        GlStateManager.disableBlend();
-
-        GlStateManager.popMatrix();
-
+        this.renderPrinterParts(te, buffers, stack, light, partialTicks);
     }
 
-    private void renderPrinterParts(EggPrinterBlockEntity te, float partialTicks) {
 
-        GlStateManager.pushMatrix();
-        this.doTabulaTransforms();
-
-        GlStateManager.pushMatrix();
+    private void renderPrinterParts(EggPrinterBlockEntity te, IRenderTypeBuffer buffers, MatrixStack stack, int light, float partialTicks) {
+        stack.pushPose();
         MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
 
         ItemStack outSlot = te.getHandler().getStackInSlot(process.getOutputSlot(0));
         float recipeProgress = process.getTotalTime() == 0 ? 0 : (process.getTime() + partialTicks) / process.getTotalTime();
-        boolean outputSlot = !outSlot.isEmpty() && (outSlot.getItem() == ItemHandler.ARTIFICIAL_EGG || outSlot.getItem() == ItemHandler.BROKEN_ARTIFICIAL_EGG);
+        boolean outputSlot = !outSlot.isEmpty() && (outSlot.getItem() == ItemHandler.ARTIFICIAL_EGG.get() || outSlot.getItem() == ItemHandler.BROKEN_ARTIFICIAL_EGG.get());
         boolean platformMove = process.getTotalTime() != 0;
 
         if(outputSlot) {
@@ -89,40 +82,35 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
         this.animateLid(te, partialTicks, outputSlot);
         this.animatePlatform(te, platformMove, recipeProgress, partialTicks);
 
-        this.renderEgg(platformMove, recipeProgress*EGG_TYPE.getEggLength());
+        this.renderEgg(stack, light, platformMove, recipeProgress*EGG_TYPE.getEggLength());
 
         this.applyAnimations();
 
         System.arraycopy(TARGET_ANIMATION, 0, te.getSnapshot(), 4, 4);
 
-        this.bindTexture(TEXTURE_LOCATION);
-        this.model.renderBoxes(1/16F);
-        GlStateManager.enableBlend();
-        this.bindTexture( new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer_glass.png"));
-        this.model.renderBoxes(1/16F);
-        GlStateManager.popMatrix();
+        this.model.renderBoxes(stack, light, TEXTURE_LOCATION);
+        RenderSystem.enableBlend();
+        this.model.renderBoxes(stack, light, EGG_PRINTER_GLASS);
 
-
-        GlStateManager.popMatrix();
-        GlStateManager.enableTexture2D();
+        stack.popPose();
     }
 
     private void applyAnimations() {
-        TabulaModelRenderer platform = this.model.getCube("platform");
+        DCMModelRenderer platform = this.model.getCube("platform");
         platform.resetRotationPoint();
-        platform.rotationPointY += TARGET_ANIMATION[0];
+        platform.yRot += TARGET_ANIMATION[0];
 
-        TabulaModelRenderer xCube = this.model.getCube("printingRail1");
+        DCMModelRenderer xCube = this.model.getCube("printingRail1");
         xCube.resetRotationPoint();
-        xCube.rotationPointX += TARGET_ANIMATION[1];
+        xCube.xRot += TARGET_ANIMATION[1];
 
-        TabulaModelRenderer zCube = this.model.getCube(NEEDLE_Z_MOVEMENT);
+        DCMModelRenderer zCube = this.model.getCube(NEEDLE_Z_MOVEMENT);
         zCube.resetRotationPoint();
-        zCube.rotationPointZ += TARGET_ANIMATION[2];
+        zCube.zRot += TARGET_ANIMATION[2];
 
-        TabulaModelRenderer lidPart = this.model.getCube("lidrotatehelper");
+        DCMModelRenderer lidPart = this.model.getCube("lidrotatehelper");
         lidPart.resetRotations();
-        lidPart.rotateAngleX += TARGET_ANIMATION[3];
+        lidPart.xRot += TARGET_ANIMATION[3];
 
     }
 
@@ -175,33 +163,19 @@ public class BlockEntityEggPrinterRenderer extends TileEntitySpecialRenderer<Egg
 
     }
 
-    private void renderEgg(boolean doPlatform, float eggLength) {
-        GlStateManager.pushMatrix();
-
-        this.bindTexture(EGG_TYPE.getTexture());
+    private void renderEgg(MatrixStack stack, int light, boolean doPlatform, float eggLength) {
 
         if(doPlatform) {
-            GlStateManager.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);
-            MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), TabulaModelClipPlane::new).render(-1.5 + eggLength, 0xFFF7F1DD);
+            stack.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);
+            MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), TabulaModelClipPlane::new).render(stack, light, EGG_TYPE.getTexture(), -1.5 + eggLength, 0xFFF7F1DD);
         } else {
-            EGG_TYPE.getEggModel().renderBoxes(1/16F);
+            EGG_TYPE.getEggModel().renderBoxes(stack, light, EGG_TYPE.getTexture());
         }
 
-        GlStateManager.popMatrix();
     }
 
-
-    private void doTabulaTransforms() {
-        GlStateManager.translate(0.5, 1.5, 0.5);
-        GlStateManager.scale(-1F, -1F, 1F);
-    }
-
-    private void setupLightmap(BlockPos pos) {
-        RenderHelper.enableStandardItemLighting();
-        int i = this.getWorld().getCombinedLight(pos.up(), 0);
-        int j = i % 65536;
-        int k = i / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+    @Override
+    public CompletableFuture<Void> reload(IStage p_215226_1_, IResourceManager p_215226_2_, IProfiler p_215226_3_, IProfiler p_215226_4_, Executor p_215226_5_, Executor p_215226_6_) {
+        return CompletableFuture.runAsync(() -> this.model = DCMUtils.getModel(MODEL_LOCATION));
     }
 }

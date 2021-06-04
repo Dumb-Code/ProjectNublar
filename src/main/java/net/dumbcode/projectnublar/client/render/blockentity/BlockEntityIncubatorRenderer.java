@@ -1,35 +1,47 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.BakedModelResolver;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
+import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.profiler.IProfiler;
+import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.opengl.GL11;
+import net.minecraftforge.client.model.data.EmptyModelData;
 
 import javax.annotation.Nullable;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.IntStream;
 
-public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<IncubatorBlockEntity> {
+public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBlockEntity> implements IFutureReloadListener {
 
-    private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final Minecraft MC = Minecraft.getInstance();
 
     private static final float TICKS_TO_ROTATE = 20F;
     private static final float TICKS_WOBBLE = 15F;
@@ -54,152 +66,105 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     private final Arm HAND_JOINT = new Arm("ClawNeck2", 4 / 16F);
     private final Arm HAND_JOINT_ROTATE = new Arm("ClawNeck1", 0); //Used for fixing parenting
 
-    private TabulaModel armModel;
+    private DCMModel armModel;
 
-
-
-    public BlockEntityIncubatorRenderer() {
-        ((IReloadableResourceManager)MC.getResourceManager()).registerReloadListener(resourceManager -> this.armModel = TabulaUtils.getModel(ARM_MODEL_LOCATION));
-        MinecraftForge.EVENT_BUS.register(this);
+    public BlockEntityIncubatorRenderer(TileEntityRendererDispatcher renderer) {
+        super(renderer);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
     }
 
     @Override
-    public void render(IncubatorBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-        super.render(te, x, y, z, partialTicks, destroyStage, alpha);
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, z);
-
-        GlStateManager.disableCull();
-        GlStateManager.enableAlpha();
+    public void render(IncubatorBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
+        stack.pushPose();
 
         this.armModel.resetAnimations();
 
         float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D) * 12.5F/16F;
 
-        int worldLight = this.getWorld().getCombinedLight(te.getPos().up(), 0);
-        int blockLight = worldLight % 65536;
-        int skyLight = worldLight / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, Math.max(blockLight, 7*16), skyLight);
-        GlStateManager.color(1F, 1F, 1F, 1F);
+        BlockPos above = te.getBlockPos().above();
+        int blockLight = te.getLevel().getBrightness(LightType.BLOCK, above);
+        int skyLight = te.getLevel().getBrightness(LightType.SKY, above);
+//        sky << 20 | block << 4
+//        light = WorldRenderer.getLightColor(te.getLevel(), above);
+
 
         for (IncubatorBlockEntity.Egg egg : te.getEggList()) {
             if(egg != null) {
-                this.renderEgg(egg);
+                this.renderEgg(egg, light, buffers, stack);
             }
         }
 
-        this.armModel.setOnRenderCallback(cube -> {
+        this.armModel.setOnRenderCallback((cube, atomicLight, atomicOverlay, atomicColors) -> {
             float lightStart = -0.7F;
-
-           Vec3d vec3d = TabulaUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
-            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) MathHelper.clamp((-vec3d.x/lightStart + 1)*16*10, blockLight, 240F), skyLight);
+           Vector3f vec3f = DCMUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
+           int block = (int) MathHelper.clamp((-vec3f.x()/lightStart + 1)*10, blockLight, 15F);
+            atomicLight.set(skyLight << 20 | block << 4);
         });
 
-        this.renderIncubatorParts(te, partialTicks);
+        this.renderIncubatorParts(te, stack, light, buffers, partialTicks);
 
-        GlStateManager.translate(0, lidHeight, 0);
-        this.renderLid(te.getWorld(), te.getPos(), te.getTier(MachineModuleType.BULB));
+        stack.translate(0, lidHeight, 0);
+        this.renderLid(stack, te.getLevel(), te.getBlockPos(), buffers, te.getTier(MachineModuleType.BULB));
 
 
-        GlStateManager.popMatrix();
+        stack.popPose();
     }
 
-    private void renderLid(World world, BlockPos pos, int bulbTier) {
-        this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        GlStateManager.pushMatrix();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buff = tessellator.getBuffer();
-        RenderHelper.disableStandardItemLighting();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GlStateManager.enableBlend();
-        GlStateManager.disableCull();
+    private void renderLid(MatrixStack stack, World world, BlockPos pos, IRenderTypeBuffer buffers, int bulbTier) {
+        IVertexBuilder buffer = buffers.getBuffer(RenderType.solid());
+        BlockState blockState = world.getBlockState(pos);
+        MC.getBlockRenderer().getModelRenderer().renderModel(world, LID_MODEL.getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
+        MC.getBlockRenderer().getModelRenderer().renderModel(world, LIGHT_MODELS[bulbTier].getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
 
-        if (Minecraft.isAmbientOcclusionEnabled()) {
-            GlStateManager.shadeModel(GL11.GL_SMOOTH);
-        } else {
-            GlStateManager.shadeModel(GL11.GL_FLAT);
-        }
-
-        buff.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
-
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, LID_MODEL.getModel(), world.getBlockState(pos), pos, buff, false);
-        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, LIGHT_MODELS[bulbTier].getModel(), world.getBlockState(pos), pos, buff, false);
-        tessellator.draw();
-
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        MC.getBlockRendererDispatcher().getBlockModelRenderer().renderModel(world, TRANSLUCENT_LID_MODEL.getModel(), world.getBlockState(pos), pos, buff, false);
-        buff.sortVertexData(0, 0, 0);
-        tessellator.draw();
-
-        buff.setTranslation(0, 0, 0);
-
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+        buffer = buffers.getBuffer(RenderType.translucent());
+        MC.getBlockRenderer().getModelRenderer().renderModel(world, TRANSLUCENT_LID_MODEL.getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
     }
 
-    private void renderIncubatorParts(IncubatorBlockEntity te, float partialTicks) {
-        GlStateManager.pushMatrix();
-        this.doTabulaTransforms();
-
-        this.setArmAngles(te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
+    private void renderIncubatorParts(IncubatorBlockEntity te, MatrixStack stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
+        this.setArmAngles(te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, stack, buffers, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
         this.updateEgg(te, partialTicks);
 
-        this.bindTexture(ARM_TEXTURE_LOCATION);
-        GlStateManager.enableAlpha();
-        this.armModel.renderBoxes(1/16F);
-
-        GlStateManager.popMatrix();
-        GlStateManager.enableTexture2D();
+        this.armModel.renderBoxes(stack, light, ARM_TEXTURE_LOCATION);
     }
 
 
-    private void renderEgg(IncubatorBlockEntity.Egg egg) {
+    private void renderEgg(IncubatorBlockEntity.Egg egg, int light, IRenderTypeBuffer buffers, MatrixStack stack) {
         if(egg.getEggType() == DinosaurEggType.EMPTY) {
             return;
         }
         DinosaurEggType type = egg.getEggType();
-        MC.renderEngine.bindTexture(type.getTexture());
 
-        GlStateManager.pushMatrix();
+        stack.pushPose();
 
-        Vec3d eggEnd = egg.getEggPosition();
-        Vec3d normal = egg.getPickupDirection().normalize();
+        Vector3d eggEnd = egg.getEggPosition();
+        Vector3d normal = egg.getPickupDirection().normalize();
         double eggRotationY = Math.atan2(normal.z, normal.x);
-        double eggRotationZ = Math.atan2(normal.y, this.xzDistance(Vec3d.ZERO, normal));
+        double eggRotationZ = Math.atan2(normal.y, this.xzDistance(Vector3d.ZERO, normal));
 
         double eggLength = type.getEggLength();
         float scale = type.getScale()*2;
 
-        GlStateManager.translate(eggEnd.x, eggEnd.y, eggEnd.z);
+        stack.translate(eggEnd.x, eggEnd.y, eggEnd.z);
 
-        GlStateManager.rotate((float) -Math.toDegrees(eggRotationY) + 180, 0, 1, 0);
-        GlStateManager.rotate((float) -Math.toDegrees(eggRotationZ) + 180, 0, 0, 1);
-        GlStateManager.rotate(-90, 0, 0, 1);
+        stack.mulPose(Vector3f.YP.rotation((float) (-eggRotationY + Math.PI)));
+        stack.mulPose(Vector3f.ZP.rotation((float) (-eggRotationZ + Math.PI/2)));
 
-        GlStateManager.rotate((float) -Math.toDegrees(egg.getRotation()), 0, 1, 0);
+        stack.mulPose(Vector3f.YP.rotation(egg.getRotation()));
+        stack.scale(scale, scale, scale);
 
-        GlStateManager.scale(-scale, -scale, scale);
+        IVertexBuilder lines = buffers.getBuffer(RenderType.lines());
+
         if(ProjectNublar.DEBUG) {
-            this.drawDebugLines(0, 0, 0);
+            this.drawDebugLines(stack, lines, 0, 0, 0);
         }
-        GlStateManager.translate(0, eggLength*scale, 0);
+        stack.translate(0, eggLength*scale, 0);
         if(ProjectNublar.DEBUG) {
-            this.drawDebugLines(0, 0, 0);
+            this.drawDebugLines(stack, lines, 0, 0, 0);
         }
-        GlStateManager.translate(0, -1.5, 0);
-        type.getEggModel().renderBoxes(1/16F);
+        stack.translate(0, -1.5, 0);
+        type.getEggModel().renderBoxes(stack, light, type.getTexture());
 
-        GlStateManager.popMatrix();
-    }
-
-    private void doTabulaTransforms() {
-        GlStateManager.translate(0.5, 1.5, 0.5);
-        GlStateManager.scale(-1F, -1F, 1F);
+        stack.popPose();
     }
 
     private void updateEgg(IncubatorBlockEntity blockEntity, float partialTicks) {
@@ -225,7 +190,7 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
                     blockEntity.getProcess(i).isHasPower() && blockEntity.getProcess(i).isProcessing()
                 )
                 .boxed()
-                .collect(CollectorUtils.randomPicker(getWorld().rand))
+                .collect(CollectorUtils.randomPicker(blockEntity.getLevel().random))
                 .map(i -> {
                     blockEntity.activeEgg[1]++;
                     blockEntity.activeEgg[0] = i;
@@ -247,34 +212,34 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
     private void createSnapshot(IncubatorBlockEntity blockEntity) {
         float[] snapshot = blockEntity.snapshot;
 
-        TabulaModelRenderer box = BASE_ROTATION.getBox();
+        DCMModelRenderer box = BASE_ROTATION.getBox();
 
-        snapshot[0] = BASE_ROTATION.getBox().rotateAngleY;
-        snapshot[1] = FIRST_ARM.getBox().rotateAngleZ;
-        snapshot[2] = LAST_ARM.getBox().rotateAngleZ;
-        snapshot[3] = HAND_JOINT_ROTATE.getBox().rotateAngleZ;
-        snapshot[4] = HAND_JOINT_ROTATE.getBox().rotateAngleY;
-        snapshot[5] = HAND_JOINT.getBox().rotateAngleZ;
-        snapshot[6] = HAND_JOINT.getBox().rotateAngleY;
+        snapshot[0] = BASE_ROTATION.getBox().yRot;
+        snapshot[1] = FIRST_ARM.getBox().zRot;
+        snapshot[2] = LAST_ARM.getBox().zRot;
+        snapshot[3] = HAND_JOINT_ROTATE.getBox().zRot;
+        snapshot[4] = HAND_JOINT_ROTATE.getBox().yRot;
+        snapshot[5] = HAND_JOINT.getBox().zRot;
+        snapshot[6] = HAND_JOINT.getBox().yRot;
     }
 
-    private void setArmAngles(@Nullable IncubatorBlockEntity.Egg egg, float movementTicks, float[] snapshot, int eggMoveAmount) {
+    private void setArmAngles(@Nullable IncubatorBlockEntity.Egg egg, MatrixStack stack, IRenderTypeBuffer buffers, float movementTicks, float[] snapshot, int eggMoveAmount) {
         float rotateInterp = movementTicks / TICKS_TO_ROTATE;
         if(egg == null) {
             float movementInterp = (movementTicks - TICKS_TO_ROTATE) / TICKS_TO_MOVE;
 
-            BASE_ROTATION.getBox().rotateAngleY = this.interpolate(snapshot[0], BASE_ROTATION.getBox().getDefaultRotation()[1], movementInterp);
-            FIRST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[1], FIRST_ARM.getBox().getDefaultRotation()[2], rotateInterp);
-            LAST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[2], LAST_ARM.getBox().getDefaultRotation()[2], rotateInterp);
+            BASE_ROTATION.getBox().yRot = this.interpolate(snapshot[0], BASE_ROTATION.getRotation(1), movementInterp);
+            FIRST_ARM.getBox().zRot = this.interpolate(snapshot[1], FIRST_ARM.getRotation(2), rotateInterp);
+            LAST_ARM.getBox().zRot = this.interpolate(snapshot[2], LAST_ARM.getRotation(2), rotateInterp);
 
-            HAND_JOINT_ROTATE.getBox().rotateAngleZ = this.interpolate(snapshot[3], HAND_JOINT_ROTATE.getBox().getDefaultRotation()[2], rotateInterp);
-            HAND_JOINT_ROTATE.getBox().rotateAngleY = this.interpolate(snapshot[4], HAND_JOINT_ROTATE.getBox().getDefaultRotation()[1] + Math.PI, rotateInterp);
+            HAND_JOINT_ROTATE.getBox().zRot = this.interpolate(snapshot[3], HAND_JOINT_ROTATE.getRotation(2), rotateInterp);
+            HAND_JOINT_ROTATE.getBox().yRot = this.interpolate(snapshot[4], HAND_JOINT_ROTATE.getRotation(1) + Math.PI, rotateInterp);
 
-            HAND_JOINT.getBox().rotateAngleZ = this.interpolate(snapshot[5], HAND_JOINT.getBox().getDefaultRotation()[2], rotateInterp);
-            HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6], HAND_JOINT.getBox().getDefaultRotation()[1], rotateInterp);
+            HAND_JOINT.getBox().zRot = this.interpolate(snapshot[5], HAND_JOINT.getRotation(2), rotateInterp);
+            HAND_JOINT.getBox().yRot = this.interpolate(snapshot[6], HAND_JOINT.getRotation(1), rotateInterp);
 
             if(movementTicks > TICKS_TO_MOVE + TICKS_TO_ROTATE) {
-                BASE_ROTATION.getBox().rotateAngleY += this.wobble((movementTicks - TICKS_TO_MOVE - TICKS_TO_ROTATE) / TICKS_WOBBLE);
+                BASE_ROTATION.getBox().yRot += this.wobble((movementTicks - TICKS_TO_MOVE - TICKS_TO_ROTATE) / TICKS_WOBBLE);
             }
 
             return;
@@ -285,12 +250,12 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
             rotateInterp = movementInterp;
         }
 
-        Vec3d origin = new Vec3d(1.5, 1.4, 0.5);
-        Vec3d target = egg.getEggPosition();
-        Vec3d normal = egg.getPickupDirection().normalize();
-        Vec3d handJointTarget = target.add(normal.scale(HAND_JOINT.length));
+        Vector3d origin = new Vector3d(1.5, 1.4, 0.5);
+        Vector3d target = egg.getEggPosition();
+        Vector3d normal = egg.getPickupDirection().normalize();
+        Vector3d handJointTarget = target.add(normal.scale(HAND_JOINT.length));
         double baseYRotation = Math.atan2(handJointTarget.z - origin.z, handJointTarget.x - origin.x);
-        Vec3d baseJoinTarget = new Vec3d(Math.cos(baseYRotation), 0, Math.sin(baseYRotation)).scale(BASE_ROTATION.length).add(origin);
+        Vector3d baseJoinTarget = new Vector3d(Math.cos(baseYRotation), 0, Math.sin(baseYRotation)).scale(BASE_ROTATION.length).add(origin);
 
         double xzlen = this.xzDistance(baseJoinTarget, handJointTarget);
         double angleFirstArmTriangle = this.cosineRule(LAST_ARM.length, FIRST_ARM.length, xzlen);
@@ -299,43 +264,43 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
 
         //Usually this would be flipped, but because the model is also flipped, we flip it here.
         double handRotY = Math.atan2(-normal.x, -normal.z);
-        double handRotZ = Math.atan2(-normal.y, this.xzDistance(Vec3d.ZERO, normal));
+        double handRotZ = Math.atan2(-normal.y, this.xzDistance(Vector3d.ZERO, normal));
 
         if(ProjectNublar.DEBUG) {
-            GlStateManager.popMatrix();
-            this.drawDebugRenderers(origin, target, handJointTarget, baseYRotation, baseJoinTarget, angleFirstArm, angleLastArm);
-            GlStateManager.pushMatrix();
-            this.doTabulaTransforms();
+            stack.popPose();
+            this.drawDebugRenderers(stack, buffers, origin, target, handJointTarget, baseYRotation, baseJoinTarget, angleFirstArm, angleLastArm);
+            stack.pushPose();
+            //doTabulaTransforms
         }
 
-        BASE_ROTATION.getBox().rotateAngleY = this.interpolate(snapshot[0], baseYRotation, rotateInterp);
-        FIRST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[1], angleFirstArm, movementInterp);
-        LAST_ARM.getBox().rotateAngleZ = this.interpolate(snapshot[2], angleLastArm, movementInterp);
+        BASE_ROTATION.getBox().yRot = this.interpolate(snapshot[0], baseYRotation, rotateInterp);
+        FIRST_ARM.getBox().zRot = this.interpolate(snapshot[1], angleFirstArm, movementInterp);
+        LAST_ARM.getBox().zRot = this.interpolate(snapshot[2], angleLastArm, movementInterp);
 
         //Make the hand face world down, meaning we can make it face the target much much easily as we don't have to worry about parented rotation.
         //The `handRotY` is used to rotate the whole hand to face the target.
-        HAND_JOINT_ROTATE.getBox().rotateAngleZ = this.interpolate(snapshot[3], -(angleFirstArm + angleLastArm), movementInterp);
-        HAND_JOINT_ROTATE.getBox().rotateAngleY = this.interpolate(snapshot[4], -(baseYRotation + handRotY + Math.PI/2D), movementInterp);
+        HAND_JOINT_ROTATE.getBox().zRot = this.interpolate(snapshot[3], -(angleFirstArm + angleLastArm), movementInterp);
+        HAND_JOINT_ROTATE.getBox().yRot = this.interpolate(snapshot[4], -(baseYRotation + handRotY + Math.PI/2D), movementInterp);
 
-        HAND_JOINT.getBox().rotateAngleZ = this.interpolate(snapshot[5], -(handRotZ + Math.PI/2D), movementInterp);
+        HAND_JOINT.getBox().zRot = this.interpolate(snapshot[5], -(handRotZ + Math.PI/2D), movementInterp);
 
         if(eggMoveAmount == 1 && movementTicks > TICKS_TO_ROTATE && movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE) {
-            BASE_ROTATION.getBox().rotateAngleY += this.wobble((movementTicks - TICKS_TO_ROTATE) / TICKS_WOBBLE);
+            BASE_ROTATION.getBox().yRot += this.wobble((movementTicks - TICKS_TO_ROTATE) / TICKS_WOBBLE);
         }
 
         int directionModifier = ((eggMoveAmount % 2) * 2) - 1;
         if(movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE) {
-            HAND_JOINT.getBox().rotateAngleY = this.interpolate(snapshot[6],directionModifier * Math.PI/2D, movementInterp);
+            HAND_JOINT.getBox().yRot = this.interpolate(snapshot[6],directionModifier * Math.PI/2D, movementInterp);
         } else if(movementTicks > TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN){
             float spinTicks = (float) (Math.PI * (movementTicks - TICKS_TO_ROTATE - TICKS_WOBBLE - TICKS_TO_MOVE - TICKS_WAIT_BEFORE_SPIN)/TICKS_TO_SPIN);
             if(movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE + TICKS_TO_MOVE + TICKS_WAIT_BEFORE_SPIN + TICKS_TO_SPIN) {
-                HAND_JOINT.getBox().rotateAngleY = (float) (directionModifier*Math.PI/2D + spinTicks);
+                HAND_JOINT.getBox().yRot = (float) (directionModifier*Math.PI/2D + spinTicks);
                 egg.setRotation(egg.getRotationStart() + spinTicks);
             } else {
-                HAND_JOINT.getBox().rotateAngleY = (float) (directionModifier*Math.PI/2D + Math.PI);
+                HAND_JOINT.getBox().yRot = (float) (directionModifier*Math.PI/2D + Math.PI);
             }
         } else {
-            HAND_JOINT.getBox().rotateAngleY = (float) (directionModifier * Math.PI/2D);
+            HAND_JOINT.getBox().yRot = (float) (directionModifier * Math.PI/2D);
         }
     }
 
@@ -380,62 +345,46 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         return Math.acos((sideA*sideA + sideB*sideB - opposite*opposite) / (2D * sideA * sideB));
     }
 
-    private double xzDistance(Vec3d from, Vec3d to) {
+    private double xzDistance(Vector3d from, Vector3d to) {
         return Math.sqrt((from.x - to.x)*(from.x - to.x) + (from.z - to.z)*(from.z - to.z));
     }
 
-    private void drawDebugRenderers(Vec3d origin, Vec3d target, Vec3d handJointTarget, double baseYRotation, Vec3d baseJoinTarget, double angleFirstArm, double angleLastArm) {
-        BufferBuilder buff = Tessellator.getInstance().getBuffer();
+    private void drawDebugRenderers(MatrixStack stack, IRenderTypeBuffer buffer, Vector3d origin, Vector3d target, Vector3d handJointTarget, double baseYRotation, Vector3d baseJoinTarget, double angleFirstArm, double angleLastArm) {
+        IVertexBuilder buff = buffer.getBuffer(RenderType.lines());
 
-        GlStateManager.disableLighting();
-        GlStateManager.pushMatrix();
-        buff.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-        buff.pos(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z).color(0F, 1F, 0F, 1F).endVertex();
-        buff.pos(handJointTarget.x, handJointTarget.y, handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
-        Tessellator.getInstance().draw();
-        this.drawDebugLines(origin.x, origin.y, origin.z);
-        this.drawDebugLines(target.x, target.y, target.z);
-        this.drawDebugLines(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
-        buff.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-        buff.pos(target.x, target.y, target.z).color(0F, 1F, 0F, 1F).endVertex();
-        buff.pos(handJointTarget.x, handJointTarget.y, handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
-        Tessellator.getInstance().draw();
-        GlStateManager.translate(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
-        GlStateManager.rotate((float) -Math.toDegrees(baseYRotation + Math.PI), 0, 1, 0);
-        GlStateManager.rotate((float) -Math.toDegrees(angleFirstArm), 0, 0, 1);
-        GlStateManager.translate(0, FIRST_ARM.length, 0);
-        this.drawDebugLines(0, 0, 0);
-        GlStateManager.rotate((float) -Math.toDegrees(angleLastArm + Math.PI), 0, 0, 1);
-        GlStateManager.translate(0, LAST_ARM.length, 0);
-        this.drawDebugLines(0, 0, 0);
-        GlStateManager.popMatrix();
-        GlStateManager.enableLighting();
+        Matrix4f pose = stack.last().pose();
+        buff.vertex(pose, (float) baseJoinTarget.x, (float) baseJoinTarget.y, (float) baseJoinTarget.z).color(0F, 1F, 0F, 1F).endVertex();
+        buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
+
+        this.drawDebugLines(stack, buff, origin.x, origin.y, origin.z);
+        this.drawDebugLines(stack, buff, target.x, target.y, target.z);
+        this.drawDebugLines(stack, buff, baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
+
+        buff.vertex(pose, (float) target.x, (float) target.y, (float) target.z).color(0F, 1F, 0F, 1F).endVertex();
+        buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
+
+        stack.translate(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
+        stack.mulPose(Vector3f.YP.rotation((float) (-baseYRotation - Math.PI)));
+        stack.mulPose(Vector3f.ZP.rotation((float) -angleFirstArm));
+        stack.translate(0, FIRST_ARM.length, 0);
+        this.drawDebugLines(stack, buff, 0, 0, 0);
+        stack.mulPose(Vector3f.ZP.rotation((float) (-angleLastArm - Math.PI)));
+        stack.translate(0, LAST_ARM.length, 0);
+        this.drawDebugLines(stack, buff, 0, 0, 0);
+        stack.popPose();
     }
 
-    private void drawDebugLines(double x, double y, double z) {
-        this.setLightmapDisabled(true);
-        GlStateManager.disableFog();
-        GlStateManager.disableLighting();
-        GlStateManager.disableTexture2D();
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.color(1F, 1F, 1F);
-        GlStateManager.glLineWidth(1F);
-        GlStateManager.pushMatrix();
-        GlStateManager.disableLighting();
-        GlStateManager.translate(x, y, z);
-        BufferBuilder buff = Tessellator.getInstance().getBuffer();
-        buff.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-        buff.pos(0.3, 0, 0).color(1F, 0F, 0F, 1F).endVertex();
-        buff.pos(0, 0, 0).color(1F, 1F, 0F, 1F).endVertex();
-        buff.pos(0, 0.3, 0).color(0F, 1F, 0F, 1F).endVertex();
-        buff.pos(0, 0, 0.3).color(0F, 0F, 1F, 0F).endVertex();
-        buff.pos(0, 0, 0).color(0F, 0F, 1F, 1F).endVertex();
-        Tessellator.getInstance().draw();
-        GlStateManager.enableLighting();
-        this.setLightmapDisabled(false);
-
-        GlStateManager.popMatrix();
+    private void drawDebugLines(MatrixStack stack, IVertexBuilder buff, double x, double y, double z) {
+        stack.pushPose();
+        stack.translate(x, y, z);
+        Matrix4f pose = stack.last().pose();
+        buff.vertex(pose, 0, 0, 0).color(1F, 0F, 0F, 1F).endVertex();
+        buff.vertex(pose, 0.3F, 0, 0).color(1F, 0F, 0F, 1F).endVertex();
+        buff.vertex(pose, 0, 0, 0).color(0F, 1F, 0F, 1F).endVertex();
+        buff.vertex(pose, 0, 0.3F, 0).color(0F, 1F, 0F, 1F).endVertex();
+        buff.vertex(pose, 0, 0, 0).color(0F, 0F, 1F, 1F).endVertex();
+        buff.vertex(pose, 0, 0, 0.3F).color(0F, 0F, 1F, 1F).endVertex();
+        stack.popPose();
     }
 
     @Value
@@ -443,8 +392,18 @@ public class BlockEntityIncubatorRenderer extends TileEntitySpecialRenderer<Incu
         String armName;
         double length;
 
-        TabulaModelRenderer getBox() {
+        DCMModelRenderer getBox() {
             return BlockEntityIncubatorRenderer.this.armModel.getCube(this.armName);
         }
+
+        float getRotation(int index) {
+            return this.getBox().getInfo().getRotation()[index];
+        }
+        
+    }
+
+    @Override
+    public CompletableFuture<Void> reload(IStage p_215226_1_, IResourceManager p_215226_2_, IProfiler p_215226_3_, IProfiler p_215226_4_, Executor p_215226_5_, Executor p_215226_6_) {
+        return CompletableFuture.runAsync(() -> this.armModel = DCMUtils.getModel(ARM_MODEL_LOCATION));
     }
 }

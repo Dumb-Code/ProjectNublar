@@ -2,14 +2,17 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.RenderAdjustmentsComponent;
 import net.dumbcode.dumblibrary.server.taxidermy.TaxidermyHistory;
+import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -20,116 +23,104 @@ import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalPr
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.component.impl.SkeletalBuilderComponent;
-import net.minecraft.block.state.IBlockState;
+import net.dumbcode.projectnublar.server.utils.DirectionUtils;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.*;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.opengl.GL11;
 
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static java.lang.Math.PI;
+public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<SkeletalBuilderBlockEntity> {
+    private Minecraft mc = Minecraft.getInstance();
 
-public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRenderer<SkeletalBuilderBlockEntity> {
-    private Minecraft mc = Minecraft.getMinecraft();
+    private static final float POLE_WIDTH = 1 / 16F;
+    private static final float BASE_WIDTH = 6 / 16F;
+    private static final float BASE_HEIGHT = 1 / 16F;
 
-    private static final double POLE_WIDTH = 1 / 16F;
-    private static final double BASE_WIDTH = 6 / 16F;
-    private static final double BASE_HEIGHT = 1 / 16F;
-
-    private static final double NOTCH_WIDTH = 4 / 16F;
-    private static final double NOTCH_HEIGHT = 2 / 16F;
+    private static final float NOTCH_WIDTH = 4 / 16F;
+    private static final float NOTCH_HEIGHT = 2 / 16F;
 
     private static final float TEXTURE_WIDTH = 8F;
     private static final float TEXTURE_HEIGHT = 16F;
 
+    private static final ResourceLocation TEXTURE = new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png");
+
+    public BlockEntitySkeletalBuilderRenderer(TileEntityRendererDispatcher dispatcher) {
+        super(dispatcher);
+    }
+
     @Override
-    public void render(SkeletalBuilderBlockEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+    public void render(SkeletalBuilderBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
         Optional<DinosaurEntity> optionalDinosaurEntity = te.getDinosaurEntity();
         if(!optionalDinosaurEntity.isPresent()) {
             return;
         }
-        IBlockState state = te.getWorld().getBlockState(te.getPos());
-        if(state.getBlock() != BlockHandler.SKELETAL_BUILDER) { //Can sometimes happen when loading in a save. Not sure why, but it happens
+        BlockState state = te.getBlockState();
+        if(state.getBlock() != BlockHandler.SKELETAL_BUILDER.get()) {
             return;
         }
 
-        GlStateManager.pushMatrix();
-        this.render(te, x, y, z, partialTicks);
-        GlStateManager.popMatrix();
+        stack.pushPose();
+        this.render(te, stack, light, buffers, partialTicks);
+        stack.popPose();
     }
 
     @SneakyThrows
-    private void render(SkeletalBuilderBlockEntity te, double x, double y, double z, float partialTicks) {
-
-        EnumFacing facing = te.getWorld().getBlockState(te.getPos()).getValue(SkeletalBuilderBlock.FACING);
+    private void render(SkeletalBuilderBlockEntity te, MatrixStack stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
+        Direction facing = te.getLevel().getBlockState(te.getBlockPos()).getValue(SkeletalBuilderBlock.FACING);
         float rawRotation = te.getSkeletalProperties().getRotation();
         float teRot = rawRotation + (te.getSkeletalProperties().getPrevRotation() - rawRotation) * partialTicks; //Interpolated version of rawRotation
         DinosaurEntity entity = te.getDinosaurEntity().orElseThrow(RuntimeException::new);//Impossible to throw
-        Pair<Vector3f, Float> rotationDetails = this.createRotationDetails(facing);
-        TabulaModel model = te.getModel();
+        Pair<Quaternion, Float> rotationDetails = this.createQuaternion(facing);
+        DCMModel model = te.getModel();
 
         if(model == null) {
             return;
         }
 
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.translate(x + 0.5, y + 0.5, z + 0.5);
+        stack.translate(0.5, 0.5, 0.5);
 
-        GlStateManager.pushMatrix();
+        stack.pushPose();
 
-        this.setupDinosaurGlState(rotationDetails, teRot, entity, te.getTexture());
+        this.setupDinosaurGlState(rotationDetails.getLeft(), stack, teRot, entity);
         this.setBoxRotations(model, te.getPoseData());
-        this.renderDinosaurModel(entity, model);
+        this.renderDinosaurModel(entity, model, stack, light, buffers.getBuffer(RenderType.entitySolid(te.getTexture())));
         this.resetDinosaurGlState();
 
-        GlStateManager.popMatrix();
+        stack.popPose();
 
-        this.renderAllPoles(te, entity, facing, teRot, rotationDetails);
+        this.renderAllPoles(buffers, stack, light, te, entity, facing, teRot, rotationDetails.getLeft(), rotationDetails.getRight(), facing.getAxis() == Direction.Axis.X);
 
     }
 
-    private void setupDinosaurGlState(Pair<Vector3f, Float> rotationDetails, float teRot, ComponentAccess entity, ResourceLocation texture) {
-        GlStateManager.enableAlpha();
-        Vector3f axis = rotationDetails.getLeft();
-        GlStateManager.rotate(rotationDetails.getRight(), axis.x, axis.y, axis.z);
-        GlStateManager.rotate(teRot, 0, 1, 0);
-        GlStateManager.translate(0, -0.5F, 0);
-        entity.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> GlStateManager.scale(floats[0],floats[1],floats[2]));
-        GlStateManager.translate(0f, 1.5f, 0f);
-        GlStateManager.rotate(180f, 0f, 0f, 1f);
-
-        GlStateManager.disableCull();
-
-        mc.getTextureManager().bindTexture(texture);
+    private void setupDinosaurGlState(Quaternion rotation, MatrixStack stack, float teRot, ComponentAccess entity) {
+        stack.mulPose(rotation);
+        stack.mulPose(Vector3f.YP.rotationDegrees(teRot));
+        stack.translate(0, -0.5F, 0);
+        entity.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> stack.scale(floats[0],floats[1],floats[2]));
     }
 
     private void resetDinosaurGlState() {
-        GlStateManager.enableCull();
+
     }
 
-    private void setBoxRotations(TabulaModel model, Map<String, TaxidermyHistory.CubeProps> poseData) {
-        for(TabulaModelRenderer box : model.getAllCubes()) {
-            TaxidermyHistory.CubeProps cube = poseData.get(box.boxName);
+    private void setBoxRotations(DCMModel model, Map<String, TaxidermyHistory.CubeProps> poseData) {
+        for(DCMModelRenderer box : model.getAllCubes()) {
+            TaxidermyHistory.CubeProps cube = poseData.get(box.getName());
             if(cube != null) {
                 cube.applyTo(box);
             } else {
@@ -138,49 +129,40 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
     }
 
-    private void renderDinosaurModel(ComponentAccess entity, TabulaModel model) {
-        setVisability(entity, model);
-        model.renderBoxes(1F/16F);
-        resetVisability(model);
+    private void renderDinosaurModel(ComponentAccess entity, DCMModel model, MatrixStack stack, int light, IVertexBuilder buff) {
+        setVisibility(entity, model);
+        model.renderBoxes(stack, light, buff);
+        resetVisibility(model);
     }
 
-    private Matrix4d createTranslationMatrix(BlockPos pos, Vec3i facingRot) {
-        Matrix4d translateMatrix = new Matrix4d();
-        translateMatrix.set(new Vector3d(pos.getX() - facingRot.getX() / 2F, pos.getY() - facingRot.getY() / 2F, pos.getZ() - facingRot.getZ() / 2F));
-        return translateMatrix;
+    private Matrix4f createTranslationMatrix(BlockPos pos, Vector3i facingRot) {
+        return Matrix4f.createTranslateMatrix(pos.getX() - facingRot.getX() / 2F, pos.getY() - facingRot.getY() / 2F, pos.getZ() - facingRot.getZ() / 2F);
     }
 
-    private Matrix4d createRotationMatrix(float teRot) {
-        Matrix4d rotateMatrix = new Matrix4d();
-        rotateMatrix.rotY(teRot / 180D * PI);
+    private Matrix4f createRotationMatrix(float teRot) {
+        Matrix4f rotateMatrix = new Matrix4f();
+        rotateMatrix.setIdentity();
+        rotateMatrix.multiply(Vector3f.YN.rotationDegrees(teRot));
         return rotateMatrix;
     }
 
-    private Matrix4d createFacingMatrix(Pair<Vector3f, Float> rotationDetails) {
-        Matrix4d facingMatrix = new Matrix4d();
-        Vector3f rotVec = rotationDetails.getLeft();
-        float angle = rotationDetails.getRight();
-
-        if(rotVec.x != 0) {
-            facingMatrix.rotX(angle / 180F * PI);
-        } else if(rotVec.y != 0) {
-            facingMatrix.rotY(angle / 180F * PI);
-        } else if(rotVec.z != 0) {
-            facingMatrix.rotZ(angle / 180F * PI);
-        }
+    private Matrix4f createFacingMatrix(Quaternion rotationDetails) {
+        Matrix4f facingMatrix = new Matrix4f();
+        facingMatrix.setIdentity();
+        facingMatrix.multiply(rotationDetails);
         return facingMatrix;
     }
 
-    private void renderAllPoles(SkeletalBuilderBlockEntity te, ComponentAccess entity, EnumFacing facing, float teRot, Pair<Vector3f, Float> rotationDetails) {
-        Matrix4d translateMatrix = this.createTranslationMatrix(te.getPos(), facing.getDirectionVec());
-        Matrix4d rotateMatrix = this.createRotationMatrix(teRot);
-        Matrix4d facingMatrix = this.createFacingMatrix(rotationDetails);
+    private void renderAllPoles(IRenderTypeBuffer buffers, MatrixStack stack, int light, SkeletalBuilderBlockEntity te, ComponentAccess entity, Direction facing, float teRot, Quaternion rotationDetails, float angle, boolean rotateOnX) {
+        Matrix4f translateMatrix = this.createTranslationMatrix(te.getBlockPos(), facing.getNormal());
+        Matrix4f rotateMatrix = this.createRotationMatrix(teRot);
+        Matrix4f facingMatrix = this.createFacingMatrix(rotationDetails);
 
-        Matrix4d translateFacingMatrix = new Matrix4d();
-        translateFacingMatrix.mul(translateMatrix, facingMatrix);
+        Matrix4f translateFacingMatrix = new Matrix4f(translateMatrix);
+        translateFacingMatrix.multiply(facingMatrix);
 
-        Matrix4d teMatrix = new Matrix4d();
-        teMatrix.mul(translateFacingMatrix, rotateMatrix);
+        Matrix4f teMatrix = new Matrix4f(translateFacingMatrix);
+        teMatrix.multiply(rotateMatrix);
 
         //This:
         //outPoint = teMatrix.transform(point)
@@ -191,129 +173,122 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         //outPoint = rotateMatrix.transform(point)
 
         for (SkeletalProperties.Pole pole : te.getSkeletalProperties().getPoles()) {
-            this.renderPole(pole, te, entity, facing, teRot, rotationDetails, teMatrix);
+            this.renderPole(buffers, stack, light, pole, te, entity, facing, teRot, angle, rotateOnX, teMatrix);
         }
     }
 
-    private void renderPole(SkeletalProperties.Pole pole, SkeletalBuilderBlockEntity te, ComponentAccess entity, EnumFacing facing, float teRot, Pair<Vector3f, Float> rotationDetails, Matrix4d teMatrix) {
+    private void renderPole(IRenderTypeBuffer buffers, MatrixStack stack, int light, SkeletalProperties.Pole pole, SkeletalBuilderBlockEntity te, ComponentAccess entity, Direction facing, float teRot, float angle, boolean rotateOnX, Matrix4f teMatrix) {
         String anchoredPart = pole.getCubeName();
         PoleFacing poleDirection = pole.getFacing();
-        EnumFacing poleFacing = poleDirection.getFacing();
-        TabulaModelRenderer cube = te.getModel().getCube(anchoredPart);
+        Direction poleFacing = poleDirection.getFacing();
+        DCMModelRenderer cube = te.getModel().getCube(anchoredPart);
 
-        if (poleDirection != PoleFacing.NONE && cube != null && (cube.getScaleX() != 0 || cube.getScaleY() != 0 || cube.getScaleZ() != 0)) {
-
-            Point3d rendererPos = this.getRenderPosition(cube, entity, teMatrix);
+        if (poleDirection != PoleFacing.NONE && cube != null) {
+            Vector3f rendererPos = this.getRenderPosition(cube, entity, teMatrix);
             AxisAlignedBB boundingBox = this.createBoundingBox(poleFacing, rendererPos);
-            double axisValue = this.getAxisValue(poleFacing, rendererPos);
-            double cubeDist = this.getCubeDistance(this.getWorld(), poleDirection, boundingBox, rendererPos, axisValue);
+            float axisValue = this.getAxisValue(poleFacing, rendererPos);
+            float cubeDist = this.getCubeDistance(te.getLevel(), poleDirection, boundingBox, rendererPos, axisValue);
             if (cubeDist == 1000) {
                 return;
             }
 
-            GlStateManager.pushMatrix();
+            stack.pushPose();
 
-            double poleLength = cubeDist * -poleDirection.getFacing().getAxisDirection().getOffset();
+            float poleLength = cubeDist * -poleDirection.getFacing().getAxisDirection().getStep();
 
-            this.setupPoleGlState(te.getPos(), rendererPos, poleFacing, facing, teRot, rotationDetails, cube);
+            this.setupPoleGlState(stack, te.getBlockPos(), rendererPos, poleFacing, facing, teRot, angle, rotateOnX, cube);
 
-            this.drawPole(poleLength);
-            this.drawPoleBase(poleLength);
-            this.drawPoleNotch();
+            this.drawPole(stack, light, buffers, poleLength);
+            this.drawPoleBase(stack, buffers, light, poleLength);
+            this.drawPoleNotch(stack, buffers, light);
 
-            GlStateManager.popMatrix();
+            stack.popPose();
         }
     }
 
-    private void setupPoleGlState(BlockPos pos, Point3d rendererPos, EnumFacing poleFacing, EnumFacing facing, float teRot, Pair<Vector3f, Float> rotationDetails, TabulaModelRenderer cube) {
-        GlStateManager.translate(-pos.getX() + rendererPos.x, -pos.getY() + rendererPos.y, -pos.getZ() + rendererPos.z);
-        GlStateManager.disableAlpha();
-        GlStateManager.disableBlend();
-        GlStateManager.color(1f, 1f, 1f, 1f);
+    private void setupPoleGlState(MatrixStack stack, BlockPos pos, Vector3f rendererPos, Direction poleFacing, Direction facing, float teRot, float rotationAngle, boolean rotationOnX, DCMModelRenderer cube) {
+        stack.translate(-pos.getX() + rendererPos.x(), -pos.getY() + rendererPos.y(), -pos.getZ() + rendererPos.z());
 
         switch (poleFacing.getAxis()) {
             case X:
-                GlStateManager.rotate(poleFacing == EnumFacing.EAST ? 90F : 270F, 0, 0, 1);
+                stack.mulPose(Vector3f.ZP.rotationDegrees(poleFacing == Direction.EAST ? 90F : 270F));
                 break;
             case Y:
-                GlStateManager.rotate(poleFacing == EnumFacing.UP ? 180F : 0F, 1, 0, 0);
+                stack.mulPose(Vector3f.XP.rotationDegrees(poleFacing == Direction.UP ? 180F : 0F));
                 break;
             case Z:
-                GlStateManager.rotate(poleFacing == EnumFacing.NORTH ? 90F : 270F, 1, 0, 0);
+                stack.mulPose(Vector3f.XP.rotationDegrees(poleFacing == Direction.NORTH ? 90F : 270F));
                 break;
         }
 
-        GlStateManager.rotate(this.getAbsolutePoleRotation(poleFacing, facing, rotationDetails.getRight(), teRot, rotationDetails.getLeft(), cube), 0, 1, 0);
-        GlStateManager.translate(-POLE_WIDTH / 2F, 0, -POLE_WIDTH / 2F);
+        stack.mulPose(Vector3f.YP.rotationDegrees(this.getAbsolutePoleRotation(poleFacing, facing, rotationAngle, teRot, rotationOnX, cube)));
+        stack.translate(-POLE_WIDTH / 2F, 0, -POLE_WIDTH / 2F);
 
-        this.mc.renderEngine.bindTexture(new ResourceLocation(ProjectNublar.MODID, "textures/entities/skeletal_builder.png"));//TODO: cache?
     }
 
-    private void drawPole(double poleLength) {
+    private void drawPole(MatrixStack stack, int light, IRenderTypeBuffer buffers, float poleLength) {
 
-        Tessellator tess = Tessellator.getInstance();
-        BufferBuilder buff = tess.getBuffer();
-
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+        Matrix4f pose = stack.last().pose();
+        Matrix3f normal = stack.last().normal();
+        SimpleVertexBuilder buff = new SimpleVertexBuilder(buffers.getBuffer(RenderType.entitySolid(TEXTURE)), stack.last(), light);
         //Render pole
-        buff.pos(0, 0, POLE_WIDTH).tex(0, 0).normal(0, 0, 1).endVertex();
-        buff.pos(0, poleLength, POLE_WIDTH).tex(0, poleLength).normal(0, 0, 1).endVertex();
-        buff.pos(POLE_WIDTH, poleLength, POLE_WIDTH).tex(1 / TEXTURE_WIDTH, poleLength).normal(0, 0, 1).endVertex();
-        buff.pos(POLE_WIDTH, 0, POLE_WIDTH).tex(1 / TEXTURE_WIDTH, 0).normal(0, 0, 1).endVertex();
 
-        buff.pos(0, 0, 0).tex(0, 0).normal(-1, 0, 0).endVertex();
-        buff.pos(0, poleLength, 0).tex(0, poleLength).normal(-1, 0, 0).endVertex();
-        buff.pos(0, poleLength, POLE_WIDTH).tex(1 / TEXTURE_WIDTH, poleLength).normal(-1, 0, 0).endVertex();
-        buff.pos(0, 0, POLE_WIDTH).tex(1 / TEXTURE_WIDTH, 0).normal(-1, 0, -1).endVertex();
+        buff.vertex(0, 0, POLE_WIDTH, 0, 0, 0, 0, 1);
+        buff.vertex(0, poleLength, POLE_WIDTH, 0, poleLength, 0, 0, 1);
+        buff.vertex(POLE_WIDTH, poleLength, POLE_WIDTH, 1 / TEXTURE_WIDTH, poleLength, 0, 0, 1);
+        buff.vertex(POLE_WIDTH, 0, POLE_WIDTH, 1 / TEXTURE_WIDTH, 0, 0, 0, 1);
 
-        buff.pos(POLE_WIDTH, 0, 0).tex(0, 0).normal(0, 0, -1).endVertex();
-        buff.pos(POLE_WIDTH, poleLength, 0).tex(0, poleLength).normal(0, 0, -1).endVertex();
-        buff.pos(0, poleLength, 0).tex(1 / TEXTURE_WIDTH, poleLength).normal(0, 0, -1).endVertex();
-        buff.pos(0, 0, 0).tex(1 / TEXTURE_WIDTH, 0).normal(0, 0, -1).endVertex();
+        buff.vertex(0, 0, 0, 0, 0, -1, 0, 0);
+        buff.vertex(0, poleLength, 0, 0, poleLength, -1, 0, 0);
+        buff.vertex(0, poleLength, POLE_WIDTH, 1 / TEXTURE_WIDTH, poleLength, -1, 0, 0);
+        buff.vertex(0, 0, POLE_WIDTH, 1 / TEXTURE_WIDTH, 0, -1, 0, -1);
 
-        buff.pos(POLE_WIDTH, 0, POLE_WIDTH).tex(0, 0).normal(1, 0, 0).endVertex();
-        buff.pos(POLE_WIDTH, poleLength, POLE_WIDTH).tex(0, poleLength).normal(1, 0, 0).endVertex();
-        buff.pos(POLE_WIDTH, poleLength, 0).tex(1 / TEXTURE_WIDTH, poleLength).normal(1, 0, 0).endVertex();
-        buff.pos(POLE_WIDTH, 0, 0).tex(1 / TEXTURE_WIDTH, 0).normal(1, 0, 0).endVertex();
+        buff.vertex(POLE_WIDTH, 0, 0, 0, 0, 0, 0, -1);
+        buff.vertex(POLE_WIDTH, poleLength, 0, 0, poleLength, 0, 0, -1);
+        buff.vertex(0, poleLength, 0, 1 / TEXTURE_WIDTH, poleLength, 0, 0, -1);
+        buff.vertex(0, 0, 0, 1 / TEXTURE_WIDTH, 0, 0, 0, -1);
 
-        tess.draw();
+        buff.vertex(POLE_WIDTH, 0, POLE_WIDTH, 0, 0, 1, 0, 0);
+        buff.vertex(POLE_WIDTH, poleLength, POLE_WIDTH, 0, poleLength, 1, 0, 0);
+        buff.vertex(POLE_WIDTH, poleLength, 0, 1 / TEXTURE_WIDTH, poleLength, 1, 0, 0);
+        buff.vertex(POLE_WIDTH, 0, 0, 1 / TEXTURE_WIDTH, 0, 1, 0, 0);
     }
 
-    private void drawPoleBase(double poleLength) {
-        GlStateManager.translate(POLE_WIDTH / 2F, poleLength, POLE_WIDTH / 2F);
-        this.renderCube(BASE_WIDTH, BASE_HEIGHT, 1, 0);
+    private void drawPoleBase(MatrixStack stack, IRenderTypeBuffer buffers, int light, double poleLength) {
+        stack.translate(POLE_WIDTH / 2F, poleLength, POLE_WIDTH / 2F);
+        this.renderCube(stack, buffers, light, BASE_WIDTH, BASE_HEIGHT, 1, 0);
     }
 
-    private void drawPoleNotch() {
-        GlStateManager.translate(0, BASE_HEIGHT, 0);
-        this.renderCube(NOTCH_WIDTH, NOTCH_HEIGHT, 1, 6);
+    private void drawPoleNotch(MatrixStack stack, IRenderTypeBuffer buffers, int light) {
+        stack.translate(0, BASE_HEIGHT, 0);
+        this.renderCube(stack, buffers, light, NOTCH_WIDTH, NOTCH_HEIGHT, 1, 6);
     }
 
-    private float getAbsolutePoleRotation(EnumFacing poleFacing, EnumFacing facing, float angle, float teRot, Vector3f rotVec, TabulaModelRenderer cube) {
+    private float getAbsolutePoleRotation(Direction poleFacing, Direction facing, float angle, float teRot, boolean rotationOnX, DCMModelRenderer cube) {
         //Get the facing direction relative to the model direction.
-        EnumFacing rotP = poleFacing;
+        Direction rotP = poleFacing;
         float rotationTimes = angle;
-        EnumFacing.Axis axis = rotVec.x == 1 ? EnumFacing.Axis.X : EnumFacing.Axis.Z;
+        Direction.Axis axis = rotationOnX ? Direction.Axis.X : Direction.Axis.Z;
 
         while(rotationTimes > 0) {
-            rotP = rotP.rotateAround(axis);
+            rotP = DirectionUtils.rotateAround(rotP, axis);
             rotationTimes -= 90F;
         }
 
         //When rotating the teRot, the axis used to go in a certian direction changes, therefore we should interpolate between the two angles.
         if (poleFacing.getAxis() != facing.getAxis()) { //Interpolate between the 2 axis
 
-            EnumFacing from = rotP;
-            EnumFacing to = rotP.rotateY().getOpposite();
+            Direction from = rotP;
+            Direction to = DirectionUtils.rotateY(rotP).getOpposite();
 
             if (teRot >= 270) {
-                from = rotP.rotateY();
+                from = DirectionUtils.rotateY(rotP);
                 to = rotP;
             } else if (teRot >= 180) {
                 from = rotP.getOpposite();
-                to = rotP.rotateY();
+                to = DirectionUtils.rotateY(rotP);
             } else if (teRot >= 90) {
-                from = rotP.rotateY().getOpposite();
+                from = DirectionUtils.rotateY(rotP).getOpposite();
                 to = rotP.getOpposite();
             }
 
@@ -326,29 +301,39 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
     }
 
-    private double getAxisValue(EnumFacing poleFacing, Point3d rendererPos) {
+    private float getAxisValue(Direction poleFacing, Vector3f rendererPos) {
         switch (poleFacing.getAxis()) {
-            case X: return rendererPos.x;
-            case Y: return rendererPos.y;
-            case Z: return rendererPos.z;
+            case X: return rendererPos.x();
+            case Y: return rendererPos.y();
+            case Z: return rendererPos.z();
             default:
                 throw new IllegalArgumentException("Unacceptable facingdir " + poleFacing.getAxis()); //Impossible ?
         }
     }
 
-    private double getCubeDistance(World world, PoleFacing poleDirection, AxisAlignedBB bounding, Point3d rendererPos, double axisValue) {
-        double cubeDist = 1000;
-        for (BlockPos sectionPos : BlockPos.getAllInBox(new BlockPos(rendererPos.x + 0.5F - BASE_WIDTH / 2F, rendererPos.y + 0.5F - BASE_WIDTH / 2F, rendererPos.z + 0.5F - BASE_WIDTH / 2F), new BlockPos(rendererPos.x + 0.5F + BASE_WIDTH / 2F, rendererPos.y + 0.5F + BASE_WIDTH / 2F, rendererPos.z + 0.5F + BASE_WIDTH / 2F))) {
+    private float getCubeDistance(World world, PoleFacing poleDirection, AxisAlignedBB bounding, Vector3f rendererPos, float axisValue) {
+        float cubeDist = 1000;
+        for (BlockPos sectionPos : BlockPos.betweenClosed(
+            new BlockPos(rendererPos.x() + 0.5F - BASE_WIDTH / 2F, rendererPos.y() + 0.5F - BASE_WIDTH / 2F, rendererPos.z() + 0.5F - BASE_WIDTH / 2F),
+            new BlockPos(rendererPos.x() + 0.5F + BASE_WIDTH / 2F, rendererPos.y() + 0.5F + BASE_WIDTH / 2F, rendererPos.z() + 0.5F + BASE_WIDTH / 2F)
+        )) {
             List<AxisAlignedBB> aabbList = Lists.newArrayList();
             int counter = 0;
             while (aabbList.isEmpty() && counter <= 100) {
-                world.getBlockState(sectionPos).addCollisionBoxToList(world, sectionPos, bounding, aabbList, null, false);
-                sectionPos = sectionPos.add(poleDirection.getFacing().getDirectionVec());
+                //TODO: maybe we don't need to iterate over the aabbs.
+                for (AxisAlignedBB aabb : world.getBlockState(sectionPos).getCollisionShape(world, sectionPos).toAabbs()) {
+                    if(aabb.intersects(bounding)) {
+                        aabbList.add(aabb);
+                    }
+                }
+
+
+                sectionPos = sectionPos.mutable().move(poleDirection.getFacing().getNormal());
                 counter++;
             }
             if (!aabbList.isEmpty()) {
                 for (AxisAlignedBB aabb : aabbList) {
-                    double hitPoint = poleDirection.apply(aabb) - 0.5F;
+                    float hitPoint = poleDirection.apply(aabb) - 0.5F;
                     if(Math.abs(hitPoint - axisValue) < Math.abs(cubeDist)) {
                         cubeDist = hitPoint - axisValue;
                     }
@@ -358,44 +343,44 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         return cubeDist;
     }
 
-    private Point3d getRenderPosition(TabulaModelRenderer cube, ComponentAccess entity, Matrix4d teMatrix) {
-        Vec3d partOrigin = TabulaUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
-        partOrigin = new Vec3d(-partOrigin.x, /*No need to minus the y, as we flip the model around anyway*/partOrigin.y, -partOrigin.z);
+    private Vector3f getRenderPosition(DCMModelRenderer cube, ComponentAccess entity, Matrix4f teMatrix) {
+        Vector3f partOrigin = DCMUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
+        partOrigin = new Vector3f(-partOrigin.x(), /*No need to minus the y, as we flip the model around anyway*/partOrigin.y(), -partOrigin.z());
 
-        Point3d rendererPos = new Point3d(partOrigin.x, partOrigin.y + 1.5, partOrigin.z);
+        Vector3f rendererPos = new Vector3f(partOrigin.x(), partOrigin.y() + 1.5F, partOrigin.z());
 
-        entity.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> {
-            rendererPos.x *= floats[0];
-            rendererPos.y *= floats[1];
-            rendererPos.z *= floats[2];
+        entity.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> rendererPos.mul(floats[0], floats[1], floats[2]));
 
-        });
+        Vector4f toMul = new Vector4f(rendererPos);
+        toMul.transform(teMatrix);
 
-        teMatrix.transform(rendererPos);
-
-        return rendererPos;
+        return new Vector3f(toMul.x(), toMul.y(), toMul.z());
     }
 
-    private AxisAlignedBB createBoundingBox(EnumFacing poleFacing, Point3d rendererPos) {
-        return new AxisAlignedBB(0, 0, 0, poleFacing.getXOffset() * 256F, poleFacing.getYOffset() * 256F, poleFacing.getZOffset() * 256F)
-                .offset(rendererPos.x + 0.5F, rendererPos.y + 0.5F, rendererPos.z + 0.5F)
-                .grow(BASE_WIDTH / 2F);
+    private AxisAlignedBB createBoundingBox(Direction poleFacing, Vector3f rendererPos) {
+        return new AxisAlignedBB(0, 0, 0, poleFacing.getStepX() * 256F, poleFacing.getStepY() * 256F, poleFacing.getStepZ() * 256F)
+                .move(rendererPos.x() + 0.5F, rendererPos.y() + 0.5F, rendererPos.z() + 0.5F)
+                .inflate(BASE_WIDTH / 2F);
     }
 
-    private Pair<Vector3f, Float> createRotationDetails(EnumFacing facing) {
+    private Pair<Quaternion, Float> createQuaternion(Direction facing) {
+        float angle;
         switch (facing.getAxis()) { //There gotta be a better way than this
             case X:
-                return Pair.of(new Vector3f(0, 0, 1), facing == EnumFacing.WEST ? 90F : 270F);
+                angle = facing == Direction.WEST ? 90F : 270F;
+                return Pair.of(Vector3f.ZP.rotationDegrees(angle), angle);
             case Y:
-                return Pair.of(new Vector3f(1, 0, 0), facing == EnumFacing.UP ? 0F : 180F);
+                angle = facing == Direction.UP ? 0F : 180F;
+                return Pair.of(Vector3f.XP.rotationDegrees(angle), angle);
             case Z:
-                return Pair.of(new Vector3f(1, 0, 0), facing == EnumFacing.SOUTH ? 90F : 270F);
+                angle = facing == Direction.SOUTH ? 90F : 270F;
+                return Pair.of(Vector3f.XP.rotationDegrees(angle), angle);
             default:
-                return Pair.of(new Vector3f(), 90F);
+                return Pair.of(Quaternion.ONE, 0F);
         }
     }
 
-    private static void setVisability(ComponentAccess entity, TabulaModel tabulaModel) {
+    private static void setVisibility(ComponentAccess entity, DCMModel tabulaModel) {
         List<String> modelList = Lists.newArrayList();
         SkeletalBuilderComponent compoent = entity.getOrNull(ComponentHandler.SKELETAL_BUILDER);
         if(compoent != null) {
@@ -403,10 +388,10 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
                 modelList.addAll(compoent.getBoneToModelMap().get(s));
             }
             int id = compoent.modelIndex % (modelList.size() + 1);
-            List<ModelRenderer> nonHiddenCubes = Lists.newArrayList();
+            List<DCMModelRenderer> nonHiddenCubes = Lists.newArrayList();
             if(id != 0) {
                 List<String> activeStates = Lists.newArrayList();
-                Map<String, List<ModelRenderer>> modelChildMap = Maps.newHashMap();
+                Map<String, List<DCMModelRenderer>> modelChildMap = Maps.newHashMap();
 
                 generateModelChildMap(modelChildMap, activeStates, modelList, id, tabulaModel);
 
@@ -421,13 +406,13 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
     }
 
-    private static void resetScaleForAll(TabulaModel tabulaModel, Predicate<TabulaModelRenderer> predicate) {
-        for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
+    private static void resetScaleForAll(DCMModel tabulaModel, Predicate<DCMModelRenderer> predicate) {
+        for (DCMModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
             modelRenderer.setHideButShowChildren(!predicate.test(modelRenderer));
         }
     }
 
-    private static void generateModelChildMap(Map<String, List<ModelRenderer>> modelChildMap, List<String> activeStates, List<String> modelList, int id, TabulaModel tabulaModel) {
+    private static void generateModelChildMap(Map<String, List<DCMModelRenderer>> modelChildMap, List<String> activeStates, List<String> modelList, int id, DCMModel tabulaModel) {
         String currentState = modelList.get(id - 1);
         for (int i = 0; i < modelList.size(); i++) {
             String model = modelList.get(i);
@@ -438,86 +423,102 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntitySpecialRendere
         }
     }
 
-    private static void resetVisability(TabulaModel tabulaModel) {
-        for (TabulaModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
+    private static void resetVisibility(DCMModel tabulaModel) {
+        for (DCMModelRenderer modelRenderer : tabulaModel.getAllCubes()) {
             modelRenderer.setHideButShowChildren(false);
         }
     }
 
-    private void renderCube(double width, double height, int uOffset, int vOffset) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(-width / 2F, 0, -width / 2F);
-
-        Tessellator tes = Tessellator.getInstance();
-        BufferBuilder buff = tes.getBuffer();
-
-        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
+    private void renderCube(MatrixStack stack, IRenderTypeBuffer buffer, int light, float width, float height, int uOffset, int vOffset) {
+        stack.pushPose();
+        stack.translate(-width / 2F, 0, -width / 2F);
 
         //Chunks of code are in U-D-N-E-S-W order
 
-        double uFrom = uOffset/TEXTURE_WIDTH;
-        double vFrom = vOffset/TEXTURE_HEIGHT;
-        double uTo = uFrom+width*16F/TEXTURE_WIDTH;
-        double vTo = vFrom+width*16F/TEXTURE_HEIGHT;
+        float uFrom = uOffset/TEXTURE_WIDTH;
+        float vFrom = vOffset/TEXTURE_HEIGHT;
+        float uTo = uFrom+width*16F/TEXTURE_WIDTH;
+        float vTo = vFrom+width*16F/TEXTURE_HEIGHT;
 
-        buff.pos(0, height, 0).tex(uFrom, vFrom).normal(0, 1, 0).endVertex();
-        buff.pos(0, height, width).tex(uFrom, vTo).normal(0, 1, 0).endVertex();
-        buff.pos(width, height, width).tex(uTo, vTo).normal(0, 1, 0).endVertex();
-        buff.pos(width, height, 0).tex(uTo, vFrom).normal(0, 1, 0).endVertex();
+        SimpleVertexBuilder buff = new SimpleVertexBuilder(buffer.getBuffer(RenderType.entitySolid(TEXTURE)), stack.last(), light);
 
-        buff.pos(width, 0, 0).tex(uFrom, vFrom).normal(0, -1, 0).endVertex();
-        buff.pos(width, 0, width).tex(uFrom, vTo).normal(0, -1, 0).endVertex();
-        buff.pos(0, 0, width).tex(uTo, vTo).normal(0, -1, 0).endVertex();
-        buff.pos(0, 0, 0).tex(uTo, vFrom).normal(0, -1, 0).endVertex();
+        buff.vertex(0, height, 0, uFrom, vFrom, 0, 1, 0);
+        buff.vertex(0, height, width, uFrom, vTo, 0, 1, 0);
+        buff.vertex(width, height, width, uTo, vTo, 0, 1, 0);
+        buff.vertex(width, height, 0, uTo, vFrom, 0, 1, 0);
+
+        buff.vertex(width, 0, 0, uFrom, vFrom, 0, -1, 0);
+        buff.vertex(width, 0, width, uFrom, vTo, 0, -1, 0);
+        buff.vertex(0, 0, width, uTo, vTo, 0, -1, 0);
+        buff.vertex(0, 0, 0, uTo, vFrom, 0, -1, 0);
 
         vTo = vFrom+height*16F/TEXTURE_HEIGHT;
 
-        buff.pos(width, height, 0).tex(uFrom, vFrom).normal(0, 0, -1).endVertex();
-        buff.pos(width, 0, 0).tex(uFrom, vTo).normal(0, 0, -1).endVertex();
-        buff.pos(0, 0, 0).tex(uTo, vTo).normal(0, 0, -1).endVertex();
-        buff.pos(0, height, 0).tex(uTo, vFrom).normal(0, 0, -1).endVertex();
+        buff.vertex(width, height, 0, uFrom, vFrom, 0, 0, -1);
+        buff.vertex(width, 0, 0, uFrom, vTo, 0, 0, -1);
+        buff.vertex(0, 0, 0, uTo, vTo, 0, 0, -1);
+        buff.vertex(0, height, 0, uTo, vFrom, 0, 0, -1);
 
-        buff.pos(width, height, width).tex(uFrom, vFrom).normal(1, 0, 0).endVertex();
-        buff.pos(width, 0, width).tex(uFrom, vTo).normal(1, 0, 0).endVertex();
-        buff.pos(width, 0, 0).tex(uTo, vTo).normal(1, 0, 0).endVertex();
-        buff.pos(width, height, 0).tex(uTo, vFrom).normal(1, 0, 0).endVertex();
+        buff.vertex(width, height, width, uFrom, vFrom, 1, 0, 0);
+        buff.vertex(width, 0, width, uFrom, vTo, 1, 0, 0);
+        buff.vertex(width, 0, 0, uTo, vTo, 1, 0, 0);
+        buff.vertex(width, height, 0, uTo, vFrom, 1, 0, 0);
 
-        buff.pos(0, height, width).tex(uFrom, vFrom).normal(0, 0, 1).endVertex();
-        buff.pos(0, 0, width).tex(uFrom, vTo).normal(0, 0, 1).endVertex();
-        buff.pos(width, 0, width).tex(uTo, vTo).normal(0, 0, 1).endVertex();
-        buff.pos(width, height, width).tex(uTo, vFrom).normal(0, 0, 1).endVertex();
+        buff.vertex(0, height, width, uFrom, vFrom, 0, 0, 1);
+        buff.vertex(0, 0, width, uFrom, vTo, 0, 0, 1);
+        buff.vertex(width, 0, width, uTo, vTo, 0, 0, 1);
+        buff.vertex(width, height, width, uTo, vFrom, 0, 0, 1);
 
-        buff.pos(0, height, 0).tex(uFrom, vFrom).normal(-1, 0, 0).endVertex();
-        buff.pos(0, 0, 0).tex(uFrom, vTo).normal(-1, 0, 0).endVertex();
-        buff.pos(0, 0, width).tex(uTo, vTo).normal(-1, 0, 0).endVertex();
-        buff.pos(0, height, width).tex(uTo, vFrom).normal(-1, 0, 0).endVertex();
+        buff.vertex(0, height, 0, uFrom, vFrom, -1, 0, 0);
+        buff.vertex(0, 0, 0, uFrom, vTo, -1, 0, 0);
+        buff.vertex(0, 0, width, uTo, vTo, -1, 0, 0);
+        buff.vertex(0, height, width, uTo, vFrom, -1, 0, 0);
 
-        tes.draw();
-        GlStateManager.popMatrix();
+        stack.popPose();
     }
 
-    private float getRotation(EnumFacing poleFacing, EnumFacing teFacing, TabulaModelRenderer cube, float rot) {
+
+
+    private float getRotation(Direction poleFacing, Direction teFacing, DCMModelRenderer cube, float rot) {
         float rotation = 0;
-        if(poleFacing.getAxis() == EnumFacing.Axis.Y) {
+        if(poleFacing.getAxis() == Direction.Axis.Y) {
             rotation = -rot;
         }
-        TabulaModelRenderer reference = cube;
+        DCMModelRenderer reference = cube;
         while(reference != null) {
             double axisRotation;
             switch (poleFacing.getAxis()) {
-                case X: axisRotation = reference.rotateAngleX; break;
-                case Y: axisRotation = reference.rotateAngleY; break;
-                case Z: axisRotation = reference.rotateAngleZ; break;
+                case X: axisRotation = reference.xRot; break;
+                case Y: axisRotation = reference.yRot; break;
+                case Z: axisRotation = reference.zRot; break;
                 default: throw new IllegalArgumentException("Unacceptable facingdir " + teFacing.getAxis());
             }
             rotation += Math.toDegrees(axisRotation);
             reference = reference.getParent();
         }
-        return rotation * poleFacing.getAxisDirection().getOffset();
+        return rotation * poleFacing.getAxisDirection().getStep();
     }
 
+
     @Override
-    public boolean isGlobalRenderer(SkeletalBuilderBlockEntity te) {
+    public boolean shouldRenderOffScreen(SkeletalBuilderBlockEntity p_188185_1_) {
         return true;
+    }
+
+    @RequiredArgsConstructor
+    private static class SimpleVertexBuilder {
+        private final IVertexBuilder buff;
+        private final MatrixStack.Entry entry;
+        private final int light;
+
+        public void vertex(float x, float y, float z, float u, float v, float nx, float ny, float nz) {
+            this.buff.vertex(this.entry.pose(), x, y, z)
+                .color(1F, 1F, 1F, 1F)
+                .uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(this.light)
+                .normal(this.entry.normal(), nx, ny, nz)
+                .endVertex();
+        }
     }
 }

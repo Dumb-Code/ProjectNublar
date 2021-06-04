@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.dumblibrary.client.model.ModelMissing;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
@@ -47,7 +48,7 @@ public class DinosaurEggType {
     }
 
     @SideOnly(Side.CLIENT)
-    public TabulaModel getEggModel() {
+    public DCMModel getEggModel() {
         if(this.eggModel != null) {
             return this.eggModel;
         }

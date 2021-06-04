@@ -2,14 +2,17 @@ package net.dumbcode.projectnublar.client.render;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModelRenderer;
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
+import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -18,21 +21,21 @@ import java.util.List;
 import java.util.Map;
 
 public class TabulaModelClipPlane {
-    private final TabulaModel model;
-    private final Map<TabulaModelRenderer, Vec3d[]> pointsMap = Maps.newHashMap();
+    private final DCMModel model;
+    private final Map<DCMModelRenderer, Vector3d[]> pointsMap = Maps.newHashMap();
 
-    public TabulaModelClipPlane(TabulaModel model) {
+    public TabulaModelClipPlane(DCMModel model) {
         this.model = model;
 
-        for (TabulaModelRenderer cube : this.model.getAllCubes()) {
+        for (DCMModelRenderer cube : this.model.getAllCubes()) {
             int[] values = new int[] {0, 1};
-            Vec3d[] points = new Vec3d[8];
+            Vector3d[] points = new Vector3d[8];
 
             for (int xb : values) {
                 for (int yb : values) {
                     for (int zb : values) {
-                        Vec3d partOrigin = TabulaUtils.getModelPosAlpha(cube, xb, yb, zb);
-                        points[(xb<<2)|(yb<<1)|zb] = new Vec3d(partOrigin.x, -partOrigin.y, -partOrigin.z);
+                        Vector3f partOrigin = DCMUtils.getModelPosAlpha(cube, xb, yb, zb);
+                        points[(xb<<2)|(yb<<1)|zb] = new Vector3d(partOrigin);
                     }
                 }
             }
@@ -40,7 +43,7 @@ public class TabulaModelClipPlane {
         }
     }
 
-    public void render(double dist, int color) {
+    public void render(MatrixStack stack, int light, ResourceLocation texture, double dist, int color) {
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;
@@ -51,17 +54,17 @@ public class TabulaModelClipPlane {
         GL11.glClipPlane(GL11.GL_CLIP_PLANE0, db);
         GL11.glEnable(GL11.GL_CLIP_PLANE0);
 
-        this.model.renderBoxes(1F/16F);
+        this.model.renderBoxes(stack, light, texture);
 
         GL11.glDisable(GL11.GL_CLIP_PLANE0);
 
-        for (Map.Entry<TabulaModelRenderer, Vec3d[]> entry : this.pointsMap.entrySet()) {
-            if(!entry.getKey().isHidden) {
+        for (Map.Entry<DCMModelRenderer, Vector3d[]> entry : this.pointsMap.entrySet()) {
+            if(entry.getKey().visible) {
 
-                List<Vec3d> outlist = Lists.newArrayList();
+                List<Vector3d> outlist = Lists.newArrayList();
 
-                Vec3d[] rawPoints = entry.getValue();
-                Vec3d[] points = new Vec3d[8];
+                Vector3d[] rawPoints = entry.getValue();
+                Vector3d[] points = new Vector3d[8];
                 for (int i = 0; i < rawPoints.length; i++) {
                     points[i] = rawPoints[i].add(0, plane[3], 0);
                 }
@@ -72,8 +75,8 @@ public class TabulaModelClipPlane {
                 getCheckPlaneCross(points, outlist, 0b001, 0b101);
                 getCheckPlaneCross(points, outlist, 0b100, 0b000);
 
-                GlStateManager.disableCull();
-                GlStateManager.disableTexture2D();
+                RenderSystem.disableCull();
+                RenderSystem.disableTexture();
                 if(outlist.size() == 4) {
 
                     outlist.sort((o1, o2) -> {
@@ -81,32 +84,32 @@ public class TabulaModelClipPlane {
                         return compare == 0 ? Double.compare(o2.x, o1.x) : compare;
                     });
 
-                    BufferBuilder buff = Tessellator.getInstance().getBuffer();
+                    BufferBuilder buff = Tessellator.getInstance().getBuilder();
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
                     for (int coord : new int[]{0, 1, 3, 2, 1, 0, 2, 3}) {
-                        Vec3d vec = outlist.get(coord);
-                        buff.pos(vec.x, vec.y - plane[3], vec.z).color(r, g, b, 255).endVertex();
+                        Vector3d vec = outlist.get(coord);
+                        buff.vertex(vec.x, vec.y - plane[3], vec.z).color(r, g, b, 255).endVertex();
                     }
-                    Tessellator.getInstance().draw();
+                    Tessellator.getInstance().end();
                 }
-                GlStateManager.enableCull();
-                GlStateManager.enableTexture2D();
+                RenderSystem.enableCull();
+                RenderSystem.enableTexture();
             }
         }
 
     }
 
-    private void getCheckPlaneCross(Vec3d[] points, List<Vec3d> outlist, int... ints) {
+    private void getCheckPlaneCross(Vector3d[] points, List<Vector3d> outlist, int... ints) {
         for (int i = 0; i < ints.length; i++) {
             int nextID = (i + 1) % ints.length;
             if (ints.length == 2 && i == 1) {
                 break;
             }
-            Vec3d vec = points[ints[i]];
-            Vec3d next = points[ints[nextID]];
+            Vector3d vec = points[ints[i]];
+            Vector3d next = points[ints[nextID]];
             if(vec.y >= 0 != next.y >= 0) { //Crosses 0
                 double alpha = vec.y / (vec.y - next.y);
-                outlist.add(new Vec3d(vec.x + (next.x - vec.x) * alpha, 0, vec.z + (next.z - vec.z) * alpha));
+                outlist.add(new Vector3d(vec.x + (next.x - vec.x) * alpha, 0, vec.z + (next.z - vec.z) * alpha));
             }
         }
     }

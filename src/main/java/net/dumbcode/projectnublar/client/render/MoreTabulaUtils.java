@@ -2,19 +2,19 @@ package net.dumbcode.projectnublar.client.render;
 
 import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.model.ModelRenderer;
+import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 
 import java.util.List;
 
 @UtilityClass
 public class MoreTabulaUtils {
-    public static List<ModelRenderer> getAllChildren(ModelRenderer box, List<String> ignoreList) {
-        if(box.childModels == null) {
+    public static List<DCMModelRenderer> getAllChildren(DCMModelRenderer box, List<String> ignoreList) {
+        if(box.getChildCubes() == null) {
             return Lists.newArrayList();
         }
-        List<ModelRenderer> list = Lists.newArrayList(box);
-        for (ModelRenderer childModel : box.childModels) {
-            if(!ignoreList.contains(childModel.boxName)) {
+        List<DCMModelRenderer> list = Lists.newArrayList(box);
+        for (DCMModelRenderer childModel : box.getChildCubes()) {
+            if(!ignoreList.contains(childModel.getName())) {
                 list.add(childModel);
                 list.addAll(getAllChildren(childModel, ignoreList));
             }
