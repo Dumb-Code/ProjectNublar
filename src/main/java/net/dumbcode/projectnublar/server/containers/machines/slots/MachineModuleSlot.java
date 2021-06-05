@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -28,5 +30,11 @@ public class MachineModuleSlot extends SlotItemHandler {
     @Override
     public boolean mayPlace(@Nonnull ItemStack stack) {
         return this.blockEntity.isItemValidFor(this.getSlotIndex(), stack);
+    }
+
+    @Override
+    public MachineModuleSlot setBackground(ResourceLocation atlas, ResourceLocation sprite) {
+        super.setBackground(atlas, sprite);
+        return this;
     }
 }

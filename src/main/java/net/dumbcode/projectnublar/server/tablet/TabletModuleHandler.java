@@ -30,7 +30,7 @@ public class TabletModuleHandler {
                 )
             )
             .screenData((s, player, buf) -> {
-                List<TrackingBeaconBlockEntity.TrackingSavedDataEntry> entries = TrackingBeaconBlockEntity.getTrackingList(player.world).getList();
+                List<TrackingBeaconBlockEntity.TrackingSavedDataEntry> entries = TrackingBeaconBlockEntity.getTrackingList(player.getLevel()).getList();
                 buf.writeShort(entries.size());
                 for (TrackingBeaconBlockEntity.TrackingSavedDataEntry entry : entries) {
                     buf.writeBlockPos(entry.getPos());

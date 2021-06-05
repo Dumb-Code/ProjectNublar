@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.block.entity;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
-import net.dumbcode.dumblibrary.client.model.tabula.TabulaModel;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.ModelComponent;
@@ -13,16 +12,14 @@ import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalPr
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ITickable;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.Optional;
@@ -31,10 +28,10 @@ import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
 @Getter
 @Setter
-public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity implements ITickable {
+public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity implements ITickableTileEntity {
     private final ItemStackHandler boneHandler = new ItemStackHandler();
     private final SkeletalProperties skeletalProperties = new SkeletalProperties();
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private SkeletonBuilderScene scene;
 
     private Optional<DinosaurEntity> dinosaurEntity = Optional.empty();
@@ -46,27 +43,28 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
     private double cameraZoom = 1.0;
 
     public SkeletalBuilderBlockEntity() {
+        super(ProjectNublarBlockEntities.SKELETAL_BUILDER.get());
         this.reassureSize();
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        this.dinosaurEntity.ifPresent(d -> nbt.setString("Dinosaur", d.getDinosaur().getRegName().toString()));
-        nbt.setTag("Inventory", this.boneHandler.serializeNBT());
+    public CompoundNBT save(CompoundNBT nbt) {
+        this.dinosaurEntity.ifPresent(d -> nbt.putString("Dinosaur", d.getDinosaur().getRegName().toString()));
+        nbt.put("Inventory", this.boneHandler.serializeNBT());
         // save pose data
-        nbt.setTag("SkeletalProperties", this.skeletalProperties.serialize(new NBTTagCompound()));
-        return super.writeToNBT(nbt);
+        nbt.put("SkeletalProperties", this.skeletalProperties.serialize(new CompoundNBT()));
+        return super.save(nbt);
     }
 
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void load(BlockState state, CompoundNBT nbt) {
         setDinosaur(DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
-        this.boneHandler.deserializeNBT(nbt.getCompoundTag("Inventory"));
+        this.boneHandler.deserializeNBT(nbt.getCompound("Inventory"));
         // load pose data
         this.reassureSize();
-        this.skeletalProperties.deserialize(nbt.getCompoundTag("SkeletalProperties"));
-        super.readFromNBT(nbt);
+        this.skeletalProperties.deserialize(nbt.getCompound("SkeletalProperties"));
+        super.load(state, nbt);
     }
 
     private void reassureSize() {
@@ -88,12 +86,12 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
                 .flatMap(EntityComponentTypes.MODEL)
                 .map(ModelComponent::getTexture)
                 .map(RenderLocationComponent.ConfigurableLocation::getLocation)
-                .orElse(TextureMap.LOCATION_MISSING_TEXTURE);
+                .orElse(TextureManager.INTENTIONAL_MISSING_TEXTURE);
     }
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
-            DinosaurEntity entity = dinosaur.createEntity(this.world, dinosaur.getAttacher().emptyConfiguration().withDefaultTypes(false).withType(ComponentHandler.DINOSAUR, ComponentHandler.SKELETAL_BUILDER, EntityComponentTypes.MODEL));
+            DinosaurEntity entity = dinosaur.createEntity(this.level, dinosaur.getAttacher().emptyConfiguration().withDefaultTypes(false).withType(ComponentHandler.DINOSAUR, ComponentHandler.SKELETAL_BUILDER, EntityComponentTypes.MODEL));
             this.dinosaurEntity = Optional.of(entity);
         }
         this.getHistory().clear();
@@ -121,7 +119,7 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
     }
 
     @Override
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return Double.MAX_VALUE;
     }
 
@@ -131,7 +129,7 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
     }
 
     @Override
-    public void update() {
+    public void tick() {
         this.getSkeletalProperties().setPrevRotation(this.getSkeletalProperties().getRotation());
     }
 }

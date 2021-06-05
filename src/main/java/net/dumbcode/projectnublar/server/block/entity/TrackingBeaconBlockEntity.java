@@ -5,10 +5,12 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
@@ -26,45 +28,49 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
     @Getter
     private int radius = 150;
 
-    @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        this.name = compound.getString("name");
-        this.radius = compound.getInteger("radius");
-        super.readFromNBT(compound);
+    public TrackingBeaconBlockEntity() {
+        super(ProjectNublarBlockEntities.TRACKING_BEACON.get());
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setString("name", this.name);
-        compound.setInteger("radius", this.radius);
-        return super.writeToNBT(compound);
+    public void load(BlockState state, CompoundNBT compound) {
+        this.name = compound.getString("name");
+        this.radius = compound.getInt("radius");
+        super.load(state, compound);
+    }
+
+    @Override
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.putString("name", this.name);
+        compound.putInt("radius", this.radius);
+        return super.save(compound);
     }
 
     @Override
     public void onLoad() {
-        getTrackingList(this.world).set(this.pos, this.name);
+        if(this.level instanceof ServerWorld) {
+            getTrackingList((ServerWorld) this.level).set(this.worldPosition, this.name);
+        }
         super.onLoad();
     }
 
     public void setName(String name) {
         this.name = name;
-        this.markDirty();
+        this.setChanged();
         this.syncToClient();
-        getTrackingList(this.world).set(this.pos, this.name);
+        if(this.level instanceof ServerWorld) {
+            getTrackingList((ServerWorld) this.level).set(this.worldPosition, this.name);
+        }
     }
 
     public void setRadius(int radius) {
         this.radius = radius;
-        this.markDirty();
+        this.setChanged();
         this.syncToClient();
     }
 
-    public static TrackingSavedData getTrackingList(World world) {
-        TrackingSavedData data =  (TrackingSavedData) world.getPerWorldStorage().getOrLoadData(TrackingSavedData.class, "tracking_beacon_data");
-        if(data == null) {
-            world.getPerWorldStorage().setData("tracking_beacon_data", data = new TrackingSavedData("tracking_beacon_data"));
-        }
-        return data;
+    public static TrackingSavedData getTrackingList(ServerWorld world) {
+        return world.getDataStorage().computeIfAbsent(() -> new TrackingSavedData("tracking_beacon_data"), "tracking_beacon_data");
     }
 
     public static class TrackingSavedData extends WorldSavedData {
@@ -76,36 +82,36 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt) {
-            StreamUtils.stream(nbt.getTagList("tracking_entries", Constants.NBT.TAG_COMPOUND))
+        public void load(CompoundNBT nbt) {
+            StreamUtils.stream(nbt.getList("tracking_entries", Constants.NBT.TAG_COMPOUND))
                 .forEachOrdered(b -> {
-                    NBTTagCompound compound = (NBTTagCompound) b;
-                    this.trackingMap.put(BlockPos.fromLong(compound.getLong("position")), compound.getString("name"));
+                    CompoundNBT compound = (CompoundNBT) b;
+                    this.trackingMap.put(NBTUtil.readBlockPos(compound.getCompound("position")), compound.getString("name"));
                 });
         }
 
         @Override
-        public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-            NBTTagList list = this.trackingMap.entrySet().stream()
+        public CompoundNBT save(CompoundNBT compound) {
+            ListNBT list = this.trackingMap.entrySet().stream()
                 .map(e -> {
-                    NBTTagCompound nbt = new NBTTagCompound();
-                    nbt.setLong("position", e.getKey().toLong());
-                    nbt.setString("name", e.getValue());
+                    CompoundNBT nbt = new CompoundNBT();
+                    nbt.put("position", NBTUtil.writeBlockPos(e.getKey()));
+                    nbt.putString("name", e.getValue());
                     return nbt;
                 })
                 .collect(CollectorUtils.toNBTTagList());
-            compound.setTag("tracking_entries", list);
+            compound.put("tracking_entries", list);
             return compound;
         }
 
         public void set(BlockPos pos, String name) {
             this.trackingMap.put(pos, name);
-            this.markDirty();
+            this.setDirty();
         }
 
         public void remove(BlockPos pos) {
             this.trackingMap.remove(pos);
-            this.markDirty();
+            this.setDirty();
         }
 
         public List<TrackingSavedDataEntry> getList() {

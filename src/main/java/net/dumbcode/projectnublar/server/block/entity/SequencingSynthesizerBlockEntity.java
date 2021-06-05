@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.client.gui.machines.DnaEditingGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingGui;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -17,26 +18,27 @@ import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.DyeColor;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,18 +47,17 @@ import java.util.function.ToDoubleFunction;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> implements DyableBlockEntity {
 
-    private final FluidTank tank = new FluidTank(Fluid.BUCKET_VOLUME) {
+    private final FluidTank tank = new FluidTank(FluidAttributes.BUCKET_VOLUME, p -> p.getFluid() == Fluids.WATER) {
 
+        @Nonnull
         @Override
-        public boolean canFillFluidType(FluidStack fluid) {
-            return fluid.getFluid() == FluidRegistry.WATER;
-        }
-
-        @Override
-        public boolean canDrain() {
-            return false;
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return FluidStack.EMPTY;
         }
     };
+
+    private final LazyOptional<FluidTank> capability = LazyOptional.of(() -> this.tank);
+
 
     public static final double DEFAULT_STORAGE = 16D;
 
@@ -92,7 +93,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 
     public SequencingSynthesizerBlockEntity() {
-        this.tank.setTileEntity(this);
+        super(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get());
         for (int i = 0; i < this.selectedDNAs.length; i++) {
             this.selectedDNAs[i] = new SelectedDnaEntry();
         }
@@ -102,45 +103,40 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public void tiersUpdated() {
         super.tiersUpdated();
         float tanks = this.getTierModifier(MachineModuleType.TANKS, 0.5F);
-        this.tank.setCapacity((int) (Fluid.BUCKET_VOLUME * tanks));
+        this.tank.setCapacity((int) (FluidAttributes.BUCKET_VOLUME * tanks));
+        if(this.tank.getFluidAmount() > this.tank.getCapacity()) {
+            this.tank.setFluid(new FluidStack(this.tank.getFluid(), this.tank.getCapacity()));
+        }
         this.totalStorage = DEFAULT_STORAGE * tanks;
 
         this.sugarAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
         this.boneAmount = MathHelper.clamp(this.boneAmount, 0, this.totalStorage);
         this.plantAmount = MathHelper.clamp(this.plantAmount, 0, this.totalStorage);
         FluidStack fluid = this.tank.getFluid();
-        if(fluid != null) {
-            fluid.amount = MathHelper.clamp(fluid.amount, 0, this.tank.getCapacity());
+        if(!fluid.isEmpty()) {
+            fluid.setAmount(MathHelper.clamp(fluid.getAmount(), 0, this.tank.getCapacity()));
         }
     }
 
+    @Nonnull
     @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
-    {
-        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Nullable
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
-    {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return (T) this.tank;
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if(cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            return this.capability.cast();
         }
-        return super.getCapability(capability, facing);
+        return super.getCapability(cap, side);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.tank.readFromNBT(compound.getCompoundTag("FluidTank"));
-        this.dye = EnumDyeColor.byMetadata(compound.getInteger("Dye"));
-        this.consumeTimer = compound.getInteger("ConsumeTimer");
+    public void load(BlockState state, CompoundNBT compound) {
+        super.save(compound);
+        this.tank.readFromNBT(compound.getCompound("FluidTank"));
+        this.dye = DyeColor.byId(compound.getInt("Dye"));
+        this.consumeTimer = compound.getInt("ConsumeTimer");
 
-        NBTTagList list = compound.getTagList("SelectedDnaList", 10);
+        ListNBT list = compound.getList("SelectedDnaList", 10);
         for (int i = 0; i < this.selectedDNAs.length; i++) {
-            NBTTagCompound tag = list.getCompoundTagAt(i);
+            CompoundNBT tag = list.getCompound(i);
             this.selectedDNAs[i].setKey(tag.getString("Key"));
             this.selectedDNAs[i].setAmount(tag.getDouble("Amount"));
         }
@@ -152,25 +148,25 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setTag("FluidTank", this.tank.writeToNBT(new NBTTagCompound()));
-        compound.setInteger("Dye", this.dye.getMetadata());
-        compound.setInteger("ConsumeTimer", this.consumeTimer);
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.put("FluidTank", this.tank.writeToNBT(new CompoundNBT()));
+        compound.putInt("Dye", this.dye.getId());
+        compound.putInt("ConsumeTimer", this.consumeTimer);
 
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (SelectedDnaEntry selectedDNA : this.selectedDNAs) {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setString("Key", selectedDNA.getKey());
-            tag.setDouble("Amount", selectedDNA.getAmount());
-            list.appendTag(tag);
+            CompoundNBT tag = new CompoundNBT();
+            tag.putString("Key", selectedDNA.getKey());
+            tag.putDouble("Amount", selectedDNA.getAmount());
+            list.add(tag);
         }
-        compound.setTag("SelectedDnaList", list);
+        compound.put("SelectedDnaList", list);
 
-        compound.setDouble("SugarAmount", this.sugarAmount);
-        compound.setDouble("BoneAmount", this.boneAmount);
-        compound.setDouble("PlantAmount", this.plantAmount);
+        compound.putDouble("SugarAmount", this.sugarAmount);
+        compound.putDouble("BoneAmount", this.boneAmount);
+        compound.putDouble("PlantAmount", this.plantAmount);
 
-        return super.writeToNBT(compound);
+        return super.save(compound);
     }
 
     @Override
@@ -202,7 +198,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             case 1: return MachineUtils.getWaterAmount(stack) != -1;
             case 2: return MachineUtils.getSugarMatter(stack) > 0;
             case 3: return MachineUtils.getBoneMatter(stack) > 0;
-            case 4: return MachineUtils.getPlantMatter(stack, this.world, this.pos) > 0;
+            case 4: return MachineUtils.getPlantMatter(stack, this.level, this.worldPosition) > 0;
             case 5: return stack.getItem() instanceof DriveUtils.DriveInformation && ((DriveUtils.DriveInformation) stack.getItem()).hasInformation(stack);
         }
         return super.isItemValidFor(slot, stack);
@@ -227,12 +223,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public void update() {
-        super.update();
+    public void tick() {
+        super.tick();
 
-        NBTTagCompound testNbt = this.handler.getStackInSlot(0).getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
+        CompoundNBT testNbt = this.handler.getStackInSlot(0).getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
         for (SelectedDnaEntry dna : this.selectedDNAs) {
-            if((!dna.getKey().isEmpty() && !testNbt.hasKey(dna.getKey(), Constants.NBT.TAG_COMPOUND)) || dna.getAmount() == 0 != dna.getKey().isEmpty()) {
+            if((!dna.getKey().isEmpty() && !testNbt.contains(dna.getKey(), Constants.NBT.TAG_COMPOUND)) || dna.getAmount() == 0 != dna.getKey().isEmpty()) {
                 dna.setKey("");
                 dna.setAmount(0);
             }
@@ -240,16 +236,16 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
         this.sugarAmount = this.updateAmount(this.sugarAmount, this.handler.getStackInSlot(2), MachineUtils::getSugarMatter);
         this.boneAmount = this.updateAmount(this.boneAmount, this.handler.getStackInSlot(3), MachineUtils::getBoneMatter);
-        this.plantAmount = this.updateAmount(this.plantAmount, this.handler.getStackInSlot(4), stack -> MachineUtils.getPlantMatter(stack, this.world, this.pos));
+        this.plantAmount = this.updateAmount(this.plantAmount, this.handler.getStackInSlot(4), stack -> MachineUtils.getPlantMatter(stack, this.level, this.worldPosition));
 
         if(this.consumeTimer != 0) {
             if(!this.canConsume()) {
                 this.consumeTimer = 0;
             } else if(this.consumeTimer++ >= this.totalConsumeTime) {
                 ItemStack inStack = this.handler.getStackInSlot(5);
-                ItemStack out = inStack.splitStack(1);
+                ItemStack out = inStack.split(1);
 
-                if(!out.isEmpty() && !this.world.isRemote) {
+                if(!out.isEmpty() && !this.level.isClientSide) {
                     DriveUtils.addItemToDrive(this.handler.getStackInSlot(0), out);
                 }
 
@@ -323,60 +319,56 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab) {
+    public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
         switch (tab) {
             case 0:
-                return new SequencingGui(player, this, info, tab);
+                return new SequencingGui(container, inventory, title, info);
             case 1:
-                return new DnaEditingGui(player, this, info, tab);
+                return new DnaEditingGui(this, container, inventory, title, info);
             default:
-                return new SequencingSynthesizerInputsGui(blockEntity, player, info, tab, this);
-
+                return new SequencingSynthesizerInputsGui(this, container, title, info, inventory);
         }
     }
 
     @Override
-    public Container createContainer(EntityPlayer player, int tab) {
+    public MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab) {
         switch (tab) {
             case 0:
-                return new MachineModuleContainer(this, player, 110, 208,
-                    new MachineModuleSlot(this, 0, 187, 5) {
-                        @Nullable
-                        @Override
-                        public String getSlotTexture() {
-                            return ProjectNublar.MODID + ":items/hard_drive";
-                        }
-                    },
+                return new MachineModuleContainer(windowId, this, player.inventory, tab, 110, 208,
+                    new MachineModuleSlot(this, 0, 187, 5)
+                    .setBackground(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(ProjectNublar.MODID, "items/hard_drive")),
                     new MachineModuleSlot(this, 5, 60, 90),
                     new MachineModuleSlot(this, 6, 40, 90),
                     new MachineModuleSlot(this, 7, 118, 90),
                     new MachineModuleSlot(this, 8, 167, 90)
                 );
             case 1:
-                return new MachineModuleContainer(this, player, -1, 208,
-                    new MachineModuleSlot(this, 0, 187, 5) {
-                        @Nullable
-                        @Override
-                        public String getSlotTexture() {
-                            return ProjectNublar.MODID + ":items/hard_drive";
-                        }
-                    }
-                );
+                return new MachineModuleContainer(windowId, this, player.inventory, tab, -1, 208,
+                    new MachineModuleSlot(this, 0, 187, 5)
+                        .setBackground(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(ProjectNublar.MODID, "items/hard_drive"))
+                    );
             default:
-                return new MachineModuleContainer(this, player, 84, 176,
-                    new MachineModuleSlot(this, 0, 78, 6) {
-                        @Nullable
-                        @Override
-                        public String getSlotTexture() {
-                            return ProjectNublar.MODID + ":items/hard_drive";
-                        }
-                    },
+                return new MachineModuleContainer(windowId, this, player.inventory, tab, 84, 176,
+                    new MachineModuleSlot(this, 0, 78, 6)
+                        .setBackground(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(ProjectNublar.MODID, "items/hard_drive")),
                     new MachineModuleSlot(this, 1, 21, 58),
                     new MachineModuleSlot(this, 2, 59, 58),
                     new MachineModuleSlot(this, 3, 97, 58),
                     new MachineModuleSlot(this, 4, 135, 58)
                 );
+        }
+    }
+
+    @Override
+    public ITextComponent createTitle(int tab) {
+        switch (tab) {
+            case 0:
+                return new TranslationTextComponent(ProjectNublar.MODID + ".container.sequencing.title");
+            case 1:
+                return new TranslationTextComponent(ProjectNublar.MODID + ".container.dna_editing.title");
+            default:
+                return new TranslationTextComponent(ProjectNublar.MODID + ".container.sequencing_synthesizing.title");
+
         }
     }
 

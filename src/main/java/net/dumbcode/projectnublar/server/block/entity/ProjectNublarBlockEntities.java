@@ -21,6 +21,14 @@ public class ProjectNublarBlockEntities {
         = REGISTER.register("fossil_processor", () -> TileEntityType.Builder.of(FossilProcessorBlockEntity::new, BlockHandler.FOSSIL_PROCESSOR.get()).build(new EmptyPart()));
     public static final RegistryObject<TileEntityType<IncubatorBlockEntity>> INCUBATOR
         = REGISTER.register("incubator", () -> TileEntityType.Builder.of(IncubatorBlockEntity::new, BlockHandler.INCUBATOR.get()).build(new EmptyPart()));
+    public static final RegistryObject<TileEntityType<IncubatorBlockEntity>> SEQUENCING_SYNTHESIZER
+        = REGISTER.register("sequencing_synthesizer", () -> TileEntityType.Builder.of(IncubatorBlockEntity::new, BlockHandler.SEQUENCING_SYNTHESIZER.get()).build(new EmptyPart()));
+
+    public static final RegistryObject<TileEntityType<SkeletalBuilderBlockEntity>> SKELETAL_BUILDER
+        = REGISTER.register("skeletal_builder", () -> TileEntityType.Builder.of(SkeletalBuilderBlockEntity::new, BlockHandler.SKELETAL_BUILDER.get()).build(new EmptyPart()));
+
+    public static final RegistryObject<TileEntityType<TrackingBeaconBlockEntity>> TRACKING_BEACON
+        = REGISTER.register("tracking_beacon", () -> TileEntityType.Builder.of(TrackingBeaconBlockEntity::new, BlockHandler.SKELETAL_BUILDER.get()).build(new EmptyPart()));
 
     public static final RegistryObject<TileEntityType<PylonHeadBlockEntity>> PYLON_HEAD
         = REGISTER.register("pylon_head", () -> TileEntityType.Builder.of(PylonHeadBlockEntity::new, BlockHandler.INCUBATOR.get()).build(new EmptyPart()));
