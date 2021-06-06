@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static net.minecraft.block.AbstractBlock.Properties.copy;
 import static net.minecraft.block.AbstractBlock.Properties.of;
 
 public class BlockHandler {
@@ -32,7 +33,7 @@ public class BlockHandler {
     public static final RegistryObject<BlockPylonHead> PYLON_HEAD = REGISTER.register("pylon_head", () -> new BlockPylonHead(of(Material.HEAVY_METAL)));
     public static final RegistryObject<BlockPylonPole> PYLON_POLE = REGISTER.register("pylon_pole", () -> new BlockPylonPole(of(Material.HEAVY_METAL)));
 
-    public static final RegistryObject<SkeletalBuilderBlock> SKELETAL_BUILDER = REGISTER.register("skeletal_builder", () -> new SkeletalBuilderBlock(of(Material.HEAVY_METAL)));
+    public static final RegistryObject<SkeletalBuilderBlock> SKELETAL_BUILDER = REGISTER.register("skeletal_builder", () -> new SkeletalBuilderBlock(of(Material.HEAVY_METAL).noCollission()));
     public static final RegistryObject<MachineModuleBlock> FOSSIL_PROCESSOR = REGISTER.register("fossil_processor", () -> new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> DRILL_EXTRACTOR = REGISTER.register("drill_extractor", () -> new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> SEQUENCING_SYNTHESIZER = REGISTER.register("sequencer_synthesizer", () -> new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER, of(Material.HEAVY_METAL)));
@@ -42,12 +43,10 @@ public class BlockHandler {
 
     public static final Map<FossilBlock.FossilType, Map<Dinosaur, RegistryObject<FossilBlock>>> FOSSIL = Util.make(new HashMap<>(), map -> {
         for(FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
-            map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value)));
+            map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value, copy(value.getCopy()))));
         }
     });
 
-    private static final ItemGroup TAB = TabHandler.TAB;
-    
     private static <T extends Block> Map<Dinosaur, RegistryObject<T>> createMap(String nameFormat, Function<Dinosaur, T> supplier) {
         Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
         for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {

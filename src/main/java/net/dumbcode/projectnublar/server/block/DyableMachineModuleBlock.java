@@ -3,16 +3,17 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.block.entity.DyableBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.item.MachineModulePart;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.DyeColor;
+import net.minecraft.item.DyeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 
 import java.util.function.Supplier;
@@ -24,21 +25,22 @@ public class DyableMachineModuleBlock extends MachineModuleBlock {
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        ItemStack stack = playerIn.getHeldItem(hand);
-        TileEntity entity = worldIn.getTileEntity(pos);
-        if(stack.getItem() == Items.DYE && entity instanceof DyableBlockEntity) {
-            EnumDyeColor color = EnumDyeColor.byDyeDamage(stack.getMetadata());
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult ray) {
+        ItemStack stack = player.getItemInHand(hand);
+        Item item = stack.getItem();
+        TileEntity entity = world.getBlockEntity(pos);
+        if(item instanceof DyeItem && entity instanceof DyableBlockEntity) {
+            DyeColor color = ((DyeItem) item).getDyeColor();
             if(((DyableBlockEntity) entity).getDye() != color) {
                 ((DyableBlockEntity) entity).setDye(color);
-                entity.markDirty();
-                worldIn.markBlockRangeForRenderUpdate(pos, pos);
-                if(!playerIn.isCreative()) {
+                entity.setChanged();
+                if(!player.isCreative()) {
                     stack.shrink(1);
                 }
-                return true;
+                return ActionResultType.SUCCESS;
             }
         }
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        return super.use(state, world, pos, player, hand, ray);
     }
+
 }

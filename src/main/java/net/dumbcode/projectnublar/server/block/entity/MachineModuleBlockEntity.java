@@ -7,16 +7,20 @@ import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
 import net.dumbcode.projectnublar.server.network.S42SyncMachineProcesses;
 import net.dumbcode.projectnublar.server.network.S43SyncMachineStack;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
@@ -33,6 +37,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -58,9 +63,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     private final LazyOptional<IItemHandler> inputCapability = LazyOptional.of(() -> this.inputWrapper);
     private final LazyOptional<IItemHandler> outputCapability = LazyOptional.of(() -> this.outputWrapper);
-
-
-    protected final Map<MachineModuleType, Integer> machineStateMap = new HashMap<>();
 
     @Setter private boolean positionDirty;
 
@@ -105,10 +107,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             compound.put("Process_" + i, nbt);
         }
 
-        CompoundNBT stateNBT = new CompoundNBT();
-        this.machineStateMap.forEach((type, part) -> stateNBT.putInt(type.getName(), part));
-        compound.put("MachineState", stateNBT);
-
         CompoundNBT energyNBT = new CompoundNBT();
         energyNBT.putInt("Amount", energy.getEnergyStored());
         compound.put("Energy", energyNBT);
@@ -128,13 +126,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             process.setCurrentRecipe(nbt.contains("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
             process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
         }
-
-        this.machineStateMap.clear();
-        CompoundNBT stateNBT = compound.getCompound("MachineState");
-        for (String s : stateNBT.getAllKeys()) {
-            this.machineStateMap.put(new MachineModuleType(s), stateNBT.getInt(s));
-        }
-        this.tiersUpdated();
 
         CompoundNBT energyNBT = compound.getCompound("Energy");
         energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInt("Amount"));
@@ -199,11 +190,16 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     public int getTier(MachineModuleType type) {
-        return this.machineStateMap.getOrDefault(type, 0);
+        Block block = this.getBlockState().getBlock();
+        if(!(block instanceof MachineModuleBlock)) {
+           throw new IllegalStateException("Expected MachineModuleBlock, found " + block);
+        }
+        return this.getBlockState().getValue(((MachineModuleBlock) block).getPropertyMap().get(type));
     }
 
-    public void setTier(MachineModuleType type, int tier) {
-        this.machineStateMap.put(type, tier);
+    @Override
+    public void setChanged() {
+        super.setChanged();
         this.tiersUpdated();
     }
 
@@ -457,6 +453,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public abstract TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab);
     public abstract MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab);
     public abstract ITextComponent createTitle(int tab);
+
+    public void openContainer(ServerPlayerEntity player, int tab) {
+        NetworkHooks.openGui(player, new SimpleNamedContainerProvider(
+            (id, inv, p) -> this.createContainer(id, p, tab),
+            this.createTitle(tab))
+        );
+    }
+
     @Setter
     @Getter
     public static class MachineProcess<B extends MachineModuleBlockEntity<B>> {

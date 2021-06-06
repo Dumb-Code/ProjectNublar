@@ -38,10 +38,7 @@ import java.util.function.Supplier;
             ServerPlayerEntity sender = context.getSender();
             TileEntity blockEntity = sender.level.getBlockEntity(packet.pos);
             if(blockEntity instanceof MachineModuleBlockEntity && isBlockEntityInChain(sender, (MachineModuleBlockEntity<?>) blockEntity)) {
-                NetworkHooks.openGui(sender, new SimpleNamedContainerProvider(
-                    (id, inv, player) -> ((MachineModuleBlockEntity<?>) blockEntity).createContainer(id, player, packet.tab),
-                    ((MachineModuleBlockEntity<?>) blockEntity).createTitle(packet.tab))
-                );
+                ((MachineModuleBlockEntity<?>) blockEntity).openContainer(sender, packet.tab);
             }
         });
 

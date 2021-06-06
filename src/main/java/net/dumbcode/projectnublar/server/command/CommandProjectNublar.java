@@ -1,27 +1,25 @@
 package net.dumbcode.projectnublar.server.command;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import net.minecraft.command.ICommandSender;
 import net.minecraftforge.server.command.CommandTreeBase;
 
-public class CommandProjectNublar extends CommandTreeBase {
+public class CommandProjectNublar {
 
-    public CommandProjectNublar() {
-        this.addSubcommand(new SpawnDinosaurCommand());
-        this.addSubcommand(new AnimateCommand());
-        this.addSubcommand(new RegenFenceCacheCommand());
-        this.addSubcommand(new GenerateCommand());
-        this.addSubcommand(new EditDinosaurDataCommand());
-        this.addSubcommand(new RaceWarCommand());
+//    public CommandProjectNublar() {
+//        this.addSubcommand(new RegenFenceCacheCommand());
+//        this.addSubcommand(new GenerateCommand());
+//        this.addSubcommand(new EditDinosaurDataCommand());
+//        this.addSubcommand(new RaceWarCommand());
     }
 
-
-    @Override
-    public String getName() {
-        return "projectnublar";
-    }
-
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return "this needs to be done";
+    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+        dispatcher.register(
+            Commands.literal("projectnublar")
+            .then(SpawnDinosaurCommand.createCommand())
+            .then(AnimateCommand.createCommand())
+        );
     }
 }

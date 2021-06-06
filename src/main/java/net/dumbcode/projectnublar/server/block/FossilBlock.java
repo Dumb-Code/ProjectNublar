@@ -1,53 +1,47 @@
 package net.dumbcode.projectnublar.server.block;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTags;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-import net.dumbcode.projectnublar.server.item.DinosaurProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.block.material.MaterialColor;
 
 //TODO: move to a simple classs
-public class FossilBlock extends Block, IItemBlock {
+public class FossilBlock extends Block implements IItemBlock {
 
     @Getter private final Dinosaur dinosaur;
 
     @Getter private final FossilType fossilType;
 
-    public FossilBlock(Dinosaur dinosaur, FossilType fossilType) {
-        super(Material.ROCK);
+    public FossilBlock(Dinosaur dinosaur, FossilType fossilType, Properties properties) {
+        super(properties);
         this.dinosaur = dinosaur;
         this.fossilType = fossilType;
     }
 
-    @SideOnly(Side.CLIENT)
-    @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT_MIPPED;
-    }
-
     @Getter
+    @RequiredArgsConstructor
     public enum FossilType {
-        STONE("stone"), SANDSTONE("sandstone"), CLAY("clay");
+        STONE("stone", Blocks.STONE),
+        SANDSTONE("sandstone", Blocks.SANDSTONE),
+        CLAY("clay", Blocks.CLAY);
 
         private final String name;
+        private final Block copy;
 
-        FossilType(String name) {
-            this.name = name;
-        }
-
-        public static IBlockState guess(IBlockState state, Dinosaur dino) {
-            if(state.getBlock() == Blocks.HARDENED_CLAY || state.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
-                return BlockHandler.FOSSIL.get(CLAY).get(dino).getDefaultState();
+        public static BlockState guess(BlockState state, Dinosaur dino) {
+            if(state.is(ProjectNublarBlockTags.FOSSIL_CLAY_REPLACEMENT)) {
+                return BlockHandler.FOSSIL.get(CLAY).get(dino).get().defaultBlockState();
             }
-            if(state.getBlock() == Blocks.SANDSTONE || state.getBlock() == Blocks.SAND) {
-                return BlockHandler.FOSSIL.get(SANDSTONE).get(dino).getDefaultState();
+            if(state.is(ProjectNublarBlockTags.FOSSIL_SANDSTONE_REPLACEMENT)) {
+                return BlockHandler.FOSSIL.get(SANDSTONE).get(dino).get().defaultBlockState();
             }
-            return BlockHandler.FOSSIL.get(STONE).get(dino).getDefaultState();
+            return BlockHandler.FOSSIL.get(STONE).get(dino).get().defaultBlockState();
         }
     }
 

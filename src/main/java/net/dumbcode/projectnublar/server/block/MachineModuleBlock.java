@@ -2,141 +2,123 @@ package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.item.MachineModulePart;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
-import net.dumbcode.projectnublar.server.network.S17MachinePositionDirty;
+import net.dumbcode.projectnublar.server.network.S2CMachinePositionDirty;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.Property;
+import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 public class MachineModuleBlock extends Block implements IItemBlock{
 
     private final List<MachineModulePart> values; //Not needed
-    private final Map<MachineModuleType, PropertyInteger> propertyMap = Maps.newHashMap();
+    private final Map<MachineModuleType, IntegerProperty> propertyMap = Maps.newHashMap();
     private final Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier;
-    private final BlockStateContainer blockState;
-    private final Set<BlockRenderLayer> renderLayers;
+    private final StateContainer<Block, BlockState> stateDefinition;
 
     public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, Properties properties) {
         super(properties);
-        this.renderLayers = Sets.newHashSet(renderLayers);
-        if(this.renderLayers.isEmpty()) {
-            this.renderLayers.add(BlockRenderLayer.SOLID);
-        }
         this.values = Lists.newArrayList(values);
         this.machineSupplier = machineSupplier;
 
         for (MachineModulePart part : this.values) {
-            this.propertyMap.put(part.getType(), PropertyInteger.create(part.getName(), 0, part.getTiers()));
+            this.propertyMap.put(part.getType(), IntegerProperty.create(part.getName(), 0, part.getTiers()));
         }
 
         //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
-        this.blockState = new BlockStateContainer(this, this.propertyMap.values().toArray(new IProperty[0]));
-        IBlockState baseState = this.blockState.getBaseState();
+        StateContainer.Builder<Block, BlockState> builder = new StateContainer.Builder<>(this);
+        this.createBlockStateDefinition(builder);
+        builder.add(this.propertyMap.values().toArray(new Property<?>[0]));
+        this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
+
+        BlockState baseState = this.stateDefinition.any();
         for (MachineModulePart part : this.values) {
-            baseState = baseState.withProperty(this.propertyMap.get(part.getType()), 0);
+            baseState = baseState.setValue(this.propertyMap.get(part.getType()), 0);
         }
-        this.setDefaultState(baseState);
-    }
 
-
-    @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
-        ProjectNublar.NETWORK.sendToDimension(new S17MachinePositionDirty(pos), worldIn.provider.getDimension());
+        this.registerDefaultState(baseState);
     }
 
     @Override
-    public BlockStateContainer getBlockState() {
-        return this.blockState;
+    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
+        if(world instanceof ServerWorld) {
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(((ServerWorld) world)::dimension), new S2CMachinePositionDirty(pos));
+        }
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        ItemStack stack = playerIn.getHeldItem(hand);
+    public StateContainer<Block, BlockState> getStateDefinition() {
+        return this.stateDefinition;
+    }
+
+    public Map<MachineModuleType, IntegerProperty> getPropertyMap() {
+        return propertyMap;
+    }
+
+    @Override
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult ray) {
+        TileEntity tileEntity = world.getBlockEntity(pos);
+        ItemStack stack = player.getItemInHand(hand);
         if(tileEntity instanceof MachineModuleBlockEntity) {
             MachineModuleBlockEntity<?> blockEntity = (MachineModuleBlockEntity) tileEntity;
             for (MachineModulePart value : this.values) {
                 int tier = blockEntity.getTier(value.getType());
                 int newTier = value.getTierFromStack(stack);
                 if(newTier == tier+1 && value.testDependents(newTier, blockEntity::getTier)) {
-                    blockEntity.setTier(value.getType(), newTier);
+                    world.setBlock(pos, state.setValue(this.propertyMap.get(value.getType()), newTier), 3);
                     blockEntity.tiersUpdated();
                     stack.shrink(1);
-                    worldIn.notifyBlockUpdate(pos, state, state, 3);
-                    blockEntity.markDirty();
-                    return true;
+                    return ActionResultType.SUCCESS;
                 }
             }
-            playerIn.openGui(ProjectNublar.INSTANCE, 0/*Not currently used. TODO: use*/, worldIn, pos.getX(), pos.getY(), pos.getZ());
-        }
-        return true;
-    }
-
-    @Override
-    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
-        return this.renderLayers.contains(layer);
-    }
-
-    @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if(tileEntity instanceof MachineModuleBlockEntity) {
-            for (MachineModulePart part : this.values) {
-                state = state.withProperty(this.propertyMap.get(part.getType()), ((MachineModuleBlockEntity) tileEntity).getTier(part.getType()));
+            if(player instanceof ServerPlayerEntity) {
+                blockEntity.openContainer((ServerPlayerEntity) player, 0);
             }
-            return state;
         }
-        return super.getActualState(state, worldIn, pos);
+        return ActionResultType.SUCCESS;
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
+    public void destroy(IWorld world, BlockPos pos, BlockState state) {
+        TileEntity tileEntity = world.getBlockEntity(pos);
         if(tileEntity instanceof MachineModuleBlockEntity) {
             ((MachineModuleBlockEntity<?>) tileEntity).dropEmStacks();
         }
-        super.breakBlock(worldIn, pos, state);
+        super.destroy(world, pos, state);
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state) {
+    public boolean hasTileEntity(BlockState state) {
         return true;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return this.machineSupplier.get();
     }
 
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return 0;
-    }
 }

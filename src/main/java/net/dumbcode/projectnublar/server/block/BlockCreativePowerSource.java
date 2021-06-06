@@ -1,17 +1,19 @@
 package net.dumbcode.projectnublar.server.block;
 
+import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.world.World;
+import net.minecraft.util.Direction;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class BlockCreativePowerSource extends Block implements IItemBlock {
@@ -22,17 +24,17 @@ public class BlockCreativePowerSource extends Block implements IItemBlock {
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state) {
-        return true;
+    public boolean hasTileEntity(BlockState state) {
+        return false;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileEntityCreativePowerSource();
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        return new BlockEntity();
     }
 
-    public static class TileEntityCreativePowerSource extends TileEntity implements ITickable {
+    public static class BlockEntity extends TileEntity implements ITickableTileEntity {
         private IEnergyStorage storage = new EnergyStorage(0) {
 
             @Override
@@ -46,29 +48,24 @@ public class BlockCreativePowerSource extends Block implements IItemBlock {
             }
         };
 
-        @Override
-        public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-            return capability == CapabilityEnergy.ENERGY || super.hasCapability(capability, facing);
+        private final LazyOptional<IEnergyStorage> capability = LazyOptional.of(() -> this.storage);
+
+        public BlockEntity() {
+            super(ProjectNublarBlockEntities.CREATIVE_ENERGY.get());
         }
 
-        @Nullable
+        @Nonnull
         @Override
-        public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-            if(capability == CapabilityEnergy.ENERGY) {
-                return CapabilityEnergy.ENERGY.cast(this.storage);
-            }
-            return super.getCapability(capability, facing);
+        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+            return CapabilityEnergy.ENERGY.orEmpty(cap, this.capability);
         }
 
         @Override
-        public void update() {
-            for (EnumFacing value : EnumFacing.values()) {
-                TileEntity te = this.world.getTileEntity(this.pos.offset(value));
-                if(te != null && te.hasCapability(CapabilityEnergy.ENERGY, value.getOpposite())) {
-                    IEnergyStorage capability = te.getCapability(CapabilityEnergy.ENERGY, value.getOpposite());
-                    if(capability != null) {
-                        capability.receiveEnergy(capability.getMaxEnergyStored(), false);
-                    }
+        public void tick() {
+            for (Direction value : Direction.values()) {
+                TileEntity te = this.level.getBlockEntity(this.worldPosition.relative(value));
+                if(te != null) {
+                    te.getCapability(CapabilityEnergy.ENERGY).ifPresent(c -> c.receiveEnergy(c.getMaxEnergyStored(), false));
                 }
             }
         }

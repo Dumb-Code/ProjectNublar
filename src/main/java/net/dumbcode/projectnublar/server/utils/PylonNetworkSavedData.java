@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -73,13 +74,8 @@ public class PylonNetworkSavedData extends WorldSavedData {
         return compound;
     }
 
-    public static PylonNetworkSavedData getData(World world) {
+    public static PylonNetworkSavedData getData(ServerWorld world) {
         String identifier = "pylon_network";
-        PylonNetworkSavedData data = (PylonNetworkSavedData) Objects.requireNonNull(world.getMapStorage()).getOrLoadData(PylonNetworkSavedData.class, identifier);
-        if(data == null) {
-            data = new PylonNetworkSavedData(identifier);
-            world.getMapStorage().setData(identifier, data);
-        }
-        return data;
+        return world.getDataStorage().computeIfAbsent(() -> new PylonNetworkSavedData(identifier), identifier);
     }
 }

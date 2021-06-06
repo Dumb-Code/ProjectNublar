@@ -4,110 +4,95 @@ import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemPylonPole;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 public class BlockPylonPole extends Block implements IItemBlock {
 
-    public static final PropertyEnum<EnumFacing.Axis> AXIS = PropertyEnum.create("axis", EnumFacing.Axis.class, axis -> axis != null && axis.isHorizontal());
+    public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
     public BlockPylonPole(Properties p_i48440_1_) {
         super(p_i48440_1_);
     }
 
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        IBlockState s = worldIn.getBlockState(pos.down());
-        if(s.getBlock() != this && !s.isSideSolid(worldIn, pos.down(), EnumFacing.UP)) {
-            worldIn.setBlockToAir(pos);
-        }
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(AXIS);
+        super.createBlockStateDefinition(builder);
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        ItemStack stack = playerIn.getHeldItem(hand);
-        if(stack.getItem() == ItemHandler.WIRE_SPOOL) {
+    public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean drops) {
+        BlockState s = worldIn.getBlockState(pos.below());
+        if(s.getBlock() != BlockHandler.PYLON_POLE.get() && !Block.isFaceFull(s.getCollisionShape(worldIn, pos.below()), Direction.UP)) {
+            worldIn.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        }
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, drops);
+    }
+
+    @Override
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult ray) {
+        ItemStack stack = player.getItemInHand(hand);
+        if(stack.getItem() == ItemHandler.WIRE_SPOOL.get()) {
             BlockPos testPos = pos;
-            while(worldIn.getBlockState(testPos).getBlock() == BlockHandler.PYLON_POLE) {
-                testPos = testPos.up();
+            while(world.getBlockState(testPos).getBlock() == BlockHandler.PYLON_POLE.get()) {
+                testPos = testPos.above();
             }
-            IBlockState head = worldIn.getBlockState(testPos);
-            if(head.getBlock() == BlockHandler.PYLON_HEAD && head.getValue(BlockPylonHead.FACING) == EnumFacing.UP) {
-                head.getBlock().onBlockActivated(worldIn, testPos, head, playerIn, hand, facing, -1, -1, -1);
+            BlockState head = world.getBlockState(testPos);
+            if(head.getBlock() == BlockHandler.PYLON_HEAD.get() && head.getValue(BlockPylonHead.FACING) == Direction.UP) {
+                //Cannot use state#use as we need to pass the blockpos in manually.
+                head.getBlock().use(head, world, testPos, player, hand, ray);
             }
         }
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        return super.use(state, world, pos, player, hand, ray);
     }
 
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+    public void destroy(IWorld p_176206_1_, BlockPos p_176206_2_, BlockState p_176206_3_) {
+        super.destroy(p_176206_1_, p_176206_2_, p_176206_3_);
+    }
+
+    @Override
+    public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
         BlockPos testPos = pos;
-        while(world.getBlockState(testPos).getBlock() == BlockHandler.PYLON_POLE) {
-            testPos = testPos.up();
+        while(world.getBlockState(testPos).getBlock() == BlockHandler.PYLON_POLE.get()) {
+            testPos = testPos.above();
         }
-        IBlockState head = world.getBlockState(testPos);
-        if(head.getBlock() == BlockHandler.PYLON_HEAD && head.getValue(BlockPylonHead.FACING) == EnumFacing.UP) {
-            TileEntity old = world.getTileEntity(testPos);
-            if(!world.isRemote && old instanceof PylonHeadBlockEntity) {
+        BlockState head = world.getBlockState(testPos);
+        if(head.getBlock() == BlockHandler.PYLON_HEAD.get() && head.getValue(BlockPylonHead.FACING) == Direction.UP) {
+            TileEntity old = world.getBlockEntity(testPos);
+            if(!world.isClientSide && old instanceof PylonHeadBlockEntity) {
                 if(!player.isCreative()) {
-                    InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(BlockHandler.PYLON_POLE));
+                    InventoryHelper.dropItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(BlockHandler.PYLON_POLE.get()));
                 }
-                world.setBlockToAir(testPos);
-                world.setBlockState(testPos.down(), head);
-                ItemPylonPole.moveConnections((PylonHeadBlockEntity) old, testPos.down());
+                world.setBlock(testPos, Blocks.AIR.defaultBlockState(), 3);
+                world.setBlock(testPos.below(), head, 3);
+                ItemPylonPole.moveConnections((PylonHeadBlockEntity) old, testPos.below());
             }
             return true;
         }
-        return super.removedByPlayer(state, world, pos, player, willHarvest);
-    }
-
-    @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, AXIS);
-    }
-
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(AXIS).ordinal();
-    }
-
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(AXIS, EnumFacing.Axis.values()[meta]);
-    }
-
-    @Override
-    public boolean isFullBlock(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
+        return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
     }
 
     @Override
     public Item createItem(Item.Properties properties) {
-        return new ItemPylonPole();
+        return new ItemPylonPole(properties);
     }
 
 }

@@ -13,6 +13,7 @@ import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
+import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
@@ -29,11 +30,13 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -47,6 +50,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -104,6 +108,8 @@ public class ProjectNublar {
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
 
+        forgeBus.addListener(this::gatherData);
+
 //        forgeBus.addGenericListener(Dinosaur.class, EventPriority.LOWEST, DinosaurBaseBlock::onDinosaurRegistryFinished);
 
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -112,6 +118,15 @@ public class ProjectNublar {
             forgeBus.addListener(ProjectNublarBlockRenderLayers::setRenderLayers);
 
         });
+    }
+
+    public void gatherData(GatherDataEvent event) {
+        DataGenerator gen = event.getGenerator();
+        ExistingFileHelper helper = event.getExistingFileHelper();
+
+        if (event.includeServer()) {
+            gen.addProvider(new ProjectNublarBlockTagsProvider(gen, helper));
+        }
     }
 
     public void preInit(FMLCommonSetupEvent event) {
@@ -229,7 +244,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C2SSequencingSynthesizerSelectChange.Handler(), C2SSequencingSynthesizerSelectChange.class, 14, Side.SERVER);
         NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
         NETWORK.registerMessage(new C16DisplayTabbedGui.Handler(), C16DisplayTabbedGui.class, 16, Side.SERVER);
-        NETWORK.registerMessage(new S17MachinePositionDirty.Handler(), S17MachinePositionDirty.class, 17, Side.CLIENT);
+        NETWORK.registerMessage(new S2CMachinePositionDirty.Handler(), S2CMachinePositionDirty.class, 17, Side.CLIENT);
         NETWORK.registerMessage(new C2SChangeContainerTab.Handler(), C2SChangeContainerTab.class, 18, Side.SERVER);
         NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
         NETWORK.registerMessage(new S20RegenCache.Handler(), S20RegenCache.class, 20, Side.CLIENT);
@@ -243,7 +258,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C2STabletModuleClicked.Handler(), C2STabletModuleClicked.class, 28, Side.SERVER);
         NETWORK.registerMessage(new S2COpenTabletModule.Handler(), S2COpenTabletModule.class, 29, Side.CLIENT);
         NETWORK.registerMessage(new C30TrackingTabletEntryClicked.Handler(), C30TrackingTabletEntryClicked.class, 30, Side.SERVER);
-        NETWORK.registerMessage(new C31TrackingBeaconDataChanged.Handler(), C31TrackingBeaconDataChanged.class, 31, Side.SERVER);
+        NETWORK.registerMessage(new C2STrackingBeaconData.Handler(), C2STrackingBeaconData.class, 31, Side.SERVER);
         NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
         NETWORK.registerMessage(new C2SSetTabletBackground.Handler(), C2SSetTabletBackground.class, 33, Side.SERVER);
         NETWORK.registerMessage(new C34UploadImage.Handler(), C34UploadImage.class, 34, Side.SERVER);

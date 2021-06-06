@@ -1,20 +1,25 @@
 package net.dumbcode.projectnublar.server.block;
 
-import net.dumbcode.dumblibrary.server.utils.SidedExecutor;
-import net.dumbcode.projectnublar.client.gui.GuiTrackingBeacon;
+import lombok.Getter;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
+import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
@@ -25,33 +30,49 @@ public class BlockTrackingBeacon extends Block implements IItemBlock {
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state) {
+    public boolean hasTileEntity(BlockState state) {
         return true;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return new TrackingBeaconBlockEntity();
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        TrackingBeaconBlockEntity.getTrackingList(worldIn).remove(pos);
-        super.breakBlock(worldIn, pos, state);
+    public void destroy(IWorld worldIn, BlockPos pos, BlockState state) {
+        if(worldIn instanceof ServerWorld) {
+            TrackingBeaconBlockEntity.getTrackingList((ServerWorld) worldIn).remove(pos);
+        }
+        super.destroy(worldIn, pos, state);
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof TrackingBeaconBlockEntity && te.getWorld().isRemote) {
-            this.displayGui((TrackingBeaconBlockEntity) te);
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult ray) {
+        TileEntity te = world.getBlockEntity(pos);
+        if(te instanceof TrackingBeaconBlockEntity && player instanceof ServerPlayerEntity) {
+            NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider(
+                (id, inv, p) -> new TrackingContainer(id, (TrackingBeaconBlockEntity) te),
+                new StringTextComponent("")
+            ), pos);
         }
-        return true;
+        return super.use(state, world, pos, player, hand, ray);
     }
 
-    @SideOnly(Side.CLIENT)
-    private void displayGui(TrackingBeaconBlockEntity te) {
-        Minecraft.getMinecraft().displayGuiScreen(new GuiTrackingBeacon(te));
+    @Getter
+    public static class TrackingContainer extends Container {
+
+        private final TrackingBeaconBlockEntity beacon;
+
+        public TrackingContainer(int id, TrackingBeaconBlockEntity beacon) {
+            super(ProjectNublarContainers.TRACKING_BEACON.get(), id);
+            this.beacon = beacon;
+        }
+
+        @Override
+        public boolean stillValid(PlayerEntity p_75145_1_) {
+            return true;
+        }
     }
 }
