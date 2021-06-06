@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
-import net.dumbcode.projectnublar.server.network.S20RegenCache;
+import net.dumbcode.projectnublar.server.network.S2CRegenFenceCache;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -35,7 +35,7 @@ public class RegenFenceCacheCommand {
                         }
                     }
                 }
-                ProjectNublar.NETWORK.send(PacketDistributor.ALL.noArg(), new S20RegenCache());
+                ProjectNublar.NETWORK.send(PacketDistributor.ALL.noArg(), new S2CRegenFenceCache());
                 return 1;
             });
     }

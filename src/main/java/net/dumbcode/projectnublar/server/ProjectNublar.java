@@ -247,7 +247,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(new S2CMachinePositionDirty.Handler(), S2CMachinePositionDirty.class, 17, Side.CLIENT);
         NETWORK.registerMessage(new C2SChangeContainerTab.Handler(), C2SChangeContainerTab.class, 18, Side.SERVER);
         NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
-        NETWORK.registerMessage(new S20RegenCache.Handler(), S20RegenCache.class, 20, Side.CLIENT);
+        NETWORK.registerMessage(new S2CRegenFenceCache.Handler(), S2CRegenFenceCache.class, 20, Side.CLIENT);
         NETWORK.registerMessage(new S21SpawnParticle.Handler(), S21SpawnParticle.class, 21, Side.CLIENT);
         NETWORK.registerMessage(new S22StartTrackingTabletHandshake.Handler(), S22StartTrackingTabletHandshake.class, 22, Side.CLIENT);
         NETWORK.registerMessage(new C23ConfirmTrackingTablet.Handler(), C23ConfirmTrackingTablet.class, 23, Side.SERVER);
@@ -263,9 +263,9 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C2SSetTabletBackground.Handler(), C2SSetTabletBackground.class, 33, Side.SERVER);
         NETWORK.registerMessage(new CS2UploadPhotoBackgroundImage.Handler(), CS2UploadPhotoBackgroundImage.class, 34, Side.SERVER);
         NETWORK.registerMessage(new C2SPhotoBackgroundRequestAllIcons.Handler(), C2SPhotoBackgroundRequestAllIcons.class, 35, Side.SERVER);
-        NETWORK.registerMessage(new S36RequestBackgroundIconHeaders.Handler(), S36RequestBackgroundIconHeaders.class, 36, Side.CLIENT);
-        NETWORK.registerMessage(new C37RequestImageBackground.Handler(), C37RequestImageBackground.class, 37, Side.SERVER);
-        NETWORK.registerMessage(new S38SyncBackgroundImage.Handler(), S38SyncBackgroundImage.class, 38, Side.CLIENT);
+        NETWORK.registerMessage(new S2CRequestBackgroundIconHeaders.Handler(), S2CRequestBackgroundIconHeaders.class, 36, Side.CLIENT);
+        NETWORK.registerMessage(new C2SRequestBackgroundImage.Handler(), C2SRequestBackgroundImage.class, 37, Side.SERVER);
+        NETWORK.registerMessage(new S2CSyncBackgroundImage.Handler(), S2CSyncBackgroundImage.class, 38, Side.CLIENT);
         NETWORK.registerMessage(new S2CSyncBackgroundIcon.Handler(), S2CSyncBackgroundIcon.class, 39, Side.CLIENT);
         NETWORK.registerMessage(new C2SRequestPhotoBackgroundIcon.Handler(), C2SRequestPhotoBackgroundIcon.class, 40, Side.SERVER);
         NETWORK.registerMessage(new C2SPlaceIncubatorEgg.Handler(), C2SPlaceIncubatorEgg.class, 41, Side.SERVER);

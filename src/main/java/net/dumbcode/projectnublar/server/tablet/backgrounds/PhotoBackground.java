@@ -4,7 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.network.C37RequestImageBackground;
+import net.dumbcode.projectnublar.server.network.C2SRequestBackgroundImage;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.nbt.CompoundNBT;
@@ -68,7 +68,7 @@ public class PhotoBackground implements TabletBackground {
     public void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY) {
         if(!this.requested) {
             this.requested = true;
-            ProjectNublar.NETWORK.sendToServer(new C37RequestImageBackground(this.uploaderUUID, this.photoHash));
+            ProjectNublar.NETWORK.sendToServer(new C2SRequestBackgroundImage(this.uploaderUUID, this.photoHash));
         }
 
         if(this.texture != null) {

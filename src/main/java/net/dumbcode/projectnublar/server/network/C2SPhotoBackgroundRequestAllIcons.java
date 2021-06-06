@@ -25,7 +25,7 @@ public class C2SPhotoBackgroundRequestAllIcons {
     public static void handle(C2SPhotoBackgroundRequestAllIcons packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
 
-        context.enqueueWork(() -> ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S36RequestBackgroundIconHeaders(packet.global, TabletBGImageHandler.getAllIcons(packet.global, context.getSender()))));
+        context.enqueueWork(() -> ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2CRequestBackgroundIconHeaders(packet.global, TabletBGImageHandler.getAllIcons(packet.global, context.getSender()))));
 
         context.setPacketHandled(true);
     }
