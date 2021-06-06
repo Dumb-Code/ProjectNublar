@@ -1,36 +1,30 @@
 package net.dumbcode.projectnublar.server.command;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.dumbcode.projectnublar.server.world.gen.DigsiteStructureNetwork;
 import net.dumbcode.projectnublar.server.world.structures.network.StructureNetwork;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.util.Random;
 
-public class GenerateCommand extends CommandBase {
+public class GenerateCommand {
 
-    @Override
-    public String getName() {
-        return "generate";
+    public static ArgumentBuilder<CommandSource, ?> createCommand() {
+        return Commands.literal("generate")
+            .executes(context -> generate(context.getSource(), context.getSource().getLevel().random))
+            .then(Commands.argument("seed", StringArgumentType.word())
+                .executes(context -> generate(context.getSource(), new Random(context.getArgument("seed", String.class).hashCode())))
+            );
     }
 
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return "todo";
-    }
+    private static int generate(CommandSource source, Random random) {
+        StructureNetwork.Stats stats = DigsiteStructureNetwork.NETWORK.generate(source.getLevel(), new BlockPos(source.getPosition()), random);
 
-    @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-
-
-
-
-        StructureNetwork.Stats stats = DigsiteStructureNetwork.NETWORK.generate(sender.getEntityWorld(), sender.getPosition(), args.length > 0 ? new Random(args[0].hashCode()) : sender.getEntityWorld().rand);
-
-        sender.sendMessage(new TextComponentString(
+        source.sendSuccess(new StringTextComponent(
             "-------------\n"+
                 "total:               " + stats.getStructures() + "\n"+
                 "-------------\n"+
@@ -38,6 +32,9 @@ public class GenerateCommand extends CommandBase {
                 "path-generate:  " + stats.getTimeTakenPathGeneration() + "ms\n"+
                 "generate:         " + stats.getTimeTakenGenerateMs() + "ms\n"+
                 "-------------"
-        ));
+        ), false);
+
+        return 1;
     }
+
 }

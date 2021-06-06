@@ -9,17 +9,18 @@ import net.minecraftforge.server.command.CommandTreeBase;
 public class CommandProjectNublar {
 
 //    public CommandProjectNublar() {
-//        this.addSubcommand(new RegenFenceCacheCommand());
-//        this.addSubcommand(new GenerateCommand());
 //        this.addSubcommand(new EditDinosaurDataCommand());
 //        this.addSubcommand(new RaceWarCommand());
-    }
+//    }
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
             Commands.literal("projectnublar")
-            .then(SpawnDinosaurCommand.createCommand())
-            .then(AnimateCommand.createCommand())
+                .requires(source -> source.hasPermission(2))
+                .then(SpawnDinosaurCommand.createCommand())
+                .then(AnimateCommand.createCommand())
+                .then(RegenFenceCacheCommand.createCommand())
+                .then(GenerateCommand.createCommand())
         );
     }
 }
