@@ -1,15 +1,16 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
-import io.netty.buffer.ByteBuf;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dumbcode.dumblibrary.client.shader.GlslSandboxShader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.function.Supplier;
 
@@ -17,6 +18,7 @@ import java.util.function.Supplier;
 public class ShaderBackground implements TabletBackground {
 
     public static final String KEY = "shader";
+    private static Minecraft MC = Minecraft.getInstance();
 
     private GlslSandboxShader shader;
     private boolean needsUpdating;
@@ -29,29 +31,29 @@ public class ShaderBackground implements TabletBackground {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        nbt.setString("url", this.url);
-        nbt.setString("screen_size", this.size.name());
+    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+        nbt.putString("url", this.url);
+        nbt.putString("screen_size", this.size.name());
         return nbt;
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundNBT nbt) {
         this.setUrl(nbt.getString("url"));
-        if(nbt.hasKey("screen_size", Constants.NBT.TAG_STRING)) {
+        if(nbt.contains("screen_size", Constants.NBT.TAG_STRING)) {
             this.size = ScreenSize.valueOf(nbt.getString("screen_size"));
         }
     }
 
     @Override
-    public void writeToBuf(ByteBuf buf) {
-        ByteBufUtils.writeUTF8String(buf, this.url);
+    public void writeToBuf(PacketBuffer buf) {
+        buf.writeUtf(this.url);
         buf.writeByte(this.size.ordinal());
     }
 
     @Override
-    public void readFromBuf(ByteBuf buf) {
-        this.setUrl(ByteBufUtils.readUTF8String(buf));
+    public void readFromBuf(PacketBuffer buf) {
+        this.setUrl(buf.readUtf());
         this.size = ScreenSize.values()[buf.readByte() % ScreenSize.values().length];
     }
 
@@ -61,7 +63,8 @@ public class ShaderBackground implements TabletBackground {
     }
 
     @Override
-    public void render(int x, int y, int width, int height, int mouseX, int mouseY) {
+    @OnlyIn(Dist.CLIENT)
+    public void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY) {
         if(this.needsUpdating) {
             this.needsUpdating = false;
             this.dispose();
@@ -77,7 +80,7 @@ public class ShaderBackground implements TabletBackground {
             }
             this.shader.render(mouseX - x, mouseY - y);
             this.shader.startShader();
-            Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, width, height, width, height);
+            AbstractGui.blit(stack, x, y, 0, 0, width, height, width, height);
             this.shader.endShader();
         }
     }
@@ -95,7 +98,7 @@ public class ShaderBackground implements TabletBackground {
 
     @Getter
     public enum ScreenSize {
-        FIT_TO_SCREEN(() -> (float) new ScaledResolution(Minecraft.getMinecraft()).getScaleFactor()),
+        FIT_TO_SCREEN(() -> 1F / MC.getWindow().calculateScale(MC.options.guiScale, MC.isEnforceUnicode())),
         FIT_TO_GUI(() -> 1F),
         FIT_TO_GUI_LOW_RES(() -> 1/2F),
         FIT_TO_GUI_LOWEST_RES(() -> 1/4F);

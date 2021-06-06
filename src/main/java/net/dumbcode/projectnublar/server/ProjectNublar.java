@@ -261,13 +261,13 @@ public class ProjectNublar {
         NETWORK.registerMessage(new C2STrackingBeaconData.Handler(), C2STrackingBeaconData.class, 31, Side.SERVER);
         NETWORK.registerMessage(new S32SetTrackingDataList.Handler(), S32SetTrackingDataList.class, 32, Side.CLIENT);
         NETWORK.registerMessage(new C2SSetTabletBackground.Handler(), C2SSetTabletBackground.class, 33, Side.SERVER);
-        NETWORK.registerMessage(new C34UploadImage.Handler(), C34UploadImage.class, 34, Side.SERVER);
-        NETWORK.registerMessage(new C35RequestAllIcons.Handler(), C35RequestAllIcons.class, 35, Side.SERVER);
+        NETWORK.registerMessage(new CS2UploadPhotoBackgroundImage.Handler(), CS2UploadPhotoBackgroundImage.class, 34, Side.SERVER);
+        NETWORK.registerMessage(new C2SPhotoBackgroundRequestAllIcons.Handler(), C2SPhotoBackgroundRequestAllIcons.class, 35, Side.SERVER);
         NETWORK.registerMessage(new S36RequestBackgroundIconHeaders.Handler(), S36RequestBackgroundIconHeaders.class, 36, Side.CLIENT);
         NETWORK.registerMessage(new C37RequestImageBackground.Handler(), C37RequestImageBackground.class, 37, Side.SERVER);
         NETWORK.registerMessage(new S38SyncBackgroundImage.Handler(), S38SyncBackgroundImage.class, 38, Side.CLIENT);
-        NETWORK.registerMessage(new S39SyncBackgroundIcon.Handler(), S39SyncBackgroundIcon.class, 39, Side.CLIENT);
-        NETWORK.registerMessage(new C40RequestBackgroundIcon.Handler(), C40RequestBackgroundIcon.class, 40, Side.SERVER);
+        NETWORK.registerMessage(new S2CSyncBackgroundIcon.Handler(), S2CSyncBackgroundIcon.class, 39, Side.CLIENT);
+        NETWORK.registerMessage(new C2SRequestPhotoBackgroundIcon.Handler(), C2SRequestPhotoBackgroundIcon.class, 40, Side.SERVER);
         NETWORK.registerMessage(new C2SPlaceIncubatorEgg.Handler(), C2SPlaceIncubatorEgg.class, 41, Side.SERVER);
         NETWORK.registerMessage(new S42SyncMachineProcesses.Handler(), S42SyncMachineProcesses.class, 42, Side.CLIENT);
         NETWORK.registerMessage(new S43SyncMachineStack.Handler(), S43SyncMachineStack.class, 43, Side.CLIENT);

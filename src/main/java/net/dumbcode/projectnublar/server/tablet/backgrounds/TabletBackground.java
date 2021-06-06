@@ -1,14 +1,15 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import io.netty.buffer.ByteBuf;
 import lombok.RequiredArgsConstructor;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.PhotoBackgroundSetup;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SetupPage;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.ShaderSetupPage;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SolidColorSetupPage;
+import net.dumbcode.projectnublar.client.gui.tablet.setuppages.PhotoBackgroundSetup;
+import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
+import net.dumbcode.projectnublar.client.gui.tablet.setuppages.ShaderSetupPage;
+import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SolidColorSetupPage;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -23,6 +24,7 @@ public interface TabletBackground {
     void writeToBuf(PacketBuffer buf);
     void readFromBuf(PacketBuffer buf);
 
+    @OnlyIn(Dist.CLIENT)
     void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY);
 
     default void dispose(){

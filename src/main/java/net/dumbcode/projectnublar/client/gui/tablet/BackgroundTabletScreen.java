@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SSetTabletBackground;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.dumbcode.projectnublar.server.tablet.backgrounds.setuppages.SetupPage;
+import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -43,7 +43,7 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
             fill(stack, this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
             fill(stack, this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
             RenderUtils.renderBorder(stack,this.startX - 5, this.startY - 5, this.startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 2, 0xFFAAAAAA);
-            this.setupPage.render(this.startX, this.startY, mouseX, mouseY);
+            this.setupPage.render(stack, mouseX, mouseY, partialTicks);
         } else {
             int entry = 0;
             int fullPageIconsHeight = ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING;
@@ -63,82 +63,48 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
     @Override
     public void tick() {
         if(this.setupPage != null) {
-            this.setupPage.updatePage(this.startX, this.startY);
+            this.setupPage.updatePage();
         }
         super.tick();
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if(this.setupPage != null) {
-            if(mouseX > this.startX - 5 && mouseX < this.startX + this.setupPage.getWidth() + 5 && mouseY > this.startY - 5 && mouseY < this.startY + this.setupPage.getHeight() + 5) {
-                this.setupPage.mouseClicked(this.startX, this.startY, mouseX, mouseY, mouseButton);
-            } else {
-                TabletBackground background = this.setupPage.create();
-                this.setBackground(background);
-                ProjectNublar.NETWORK.sendToServer(new C2SSetTabletBackground(this.hand, background));
-                this.setupPage = null;
-            }
-            return true;
-        } else {
-            int entry = 0;
-            int fullPageIconsHeight = (ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING);
-            for (String s : TabletBackground.REGISTRY.keySet()) {
-                int yID = entry % ICONS_PER_COLUMN;
-                int xPos = this.leftStart + 25 + entry/ICONS_PER_COLUMN * (ICON_SIZE + ICON_PADDING);
-                int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
-
-                if(mouseX > xPos && mouseX < xPos + ICON_SIZE && mouseY > yPos && mouseY < yPos + ICON_SIZE) {
-                    TabletBackground.Entry<?> e = TabletBackground.REGISTRY.get(s);
-                    this.setupPage = e.getSetupPage();
-                    if(e.getBackground().getClass() == this.getBackground().getClass()) {
-                        this.setupPage.setupFromPage(this.getBackground());
-                    }
-                    this.startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2;
-                    this.startY = this.topStart + this.tabletHeight/2 - this.setupPage.getHeight()/2;
-                    this.setupPage.initPage(this.startX, this.startY);
+        if(!super.mouseClicked(mouseX, mouseY, mouseButton)) {
+            if(this.setupPage != null) {
+                if(!(mouseX > this.startX - 5 && mouseX < this.startX + this.setupPage.getWidth() + 5 && mouseY > this.startY - 5 && mouseY < this.startY + this.setupPage.getHeight() + 5)) {
+                    TabletBackground background = this.setupPage.create();
+                    this.setBackground(background);
+                    ProjectNublar.NETWORK.sendToServer(new C2SSetTabletBackground(this.hand, background));
+                    this.children.remove(this.setupPage);
+                    this.setupPage = null;
                 }
+                return true;
+            } else {
+                int entry = 0;
+                int fullPageIconsHeight = (ICONS_PER_COLUMN * ICON_SIZE + (ICONS_PER_COLUMN - 1) * ICON_PADDING);
+                for (String s : TabletBackground.REGISTRY.keySet()) {
+                    int yID = entry % ICONS_PER_COLUMN;
+                    int xPos = this.leftStart + 25 + entry/ICONS_PER_COLUMN * (ICON_SIZE + ICON_PADDING);
+                    int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
-                entry++;
+                    if(mouseX > xPos && mouseX < xPos + ICON_SIZE && mouseY > yPos && mouseY < yPos + ICON_SIZE) {
+                        TabletBackground.Entry<?> e = TabletBackground.REGISTRY.get(s);
+                        this.children.remove(this.setupPage);
+                        this.setupPage = this.addWidget(e.getSetupPage());
+                        if(e.getBackground().getClass() == this.getBackground().getClass()) {
+                            this.setupPage.setupFromPage(this.getBackground());
+                        }
+                        this.startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2;
+                        this.startY = this.topStart + this.tabletHeight/2 - this.setupPage.getHeight()/2;
+                        this.setupPage.initPage(this.startX, this.startY);
+                    }
+
+                    entry++;
+                }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double changeX, double changeY) {
-        if(this.setupPage != null) {
-            this.setupPage.mouseDragged(this.startX, this.startY, (int) mouseX, (int) mouseY, clickedMouseButton, changeX, changeY);
-            return true;
-        }
-        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, changeX, changeY);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
-        if (this.setupPage != null) {
-            this.setupPage.mouseScrolled(this.startX, this.startY, mouseX, mouseY, scroll);
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, scroll);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int state) {
-        if(this.setupPage != null) {
-            this.setupPage.mouseReleased(this.startX, this.startY, mouseX, mouseY, state);
-            return true;
-        }
-        return super.mouseReleased(mouseX, mouseY, state);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifier) {
-        if(this.setupPage != null) {
-            this.setupPage.keyPressed(keyCode, scanCode, modifier);
-            return true;
-        }
-        return super.keyPressed(keyCode, scanCode, modifier);
+        return false;
     }
 
     @Override
