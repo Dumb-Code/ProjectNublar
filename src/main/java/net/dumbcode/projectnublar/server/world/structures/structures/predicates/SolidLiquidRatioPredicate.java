@@ -17,7 +17,7 @@ public class SolidLiquidRatioPredicate implements StructurePredicate {
         registry.accept(new PredicateTraverser<>(
                 Pair.of(new AtomicInteger(), new AtomicInteger()), //solids, liquids
                 (instance, pos, pair) -> {
-                    if(instance.getWorld().getBlockState(pos.down()).getMaterial().isLiquid()) {
+                    if(instance.getWorld().getBlockState(pos.below()).getMaterial().isLiquid()) {
                         pair.getRight().incrementAndGet();
                     } else {
                         pair.getLeft().incrementAndGet();

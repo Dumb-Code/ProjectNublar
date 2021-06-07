@@ -14,15 +14,19 @@ import net.dumbcode.projectnublar.server.world.structures.structures.predicates.
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.SolidLiquidRatioPredicate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandlers;
-import net.minecraft.block.BlockColored;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 
 public class DigsiteStructureNetwork {
-    private static final ConstantDefinition<IBlockState> WOOL_1 = new ConstantDefinition<>();
-    private static final ConstantDefinition<IBlockState> WOOL_2 = new ConstantDefinition<>();
+    private static final ConstantDefinition<Block> WOOL_1 = new ConstantDefinition<>();
+    private static final ConstantDefinition<Block> WOOL_2 = new ConstantDefinition<>();
 
+    private static final Block[] WOOL = new Block[] {
+        Blocks.WHITE_WOOL, Blocks.ORANGE_WOOL, Blocks.MAGENTA_WOOL, Blocks.LIGHT_BLUE_WOOL,
+        Blocks.YELLOW_WOOL, Blocks.LIME_WOOL, Blocks.PINK_WOOL, Blocks.GRAY_WOOL,
+        Blocks.LIGHT_GRAY_WOOL, Blocks.CYAN_WOOL, Blocks.PURPLE_WOOL, Blocks.BLUE_WOOL,
+        Blocks.BROWN_WOOL, Blocks.GREEN_WOOL, Blocks.RED_WOOL, Blocks.BLACK_WOOL
+    };
 
     private static final String N = "nbt_predicates";
     private static final String D = "digsite_predicates";
@@ -31,11 +35,11 @@ public class DigsiteStructureNetwork {
     public static final StructureNetwork NETWORK = new NetworkBuilder()
         .addData(DataHandlers.LOOTTABLE)
         .addData(new DataHandler(DataHandler.Scope.STRUCTURE, s -> s.equals("projectnublar:digsite_wool_1"),
-            (world, pos, name, random, decision) -> decision.requireEntry((random.nextBoolean() ? WOOL_1 : WOOL_2)))
+            (world, pos, name, random, decision) -> decision.requireEntry((random.nextBoolean() ? WOOL_1 : WOOL_2)).defaultBlockState())
         )
 
-        .addConstant(WOOL_1, random -> Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.byMetadata(random.nextInt(16))))
-        .addConstant(WOOL_2, random -> Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.byDyeDamage(random.nextInt(16))))
+        .addConstant(WOOL_1, random -> WOOL[random.nextInt(WOOL.length)])
+        .addConstant(WOOL_2, random -> WOOL[random.nextInt(WOOL.length)])
 
         .globalPredicate(N,
             new HeightRangePredicate(ValueRange.upperBound(3)),

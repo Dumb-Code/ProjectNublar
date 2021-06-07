@@ -14,16 +14,15 @@ import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.StructurePredicate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 import javax.annotation.Nullable;
-import javax.vecmath.Vector2f;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -74,22 +73,25 @@ public class StructureNetwork {
         Set<BlockPos> generatedPaths = Sets.newHashSet();
         Biome biome = world.getBiome(startingPosition);
         for (BlockPos pathPosition : pathPositions) {
-            for (EnumFacing horizontal : EnumFacing.HORIZONTALS) {
-                BlockPos pos = pathPosition.offset(horizontal);
+            for (Direction horizontal : Direction.values()) {
+                if(horizontal.getAxis() == Direction.Axis.Y) {
+                    continue;
+                }
+                BlockPos pos = pathPosition.relative(horizontal);
                 if(!pathPositions.contains(pos) && !generatedPaths.contains(pos)) {
                     generatedPaths.add(pos);
                     float perc = random.nextFloat();
-                    pos = WorldUtils.getDirectTopdownBlock(world, pos.add(startingPosition)).down();
+                    pos = WorldUtils.getDirectTopdownBlock(world, pos.offset(startingPosition)).below();
                     if(world.getBlockState(pos).getMaterial().isLiquid()) {
-                        world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.PLANKS.getDefaultState(), biome));
+                        world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.OAK_PLANKS.defaultBlockState(), biome), 3);
                     } else if(perc < 0.6) {
-                        world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
+                        world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.COARSE_DIRT.defaultBlockState(), biome), 3);
                     }
                 }
             }
-            pathPosition = WorldUtils.getDirectTopdownBlock(world, pathPosition.add(startingPosition)).down();
-            IBlockState setState = world.getBlockState(pathPosition).getMaterial().isLiquid() ? Blocks.PLANKS.getDefaultState() : Blocks.GRASS_PATH.getDefaultState();
-            world.setBlockState(pathPosition, BlockUtils.getBiomeDependantState(setState, biome));
+            pathPosition = WorldUtils.getDirectTopdownBlock(world, pathPosition.mutable().move(startingPosition)).below();
+            BlockState setState = world.getBlockState(pathPosition).getMaterial().isLiquid() ? Blocks.OAK_PLANKS.defaultBlockState() : Blocks.GRASS_PATH.defaultBlockState();
+            world.setBlock(pathPosition, BlockUtils.getBiomeDependantState(setState, biome), 3);
         }
     }
 
@@ -129,7 +131,7 @@ public class StructureNetwork {
                 int offz = (int) (Math.cos(theta) * (startOffZ + tries / 2D) + baseoffZ);
 
 
-                StructureInstance childInstance = this.instantiate(instance, world, pos.add(offx, 0, offz), random, child);
+                StructureInstance childInstance = this.instantiate(instance, world, pos.offset(offx, 0, offz), random, child);
 
                 if(this.doesStructureIntersect(childInstance, offx, offz, placedEntries) || !childInstance.canBuild()) {
                     continue;

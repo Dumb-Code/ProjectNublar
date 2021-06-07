@@ -15,6 +15,6 @@ public class PushdownPlacement implements StructurePlacement {
 
     @Override
     public BlockPos transpose(World world, StructureInstance instance, BlockPos worldPosition, BlockPos relativePosition) {
-        return WorldUtils.getDirectTopdownBlock(world, worldPosition).up(relativePosition.getY() - this.levelY);
+        return WorldUtils.getDirectTopdownBlock(world, worldPosition).above(relativePosition.getY() - this.levelY);
     }
 }

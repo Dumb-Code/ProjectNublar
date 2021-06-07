@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
-import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplateOLD;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,10 +21,10 @@ import java.util.function.Consumer;
 @Accessors(chain = true)
 public class StructureTemplate extends Structure {
 
-    private final NBTTemplate template;
+    private final NBTTemplateOLD template;
     protected final PlacementSettings settings = new PlacementSettings();
 
-    public StructureTemplate(NBTTemplate template, int children, int weight) {
+    public StructureTemplate(NBTTemplateOLD template, int children, int weight) {
         super(weight, children);
         this.template = template;
     }
@@ -74,7 +74,7 @@ public class StructureTemplate extends Structure {
             StructureTemplate.this.template.addBlocksToWorld(
                 this.world, this.position,
                 this, handlers, decision, this.decision, random,
-                (pos, blockInfo) -> new NBTTemplate.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData),
+                (pos, blockInfo) -> new NBTTemplateOLD.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData),
                 2
             );
             for (DataHandler handler : handlers) {
