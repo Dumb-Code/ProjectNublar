@@ -10,6 +10,7 @@ import net.dumbcode.projectnublar.server.world.structures.structures.predicates.
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public abstract class StructureInstance {
 
     @Nullable
     protected final StructureInstance parent;
-    protected final World world;
+    protected final ServerWorld world;
     protected final BlockPos position;
 
     protected final int children;
@@ -36,7 +37,7 @@ public abstract class StructureInstance {
 
     protected Boolean cachedBuildResult;
 
-    public StructureInstance(@Nullable StructureInstance parent, World world, BlockPos position, int xSize, int zSize, Structure structure, StructurePredicate... predicates) {
+    public StructureInstance(@Nullable StructureInstance parent, ServerWorld world, BlockPos position, int xSize, int zSize, Structure structure, StructurePredicate... predicates) {
         this.parent = parent;
         this.world = world;
         this.children = structure.getChildren();
@@ -80,7 +81,7 @@ public abstract class StructureInstance {
     protected void traverseTopdown(Consumer<BlockPos> consumer) {
         for (int x = 0; x <= this.xSize; x++) {
             for (int z = 0; z <= this.zSize; z++) {
-                consumer.accept(WorldUtils.getDirectTopdownBlock(this.world, this.position.add(x, 0, z)));
+                consumer.accept(WorldUtils.getDirectTopdownBlock(this.world, this.position.offset(x, 0, z)));
             }
         }
 

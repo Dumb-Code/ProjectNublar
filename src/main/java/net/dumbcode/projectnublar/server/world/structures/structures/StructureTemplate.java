@@ -6,11 +6,12 @@ import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
-import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplateOLD;
+import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -21,28 +22,28 @@ import java.util.function.Consumer;
 @Accessors(chain = true)
 public class StructureTemplate extends Structure {
 
-    private final NBTTemplateOLD template;
-    protected final PlacementSettings settings = new PlacementSettings();
+    private final NBTTemplate template;
+    protected final PnPlacementSettings settings = new PnPlacementSettings();
 
-    public StructureTemplate(NBTTemplateOLD template, int children, int weight) {
+    public StructureTemplate(NBTTemplate template, int children, int weight) {
         super(weight, children);
         this.template = template;
     }
 
     @Override
-    public StructureInstance createInstance(@Nullable StructureInstance parent, World world, BlockPos pos, Random random) {
-        PlacementSettings.Decision decision = this.settings.makeDecision(random);
+    public StructureInstance createInstance(@Nullable StructureInstance parent, ServerWorld world, BlockPos pos, Random random) {
+        PnPlacementSettings.Decision decision = this.settings.makeDecision(random);
         BlockPos range = this.template.transformedBlockPosAround(this.template.getRange(), 0, 0, decision);
 
         return new Instance(
             parent,
             world,
-            pos.add(-Math.abs(range.getX())/2, 0, -Math.abs(range.getZ())/2),
+            pos.offset(-Math.abs(range.getX())/2, 0, -Math.abs(range.getZ())/2),
             this, decision,
             Math.abs(range.getX()), Math.abs(range.getZ()));
     }
 
-    public StructureTemplate settings(Consumer<PlacementSettings> consumer) {
+    public StructureTemplate settings(Consumer<PnPlacementSettings> consumer) {
         consumer.accept(this.settings);
         return this;
     }
@@ -61,9 +62,9 @@ public class StructureTemplate extends Structure {
 
     private class Instance extends StructureInstance {
 
-        private final PlacementSettings.Decision decision;
+        private final PnPlacementSettings.Decision decision;
 
-        public Instance(@Nullable StructureInstance parent, World world, BlockPos position, StructureTemplate template, PlacementSettings.Decision decision, int xSize, int zSize) {
+        public Instance(@Nullable StructureInstance parent, ServerWorld world, BlockPos position, StructureTemplate template, PnPlacementSettings.Decision decision, int xSize, int zSize) {
             super(parent, world, position, xSize, zSize, template);
             this.decision = decision;
         }
@@ -74,7 +75,7 @@ public class StructureTemplate extends Structure {
             StructureTemplate.this.template.addBlocksToWorld(
                 this.world, this.position,
                 this, handlers, decision, this.decision, random,
-                (pos, blockInfo) -> new NBTTemplateOLD.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.blockState, biome), blockInfo.tileentityData),
+                (pos, blockInfo) -> new Template.BlockInfo(blockInfo.pos, BlockUtils.getBiomeDependantState(blockInfo.state, biome), blockInfo.nbt),
                 2
             );
             for (DataHandler handler : handlers) {

@@ -21,6 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -37,7 +38,7 @@ public class StructureNetwork {
     private final Map<String, List<StructurePredicate>> globalPredicates;
     private final StructureConstants constants;
 
-    public Stats generate(World world, BlockPos pos, Random random) {
+    public Stats generate(ServerWorld world, BlockPos pos, Random random) {
         long startTime = System.currentTimeMillis();
 
         StructureConstants.Decision constantDecision = this.constants.createDecision(random);
@@ -95,14 +96,14 @@ public class StructureNetwork {
         }
     }
 
-    private StructureInstance instantiate(@Nullable StructureInstance parent, World world, BlockPos pos, Random random, BuilderNode.Entry<Structure> entry) {
+    private StructureInstance instantiate(@Nullable StructureInstance parent, ServerWorld world, BlockPos pos, Random random, BuilderNode.Entry<Structure> entry) {
         StructureInstance instance = entry.getElement().createInstance(parent, world, pos, random);
         instance.getGlobalPredicates().stream().filter(this.globalPredicates::containsKey).map(this.globalPredicates::get).forEach(instance.getPredicates()::addAll);
         return instance;
     }
 
     private void prepGeneration (
-        World world,
+        ServerWorld world,
         BlockPos pos,
         Random random,
         Set<Vector2f> placedEntries,

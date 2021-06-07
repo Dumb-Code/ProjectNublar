@@ -7,26 +7,26 @@ import net.minecraft.util.Rotation;
 
 import java.util.*;
 
-public class PlacementSettings {
+public class PnPlacementSettings {
     private final Set<Mirror> acceptedMirrors = new HashSet<>();
     private final Set<Rotation> acceptedRotation = new HashSet<>();
 
-    public PlacementSettings addRotation(Rotation... rotation) {
+    public PnPlacementSettings addRotation(Rotation... rotation) {
         Collections.addAll(this.acceptedRotation, rotation);
         return this;
     }
 
-    public PlacementSettings addMirror(Mirror... mirror) {
+    public PnPlacementSettings addMirror(Mirror... mirror) {
         Collections.addAll(this.acceptedMirrors, mirror);
         return this;
     }
 
-    public PlacementSettings removeRotation(Rotation... rotation) {
+    public PnPlacementSettings removeRotation(Rotation... rotation) {
         this.acceptedRotation.removeAll(Arrays.asList(rotation));
         return this;
     }
 
-    public PlacementSettings removeMirror(Mirror... mirror) {
+    public PnPlacementSettings removeMirror(Mirror... mirror) {
         this.acceptedMirrors.removeAll(Arrays.asList(mirror));
         return this;
     }

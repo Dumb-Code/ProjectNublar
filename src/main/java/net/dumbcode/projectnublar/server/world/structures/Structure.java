@@ -3,10 +3,8 @@ package net.dumbcode.projectnublar.server.world.structures;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public abstract class Structure {
         return this;
     }
 
-    public abstract StructureInstance createInstance(@Nullable StructureInstance parent, World world, BlockPos pos, Random random);
+    public abstract StructureInstance createInstance(@Nullable StructureInstance parent, ServerWorld world, BlockPos pos, Random random);
 
     @Nullable
     public BlockPos attemptSize() {

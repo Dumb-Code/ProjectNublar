@@ -13,21 +13,19 @@ import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
-import net.minecraft.block.BlockChest;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.*;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityLockableLoot;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -47,7 +45,7 @@ public class Digsite extends Structure {
     }
 
     @Override
-    public StructureInstance createInstance(@Nullable StructureInstance parent, World world, BlockPos pos, Random random) {
+    public StructureInstance createInstance(@Nullable StructureInstance parent, ServerWorld world, BlockPos pos, Random random) {
         int overallsize = (int) Math.abs(random.nextGaussian()) + this.size;
         int totalLayers = 2 + random.nextInt(2);
         Circle[][] circles = new Circle[totalLayers][];
@@ -83,7 +81,7 @@ public class Digsite extends Structure {
             }
         }
 
-        return new Instance(parent, world, pos.add(minx, 0, minz), overallsize, circles, totalLayers, new float[] {minx, maxx, minz, maxz}, this);
+        return new Instance(parent, world, pos.offset(minx, 0, minz), overallsize, circles, totalLayers, new float[] {minx, maxx, minz, maxz}, this);
     }
 
     @AllArgsConstructor
@@ -96,7 +94,7 @@ public class Digsite extends Structure {
         private final int totalLayers;
         private final BlockPos centralPosition;
 
-        public Instance(@Nullable StructureInstance parent, World world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, float[] dims, Digsite structure) {
+        public Instance(@Nullable StructureInstance parent, ServerWorld world, BlockPos position, int overallsize, Circle[][] circles, int totalLayers, float[] dims, Digsite structure) {
             super(parent, world, position, (int) (dims[1] - dims[0]), (int) (dims[3] - dims[2]), structure);
             this.overallsize = overallsize;
             this.circles = circles;
@@ -130,18 +128,21 @@ public class Digsite extends Structure {
             this.digOutHole(holePositions, edgePositions, random, drops, biome);
 
             for (BlockPos edge : edgePositions) {
-                if(this.world.getBlockState(edge.down()).isSideSolid(this.world, edge.down(), EnumFacing.UP)) {
+                if(Block.isFaceFull(this.world.getBlockState(edge.below()).getShape(this.world, edge.below()), Direction.UP)) {
                     if (random.nextFloat() < 0.95) {
                         chests.add(edge);
                     } else {
-                        this.world.setBlockState(edge, BlockUtils.getBiomeDependantState(Blocks.OAK_FENCE.getDefaultState(), biome));
-                        this.world.setBlockState(edge.up(), BlockUtils.getBiomeDependantState(Blocks.TORCH.getDefaultState(), biome));
+                        this.world.setBlock(edge, BlockUtils.getBiomeDependantState(Blocks.OAK_FENCE.defaultBlockState(), biome), 2);
+                        this.world.setBlock(edge.above(), BlockUtils.getBiomeDependantState(Blocks.TORCH.defaultBlockState(), biome), 2);
                     }
                 }
-                for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-                    BlockPos blockPos = edge.offset(facing.getOpposite());
-                    if(this.world.getBlockState(blockPos).isSideSolid(this.world, blockPos, facing) && random.nextFloat() < 0.05) {
-                        this.world.setBlockState(edge, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, facing));
+                for (Direction facing : Direction.values()) {
+                    if(facing.getAxis() == Direction.Axis.Y) {
+                        continue;
+                    }
+                    BlockPos blockPos = edge.relative(facing.getOpposite());
+                    if(Block.isFaceFull(this.world.getBlockState(blockPos).getShape(this.world, blockPos), facing) && random.nextFloat() < 0.05) {
+                        this.world.setBlock(edge, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, facing), 2);
                         break;
                     }
                 }
@@ -155,16 +156,16 @@ public class Digsite extends Structure {
                 if (this.processHolePositions(holePositions, holePosition, random, biome)) {
                     edgePositions.add(holePosition);
                 } else {
-                    IBlockState blockState = this.world.getBlockState(holePosition);
-                    blockState.getBlock().getDrops(drops, this.world, holePosition, blockState, 0);
+                    BlockState blockState = this.world.getBlockState(holePosition);
+                    drops.addAll(Block.getDrops(blockState, this.world, holePosition, this.world.getBlockEntity(holePosition)));
 
-                    BlockPos mutPos = WorldUtils.getTopNonLeavesBlock(this.world, holePosition, state -> (state.getMaterial().blocksMovement() && !state.getMaterial().isLiquid()));
+                    BlockPos mutPos = WorldUtils.getTopNonLeavesBlock(this.world, holePosition, state -> (state.getMaterial().blocksMotion() && !state.getMaterial().isLiquid()));
                     while (mutPos.getY() >= holePosition.getY() && mutPos.getY() > 0) {
-                        this.world.setBlockState(mutPos, Blocks.AIR.getDefaultState());
-                        mutPos = mutPos.down();
+                        this.world.setBlock(mutPos, Blocks.AIR.defaultBlockState(), 2);
+                        mutPos = mutPos.below();
                     }
                 }
-                this.world.setBlockState(holePosition, Blocks.AIR.getDefaultState());
+                this.world.setBlock(holePosition, Blocks.AIR.defaultBlockState(), 2);
             }
         }
 
@@ -179,25 +180,24 @@ public class Digsite extends Structure {
                     break;
                 }
 
-                this.world.setBlockState(chestList.get(i), Blocks.CHEST.getDefaultState().withProperty(BlockChest.FACING, this.getChestRotateAngle(random, chestList.get(i))));
-                TileEntity tileEntity = this.world.getTileEntity(chestList.get(i));
-                if (tileEntity instanceof TileEntityLockableLoot) {
+                this.world.setBlock(chestList.get(i), Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, this.getChestRotateAngle(random, chestList.get(i))), 2);
+                TileEntity tileEntity = this.world.getBlockEntity(chestList.get(i));
+                if (tileEntity instanceof LockableLootTileEntity) {
 
-                    TileEntityLockableLoot chest = (TileEntityLockableLoot) tileEntity;
+                    LockableLootTileEntity chest = (LockableLootTileEntity) tileEntity;
                     chest.setLootTable(LootTableHandler.CHEST_DIGSITE, random.nextLong());
-                    chest.fillWithLoot(null);
+                    chest.unpackLootTable(null);
 
                     if (!mergedDrops.isEmpty()) {
-                        IntStream.range(0, chest.getSizeInventory())
+                        IntStream.range(0, chest.getContainerSize())
                             .boxed()
                             .collect(CollectorUtils.shuffler(random))
-                            .filter(slot -> chest.getStackInSlot(slot).isEmpty())
+                            .filter(slot -> chest.getItem(slot).isEmpty())
                             .limit(random.nextInt(3) + 2)
                             .forEach(slot -> {
                                 ItemStack stack = mergedDrops.get(random.nextInt(mergedDrops.size()));
                                 int split = random.nextInt(17) + 3;
-                                chest.setInventorySlotContents(slot, stack.splitStack(split));
-
+                                chest.setItem(slot, stack.split(split));
                             });
 
                     }
@@ -205,20 +205,20 @@ public class Digsite extends Structure {
             }
         }
 
-        private EnumFacing getChestRotateAngle(Random random, BlockPos chest) {
+        private Direction getChestRotateAngle(Random random, BlockPos chest) {
             if (random.nextBoolean()) {
-                IBlockState blockState = this.world.getBlockState(chest.offset(EnumFacing.NORTH));
+                BlockState blockState = this.world.getBlockState(chest.relative(Direction.NORTH));
                 if (blockState.getBlock().isAir(blockState, this.world, chest)) {
-                    return EnumFacing.NORTH;
+                    return Direction.NORTH;
                 } else {
-                    return EnumFacing.SOUTH;
+                    return Direction.SOUTH;
                 }
             } else {
-                IBlockState blockState = this.world.getBlockState(chest.offset(EnumFacing.EAST));
+                BlockState blockState = this.world.getBlockState(chest.relative(Direction.EAST));
                 if (blockState.getBlock().isAir(blockState, this.world, chest)) {
-                    return EnumFacing.EAST;
+                    return Direction.EAST;
                 } else {
-                    return EnumFacing.WEST;
+                    return Direction.WEST;
                 }
             }
         }
@@ -229,7 +229,7 @@ public class Digsite extends Structure {
                 List<ItemStack> additions = Lists.newArrayList();
                 boolean found = false;
                 for (ItemStack mergedDrop : mergedDrops) {
-                    if (mergedDrop.isItemEqual(drop)) {
+                    if (mergedDrop.equals(drop, false)) {
                         int mergeCount = mergedDrop.getCount() + drop.getCount();
                         if (mergeCount <= mergedDrop.getMaxStackSize()) {
                             mergedDrop.setCount(mergeCount);
@@ -256,18 +256,18 @@ public class Digsite extends Structure {
             boolean xFree = false;
             boolean yFree = false;
             boolean zFree = false;
-            for (EnumFacing value : EnumFacing.values()) {
-                BlockPos pos = holePosition.offset(value);
+            for (Direction value : Direction.values()) {
+                BlockPos pos = holePosition.relative(value);
                 if (!holePositions.contains(pos)) {
-                    if (value.getAxis() == EnumFacing.Axis.X) {
+                    if (value.getAxis() == Direction.Axis.X) {
                         xFree = !xFree;
-                    } else if (value.getAxis() == EnumFacing.Axis.Y) {
+                    } else if (value.getAxis() == Direction.Axis.Y) {
                         yFree = !yFree;
-                    } else if (value.getAxis() == EnumFacing.Axis.Z) {
+                    } else if (value.getAxis() == Direction.Axis.Z) {
                         zFree = !zFree;
                     }
                 }
-                if (value == EnumFacing.UP) {
+                if (value == Direction.UP) {
                     continue;
                 }
                 if (!holePositions.contains(pos)) { //The outline of the hole.
@@ -277,26 +277,26 @@ public class Digsite extends Structure {
             return yFree && (xFree || zFree);
         }
 
-        private void setHoldState(IBlockState currentState, BlockPos pos, Random random, Biome biome) {
-            if (!currentState.getBlock().isReplaceable(this.world, pos)) {
+        private void setHoldState(BlockState currentState, BlockPos pos, Random random, Biome biome) {
+            if (!currentState.getBlock().canBeReplaced(currentState, Fluids.EMPTY)) {
                 if (random.nextFloat() < 0.1 - 0.05 * (this.circles.length - this.centralPosition.getY() + pos.getY())) {
-                    this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.STONE.getDefaultState(), biome));
+                    this.world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.STONE.defaultBlockState(), biome), 2);
                 } else if (random.nextFloat() < 0.1) {
-                    this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.GRASS.getDefaultState(), biome));
+                    this.world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.GRASS.defaultBlockState(), biome), 2);
                 } else if (random.nextFloat() < 0.095) {
-                    this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), biome));
+                    this.world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.COARSE_DIRT.defaultBlockState(), biome), 2);
                 } else {
-                    this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(currentState, biome));
+                    this.world.setBlock(pos, BlockUtils.getBiomeDependantState(currentState, biome), 2);
                 }
             } else if (currentState.getMaterial().isLiquid()) {
                 if(pos.getY() - this.centralPosition.getY() == -1) { //Top circle layer
                     BlockPos mut = pos;
                     while(this.world.getBlockState(mut).getMaterial().isLiquid()) {
-                        this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.getDefaultState(), biome));
-                        mut = mut.up();
+                        this.world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.defaultBlockState(), biome), 2);
+                        mut = mut.above();
                     }
                 } else {
-                    this.world.setBlockState(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.getDefaultState(), biome));
+                    this.world.setBlock(pos, BlockUtils.getBiomeDependantState(Blocks.COBBLESTONE.defaultBlockState(), biome), 2);
                 }
             }
         }
@@ -333,23 +333,23 @@ public class Digsite extends Structure {
                 this.iterateCircle(distX, distZ, xsize, zsize, rad, (x, z) -> {
                     BlockPos blockPos = new BlockPos(startx + x, this.centralPosition.getY() + layer - this.totalLayers, startz + z);
                     int ytop = this.getTopSolid(blockPos);
-                    for (; blockPos.getY() <= ytop; blockPos = blockPos.up()) {
-                        this.world.setBlockState(blockPos, Blocks.AIR.getDefaultState());
+                    for (; blockPos.getY() <= ytop; blockPos = blockPos.above()) {
+                        this.world.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
                     }
                 });
             }
         }
 
         private int getTopSolid(BlockPos pos) {
-            Chunk chunk = this.world.getChunk(pos);
+            Chunk chunk = this.world.getChunkAt(pos);
             BlockPos blockpos;
             BlockPos blockpos1;
 
-            for (blockpos = new BlockPos(pos.getX(), chunk.getTopFilledSegment() + 16, pos.getZ()); blockpos.getY() >= 0; blockpos = blockpos1) {
-                blockpos1 = blockpos.down();
-                IBlockState state = chunk.getBlockState(blockpos1);
+            for (blockpos = new BlockPos(pos.getX(), chunk.getHighestSectionPosition() + 16, pos.getZ()); blockpos.getY() >= 0; blockpos = blockpos1) {
+                blockpos1 = blockpos.below();
+                BlockState state = chunk.getBlockState(blockpos1);
 
-                if ((state.getMaterial().blocksMovement() || state.getMaterial().isLiquid()) && !state.getBlock().isLeaves(state, this.world, blockpos1) && !state.getBlock().isFoliage(this.world, blockpos1)) {
+                if ((state.getMaterial().blocksMotion() || state.getMaterial().isLiquid()) && !state.is(BlockTags.LEAVES)) {
                     break;
                 }
             }
@@ -359,8 +359,8 @@ public class Digsite extends Structure {
 
         private void setFossils(Set<BlockPos> fossilPositions) {
             for (BlockPos pos : fossilPositions) {
-                if (!this.world.getBlockState(pos).getBlock().isReplaceable(this.world, pos)) {
-                    this.world.setBlockState(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), DinosaurHandler.TYRANNOSAURUS));
+                if (!this.world.getBlockState(pos).canBeReplaced(Fluids.EMPTY)) {
+                    this.world.setBlock(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), DinosaurHandler.TYRANNOSAURUS), 2);
                 }
             }
         }
