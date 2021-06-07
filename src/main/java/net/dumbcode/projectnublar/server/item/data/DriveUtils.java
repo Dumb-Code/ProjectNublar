@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.item.data;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.List;
@@ -19,23 +19,23 @@ public class DriveUtils {
         if(key.isEmpty()) {
             return false;
         }
-        return drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(key).getInteger("amount") < 100;
+        return drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information").getCompound(key).getInt("amount") < 100;
     }
 
     public static List<DriveEntry> getAll(ItemStack drive) {
         List<DriveEntry> out = Lists.newArrayList();
-        NBTTagCompound nbt = drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
+        CompoundNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
 
-        for (String s : nbt.getKeySet()) {
-            NBTTagCompound tag = nbt.getCompoundTag(s);
-            out.add(new DriveEntry(s, tag.getString("translation_key"), tag.getInteger("amount"), DriveType.values()[tag.getInteger("drive_type") % DriveType.values().length]));
+        for (String s : nbt.getAllKeys()) {
+            CompoundNBT tag = nbt.getCompound(s);
+            out.add(new DriveEntry(s, tag.getString("translation_key"), tag.getInt("amount"), DriveType.values()[tag.getInt("drive_type") % DriveType.values().length]));
         }
 
         return out;
     }
 
     public static int getAmount(ItemStack drive, String key) {
-        return drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information").getCompoundTag(key).getInteger("amount");
+        return drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information").getCompound(key).getInt("amount");
     }
 
     public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
@@ -44,23 +44,23 @@ public class DriveUtils {
         }
 
         DriveInformation info = (DriveInformation) inItem.getItem();
-        NBTTagCompound nbt = drive.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("drive_information");
+        CompoundNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
         String key = info.getKey(inItem);
         if(key.isEmpty()) {
             return;
         }
-        NBTTagCompound inner = nbt.getCompoundTag(key);
-        int current = inner.getInteger("amount");
+        CompoundNBT inner = nbt.getCompound(key);
+        int current = inner.getInt("amount");
         if(current >= 100) {
             return;
         }
         int result = info.getSize(inItem);
-        inner.setInteger("amount", MathHelper.clamp(current + result, 0, 100));
-        inner.setString("translation_key", info.getDriveTranslationKey(inItem));
-        inner.setInteger("drive_type", info.getDriveType(inItem).ordinal());
-        nbt.setTag(key, inner);
+        inner.putInt("amount", MathHelper.clamp(current + result, 0, 100));
+        inner.putString("translation_key", info.getDriveTranslationKey(inItem));
+        inner.putInt("drive_type", info.getDriveType(inItem).ordinal());
+        nbt.put(key, inner);
 
-        drive.getOrCreateSubCompound(ProjectNublar.MODID).setTag("drive_information", nbt);
+        drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", nbt);
     }
 
     public interface DriveInformation {

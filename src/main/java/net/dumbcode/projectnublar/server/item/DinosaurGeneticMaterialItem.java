@@ -4,7 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 
 public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements DriveUtils.DriveInformation {
@@ -19,8 +19,8 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
 
     @Override
     public int getSize(ItemStack stack) {
-        NBTTagCompound compound = stack.getSubCompound(ProjectNublar.MODID);
-        return compound != null && compound.hasKey("GeneticMaterialSize", 99)? compound.getInteger("GeneticMaterialSize") : 2;
+        CompoundNBT compound = stack.getTagElement(ProjectNublar.MODID);
+        return compound != null && compound.contains("GeneticMaterialSize", 99)? compound.getInt("GeneticMaterialSize") : 2;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
         return DriveUtils.DriveType.DINOSAUR;
     }
 
-    @Override
+
     public String getTranslationKey(ItemStack stack) {
         ResourceLocation regName = this.getDinosaur().getRegName();
         return regName.getNamespace()+".dino."+regName.getPath();
@@ -46,7 +46,7 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
 
     public static ItemStack setSize(ItemStack stack, int size) {
         if(stack.getItem() instanceof DinosaurGeneticMaterialItem) {
-            stack.getOrCreateSubCompound(ProjectNublar.MODID).setInteger("GeneticMaterialSize", size);
+            stack.getOrCreateTagElement(ProjectNublar.MODID).putInt("GeneticMaterialSize", size);
         }
         return stack;
     }

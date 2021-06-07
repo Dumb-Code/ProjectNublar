@@ -6,18 +6,17 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import java.util.Locale;
 
@@ -28,82 +27,79 @@ public class DinosaurSpawnEgg extends BasicDinosaurItem {
         super(dinosaur, properties);
     }
 
-    @Override
-    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand) {
-        return super.itemInteractionForEntity(stack, playerIn, target, hand);
-    }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if(player.isSneaking()) {
+    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if(player.isCrouching()) {
             SpawnEggInfo info = SpawnEggInfo.fromStack(stack);
             info.setState(info.getState().next());
-            if (world.isRemote) {
+            if (world.isClientSide) {
                 String modeString;
                 switch (info.getState()) {
                     case MALE: modeString = "male"; break;
                     case FEMALE: modeString = "female"; break;
                     default: modeString = "random"; break;
                 }
-                player.sendMessage(new TextComponentTranslation("spawnegg.genderchange." + modeString));
+                player.displayClientMessage(new TranslationTextComponent(ProjectNublar.MODID + ".spawnegg.genderchange." + modeString), false);
             }
-            stack.getOrCreateSubCompound(ProjectNublar.MODID).setTag("SpawnEggInfo", info.serialize());
+            stack.getOrCreateTagElement(ProjectNublar.MODID).put("SpawnEggInfo", info.serialize());
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (world.isRemote) {
-            return EnumActionResult.SUCCESS;
-        } else if (!player.canPlayerEdit(pos.offset(side), side, stack)) {
-            return EnumActionResult.PASS;
-        } else {
-            IBlockState state = world.getBlockState(pos);
-            pos = pos.offset(side);
-            double yOffset = 0.0D;
+    public ActionResultType useOn(ItemUseContext context) {
+        World world = context.getLevel();
+        PlayerEntity player = context.getPlayer();
+        Hand hand = context.getHand();
+        BlockPos clickedPos = context.getClickedPos();
+        Direction direction = context.getClickedFace();
+        ItemStack stack = player.getItemInHand(hand);
+        if (!world.isClientSide) {
+            BlockState state = world.getBlockState(clickedPos);
 
-            if (side == EnumFacing.UP && state.getBlock() instanceof BlockFence) {
-                yOffset = 0.5D;
+            BlockPos blockpos;
+            if (state.getCollisionShape(world, clickedPos).isEmpty()) {
+                blockpos = clickedPos;
+            } else {
+                blockpos = clickedPos.relative(direction);
             }
 
-            DinosaurEntity dinosaur = this.createDinosaurEntity(world, player, stack, pos.getX() + 0.5D, pos.getY() + yOffset, pos.getZ() + 0.5D);
+
+            DinosaurEntity dinosaur = this.createDinosaurEntity(world, player, stack, blockpos.getX() + 0.5D, blockpos.getY() + 0.5, blockpos.getZ() + 0.5D);
 
             if (dinosaur != null) {
-                if (stack.hasDisplayName()) {
-                    dinosaur.setCustomNameTag(stack.getDisplayName());
+                if (stack.hasCustomHoverName()) {
+                    dinosaur.setCustomName(stack.getDisplayName());
                 }
 
-                if (!player.capabilities.isCreativeMode) {
+                if (!player.isCreative()) {
                     stack.shrink(1);
                 }
 
-                world.spawnEntity(dinosaur);
-                dinosaur.playLivingSound();
+                ((ServerWorld) world).addFreshEntityWithPassengers(dinosaur);
+                dinosaur.playAmbientSound();
             }
 
-            return EnumActionResult.SUCCESS;
         }
+        return ActionResultType.SUCCESS;
     }
 
-    public DinosaurEntity createDinosaurEntity(World world, EntityPlayer player, ItemStack stack, double x, double y, double z) {
+    public DinosaurEntity createDinosaurEntity(World world, PlayerEntity player, ItemStack stack, double x, double y, double z) {
         DinosaurEntity entity = this.dinosaur.createEntity(world);
 
         boolean male;
         switch (SpawnEggInfo.fromStack(stack).getState()) {
             case MALE: male = true; break;
             case FEMALE: male = false; break;
-            default: male = player.getRNG().nextBoolean(); break;
+            default: male = player.getRandom().nextBoolean(); break;
         }
 
         entity.get(EntityComponentTypes.GENDER).ifPresent(comp -> comp.male = male);
 
-        entity.setPosition(x, y, z);
-        entity.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(world.rand.nextFloat() * 360.0F), 0.0F);
-        entity.rotationYawHead = entity.rotationYaw;
-        entity.renderYawOffset = entity.rotationYaw;
+        entity.setPos(x, y, z);
+        entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
         return entity;
     }
 
@@ -114,17 +110,17 @@ public class DinosaurSpawnEgg extends BasicDinosaurItem {
         SpawnEggState state;
 
         private static SpawnEggInfo fromStack(ItemStack stack) {
-            NBTTagCompound nbt = stack.getOrCreateSubCompound(ProjectNublar.MODID).getCompoundTag("SpawnEggInfo");
+            CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID).getCompound("SpawnEggInfo");
             return new SpawnEggInfo(
                     ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))),
                     SpawnEggState.fromName(nbt.getString("State"))
             );
         }
 
-        private NBTTagCompound serialize() {
-            NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setString("Dinosaur", this.dinosaur.getRegName().toString());
-            nbt.setString("State", this.state.name().toLowerCase(Locale.ROOT));
+        private CompoundNBT serialize() {
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putString("Dinosaur", this.dinosaur.getRegName().toString());
+            nbt.putString("State", this.state.name().toLowerCase(Locale.ROOT));
             return nbt;
         }
     }
