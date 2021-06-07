@@ -1,55 +1,55 @@
 package net.dumbcode.projectnublar.server.network;
 
-import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class S43SyncMachineStack implements IMessage {
+import java.util.function.Supplier;
 
-    private BlockPos pos;
-    private int slot;
-    private ItemStack stack;
+public class S43SyncMachineStack {
 
-    public S43SyncMachineStack() {
+    private final BlockPos pos;
+    private final int slot;
+    private final ItemStack stack;
+
+    public S43SyncMachineStack(BlockPos pos, int slot, ItemStack stack) {
+        this.pos = pos;
+        this.slot = slot;
+        this.stack = stack;
     }
 
     public S43SyncMachineStack(MachineModuleBlockEntity<?> entity, int slot) {
-        this.pos = entity.getPos();
+        this.pos = entity.getBlockPos();
         this.slot = slot;
         this.stack = entity.getHandler().getStackInSlot(slot);
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.pos = BlockPos.fromLong(buf.readLong());
-        this.slot = buf.readByte();
-        this.stack = ByteBufUtils.readItemStack(buf);
+    public static S43SyncMachineStack fromBytes(PacketBuffer buf) {
+        return new S43SyncMachineStack(
+            buf.readBlockPos(), buf.readInt(), buf.readItem()
+        );
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeLong(this.pos.toLong());
-        buf.writeByte(this.slot);
-        ByteBufUtils.writeItemStack(buf, this.stack);
+    public static void toBytes(S43SyncMachineStack packet, PacketBuffer buf) {
+        buf.writeBlockPos(packet.pos);
+        buf.writeInt(packet.slot);
+        buf.writeItem(packet.stack);
     }
 
+    public static void handle(S43SyncMachineStack packet, Supplier<NetworkEvent.Context> supplier) {
+        NetworkEvent.Context context = supplier.get();
 
-    public static class Handler extends WorldModificationsMessageHandler<S43SyncMachineStack, S43SyncMachineStack> {
-
-        @Override
-        protected void handleMessage(S43SyncMachineStack message, MessageContext ctx, World world, EntityPlayer player) {
-            TileEntity te = world.getTileEntity(message.pos);
+        context.enqueueWork(() -> {
+            TileEntity te = Minecraft.getInstance().level.getBlockEntity(packet.pos);
             if(te instanceof MachineModuleBlockEntity) {
-                ((MachineModuleBlockEntity<?>) te).getHandler().setStackInSlot(message.slot, message.stack);
+                ((MachineModuleBlockEntity<?>) te).getHandler().setStackInSlot(packet.slot, packet.stack);
             }
+        });
 
-        }
+        context.setPacketHandled(true);
     }
 }

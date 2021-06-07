@@ -11,9 +11,9 @@ import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
-import net.dumbcode.projectnublar.server.network.C23ConfirmTrackingTablet;
+import net.dumbcode.projectnublar.server.network.C2SConfirmTrackingTablet;
 import net.dumbcode.projectnublar.server.network.C25StopTrackingTablet;
-import net.dumbcode.projectnublar.server.network.C30TrackingTabletEntryClicked;
+import net.dumbcode.projectnublar.server.network.C2STrackingTabletEntryClicked;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.RenderHelper;
@@ -76,7 +76,7 @@ public class TrackingTabletScreen extends TabletScreen {
 
         this.texture = new DynamicTexture(textureWidth, textureHeight, true);
 
-        ProjectNublar.NETWORK.sendToServer(new C23ConfirmTrackingTablet());
+        ProjectNublar.NETWORK.sendToServer(new C2SConfirmTrackingTablet());
     }
 
 
@@ -345,7 +345,7 @@ public class TrackingTabletScreen extends TabletScreen {
         public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
             transformation.setIdentity();
             selected = null;
-            ProjectNublar.NETWORK.sendToServer(new C30TrackingTabletEntryClicked(this.pos));
+            ProjectNublar.NETWORK.sendToServer(new C2STrackingTabletEntryClicked(this.pos));
             return true;
         }
 

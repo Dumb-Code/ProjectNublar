@@ -41,6 +41,10 @@ public class BlockHandler {
     public static final RegistryObject<MachineModuleBlock> INCUBATOR = REGISTER.register("incubator", () -> new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.INCUBATOR, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
 
+    public static final RegistryObject<Block> PLANTER_BOX = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
+    public static final RegistryObject<Block> UNNAMED_SCIENTIST_BLOCK = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
+    public static final RegistryObject<Block> UNNAMED_PALEONTOLOGIST_BLOCK = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
+
     public static final Map<FossilBlock.FossilType, Map<Dinosaur, RegistryObject<FossilBlock>>> FOSSIL = Util.make(new HashMap<>(), map -> {
         for(FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
             map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value, copy(value.getCopy()))));

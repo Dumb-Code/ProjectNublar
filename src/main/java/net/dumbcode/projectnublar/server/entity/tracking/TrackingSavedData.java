@@ -6,6 +6,7 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -90,7 +91,7 @@ public class TrackingSavedData extends WorldSavedData {
             return info;
         }
 
-        public static void serialize(ByteBuf buf, DataEntry info) {
+        public static void serialize(PacketBuffer buf, DataEntry info) {
             buf.writeLong(info.uuid.getLeastSignificantBits());
             buf.writeLong(info.uuid.getMostSignificantBits());
 
@@ -102,7 +103,7 @@ public class TrackingSavedData extends WorldSavedData {
             info.information.forEach(d -> TrackingDataInformation.serializeBuf(buf, d));
         }
 
-        public static DataEntry deserailize(ByteBuf buf) {
+        public static DataEntry deserailize(PacketBuffer buf) {
             DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()),new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()));
             IntStream.range(0, buf.readShort())
                 .mapToObj(i -> TrackingDataInformation.deserializeBuf(buf))

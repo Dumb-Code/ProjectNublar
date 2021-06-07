@@ -3,21 +3,24 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Maps;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
-import net.dumbcode.projectnublar.server.network.S22StartTrackingTabletHandshake;
-import net.dumbcode.projectnublar.server.network.S24TrackingTabletUpdateChunk;
-import net.dumbcode.projectnublar.server.network.S32SetTrackingDataList;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.dumbcode.projectnublar.server.network.S2STrackingTabletUpdateChunk;
+import net.dumbcode.projectnublar.server.network.S2CStartTrackingTabletHandshake;
+import net.dumbcode.projectnublar.server.network.S2CSetTrackingDataList;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -29,7 +32,7 @@ public class TrackingTabletIterator {
 
     public static final int MAX_RADIUS = 1000;
 
-    private final EntityPlayerMP player;
+    private final ServerPlayerEntity player;
     private final BlockPos center;
     private final int radius;
     private final BlockPos fromPos;
@@ -42,25 +45,25 @@ public class TrackingTabletIterator {
     private boolean finishedTerrain;
     private int tickCounter;
 
-    public TrackingTabletIterator(EntityPlayerMP player, BlockPos center, int squareRadius) {
+    public TrackingTabletIterator(ServerPlayerEntity player, BlockPos center, int squareRadius) {
         this.player = player;
-        this.world = player.world;
+        this.world = player.level;
         this.center = center;
 
         squareRadius = Math.min(Math.abs(squareRadius), MAX_RADIUS);
         this.radius = squareRadius;
 
-        this.fromPos = center.add(-squareRadius, 0, -squareRadius);
-        this.toPos = center.add(squareRadius, 0, squareRadius);
+        this.fromPos = center.offset(-squareRadius, 0, -squareRadius);
+        this.toPos = center.offset(squareRadius, 0, squareRadius);
 
-        if(PLAYER_TO_TABLET_MAP.containsKey(player.getUniqueID())) {
-            PLAYER_TO_TABLET_MAP.get(player.getUniqueID()).finish();
+        if(PLAYER_TO_TABLET_MAP.containsKey(player.getUUID())) {
+            PLAYER_TO_TABLET_MAP.get(player.getUUID()).finish();
         }
 
-        PLAYER_TO_TABLET_MAP.put(player.getUniqueID(), this);
+        PLAYER_TO_TABLET_MAP.put(player.getUUID(), this);
 
         this.currentPos = new ChunkPos(this.fromPos);
-        ProjectNublar.NETWORK.sendTo(new S22StartTrackingTabletHandshake(this.fromPos.getX(), this.toPos.getX(), this.fromPos.getZ(), this.toPos.getZ()), player);
+        ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(() -> this.player), new S2CStartTrackingTabletHandshake(this.fromPos.getX(), this.toPos.getX(), this.fromPos.getZ(), this.toPos.getZ()));
     }
 
     @SubscribeEvent
@@ -82,26 +85,32 @@ public class TrackingTabletIterator {
         }
 
         if(this.tickCounter++ % 5 == 0) {
-            ProjectNublar.NETWORK.sendTo(new S32SetTrackingDataList(
+            ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(() -> this.player), new S2CSetTrackingDataList(
                 TrackingSavedData.getData(event.world).getEntries().stream()
-                    .filter(entry -> this.center.distanceSqToCenter(entry.getPosition().x, 0, entry.getPosition().z) <= this.radius*this.radius)
+                    .filter(entry -> this.center.distSqr(entry.getPosition().x, 0, entry.getPosition().z, true) <= this.radius*this.radius)
                     .collect(Collectors.toList())
-            ), this.player);
+            ));
         }
+    }
 
-
+    private Biome[] getBiomes(int startX, int startZ, int endX, int endZ) {
+        Biome[] biomes = new Biome[(endX-startX) * (endZ - startZ)];
+        for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(startX, 0, startZ), new BlockPos(endX, 0, endZ))) {
+            biomes[this.getIndex(startX, endX, startZ, pos.getX(), pos.getZ())] = this.world.getBiome(pos);
+        }
+        return biomes;
     }
 
     private void doCurrentChunk() {
         //All values are inclusive.
-        int xStart = MathHelper.clamp(this.currentPos.getXStart(), this.fromPos.getX(), this.toPos.getX());
-        int xEnd = MathHelper.clamp(this.currentPos.getXEnd(), this.fromPos.getX(), this.toPos.getX());
+        int xStart = MathHelper.clamp(this.currentPos.getMinBlockX(), this.fromPos.getX(), this.toPos.getX());
+        int xEnd = MathHelper.clamp(this.currentPos.getMaxBlockX(), this.fromPos.getX(), this.toPos.getX());
 
-        int zStart = MathHelper.clamp(this.currentPos.getZStart(), this.fromPos.getZ(), this.toPos.getZ());
-        int zEnd = MathHelper.clamp(this.currentPos.getZEnd(), this.fromPos.getZ(), this.toPos.getZ());
+        int zStart = MathHelper.clamp(this.currentPos.getMinBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
+        int zEnd = MathHelper.clamp(this.currentPos.getMaxBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
 
         int[] colorData = new int[(xEnd - xStart + 1)*(zEnd - zStart + 1)];
-        Biome[] biomes = this.world.getBiomeProvider().getBiomes(null, xStart-1, zStart-1, xEnd - xStart + 3, zEnd - zStart + 3, false);
+        Biome[] biomes = this.getBiomes(xStart, zStart, xEnd, zEnd);
 
         this.generateBiomeData(xStart, zStart, xEnd, zEnd, colorData, biomes);
 
@@ -109,37 +118,36 @@ public class TrackingTabletIterator {
             this.generateBlockMapData(xStart, zStart, xEnd, zEnd, colorData, biomes);
         }
 
-        ProjectNublar.NETWORK.sendTo(new S24TrackingTabletUpdateChunk(xStart, xEnd, zStart, zEnd, colorData), this.player);
+        ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(() -> this.player), new S2STrackingTabletUpdateChunk(xStart, xEnd, zStart, zEnd, colorData));
     }
 
     private void generateBlockMapData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[] biomes) {
         int[] biomeData = Arrays.copyOf(colorData, colorData.length);
-        BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
+        BlockPos.Mutable pos = new BlockPos.Mutable();
 
         for (int z = zStart; z <= zEnd ; z++) {
             for (int x = xStart; x <= xEnd ; x++) {
-                BlockPos.MutableBlockPos blockPos = this.getTopBlock(pos.setPos(x, 0, z));
-                IBlockState state = this.world.getBlockState(blockPos);
+                BlockPos.Mutable blockPos = this.getTopBlock(pos.set(x, 0, z));
+                BlockState state = this.world.getBlockState(blockPos);
 
                 int colorIndex = 1;
-                if(this.world.isBlockLoaded(blockPos.north())) {
-                    int prevHeight = blockPos.getY() - this.getTopBlock(blockPos.move(EnumFacing.NORTH)).getY();
+                if(this.world.isLoaded(blockPos.north())) {
+                    int prevHeight = blockPos.getY() - this.getTopBlock(blockPos.move(Direction.NORTH)).getY();
                     colorIndex = MathHelper.clamp(prevHeight, -1, 1) + 1;
                 }
 
                 int color;
                 //todo: config these blocks
                 if(state.getBlock() == Blocks.GRASS) {
-                    color = BiomeUtils.getGrassColor(biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, x, z)], blockPos, 0.5F);
-                } else if (state.getBlock() == Blocks.LEAVES || state.getBlock() == Blocks.LEAVES2) {
-                    color = BiomeUtils.getGrassColor(biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, x, z)], blockPos, 0.3F);
+                    color = BiomeUtils.getGrassColor(biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, x, z)], 0.5F);
+                } else if (state.is(BlockTags.LEAVES)) {
+                    color = BiomeUtils.getGrassColor(biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, x, z)], 0.3F);
                 } else {
-                    color = state.getMapColor(this.world, blockPos).colorValue;
+                    color = state.getMapColor(this.world, blockPos).col;
                 }
                 colorData[this.getIndex(xStart, xEnd, zStart, x, z)] = this.getMapColor(color, colorIndex);
             }
         }
-        pos.release();
 
         boolean topCorner = this.isChunkOffsetGenerated(0, -1);
         boolean leftCorner = this.isChunkOffsetGenerated(-1, 0);
@@ -169,8 +177,8 @@ public class TrackingTabletIterator {
         for (int quadX = 0; quadX < 2; quadX++) {
             for (int quadZ = 0; quadZ < 2; quadZ++) {
 
-                int worldStartX = this.currentPos.getXStart() + quadX*8;
-                int worldStartZ = this.currentPos.getZStart() + quadZ*8;
+                int worldStartX = this.currentPos.getMinBlockX() + quadX*8;
+                int worldStartZ = this.currentPos.getMinBlockZ() + quadZ*8;
 
                 int worldEndX = worldStartX + 7;
                 int worldEndZ = worldStartZ + 7;
@@ -283,7 +291,7 @@ public class TrackingTabletIterator {
     }
 
     private boolean isChunkOffsetGenerated(int xOff, int zOff) {
-        return this.world.isChunkGeneratedAt(this.currentPos.x + xOff, this.currentPos.z + zOff) && this.world.getChunk(this.currentPos.x + xOff, this.currentPos.z + zOff).isTerrainPopulated();
+        return this.world.hasChunk(this.currentPos.x + xOff, this.currentPos.z + zOff);
     }
 
     private void generateBiomeData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[] biomes) {
@@ -306,7 +314,7 @@ public class TrackingTabletIterator {
 
                 if(!bordered) {
                 }
-                colorData[this.getIndex(xStart, xEnd, zStart, x, z)] = BiomeUtils.getBiomeColor(new BlockPos(x, 100, z), biome);
+                colorData[this.getIndex(xStart, xEnd, zStart, x, z)] = BiomeUtils.getBiomeColor(biome);
             }
         }
     }
@@ -336,11 +344,11 @@ public class TrackingTabletIterator {
         return 0xFF000000 | r << 16 | g << 8 | b;
     }
 
-    private BlockPos.MutableBlockPos getTopBlock(BlockPos.MutableBlockPos topPos) {
+    private BlockPos.Mutable getTopBlock(BlockPos.Mutable topPos) {
         topPos.setY(256);
         while(topPos.getY() >= 1) {
-            IBlockState state = this.world.getBlockState(topPos);
-            if(state.isFullBlock() || state.getMaterial().isLiquid() || state.getBlock() == Blocks.SNOW_LAYER) {
+            BlockState state = this.world.getBlockState(topPos);
+            if(Block.isShapeFullBlock(state.getShape(this.world, topPos)) || state.getMaterial().isLiquid() || state.getBlock() == Blocks.SNOW) {
                 break;
             }
             topPos.setY(topPos.getY() - 1);
@@ -353,12 +361,12 @@ public class TrackingTabletIterator {
         this.currentPos = new ChunkPos(this.currentPos.x + 1, this.currentPos.z);
 
         //Out of bounds to the right, so move down one
-        if(this.currentPos.getXStart() > this.toPos.getX()) {
+        if(this.currentPos.getMinBlockX() > this.toPos.getX()) {
             this.currentPos = new ChunkPos(this.fromPos.getX() >> 4, this.currentPos.z + 1);
         }
 
         //Out of bounds to the bottom, so we're done and should return false
-        return this.currentPos.getZStart() <= this.toPos.getZ();
+        return this.currentPos.getMinBlockZ() <= this.toPos.getZ();
     }
 
     public void start() {
@@ -367,7 +375,7 @@ public class TrackingTabletIterator {
 
     public void finish() {
         MinecraftForge.EVENT_BUS.unregister(this);
-        PLAYER_TO_TABLET_MAP.remove(this.player.getUniqueID());
+        PLAYER_TO_TABLET_MAP.remove(this.player.getUUID());
     }
 
 }

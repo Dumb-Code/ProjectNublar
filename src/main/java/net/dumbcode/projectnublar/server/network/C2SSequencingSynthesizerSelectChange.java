@@ -1,11 +1,13 @@
 package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -32,7 +34,10 @@ public class C2SSequencingSynthesizerSelectChange {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> MachineModuleContainer.getFromMenu(
             SequencingSynthesizerBlockEntity.class,
-            context.getSender()).ifPresent(b -> b.setSelect(message.id, message.key, message.amount))
+            context.getSender()).ifPresent(b -> {
+            ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2CSyncSequencingSynthesizerSelectChange(b.getBlockPos(), message.id, message.key, message.amount));
+            b.setSelect(message.id, message.key, message.amount);
+            })
         );
         context.setPacketHandled(true);
     }

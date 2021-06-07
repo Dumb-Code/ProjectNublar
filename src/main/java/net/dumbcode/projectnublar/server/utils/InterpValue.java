@@ -3,19 +3,19 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid=ProjectNublar.MODID)
-public class InterpValue implements INBTSerializable<NBTTagCompound> {
+public class InterpValue implements INBTSerializable<CompoundNBT> {
 
     private static final List<InterpValue> INSTANCES = Lists.newArrayList();
     private static final List<InterpValue> MARKED_REMOVE = Lists.newArrayList();
@@ -34,7 +34,7 @@ public class InterpValue implements INBTSerializable<NBTTagCompound> {
     }
 
     public InterpValue(Entity entity, double speed) {
-        this(entity::isEntityAlive, speed);
+        this(entity::isAlive, speed);
     }
 
     public InterpValue(Supplier<Boolean> supplier, double speed) {
@@ -86,15 +86,15 @@ public class InterpValue implements INBTSerializable<NBTTagCompound> {
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setDouble("target", target);
-        tag.setDouble("current", current);
+    public CompoundNBT serializeNBT() {
+        CompoundNBT tag = new CompoundNBT();
+        tag.putDouble("target", target);
+        tag.putDouble("current", current);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundNBT nbt) {
         this.target = nbt.getDouble("target");
         this.current = nbt.getDouble("current");
         this.previousCurrent = current;
@@ -102,8 +102,8 @@ public class InterpValue implements INBTSerializable<NBTTagCompound> {
 
     @SubscribeEvent
     public static void onTick(TickEvent event) {
-        Side side = FMLCommonHandler.instance().getSide();
-        if((event instanceof TickEvent.ClientTickEvent && side.isClient()) || (event instanceof TickEvent.ServerTickEvent && side.isServer())) {
+        Dist side = FMLEnvironment.dist;
+        if((event instanceof TickEvent.ClientTickEvent && side.isClient()) || (event instanceof TickEvent.ServerTickEvent && side.isDedicatedServer())) {
             INSTANCES.forEach(InterpValue::tickInterp);
             MARKED_REMOVE.forEach(INSTANCES::remove);
             MARKED_REMOVE.clear();

@@ -115,13 +115,13 @@ public class RotatedRayBox {
             this.box = box;
         }
 
-        public Builder origin(float x, float y, float z) {
-            this.origin = new Vector3f(x, y, z);
+        public Builder origin(double x, double y, double z) {
+            this.origin = new Vector3f((float) x, (float) y, (float) z);
             return this;
         }
 
-        public Builder rotate(float angle, float x, float y, float z) {
-            this.matrix.mulPose(new Vector3f(x, y, z).rotation(angle));
+        public Builder rotate(double angle, float x, float y, float z) {
+            this.matrix.mulPose(new Vector3f(x, y, z).rotation((float) angle));
             return this;
         }
 

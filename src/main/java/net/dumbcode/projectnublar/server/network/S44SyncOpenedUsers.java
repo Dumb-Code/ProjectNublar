@@ -1,61 +1,51 @@
 package net.dumbcode.projectnublar.server.network;
 
-import io.netty.buffer.ByteBuf;
-import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
+import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class S44SyncOpenedUsers implements IMessage {
+@RequiredArgsConstructor
+public class S44SyncOpenedUsers {
+    private final BlockPos pos;
+    private final Set<UUID> uuidSet;
 
-    private BlockPos pos;
-    private final Set<UUID> uuidSet = new HashSet<>();
-
-    public S44SyncOpenedUsers() {
+    public static S44SyncOpenedUsers fromBytes(PacketBuffer buf) {
+        return new S44SyncOpenedUsers(
+            buf.readBlockPos(),
+            IntStream.range(0, buf.readShort()).mapToObj(i -> buf.readUUID()).collect(Collectors.toSet())
+        );
     }
 
-    public S44SyncOpenedUsers(MachineModuleBlockEntity<?> machine) {
-        this.pos = machine.getPos();
-        this.uuidSet.addAll(machine.getOpenedUsers());
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.pos = BlockPos.fromLong(buf.readLong());
-        short size = buf.readShort();
-        for (int i = 0; i < size; i++) {
-            this.uuidSet.add(new UUID(buf.readLong(), buf.readLong()));
+    public static void toBytes(S44SyncOpenedUsers packet, PacketBuffer buf) {
+        buf.writeBlockPos(packet.pos);
+        buf.writeShort(packet.uuidSet.size());
+        for (UUID uuid : packet.uuidSet) {
+            buf.writeUUID(uuid);
         }
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeLong(this.pos.toLong());
-        buf.writeShort(this.uuidSet.size());
-        for (UUID uuid : this.uuidSet) {
-            buf.writeLong(uuid.getMostSignificantBits());
-            buf.writeLong(uuid.getLeastSignificantBits());
-        }
-    }
+    public static void handle(S44SyncOpenedUsers packet, Supplier<NetworkEvent.Context> supplier) {
+        NetworkEvent.Context context = supplier.get();
 
-    public static class Handler extends WorldModificationsMessageHandler<S44SyncOpenedUsers, S44SyncOpenedUsers> {
-
-        @Override
-        protected void handleMessage(S44SyncOpenedUsers message, MessageContext ctx, World world, EntityPlayer player) {
-            TileEntity entity = world.getTileEntity(message.pos);
+        context.enqueueWork(() -> {
+            TileEntity entity = Minecraft.getInstance().level.getBlockEntity(packet.pos);
             if(entity instanceof MachineModuleBlockEntity) {
                 Set<UUID> users = ((MachineModuleBlockEntity<?>) entity).getOpenedUsers();
                 users.clear();
-                users.addAll(message.uuidSet);
+                users.addAll(packet.uuidSet);
             }
-        }
+        });
+
+        context.setPacketHandled(true);
     }
 }

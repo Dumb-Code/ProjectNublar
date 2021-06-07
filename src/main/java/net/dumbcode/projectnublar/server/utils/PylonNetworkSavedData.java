@@ -2,14 +2,14 @@ package net.dumbcode.projectnublar.server.utils;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagLongArray;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
 
@@ -28,13 +28,13 @@ public class PylonNetworkSavedData extends WorldSavedData {
 
     public Set<BlockPos> getPositions(PylonHeadBlockEntity entity) {
         Set<BlockPos> set = this.getPositions(entity.getNetworkUUID());
-        set.add(entity.getPos());
+        set.add(entity.getBlockPos());
         return set;
     }
 
     public void cleanAndRemove(PylonHeadBlockEntity entity) {
         if (this.uuidPosMap.containsKey(entity.getNetworkUUID())) {
-            this.uuidPosMap.get(entity.getNetworkUUID()).remove(entity.getPos());
+            this.uuidPosMap.get(entity.getNetworkUUID()).remove(entity.getBlockPos());
         }
         this.clean();
     }
@@ -49,17 +49,13 @@ public class PylonNetworkSavedData extends WorldSavedData {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void load(CompoundNBT nbt) {
         this.uuidPosMap.clear();
-        for (String s : nbt.getKeySet()) {
+        for (String s : nbt.getAllKeys()) {
             try {
                 Set<BlockPos> set = new HashSet<>();
-                NBTBase tag = nbt.getTag(s);
-                if(tag instanceof NBTTagLongArray) {
-                    long[] along = ObfuscationReflectionHelper.getPrivateValue(NBTTagLongArray.class, (NBTTagLongArray)tag, "data", "field_193587_b");
-                    for (long l : along) {
-                        set.add(BlockPos.fromLong(l));
-                    }
+                for (INBT inbt : nbt.getList(s, Constants.NBT.TAG_COMPOUND)) {
+                    set.add(NBTUtil.readBlockPos((CompoundNBT) inbt));
                 }
                 this.uuidPosMap.put(UUID.fromString(s), set);
             } catch (IllegalArgumentException e) {
@@ -69,8 +65,14 @@ public class PylonNetworkSavedData extends WorldSavedData {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        this.uuidPosMap.forEach((uuid, set) -> compound.setTag(uuid.toString(), new NBTTagLongArray(set.stream().mapToLong(BlockPos::toLong).toArray())));
+    public CompoundNBT save(CompoundNBT compound) {
+        this.uuidPosMap.forEach((uuid, set) -> {
+            ListNBT list = new ListNBT();
+            for (BlockPos pos : set) {
+                list.add(NBTUtil.writeBlockPos(pos));
+            }
+            compound.put(uuid.toString(), list);
+        });
         return compound;
     }
 

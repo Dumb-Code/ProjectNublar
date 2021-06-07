@@ -1,162 +1,191 @@
 package net.dumbcode.projectnublar.server.villager;
 
-import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.merchant.villager.VillagerProfession;
+import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraft.item.Items;
+import net.minecraft.item.MerchantOffer;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.village.PointOfInterestType;
+import net.minecraftforge.common.BasicTrade;
+import net.minecraftforge.event.village.VillagerTradesEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.VillagerRegistry;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static net.dumbcode.projectnublar.server.block.BlockHandler.UNNAMED_PALEONTOLOGIST_BLOCK;
+import static net.dumbcode.projectnublar.server.block.BlockHandler.UNNAMED_SCIENTIST_BLOCK;
 
 @Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
-@GameRegistry.ObjectHolder(ProjectNublar.NAME)
 public class VillagerHandler {
 
-    public static final VillagerRegistry.VillagerProfession PALEONTOLOGIST = InjectedUtils.injected();
+    public static final DeferredRegister<PointOfInterestType> POI_REGISTER = DeferredRegister.create(ForgeRegistries.POI_TYPES, ProjectNublar.MODID);
+    public static final RegistryObject<PointOfInterestType> PLANTER_BOX = POI_REGISTER.register("planter_box", () -> new PointOfInterestType("planter_box", ImmutableSet.of(BlockHandler.PLANTER_BOX.get().defaultBlockState()), 1, 1));
+    public static final RegistryObject<PointOfInterestType> UNNAMED_SCIENTIST = POI_REGISTER.register("planter_box", () -> new PointOfInterestType("unnamed_scientist", ImmutableSet.of(UNNAMED_SCIENTIST_BLOCK.get().defaultBlockState()), 1, 1));
+    public static final RegistryObject<PointOfInterestType> UNNAMED_PALEONTOLOGIST = POI_REGISTER.register("planter_box", () -> new PointOfInterestType("unnamed_paleontologist", ImmutableSet.of(UNNAMED_PALEONTOLOGIST_BLOCK.get().defaultBlockState()), 1, 1));
 
-    @SubscribeEvent
-    public static void registerProfessions(RegistryEvent.Register<VillagerRegistry.VillagerProfession> event) {
-        event.getRegistry().register(
-            createProfession("paleontologist", profession -> {
-                VillagerRegistry.VillagerCareer career = new VillagerRegistry.VillagerCareer(profession, "paleontologist");
-                career.addTrade(1,
-                    new EntityVillager.ListItemForEmeralds(ItemHandler.AMBER, new EntityVillager.PriceInfo(-2, -1)),
-                    pickedTradeList(1, 2,
-                        new EntityVillager.ListItemForEmeralds(Items.BONE, new EntityVillager.PriceInfo(-5, -2)),
-                        new EntityVillager.EmeraldForItems(Items.BONE, new EntityVillager.PriceInfo(3, 10))
+    public static final DeferredRegister<VillagerProfession> PROFESSION_REGISTER = DeferredRegister.create(ForgeRegistries.PROFESSIONS, ProjectNublar.MODID);
+    public static final RegistryObject<VillagerProfession> PALEONTOLOGIST = PROFESSION_REGISTER.register("paleontologist", () -> new VillagerProfession("paleontologist", UNNAMED_PALEONTOLOGIST.get(), ImmutableSet.of(), ImmutableSet.of(), SoundEvents.VILLAGER_WORK_LEATHERWORKER));
+    public static final RegistryObject<VillagerProfession> SCIENTIST = PROFESSION_REGISTER.register("scientist", () -> new VillagerProfession("scientist", UNNAMED_SCIENTIST.get(), ImmutableSet.of(), ImmutableSet.of(), SoundEvents.VILLAGER_WORK_LEATHERWORKER));
+    public static final RegistryObject<VillagerProfession> PALEOBOTANIST = PROFESSION_REGISTER.register("paleobotanist", () -> new VillagerProfession("paleobotanist", PLANTER_BOX.get(), ImmutableSet.of(), ImmutableSet.of(), SoundEvents.VILLAGER_WORK_LEATHERWORKER));
+
+    public static void registerTrades(VillagerTradesEvent event) {
+        if (event.getType() == PALEONTOLOGIST.get()) {
+            event.getTrades().putAll(new ImmutableMap.Builder<Integer, List<VillagerTrades.ITrade>>()
+                .put(1, Arrays.asList(
+                    new BasicTrade(2, new ItemStack(ItemHandler.AMBER.get()), 16, 1, 2F),
+                    new BasicTrade(3, new ItemStack(Items.BONE), 1, 1, 0.05F),
+
+                    new BasicTrade(5, new ItemStack(Items.WOODEN_PICKAXE), 4, 1, 0.5F),
+                    new BasicTrade(5, new ItemStack(Items.WOODEN_SHOVEL), 4, 1, 0.5F),
+                    new BasicTrade(7, new ItemStack(Items.STONE_PICKAXE), 4, 2, 0.5F),
+                    new BasicTrade(7, new ItemStack(Items.STONE_SHOVEL), 4, 2, 0.5F)
+                ))
+                .put(2, Arrays.asList(
+                    RandomChoiceCheckTrade.ofNestedMap(4, 7, 8, 2, 0.5F, ItemHandler.FOSSIL_ITEMS),
+                    new UseEmeraldToCookRawMeat(3, 6, 16, 2, 0.5F),
+                    new BasicTrade(11, new ItemStack(Items.IRON_PICKAXE), 4, 1, 0.5F),
+                    new BasicTrade(11, new ItemStack(Items.IRON_SHOVEL), 4, 1, 0.5F)
+                ))
+                .build()
+            );
+        }
+
+        if (event.getType() == SCIENTIST.get()) {
+            event.getTrades().putAll(new ImmutableMap.Builder<Integer, List<VillagerTrades.ITrade>>()
+                .put(1, Arrays.asList(
+                    new RandomChoiceCheckTrade(10, 1, 16, 2, 0.5F,
+                        new ItemStack(ItemHandler.COMPUTER_CHIP_PART_1.get()), new ItemStack(ItemHandler.TANKS_PART_1.get()),
+                        new ItemStack(ItemHandler.DRILL_BIT_PART_1.get()), new ItemStack(ItemHandler.LEVELLING_SENSOR_PART.get()),
+                        new ItemStack(ItemHandler.BULB_PART_1.get()), new ItemStack(ItemHandler.CONTAINER_PART_1.get()),
+                        new ItemStack(ItemHandler.TURBINES_PART_1.get())
                     ),
-                    pickedTradeList(0, 3,
-                        new EntityVillager.ListItemForEmeralds(Items.WOODEN_PICKAXE, new EntityVillager.PriceInfo(3, 6)),
-                        new EntityVillager.ListItemForEmeralds(Items.WOODEN_SHOVEL, new EntityVillager.PriceInfo(3, 6)),
-                        new EntityVillager.ListItemForEmeralds(Items.STONE_PICKAXE, new EntityVillager.PriceInfo(6, 10)),
-                        new EntityVillager.ListItemForEmeralds(Items.STONE_SHOVEL, new EntityVillager.PriceInfo(6, 10))
-                    )
-                );
-                career.addTrade(2,
-                    tradeNestedDinosaurVariants(3, 5, 6, 10, ItemHandler.FOSSIL_ITEMS),
-                    pickedTradeList(1, 3,
-                        ProjectNublar.DINOSAUR_REGISTRY.getValuesCollection().stream().map(d ->
-                            new ItemEmeraldFunction(
-                                ItemHandler.RAW_MEAT_ITEMS.get(d), ItemHandler.COOKED_MEAT_ITEMS.get(d),
-                                new EntityVillager.PriceInfo(1, 5),  new EntityVillager.PriceInfo(6, 10)
-                            )
-                        ).toArray(EntityVillager.ITradeList[]::new)
+                    new RandomChoiceCheckTrade(10, 1, 16, 2, 0.5F,
+                        new ItemStack(ItemHandler.COMPUTER_CHIP_PART_1.get()), new ItemStack(ItemHandler.TANKS_PART_1.get()),
+                        new ItemStack(ItemHandler.DRILL_BIT_PART_1.get()), new ItemStack(ItemHandler.LEVELLING_SENSOR_PART.get()),
+                        new ItemStack(ItemHandler.BULB_PART_1.get()), new ItemStack(ItemHandler.CONTAINER_PART_1.get()),
+                        new ItemStack(ItemHandler.TURBINES_PART_1.get())
                     ),
-                    pickedTradeList(0, 3,
-                        new EntityVillager.ListItemForEmeralds(Items.IRON_PICKAXE, new EntityVillager.PriceInfo(10, 15)),
-                        new EntityVillager.ListItemForEmeralds(Items.IRON_SHOVEL, new EntityVillager.PriceInfo(10, 15))
+                    new BasicTrade(40, new ItemStack(ItemHandler.TABLET.get()), 1, 10, 0.5F),
+                    new RandomTrade(
+                        new BasicTrade(30, new ItemStack(ItemHandler.TRACKING_MODULE.get()), 2, 7, 0.3F),
+                        new BasicTrade(12, new ItemStack(ItemHandler.TRACKING_MODULE.get()), 2, 5, 0.3F)
                     )
-                );
+                ))
+                .put(2, Arrays.asList(
+                    RandomChoiceCheckTrade.ofMap(20, 1, 8, 6, 1.5F, ItemHandler.TEST_TUBES_GENETIC_MATERIAL),
+                    new RandomChoiceCheckTrade(15, 1, 8, 5, 0.75F,
+                        new ItemStack(ItemHandler.COMPUTER_CHIP_PART_2.get()), new ItemStack(ItemHandler.TANKS_PART_2.get()),
+                        new ItemStack(ItemHandler.DRILL_BIT_PART_2.get()), new ItemStack(ItemHandler.BULB_PART_2.get()),
+                        new ItemStack(ItemHandler.CONTAINER_PART_2.get()), new ItemStack(ItemHandler.TURBINES_PART_2.get())
+                    )
+                ))
+                .put(3, Arrays.asList(
+                    new RandomChoiceCheckTrade(30, 1, 4, 8, 1F,
+                        new ItemStack(ItemHandler.COMPUTER_CHIP_PART_3.get()), new ItemStack(ItemHandler.TANKS_PART_3.get()),
+                        new ItemStack(ItemHandler.DRILL_BIT_PART_3.get()), new ItemStack(ItemHandler.BULB_PART_3.get()),
+                        new ItemStack(ItemHandler.CONTAINER_PART_3.get())
+                    )
+                ))
+                .put(4, Arrays.asList(
+                    RandomChoiceCheckTrade.ofMap(30, 1, 2, 15, 1.5F, ItemHandler.TEST_TUBES_DNA),
+                    new RandomChoiceCheckTrade(25, 1, 2, 12, 1.25F,
+                        new ItemStack(ItemHandler.TANKS_PART_4.get()), new ItemStack(ItemHandler.DRILL_BIT_PART_4.get())
+                    )
+                ))
+                .build()
+            );
+        }
 
-
-                career = new VillagerRegistry.VillagerCareer(profession, "scientist");
-                career.addTrade(1,
-                    tradeItemMetaVariants(2, 3, 5, 12, 0,
-                        ItemHandler.COMPUTER_CHIP_PART, ItemHandler.TANKS_PART, ItemHandler.DRILL_BIT_PART,
-                        ItemHandler.LEVELLING_SENSOR_PART, ItemHandler.BULB_PART, ItemHandler.CONTAINER_PART, ItemHandler.TURBINES_PART
+        if (event.getType() == PALEOBOTANIST.get()) {
+            event.getTrades().putAll(new ImmutableMap.Builder<Integer, List<VillagerTrades.ITrade>>()
+                .put(1, Arrays.asList(
+                    new RandomChoiceCheckTrade(1, 5, 16, 1, 0.05F,
+                        new ItemStack(Items.WHEAT_SEEDS), new ItemStack(Items.PUMPKIN_SEEDS),
+                        new ItemStack(Items.MELON_SEEDS), new ItemStack(Items.PUMPKIN_SEEDS)
                     ),
-                    new EntityVillager.ListItemForEmeralds(ItemHandler.TRACKING_TABLET, new EntityVillager.PriceInfo(40, 57)),
-                    pickedTradeList(0, 1,
-                        new EntityVillager.ListItemForEmeralds(ItemHandler.TRACKING_MODULE, new EntityVillager.PriceInfo(30, 40)),
-                        new EntityVillager.ListItemForEmeralds(ItemHandler.FLAPPY_DINO_MODULE, new EntityVillager.PriceInfo(12, 18))
+                    new BasicTrade(1, new ItemStack(Items.BONE_MEAL, 5), 16, 1, 0.05F),
+                    new RandomTrade(
+                        new BasicTrade(5, new ItemStack(Items.WOODEN_HOE), 16, 1),
+                        new BasicTrade(7, new ItemStack(Items.STONE_HOE), 16, 1)
                     )
-                );
-                career.addTrade(2,
-                    tradeDinosaurVariants(1, 2, 20, 32, ItemHandler.TEST_TUBES_GENETIC_MATERIAL),
-                    tradeItemMetaVariants(2, 3, 15, 22, 1,
-                        ItemHandler.COMPUTER_CHIP_PART, ItemHandler.TANKS_PART, ItemHandler.DRILL_BIT_PART,
-                        ItemHandler.BULB_PART, ItemHandler.CONTAINER_PART, ItemHandler.TURBINES_PART
-                    )
-                );
-                career.addTrade(3,
-                    tradeItemMetaVariants(1, 2, 25, 32, 2,
-                        ItemHandler.COMPUTER_CHIP_PART, ItemHandler.TANKS_PART, ItemHandler.DRILL_BIT_PART, ItemHandler.BULB_PART
-                    )
-                );
-                career.addTrade(4,
-                    tradeDinosaurVariants(1, 1, 50, 64, ItemHandler.TEST_TUBES_DNA),
-                    tradeItemMetaVariants(1, 1, 35, 42, 3, ItemHandler.TANKS_PART, ItemHandler.DRILL_BIT_PART)
-                );
-
-
-                career = new VillagerRegistry.VillagerCareer(profession, "paleobotany");
-                career.addTrade(1,
-                    tradeItemMetaVariants(1, 2, -5, -2, 0, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS),
-                    tradeItemMetaVariants(1, 1, -7, -3, EnumDyeColor.WHITE.getMetadata(), Items.DYE),
-                    pickedTradeList(1, 1,
-                        new EntityVillager.ListItemForEmeralds(Items.WOODEN_HOE, new EntityVillager.PriceInfo(3, 6)),
-                        new EntityVillager.ListItemForEmeralds(Items.STONE_HOE, new EntityVillager.PriceInfo(6, 10))
-                    )
-                );
-                career.addTrade(2,
-                    pickedTradeList(1, 1,
-                        new EntityVillager.ListItemForEmeralds(Items.IRON_HOE, new EntityVillager.PriceInfo(10, 15))
-                    )
-                );
-
-            })
-        );
+                ))
+                .put(2, Arrays.asList(
+                    new BasicTrade(11, new ItemStack(Items.IRON_HOE), 8, 2)
+                ))
+                .build()
+            );
+        }
     }
 
-    //If price is smaller than 0, then it's 1 emerald for -x amount of items;
-    //If price is larger than 0, than it's x emeralds for one amount of items.
+    public static class RandomTrade implements VillagerTrades.ITrade {
 
-    public static EntityVillager.ITradeList tradeNestedDinosaurVariants(int min, int max, int priceMin, int priceMax, Map<?, ? extends Map<?, ? extends Item>> map) {
-        return tradeListVariants(min, max, priceMin, priceMax, map.values().stream().flatMap(m -> m.values().stream()).map(ItemStack::new).toArray(ItemStack[]::new));
+        private final VillagerTrades.ITrade[] trades;
+
+        public RandomTrade(VillagerTrades.ITrade... trades) {
+            this.trades = trades;
+        }
+
+        @Nullable
+        @Override
+        public MerchantOffer getOffer(Entity entity, Random random) {
+            return this.trades[random.nextInt(this.trades.length)].getOffer(entity, random);
+        }
     }
 
-    public static EntityVillager.ITradeList tradeDinosaurVariants(int min, int max, int priceMin, int priceMax, Map<?, ? extends Item> map) {
-        return tradeListVariants(min, max, priceMin, priceMax, map.values().stream().map(ItemStack::new).toArray(ItemStack[]::new));
-    }
+    public static class RandomChoiceCheckTrade implements VillagerTrades.ITrade {
 
-    public static EntityVillager.ITradeList tradeItemMetaVariants(int min, int max, int priceMin, int priceMax, int meta, Item... items) {
-        return tradeListVariants(min, max, priceMin, priceMax, Arrays.stream(items).map(item -> new ItemStack(item, 1, item.getMetadata(meta))).toArray(ItemStack[]::new));
-    }
+        private final int emeralds;
+        private final int result;
+        private final int maxTrades;
+        private final int xp;
+        private final float mul;
+        private final ItemStack[] stacks;
 
-    public static EntityVillager.ITradeList tradeListVariants(int min, int max, int priceMin, int priceMax, ItemStack... stacks) {
-        EntityVillager.PriceInfo priceInfo = new EntityVillager.PriceInfo(priceMin, priceMax);
-        return pickedTradeList(min, max, Arrays.stream(stacks).map(stack -> new EntityVillager.ListItemForEmeralds(stack, priceInfo)).toArray(EntityVillager.ITradeList[]::new));
-    }
+        public RandomChoiceCheckTrade(int emeralds, int result, int maxTrades, int xp, float mul, ItemStack... stacks) {
+            this.stacks = stacks;
+            this.emeralds = emeralds;
+            this.result = result;
+            this.maxTrades = maxTrades;
+            this.xp = xp;
+            this.mul = mul;
+        }
 
-    public static EntityVillager.ITradeList pickedTradeList(int min, int max, EntityVillager.ITradeList... recipes) {
-        List<EntityVillager.ITradeList> possible = new ArrayList<>(Arrays.asList(recipes));
-        return (merchant, recipeList, random) -> {
-            int amount = min + random.nextInt(max-min+1);
+        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, RegistryObject<Item>> map) {
+            return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
+                .map(r -> new ItemStack(r.get()))
+                .toArray(ItemStack[]::new)
+            );
+        }
+        public static RandomChoiceCheckTrade ofNestedMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, ? extends Map<?, RegistryObject<Item>>> nestedMap) {
+            return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, nestedMap.values().stream()
+                .flatMap(m -> m.values().stream())
+                .map(r -> new ItemStack(r.get()))
+                .toArray(ItemStack[]::new)
+            );
+        }
 
-            List<Integer> ids = IntStream.range(0, possible.size()).boxed().collect(Collectors.toList());
-            Collections.shuffle(ids, random);
-
-            List<Integer> chosen = new ArrayList<>(amount);
-            for (int i = 0; i < amount; i++) {
-                chosen.add(ids.get(i));
-            }
-            Collections.sort(chosen);
-
-            for (int i : chosen) {
-                possible.get(i).addMerchantRecipe(merchant, recipeList, random);
-            }
-        };
-    }
-
-    public static VillagerRegistry.VillagerProfession createProfession(String name, Consumer<VillagerRegistry.VillagerProfession> consumer) {
-        VillagerRegistry.VillagerProfession profession = new VillagerRegistry.VillagerProfession(
-            ProjectNublar.MODID + ":" + name,
-            ProjectNublar.MODID + ":textures/entities/villager/" + name + ".png",
-            ProjectNublar.MODID + ":textures/entities/villager/" + name + "_zombie.png"
-        );
-        consumer.accept(profession);
-        return profession;
+        @Nullable
+        @Override
+        public MerchantOffer getOffer(Entity entity, Random random) {
+            ItemStack out = this.stacks[random.nextInt(this.stacks.length)].copy();
+            out.setCount(this.result);
+            return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeralds), out, this.maxTrades, this.xp, this.mul);
+        }
     }
 
 }

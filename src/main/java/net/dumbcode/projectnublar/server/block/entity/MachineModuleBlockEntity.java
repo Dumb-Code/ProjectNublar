@@ -11,8 +11,9 @@ import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
-import net.dumbcode.projectnublar.server.network.S42SyncMachineProcesses;
+import net.dumbcode.projectnublar.server.network.S2CSyncMachineProcesses;
 import net.dumbcode.projectnublar.server.network.S43SyncMachineStack;
+import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -48,6 +49,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements ITickableTileEntity {
@@ -174,7 +176,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 }
             }
             //todo: only sync when needed
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S42SyncMachineProcesses(this));
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S2CSyncMachineProcesses(this.worldPosition, this.processes.stream().map(S2CSyncMachineProcesses.ProcessSync::of).collect(Collectors.toList())));
         } else {
             for (MachineProcess<B> process : this.processes) {
                 if(process.isProcessing() && !process.isFinished()) {
@@ -455,6 +457,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public abstract ITextComponent createTitle(int tab);
 
     public void openContainer(ServerPlayerEntity player, int tab) {
+        ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(player.getLevel()::dimension), new S44SyncOpenedUsers(this.worldPosition, this.getOpenedUsers()));
         NetworkHooks.openGui(player, new SimpleNamedContainerProvider(
             (id, inv, p) -> this.createContainer(id, p, tab),
             this.createTitle(tab))

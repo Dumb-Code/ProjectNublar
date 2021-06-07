@@ -68,7 +68,7 @@ public class MachineModuleContainer extends Container {
     public void removed(PlayerEntity playerIn) {
         if(!playerIn.level.isClientSide) {
             this.blockEntity.getOpenedUsers().remove(playerIn.getUUID());
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(playerIn.level::dimension), new S44SyncOpenedUsers(this.blockEntity));
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(playerIn.level::dimension), new S44SyncOpenedUsers(this.blockEntity.getBlockPos(), this.blockEntity.getOpenedUsers()));
         }
         super.removed(playerIn);
     }

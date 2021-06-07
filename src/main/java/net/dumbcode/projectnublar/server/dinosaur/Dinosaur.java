@@ -14,6 +14,7 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -72,7 +73,7 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
         if(config == null) {
             config = this.attacher.getDefaultConfig();
         }
-        DinosaurEntity entity = new DinosaurEntity(world);
+        DinosaurEntity entity = new DinosaurEntity(EntityHandler.DINOSAUR.get(), world);
         entity.getOrExcept(ComponentHandler.DINOSAUR).setDinosaur(this);
         config.attachAll(entity);
         return entity;
@@ -116,8 +117,13 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
      * @return random dinosaur.
      */
     public static Dinosaur getRandom() {
+        return getRandom(RANDOM);
+
+    }
+
+    public static Dinosaur getRandom(Random random) {
         Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValues();
-        int i = RANDOM.nextInt(from.size());
+        int i = random.nextInt(from.size());
         return from.toArray(new Dinosaur[0])[i];
 
     }

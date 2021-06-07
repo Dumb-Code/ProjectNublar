@@ -2,22 +2,26 @@ package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.*;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class LineUtils {
     //Returns {x, x1, z, z1, y, y1} Maybe swap around ?
     public static double[] intersect(BlockPos position, BlockPos fromPos, BlockPos toPos, double yoff) {
-        Vec3d from = new Vec3d(fromPos).add(0.5, yoff, 0.5);
-        Vec3d to = new Vec3d(toPos).add(0.5, yoff, 0.5);
-        RayTraceResult result = new AxisAlignedBB(position).calculateIntercept(from, to);
-        RayTraceResult reverseResult = new AxisAlignedBB(position).calculateIntercept(to, from);
-        if(result != null && reverseResult != null) {
-            Vec3d normal = result.hitVec;
-            Vec3d reverse = reverseResult.hitVec;
+        Vector3d from = new Vector3d(fromPos.getX(), fromPos.getY(), fromPos.getZ()).add(0.5, yoff, 0.5);
+        Vector3d to = new Vector3d(toPos.getX(), toPos.getY(), toPos.getZ()).add(0.5, yoff, 0.5);
+        Optional<Vector3d> result = new AxisAlignedBB(position).clip(from, to);
+        Optional<Vector3d> reverseResult = new AxisAlignedBB(position).clip(to, from);
+        if(result.isPresent() && reverseResult.isPresent()) {
+            Vector3d normal = result.get();
+            Vector3d reverse = reverseResult.get();
             if(position.equals(new BlockPos(from))) {
                 normal = from;
             } else if(position.equals(new BlockPos(to))) {
@@ -29,8 +33,8 @@ public class LineUtils {
     }
     public static List<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, double offset) {
         Set<BlockPos> set = Sets.newLinkedHashSet();
-        Vec3d from = new Vec3d(fromPos.getX() + 0.5, fromPos.getY() + offset, fromPos.getZ() + 0.5);
-        Vec3d to = new Vec3d(toPos.getX() + 0.5, toPos.getY() + offset, toPos.getZ() + 0.5);
+        Vector3d from = new Vector3d(fromPos.getX() + 0.5, fromPos.getY() + offset, fromPos.getZ() + 0.5);
+        Vector3d to = new Vector3d(toPos.getX() + 0.5, toPos.getY() + offset, toPos.getZ() + 0.5);
 
 
         if (!Double.isNaN(from.x) && !Double.isNaN(from.y) && !Double.isNaN(from.z)) {
@@ -117,22 +121,22 @@ public class LineUtils {
                         d5 = -1.0E-4D;
                     }
 
-                    EnumFacing enumfacing;
+                    Direction enumfacing;
 
                     if (d3 < d4 && d3 < d5) {
-                        enumfacing = i > l ? EnumFacing.WEST : EnumFacing.EAST;
-                        from = new Vec3d(d0, from.y + d7 * d3, from.z + d8 * d3);
+                        enumfacing = i > l ? Direction.WEST : Direction.EAST;
+                        from = new Vector3d(d0, from.y + d7 * d3, from.z + d8 * d3);
                     } else if (d4 < d5) {
-                        enumfacing = j > i1 ? EnumFacing.DOWN : EnumFacing.UP;
-                        from = new Vec3d(from.x + d6 * d4, d1, from.z + d8 * d4);
+                        enumfacing = j > i1 ? Direction.DOWN : Direction.UP;
+                        from = new Vector3d(from.x + d6 * d4, d1, from.z + d8 * d4);
                     } else {
-                        enumfacing = k > j1 ? EnumFacing.NORTH : EnumFacing.SOUTH;
-                        from = new Vec3d(from.x + d6 * d5, from.y + d7 * d5, d2);
+                        enumfacing = k > j1 ? Direction.NORTH : Direction.SOUTH;
+                        from = new Vector3d(from.x + d6 * d5, from.y + d7 * d5, d2);
                     }
 
-                    l = MathHelper.floor(from.x) - (enumfacing == EnumFacing.EAST ? 1 : 0);
-                    i1 = MathHelper.floor(from.y) - (enumfacing == EnumFacing.UP ? 1 : 0);
-                    j1 = MathHelper.floor(from.z) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
+                    l = MathHelper.floor(from.x) - (enumfacing == Direction.EAST ? 1 : 0);
+                    i1 = MathHelper.floor(from.y) - (enumfacing == Direction.UP ? 1 : 0);
+                    j1 = MathHelper.floor(from.z) - (enumfacing == Direction.SOUTH ? 1 : 0);
                     BlockPos pos = new BlockPos(l, i1, j1);
                     double[] in = intersect(pos, fromPos, toPos, offset); //Surly a better way to do it
                     if(in != null && (in[0] != in[1] || in[2] != in[3] || in[4] != in[5])) {
