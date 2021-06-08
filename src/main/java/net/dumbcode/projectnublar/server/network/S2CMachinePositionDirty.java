@@ -15,7 +15,7 @@ public class S2CMachinePositionDirty {
 
     private final BlockPos pos;
 
-    public S2CMachinePositionDirty fromBytes(PacketBuffer buf) {
+    public static S2CMachinePositionDirty fromBytes(PacketBuffer buf) {
         return new S2CMachinePositionDirty(buf.readBlockPos());
     }
 

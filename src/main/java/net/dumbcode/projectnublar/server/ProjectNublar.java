@@ -24,7 +24,8 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.plants.Plant;
-import net.dumbcode.projectnublar.server.registry.EarlyRegistryEvent;
+import net.dumbcode.dumblibrary.server.registry.EarlyRegistryEvent;
+import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
@@ -92,6 +93,7 @@ public class ProjectNublar {
         ProjectNublarParticles.REGISTER.register(bus);
         TabletModuleHandler.DR.register(bus);
         EntityHandler.REGISTER.register(bus);
+        SoundHandler.REGISTER.register(bus);
 
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
@@ -223,42 +225,36 @@ public class ProjectNublar {
 
     private void registerPackets() {
 
-        //Now you might be asking where the packets 0-8 are, they simply got moved to dumb lib and i don't want to change the packet names
-        NETWORK.registerMessage(new BChangeGlobalRotation.Handler(), BChangeGlobalRotation.class, 9, Side.SERVER);
-        NETWORK.registerMessage(new S10ChangeGlobalRotation.Handler(), S10ChangeGlobalRotation.class, 10, Side.CLIENT);
-        NETWORK.registerMessage(new BUpdatePoleList.Handler(), BUpdatePoleList.class, 11, Side.SERVER);
-        NETWORK.registerMessage(new S12UpdatePoleList.Handler(), S12UpdatePoleList.class, 12, Side.CLIENT);
-        NETWORK.registerMessage(new C2SVehicleInputStateUpdated.Handler(), C2SVehicleInputStateUpdated.class, 13, Side.SERVER);
-        NETWORK.registerMessage(new C2SSequencingSynthesizerSelectChange.Handler(), C2SSequencingSynthesizerSelectChange.class, 14, Side.SERVER);
-        NETWORK.registerMessage(new S15SyncSequencingSynthesizerSelectChange.Handler(), S15SyncSequencingSynthesizerSelectChange.class, 15, Side.CLIENT);
-        NETWORK.registerMessage(new C16DisplayTabbedGui.Handler(), C16DisplayTabbedGui.class, 16, Side.SERVER);
-        NETWORK.registerMessage(new S2CMachinePositionDirty.Handler(), S2CMachinePositionDirty.class, 17, Side.CLIENT);
-        NETWORK.registerMessage(new C2SChangeContainerTab.Handler(), C2SChangeContainerTab.class, 18, Side.SERVER);
-        NETWORK.registerMessage(new S19SetGuiWindow.Handler(), S19SetGuiWindow.class, 19, Side.CLIENT);
-        NETWORK.registerMessage(new S2CRegenFenceCache.Handler(), S2CRegenFenceCache.class, 20, Side.CLIENT);
-        NETWORK.registerMessage(new S21SpawnParticle.Handler(), S21SpawnParticle.class, 21, Side.CLIENT);
-        NETWORK.registerMessage(new S2CStartTrackingTabletHandshake.Handler(), S2CStartTrackingTabletHandshake.class, 22, Side.CLIENT);
-        NETWORK.registerMessage(new C2SConfirmTrackingTablet.Handler(), C2SConfirmTrackingTablet.class, 23, Side.SERVER);
-        NETWORK.registerMessage(new S2STrackingTabletUpdateChunk.Handler(), S2STrackingTabletUpdateChunk.class, 24, Side.CLIENT);
-        NETWORK.registerMessage(new C25StopTrackingTablet.Handler(), C25StopTrackingTablet.class, 25, Side.SERVER);
-        NETWORK.registerMessage(new S2COpenTablet.Handler(), S2COpenTablet.class, 26, Side.CLIENT);
-        NETWORK.registerMessage(new C2SInstallModule.Handler(), C2SInstallModule.class, 27, Side.SERVER);
-        NETWORK.registerMessage(new C2STabletModuleClicked.Handler(), C2STabletModuleClicked.class, 28, Side.SERVER);
-        NETWORK.registerMessage(new S2COpenTabletModule.Handler(), S2COpenTabletModule.class, 29, Side.CLIENT);
-        NETWORK.registerMessage(new C2STrackingTabletEntryClicked.Handler(), C2STrackingTabletEntryClicked.class, 30, Side.SERVER);
-        NETWORK.registerMessage(new C2STrackingBeaconData.Handler(), C2STrackingBeaconData.class, 31, Side.SERVER);
-        NETWORK.registerMessage(new S2CSetTrackingDataList.Handler(), S2CSetTrackingDataList.class, 32, Side.CLIENT);
-        NETWORK.registerMessage(new C2SSetTabletBackground.Handler(), C2SSetTabletBackground.class, 33, Side.SERVER);
-        NETWORK.registerMessage(new CS2UploadPhotoBackgroundImage.Handler(), CS2UploadPhotoBackgroundImage.class, 34, Side.SERVER);
-        NETWORK.registerMessage(new C2SPhotoBackgroundRequestAllIcons.Handler(), C2SPhotoBackgroundRequestAllIcons.class, 35, Side.SERVER);
-        NETWORK.registerMessage(new S2CRequestBackgroundIconHeaders.Handler(), S2CRequestBackgroundIconHeaders.class, 36, Side.CLIENT);
-        NETWORK.registerMessage(new C2SRequestBackgroundImage.Handler(), C2SRequestBackgroundImage.class, 37, Side.SERVER);
-        NETWORK.registerMessage(new S2CSyncBackgroundImage.Handler(), S2CSyncBackgroundImage.class, 38, Side.CLIENT);
-        NETWORK.registerMessage(new S2CSyncBackgroundIcon.Handler(), S2CSyncBackgroundIcon.class, 39, Side.CLIENT);
-        NETWORK.registerMessage(new C2SRequestPhotoBackgroundIcon.Handler(), C2SRequestPhotoBackgroundIcon.class, 40, Side.SERVER);
-        NETWORK.registerMessage(new C2SPlaceIncubatorEgg.Handler(), C2SPlaceIncubatorEgg.class, 41, Side.SERVER);
-        NETWORK.registerMessage(new S2CSyncMachineProcesses.Handler(), S2CSyncMachineProcesses.class, 42, Side.CLIENT);
-        NETWORK.registerMessage(new S43SyncMachineStack.Handler(), S43SyncMachineStack.class, 43, Side.CLIENT);
-        NETWORK.registerMessage(new S44SyncOpenedUsers.Handler(), S44SyncOpenedUsers.class, 44, Side.CLIENT);
+        NETWORK.registerMessage(0, BChangeGlobalRotation.class, BChangeGlobalRotation::toBytes, BChangeGlobalRotation::fromBytes, BChangeGlobalRotation::handle);
+        NETWORK.registerMessage(1, BUpdatePoleList.class, BUpdatePoleList::toBytes, BUpdatePoleList::fromBytes, BUpdatePoleList::handle);
+        NETWORK.registerMessage(2, C2SChangeContainerTab.class, C2SChangeContainerTab::toBytes, C2SChangeContainerTab::fromBytes, C2SChangeContainerTab::handle);
+        NETWORK.registerMessage(3, C2SConfirmTrackingTablet.class, C2SConfirmTrackingTablet::toBytes, C2SConfirmTrackingTablet::fromBytes, C2SConfirmTrackingTablet::handle);
+        NETWORK.registerMessage(4, C2SInstallModule.class, C2SInstallModule::toBytes, C2SInstallModule::fromBytes, C2SInstallModule::handle);
+        NETWORK.registerMessage(5, C2SPhotoBackgroundRequestAllIcons.class, C2SPhotoBackgroundRequestAllIcons::toBytes, C2SPhotoBackgroundRequestAllIcons::fromBytes, C2SPhotoBackgroundRequestAllIcons::handle);
+        NETWORK.registerMessage(6, C2SPlaceIncubatorEgg.class, C2SPlaceIncubatorEgg::toBytes, C2SPlaceIncubatorEgg::fromBytes, C2SPlaceIncubatorEgg::handle);
+        NETWORK.registerMessage(7, C2SRequestBackgroundImage.class, C2SRequestBackgroundImage::toBytes, C2SRequestBackgroundImage::fromBytes, C2SRequestBackgroundImage::handle);
+        NETWORK.registerMessage(8, C2SRequestPhotoBackgroundIcon.class, C2SRequestPhotoBackgroundIcon::toBytes, C2SRequestPhotoBackgroundIcon::fromBytes, C2SRequestPhotoBackgroundIcon::handle);
+        NETWORK.registerMessage(9, C2SSequencingSynthesizerSelectChange.class, C2SSequencingSynthesizerSelectChange::toBytes, C2SSequencingSynthesizerSelectChange::fromBytes, C2SSequencingSynthesizerSelectChange::handle);
+        NETWORK.registerMessage(10, C2SSetTabletBackground.class, C2SSetTabletBackground::toBytes, C2SSetTabletBackground::fromBytes, C2SSetTabletBackground::handle);
+        NETWORK.registerMessage(11, C2STabletModuleClicked.class, C2STabletModuleClicked::toBytes, C2STabletModuleClicked::fromBytes, C2STabletModuleClicked::handle);
+        NETWORK.registerMessage(12, C2STrackingBeaconData.class, C2STrackingBeaconData::toBytes, C2STrackingBeaconData::fromBytes, C2STrackingBeaconData::handle);
+        NETWORK.registerMessage(13, C2STrackingTabletEntryClicked.class, C2STrackingTabletEntryClicked::toBytes, C2STrackingTabletEntryClicked::fromBytes, C2STrackingTabletEntryClicked::handle);
+        NETWORK.registerMessage(14, C2SVehicleInputStateUpdated.class, C2SVehicleInputStateUpdated::toBytes, C2SVehicleInputStateUpdated::fromBytes, C2SVehicleInputStateUpdated::handle);
+        NETWORK.registerMessage(15, C25StopTrackingTablet.class, C25StopTrackingTablet::toBytes, C25StopTrackingTablet::fromBytes, C25StopTrackingTablet::handle);
+        NETWORK.registerMessage(16, CS2UploadPhotoBackgroundImage.class, CS2UploadPhotoBackgroundImage::toBytes, CS2UploadPhotoBackgroundImage::fromBytes, CS2UploadPhotoBackgroundImage::handle);
+        NETWORK.registerMessage(17, S2CMachinePositionDirty.class, S2CMachinePositionDirty::toBytes, S2CMachinePositionDirty::fromBytes, S2CMachinePositionDirty::handle);
+        NETWORK.registerMessage(18, S2COpenTablet.class, S2COpenTablet::toBytes, S2COpenTablet::fromBytes, S2COpenTablet::handle);
+        NETWORK.registerMessage(19, S2COpenTabletModule.class, S2COpenTabletModule::toBytes, S2COpenTabletModule::fromBytes, S2COpenTabletModule::handle);
+        NETWORK.registerMessage(20, S2CRegenFenceCache.class, S2CRegenFenceCache::toBytes, S2CRegenFenceCache::fromBytes, S2CRegenFenceCache::handle);
+        NETWORK.registerMessage(21, S2CRequestBackgroundIconHeaders.class, S2CRequestBackgroundIconHeaders::toBytes, S2CRequestBackgroundIconHeaders::fromBytes, S2CRequestBackgroundIconHeaders::handle);
+        NETWORK.registerMessage(22, S2CSetTrackingDataList.class, S2CSetTrackingDataList::toBytes, S2CSetTrackingDataList::fromBytes, S2CSetTrackingDataList::handle);
+        NETWORK.registerMessage(23, S2CStartTrackingTabletHandshake.class, S2CStartTrackingTabletHandshake::toBytes, S2CStartTrackingTabletHandshake::fromBytes, S2CStartTrackingTabletHandshake::handle);
+        NETWORK.registerMessage(24, S2CSyncBackgroundIcon.class, S2CSyncBackgroundIcon::toBytes, S2CSyncBackgroundIcon::fromBytes, S2CSyncBackgroundIcon::handle);
+        NETWORK.registerMessage(25, S2CSyncBackgroundImage.class, S2CSyncBackgroundImage::toBytes, S2CSyncBackgroundImage::fromBytes, S2CSyncBackgroundImage::handle);
+        NETWORK.registerMessage(26, S2CSyncMachineProcesses.class, S2CSyncMachineProcesses::toBytes, S2CSyncMachineProcesses::fromBytes, S2CSyncMachineProcesses::handle);
+        NETWORK.registerMessage(27, S2CSyncMachineStack.class, S2CSyncMachineStack::toBytes, S2CSyncMachineStack::fromBytes, S2CSyncMachineStack::handle);
+        NETWORK.registerMessage(28, S2CSyncOpenedUsers.class, S2CSyncOpenedUsers::toBytes, S2CSyncOpenedUsers::fromBytes, S2CSyncOpenedUsers::handle);
+        NETWORK.registerMessage(29, S2CSyncSequencingSynthesizerSelectChange.class, S2CSyncSequencingSynthesizerSelectChange::toBytes, S2CSyncSequencingSynthesizerSelectChange::fromBytes, S2CSyncSequencingSynthesizerSelectChange::handle);
+        NETWORK.registerMessage(30, S2STrackingTabletUpdateChunk.class, S2STrackingTabletUpdateChunk::toBytes, S2STrackingTabletUpdateChunk::fromBytes, S2STrackingTabletUpdateChunk::handle);
     }
 }

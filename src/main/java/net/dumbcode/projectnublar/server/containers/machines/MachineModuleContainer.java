@@ -1,22 +1,18 @@
 package net.dumbcode.projectnublar.server.containers.machines;
 
-import com.mojang.datafixers.util.Either;
 import lombok.NonNull;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
-import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
+import net.dumbcode.projectnublar.server.network.S2CSyncOpenedUsers;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -68,7 +64,7 @@ public class MachineModuleContainer extends Container {
     public void removed(PlayerEntity playerIn) {
         if(!playerIn.level.isClientSide) {
             this.blockEntity.getOpenedUsers().remove(playerIn.getUUID());
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(playerIn.level::dimension), new S44SyncOpenedUsers(this.blockEntity.getBlockPos(), this.blockEntity.getOpenedUsers()));
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(playerIn.level::dimension), new S2CSyncOpenedUsers(this.blockEntity.getBlockPos(), this.blockEntity.getOpenedUsers()));
         }
         super.removed(playerIn);
     }

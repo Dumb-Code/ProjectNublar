@@ -15,11 +15,13 @@ import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
+import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
@@ -28,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Supplier;
 
 @Getter
 @Setter
@@ -79,8 +82,17 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
         return entity;
     }
 
+
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(Supplier<? extends EntityComponentType<T, ? extends S>> supplier) {
+        return this.addComponent(supplier.get());
+    }
+
     public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(EntityComponentType<T, S> type) {
         return this.attacher.addComponent(type); //delegate
+    }
+
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(Supplier<? extends EntityComponentType<T, ?>> supplier, EntityComponentType.StorageOverride<T, S> override) {
+        return this.addComponent(supplier.get(), override);
     }
 
     public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(EntityComponentType<T, ?> type, EntityComponentType.StorageOverride<T, S> override) {

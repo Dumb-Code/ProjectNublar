@@ -1,28 +1,31 @@
 package net.dumbcode.projectnublar.server.network;
 
-import io.netty.buffer.ByteBuf;
 import net.dumbcode.projectnublar.server.utils.TrackingTabletIterator;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class C25StopTrackingTablet implements IMessage {
-    @Override
-    public void fromBytes(ByteBuf buf) {
+import java.util.function.Supplier;
+
+public class C25StopTrackingTablet {
+    public static C25StopTrackingTablet fromBytes(PacketBuffer buffer) {
+        return new C25StopTrackingTablet();
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
+    public static void toBytes(C25StopTrackingTablet packet, PacketBuffer buffer) {
+
     }
 
-    public static class Handler extends WorldModificationsMessageHandler<C25StopTrackingTablet, C25StopTrackingTablet> {
+    public static void handle(C25StopTrackingTablet packet, Supplier<NetworkEvent.Context> supplier) {
+        NetworkEvent.Context context = supplier.get();
 
-        @Override
-        protected void handleMessage(C25StopTrackingTablet message, MessageContext ctx, World world, EntityPlayer player) {
-            if (TrackingTabletIterator.PLAYER_TO_TABLET_MAP.containsKey(player.getUniqueID())) {
-                TrackingTabletIterator.PLAYER_TO_TABLET_MAP.get(player.getUniqueID()).finish();
+        context.enqueueWork(() -> {
+            ServerPlayerEntity player = context.getSender();
+            if (player != null && TrackingTabletIterator.PLAYER_TO_TABLET_MAP.containsKey(player.getUUID())) {
+                TrackingTabletIterator.PLAYER_TO_TABLET_MAP.get(player.getUUID()).finish();
             }
-        }
+        });
+
+        context.setPacketHandled(true);
     }
 }

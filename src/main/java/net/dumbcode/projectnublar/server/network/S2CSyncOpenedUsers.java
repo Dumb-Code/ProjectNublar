@@ -15,18 +15,18 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
-public class S44SyncOpenedUsers {
+public class S2CSyncOpenedUsers {
     private final BlockPos pos;
     private final Set<UUID> uuidSet;
 
-    public static S44SyncOpenedUsers fromBytes(PacketBuffer buf) {
-        return new S44SyncOpenedUsers(
+    public static S2CSyncOpenedUsers fromBytes(PacketBuffer buf) {
+        return new S2CSyncOpenedUsers(
             buf.readBlockPos(),
             IntStream.range(0, buf.readShort()).mapToObj(i -> buf.readUUID()).collect(Collectors.toSet())
         );
     }
 
-    public static void toBytes(S44SyncOpenedUsers packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncOpenedUsers packet, PacketBuffer buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeShort(packet.uuidSet.size());
         for (UUID uuid : packet.uuidSet) {
@@ -34,7 +34,7 @@ public class S44SyncOpenedUsers {
         }
     }
 
-    public static void handle(S44SyncOpenedUsers packet, Supplier<NetworkEvent.Context> supplier) {
+    public static void handle(S2CSyncOpenedUsers packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
 
         context.enqueueWork(() -> {

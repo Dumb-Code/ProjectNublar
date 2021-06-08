@@ -12,8 +12,8 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
 import net.dumbcode.projectnublar.server.network.S2CSyncMachineProcesses;
-import net.dumbcode.projectnublar.server.network.S43SyncMachineStack;
-import net.dumbcode.projectnublar.server.network.S44SyncOpenedUsers;
+import net.dumbcode.projectnublar.server.network.S2CSyncMachineStack;
+import net.dumbcode.projectnublar.server.network.S2CSyncOpenedUsers;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -361,7 +361,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     protected void onSlotChanged(int slot) {
         if(!this.level.isClientSide) {
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S43SyncMachineStack(this, slot));
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S2CSyncMachineStack(this, slot));
         }
     }
 
@@ -457,7 +457,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public abstract ITextComponent createTitle(int tab);
 
     public void openContainer(ServerPlayerEntity player, int tab) {
-        ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(player.getLevel()::dimension), new S44SyncOpenedUsers(this.worldPosition, this.getOpenedUsers()));
+        ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(player.getLevel()::dimension), new S2CSyncOpenedUsers(this.worldPosition, this.getOpenedUsers()));
         NetworkHooks.openGui(player, new SimpleNamedContainerProvider(
             (id, inv, p) -> this.createContainer(id, p, tab),
             this.createTitle(tab))
