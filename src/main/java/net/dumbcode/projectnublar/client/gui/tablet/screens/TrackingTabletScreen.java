@@ -127,7 +127,7 @@ public class TrackingTabletScreen extends TabletScreen {
             int rely = mouseY - (int) yCoord - top;
             boolean over = MathUtils.inBetween(relx, 0, d.width) && MathUtils.inBetween(rely, 0, d.height);
             if(d.height != 0) {
-                info.renderInfo(padding, (int) yCoord, over ? relx : -1, over ? rely : -1);
+                info.renderInfo(stack, padding, (int) yCoord, over ? relx : -1, over ? rely : -1);
                 yCoord += d.height + padding;
 
             }

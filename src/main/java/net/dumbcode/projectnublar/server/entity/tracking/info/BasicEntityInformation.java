@@ -1,18 +1,21 @@
 package net.dumbcode.projectnublar.server.entity.tracking.info;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.RepeatingIconDisplay;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -48,7 +51,7 @@ public class BasicEntityInformation extends TooltipInformation {
 
     @Override
     protected List<String> getTooltipLines() {
-        return Collections.singletonList(I18n.format("projectnublar.gui.tracking.health"));
+        return Collections.singletonList(I18n.get("projectnublar.gui.tracking.health"));
     }
 
     @Nonnull
@@ -58,49 +61,48 @@ public class BasicEntityInformation extends TooltipInformation {
         return new Dimension(d.width + PADDING_AFTER_TEXT + this.display.getWidth(), Math.max(d.height, this.display.getHeight()));
     }
 
-    private void renderHeartAt(int x, int y, float size) {
-        RenderUtils.draw256Texture(x, y, 16, 0, HEART_SIZE, HEART_SIZE);
+    private void renderHeartAt(MatrixStack stack, int x, int y, float size) {
+        AbstractGui.blit(stack, x, y, 0, 16, 0, HEART_SIZE, HEART_SIZE, 256, 256);
         if(size > 0) {
-            RenderUtils.draw256Texture(x, y, 52, 0, size * HEART_SIZE, HEART_SIZE);
+            AbstractGui.blit(stack, x, y, 52, 16, 0, (int) (size * HEART_SIZE), HEART_SIZE, 256, 256);
         }
     }
 
     @Override
-    public void renderInfo(int x, int y, int relativeMouseX, int relativeMouseY) {
-        super.renderInfo(x, y, relativeMouseX, relativeMouseY);
+    @OnlyIn(Dist.CLIENT)
+    public void renderInfo(MatrixStack stack, int x, int y, int relativeMouseX, int relativeMouseY) {
+        super.renderInfo(stack, x, y, relativeMouseX, relativeMouseY);
 
         int startX = super.getInfoDimensions().width + PADDING_AFTER_TEXT;
-        Minecraft.getMinecraft().renderEngine.bindTexture(Gui.ICONS);
+        Minecraft.getInstance().textureManager.bind(AbstractGui.GUI_ICONS_LOCATION);
 
-        GlStateManager.enableAlpha();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.display.render(x + startX, y);
+        this.display.render(stack, x + startX, y);
 
         if(relativeMouseX >= startX && relativeMouseY != -1) {
-            GuiUtils.drawHoveringText(ItemStack.EMPTY, Collections.singletonList((Math.round(this.health * 10) / 10F) + "/" + (Math.round(this.maxHealth * 10) / 10F)),
-                x + relativeMouseX, y + relativeMouseY, Integer.MAX_VALUE, Integer.MAX_VALUE, -1, Minecraft.getMinecraft().fontRenderer
+            GuiUtils.drawHoveringText(ItemStack.EMPTY, stack, Collections.singletonList(new StringTextComponent((Math.round(this.health * 10) / 10F) + "/" + (Math.round(this.maxHealth * 10) / 10F))),
+                x + relativeMouseX, y + relativeMouseY, Integer.MAX_VALUE, Integer.MAX_VALUE, -1, Minecraft.getInstance().font
             );
         }
     }
 
-    public static void encodeNBT(NBTTagCompound nbt, BasicEntityInformation info) {
-        nbt.setFloat("health", info.health);
-        nbt.setFloat("max_health", info.maxHealth);
+    public static void encodeNBT(CompoundNBT nbt, BasicEntityInformation info) {
+        nbt.putFloat("health", info.health);
+        nbt.putFloat("max_health", info.maxHealth);
     }
 
-    public static BasicEntityInformation decodeNBT(NBTTagCompound nbt) {
+    public static BasicEntityInformation decodeNBT(CompoundNBT nbt) {
         return new BasicEntityInformation(
             nbt.getFloat("health"),
             nbt.getFloat("max_health")
         );
     }
 
-    public static void encodeBuf(ByteBuf buf, BasicEntityInformation info) {
+    public static void encodeBuf(PacketBuffer buf, BasicEntityInformation info) {
         buf.writeFloat(info.health);
         buf.writeFloat(info.maxHealth);
     }
 
-    public static BasicEntityInformation decodeBuf(ByteBuf buf) {
+    public static BasicEntityInformation decodeBuf(PacketBuffer buf) {
         return new BasicEntityInformation(
             buf.readFloat(),
             buf.readFloat()

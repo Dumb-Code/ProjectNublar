@@ -1,16 +1,15 @@
 package net.dumbcode.projectnublar.server.entity.tracking.info;
 
-import io.netty.buffer.ByteBuf;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,31 +27,31 @@ public class DinosaurInformation extends TooltipInformation {
     }
 
     @Override
-    public void renderMap(int x, int y) {
+    public void renderMap(MatrixStack stack, int x, int y) {
         String s = this.dinosaur.getRegName().getPath().substring(0, 1);
-        int width = Minecraft.getMinecraft().fontRenderer.getStringWidth(s);
-        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s, x - width/2, y - 3, 0xAAAAAA);
-        super.renderMap(x, y);
+        int width = Minecraft.getInstance().font.width(s);
+        Minecraft.getInstance().font.draw(stack, s, x - width/2F, y - 3, 0xAAAAAA);
+        super.renderMap(stack, x, y);
     }
 
     @Override
     protected List<String> getTooltipLines() {
-        return Collections.singletonList(I18n.format("projectnublar.gui.tracking.dinosaur", this.dinosaur.createNameComponent().getUnformattedText()));
+        return Collections.singletonList(I18n.get("projectnublar.gui.tracking.dinosaur", I18n.get(this.dinosaur.createNameTranslationKey())));
     }
 
-    public static void encodeNBT(NBTTagCompound nbt, DinosaurInformation info) {
-        nbt.setString("dinosaur", info.dinosaur.getRegName().toString());
+    public static void encodeNBT(CompoundNBT nbt, DinosaurInformation info) {
+        nbt.putString("dinosaur", info.dinosaur.getRegName().toString());
     }
 
-    public static DinosaurInformation decodeNBT(NBTTagCompound nbt) {
+    public static DinosaurInformation decodeNBT(CompoundNBT nbt) {
         return new DinosaurInformation(ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("dinosaur"))));
     }
 
-    public static void encodeBuf(ByteBuf buf, DinosaurInformation info) {
-        ByteBufUtils.writeRegistryEntry(buf, info.dinosaur);
+    public static void encodeBuf(PacketBuffer buf, DinosaurInformation info) {
+        buf.writeRegistryId(info.dinosaur);
     }
 
-    public static DinosaurInformation decodeBuf(ByteBuf buf) {
-        return new DinosaurInformation(ByteBufUtils.readRegistryEntry(buf, ProjectNublar.DINOSAUR_REGISTRY));
+    public static DinosaurInformation decodeBuf(PacketBuffer buf) {
+        return new DinosaurInformation(buf.readRegistryIdSafe(Dinosaur.class));
     }
 }

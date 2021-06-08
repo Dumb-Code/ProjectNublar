@@ -115,8 +115,12 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
         return this.getRegistryName();
     }
 
+    public String createNameTranslationKey() {
+        return getRegName().getNamespace()+".dino."+getRegName().getPath()+".name";
+    }
+
     public TranslationTextComponent createNameComponent() {
-        return new TranslationTextComponent(getRegName().getNamespace()+".dino."+getRegName().getPath()+".name");
+        return new TranslationTextComponent(this.createNameTranslationKey());
     }
 
     public void attachDefaultComponents() {

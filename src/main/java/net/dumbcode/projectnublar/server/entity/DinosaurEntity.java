@@ -7,7 +7,6 @@ import net.dumbcode.projectnublar.server.entity.ai.SlowMoveHelper;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
@@ -19,17 +18,17 @@ public class DinosaurEntity extends ComposableCreatureEntity {
         super(type, worldIn);
 
         //TODO-stream: move to a component
-        this.moveHelper = new SlowMoveHelper(this);
+        this.lookControl = new SlowMoveHelper(this);
     }
 
     @Override
     protected void attachComponents() {
-        this.attachComponent(ComponentHandler.DINOSAUR);
+        this.attachComponent(ComponentHandler.DINOSAUR.get());
     }
 
     @Override
-    protected boolean canDespawn() {
-        return false;
+    public boolean isPersistenceRequired() {
+        return true;
     }
 
     /**
@@ -40,14 +39,15 @@ public class DinosaurEntity extends ComposableCreatureEntity {
         return this.get(ComponentHandler.DINOSAUR).map(DinosaurComponent::getDinosaur).orElse(DinosaurHandler.TYRANNOSAURUS);
     }
 
+
     @Override
-    public boolean isOnLadder() {
-        return getDinosaur().getDinosaurInfomation().isCanClimb() && super.isOnLadder();
+    public boolean onClimbable() {
+        return getDinosaur().getDinosaurInfomation().isCanClimb() && super.onClimbable();
     }
 
     @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundHandler.VELOCIRAPTOR_DEATH;
+        return SoundHandler.VELOCIRAPTOR_DEATH.get();
     }
 }

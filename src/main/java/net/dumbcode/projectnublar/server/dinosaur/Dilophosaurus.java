@@ -12,10 +12,12 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
 

@@ -1,29 +1,31 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.EntityType;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.UUID;
 
 public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
-    private static final DataParameter<Vec3d> WATCHER_SIZE = EntityDataManager.createKey(EntityPart.class, DataSerializerHandler.VEC_3D);
+    private static final DataParameter<Vector3d> WATCHER_SIZE = EntityDataManager.defineId(EntityPart.class, DataSerializerHandler.VEC_3D);
 
     private UUID parentUUID;
     @Getter private String partName;
@@ -33,55 +35,51 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     private boolean setInParent = false;
 
     public EntityPart(@Nonnull Entity parent, @Nonnull String partName) {
-        this(parent.world);
-        this.entityCollisionReduction = 0.5F;
-        this.parentUUID = parent.getUniqueID();
+        this(EntityHandler.DUMMY_PART.get(), parent.level);
+//        this.entityCollisionReduction = 0.5F;
+        this.parentUUID = parent.getUUID();
         this.partName = partName;
     }
 
-    public EntityPart(World world) {
-        super(world);
+    public EntityPart(EntityType<?> type, World world) {
+        super(type, world);
     }
 
-    public void setSize(Vec3d size) {
-        this.dataManager.set(WATCHER_SIZE, size);
-    }
-
-    @Override
-    protected void entityInit() {
-        this.dataManager.register(WATCHER_SIZE, Vec3d.ZERO);
+    public void setSize(Vector3d size) {
+        this.entityData.set(WATCHER_SIZE, size);
     }
 
     @Override
-    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.setPositionAndRotationDirect(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    protected void defineSynchedData() {
+        this.entityData.define(WATCHER_SIZE, Vector3d.ZERO);
     }
 
     @Override
-    public void onUpdate() {
+    public IPacket<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    @Override
+    public void tick() {
         Entity parent = this.getParent();
-        if(!this.world.isRemote && ((this.setInParent && parent == null) || (parent != null && parent.isDead))) {
-            this.setDead();
+        if(!this.level.isClientSide && ((this.setInParent && parent == null) || (parent != null && !parent.isAlive()))) {
+            this.kill();
         }
 
         if(!this.setInParent) {
             this.setInParent = parent != null;
             if(parent instanceof ComponentAccess) {
                 ((ComponentAccess) parent).get(ComponentHandler.MULTIPART)
-                        .ifPresent(multipartEntityComponent -> multipartEntityComponent.getEntities().add(new MultipartEntityComponent.LinkedEntity(this.partName, this.getUniqueID())));
+                        .ifPresent(multipartEntityComponent -> multipartEntityComponent.getEntities().add(new MultipartEntityComponent.LinkedEntity(this.partName, this.getUUID())));
 
             }
         }
+        super.tick();
+    }
 
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox(), EntitySelectors.getTeamCollisionPredicate(this));
-        if (!list.isEmpty()) {
-            for (Entity entity : list) {
-                if(!(entity instanceof EntityPart)) {
-                    this.applyEntityCollision(entity);
-                }
-            }
-        }
-        super.onUpdate();
+    @Override
+    public boolean canCollideWith(Entity part) {
+        return !(part instanceof EntityPart);
     }
 
     @Nullable
@@ -89,88 +87,92 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         if (this.parentCache != null) {
             return parentCache;
         }
-        for (Entity entity : this.world.loadedEntityList) {
-            if (entity.getUniqueID().equals(this.parentUUID)) {
-                this.parentCache = entity;
+        if(this.level instanceof ServerWorld) {
+            this.parentCache = ((ServerWorld) this.level).getEntity(this.parentUUID);
+        } else {
+            for (Entity entity : ((ClientWorld) this.level).entitiesForRendering()) {
+                if (entity.getUUID().equals(this.parentUUID)) {
+                    this.parentCache = entity;
+                }
             }
         }
         return this.parentCache;
     }
 
+
     @Override
-    public void setPosition(double x, double y, double z) {
-        this.posX = x;
-        this.posY = y;
-        this.posZ = z;
-        Vec3d size = this.dataManager == null ? Vec3d.ZERO : this.dataManager.get(WATCHER_SIZE);
+    public void setPos(double x, double y, double z) {
+        this.setPosRaw(x, y, z);
+        Vector3d size = this.entityData == null ? Vector3d.ZERO : this.entityData.get(WATCHER_SIZE);
         double width = size.x / 2.0F;
+        double height = size.y / 2.0F;
         double depth = size.z / 2.0F;
 
-        this.height = (float) size.y;
-        this.setEntityBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + this.height, z + depth));
+        this.setBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + height, z + depth));
     }
 
     @Override
-    public boolean attackEntityFrom(DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         Entity parent = this.getParent();
-        return parent != null ? parent.attackEntityFrom(source, amount) : super.attackEntityFrom(source, amount);
+        return parent != null ? parent.hurt(source, amount) : super.hurt(source, amount);
     }
 
     @Override
-    public void applyEntityCollision(Entity entityIn) {
-        if(entityIn == this.getParent()) {
+    public void push(Entity entity) {
+        if(entity == this.getParent()) {
             return;
         }
-        super.applyEntityCollision(entityIn);
+        super.push(entity);
     }
 
-    @Override
-    public void addVelocity(double x, double y, double z) {
-        Entity p = this.getParent();
-        if(p != null) {
-            p.addVelocity(x, y, z);
-        } else {
-            super.addVelocity(x, y, z);
-        }
-    }
+//    @Override
+//    public void addVelocity(double x, double y, double z) {
+//        Entity p = this.getParent();
+//        if(p != null) {
+//            p.addVelocity(x, y, z);
+//        } else {
+//            super.addVelocity(x, y, z);
+//        }
+//    }
 
-    @Override
-    public boolean canBePushed() {
-        return true;
-    }
+//    @Override
+//    public boolean canBePushed() {
+//        return true;
+//    }
 
     @Override
     public boolean canBeCollidedWith() {
         return true;
     }
 
+
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-        this.parentUUID = compound.getUniqueId("parent");
+    protected void readAdditionalSaveData(CompoundNBT compound) {
+        this.parentUUID = compound.getUUID("parent");
         this.partName = compound.getString("partname");
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
-        compound.setUniqueId("parent", this.parentUUID);
-        compound.setString("partname", this.partName);
+    protected void addAdditionalSaveData(CompoundNBT compound) {
+        compound.putUUID("parent", this.parentUUID);
+        compound.putString("partname", this.partName);
     }
 
     @Override
-    public void writeSpawnData(ByteBuf buffer) {
+    public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeBoolean(this.parentUUID != null);
         if(this.parentUUID != null) {
             buffer.writeLong(this.parentUUID.getMostSignificantBits());
             buffer.writeLong(this.parentUUID.getLeastSignificantBits());
-            ByteBufUtils.writeUTF8String(buffer, this.partName);
+            buffer.writeUtf(this.partName);
         }
     }
 
     @Override
-    public void readSpawnData(ByteBuf additionalData) {
+    public void readSpawnData(PacketBuffer additionalData) {
         if(additionalData.readBoolean()) {
             this.parentUUID = new UUID(additionalData.readLong(), additionalData.readLong());
-            this.partName = ByteBufUtils.readUTF8String(additionalData);
+            this.partName = additionalData.readUtf();
         }
     }
 }

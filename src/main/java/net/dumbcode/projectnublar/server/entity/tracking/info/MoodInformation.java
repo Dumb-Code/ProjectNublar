@@ -1,15 +1,15 @@
 package net.dumbcode.projectnublar.server.entity.tracking.info;
 
-import io.netty.buffer.ByteBuf;
 import lombok.Data;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,33 +34,36 @@ public class MoodInformation extends TooltipInformation {
     protected List<String> getTooltipLines() {
         List<String> lines = new ArrayList<>();
 
-        lines.add(I18n.format("projectnublar.gui.tracking.mood", I18n.format(this.mood)));
-        this.reasons.forEach(s -> lines.add(" - " + I18n.format(s)));
+        lines.add(I18n.get("projectnublar.gui.tracking.mood", I18n.get(this.mood)));
+        this.reasons.forEach(s -> lines.add(" - " + I18n.get(s)));
         return lines;
     }
 
 
-    public static void encodeNBT(NBTTagCompound nbt, MoodInformation info) {
-        nbt.setString("mood", info.mood);
-        nbt.setTag("reasons", info.reasons.stream().collect(CollectorUtils.toNBTList(NBTTagString::new)));
+    public static void encodeNBT(CompoundNBT nbt, MoodInformation info) {
+        nbt.putString("mood", info.mood);
+        nbt.put("reasons", info.reasons.stream().collect(CollectorUtils.toNBTList(StringNBT::valueOf)));
     }
 
-    public static MoodInformation decodeNBT(NBTTagCompound nbt) {
+    public static MoodInformation decodeNBT(CompoundNBT nbt) {
         return new MoodInformation(
             nbt.getString("mood"),
-            StreamUtils.stream(nbt.getTagList("reasons", Constants.NBT.TAG_STRING))
-                .map(b -> ((NBTTagString) b).getString())
+            StreamUtils.stream(nbt.getList("reasons", Constants.NBT.TAG_STRING))
+                .map(INBT::toString)
                 .collect(Collectors.toList())
         );
     }
 
-    public static void encodeBuf(ByteBuf buf, MoodInformation info) {
-        ByteBufUtils.writeUTF8String(buf, info.mood);
+    public static void encodeBuf(PacketBuffer buf, MoodInformation info) {
+        buf.writeUtf(info.mood);
         buf.writeShort(info.reasons.size());
-        info.reasons.forEach(r -> ByteBufUtils.writeUTF8String(buf, r));
+        info.reasons.forEach(buf::writeUtf);
     }
 
-    public static MoodInformation decodeBuf(ByteBuf buf) {
-        return new MoodInformation(ByteBufUtils.readUTF8String(buf), IntStream.range(0, buf.readShort()).mapToObj(i -> ByteBufUtils.readUTF8String(buf)).collect(Collectors.toList()));
+    public static MoodInformation decodeBuf(PacketBuffer buf) {
+        return new MoodInformation(
+            buf.readUtf(),
+            IntStream.range(0, buf.readShort()).mapToObj(i -> buf.readUtf()).collect(Collectors.toList())
+        );
     }
 }

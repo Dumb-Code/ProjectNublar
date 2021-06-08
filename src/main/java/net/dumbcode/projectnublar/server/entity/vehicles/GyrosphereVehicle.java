@@ -1,25 +1,25 @@
 package net.dumbcode.projectnublar.server.entity.vehicles;
 
-import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.utils.InterpValue;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.Pose;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.util.vector.Quaternion;
-import org.lwjgl.util.vector.Vector4f;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultInput> {
 
@@ -38,36 +38,40 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     }
 
     @Override
-    public boolean canBePushed() {
-        return true;
+    public IPacket<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    //    @Override
+//    public boolean canBePushed() {
+//        return true;
+//    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT compound) {
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-    }
-
-    @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
+    protected void addAdditionalSaveData(CompoundNBT compound) {
     }
 
     @Override
     public boolean canBeCollidedWith() {
-        if(this.world.isRemote) {
+        if(this.level.isClientSide) {
             return !this.isPlayerIn();
         }
         return true;
     }
 
-    @SideOnly(Side.CLIENT)
     private boolean isPlayerIn() {
-        return this.getPassengers().contains(Minecraft.getMinecraft().player);
+        return this.getPassengers().contains(Minecraft.getInstance().player);
     }
 
     @Override
     protected void applyMovement() {
         Entity driver = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0); //Move to controlling passanger
         if(driver != null) {
-            this.rotationYaw = driver.rotationYaw;
+            this.yRot = driver.yRot;
         }
 
         float velX = (float) this.getIntInput(DefaultInput.LEFT) - this.getIntInput(DefaultInput.RIGHT);
@@ -76,8 +80,8 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
         velX /= 30F;
         velZ /= 30F;
 
-        double sin = Math.sin(Math.toRadians(this.rotationYaw));
-        double cos = Math.cos(Math.toRadians(this.rotationYaw));
+        double sin = Math.sin(Math.toRadians(this.yRot));
+        double cos = Math.cos(Math.toRadians(this.yRot));
 
         this.xMotion.setTarget(velX * cos - velZ * sin);
         this.zMotion.setTarget(velX * sin + velZ * cos);
@@ -116,27 +120,27 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     }
 
     @Override
-    protected boolean isActive(EntityPlayerSP player, DefaultInput defaultInput) {
-        MovementInput move = player.movementInput;
+    @OnlyIn(Dist.CLIENT)
+    protected boolean isActive(ClientPlayerEntity player, DefaultInput defaultInput) {
+        MovementInput move = player.input;
         switch (defaultInput) {
-            case LEFT: return move.leftKeyDown;
-            case RIGHT: return move.rightKeyDown;
-            case FORWARD: return move.forwardKeyDown;
-            case BACKWARDS: return move.backKeyDown;
+            case LEFT: return move.left;
+            case RIGHT: return move.right;
+            case FORWARD: return move.up;
+            case BACKWARDS: return move.down;
         }
         return false;
     }
 
     @Override
-    public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+    public ActionResultType interact(PlayerEntity player, Hand hand) {
         player.startRiding(this);
-        return true;
+        return ActionResultType.SUCCESS;
     }
 
-    @Override
     public void updatePassenger(Entity passenger) {
-        if (this.isPassenger(passenger)) {
-            passenger.setPosition(this.posX, this.posY + this.height / 2 - passenger.height / 2, this.posZ);
+        if (this.hasPassenger(passenger)) {
+            passenger.setPos(this.position().x, this.position().y + this.getDimensions(Pose.STANDING).height / 2 - passenger.getDimensions(passenger.getPose()).height / 2, this.position().z);
         }
     }
 }

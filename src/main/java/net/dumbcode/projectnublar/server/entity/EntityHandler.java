@@ -40,12 +40,12 @@ public class EntityHandler {
             .build("gyrosphere")
     );
 
-    public static final RegistryObject<EntityType<EntityPart>> DUMMY_PART = REGISTER.register("gyrosphere", () ->
-        EntityType.Builder.<GyrosphereVehicle>of(EntityPart::new, EntityClassification.AMBIENT)
+    public static final RegistryObject<EntityType<EntityPart>> DUMMY_PART = REGISTER.register("entity_part", () ->
+        EntityType.Builder.<EntityPart>of(EntityPart::new, EntityClassification.AMBIENT)
             .clientTrackingRange(128)
             .setTrackingRange(128)
             .setUpdateInterval(20)
             .setShouldReceiveVelocityUpdates(true)
-            .build("gyrosphere")
+            .build("entity_part")
     );
 }

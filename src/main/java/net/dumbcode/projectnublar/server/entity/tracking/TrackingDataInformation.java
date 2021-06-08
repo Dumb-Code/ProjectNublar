@@ -1,10 +1,12 @@
 package net.dumbcode.projectnublar.server.entity.tracking;
 
-import io.netty.buffer.ByteBuf;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.info.*;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -22,7 +24,7 @@ public abstract class TrackingDataInformation {
 
     protected abstract String getTypeName();
 
-    public void renderMap(int x, int y) {
+    public void renderMap(MatrixStack stack, int x, int y) {
 
     }
 
@@ -31,14 +33,15 @@ public abstract class TrackingDataInformation {
         return new Dimension();
     }
 
-    public void renderInfo(int x, int y, int relativeMouseX, int relativeMouseY) {
+    @OnlyIn(Dist.CLIENT)
+    public void renderInfo(MatrixStack stack, int x, int y, int relativeMouseX, int relativeMouseY) {
 
     }
 
     public static <T extends TrackingDataInformation> void registerTrackingType(
         String typeName,
-        Function<ByteBuf, T> bufDeserailizer, BiConsumer<ByteBuf, T> bufSerializer,
-        Function<NBTTagCompound, T> nbtDeserailizer, BiConsumer<NBTTagCompound, T> nbtSerailizer
+        Function<PacketBuffer, T> bufDeserailizer, BiConsumer<PacketBuffer, T> bufSerializer,
+        Function<CompoundNBT, T> nbtDeserailizer, BiConsumer<CompoundNBT, T> nbtSerailizer
     ) {
         REGISTERED_MAP.put(typeName, new Entry<>(bufDeserailizer, bufSerializer, nbtDeserailizer, nbtSerailizer));
     }
@@ -48,22 +51,22 @@ public abstract class TrackingDataInformation {
         return Optional.ofNullable(REGISTERED_MAP.get(name));
     }
 
-    public static Optional<TrackingDataInformation> deserializeBuf(ByteBuf buf) {
-        return getEntry(ByteBufUtils.readUTF8String(buf)).map(c -> c.getBufDeserailizer().apply(buf));
+    public static Optional<TrackingDataInformation> deserializeBuf(PacketBuffer buf) {
+        return getEntry(buf.readUtf()).map(c -> c.getBufDeserailizer().apply(buf));
     }
 
-    public static void serializeBuf(ByteBuf buf, TrackingDataInformation info) {
-        ByteBufUtils.writeUTF8String(buf, info.typeName);
+    public static void serializeBuf(PacketBuffer buf, TrackingDataInformation info) {
+        buf.writeUtf(info.typeName);
         getEntry(info.typeName).ifPresent(c -> c.getBufSerializer().accept(buf, info));
     }
 
-    public static Optional<TrackingDataInformation> deserializeNBT(NBTTagCompound nbt) {
+    public static Optional<TrackingDataInformation> deserializeNBT(CompoundNBT nbt) {
         return getEntry(nbt.getString("key")).map(c -> c.getNbtDeserailizer().apply(nbt));
     }
 
-    public static NBTTagCompound serializeNBT(NBTTagCompound nbt, TrackingDataInformation info) {
+    public static CompoundNBT serializeNBT(CompoundNBT nbt, TrackingDataInformation info) {
         getEntry(info.typeName).ifPresent(c -> {
-            nbt.setString("key", info.typeName);
+            nbt.putString("key", info.typeName);
             c.getNbtSerailizer().accept(nbt, info);
         });
         return nbt;
@@ -71,10 +74,10 @@ public abstract class TrackingDataInformation {
 
     @Value
     private static class Entry<T extends TrackingDataInformation> {
-        private final Function<ByteBuf, T> bufDeserailizer;
-        private final BiConsumer<ByteBuf, T> bufSerializer;
-        private final Function<NBTTagCompound, T> nbtDeserailizer;
-        private final BiConsumer<NBTTagCompound, T> nbtSerailizer;
+        Function<PacketBuffer, T> bufDeserailizer;
+        BiConsumer<PacketBuffer, T> bufSerializer;
+        Function<CompoundNBT, T> nbtDeserailizer;
+        BiConsumer<CompoundNBT, T> nbtSerailizer;
     }
 
     static {

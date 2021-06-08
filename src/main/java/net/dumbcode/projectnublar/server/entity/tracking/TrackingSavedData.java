@@ -1,15 +1,13 @@
 package net.dumbcode.projectnublar.server.entity.tracking;
 
-import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
@@ -25,9 +23,9 @@ public class TrackingSavedData extends WorldSavedData {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void load(CompoundNBT nbt) {
         this.entries.clear();
-        StreamUtils.stream(nbt.getTagList("entries", Constants.NBT.TAG_COMPOUND)).map(b -> DataEntry.deserialize((NBTTagCompound) b)).forEach(this.entries::add);
+        StreamUtils.stream(nbt.getList("entries", Constants.NBT.TAG_COMPOUND)).map(b -> DataEntry.deserialize((CompoundNBT) b)).forEach(this.entries::add);
     }
 
     public Set<DataEntry> getEntries() {
@@ -37,53 +35,48 @@ public class TrackingSavedData extends WorldSavedData {
     public void setEntry(DataEntry entry) {
         this.removeEntry(entry.uuid);
         this.entries.add(entry);
-        this.markDirty();
+        this.setDirty();
     }
 
     public void removeEntry(UUID uuid) {
-        this.entries.remove(new DataEntry(uuid, Vec3d.ZERO));
-        this.markDirty();
+        this.entries.remove(new DataEntry(uuid, Vector3d.ZERO));
+        this.setDirty();
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        nbt.setTag("entries", this.entries.stream().map(DataEntry::serialize).collect(CollectorUtils.toNBTTagList()));
+    public CompoundNBT save(CompoundNBT nbt) {
+        nbt.put("entries", this.entries.stream().map(DataEntry::serialize).collect(CollectorUtils.toNBTTagList()));
         return nbt;
     }
 
-    public static TrackingSavedData getData(World world) {
+    public static TrackingSavedData getData(ServerWorld world) {
         String identifier = "tracking_data";
-        TrackingSavedData data = (TrackingSavedData) Objects.requireNonNull(world.getMapStorage()).getOrLoadData(TrackingSavedData.class, identifier);
-        if(data == null) {
-            data = new TrackingSavedData(identifier);
-            world.getMapStorage().setData(identifier, data);
-        }
-        return data;
+        return world.getDataStorage().computeIfAbsent(() -> new TrackingSavedData(identifier), identifier);
     }
 
     //Per entity
     @Value
     public static class DataEntry {
-        private final UUID uuid;
+        UUID uuid;
         @EqualsAndHashCode.Exclude
-        private final Vector3d position;
+        Vector3d position;
         @EqualsAndHashCode.Exclude
-        private final List<TrackingDataInformation> information = new ArrayList<>();
+        List<TrackingDataInformation> information = new ArrayList<>();
 
-        public static NBTTagCompound serialize(DataEntry info) {
-            NBTTagCompound compound = new NBTTagCompound();
-            compound.setUniqueId("uuid", info.uuid);
-            compound.setDouble("position_x", info.position.x);
-            compound.setDouble("position_y", info.position.y);
-            compound.setDouble("position_z", info.position.z);
-            compound.setTag("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new NBTTagCompound(), d)).collect(CollectorUtils.toNBTTagList()));
+        public static CompoundNBT serialize(DataEntry info) {
+            CompoundNBT compound = new CompoundNBT();
+            compound.putUUID("uuid", info.uuid);
+            compound.putDouble("position_x", info.position.x);
+            compound.putDouble("position_y", info.position.y);
+            compound.putDouble("position_z", info.position.z);
+            compound.put("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new CompoundNBT(), d)).collect(CollectorUtils.toNBTTagList()));
             return compound;
         }
 
-        public static DataEntry deserialize(NBTTagCompound nbt) {
-            DataEntry info = new DataEntry(nbt.getUniqueId("uuid"), new Vec3d(nbt.getDouble("position_x"), nbt.getDouble("position_y"), nbt.getDouble("position_z")));
-            StreamUtils.stream(nbt.getTagList("infos", Constants.NBT.TAG_COMPOUND))
-                .map(base -> TrackingDataInformation.deserializeNBT((NBTTagCompound) base))
+        public static DataEntry deserialize(CompoundNBT nbt) {
+            DataEntry info = new DataEntry(nbt.getUUID("uuid"), new Vector3d(nbt.getDouble("position_x"), nbt.getDouble("position_y"), nbt.getDouble("position_z")));
+            StreamUtils.stream(nbt.getList("infos", Constants.NBT.TAG_COMPOUND))
+                .map(base -> TrackingDataInformation.deserializeNBT((CompoundNBT) base))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(info.information::add);
@@ -104,7 +97,7 @@ public class TrackingSavedData extends WorldSavedData {
         }
 
         public static DataEntry deserailize(PacketBuffer buf) {
-            DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()),new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()));
+            DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()),new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble()));
             IntStream.range(0, buf.readShort())
                 .mapToObj(i -> TrackingDataInformation.deserializeBuf(buf))
                 .filter(Optional::isPresent)

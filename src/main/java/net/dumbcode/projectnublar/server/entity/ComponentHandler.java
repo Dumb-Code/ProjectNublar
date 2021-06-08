@@ -1,18 +1,13 @@
 package net.dumbcode.projectnublar.server.entity;
 
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
-import net.dumbcode.dumblibrary.server.ecs.component.RegisterComponentsEvent;
-import net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType;
-import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.*;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackFenceComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.DefenseComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
-import net.dumbcode.projectnublar.server.plants.component.PlantComponent;
-import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
-import net.minecraft.util.ResourceLocation;
+import net.dumbcode.projectnublar.server.registry.EarlyDeferredRegister;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 

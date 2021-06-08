@@ -16,6 +16,7 @@ import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
@@ -24,7 +25,7 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.plants.Plant;
-import net.dumbcode.dumblibrary.server.registry.EarlyRegistryEvent;
+import net.dumbcode.projectnublar.server.registry.EarlyRegistryEvent;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
@@ -94,6 +95,7 @@ public class ProjectNublar {
         TabletModuleHandler.DR.register(bus);
         EntityHandler.REGISTER.register(bus);
         SoundHandler.REGISTER.register(bus);
+        GeneticHandler.REGISTER.register(bus);
 
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);

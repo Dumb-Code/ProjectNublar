@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.entity;
 
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.dumblibrary.server.ecs.FamilySavedData;
@@ -10,14 +9,16 @@ import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MoverType;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.*;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,27 +51,30 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
         this.hatchingTicks = hatchingTicks;
     }
 
+    @Override
+    protected void defineSynchedData() {
+        
+    }
 
     @Override
-    public void onEntityUpdate() {
-        this.setSize(7/16F * this.randomScaleAdjustment, (this.type.getEggLength() + 2/16F) * this.randomScaleAdjustment);
+    public EntitySize getDimensions(Pose pose) {
+        return EntitySize.fixed(7/16F * this.randomScaleAdjustment, (this.type.getEggLength() + 2/16F) * this.randomScaleAdjustment);
+    }
 
-        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-        this.motionX *= 0.8F;
-        this.motionZ *= 0.8F;
-        this.motionY = -0.5F;
+    @Override
+    public void tick() {
+        Vector3d movement = this.getDeltaMovement();
+        this.move(MoverType.SELF, movement);
 
-        for (Entity entity : this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox(), input -> true)) {
-            entity.applyEntityCollision(this);
-        }
+        this.setDeltaMovement(movement.x * 0.8F, movement.y - 0.5F, movement.z * 0.8F);
 
 
-        if(!this.world.isRemote && this.ticksExisted >= this.hatchingTicks) {
-            this.setDead();
+        if(!this.level.isClientSide && this.tickCount >= this.hatchingTicks) {
+            this.kill();
             if(this.dinosaur != null) {
-                DinosaurEntity child = this.dinosaur.createEntity(this.world);
+                DinosaurEntity child = this.dinosaur.createEntity(this.level);
 
-                child.setPosition(this.posX, this.posY, this.posZ);
+                child.setPos(this.position().x, this.position().y, this.position().z);
 
                 List<GeneticEntry<?>> entries = child.getOrExcept(EntityComponentTypes.GENETICS).getGenetics();
 
@@ -84,28 +88,27 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
                 });
 
                 if(this.familyUUID != null) {
-                    FamilySavedData.getData(this.familyUUID).getChildren().add(child.getUniqueID());
+                    FamilySavedData.getData(this.familyUUID).getChildren().add(child.getUUID());
                 }
                 child.get(ComponentHandler.AGE).ifPresent(a -> a.resetStageTo(Dinosaur.CHILD_AGE));
 
                 child.finalizeComponents();
 
-                this.world.spawnEntity(child);
+                this.level.addFreshEntity(child);
 
             }
         }
-        super.onEntityUpdate();
+        super.tick();
     }
 
     @Override
-    protected void entityInit() {
-
+    public IPacket<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
-
-    @Override
-    public boolean canBePushed() {
-        return true;
-    }
+//    @Override
+//    public boolean canBePushed() {
+//        return true;
+//    }
 
     @Override
     public boolean canBeCollidedWith() {
@@ -113,40 +116,40 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbt) {
+    public void readAdditionalSaveData(CompoundNBT nbt) {
         this.combinedGenetics.clear();
-        StreamUtils.stream(nbt.getTagList("genetics", Constants.NBT.TAG_COMPOUND))
-            .map(b -> GeneticEntry.deserialize((NBTTagCompound) b))
+        StreamUtils.stream(nbt.getList("genetics", Constants.NBT.TAG_COMPOUND))
+            .map(b -> GeneticEntry.deserialize((CompoundNBT) b))
             .forEach(this.combinedGenetics::add);
         this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("dinosaur")));
         this.randomScaleAdjustment = nbt.getFloat("random_scale");
-        this.type = DinosaurEggType.readFromNBT(nbt.getCompoundTag("egg_type"));
-        this.familyUUID = nbt.hasUniqueId("family_uuid") ? nbt.getUniqueId("family_uuid") : null;
-        this.hatchingTicks = nbt.getInteger("hatching_ticks");
+        this.type = DinosaurEggType.readFromNBT(nbt.getCompound("egg_type"));
+        this.familyUUID = nbt.hasUUID("family_uuid") ? nbt.getUUID("family_uuid") : null;
+        this.hatchingTicks = nbt.getInt("hatching_ticks");
         this.randomRotation = nbt.getFloat("rot");
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound nbt) {
-        nbt.setTag("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new NBTTagCompound())).collect(CollectorUtils.toNBTTagList()));
-        nbt.setString("dinosaur", this.dinosaur.getRegName().toString());
-        nbt.setFloat("random_scale", this.randomScaleAdjustment);
-        nbt.setTag("egg_type", DinosaurEggType.writeToNBT(this.type));
+    protected void addAdditionalSaveData(CompoundNBT nbt) {
+        nbt.put("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new CompoundNBT())).collect(CollectorUtils.toNBTTagList()));
+        nbt.putString("dinosaur", this.dinosaur.getRegName().toString());
+        nbt.putFloat("random_scale", this.randomScaleAdjustment);
+        nbt.put("egg_type", DinosaurEggType.writeToNBT(this.type));
         if(this.familyUUID != null) {
-            nbt.setUniqueId("family_uuid", this.familyUUID);
+            nbt.putUUID("family_uuid", this.familyUUID);
         }
-        nbt.setInteger("hatching_ticks", this.hatchingTicks);
-        nbt.setFloat("rot", this.randomRotation);
+        nbt.putInt("hatching_ticks", this.hatchingTicks);
+        nbt.putFloat("rot", this.randomRotation);
     }
 
     @Override
-    public void writeSpawnData(ByteBuf buf) {
+    public void writeSpawnData(PacketBuffer buf) {
         buf.writeFloat(this.randomScaleAdjustment);
         DinosaurEggType.writeToBuf(this.type, buf);
     }
 
     @Override
-    public void readSpawnData(ByteBuf buf) {
+    public void readSpawnData(PacketBuffer buf) {
         this.randomScaleAdjustment = buf.readFloat();
         this.type = DinosaurEggType.readFromBuf(buf);
     }

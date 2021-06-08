@@ -4,7 +4,8 @@ import io.netty.buffer.ByteBuf;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -39,34 +40,34 @@ public class PregnancyInformation extends TooltipInformation {
             List<Integer> keys = new ArrayList<>(countMap.keySet());
             Collections.sort(keys);
 
-            lines.add(I18n.format("projectnublar.gui.tracking.pregnancy"));
+            lines.add(I18n.get("projectnublar.gui.tracking.pregnancy"));
 
             for (Integer key : keys) {
                 int hours = key / 72000;
                 int minutes = (key % 72000) / 1200;
                 int seconds = (key % 1200) / 20;
-                lines.add(I18n.format("projectnublar.gui.tracking.pregnancy.entry", countMap.get(key), hours, minutes, seconds));
+                lines.add(I18n.get("projectnublar.gui.tracking.pregnancy.entry", countMap.get(key), hours, minutes, seconds));
             }
         }
         return lines;
     }
 
-    public static void encodeNBT(NBTTagCompound nbt, PregnancyInformation info) {
-        nbt.setIntArray("ticks", info.ticksTillGiveBirth);
+    public static void encodeNBT(CompoundNBT nbt, PregnancyInformation info) {
+        nbt.putIntArray("ticks", info.ticksTillGiveBirth);
     }
 
-    public static PregnancyInformation decodeNBT(NBTTagCompound nbt) {
+    public static PregnancyInformation decodeNBT(CompoundNBT nbt) {
         return new PregnancyInformation(nbt.getIntArray("ticks"));
     }
 
-    public static void encodeBuf(ByteBuf buf, PregnancyInformation info) {
+    public static void encodeBuf(PacketBuffer buf, PregnancyInformation info) {
         buf.writeShort(info.ticksTillGiveBirth.length);
         for (int i : info.ticksTillGiveBirth) {
             buf.writeInt(i);
         }
     }
 
-    public static PregnancyInformation decodeBuf(ByteBuf buf) {
+    public static PregnancyInformation decodeBuf(PacketBuffer buf) {
         return new PregnancyInformation(IntStream.range(0, buf.readShort()).map(i -> buf.readInt()).toArray());
     }
 }

@@ -2,13 +2,13 @@ package net.dumbcode.projectnublar.server.entity.vehicles;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SVehicleInputStateUpdated;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public abstract class AbstractVehicle<E extends Enum<E>> extends Entity {
 
@@ -47,41 +47,41 @@ public abstract class AbstractVehicle<E extends Enum<E>> extends Entity {
     }
 
     @Override
-    protected void entityInit() {
+    protected void defineSynchedData() {
 
     }
 
     @Override
-    public void onEntityUpdate() {
-        super.onEntityUpdate();
+    public void baseTick() {
+        super.baseTick();
 
-        if(this.world.isRemote) {
+        if(this.level.isClientSide) {
             this.handleInputs();
         }
 //        if(!world.isRemote)
         {
             this.applyMovement();
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.move(MoverType.SELF, this.getDeltaMovement());
         }
     }
 
     protected void handleInputs() {
         Entity driver = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0); //Move to controlling passanger
-        if(!(driver instanceof  EntityPlayerSP)) {
+        if(!(driver instanceof ClientPlayerEntity)) {
             return;
         }
-        EntityPlayerSP player = (EntityPlayerSP) driver;
+        ClientPlayerEntity player = (ClientPlayerEntity) driver;
         int previousState = this.getControlState();
         for (E e : this.values) {
             this.setInput(e, this.isActive(player, e));
         }
         if(this.getControlState() != previousState) {
-            ProjectNublar.NETWORK.sendToServer(new C2SVehicleInputStateUpdated(this, this.getControlState()));
+            ProjectNublar.NETWORK.sendToServer(new C2SVehicleInputStateUpdated(this.getId(), this.getControlState()));
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    protected abstract boolean isActive(EntityPlayerSP player, E e);
+    @OnlyIn(Dist.CLIENT)
+    protected abstract boolean isActive(ClientPlayerEntity player, E e);
 
     protected abstract void applyMovement();
 
