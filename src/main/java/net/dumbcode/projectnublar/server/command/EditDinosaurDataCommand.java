@@ -1,5 +1,9 @@
 package net.dumbcode.projectnublar.server.command;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
@@ -7,81 +11,82 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.BreedingComponent;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
+import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurEggLayingComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.EntitySelector;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
-import scala.actors.$bang;
+import net.minecraft.util.text.StringTextComponent;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 
-public class EditDinosaurDataCommand extends CommandBase {
+public class EditDinosaurDataCommand {
 
-    private final Map<String, ChangeableEntry<?>> entries = new HashMap<>();
+    public static final ChangeableEntry<MetabolismComponent> THIRST = new ChangeableEntry<>("thirst", ComponentHandler.METABOLISM, MetabolismComponent::getWater, MetabolismComponent::setWater);
+    public static final ChangeableEntry<MetabolismComponent> HUNGER = new ChangeableEntry<>("hunger", ComponentHandler.METABOLISM, MetabolismComponent::getFood, MetabolismComponent::setFood);
+    public static final ChangeableEntry<BreedingComponent> BREED = new ChangeableEntry<>("breed", () -> EntityComponentTypes.BREEDING, BreedingComponent::getTicksSinceLastBreed, BreedingComponent::setTicksSinceLastBreed);
+    public static final ChangeableEntry<DinosaurEggLayingComponent> PREGNANCY = new ChangeableEntry<>("pregnancy", ComponentHandler.DINOSAUR_EGG_LAYING, e -> -1, (c, i) -> c.getHeldEggs().forEach(e -> e.setTicksLeft(i)));
 
-    public EditDinosaurDataCommand() {
-        this.entries.put("thirst", new ChangeableEntry<>(ComponentHandler.METABOLISM, MetabolismComponent::getWater, MetabolismComponent::setWater));
-        this.entries.put("hunger", new ChangeableEntry<>(ComponentHandler.METABOLISM, MetabolismComponent::getFood, MetabolismComponent::setFood));
-        this.entries.put("breed", new ChangeableEntry<>(EntityComponentTypes.BREEDING, BreedingComponent::getTicksSinceLastBreed, BreedingComponent::setTicksSinceLastBreed));
-        this.entries.put("pregnancy", new ChangeableEntry<>(ComponentHandler.DINOSAUR_EGG_LAYING, e -> -1, (c, i) -> c.getHeldEggs().forEach(e -> e.setTicksLeft(i))));
+
+    public static ArgumentBuilder<CommandSource, ?> createCommand() {
+        return Commands.literal("ticks")
+            .then(createEntry(THIRST))
+            .then(createEntry(HUNGER))
+            .then(createEntry(BREED))
+            .then(createEntry(PREGNANCY))
+            ;
     }
 
-    @Override
-    public String getName() {
-        return "ticks";
-    }
-
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return "todo";
-    }
-
-    @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if(args.length >= 1) {
-            ChangeableEntry<?> entry = this.entries.get(args[0]);
-            List<ComponentAccess> accessList = new ArrayList<>();
-            for (Entity entity : sender.getEntityWorld().loadedEntityList) {
-                if(entity instanceof ComponentAccess) {
-                    accessList.add((ComponentAccess) entity);
+    private static <E extends EntityComponent> ArgumentBuilder<CommandSource, ?> createEntry(ChangeableEntry<E> entry) {
+        return Commands.literal(entry.name)
+            .then(Commands.argument("targets", EntityArgument.entities()))
+            .executes(context -> {
+                List<Double> out = new ArrayList<>();
+                for (ComponentAccess access : gather(context)) {
+                    runGetters(access, entry).ifPresent(out::add);
                 }
-            }
-
-            if(entry == null) {
-                throw new CommandException(args[0] + " is not valid. Please use: " + this.entries.keySet().toString());
-            }
-            if(args.length >= 2) {
-                //set
-                int ticksSet = parseInt(args[1]);
+                context.getSource().sendSuccess(new StringTextComponent("Command Output: " + out), false);
+                return 1;
+            })
+            .then(Commands.argument("value", IntegerArgumentType.integer())
+            .executes(context -> {
+                Integer value = context.getArgument("value", Integer.class);
                 int affected = 0;
-                for (ComponentAccess access : accessList) {
-                    if (runSetters(access, entry, ticksSet)) {
+                for (ComponentAccess access : gather(context)) {
+                    if (runSetters(access, entry, value)) {
                         affected++;
                     }
                 }
-                sender.sendMessage(new TextComponentString("Affected: " + affected));
-
-            } else {
-                //get
-                List<Double> out = new ArrayList<>();
-                for (ComponentAccess access : accessList) {
-                    runGetters(access, entry).ifPresent(out::add);
-                }
-
-                sender.sendMessage(new TextComponentString("Command Output: " + out));
-            }
-        }
+                context.getSource().sendSuccess(new StringTextComponent("Affected: " + affected), false);
+                return 1;
+            }));
     }
 
-    private <E extends EntityComponent> Optional<Double> runGetters(ComponentAccess access, ChangeableEntry<E> entry) {
+    private static List<ComponentAccess> gather(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        EntitySelector target = context.getArgument("targets", EntitySelector.class);
+        CommandSource source = context.getSource();
+        List<? extends Entity> entities = target.findEntities(source);
+        List<ComponentAccess> accessList = new ArrayList<>();
+        for (Entity entity : entities) {
+            if(entity instanceof ComponentAccess) {
+                accessList.add((ComponentAccess) entity);
+            }
+        }
+        return accessList;
+    }
+
+    private static <E extends EntityComponent> Optional<Double> runGetters(ComponentAccess access, ChangeableEntry<E> entry) {
         return access.get(entry.getType()).map(e -> entry.getValueGetter().applyAsDouble(e));
     }
 
-    private <E extends EntityComponent> boolean runSetters(ComponentAccess access, ChangeableEntry<E> entry, int value) {
+    private static <E extends EntityComponent> boolean runSetters(ComponentAccess access, ChangeableEntry<E> entry, int value) {
         return access.get(entry.getType()).map(e -> {
             entry.getValueSetter().accept(e, value);
             e.syncToClient();
@@ -91,7 +96,8 @@ public class EditDinosaurDataCommand extends CommandBase {
 
     @Value
     private static class ChangeableEntry<E extends EntityComponent> {
-        EntityComponentType<E, ?> type;
+        String name;
+        Supplier<? extends EntityComponentType<E, ?>> type;
         ToDoubleFunction<E> valueGetter;
         BiConsumer<E, Integer> valueSetter;
     }
