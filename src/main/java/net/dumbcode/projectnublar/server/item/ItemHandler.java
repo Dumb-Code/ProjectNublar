@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
+import net.dumbcode.dumblibrary.server.registry.PreprocessRegisterDeferredRegister;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
@@ -17,7 +18,6 @@ import net.minecraft.item.ItemGroup;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
@@ -34,8 +34,8 @@ public final class ItemHandler {
     private static final ItemGroup TAB = TabHandler.TAB;
 
     private static final Supplier<Item> BASIC_ITEM = () -> new Item(new Item.Properties().tab(TAB));
-    
-    public static DeferredRegister<Item> REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, ProjectNublar.MODID);
+
+    public static final PreprocessRegisterDeferredRegister<Item> REGISTER = PreprocessRegisterDeferredRegister.create(ForgeRegistries.ITEMS.getRegistrySuperType(), ProjectNublar.MODID);
 
     public static final RegistryObject<Item> EMPTY_TEST_TUBE = REGISTER.register("test_tube", () -> new Item(new Item.Properties().stacksTo(1).tab(TAB)));
     public static final RegistryObject<Item> IRON_FILTER = REGISTER.register("iron_filter", () -> new FilterItem(0.25F, new Item.Properties().durability(150).tab(TAB)));
@@ -125,12 +125,14 @@ public final class ItemHandler {
 
     private static <T extends Item> Map<Dinosaur, RegistryObject<T>> createMap(String format, Function<Dinosaur, T> supplier) {
         Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
-        for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
-            map.put(dinosaur, REGISTER.register(
-                String.format(format, dinosaur.getFormattedName()),
-                () -> supplier.apply(dinosaur)
-            ));
-        }
+        REGISTER.beforeRegister(() -> {
+            for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
+                map.put(dinosaur, REGISTER.register(
+                    String.format(format, dinosaur.getFormattedName()),
+                    () -> supplier.apply(dinosaur)
+                ));
+            }
+        });
         return map;
     }
 
@@ -149,19 +151,21 @@ public final class ItemHandler {
         BiFunction<Dinosaur, S, T> creationFunc
     ) {
         Map<Dinosaur, Map<S, RegistryObject<T>>> map = new HashMap<>();
-        for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
-            Collection<S> collection = getterFunction.apply(dinosaur);
-            if (collection != null) {
-                for (S s : collection) {
-                    map.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, REGISTER.register(
-                        String.format(format, dinosaur.getFormattedName(), toStringFunction.apply(s)),
-                        () -> creationFunc.apply(dinosaur, s)
-                    ));
+        REGISTER.beforeRegister(() -> {
+            for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
+                Collection<S> collection = getterFunction.apply(dinosaur);
+                if (collection != null) {
+                    for (S s : collection) {
+                        map.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, REGISTER.register(
+                            String.format(format, dinosaur.getFormattedName(), toStringFunction.apply(s)),
+                            () -> creationFunc.apply(dinosaur, s)
+                        ));
+                    }
+                } else {
+                    map.put(dinosaur, new HashMap<>());
                 }
-            } else {
-                map.put(dinosaur, new HashMap<>());
             }
-        }
+        });
         return map;
     }
 }

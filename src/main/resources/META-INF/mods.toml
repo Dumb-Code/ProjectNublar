@@ -2,8 +2,12 @@ modLoader="javafml"
 loaderVersion="[36,)"
 license="All right reserved"
 [[mods]]
-modId="projectnublar"
-version="${file.jarVersion}"
-displayName="Project Nublar"
-authors="DumbCode"
-description=''''''
+  modId="projectnublar"
+  version="${file.jarVersion}"
+  displayName="Project Nublar"
+  authors="DumbCode"
+  description=''''''
+
+  [[dependencies.projectnublar]]
+    modId="dumblibrary"
+    mandatory=true

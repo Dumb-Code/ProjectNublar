@@ -63,6 +63,7 @@ public class PylonHeadConnectionRenderer {
         double posZ = MathHelper.lerp(partialTicks, e.zOld, e.getZ());
 
         MatrixStack stack = event.getMatrixStack();
+        stack.pushPose();
         stack.translate(-posX, -posY, -posZ);
 
         RenderHelper.setupForFlatItems();

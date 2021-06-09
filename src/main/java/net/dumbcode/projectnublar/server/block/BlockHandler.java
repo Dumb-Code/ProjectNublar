@@ -5,14 +5,11 @@ import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleParts;
-import net.dumbcode.projectnublar.server.tabs.TabHandler;
+import net.dumbcode.dumblibrary.server.registry.PreprocessRegisterDeferredRegister;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
@@ -24,7 +21,7 @@ import static net.minecraft.block.AbstractBlock.Properties.of;
 
 public class BlockHandler {
 
-    public static final DeferredRegister<Block> REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, ProjectNublar.MODID);
+    public static final PreprocessRegisterDeferredRegister<Block> REGISTER = PreprocessRegisterDeferredRegister.create(ForgeRegistries.BLOCKS.getRegistrySuperType(), ProjectNublar.MODID);
 
     public static final RegistryObject<BlockElectricFencePole> LOW_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("low_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.LOW_SECURITY));
     public static final RegistryObject<BlockElectricFencePole> HIGH_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("high_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.HIGH_SECURITY));
@@ -43,10 +40,10 @@ public class BlockHandler {
     public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
 
     public static final RegistryObject<Block> PLANTER_BOX = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
-    public static final RegistryObject<Block> UNNAMED_SCIENTIST_BLOCK = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
-    public static final RegistryObject<Block> UNNAMED_PALEONTOLOGIST_BLOCK = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
+    public static final RegistryObject<Block> UNNAMED_SCIENTIST_BLOCK = REGISTER.register("unnamed_scientist_block", () -> new Block(of(Material.METAL)));
+    public static final RegistryObject<Block> UNNAMED_PALEONTOLOGIST_BLOCK = REGISTER.register("unnamed_paleontologist_block", () -> new Block(of(Material.METAL)));
 
-    public static final Map<FossilBlock.FossilType, Map<Dinosaur, RegistryObject<FossilBlock>>> FOSSIL = Util.make(new HashMap<>(), map -> {
+    public static final Map<FossilBlock.FossilType, Map<Dinosaur, RegistryObject<FossilBlock>>> FOSSIL = REGISTER.beforeRegister(new HashMap<>(), map -> {
         for(FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
             map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value, copy(value.getCopy()))));
         }

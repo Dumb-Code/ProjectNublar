@@ -35,8 +35,8 @@ public class VillagerHandler {
 
     public static final DeferredRegister<PointOfInterestType> POI_REGISTER = DeferredRegister.create(ForgeRegistries.POI_TYPES, ProjectNublar.MODID);
     public static final RegistryObject<PointOfInterestType> PLANTER_BOX = POI_REGISTER.register("planter_box", () -> new PointOfInterestType("planter_box", ImmutableSet.of(BlockHandler.PLANTER_BOX.get().defaultBlockState()), 1, 1));
-    public static final RegistryObject<PointOfInterestType> UNNAMED_SCIENTIST = POI_REGISTER.register("planter_box", () -> new PointOfInterestType("unnamed_scientist", ImmutableSet.of(UNNAMED_SCIENTIST_BLOCK.get().defaultBlockState()), 1, 1));
-    public static final RegistryObject<PointOfInterestType> UNNAMED_PALEONTOLOGIST = POI_REGISTER.register("planter_box", () -> new PointOfInterestType("unnamed_paleontologist", ImmutableSet.of(UNNAMED_PALEONTOLOGIST_BLOCK.get().defaultBlockState()), 1, 1));
+    public static final RegistryObject<PointOfInterestType> UNNAMED_SCIENTIST = POI_REGISTER.register("unnamed_scientist", () -> new PointOfInterestType("unnamed_scientist", ImmutableSet.of(UNNAMED_SCIENTIST_BLOCK.get().defaultBlockState()), 1, 1));
+    public static final RegistryObject<PointOfInterestType> UNNAMED_PALEONTOLOGIST = POI_REGISTER.register("unnamed_paleontolist", () -> new PointOfInterestType("unnamed_paleontologist", ImmutableSet.of(UNNAMED_PALEONTOLOGIST_BLOCK.get().defaultBlockState()), 1, 1));
 
     public static final DeferredRegister<VillagerProfession> PROFESSION_REGISTER = DeferredRegister.create(ForgeRegistries.PROFESSIONS, ProjectNublar.MODID);
     public static final RegistryObject<VillagerProfession> PALEONTOLOGIST = PROFESSION_REGISTER.register("paleontologist", () -> new VillagerProfession("paleontologist", UNNAMED_PALEONTOLOGIST.get(), ImmutableSet.of(), ImmutableSet.of(), SoundEvents.VILLAGER_WORK_LEATHERWORKER));

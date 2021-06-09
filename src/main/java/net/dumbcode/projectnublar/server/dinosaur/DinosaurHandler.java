@@ -1,10 +1,9 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.registry.EarlyDeferredRegister;
+import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
@@ -12,7 +11,7 @@ import java.util.function.Supplier;
 
 public class DinosaurHandler {
 
-    public static final EarlyDeferredRegister<Dinosaur> REGISTER = EarlyDeferredRegister.wrap(DeferredRegister.create(Dinosaur.class, ProjectNublar.MODID));
+    public static final EarlyDeferredRegister<Dinosaur> REGISTER = EarlyDeferredRegister.create(Dinosaur.class, ProjectNublar.MODID);
 
     private static final Supplier<IForgeRegistry<Dinosaur>> DINOSAUR_REGISTRY = REGISTER.makeRegistry("dinosaurs", () ->
         new RegistryBuilder<Dinosaur>()

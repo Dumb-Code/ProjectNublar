@@ -1,10 +1,8 @@
 package net.dumbcode.projectnublar.server.plants;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.registry.EarlyDeferredRegister;
+import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
 import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
@@ -12,7 +10,7 @@ import java.util.function.Supplier;
 
 public class PlantHandler {
 
-    public static final EarlyDeferredRegister<Plant> REGISTER = EarlyDeferredRegister.wrap(DeferredRegister.create(Plant.class, ProjectNublar.MODID));
+    public static final EarlyDeferredRegister<Plant> REGISTER = EarlyDeferredRegister.create(Plant.class, ProjectNublar.MODID);
 
     public static final Supplier<IForgeRegistry<Plant>> PLANT_REGISTRY = REGISTER.makeRegistry("plants", RegistryBuilder::new);
 

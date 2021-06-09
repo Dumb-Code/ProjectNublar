@@ -22,10 +22,10 @@ public enum EnumDinosaurEggTypes { //TODO: check scale
     private final DinosaurEggType qrType;
 
     EnumDinosaurEggTypes(float length, float scale) {
-        ResourceLocation modelLocation = new ResourceLocation(ProjectNublar.MODID, "models/entities/eggs/egg_" + this.name());
-        ResourceLocation mainTextureLocation = new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + ".png");
+        ResourceLocation modelLocation = new ResourceLocation(ProjectNublar.MODID, "models/entities/eggs/egg_" + this.name().toLowerCase());
+        ResourceLocation mainTextureLocation = new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name().toLowerCase() + ".png");
         this.type = new DinosaurEggType(length, scale, modelLocation, mainTextureLocation);
-        this.qrType = new DinosaurEggType(length, scale, modelLocation, mainTextureLocation, new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name() + "_qr.png"));
+        this.qrType = new DinosaurEggType(length, scale, modelLocation, mainTextureLocation, new ResourceLocation(ProjectNublar.MODID, "textures/entities/eggs/egg_" + this.name().toLowerCase() + "_qr.png"));
     }
 
 

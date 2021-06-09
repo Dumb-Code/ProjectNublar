@@ -20,6 +20,7 @@ import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
+import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -27,7 +28,6 @@ import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.plants.PlantHandler;
 import net.dumbcode.projectnublar.server.recipes.crafting.ProjectNublarRecipesSerializers;
-import net.dumbcode.projectnublar.server.registry.EarlyRegistryEvent;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
@@ -39,10 +39,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
@@ -50,8 +48,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,21 +93,26 @@ public class ProjectNublar {
         GeneticHandler.REGISTER.register(bus);
         DinosaurHandler.REGISTER.register(bus);
         PlantHandler.REGISTER.register(bus);
-        ProjectNublarRecipesSerializers.REGISTER.register(bus)
+        ProjectNublarRecipesSerializers.REGISTER.register(bus);
+        ComponentHandler.REGISTER.register(bus);
 
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
 
         forgeBus.addListener(this::gatherData);
 
-//        forgeBus.addGenericListener(Dinosaur.class, EventPriority.LOWEST, DinosaurBaseBlock::onDinosaurRegistryFinished);
+        if(FMLEnvironment.dist == Dist.CLIENT) {
+            this.clientSetup();
+        }
 
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> {
-            bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
+    }
 
-            forgeBus.addListener(ProjectNublarBlockRenderLayers::setRenderLayers);
+    public void clientSetup() {
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
-        });
+        bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
+        forgeBus.addListener(ProjectNublarBlockRenderLayers::setRenderLayers);
     }
 
     public void gatherData(GatherDataEvent event) {
@@ -124,21 +125,10 @@ public class ProjectNublar {
     }
 
     public void preInit(FMLCommonSetupEvent event) {
-//        registerJsonDinosaurs();
-
+        EntityStorageOverrides.onRegisterStorages();
 
         DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
         PlantHandler.getRegistry().forEach(Plant::attachComponents);
-
-        registerPackets();
-
-        DataSerializerHandler.register();
-        if(FMLEnvironment.dist.isClient()) {
-            EnumWeatherIcons.register();
-            TabletBackground.registerDefaults();
-            ProjectNublarContainers.registerScreens();
-        }
-        AnimationFactorHandler.register();
 
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry().getValues()) {
             ResourceLocation regName = dinosaur.getRegName();
@@ -150,20 +140,17 @@ public class ProjectNublar {
 
             }
         }
+//        registerJsonDinosaurs();
 
-//        GameRegistry.registerTileEntity(SkeletalBuilderBlockEntity.class, new ResourceLocation(MODID, "skeletal_builder"));
-//        GameRegistry.registerTileEntity(FossilProcessorBlockEntity.class, new ResourceLocation(MODID, "fossil_processor"));
-//        GameRegistry.registerTileEntity(DrillExtractorBlockEntity.class, new ResourceLocation(MODID, "drill_extractor"));
-//        GameRegistry.registerTileEntity(SequencingSynthesizerBlockEntity.class, new ResourceLocation(MODID, "sequencing_synthesizer"));
-//        GameRegistry.registerTileEntity(EggPrinterBlockEntity.class, new ResourceLocation(MODID, "egg_printer"));
-//        GameRegistry.registerTileEntity(IncubatorBlockEntity.class, new ResourceLocation(MODID, "incubator"));
-//        GameRegistry.registerTileEntity(CoalGeneratorBlockEntity.class, new ResourceLocation(MODID, "coal_generator"));
-//        GameRegistry.registerTileEntity(BlockEntityElectricFencePole.class, new ResourceLocation(MODID, "electric_fence_pole"));
-//        GameRegistry.registerTileEntity(BlockEntityElectricFence.class, new ResourceLocation(MODID, "electric_fence"));
-//        GameRegistry.registerTileEntity(BlockCreativePowerSource.TileEntityCreativePowerSource.class, new ResourceLocation(MODID, "creative_power"));
-//        GameRegistry.registerTileEntity(TrackingBeaconBlockEntity.class, new ResourceLocation(MODID, "tracking_beacon"));
-//        GameRegistry.registerTileEntity(PylonHeadBlockEntity.class, new ResourceLocation(MODID, "pylon_head"));
+        registerPackets();
 
+        DataSerializerHandler.register();
+        if(FMLEnvironment.dist.isClient()) {
+            EnumWeatherIcons.register();
+            TabletBackground.registerDefaults();
+            ProjectNublarContainers.registerScreens();
+        }
+        AnimationFactorHandler.register();
 
         // TODO: Remove, debug only
         GsonBuilder builder = new GsonBuilder();
@@ -181,26 +168,6 @@ public class ProjectNublar {
                 logger.warn("There was an issue writing to {}", jsonFile.getName());
             }
         });
-    }
-
-    //TODO: move these to deferred register.
-    @SubscribeEvent
-    public static void createRegistries(RegistryEvent.NewRegistry event) {
-//        DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
-//                .setType(Dinosaur.class)
-//                .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
-//                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
-//                .set(((key, isNetwork) -> DinosaurHandler.TYRANNOSAURUS))
-//                .create();
-//
-//        PLANT_REGISTRY = new RegistryBuilder<Plant>()
-//                .setType(Plant.class)
-//                .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
-//                .create();
-
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.post(new EarlyRegistryEvent<>(DinosaurHandler.getRegistry()));
-        bus.post(new EarlyRegistryEvent<>(PlantHandler.getRegistry()));
     }
 
     @SubscribeEvent

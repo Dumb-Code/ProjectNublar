@@ -7,15 +7,14 @@ import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponen
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackFenceComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.DefenseComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
-import net.dumbcode.projectnublar.server.registry.EarlyDeferredRegister;
+import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
 import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
 
 import static net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType.of;
 
 public class ComponentHandler {
 
-    public static final EarlyDeferredRegister<EntityComponentType<? ,?>> REGISTER = EarlyDeferredRegister.wrap(DeferredRegister.create(EntityComponentType.getWildcardType(), ProjectNublar.MODID));
+    public static final EarlyDeferredRegister<EntityComponentType<? ,?>> REGISTER = EarlyDeferredRegister.create(EntityComponentType.getWildcardType(), ProjectNublar.MODID);
 
     public static final RegistryObject<EntityComponentType<DinosaurComponent,?>> DINOSAUR = REGISTER.register("dinosaur", () -> of(DinosaurComponent.class, DinosaurComponent::new));
     public static final RegistryObject<EntityComponentType<DinosaurCompatComponent,?>> DINOSAUR_COMPAT = REGISTER.register("dinosaur_compat", () -> of(DinosaurCompatComponent.class, DinosaurCompatComponent::new));
