@@ -6,10 +6,12 @@ import lombok.AllArgsConstructor;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.WorldUtils;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
-import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.LootTableHandler;
+import net.dumbcode.projectnublar.server.world.constants.ConstantDefinition;
 import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
+import net.dumbcode.projectnublar.server.world.gen.DigsiteStructureNetwork;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
@@ -36,6 +38,8 @@ import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
 public class Digsite extends Structure {
+
+    public static final ConstantDefinition<Dinosaur> DIGSITE_DINOSAUR = new ConstantDefinition<>();
 
     private final int size;
 
@@ -113,7 +117,7 @@ public class Digsite extends Structure {
                 }
             }
 
-            this.setFossils(fossilPositions);
+            this.setFossils(fossilPositions, decision.requireEntry(DIGSITE_DINOSAUR));
 
             this.generateHoleDecor(holePositions, random);
         }
@@ -357,10 +361,10 @@ public class Digsite extends Structure {
             return blockpos.getY();
         }
 
-        private void setFossils(Set<BlockPos> fossilPositions) {
+        private void setFossils(Set<BlockPos> fossilPositions, Dinosaur dinosaur) {
             for (BlockPos pos : fossilPositions) {
                 if (!this.world.getBlockState(pos).canBeReplaced(Fluids.EMPTY)) {
-                    this.world.setBlock(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), DinosaurHandler.TYRANNOSAURUS), 2);
+                    this.world.setBlock(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), dinosaur), 2);
                 }
             }
         }
