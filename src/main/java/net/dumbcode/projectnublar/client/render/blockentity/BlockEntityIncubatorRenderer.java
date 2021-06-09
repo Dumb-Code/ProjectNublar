@@ -51,13 +51,13 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     private static final float TICKS_WAIT_AFTER_SPIN = 10F;
     private static final float TICKS_COOLDOWN = 20F;
 
-    private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.tbl");
+    private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.dcm");
     private static final ResourceLocation ARM_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_arm.png");
 
-    private static final BakedModelResolver LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.tbl"));
-    private static final BakedModelResolver TRANSLUCENT_LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans.tbl"));
+    private static final BakedModelResolver LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.dcm"));
+    private static final BakedModelResolver TRANSLUCENT_LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans.dcm"));
     private static final BakedModelResolver[] LIGHT_MODELS = IntStream.range(0, 4) //4 is the amount of incubator bulb upgrades + 1
-        .mapToObj(i -> new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_light_" + i + ".tbl")))
+        .mapToObj(i -> new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_light_" + i + ".dcm")))
         .toArray(BakedModelResolver[]::new);
 
     private final Arm BASE_ROTATION = new Arm("ArmBase1", 3 / 16F);

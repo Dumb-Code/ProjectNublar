@@ -1,5 +1,5 @@
 {
   "variants": {
-    "normal": { "model": "projectnublar:creative_power" }
+    "normal": { "model": "projectnublar:block/creative_power" }
   }
 }

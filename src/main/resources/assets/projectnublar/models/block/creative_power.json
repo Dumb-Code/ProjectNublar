@@ -8,12 +8,12 @@
     }
   },
   "textures": {
-    "particle": "projectnublar:blocks/coal_generator_front",
-    "down": "projectnublar:blocks/coal_generator_bottom",
-    "up": "projectnublar:blocks/coal_generator_top",
-    "north": "projectnublar:blocks/coal_generator_front",
-    "east": "projectnublar:blocks/coal_generator_left",
-    "south": "projectnublar:blocks/coal_generator_bottom",
-    "west": "projectnublar:blocks/coal_generator_right"
+    "particle": "projectnublar:block/coal_generator_front",
+    "down": "projectnublar:block/coal_generator_bottom",
+    "up": "projectnublar:block/coal_generator_top",
+    "north": "projectnublar:block/coal_generator_front",
+    "east": "projectnublar:block/coal_generator_left",
+    "south": "projectnublar:block/coal_generator_bottom",
+    "west": "projectnublar:block/coal_generator_right"
   }
 }

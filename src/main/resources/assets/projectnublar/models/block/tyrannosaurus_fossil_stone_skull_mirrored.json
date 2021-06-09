@@ -5,6 +5,6 @@
     "bottom": "blocks/stone",
     "top": "blocks/stone",
     "side": "blocks/stone",
-    "overlay": "projectnublar:blocks/tyrannosaurus_fossil_skull"
+    "overlay": "projectnublar:block/tyrannosaurus_fossil_skull"
   }
 }

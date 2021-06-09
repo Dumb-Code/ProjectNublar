@@ -1,7 +1,8 @@
 {
+  "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/pylon_pole"
+    "layer0": "projectnublar:block/pylon_pole"
   },
-  "tabula": "projectnublar:models/block/pylon_pole"
+  "model": "projectnublar:models/block/pylon_pole"
 }

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "projectnublar:items/low_security_electric_fence_pole"
+    "layer0": "projectnublar:item/low_security_electric_fence_pole"
   }
 }

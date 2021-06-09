@@ -33,7 +33,7 @@ import java.util.concurrent.Executor;
 
 public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> implements IFutureReloadListener {
 
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.tbl");
+    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.dcm");
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer.png");
     private static final ResourceLocation EGG_PRINTER_GLASS = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer_glass.png");
 

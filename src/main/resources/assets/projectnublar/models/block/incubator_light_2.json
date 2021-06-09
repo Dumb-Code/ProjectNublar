@@ -1,9 +1,10 @@
 {
+  "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/incubator_lid"
+    "layer0": "projectnublar:block/incubator_lid"
   },
-  "tabula": "projectnublar:models/block/incubator_light_2",
+  "model": "projectnublar:models/block/incubator_light_2",
   "lightup_data": [{
     "smooth_cubes": [{
       "cube_name": "Light",

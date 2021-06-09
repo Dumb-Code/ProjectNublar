@@ -1,7 +1,8 @@
 {
+  "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/fossil_processor"
+    "layer0": "projectnublar:block/fossil_processor"
   },
-  "tabula": "projectnublar:models/block/fossil_processor_tanks_0"
+  "model": "projectnublar:models/block/fossil_processor_tanks_0"
 }

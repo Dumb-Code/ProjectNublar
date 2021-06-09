@@ -1,4 +1,4 @@
 {
   "parent": "block/cube_all",
-  "tabula": "projectnublar:models/block/sequencer_computer"
+  "model": "projectnublar:models/block/sequencer_computer"
 }

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "projectnublar:items/dna_filled_syringe"
+    "layer0": "projectnublar:item/dna_filled_syringe"
   }
 }

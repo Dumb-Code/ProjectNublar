@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "projectnublar:items/hard_drive"
+    "layer0": "projectnublar:item/hard_drive"
   }
 }

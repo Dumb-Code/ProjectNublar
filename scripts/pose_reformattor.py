@@ -32,7 +32,7 @@ if inpDir != "":
     comareFiles = [(name, getCubeInfo(name))]
 else:
     for file in [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]:
-        if file.endswith(".tbl") and file != mainName:
+        if file.endswith(".dcm") and file != mainName:
             name = directory + file
             comareFiles.append((name, getCubeInfo(name)))
 

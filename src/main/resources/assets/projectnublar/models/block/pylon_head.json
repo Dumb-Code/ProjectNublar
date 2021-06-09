@@ -1,7 +1,8 @@
 {
+  "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/pylon_head"
+    "layer0": "projectnublar:block/pylon_head"
   },
-  "tabula": "projectnublar:models/block/pylon_head"
+  "model": "projectnublar:models/block/pylon_head"
 }

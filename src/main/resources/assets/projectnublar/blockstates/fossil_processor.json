@@ -1,19 +1,19 @@
 {
   "multipart": [
     {
-      "apply": { "model": "projectnublar:fossil_processor_base.tbl" }
+      "apply": { "model": "projectnublar:block/fossil_processor_base" }
     },
     {
       "when": { "tanks": "0" },
-      "apply": { "model": "projectnublar:fossil_processor_tanks_0.tbl" }
+      "apply": { "model": "projectnublar:block/fossil_processor_tanks_0" }
     },
     {
       "when": { "tanks": "1" },
-      "apply": { "model": "projectnublar:fossil_processor_tanks_1.tbl" }
+      "apply": { "model": "projectnublar:block/fossil_processor_tanks_1" }
     },
     {
       "when": { "tanks": "2" },
-      "apply": { "model": "projectnublar:fossil_processor_tanks_2.tbl" }
+      "apply": { "model": "projectnublar:block/fossil_processor_tanks_2" }
     }
   ]
 }

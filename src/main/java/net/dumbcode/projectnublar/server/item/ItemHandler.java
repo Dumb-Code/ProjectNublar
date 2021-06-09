@@ -50,7 +50,7 @@ public final class ItemHandler {
     public static final RegistryObject<Item> CREATIVE_FENCE_REMOVER = REGISTER.register("creative_fence_remover", () -> new CreativeFenceRemovers(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> ARTIFICIAL_EGG = REGISTER.register("artificial_egg", BASIC_ITEM);
     public static final RegistryObject<Item> BROKEN_ARTIFICIAL_EGG = REGISTER.register("broken_artificial_egg", () ->new Item(new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> WIRE_SPOOL = REGISTER.register("wire_spool", () -> new WireSpoolItem(BlockHandler.ELECTRIC_FENCE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> WIRE_SPOOL = REGISTER.register("wire_spool", () -> new WireSpoolItem(BlockHandler.ELECTRIC_FENCE.get(), new Item.Properties().tab(TAB)));
 
     public static final RegistryObject<Item> TABLET = REGISTER.register("tablet", () -> new ItemTablet(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> TRACKING_MODULE = REGISTER.register("tracking_module", () -> new BasicModuleItem(TabletModuleHandler.TRACKING_TABLET, new Item.Properties().tab(TAB)));

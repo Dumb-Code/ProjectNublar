@@ -1,11 +1,11 @@
 {
   "variants": {
     "axis=x": {
-      "model": "projectnublar:pylon_pole.tbl",
+      "model": "projectnublar:block/pylon_pole",
       "y": 90
     },
     "axis=z": {
-      "model": "projectnublar:pylon_pole.tbl"
+      "model": "projectnublar:block/pylon_pole"
     }
   }
 }

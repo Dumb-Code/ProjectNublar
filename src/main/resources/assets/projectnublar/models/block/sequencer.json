@@ -1,10 +1,11 @@
 {
+  "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/sequencer_base",
-    "layer1": "projectnublar:blocks/sequencer_overlay"
+    "layer0": "projectnublar:block/sequencer_base",
+    "layer1": "projectnublar:block/sequencer_overlay"
   },
-  "tabula": "projectnublar:models/block/sequencer",
+  "model": "projectnublar:models/block/sequencer",
   "texture_data": {
     "layer0": { "type": "blacklist", "cubes": [ "cornerpiece1", "Angledcorner2", "Angledcorner3", "computerfront", "computerbeveledge1", "computerfrontside1", "computerfrontside2", "computerbeveledge1" ]},
     "layer1": { "type": "whitelist", "cubes": [ "mainbody", "cornerpiece1", "Angledcorner2", "Angledcorner3", "computerfront", "computerbeveledge1", "computerfrontside1", "computerfrontside2", "computerbeveledge1" ]}

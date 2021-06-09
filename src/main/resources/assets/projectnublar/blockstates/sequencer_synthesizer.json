@@ -1,7 +1,7 @@
 {
 	"multipart": [
 		{
-			"apply": { "model": "projectnublar:sequencer.tbl" }
+			"apply": { "model": "projectnublar:block/sequencer" }
 		}
 	]
 }

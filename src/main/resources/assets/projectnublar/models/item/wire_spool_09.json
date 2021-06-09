@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "projectnublar:items/spool_09"
+        "layer0": "projectnublar:item/spool_09"
     }
 }

@@ -121,7 +121,7 @@ public class Connection {
         this.prevCache = this.genCache(false);
         this.nextCache = this.genCache(true);
 
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> this.renderData = this.buildRenderData());
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> this.renderData = this.buildRenderData());
 
     }
 

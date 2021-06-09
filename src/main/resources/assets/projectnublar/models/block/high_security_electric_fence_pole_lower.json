@@ -1,7 +1,8 @@
 {
+  "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
-    "layer0": "projectnublar:blocks/high_security_electric_fence_pole_unpowered"
+    "layer0": "projectnublar:block/high_security_electric_fence_pole_unpowered"
   },
-  "tabula": "projectnublar:models/block/high_security_electric_fence_pole_lower"
+  "model": "projectnublar:models/block/high_security_electric_fence_pole_lower"
 }

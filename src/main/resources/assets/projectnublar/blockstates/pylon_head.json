@@ -1,10 +1,10 @@
 {
   "variants": {
-    "facing=up": { "model": "projectnublar:pylon_head.tbl" },
-    "facing=down": { "model": "projectnublar:pylon_head.tbl", "x": 180},
-    "facing=north": { "model": "projectnublar:pylon_head.tbl", "x": 90},
-    "facing=east": { "model": "projectnublar:pylon_head.tbl", "x": 90, "y": 90},
-    "facing=south": { "model": "projectnublar:pylon_head.tbl", "x": 270 },
-    "facing=west": { "model": "projectnublar:pylon_head.tbl", "x": 90, "y": 270 }
+    "facing=up": { "model": "projectnublar:block/pylon_head" },
+    "facing=down": { "model": "projectnublar:block/pylon_head", "x": 180},
+    "facing=north": { "model": "projectnublar:block/pylon_head", "x": 90},
+    "facing=east": { "model": "projectnublar:block/pylon_head", "x": 90, "y": 90},
+    "facing=south": { "model": "projectnublar:block/pylon_head", "x": 270 },
+    "facing=west": { "model": "projectnublar:block/pylon_head", "x": 90, "y": 270 }
   }
 }
