@@ -8,10 +8,9 @@ import net.dumbcode.projectnublar.server.entity.component.impl.TrackingComponent
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -30,8 +29,8 @@ public class TrackingSystem implements EntitySystem {
         Entity[] newEntities = family.getEntities();
         Set<Entity> entitySet = Arrays.stream(newEntities).collect(Collectors.toSet());
         if(newEntities.length < this.entities.length) { //Entity removed
-            TrackingSavedData data = TrackingSavedData.getData(this.entities[0].world);
-            Arrays.stream(this.entities).filter(e -> !entitySet.contains(e)).forEach(e -> data.removeEntry(e.getUniqueID()));
+            TrackingSavedData data = TrackingSavedData.getData((ServerWorld) this.entities[0].level);
+            Arrays.stream(this.entities).filter(e -> !entitySet.contains(e)).forEach(e -> data.removeEntry(e.getUUID()));
         }
         this.entities = newEntities;
         this.components = family.populateBuffer(ComponentHandler.TRACKING_DATA, this.components);
@@ -40,15 +39,17 @@ public class TrackingSystem implements EntitySystem {
     @Override
     public void update(World world) {
         for (int i = 0; i < this.entities.length; i++) {
-            TrackingSavedData.DataEntry entry = new TrackingSavedData.DataEntry(this.entities[i].getUniqueID(), this.entities[i].getPositionVector());
+            TrackingSavedData.DataEntry entry = new TrackingSavedData.DataEntry(this.entities[i].getUUID(), this.entities[i].position());
             this.components[i].getInfoSuppliers().stream().map(Supplier::get).filter(Objects::nonNull).forEach(entry.getInformation()::add);
-            TrackingSavedData.getData(world).setEntry(entry);
+            TrackingSavedData.getData((ServerWorld) world).setEntry(entry);
         }
     }
 
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
     public void onLivingDeath(LivingDeathEvent event) {
-        TrackingSavedData.getData(event.getEntity().world).removeEntry(event.getEntity().getUniqueID());
+        World level = event.getEntity().level;
+        if(level instanceof ServerWorld) {
+            TrackingSavedData.getData((ServerWorld) level).removeEntry(event.getEntity().getUUID());
+        }
     }
 }

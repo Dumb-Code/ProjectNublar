@@ -11,6 +11,7 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEggEntity;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurEggLayingComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class DinosaurEggLayingSystem implements EntitySystem {
@@ -38,7 +39,7 @@ public class DinosaurEggLayingSystem implements EntitySystem {
                 int ticksLeft = egg.getTicksLeft();
                 if(ticksLeft <= 0) {
                     DinosaurEggEntity eggEntity = new DinosaurEggEntity(
-                        en.world,
+                        en.level,
                         egg.getCombinedGenetics(),
                         dinosaur.getDinosaur(),
                         egg.getType(),
@@ -47,9 +48,10 @@ public class DinosaurEggLayingSystem implements EntitySystem {
                         egg.getEggTicks()
                     );
 
-                    eggEntity.setPosition(en.posX + en.world.rand.nextGaussian()*0.2, en.posY, en.posZ + en.world.rand.nextGaussian()*0.2);
+                    Vector3d pos = en.position();
+                    eggEntity.setPos(pos.x + en.level.random.nextGaussian()*0.2, pos.y, pos.z + en.level.random.nextGaussian()*0.2);
 
-                    world.spawnEntity(eggEntity);
+                    world.addFreshEntity(eggEntity);
 
                     return true;
                 } else {

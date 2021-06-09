@@ -1,8 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.system.impl;
 
-import net.dumbcode.dumblibrary.server.animation.TabulaUtils;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimatableCube;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimationLayer;
+import net.dumbcode.dumblibrary.server.animation.AnimatedReferenceCube;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.EntityFamily;
 import net.dumbcode.dumblibrary.server.ecs.EntityManager;
@@ -10,23 +8,23 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AnimationComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.RenderAdjustmentsComponent;
 import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
+import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
+import net.dumbcode.studio.animation.instance.ModelAnimationHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix3f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Point3d;
 import java.util.Objects;
-import java.util.function.Function;
 
 public class MultipartSystem implements EntitySystem {
 
@@ -50,100 +48,90 @@ public class MultipartSystem implements EntitySystem {
     }
 
     private void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
-        if(entity.ticksExisted % 3 != 0) {
+        if(entity.tickCount % 3 != 0) {
             return;
         }
 
-        AnimationLayer layer = animation.getAnimationLayer(entity);
-        if(layer == null) {
-            return;
-        }
+        ModelAnimationHandler handler = animation.getAnimationHandler();
 
         DinosaurEntity dinosaur = null;
         if(entity instanceof DinosaurEntity) {
             dinosaur = (DinosaurEntity) entity;
         }
 
-        if(!entity.world.isRemote) {
-            for (String cubeName : layer.getCubeNames()) {
-                layer.getAnicubeRef().apply(cubeName).reset();
-            }
-            layer.animate(1);
+        if(!entity.level.isClientSide) {
+            handler.animate(animation.getModelCubes(), 1 / 20F);
         }
 
-        Matrix4d entityRotate = new Matrix4d();
-        entityRotate.rotY(-Math.toRadians(entity.rotationYaw));
+        Matrix3f entityRotate = new Matrix3f();
+        entityRotate.mul(Vector3f.YP.rotationDegrees(-entity.yRot));
 
-        Function<String, AnimatableCube> function = layer.getAnicubeRef();
-        for (MultipartEntityComponent.LinkedEntity cube : multipart.getEntities()) {
-            for (Entity e : entity.world.loadedEntityList) {
-                if(e instanceof EntityPart && e.getUniqueID().equals(cube.getEntityUUID())) {
-                    AnimatableCube animatableCube = function.apply(cube.getCubeName());
-                    if (animatableCube != null && e.ticksExisted > 1) {
-                        EntityPart cubeEntity = (EntityPart) e;
-                        Point3d sp = null;
-                        Point3d ep = null;
+        for (AnimatedReferenceCube modelCube : animation.getModelCubes()) {
+            for (MultipartEntityComponent.LinkedEntity cube : multipart.getEntities()) {
+                if(!cube.getCubeName().equals(modelCube.getInfo().getName())) {
+                    continue;
+                }
+                EntityPart part = cube.getCachedPart(entity.level);
+                if(part == null) {
+                    continue;
+                }
 
-                        double minX = Integer.MAX_VALUE;
-                        double minY = Integer.MAX_VALUE;
-                        double minZ = Integer.MAX_VALUE;
+                if (part.tickCount > 1) {
+                    Vector3f sp = null;
+                    Vector3f ep = null;
 
-                        double maxX = Integer.MIN_VALUE;
-                        double maxY = Integer.MIN_VALUE;
-                        double maxZ = Integer.MIN_VALUE;
+                    double minX = Integer.MAX_VALUE;
+                    double minY = Integer.MAX_VALUE;
+                    double minZ = Integer.MAX_VALUE;
 
-                        for (int i = 0; i < 8; i++) {
-                            Vec3d startPoint = TabulaUtils.getModelPosAlpha(animatableCube, (i >> 2)&1, (i >> 1)&1, i&1);
-                            Point3d point = new Point3d(startPoint.x, startPoint.y + 1.5, startPoint.z);
+                    double maxX = Integer.MIN_VALUE;
+                    double maxY = Integer.MIN_VALUE;
+                    double maxZ = Integer.MIN_VALUE;
 
-                            if(dinosaur != null) {
-                                dinosaur.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> {
-                                            point.x *= floats[0];
-                                            point.y *= floats[1];
-                                            point.z *= floats[2];
-                                        }
-                                );
-                            }
-                            entityRotate.transform(point);
+                    for (int i = 0; i < 8; i++) {
+                        Vector3f startPoint = DCMUtils.getModelPosAlpha(modelCube, (i >> 2) & 1, (i >> 1) & 1, i & 1);
+                        Vector3f point = new Vector3f(startPoint.x(), startPoint.y() + 1.5F, startPoint.z());
 
-                            minX = Math.min(minX, point.x);
-                            minY = Math.min(minY, point.y);
-                            minZ = Math.min(minZ, point.z);
-
-                            maxX = Math.max(maxX, point.x);
-                            maxY = Math.max(maxY, point.y);
-                            maxZ = Math.max(maxZ, point.z);
-
-                            if(i == 0) {
-                                sp = point;
-                            } else if(i == 7) {
-                                ep = point;
-                            }
+                        if (dinosaur != null) {
+                            dinosaur.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> point.mul(floats[0], floats[1], floats[2]));
                         }
+                        point.transform(entityRotate);
 
+                        minX = Math.min(minX, point.x());
+                        minY = Math.min(minY, point.y());
+                        minZ = Math.min(minZ, point.z());
 
-                        Vec3d size = new Vec3d(maxX, maxY, maxZ).subtract(minX, minY, minZ).add(0.1F, 0.1F, 0.1F); //0.1F -> padding
+                        maxX = Math.max(maxX, point.x());
+                        maxY = Math.max(maxY, point.y());
+                        maxZ = Math.max(maxZ, point.z());
 
-                        cubeEntity.setSize(size);
-
-                        Objects.requireNonNull(ep);
-                        Objects.requireNonNull(sp);
-
-                        cubeEntity.setPosition(sp.x + (ep.x - sp.x) / 2D + entity.posX, sp.y + (ep.y - sp.y) / 2D + entity.posY - size.y / 2, sp.z + (ep.z - sp.z) / 2D + entity.posZ);
+                        if (i == 0) {
+                            sp = point;
+                        } else if (i == 7) {
+                            ep = point;
+                        }
                     }
 
-                    break;
+
+                    Vector3d size = new Vector3d(maxX, maxY, maxZ).subtract(minX, minY, minZ).add(0.1F, 0.1F, 0.1F); //0.1F -> padding
+
+                    part.setSize(size);
+
+                    Objects.requireNonNull(ep);
+                    Objects.requireNonNull(sp);
+
+                    Vector3d position = entity.position();
+                    part.setPos(sp.x() + (ep.x() - sp.x()) / 2D + position.x, sp.y() + (ep.y() - sp.y()) / 2D + position.y - size.y / 2F, sp.z() + (ep.z() - sp.z()) / 2D + position.z);
                 }
             }
         }
     }
 
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
     public void onClientWorldTick(TickEvent.ClientTickEvent event) {
-        World world = Minecraft.getMinecraft().world;
-        if(world != null && !Minecraft.getMinecraft().isGamePaused()) {
-            for (Entity entity : world.loadedEntityList) {
+        ClientWorld level = Minecraft.getInstance().level;
+        if(level != null && !Minecraft.getInstance().isPaused()) {
+            for (Entity entity : level.entitiesForRendering()) {
                 if(entity instanceof ComponentAccess) {
                     AnimationComponent animation = ((ComponentAccess) entity).getOrNull(EntityComponentTypes.ANIMATION);
                     MultipartEntityComponent multipart = ((ComponentAccess) entity).getOrNull(ComponentHandler.MULTIPART);

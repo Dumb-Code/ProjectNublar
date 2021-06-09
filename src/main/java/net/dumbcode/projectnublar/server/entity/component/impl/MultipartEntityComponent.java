@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.entity.component.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
@@ -11,10 +12,13 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -107,9 +111,29 @@ public class MultipartEntityComponent extends EntityComponent {
         }
     }
 
-    @Value
+    @Data
     public static class LinkedEntity {
-        String cubeName;
-        UUID entityUUID;
+        private final String cubeName;
+        private final UUID entityUUID;
+        private EntityPart cachedPart;
+
+        public EntityPart getCachedPart(World world) {
+            if(this.cachedPart == null) {
+                if(world instanceof ServerWorld) {
+                    Entity entity = ((ServerWorld) world).getEntity(this.entityUUID);
+                    if(entity instanceof EntityPart) {
+                        this.cachedPart = (EntityPart) entity;
+                    }
+                } else if(world instanceof ClientWorld) {
+                    for (Entity entity : ((ClientWorld) world).entitiesForRendering()) {
+                        if(entity.getUUID().equals(this.entityUUID)) {
+                            this.cachedPart = (EntityPart) entity;
+                            break;
+                        }
+                    }
+                }
+            }
+            return cachedPart;
+        }
     }
 }

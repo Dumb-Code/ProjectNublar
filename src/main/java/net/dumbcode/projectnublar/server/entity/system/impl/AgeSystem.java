@@ -8,12 +8,11 @@ import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.Iterator;
 
@@ -66,11 +65,10 @@ public class AgeSystem implements EntitySystem {
     }
 
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
     public void onClientWorldTick(TickEvent.ClientTickEvent event) {
-        World world = Minecraft.getMinecraft().world;
-        if(world != null && !Minecraft.getMinecraft().isGamePaused()) {
-            for (Entity entity : world.loadedEntityList) {
+        ClientWorld world = Minecraft.getInstance().level;
+        if(world != null && !Minecraft.getInstance().isPaused()) {
+            for (Entity entity : world.entitiesForRendering()) {
                 if(entity instanceof ComponentAccess) {
                     ((ComponentAccess) entity).get(ComponentHandler.AGE).ifPresent(a -> this.update(a, entity));
                 }
