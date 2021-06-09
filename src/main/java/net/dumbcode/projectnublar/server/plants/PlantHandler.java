@@ -1,25 +1,26 @@
 package net.dumbcode.projectnublar.server.plants;
 
-import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.registry.RegisterPlantEvent;
+import net.dumbcode.projectnublar.server.registry.EarlyDeferredRegister;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryBuilder;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
-@GameRegistry.ObjectHolder(ProjectNublar.MODID)
+import java.util.function.Supplier;
+
 public class PlantHandler {
 
-    public static final Plant CYCAD = InjectedUtils.injected();
-    public static final Plant SERENNA_VERIFORMANS = InjectedUtils.injected();
+    public static final EarlyDeferredRegister<Plant> REGISTER = EarlyDeferredRegister.wrap(DeferredRegister.create(Plant.class, ProjectNublar.MODID));
 
-    @SubscribeEvent
-    public static void register(RegisterPlantEvent event) {
-        event.getRegistry().registerAll(
-                new Cycad().setRegistryName("cycad"),
-                new SerennaVeriformans().setRegistryName("serenna_veriformans")
+    public static final Supplier<IForgeRegistry<Plant>> PLANT_REGISTRY = REGISTER.makeRegistry("plants", RegistryBuilder::new);
 
-        );
+
+    public static final RegistryObject<Plant> CYCAD = REGISTER.register("cycad", Cycad::new);
+    public static final RegistryObject<Plant> SERENNA_VERIFORMANS = REGISTER.register("serenna_veriformans", SerennaVeriformans::new);
+
+    public static IForgeRegistry<Plant> getRegistry() {
+        return PLANT_REGISTRY.get();
     }
 }

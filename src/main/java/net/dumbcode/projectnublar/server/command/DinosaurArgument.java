@@ -24,7 +24,7 @@ public class DinosaurArgument implements ArgumentType<Dinosaur> {
 
     @Override
     public Dinosaur parse(StringReader reader) throws CommandSyntaxException {
-        Dinosaur value = ProjectNublar.DINOSAUR_REGISTRY.getValue(ResourceLocation.read(reader));
+        Dinosaur value = DinosaurHandler.getRegistry().getValue(ResourceLocation.read(reader));
         if(value == null) {
             throw ERROR_INVALID.createWithContext(reader);
         }
@@ -33,6 +33,6 @@ public class DinosaurArgument implements ArgumentType<Dinosaur> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ISuggestionProvider.suggest(ProjectNublar.DINOSAUR_REGISTRY.getValues().stream().map(d -> Objects.requireNonNull(d.getRegistryName()).toString()), builder);
+        return ISuggestionProvider.suggest(DinosaurHandler.getRegistry().getValues().stream().map(d -> Objects.requireNonNull(d.getRegistryName()).toString()), builder);
     }
 }

@@ -6,40 +6,40 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 
 public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     INSTANCE;
 
     @Override
-    public boolean accepts(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        MachineModuleItemStackHandler handler = blockEntity.getHandler();
+    public boolean accepts(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process) {
+        MachineModuleItemStackHandler<EggPrinterBlockEntity> handler = blockEntity.getHandler();
         ItemStack boneStack = handler.getStackInSlot(process.getInputSlot(1));
-        if(handler.getStackInSlot(process.getInputSlot(0)).getItem() == ItemHandler.EMBRYO_FILLED_SYRINGE && boneStack.getItem() == Items.DYE && boneStack.getMetadata() == 15 && boneStack.getCount() >= 5) {
-            return handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.EMPTY_SYRINGE), true).isEmpty() && handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.ARTIFICIAL_EGG), true).isEmpty();
+        if(handler.getStackInSlot(process.getInputSlot(0)).getItem() == ItemHandler.EMBRYO_FILLED_SYRINGE.get() && boneStack.getItem() == Items.BONE_MEAL && boneStack.getCount() >= 5) {
+            return handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.EMPTY_SYRINGE.get()), true).isEmpty() && handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(ItemHandler.ARTIFICIAL_EGG.get()), true).isEmpty();
         }
         return false;
     }
 
 
     @Override
-    public int getRecipeTime(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getRecipeTime(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process) {
         return 12000 - 2400*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override
-    public void onRecipeFinished(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        MachineModuleItemStackHandler handler = blockEntity.getHandler();
-        boolean brokenEgg = blockEntity.getTier(MachineModuleType.LEVELING_SENSORS) == 0 && blockEntity.getWorld().rand.nextFloat() < 0.1F;
+    public void onRecipeFinished(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process) {
+        MachineModuleItemStackHandler<EggPrinterBlockEntity> handler = blockEntity.getHandler();
+        boolean brokenEgg = blockEntity.getTier(MachineModuleType.LEVELING_SENSORS) == 0 && blockEntity.getLevel().random.nextFloat() < 0.1F;
 
-        handler.insertOutputItem(process.getOutputSlot(1), new ItemStack(ItemHandler.EMPTY_SYRINGE), false);
-        ItemStack remaining = handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(brokenEgg ? ItemHandler.BROKEN_ARTIFICIAL_EGG : ItemHandler.ARTIFICIAL_EGG), false);
+        handler.insertOutputItem(process.getOutputSlot(1), new ItemStack(ItemHandler.EMPTY_SYRINGE.get()), false);
+        ItemStack remaining = handler.insertOutputItem(process.getOutputSlot(0), new ItemStack(brokenEgg ? ItemHandler.BROKEN_ARTIFICIAL_EGG.get() : ItemHandler.ARTIFICIAL_EGG.get()), false);
         if(!remaining.isEmpty()) {
-            InventoryHelper.spawnItemStack(blockEntity.getWorld(), blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ(), remaining);
+            InventoryHelper.dropItemStack(blockEntity.getLevel(), blockEntity.getBlockPos().getX(), blockEntity.getBlockPos().getY(), blockEntity.getBlockPos().getZ(), remaining);
         }
 
         handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
@@ -49,11 +49,11 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     }
 
     @Override
-    public boolean acceptsInputSlot(EggPrinterBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean acceptsInputSlot(EggPrinterBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process) {
         Item item = testStack.getItem();
         switch (slotIndex) {
-            case 0: return item == ItemHandler.EMBRYO_FILLED_SYRINGE;
-            case 1: return item == Items.DYE && testStack.getMetadata() == 15;
+            case 0: return item == ItemHandler.EMBRYO_FILLED_SYRINGE.get();
+            case 1: return item == Items.BONE_MEAL;
         }
         return false;
     }
@@ -65,12 +65,12 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
 
     // TODO: test values, change for balance
     @Override
-    public int getCurrentConsumptionPerTick(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getCurrentConsumptionPerTick(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process) {
         return 20;
     }
 
     @Override
-    public int getCurrentProductionPerTick(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getCurrentProductionPerTick(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process) {
         return 0;
     }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -112,8 +113,8 @@ public class DinosaurSpawnEgg extends BasicDinosaurItem {
         private static SpawnEggInfo fromStack(ItemStack stack) {
             CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID).getCompound("SpawnEggInfo");
             return new SpawnEggInfo(
-                    ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))),
-                    SpawnEggState.fromName(nbt.getString("State"))
+                DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("Dinosaur"))),
+                SpawnEggState.fromName(nbt.getString("State"))
             );
         }
 

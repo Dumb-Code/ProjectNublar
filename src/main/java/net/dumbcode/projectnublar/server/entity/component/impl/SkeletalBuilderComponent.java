@@ -9,10 +9,10 @@ import lombok.Getter;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 
 import java.util.*;
 
@@ -29,41 +29,41 @@ public class SkeletalBuilderComponent extends EntityComponent implements RenderL
     public int modelIndex;
 
     @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setInteger("model_index", this.modelIndex);
+    public CompoundNBT serialize(CompoundNBT compound) {
+        compound.putInt("model_index", this.modelIndex);
 
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundNBT tag = new CompoundNBT();
         for(Map.Entry<String, List<String>> entry : this.boneToModelMap.entrySet()) {
             String bone = entry.getKey();
             List<String> modelParts = entry.getValue();
             if(modelParts.size() == 1) {
-                tag.setString(bone, modelParts.get(0));
+                tag.putString(bone, modelParts.get(0));
             } else {
-                NBTTagList list = new NBTTagList();
-                modelParts.forEach(s -> list.appendTag(new NBTTagString(s)));
-                tag.setTag(bone, list);
+                ListNBT list = new ListNBT();
+                modelParts.forEach(s -> list.add(StringNBT.valueOf(s)));
+                tag.put(bone, list);
             }
         }
-        compound.setTag("bone_map", tag);
+        compound.put("bone_map", tag);
 
         return compound;
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
-        this.modelIndex = compound.getInteger("model_index");
+    public void deserialize(CompoundNBT compound) {
+        this.modelIndex = compound.getInt("model_index");
 
-        NBTTagCompound tag = compound.getCompoundTag("bone_map");
+        CompoundNBT tag = compound.getCompound("bone_map");
         Map<String, List<String>> nbtBoneMap = new HashMap<>();
-        for (String bone : tag.getKeySet()) {
-            NBTBase base = tag.getTag(bone);
-            if(base instanceof NBTTagList) {
-                NBTTagList array = (NBTTagList) base;
+        for (String bone : tag.getAllKeys()) {
+            INBT base = tag.get(bone);
+            if(base instanceof ListNBT) {
+                ListNBT array = (ListNBT) base;
                 List<String> list = new LinkedList<>();
-                array.forEach(elem -> list.add(((NBTTagString)elem).getString()));
+                array.forEach(elem -> list.add(elem.toString()));
                 nbtBoneMap.put(bone, list);
-            } else {
-                nbtBoneMap.put(bone, Collections.singletonList(((NBTTagString)base).getString()));
+            } else if(base instanceof StringNBT) {
+                nbtBoneMap.put(bone, Collections.singletonList(base.toString()));
             }
         }
         initializeFromBoneMap(this.individualBones, this.boneListed, this.boneToModelMap, nbtBoneMap);

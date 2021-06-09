@@ -65,7 +65,8 @@ public class ProjectNublarContainers {
 
     @OnlyIn(Dist.CLIENT)
     public static void registerScreens() {
-        ScreenManager.register(MACHINE_MODULES.get(), (container, inventory, title) -> {
+        //Doesn't compile without the <>
+        ScreenManager.<MachineModuleContainer, TabbedGuiContainer<MachineModuleContainer>>register(MACHINE_MODULES.get(), (container, inventory, title) -> {
             MachineModuleBlockEntity<?> be = container.getBlockEntity();
             Screen screen = Minecraft.getInstance().screen;
             TabInformationBar bar;
@@ -77,7 +78,7 @@ public class ProjectNublarContainers {
             return be.createScreen(container, inventory, title, bar, container.getTab());
         });
 
-        ScreenManager.register(TRACKING_BEACON.get(), (container, inventory, title) -> new GuiTrackingBeacon(container));
+        ScreenManager.<BlockTrackingBeacon.TrackingContainer, GuiTrackingBeacon>register(TRACKING_BEACON.get(), (container, inventory, title) -> new GuiTrackingBeacon(container));
     }
 
     public static <T extends Container> Optional<T> getFromMenu(Class<T> expected, @Nullable ServerPlayerEntity player) {

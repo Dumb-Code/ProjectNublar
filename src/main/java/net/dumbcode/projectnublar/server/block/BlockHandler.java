@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleParts;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
@@ -53,7 +54,7 @@ public class BlockHandler {
 
     private static <T extends Block> Map<Dinosaur, RegistryObject<T>> createMap(String nameFormat, Function<Dinosaur, T> supplier) {
         Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
-        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
+        for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
             map.put(dinosaur, REGISTER.register(String.format(nameFormat, dinosaur.getFormattedName()), () -> supplier.apply(dinosaur)));
         }
         return map;

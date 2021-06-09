@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.world.gen;
 
 import net.dumbcode.dumblibrary.server.utils.BuilderNode;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.utils.ValueRange;
 import net.dumbcode.projectnublar.server.world.constants.ConstantDefinition;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
@@ -18,8 +19,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 
 public class DigsiteStructureNetwork {
-    private static final ConstantDefinition<Block> WOOL_1 = new ConstantDefinition<>();
-    private static final ConstantDefinition<Block> WOOL_2 = new ConstantDefinition<>();
+    public static final ConstantDefinition<Block> WOOL_1 = new ConstantDefinition<>();
+    public static final ConstantDefinition<Block> WOOL_2 = new ConstantDefinition<>();
 
     private static final Block[] WOOL = new Block[] {
         Blocks.WHITE_WOOL, Blocks.ORANGE_WOOL, Blocks.MAGENTA_WOOL, Blocks.LIGHT_BLUE_WOOL,
@@ -40,6 +41,7 @@ public class DigsiteStructureNetwork {
 
         .addConstant(WOOL_1, random -> WOOL[random.nextInt(WOOL.length)])
         .addConstant(WOOL_2, random -> WOOL[random.nextInt(WOOL.length)])
+        .addConstant(Digsite.DIGSITE_DINOSAUR, Dinosaur::getRandom)
 
         .globalPredicate(N,
             new HeightRangePredicate(ValueRange.upperBound(3)),

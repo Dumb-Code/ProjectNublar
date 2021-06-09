@@ -11,11 +11,11 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.List;
@@ -43,12 +43,12 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
     @Override
     public void readJson(JsonObject json) {
         this.ageCubeMap.clear();
-        JsonArray cubeMap = JsonUtils.getJsonArray(json, "cube_map");
+        JsonArray cubeMap = JSONUtils.getAsJsonArray(json, "cube_map");
         for (JsonElement element : cubeMap) {
-            JsonObject cubeMapEntry = JsonUtils.getJsonObject(element, "cube_map_entry");
+            JsonObject cubeMapEntry = element.getAsJsonObject();
 
-            this.ageCubeMap.put(JsonUtils.getString(cubeMapEntry, "age"),
-                    StreamSupport.stream(JsonUtils.getJsonArray(cubeMapEntry, "cubes").spliterator(), false)
+            this.ageCubeMap.put(JSONUtils.getAsString(cubeMapEntry, "age"),
+                    StreamSupport.stream(JSONUtils.getAsJsonArray(cubeMapEntry, "cubes").spliterator(), false)
                             .filter(JsonElement::isJsonPrimitive)
                             .map(JsonElement::getAsString)
                             .collect(Collectors.toList())
@@ -57,14 +57,14 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
     }
 
     @Override
-    public void readNBT(NBTTagCompound nbt) {
+    public void readNBT(CompoundNBT nbt) {
         this.ageCubeMap.clear();
-        for (NBTBase element : nbt.getTagList("cube_map", Constants.NBT.TAG_COMPOUND)) {
-            NBTTagCompound cubeMapEntry = (NBTTagCompound) element;
+        for (INBT element : nbt.getList("cube_map", Constants.NBT.TAG_COMPOUND)) {
+            CompoundNBT cubeMapEntry = (CompoundNBT) element;
 
             this.ageCubeMap.put(cubeMapEntry.getString("age"),
-                    StreamSupport.stream(cubeMapEntry.getTagList("cubes", Constants.NBT.TAG_STRING).spliterator(), false)
-                            .map(b -> ((NBTTagString)b).getString())
+                    cubeMapEntry.getList("cubes", Constants.NBT.TAG_STRING).stream()
+                            .map(b -> ((StringNBT)b).getAsString())
                             .collect(Collectors.toList())
             );
         }
@@ -87,19 +87,19 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
     }
 
     @Override
-    public NBTTagCompound writeNBT(NBTTagCompound nbt) {
-        NBTTagList list = new NBTTagList();
+    public CompoundNBT writeNBT(CompoundNBT nbt) {
+        ListNBT list = new ListNBT();
         for (Map.Entry<String, List<String>> entry : this.ageCubeMap.entrySet()) {
-            NBTTagCompound cubeMapEntry = new NBTTagCompound();
-            cubeMapEntry.setString("age", entry.getKey());
-            NBTTagList cubes = new NBTTagList();
+            CompoundNBT cubeMapEntry = new CompoundNBT();
+            cubeMapEntry.putString("age", entry.getKey());
+            ListNBT cubes = new ListNBT();
             for (String s : entry.getValue()) {
-                cubes.appendTag(new NBTTagString(s));
+                cubes.add(StringNBT.valueOf(s));
             }
-            cubeMapEntry.setTag("cubes", cubes);
-            list.appendTag(cubeMapEntry);
+            cubeMapEntry.put("cubes", cubes);
+            list.add(cubeMapEntry);
         }
-        nbt.setTag("cube_map", list);
+        nbt.put("cube_map", list);
         return nbt;
     }
 }

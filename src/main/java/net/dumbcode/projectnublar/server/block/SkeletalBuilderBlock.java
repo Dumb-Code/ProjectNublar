@@ -81,7 +81,7 @@ public class SkeletalBuilderBlock extends DirectionalBlock implements IItemBlock
 
     private void setBonesInHandler(SkeletalBuilderBlockEntity skeletalBuilder, Dinosaur dinosaur, ItemStack stack, String variant) {
         if(skeletalBuilder.getDinosaur().map(d -> d == dinosaur).orElse(false) && skeletalBuilder.getDinosaurEntity().isPresent()) {
-            skeletalBuilder.getDinosaurEntity().flatMap(ComponentHandler.SKELETAL_BUILDER).ifPresent(component -> {
+            skeletalBuilder.getDinosaurEntity().flatMap(ComponentHandler.SKELETAL_BUILDER.get()).ifPresent(component -> {
                 List<String> boneList = component.getBoneListed();
                 if (component.modelIndex < boneList.size() && variant.equals(boneList.get(component.modelIndex))) {
                     skeletalBuilder.getBoneHandler().setStackInSlot(component.modelIndex++, stack.split(1));

@@ -15,8 +15,8 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     INSTANCE;
 
     @Override
-    public boolean accepts(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        MachineModuleItemStackHandler handler = blockEntity.getHandler();
+    public boolean accepts(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
+        MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
         Item item = inSlot.getItem();
         return item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item)
@@ -24,30 +24,30 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     }
 
     @Override
-    public int getRecipeTime(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getRecipeTime(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         return 4800 - 1200*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override
-    public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
-        MachineModuleItemStackHandler handler = blockEntity.getHandler();
+    public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
+        MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
         ItemStack inputStack = handler.getStackInSlot(process.getInputSlot(0));
         ItemStack filter = handler.getStackInSlot(3);
         float efficiency = ((FilterItem)filter.getItem()).getEfficiency(filter);
         inputStack.shrink(1);
-        if (filter.attemptDamageItem(1, blockEntity.getWorld().rand, null)) {
+        if (filter.hurt(1, blockEntity.getLevel().getRandom(), null)) {
             filter.shrink(1);
         }
         Item item = inputStack.getItem();
         if(item instanceof DinosaurProvider) {
-            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()));
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()).get());
             DinosaurGeneticMaterialItem.setSize(stack, MathUtils.getWeightedResult(5*efficiency, 0.5F-efficiency/2F));
             handler.insertOutputItem(process.getOutputSlot(0), stack, false);
         }
     }
 
     @Override
-    public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         Item item = testStack.getItem();
         return slotIndex == 0 && item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item);
     }
@@ -59,12 +59,12 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
 
     // TODO: test values, change for balance
     @Override
-    public int getCurrentConsumptionPerTick(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getCurrentConsumptionPerTick(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         return 20;
     }
 
     @Override
-    public int getCurrentProductionPerTick(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getCurrentProductionPerTick(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         return 0;
     }
 }

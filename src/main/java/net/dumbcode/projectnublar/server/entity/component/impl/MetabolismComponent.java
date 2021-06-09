@@ -20,15 +20,11 @@ import net.dumbcode.projectnublar.server.entity.mood.MoodReason;
 import net.dumbcode.projectnublar.server.entity.mood.MoodReasons;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.MetabolismInformation;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.JsonUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -56,53 +52,53 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     private int hydrateAmountPerTick;
 
     @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setFloat("food", this.food);
-        compound.setFloat("water", this.water);
+    public CompoundNBT serialize(CompoundNBT compound) {
+        compound.putFloat("food", this.food);
+        compound.putFloat("water", this.water);
 
-        compound.setTag("max_food", this.maxFood.writeToNBT());
-        compound.setTag("max_water", this.maxWater.writeToNBT());
+        compound.put("max_food", this.maxFood.writeToNBT());
+        compound.put("max_water", this.maxWater.writeToNBT());
 
-        compound.setTag("food_rate", this.foodRate.writeToNBT());
-        compound.setTag("water_rate", this.waterRate.writeToNBT());
+        compound.put("food_rate", this.foodRate.writeToNBT());
+        compound.put("water_rate", this.waterRate.writeToNBT());
 
-        compound.setInteger("food_ticks", this.foodTicks);
-        compound.setInteger("water_ticks", this.waterTicks);
+        compound.putInt("food_ticks", this.foodTicks);
+        compound.putInt("water_ticks", this.waterTicks);
 
-        compound.setInteger("food_smell_distance", this.foodSmellDistance);
-        compound.setInteger("hydrate_amount_per_tick", this.hydrateAmountPerTick);
+        compound.putInt("food_smell_distance", this.foodSmellDistance);
+        compound.putInt("hydrate_amount_per_tick", this.hydrateAmountPerTick);
 
-        compound.setTag("diet", this.diet.writeToNBT(new NBTTagCompound()));
+        compound.put("diet", this.diet.writeToNBT(new CompoundNBT()));
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
+    public void deserialize(CompoundNBT compound) {
         super.deserialize(compound);
         this.food = compound.getFloat("food");
         this.water = compound.getFloat("water");
 
-        this.maxFood.readFromNBT(compound.getCompoundTag("max_food"));
-        this.maxWater.readFromNBT(compound.getCompoundTag("max_water"));
+        this.maxFood.readFromNBT(compound.getCompound("max_food"));
+        this.maxWater.readFromNBT(compound.getCompound("max_water"));
 
-        this.foodRate.readFromNBT(compound.getCompoundTag("food_rate"));
-        this.waterRate.readFromNBT(compound.getCompoundTag("water_rate"));
+        this.foodRate.readFromNBT(compound.getCompound("food_rate"));
+        this.waterRate.readFromNBT(compound.getCompound("water_rate"));
 
-        this.foodTicks = compound.getInteger("food_ticks");
-        this.waterTicks = compound.getInteger("water_ticks");
+        this.foodTicks = compound.getInt("food_ticks");
+        this.waterTicks = compound.getInt("water_ticks");
 
-        this.foodSmellDistance = compound.getInteger("food_smell_distance");
-        this.hydrateAmountPerTick = compound.getInteger("hydrate_amount_per_tick");
+        this.foodSmellDistance = compound.getInt("food_smell_distance");
+        this.hydrateAmountPerTick = compound.getInt("hydrate_amount_per_tick");
 
-        this.diet.fromNBT(compound.getCompoundTag("diet"));
+        this.diet.fromNBT(compound.getCompound("diet"));
     }
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        if(entity instanceof EntityLiving) {
-            EntityLiving living = (EntityLiving) entity;
-            living.tasks.addTask(2, new FeedingAI(entity, (EntityLiving) entity, this));
-            living.tasks.addTask(2, new DrinkingAI(entity, (EntityLiving) entity, this));
+        if(entity instanceof MobEntity) {
+            MobEntity living = (MobEntity) entity;
+            living.goalSelector.addGoal(2, new FeedingAI(entity, (MobEntity) entity, this));
+            living.goalSelector.addGoal(2, new DrinkingAI(entity, (MobEntity) entity, this));
         }
     }
 
@@ -167,16 +163,16 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
 
         @Override
         public void readJson(JsonObject json) {
-            this.maxFood = JsonUtils.getInt(json, "max_food");
-            this.maxWater = JsonUtils.getInt(json, "max_water");
+            this.maxFood = JSONUtils.getAsInt(json, "max_food");
+            this.maxWater = JSONUtils.getAsInt(json, "max_water");
 
-            this.waterRate = JsonUtils.getInt(json, "water_rate");
-            this.foodRate = JsonUtils.getInt(json, "food_rate");
+            this.waterRate = JSONUtils.getAsInt(json, "water_rate");
+            this.foodRate = JSONUtils.getAsInt(json, "food_rate");
 
-            this.foodTicks = JsonUtils.getInt(json, "food_ticks");
-            this.waterTicks = JsonUtils.getInt(json, "water_ticks");
+            this.foodTicks = JSONUtils.getAsInt(json, "food_ticks");
+            this.waterTicks = JSONUtils.getAsInt(json, "water_ticks");
 
-            this.hydrateAmountPerTick = JsonUtils.getInt(json, "hydrate_amount_per_tick");
+            this.hydrateAmountPerTick = JSONUtils.getAsInt(json, "hydrate_amount_per_tick");
 
             this.distanceSmellFood = json.get("food_smell_distance").getAsInt();
         }

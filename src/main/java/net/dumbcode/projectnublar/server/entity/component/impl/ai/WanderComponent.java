@@ -8,15 +8,11 @@ import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.MovePredicateComponent;
 import net.dumbcode.projectnublar.server.entity.ai.FloatAi;
 import net.dumbcode.projectnublar.server.entity.ai.WanderAI;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.MobEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Getter
@@ -35,13 +31,13 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        if(entity instanceof EntityCreature) {
-            EntityCreature creature = (EntityCreature) entity;
-            creature.tasks.addTask(this.priority, new WanderAI(creature, this));
-            creature.tasks.addTask(this.priority - 1, new FloatAi(creature));
+        if(entity instanceof CreatureEntity) {
+            CreatureEntity creature = (CreatureEntity) entity;
+            creature.goalSelector.addGoal(this.priority, new WanderAI(creature, this));
+            creature.goalSelector.addGoal(this.priority - 1, new FloatAi(creature));
 //            ((EntityCreature) entity).tasks.addTask(this.priority, this.avoidWater ? new EntityAIWanderAvoidWater(creature, this.speed, 1F / this.chance) : new EntityAIWander(creature, this.speed, this.chance));
         } else {
-            throw new IllegalArgumentException("Tried to attach a wander component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of EntityCreature");
+            throw new IllegalArgumentException("Tried to attach a wander component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of MobEntity");
         }
 
         List<Supplier<Boolean>> registry = new ArrayList<>();
@@ -51,16 +47,6 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
             }
         }
         this.canExecute = registry.stream().reduce(() -> true, (b1, b2) -> () -> b1.get() && b2.get());
-
-    }
-
-    @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        return compound;
-    }
-
-    @Override
-    public void deserialize(NBTTagCompound compound) {
 
     }
 }

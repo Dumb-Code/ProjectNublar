@@ -559,7 +559,7 @@ public class BlockConnectableBase extends Block {
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         World world = event.getWorld();
         Direction side = event.getFace();
-        if (side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == ItemHandler.WIRE_SPOOL) {
+        if (side != null && !event.getItemStack().isEmpty() && event.getItemStack().getItem() == ItemHandler.WIRE_SPOOL.get()) {
             TileEntity tile = world.getBlockEntity(event.getPos().relative(side));
             if (tile instanceof ConnectableBlockEntity) {
                 ConnectableBlockEntity cb = (ConnectableBlockEntity) tile;

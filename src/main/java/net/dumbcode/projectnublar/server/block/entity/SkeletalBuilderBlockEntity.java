@@ -10,6 +10,7 @@ import net.dumbcode.dumblibrary.server.taxidermy.BaseTaxidermyBlockEntity;
 import net.dumbcode.projectnublar.client.render.SkeletonBuilderScene;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.block.BlockState;
@@ -23,8 +24,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.Optional;
-
-import static net.dumbcode.projectnublar.server.ProjectNublar.DINOSAUR_REGISTRY;
 
 @Getter
 @Setter
@@ -59,7 +58,7 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
 
     @Override
     public void load(BlockState state, CompoundNBT nbt) {
-        setDinosaur(DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
+        setDinosaur(DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
         this.boneHandler.deserializeNBT(nbt.getCompound("Inventory"));
         // load pose data
         this.reassureSize();
@@ -83,7 +82,7 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
     @Override
     public ResourceLocation getTexture() {
         return this.dinosaurEntity
-                .flatMap(EntityComponentTypes.MODEL)
+                .flatMap(EntityComponentTypes.MODEL.get())
                 .map(ModelComponent::getTexture)
                 .map(RenderLocationComponent.ConfigurableLocation::getLocation)
                 .orElse(TextureManager.INTENTIONAL_MISSING_TEXTURE);
@@ -91,7 +90,7 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
 
     public void setDinosaur(Dinosaur dinosaur) {
         if(dinosaur != null) {
-            DinosaurEntity entity = dinosaur.createEntity(this.level, dinosaur.getAttacher().emptyConfiguration().withDefaultTypes(false).withType(ComponentHandler.DINOSAUR, ComponentHandler.SKELETAL_BUILDER, EntityComponentTypes.MODEL));
+            DinosaurEntity entity = dinosaur.createEntity(this.level, dinosaur.getAttacher().emptyConfiguration().withDefaultTypes(false).withType(ComponentHandler.DINOSAUR.get(), ComponentHandler.SKELETAL_BUILDER.get(), EntityComponentTypes.MODEL.get()));
             this.dinosaurEntity = Optional.of(entity);
         }
         this.getHistory().clear();

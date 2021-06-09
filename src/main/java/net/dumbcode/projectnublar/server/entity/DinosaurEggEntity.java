@@ -6,8 +6,8 @@ import net.dumbcode.dumblibrary.server.ecs.FamilySavedData;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.minecraft.entity.*;
 import net.minecraft.nbt.CompoundNBT;
@@ -33,19 +33,19 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     @Getter
     private float randomScaleAdjustment;
     @Getter
-    private DinosaurEggType type = DinosaurEggType.EMPTY;
+    private DinosaurEggType eggType = DinosaurEggType.EMPTY;
     private UUID familyUUID;
     private int hatchingTicks;
 
-    public DinosaurEggEntity(EntityType<?> type, World world) {
-        super(type, world);
+    public DinosaurEggEntity(EntityType<?> eggType, World world) {
+        super(eggType, world);
     }
 
-    public DinosaurEggEntity(World world, List<GeneticEntry<?>> combinedGenetics, Dinosaur dinosaur, DinosaurEggType type, float randomScaleAdjustment, UUID familyUUID, int hatchingTicks) {
+    public DinosaurEggEntity(World world, List<GeneticEntry<?>> combinedGenetics, Dinosaur dinosaur, DinosaurEggType eggType, float randomScaleAdjustment, UUID familyUUID, int hatchingTicks) {
         this(EntityHandler.DINOSAUR_EGG.get(), world);
         this.combinedGenetics.addAll(combinedGenetics);
         this.dinosaur = dinosaur;
-        this.type = type;
+        this.eggType = eggType;
         this.randomScaleAdjustment = randomScaleAdjustment;
         this.familyUUID = familyUUID;
         this.hatchingTicks = hatchingTicks;
@@ -58,7 +58,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
 
     @Override
     public EntitySize getDimensions(Pose pose) {
-        return EntitySize.fixed(7/16F * this.randomScaleAdjustment, (this.type.getEggLength() + 2/16F) * this.randomScaleAdjustment);
+        return EntitySize.fixed(7/16F * this.randomScaleAdjustment, (this.eggType.getEggLength() + 2/16F) * this.randomScaleAdjustment);
     }
 
     @Override
@@ -121,9 +121,9 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
         StreamUtils.stream(nbt.getList("genetics", Constants.NBT.TAG_COMPOUND))
             .map(b -> GeneticEntry.deserialize((CompoundNBT) b))
             .forEach(this.combinedGenetics::add);
-        this.dinosaur = ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("dinosaur")));
+        this.dinosaur = DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("dinosaur")));
         this.randomScaleAdjustment = nbt.getFloat("random_scale");
-        this.type = DinosaurEggType.readFromNBT(nbt.getCompound("egg_type"));
+        this.eggType = DinosaurEggType.readFromNBT(nbt.getCompound("egg_type"));
         this.familyUUID = nbt.hasUUID("family_uuid") ? nbt.getUUID("family_uuid") : null;
         this.hatchingTicks = nbt.getInt("hatching_ticks");
         this.randomRotation = nbt.getFloat("rot");
@@ -134,7 +134,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
         nbt.put("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new CompoundNBT())).collect(CollectorUtils.toNBTTagList()));
         nbt.putString("dinosaur", this.dinosaur.getRegName().toString());
         nbt.putFloat("random_scale", this.randomScaleAdjustment);
-        nbt.put("egg_type", DinosaurEggType.writeToNBT(this.type));
+        nbt.put("egg_type", DinosaurEggType.writeToNBT(this.eggType));
         if(this.familyUUID != null) {
             nbt.putUUID("family_uuid", this.familyUUID);
         }
@@ -145,12 +145,12 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     @Override
     public void writeSpawnData(PacketBuffer buf) {
         buf.writeFloat(this.randomScaleAdjustment);
-        DinosaurEggType.writeToBuf(this.type, buf);
+        DinosaurEggType.writeToBuf(this.eggType, buf);
     }
 
     @Override
     public void readSpawnData(PacketBuffer buf) {
         this.randomScaleAdjustment = buf.readFloat();
-        this.type = DinosaurEggType.readFromBuf(buf);
+        this.eggType = DinosaurEggType.readFromBuf(buf);
     }
 }

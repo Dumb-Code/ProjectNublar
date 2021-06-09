@@ -1,9 +1,7 @@
 package net.dumbcode.projectnublar.server.registry;
 
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.*;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -11,6 +9,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 //An abstraction of the deferred register used to handle stuff that need to go before blocks and items.
@@ -55,7 +54,6 @@ public class EarlyDeferredRegister<T extends IForgeRegistryEntry<T>> {
 
     @RequiredArgsConstructor
     private static class EventBusDelegate implements IEventBus {
-        @Delegate(excludes = Excludes.class)
         private final IEventBus bus;
 
         @Override
@@ -66,11 +64,58 @@ public class EarlyDeferredRegister<T extends IForgeRegistryEntry<T>> {
                 this.bus.register(target);
             }
         }
-    }
 
+        //Delegates as @Delegate throws a weird error.
+        public <T extends Event> void addListener(Consumer<T> consumer) {
+            this.bus.addListener(consumer);
+        }
 
+        public <T extends Event> void addListener(EventPriority priority, Consumer<T> consumer) {
+            this.bus.addListener(priority, consumer);
+        }
 
-    private interface Excludes {
-        void register(Object target);
+        public <T extends Event> void addListener(EventPriority priority, boolean receiveCancelled, Consumer<T> consumer) {
+            this.bus.addListener(priority, receiveCancelled, consumer);
+        }
+
+        public <T extends Event> void addListener(EventPriority priority, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer) {
+            this.bus.addListener(priority, receiveCancelled, eventType, consumer);
+        }
+
+        public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Consumer<T> consumer) {
+            this.bus.addGenericListener(genericClassFilter, consumer);
+        }
+
+        public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Consumer<T> consumer) {
+            this.bus.addGenericListener(genericClassFilter, priority, consumer);
+        }
+
+        public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCancelled, Consumer<T> consumer) {
+            this.bus.addGenericListener(genericClassFilter, priority, receiveCancelled, consumer);
+        }
+
+        public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer) {
+            this.bus.addGenericListener(genericClassFilter, priority, receiveCancelled, eventType, consumer);
+        }
+
+        public void unregister(Object object) {
+            this.bus.unregister(object);
+        }
+
+        public boolean post(Event event) {
+            return this.bus.post(event);
+        }
+
+        public boolean post(Event event, IEventBusInvokeDispatcher wrapper) {
+            return this.bus.post(event, wrapper);
+        }
+
+        public void shutdown() {
+            this.bus.shutdown();
+        }
+
+        public void start() {
+            this.bus.start();
+        }
     }
 }

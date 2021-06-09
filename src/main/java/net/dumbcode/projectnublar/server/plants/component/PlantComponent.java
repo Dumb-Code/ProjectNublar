@@ -1,6 +1,5 @@
 package net.dumbcode.projectnublar.server.plants.component;
 
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
@@ -9,42 +8,42 @@ import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.plants.PlantHandler;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.Objects;
 
 public class PlantComponent extends EntityComponent implements FinalizableComponent {
 
-    @NonNull @Getter private Plant plant = PlantHandler.CYCAD;
+    @NonNull @Getter private Plant plant = PlantHandler.CYCAD.get();
 
     @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setString("plant", Objects.requireNonNull(this.plant.getRegistryName()).toString());
+    public CompoundNBT serialize(CompoundNBT compound) {
+        compound.putString("plant", Objects.requireNonNull(this.plant.getRegistryName()).toString());
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
+    public void deserialize(CompoundNBT compound) {
         super.deserialize(compound);
         ResourceLocation identifier = new ResourceLocation(compound.getString("plant"));
-        if (ProjectNublar.PLANT_REGISTRY.containsKey(identifier)) {
-            this.plant = ProjectNublar.PLANT_REGISTRY.getValue(identifier);
+        if (PlantHandler.getRegistry().containsKey(identifier)) {
+            this.plant = PlantHandler.getRegistry().getValue(identifier);
         } else {
             ProjectNublar.getLogger().warn("Parsed invalid plant component '{}'", identifier);
-            this.plant = PlantHandler.CYCAD;
+            this.plant = PlantHandler.CYCAD.get();
         }
     }
 
     @Override
-    public void serialize(ByteBuf buf) {
-        ByteBufUtils.writeRegistryEntry(buf, this.plant);
+    public void serialize(PacketBuffer buf) {
+        buf.writeRegistryId(this.plant);
     }
 
     @Override
-    public void deserialize(ByteBuf buf) {
-        this.plant = ByteBufUtils.readRegistryEntry(buf, ProjectNublar.PLANT_REGISTRY);
+    public void deserialize(PacketBuffer buf) {
+        this.plant = buf.readRegistryIdSafe(Plant.class);
     }
 
     @Override

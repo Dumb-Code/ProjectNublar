@@ -50,10 +50,10 @@ public class Tyrannosaurus extends Dinosaur {
             .setMaxFood(7500)
             .setMaxWater(6000);
 
-        this.addComponent(ComponentHandler.MOOD);
-        this.addComponent(ComponentHandler.ATTACK_FENCE_AI);
+        this.addEmptyComponent(ComponentHandler.MOOD);
+        this.addEmptyComponent(ComponentHandler.ATTACK_FENCE_AI);
 
-        this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
+        this.addComponentWithOverride(ComponentHandler.MULTIPART.get(), EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .addCubesForAge(ADULT_AGE,
                         "tail4", "Tail3", "tail2", "tail1",
                         "legUpperRight", "legMiddleRight", "legLowerRight",
@@ -61,7 +61,7 @@ public class Tyrannosaurus extends Dinosaur {
                         "neck3", "hips", "chest", "jawUpper1", "head"
                 );
 
-        this.addComponent(EntityComponentTypes.ANIMATION);
+        this.addEmptyComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(ComponentHandler.ITEM_DROPS)
             .addFossils("foot", "claw", "leg", "neck", "pelvis", "ribcage", "skull", "tail");
@@ -73,7 +73,7 @@ public class Tyrannosaurus extends Dinosaur {
             .setScaleZ(2.5F);
 
 
-        this.addComponent(EntityComponentTypes.GENDER);
+        this.addEmptyComponent(EntityComponentTypes.GENDER);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
             .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))
@@ -81,12 +81,12 @@ public class Tyrannosaurus extends Dinosaur {
             .setDefaultStageName(ADULT_AGE);
 
         this.addComponent(EntityComponentTypes.MODEL).setShadowSize(3F);
-        this.addComponent(EntityComponentTypes.SPEED_TRACKING);
+        this.addEmptyComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
             .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
 
-        this.addComponent(ComponentHandler.WANDER_AI);
-        this.addComponent(ComponentHandler.ATTACK_AI);
+        this.addEmptyComponent(ComponentHandler.WANDER_AI);
+        this.addEmptyComponent(ComponentHandler.ATTACK_AI);
         this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(3D);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
@@ -102,7 +102,7 @@ public class Tyrannosaurus extends Dinosaur {
             );
 
         this.addComponent(EntityComponentTypes.GENETICS)
-                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", 0, 0.75F);
+                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed", 0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
                 .addLayer("body", 0F, "body")

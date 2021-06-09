@@ -2,98 +2,95 @@ package net.dumbcode.projectnublar.server.entity.ai;
 
 import lombok.ToString;
 import net.dumbcode.dumblibrary.DumbLibrary;
-import net.dumbcode.dumblibrary.server.animation.objects.Animation;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimationEntry;
-import net.dumbcode.dumblibrary.server.animation.objects.AnimationWrap;
+import net.dumbcode.dumblibrary.server.animation.Animation;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSound;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.ECSSounds;
 import net.dumbcode.dumblibrary.server.utils.BlockStateWorker;
 import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class FeedingAI extends EntityAIBase {
+public class FeedingAI extends Goal {
 
     private final ComponentAccess access;
-    private final EntityLiving entityLiving;
+    private final MobEntity entityLiving;
     private final MetabolismComponent metabolism;
     private Future<List<BlockPos>> blockPosList;
 
     private FeedingProcess process = null;
     private int eatingTicks;
 
-    public FeedingAI(ComponentAccess access, EntityLiving entityLiving, MetabolismComponent metabolism) {
+    public FeedingAI(ComponentAccess access, MobEntity entityLiving, MetabolismComponent metabolism) {
         this.access = access;
         this.entityLiving = entityLiving;
         this.metabolism = metabolism;
-        this.setMutexBits(1);
+        this.setFlags(EnumSet.of(Flag.MOVE));
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         if (this.metabolism.getFood() <= 7500) {
             if (this.process == null) {
-                World world = this.entityLiving.world;
+                World world = this.entityLiving.level;
                 //Search entities first
                 Entity targetEntity = null;
                 boolean isTargetItem = false;
-                for (Entity entity : world.loadedEntityList) {
-                    double dist = entity.getDistanceSq(this.entityLiving);
-                    if (dist < this.metabolism.getFoodSmellDistance() * this.metabolism.getFoodSmellDistance()) {
-                        boolean isEntityItem = entity instanceof EntityItem && this.metabolism.getDiet().getResult(((EntityItem) entity).getItem()).isPresent();
-                        boolean isNormalEntity = this.metabolism.getDiet().getResult(entity).isPresent();
+                for (Entity entity : world.getEntities(this.entityLiving, this.entityLiving.getBoundingBox().inflate(this.metabolism.getFoodSmellDistance()), EntityPredicates.NO_CREATIVE_OR_SPECTATOR)) {
+                    double dist = entity.distanceTo(this.entityLiving);
 
-                        boolean closer = targetEntity == null || targetEntity.getDistanceSq(this.entityLiving) < dist;
+                    boolean isEntityItem = entity instanceof ItemEntity && this.metabolism.getDiet().getResult(((ItemEntity) entity).getItem()).isPresent();
+                    boolean isNormalEntity = this.metabolism.getDiet().getResult(entity).isPresent();
 
-                        //If we've found not an item and we're targeting an item
-                        if(isTargetItem && !isEntityItem) {
-                            continue;
-                        }
+                    boolean closer = targetEntity == null || targetEntity.distanceTo(this.entityLiving) < dist;
 
-                        //If the target entity isn't an item and we've found an item:
-                        if(isEntityItem && (!isTargetItem || closer)) {
-                            this.process = new ItemStackProcess((EntityItem) entity);
-                            targetEntity = entity;
-                            isTargetItem = true;
-                            continue;
-                        }
+                    //If we've found not an item and we're targeting an item
+                    if(isTargetItem && !isEntityItem) {
+                        continue;
+                    }
 
-                        if(closer && isNormalEntity) {
-                            this.process = new EntityProcess(entity);
-                            targetEntity = entity;
-                            isTargetItem = false;
-                        }
+                    //If the target entity isn't an item and we've found an item:
+                    if(isEntityItem && (!isTargetItem || closer)) {
+                        this.process = new ItemStackProcess((ItemEntity) entity);
+                        targetEntity = entity;
+                        isTargetItem = true;
+                        continue;
+                    }
+
+                    if(closer && isNormalEntity) {
+                        this.process = new EntityProcess(entity);
+                        targetEntity = entity;
+                        isTargetItem = false;
                     }
                 }
                 if(this.process == null) {
                     if(this.blockPosList == null) {
-                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.world, entityLiving.getPosition(), metabolism.getFoodSmellDistance(), (w, pos) -> this.metabolism.getDiet().getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigator().getPathToPos(pos) != null);
+                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.level, entityLiving.blockPosition(), metabolism.getFoodSmellDistance(), (w, pos) -> this.metabolism.getDiet().getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigation().getPath() != null);
                     } else if(this.blockPosList.isDone()) {
                         try {
                             List<BlockPos> results = this.blockPosList.get();
                             this.blockPosList = null;
-                            Vec3d pos = this.entityLiving.getPositionVector();
+                            Vector3d pos = this.entityLiving.position();
                             if (!results.isEmpty()) {
-                                results.sort(Comparator.comparingDouble(o -> o.distanceSq(pos.x, pos.y, pos.z)));
+                                results.sort(Comparator.comparingDouble(o -> o.distSqr(pos.x, pos.y, pos.z, true)));
                                 for (BlockPos result : results) {
-                                    if(this.metabolism.getDiet().getResult(this.entityLiving.world.getBlockState(result)).isPresent()) {
+                                    if(this.metabolism.getDiet().getResult(this.entityLiving.level.getBlockState(result)).isPresent()) {
                                         this.process = new BlockStateProcess(world, result);
                                         break;
                                     }
@@ -117,40 +114,37 @@ public class FeedingAI extends EntityAIBase {
     }
 
     @Override
-    public void updateTask() {
+    public void tick() {
         if(this.process != null) {
-            Vec3d position = this.process.position();
-            if(this.entityLiving.getPositionVector().squareDistanceTo(position) <= 2*2) {
-                this.entityLiving.getNavigator().setPath(null, 0F);
-                this.entityLiving.getLookHelper().setLookPosition(position.x, position.y, position.z, this.entityLiving.getHorizontalFaceSpeed(), this.entityLiving.getVerticalFaceSpeed());
+            Vector3d position = this.process.position();
+            if(this.entityLiving.position().distanceToSqr(position) <= 2*2) {
+                this.entityLiving.getNavigation().stop();
+                this.entityLiving.getLookControl().setLookAt(position.x, position.y, position.z, this.entityLiving.getMaxHeadYRot(), this.entityLiving.getMaxHeadXRot());
                 this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> {
                     Animation animation = this.process.getAnimation();
-                    AnimationWrap wrap = a.getWrap(MetabolismComponent.METABOLISM_CHANNEL);
-                    if(wrap ==  null || wrap.isInvalidated() || (wrap.getEntry().getAnimation() != animation)) {
-                        a.playAnimation(this.access, new AnimationEntry(animation), MetabolismComponent.METABOLISM_CHANNEL);
+                    if(!a.isAnimationPlaying(animation, MetabolismComponent.METABOLISM_CHANNEL)) {
+                        a.playAnimation(animation, MetabolismComponent.METABOLISM_CHANNEL);
                     }
                 });
 
-                //TODO-stream: don't have this directly. THIS IS JUST FOR THE VELOCIRAPTOR
-                //What I should do is have an animation, then also have an "audio timeline" that plays spefic events at times.
                 if (!(this.process instanceof EntityProcess)) {
-                    if(this.eatingTicks == 41 || this.eatingTicks == 77) {
-                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_RIP).ifPresent(e ->
-                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
-                        );
-                    }
-                    if(this.eatingTicks == 65 || this.eatingTicks == 97) {
-                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_CRUNCH).ifPresent(e ->
-                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
-                        );
-                    }
-                    this.process.tick();
+//                    if(this.eatingTicks == 41 || this.eatingTicks == 77) {
+//                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_RIP).ifPresent(e ->
+//                            this.entityLiving.level.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
+//                        );
+//                    }
+//                    if(this.eatingTicks == 65 || this.eatingTicks == 97) {
+//                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.EATING_CRUNCH).ifPresent(e ->
+//                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
+//                        );
+//                    }
+                    this.process.onProcessRan();
                 } else {
-                    if(this.eatingTicks == 11) {
-                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.ATTACKING).ifPresent(e ->
-                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
-                        );
-                        this.process.tick();
+                    if(this.eatingTicks == 11) { //TODO: config 11.
+//                        this.access.get(EntityComponentTypes.SOUND_STORAGE).flatMap(ECSSounds.ATTACKING).ifPresent(e ->
+//                            this.entityLiving.world.playSound(null, this.entityLiving.posX, this.entityLiving.posY, this.entityLiving.posZ, e, SoundCategory.AMBIENT, this.entityLiving.getRNG().nextFloat()*0.25F+0.2F, this.entityLiving.getRNG().nextFloat()*0.5F+0.75F)
+//                        );
+                        this.process.onProcessRan();
                     }
                 }
                 if(this.eatingTicks++ >= this.metabolism.getFoodTicks()) {
@@ -160,35 +154,35 @@ public class FeedingAI extends EntityAIBase {
                     this.eatingTicks = 0;
                 }
             } else {
-                this.entityLiving.getNavigator().tryMoveToXYZ(position.x, position.y, position.z, 0.65D);
+                this.entityLiving.getNavigation().moveTo(position.x, position.y, position.z, 0.65D);
             }
         }
-        super.updateTask();
+        super.tick();
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         return this.process != null && this.process.active() && this.eatingTicks < this.metabolism.getFoodTicks()+3;
     }
 
     @Override
-    public void resetTask() {
+    public void stop() {
         this.process = null;
         this.eatingTicks = 0;
-        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(this.entityLiving, MetabolismComponent.METABOLISM_CHANNEL));
+        this.access.get(EntityComponentTypes.ANIMATION).ifPresent(a -> a.stopAnimation(MetabolismComponent.METABOLISM_CHANNEL));
     }
 
 
     public interface FeedingProcess {
         boolean active();
 
-        default void tick() {};
+        default void onProcessRan() {};
 
         default Animation getAnimation() {
             return AnimationHandler.EATING;
         }
 
-        Vec3d position();
+        Vector3d position();
 
         FeedingResult consume();
     }
@@ -196,20 +190,20 @@ public class FeedingAI extends EntityAIBase {
     @ToString
     public class ItemStackProcess implements FeedingProcess {
 
-        private final EntityItem entity;
+        private final ItemEntity entity;
 
-        public ItemStackProcess(EntityItem entity) {
+        public ItemStackProcess(ItemEntity entity) {
             this.entity = entity;
         }
 
         @Override
         public boolean active() {
-            return !this.entity.isDead && !this.entity.getItem().isEmpty();
+            return this.entity.isAlive() && !this.entity.getItem().isEmpty();
         }
 
         @Override
-        public Vec3d position() {
-            return this.entity.getPositionVector();
+        public Vector3d position() {
+            return this.entity.position();
         }
 
         @Override
@@ -232,18 +226,18 @@ public class FeedingAI extends EntityAIBase {
 
         @Override
         public boolean active() {
-            return !this.entity.isDead;
+            return this.entity.isAlive();
         }
 
         @Override
-        public Vec3d position() {
-            return this.entity.getPositionVector();
+        public Vector3d position() {
+            return this.entity.position();
         }
 
         @Override
-        public void tick() {
-            if(this.entity instanceof EntityLivingBase) {
-                this.entity.attackEntityFrom(DamageSource.causeMobDamage(entityLiving), 6F);
+        public void onProcessRan() {
+            if(this.entity instanceof LivingEntity) {
+                this.entity.hurt(DamageSource.mobAttack(entityLiving), 6F);
             }
         }
 
@@ -254,7 +248,7 @@ public class FeedingAI extends EntityAIBase {
 
         @Override
         public FeedingResult consume() {
-            this.entity.setDead();
+            this.entity.kill();
             return metabolism.getDiet().getResult(this.entity).orElse(new FeedingResult(0, 0));
         }
     }
@@ -264,7 +258,7 @@ public class FeedingAI extends EntityAIBase {
 
         private final World world;
         private final BlockPos position;
-        private final IBlockState initialState;
+        private final BlockState initialState;
 
         public BlockStateProcess(World world, BlockPos position) {
             this.world = world;
@@ -278,13 +272,13 @@ public class FeedingAI extends EntityAIBase {
         }
 
         @Override
-        public Vec3d position() {
-            return new Vec3d(this.position);
+        public Vector3d position() {
+            return new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ());
         }
 
         @Override
         public FeedingResult consume() {
-            this.world.setBlockToAir(this.position);
+            this.world.setBlock(this.position, Blocks.AIR.defaultBlockState(), 3);
             return metabolism.getDiet().getResult(this.initialState).orElse(new FeedingResult(0, 0));
         }
     }

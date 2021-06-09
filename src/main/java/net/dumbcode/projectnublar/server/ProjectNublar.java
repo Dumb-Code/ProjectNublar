@@ -25,6 +25,8 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
 import net.dumbcode.projectnublar.server.plants.Plant;
+import net.dumbcode.projectnublar.server.plants.PlantHandler;
+import net.dumbcode.projectnublar.server.recipes.crafting.ProjectNublarRecipesSerializers;
 import net.dumbcode.projectnublar.server.registry.EarlyRegistryEvent;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
@@ -69,9 +71,6 @@ public class ProjectNublar {
 
     public static final boolean DEBUG = false;
 
-    public static IForgeRegistry<Dinosaur> DINOSAUR_REGISTRY;
-    public static IForgeRegistry<Plant> PLANT_REGISTRY;
-
 
     private static Logger logger = LogManager.getLogger(MODID);
 
@@ -96,6 +95,9 @@ public class ProjectNublar {
         EntityHandler.REGISTER.register(bus);
         SoundHandler.REGISTER.register(bus);
         GeneticHandler.REGISTER.register(bus);
+        DinosaurHandler.REGISTER.register(bus);
+        PlantHandler.REGISTER.register(bus);
+        ProjectNublarRecipesSerializers.REGISTER.register(bus)
 
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
@@ -125,8 +127,8 @@ public class ProjectNublar {
 //        registerJsonDinosaurs();
 
 
-        DINOSAUR_REGISTRY.forEach(Dinosaur::attachDefaultComponents);
-        PLANT_REGISTRY.forEach(Plant::attachComponents);
+        DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
+        PlantHandler.getRegistry().forEach(Plant::attachComponents);
 
         registerPackets();
 
@@ -138,7 +140,7 @@ public class ProjectNublar {
         }
         AnimationFactorHandler.register();
 
-        for (Dinosaur dinosaur : DINOSAUR_REGISTRY.getValues()) {
+        for (Dinosaur dinosaur : DinosaurHandler.getRegistry().getValues()) {
             ResourceLocation regName = dinosaur.getRegName();
             for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(ComponentHandler.AGE).getOrderedAges()) {
                 Map<String, AnimationContainer> container = dinosaur.getModelContainer();
@@ -168,7 +170,7 @@ public class ProjectNublar {
         builder.setPrettyPrinting();
         JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
-        DINOSAUR_REGISTRY.getValues().forEach(dino -> {
+        DinosaurHandler.getRegistry().getValues().forEach(dino -> {
             File jsonFile = new File("./mods/projectnublar/debug/" + dino.getRegName().getPath() + ".json");
             if (!jsonFile.getParentFile().exists()) {
                 jsonFile.getParentFile().mkdirs();
@@ -184,21 +186,21 @@ public class ProjectNublar {
     //TODO: move these to deferred register.
     @SubscribeEvent
     public static void createRegistries(RegistryEvent.NewRegistry event) {
-        DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
-                .setType(Dinosaur.class)
-                .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
-                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
-                .set(((key, isNetwork) -> DinosaurHandler.TYRANNOSAURUS))
-                .create();
-
-        PLANT_REGISTRY = new RegistryBuilder<Plant>()
-                .setType(Plant.class)
-                .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
-                .create();
+//        DINOSAUR_REGISTRY = new RegistryBuilder<Dinosaur>()
+//                .setType(Dinosaur.class)
+//                .setName(new ResourceLocation(ProjectNublar.MODID, "dinosaur"))
+//                .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "missing"))
+//                .set(((key, isNetwork) -> DinosaurHandler.TYRANNOSAURUS))
+//                .create();
+//
+//        PLANT_REGISTRY = new RegistryBuilder<Plant>()
+//                .setType(Plant.class)
+//                .setName(new ResourceLocation(ProjectNublar.MODID, "plant"))
+//                .create();
 
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.post(new EarlyRegistryEvent<>(DINOSAUR_REGISTRY));
-        bus.post(new EarlyRegistryEvent<>(PLANT_REGISTRY));
+        bus.post(new EarlyRegistryEvent<>(DinosaurHandler.getRegistry()));
+        bus.post(new EarlyRegistryEvent<>(PlantHandler.getRegistry()));
     }
 
     @SubscribeEvent
@@ -222,7 +224,7 @@ public class ProjectNublar {
         GsonBuilder builder = new GsonBuilder();
         JsonHandlers.registerAllHandlers(builder);
         Gson gson = builder.create();
-        JsonUtil.registerModJsons(DINOSAUR_REGISTRY, gson, ProjectNublar.MODID, "dinosaurs");
+        JsonUtil.registerModJsons(DinosaurHandler.getRegistry(), gson, ProjectNublar.MODID, "dinosaurs");
     }
 
     private void registerPackets() {

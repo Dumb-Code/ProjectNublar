@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
@@ -107,7 +108,7 @@ public final class ItemHandler {
 
     public static final Map<Dinosaur, Map<String, RegistryObject<Item>>> FOSSIL_ITEMS = createNestedMap(
         "%s_fossil_%s",
-        dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS), DinosaurDropsComponent.Storage::getFossilList),
+        dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS.get()), DinosaurDropsComponent.Storage::getFossilList),
         (dinosaur, fossil) -> new FossilItem(dinosaur, fossil, new Item.Properties())
         );
 
@@ -124,7 +125,7 @@ public final class ItemHandler {
 
     private static <T extends Item> Map<Dinosaur, RegistryObject<T>> createMap(String format, Function<Dinosaur, T> supplier) {
         Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
-        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
+        for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
             map.put(dinosaur, REGISTER.register(
                 String.format(format, dinosaur.getFormattedName()),
                 () -> supplier.apply(dinosaur)
@@ -148,7 +149,7 @@ public final class ItemHandler {
         BiFunction<Dinosaur, S, T> creationFunc
     ) {
         Map<Dinosaur, Map<S, RegistryObject<T>>> map = new HashMap<>();
-        for (Dinosaur dinosaur : ProjectNublar.DINOSAUR_REGISTRY) {
+        for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
             Collection<S> collection = getterFunction.apply(dinosaur);
             if (collection != null) {
                 for (S s : collection) {

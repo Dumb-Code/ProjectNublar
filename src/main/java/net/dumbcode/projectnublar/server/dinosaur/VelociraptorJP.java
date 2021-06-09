@@ -13,11 +13,12 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
-import net.minecraft.entity.passive.*;
-import net.minecraft.init.Items;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
 
@@ -51,9 +52,9 @@ public class VelociraptorJP extends Dinosaur {
         this.addComponent(ComponentHandler.METABOLISM)
             .setDistanceSmellFood(30)
             .setDiet(new FeedingDiet()
-                .add(250, 30, EntityChicken.class, EntityRabbit.class)
-                .add(1000, 100, EntitySheep.class, EntityCow.class, EntityPig.class)
-                .add(5000, 300, EntityHorse.class)
+                .add(250, 30, EntityType.CHICKEN, EntityType.RABBIT)
+                .add(1000, 100, EntityType.SHEEP, EntityType.COW, EntityType.PIG)
+                .add(5000, 300, EntityType.HORSE)
 
                 .add(250, 20, Items.PORKCHOP, Items.COOKED_PORKCHOP, Items.BEEF, Items.COOKED_BEEF, Items.MUTTON, Items.COOKED_MUTTON)
                 .add(150, 15, Items.CHICKEN, Items.COOKED_CHICKEN, Items.RABBIT, Items.COOKED_RABBIT)
@@ -66,7 +67,7 @@ public class VelociraptorJP extends Dinosaur {
             .setFoodTicks(100)
             .setWaterTicks(190);
 
-        this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
+        this.addComponentWithOverride(ComponentHandler.MULTIPART.get(), EntityStorageOverrides.DINOSAUR_MULTIPART)
                 .addCubesForAge(ADULT_AGE,
                         "tail4", "tail3", "tail2", "tail1",
                         "legUpperRight", "legMiddleRight", "legLowerRight",
@@ -74,15 +75,15 @@ public class VelociraptorJP extends Dinosaur {
                         "neck2", "hips", "chest", "jawUpper1", "head"
                 );
 
-        this.addComponent(ComponentHandler.MOOD);
-        this.addComponent(EntityComponentTypes.ANIMATION);
+        this.addEmptyComponent(ComponentHandler.MOOD);
+        this.addEmptyComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS)
             .setScaleX(0.75F)
             .setScaleY(0.75F)
             .setScaleZ(0.75F);
 
-        this.addComponent(EntityComponentTypes.GENDER);
+        this.addEmptyComponent(EntityComponentTypes.GENDER);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
             .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))
@@ -90,16 +91,16 @@ public class VelociraptorJP extends Dinosaur {
             .setDefaultStageName(ADULT_AGE);
 
         this.addComponent(EntityComponentTypes.MODEL).setShadowSize(2F);
-        this.addComponent(EntityComponentTypes.SPEED_TRACKING);
+        this.addEmptyComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
             .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
 
-        this.addComponent(ComponentHandler.WANDER_AI);
-        this.addComponent(ComponentHandler.ATTACK_AI);
+        this.addEmptyComponent(ComponentHandler.WANDER_AI);
+        this.addEmptyComponent(ComponentHandler.ATTACK_AI);
         this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(2D);
 
         this.addComponent(EntityComponentTypes.GENETICS)
-                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed", -1, 0.2F);
+                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed", -1, 0.2F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
             .addLayer("body", 0F, "base")
@@ -137,22 +138,22 @@ public class VelociraptorJP extends Dinosaur {
             .setSleepTime(13000);
 
 
-        this.addComponent(ComponentHandler.TRACKING_DATA);
+        this.addEmptyComponent(ComponentHandler.TRACKING_DATA);
         this.addComponent(EntityComponentTypes.IDLE_ACTION)
             .setIdleAnimations(Lists.newArrayList(() -> AnimationHandler.LOOK_AROUND, () -> AnimationHandler.SCRATCHING, () -> AnimationHandler.SNIFF_AIR, () -> AnimationHandler.SNIFF_GROUND))
             .setSittingAnimation(() -> AnimationHandler.SITTING)
             .setMovementAnimations(Lists.newArrayList(() -> AnimationHandler.LEFT_CLAW, () -> AnimationHandler.RIGHT_CLAW, () -> AnimationHandler.LOOK_LEFT, () -> AnimationHandler.LOOK_RIGHT));
-        this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
-        this.addComponent(EntityComponentTypes.CLOSE_PROXIMITY_ANGRY)
+        this.addEmptyComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
+        this.addComponentWithOverride(EntityComponentTypes.CLOSE_PROXIMITY_ANGRY.get(), EntityStorageOverrides.CLOSE_PROXIMITY_BLACKLIST)
             .setRange(3)
-            .add(DinosaurEntity.class);
+            .add(EntityHandler.DINOSAUR.get());
 
         this.addComponent(EntityComponentTypes.SOUND_STORAGE)
-            .addSound(ECSSounds.EATING_CRUNCH, () -> SoundHandler.VELOCIRAPTOR_FLESH_CRUNCH)
-            .addSound(ECSSounds.EATING_RIP, () -> SoundHandler.VELOCIRAPTOR_FLESH_RIP)
-            .addSound(ECSSounds.DRINKING, () -> SoundHandler.VELOCIRAPTOR_DRINK)
-            .addSound(ECSSounds.ATTACKING, () -> SoundHandler.VELOCIRAPTOR_BITE, () -> SoundHandler.VELOCIRAPTOR_BITE, () -> SoundHandler.VELOCIRAPTOR_BITE, () -> SoundHandler.VELOCIRAPTOR_SCREECH, () -> SoundHandler.VELOCIRAPTOR_CALL)
-            .addSound(ECSSounds.IDLE, () -> SoundHandler.VELOCIRAPTOR_IDLE)
-            .addSound(ECSSounds.CALLING, () -> SoundHandler.VELOCIRAPTOR_CALL);
+            .addSound(ECSSounds.EATING_CRUNCH, SoundHandler.VELOCIRAPTOR_FLESH_CRUNCH)
+            .addSound(ECSSounds.EATING_RIP, SoundHandler.VELOCIRAPTOR_FLESH_RIP)
+            .addSound(ECSSounds.DRINKING, SoundHandler.VELOCIRAPTOR_DRINK)
+            .addSound(ECSSounds.ATTACKING, SoundHandler.VELOCIRAPTOR_BITE, SoundHandler.VELOCIRAPTOR_BITE, SoundHandler.VELOCIRAPTOR_BITE, SoundHandler.VELOCIRAPTOR_SCREECH, SoundHandler.VELOCIRAPTOR_CALL)
+            .addSound(ECSSounds.IDLE, SoundHandler.VELOCIRAPTOR_IDLE)
+            .addSound(ECSSounds.CALLING, SoundHandler.VELOCIRAPTOR_CALL);
     }
 }

@@ -17,6 +17,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -86,7 +87,7 @@ public class TrackingTabletIterator {
 
         if(this.tickCounter++ % 5 == 0) {
             ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(() -> this.player), new S2CSetTrackingDataList(
-                TrackingSavedData.getData(event.world).getEntries().stream()
+                TrackingSavedData.getData((ServerWorld) event.world).getEntries().stream()
                     .filter(entry -> this.center.distSqr(entry.getPosition().x, 0, entry.getPosition().z, true) <= this.radius*this.radius)
                     .collect(Collectors.toList())
             ));

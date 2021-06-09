@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -17,12 +16,12 @@ import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationC
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ScaleAdjustmentComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -65,37 +64,37 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setInteger("Age", this.ageInTicks);
-        compound.setString("CurrentAge", this.stage.getName());
+    public CompoundNBT serialize(CompoundNBT compound) {
+        compound.putInt("Age", this.ageInTicks);
+        compound.putString("CurrentAge", this.stage.getName());
 
-        NBTTagList ages = new NBTTagList();
+        ListNBT ages = new ListNBT();
         for (AgeStage age : this.orderedAges) {
-            NBTTagCompound ageTag = new NBTTagCompound();
-            ageTag.setString("Name", age.getName());
-            ageTag.setInteger("Time", age.getTime());
-            ageTag.setString("ModelStage", age.getModelStage());
+            CompoundNBT ageTag = new CompoundNBT();
+            ageTag.putString("Name", age.getName());
+            ageTag.putInt("Time", age.getTime());
+            ageTag.putString("ModelStage", age.getModelStage());
 
-            ageTag.setBoolean("CanBreed", age.isCanBreed());
+            ageTag.putBoolean("CanBreed", age.isCanBreed());
 
-            ages.appendTag(ageTag);
+            ages.add(ageTag);
         }
 
-        compound.setTag("OrderedAges", ages);
+        compound.put("OrderedAges", ages);
 
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
+    public void deserialize(CompoundNBT compound) {
         this.orderedAges.clear();
         this.stage = AgeStage.MISSING;
 
-        this.ageInTicks = compound.getInteger("Age");
-        NBTTagList ages = compound.getTagList("OrderedAges", Constants.NBT.TAG_COMPOUND);
-        for (NBTBase base : ages) {
-            NBTTagCompound ageTag = (NBTTagCompound) base;
-            this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInteger("Time"), ageTag.getString("ModelStage")).setCanBreed(ageTag.getBoolean("CanBreed")));
+        this.ageInTicks = compound.getInt("Age");
+        ListNBT ages = compound.getList("OrderedAges", Constants.NBT.TAG_COMPOUND);
+        for (INBT base : ages) {
+            CompoundNBT ageTag = (CompoundNBT) base;
+            this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInt("Time"), ageTag.getString("ModelStage")).setCanBreed(ageTag.getBoolean("CanBreed")));
         }
 
         this.setRawStage(compound.getString("CurrentAge"));
@@ -103,12 +102,12 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public void serialize(ByteBuf buf) {
+    public void serialize(PacketBuffer buf) {
         buf.writeShort(this.orderedAges.size());
         for (AgeStage s : this.orderedAges) {
-            ByteBufUtils.writeUTF8String(buf, s.getName());
+            buf.writeUtf(s.getName());
             buf.writeInt(s.getTime());
-            ByteBufUtils.writeUTF8String(buf, s.getModelStage());
+            buf.writeUtf(s.getModelStage());
             buf.writeBoolean(s.isCanBreed());
         }
         buf.writeInt(this.orderedAges.indexOf(this.stage));
@@ -117,11 +116,11 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public void deserialize(ByteBuf buf) {
+    public void deserialize(PacketBuffer buf) {
         this.orderedAges.clear();
         short size = buf.readShort();
         for (int i = 0; i < size; i++) {
-            this.orderedAges.add(new AgeStage(ByteBufUtils.readUTF8String(buf), buf.readInt(), ByteBufUtils.readUTF8String(buf)).setCanBreed(buf.readBoolean()));
+            this.orderedAges.add(new AgeStage(buf.readUtf(), buf.readInt(), buf.readUtf()).setCanBreed(buf.readBoolean()));
         }
         this.stage = this.orderedAges.get(buf.readInt());
 
@@ -191,10 +190,10 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
         public void readJson(JsonObject json) {
 
             this.orderedAges.clear();
-            JsonArray ages = JsonUtils.getJsonArray(json, "ordered_ages");
+            JsonArray ages = JSONUtils.getAsJsonArray(json, "ordered_ages");
             for (JsonElement element : ages) {
-                JsonObject jsonObject = JsonUtils.getJsonObject(element, "ordered_ages_element");
-                this.orderedAges.add(new AgeStage(JsonUtils.getString(jsonObject, "name"), JsonUtils.getInt(jsonObject, "time"), JsonUtils.getString(json, "model_stage")));
+                JsonObject jsonObject = element.getAsJsonObject();
+                this.orderedAges.add(new AgeStage(JSONUtils.getAsString(jsonObject, "name"), JSONUtils.getAsInt(jsonObject, "time"), JSONUtils.getAsString(json, "model_stage")));
             }
         }
 

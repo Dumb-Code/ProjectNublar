@@ -3,8 +3,10 @@ package net.dumbcode.projectnublar.server.dinosaur.eggs;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.concurrent.CompletableFuture;
 
 
 @Getter
@@ -28,10 +30,10 @@ public enum EnumDinosaurEggTypes { //TODO: check scale
 
 
     public static void registerResourceReload() {
-        ((IReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(resourceManager -> {
+        ((IReloadableResourceManager)Minecraft.getInstance().getResourceManager()).registerReloadListener((stage, resourceManager, profiler, profiler1, executor, executor1) -> CompletableFuture.runAsync(() -> {
             for (EnumDinosaurEggTypes value : values()) {
                 value.type.clearCache();
             }
-        });
+        }));
     }
 }

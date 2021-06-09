@@ -36,7 +36,7 @@ public class DinosaurEntity extends ComposableCreatureEntity {
      * @return Dinosaur class.
      */
     public Dinosaur getDinosaur() {
-        return this.get(ComponentHandler.DINOSAUR).map(DinosaurComponent::getDinosaur).orElse(DinosaurHandler.TYRANNOSAURUS);
+        return this.get(ComponentHandler.DINOSAUR.get()).map(DinosaurComponent::getDinosaur).orElseGet(DinosaurHandler.TYRANNOSAURUS);
     }
 
 

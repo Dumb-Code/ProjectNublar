@@ -7,8 +7,8 @@ import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.attributes.ModifiableField;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.JSONUtils;
 
 @Getter
 public class DefenseComponent extends EntityComponent {
@@ -16,14 +16,14 @@ public class DefenseComponent extends EntityComponent {
     private final ModifiableField defense = new ModifiableField();
 
     @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        compound.setTag("defense", this.defense.writeToNBT());
+    public CompoundNBT serialize(CompoundNBT compound) {
+        compound.put("defense", this.defense.writeToNBT());
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
-        this.defense.readFromNBT(compound.getCompoundTag("defense"));
+    public void deserialize(CompoundNBT compound) {
+        this.defense.readFromNBT(compound.getCompound("defense"));
         super.deserialize(compound);
     }
 
@@ -46,7 +46,7 @@ public class DefenseComponent extends EntityComponent {
 
         @Override
         public void readJson(JsonObject json) {
-            this.baseDefense = JsonUtils.getFloat(json, "defense");
+            this.baseDefense = JSONUtils.getAsFloat(json, "defense");
         }
     }
 }

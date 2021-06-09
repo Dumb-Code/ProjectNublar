@@ -9,12 +9,14 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.ModelComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.ItemProperties;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
+import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.JSONUtils;
@@ -81,9 +83,13 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
         config.attachAll(entity);
         return entity;
     }
+//
+    public <T extends EntityComponent> void addEmptyComponent(RegistryObject<EntityComponentType<T, ?>> supplier) {
+        this.addComponent(supplier.get());
+    }
 
 
-    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(Supplier<? extends EntityComponentType<T, ? extends S>> supplier) {
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(RegistryObject<EntityComponentType<T, S>> supplier) {
         return this.addComponent(supplier.get());
     }
 
@@ -91,11 +97,7 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
         return this.attacher.addComponent(type); //delegate
     }
 
-    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(Supplier<? extends EntityComponentType<T, ?>> supplier, EntityComponentType.StorageOverride<T, S> override) {
-        return this.addComponent(supplier.get(), override);
-    }
-
-    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponent(EntityComponentType<T, ?> type, EntityComponentType.StorageOverride<T, S> override) {
+    public <T extends EntityComponent, S extends EntityComponentStorage<T>> S addComponentWithOverride(EntityComponentType<T, ?> type, EntityComponentType.StorageOverride<T, S> override) {
         return this.attacher.addComponent(type, override); //delegate
     }
 
@@ -138,7 +140,7 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
     }
 
     public static Dinosaur getRandom(Random random) {
-        Collection<Dinosaur> from = ProjectNublar.DINOSAUR_REGISTRY.getValues();
+        Collection<Dinosaur> from = DinosaurHandler.getRegistry().getValues();
         int i = random.nextInt(from.size());
         return from.toArray(new Dinosaur[0])[i];
 

@@ -5,7 +5,6 @@ import net.dumbcode.dumblibrary.server.ecs.ComposableCreatureEntity;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.projectnublar.server.entity.ai.EntityAttackFenceAI;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class AttackFenceComponent extends EntityComponent implements FinalizableComponent {
 
@@ -17,19 +16,10 @@ public class AttackFenceComponent extends EntityComponent implements Finalizable
 
         if (entity instanceof ComposableCreatureEntity) {
             ComposableCreatureEntity creature = (ComposableCreatureEntity) entity;
-            creature.tasks.addTask(this.priority, new EntityAttackFenceAI(creature));
+            creature.goalSelector.addGoal(this.priority, new EntityAttackFenceAI(creature));
         } else {
             throw new IllegalArgumentException("Tried to attach a attack component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of EntityCreature");
         }
-    }
-
-    @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        return compound;
-    }
-
-    @Override
-    public void deserialize(NBTTagCompound compound) {
 
     }
 }

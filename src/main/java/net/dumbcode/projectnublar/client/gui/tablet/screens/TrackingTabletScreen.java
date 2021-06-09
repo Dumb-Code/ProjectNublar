@@ -101,7 +101,7 @@ public class TrackingTabletScreen extends TabletScreen {
                 Vector2f point = this.getPoint(datum);
                 //Debug
                 RenderUtils.renderBorderExclusive(stack, (int) point.x - 1, (int) point.y - 1, (int) point.x + 1, (int) point.y + 1, 2, 0xFFFF0000);
-                datum.getInformation().forEach(i -> i.renderMap((int) point.x, (int) point.y));
+                datum.getInformation().forEach(i -> i.renderMap(stack, (int) point.x, (int) point.y));
             }
             if(this.selected != null) {
                 this.renderTooltip(stack, mouseX - left, mouseY - top);

@@ -16,12 +16,12 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     INSTANCE;
 
     @Override
-    public boolean accepts(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean accepts(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         ItemStackHandler handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
-        if(inSlot.getItem() == ItemHandler.AMBER) {
+        if(inSlot.getItem() == ItemHandler.AMBER.get()) {
             for (int i = 0; i < process.getOutputSlots().length; i++) {
-                if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE) {
+                if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE.get()) {
                     return true;
                 }
             }
@@ -30,19 +30,19 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     }
 
     @Override
-    public int getRecipeTime(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getRecipeTime(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         return 7200 - 600*blockEntity.getTier(MachineModuleType.DRILL_BIT);
     }
 
     @Override
-    public void onRecipeFinished(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public void onRecipeFinished(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         ItemStackHandler handler = blockEntity.getHandler();
         ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
         for (int i : process.getOutputSlots()) {
-            if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE) {
-                ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom()));
+            if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE.get()) {
+                ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom()).get());
                 DinosaurGeneticMaterialItem.setSize(stack, MathUtils.getWeightedResult(blockEntity.getTier(MachineModuleType.DRILL_BIT) + 1, 0.5));
-                if(!blockEntity.getWorld().isRemote) {
+                if(!blockEntity.getLevel().isClientSide) {
                     handler.setStackInSlot(i, stack);
                     inSlot.shrink(1);
                 }
@@ -52,14 +52,14 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     }
 
     @Override
-    public boolean acceptsInputSlot(DrillExtractorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess process) {
+    public boolean acceptsInputSlot(DrillExtractorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         switch (slotIndex) {
-            case 0: return testStack.getItem() == ItemHandler.AMBER;
+            case 0: return testStack.getItem() == ItemHandler.AMBER.get();
             case 1:
             case 2:
             case 3:
             case 4:
-                return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE;
+                return testStack.getItem() == ItemHandler.EMPTY_TEST_TUBE.get();
         }
         return false;
     }
@@ -71,12 +71,12 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
 
     // TODO: test values, change for balance
     @Override
-    public int getCurrentConsumptionPerTick(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getCurrentConsumptionPerTick(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         return 20;
     }
 
     @Override
-    public int getCurrentProductionPerTick(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess process) {
+    public int getCurrentProductionPerTick(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         return 0;
     }
 

@@ -1,45 +1,42 @@
 package net.dumbcode.projectnublar.server.entity.ai;
 
-import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.pathfinding.PathNavigateFlying;
-import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 
-public class FloatAi extends EntityAIBase {
-    private final EntityLiving entity;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
 
-    public FloatAi(EntityLiving entityIn) {
+public class FloatAi extends Goal {
+    private final MobEntity entity;
+
+    public FloatAi(MobEntity entityIn) {
         this.entity = entityIn;
-        this.setMutexBits(4);
-
-        if (entityIn.getNavigator() instanceof PathNavigateGround) {
-            ((PathNavigateGround)entityIn.getNavigator()).setCanSwim(true);
-        } else if (entityIn.getNavigator() instanceof PathNavigateFlying) {
-            ((PathNavigateFlying)entityIn.getNavigator()).setCanFloat(true);
-        }
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP));
+        entityIn.getNavigation().setCanFloat(true);
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         return this.entity.isInWater() || this.entity.isInLava();
     }
 
     @Override
-    public void updateTask() {
-        for (Material material : new Material[]{Material.WATER, Material.LAVA}) {
-            AxisAlignedBB box = this.entity.getEntityBoundingBox();
-            if (this.entity.world.handleMaterialAcceleration(box.contract(0, box.minY-box.maxY, 0).shrink(0.001D), material, this.entity)) {
-                if (this.entity.getRNG().nextFloat() < 0.8F) {
-                    this.entity.motionY =+ 0.25;
+    public void tick() {
+        AxisAlignedBB box = this.entity.getBoundingBox();
+        for (BlockPos blockPos : BlockPos.betweenClosedStream(box.contract(0, box.minY - box.maxY, 0).deflate(0.001D)).collect(Collectors.toList())) {
+            FluidState fluidState = this.entity.level.getFluidState(blockPos);
+            if(!fluidState.isEmpty()) {
+                if (this.entity.getRandom().nextFloat() < 0.8F) {
+                    this.entity.setDeltaMovement(this.entity.getDeltaMovement().add(0, 0.25, 0));
                     return;
                 }
             }
         }
-        if (this.entity.onGround && this.entity.getRNG().nextFloat() < 0.8F) {
-            this.entity.motionY =+ 0.25;
+        if (this.entity.isOnGround() && this.entity.getRandom().nextFloat() < 0.8F) {
+            this.entity.setDeltaMovement(this.entity.getDeltaMovement().add(0, 0.25, 0));
         }
 
     }

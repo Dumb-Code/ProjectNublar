@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -44,7 +45,7 @@ public class DinosaurInformation extends TooltipInformation {
     }
 
     public static DinosaurInformation decodeNBT(CompoundNBT nbt) {
-        return new DinosaurInformation(ProjectNublar.DINOSAUR_REGISTRY.getValue(new ResourceLocation(nbt.getString("dinosaur"))));
+        return new DinosaurInformation(DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("dinosaur"))));
     }
 
     public static void encodeBuf(PacketBuffer buf, DinosaurInformation info) {

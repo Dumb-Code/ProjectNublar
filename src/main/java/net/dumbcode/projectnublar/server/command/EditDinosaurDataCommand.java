@@ -19,19 +19,19 @@ import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 
 public class EditDinosaurDataCommand {
 
     public static final ChangeableEntry<MetabolismComponent> THIRST = new ChangeableEntry<>("thirst", ComponentHandler.METABOLISM, MetabolismComponent::getWater, MetabolismComponent::setWater);
     public static final ChangeableEntry<MetabolismComponent> HUNGER = new ChangeableEntry<>("hunger", ComponentHandler.METABOLISM, MetabolismComponent::getFood, MetabolismComponent::setFood);
-    public static final ChangeableEntry<BreedingComponent> BREED = new ChangeableEntry<>("breed", () -> EntityComponentTypes.BREEDING, BreedingComponent::getTicksSinceLastBreed, BreedingComponent::setTicksSinceLastBreed);
+    public static final ChangeableEntry<BreedingComponent> BREED = new ChangeableEntry<>("breed", EntityComponentTypes.BREEDING, BreedingComponent::getTicksSinceLastBreed, BreedingComponent::setTicksSinceLastBreed);
     public static final ChangeableEntry<DinosaurEggLayingComponent> PREGNANCY = new ChangeableEntry<>("pregnancy", ComponentHandler.DINOSAUR_EGG_LAYING, e -> -1, (c, i) -> c.getHeldEggs().forEach(e -> e.setTicksLeft(i)));
 
 
@@ -97,7 +97,7 @@ public class EditDinosaurDataCommand {
     @Value
     private static class ChangeableEntry<E extends EntityComponent> {
         String name;
-        Supplier<? extends EntityComponentType<E, ?>> type;
+        RegistryObject<? extends EntityComponentType<E, ?>> type;
         ToDoubleFunction<E> valueGetter;
         BiConsumer<E, Integer> valueSetter;
     }

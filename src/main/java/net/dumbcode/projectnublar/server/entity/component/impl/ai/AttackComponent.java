@@ -6,10 +6,9 @@ import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.ComposableCreatureEntity;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
-import net.dumbcode.projectnublar.server.entity.ai.EntityAttackAI;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.GatherEnemiesComponent;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.dumbcode.projectnublar.server.entity.ai.EntityAttackAI;
+import net.minecraft.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
     @Override
     public void finalizeComponent(ComponentAccess entity) {
         this.attackDamage.setBaseValue(6);
-        List<Predicate<EntityLivingBase>> enemyPredicates = new ArrayList<>();
+        List<Predicate<LivingEntity>> enemyPredicates = new ArrayList<>();
 
         for (EntityComponent component : entity.getAllComponents()) {
             if(component instanceof GatherEnemiesComponent) {
@@ -37,20 +36,10 @@ public class AttackComponent extends EntityComponent implements FinalizableCompo
         if(entity instanceof ComposableCreatureEntity) {
             enemyPredicates.stream().reduce(Predicate::or).ifPresent(predicate -> {
                 ComposableCreatureEntity creature = (ComposableCreatureEntity) entity;
-                creature.tasks.addTask(this.priority, new EntityAttackAI(creature, predicate, this));
+                creature.goalSelector.addGoal(this.priority, new EntityAttackAI(creature, predicate, this));
             });
         } else {
             throw new IllegalArgumentException("Tried to attach a attack component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of EntityCreature");
         }
-    }
-
-    @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        return compound;
-    }
-
-    @Override
-    public void deserialize(NBTTagCompound compound) {
-
     }
 }

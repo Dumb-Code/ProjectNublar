@@ -15,11 +15,11 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.Collections;
@@ -32,21 +32,21 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
     private final List<String> fossilList = Lists.newArrayList();
 
     @Override
-    public NBTTagCompound serialize(NBTTagCompound compound) {
-        NBTTagList list = new NBTTagList();
+    public CompoundNBT serialize(CompoundNBT compound) {
+        ListNBT list = new ListNBT();
         for (String fossil : this.fossilList) {
-            list.appendTag(new NBTTagString(fossil));
+            list.add(StringNBT.valueOf(fossil));
         }
-        compound.setTag("drop_fossils", list);
+        compound.put("drop_fossils", list);
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(NBTTagCompound compound) {
+    public void deserialize(CompoundNBT compound) {
         super.deserialize(compound);
         this.fossilList.clear();
-        for (NBTBase base : compound.getTagList("drop_fossils", Constants.NBT.TAG_STRING)) {
-            this.fossilList.add(((NBTTagString)base).getString());
+        for (INBT base : compound.getList("drop_fossils", Constants.NBT.TAG_STRING)) {
+            this.fossilList.add(base.toString());
         }
     }
 
@@ -54,7 +54,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
     public void collectItems(ComponentAccess access, Consumer<ItemStack> itemPlacer) {
         Dinosaur dino = access.get(ComponentHandler.DINOSAUR).orElseThrow(IllegalArgumentException::new).getDinosaur();
         for (String fossil : this.fossilList) {
-            itemPlacer.accept(new ItemStack(ItemHandler.FOSSIL_ITEMS.get(dino).get(fossil)));
+            itemPlacer.accept(new ItemStack(ItemHandler.FOSSIL_ITEMS.get(dino).get(fossil).get()));
         }
     }
 
@@ -90,7 +90,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
         @Override
         public void readJson(JsonObject json) {
             this.fossilList.clear();
-            for (JsonElement element : JsonUtils.getJsonArray(json, "fossils")) {
+            for (JsonElement element : JSONUtils.getAsJsonArray(json, "fossils")) {
                 this.fossilList.add(element.getAsString());
             }
         }

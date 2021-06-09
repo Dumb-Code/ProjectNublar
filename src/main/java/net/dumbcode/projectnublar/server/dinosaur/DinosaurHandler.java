@@ -1,25 +1,32 @@
 package net.dumbcode.projectnublar.server.dinosaur;
 
-import net.dumbcode.dumblibrary.server.utils.InjectedUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.registry.RegisterDinosaurEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.dumbcode.projectnublar.server.registry.EarlyDeferredRegister;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryBuilder;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
-@GameRegistry.ObjectHolder(ProjectNublar.MODID)
+import java.util.function.Supplier;
+
 public class DinosaurHandler {
 
-    public static final Dinosaur TYRANNOSAURUS = InjectedUtils.injected();
-    public static final Dinosaur DILOPHOSAURUS = InjectedUtils.injected();
+    public static final EarlyDeferredRegister<Dinosaur> REGISTER = EarlyDeferredRegister.wrap(DeferredRegister.create(Dinosaur.class, ProjectNublar.MODID));
 
-    @SubscribeEvent
-    public static void register(RegisterDinosaurEvent event) {
-        event.getRegistry().register(new Tyrannosaurus().setRegistryName("projectnublar:tyrannosaurus"));
-        event.getRegistry().register(new Dilophosaurus().setRegistryName("projectnublar:dilophosaurus"));
-        event.getRegistry().register(new VelociraptorJP().setRegistryName("projectnublar:velociraptor_jp"));
-        event.getRegistry().register(new VelociraptorJP().setRegistryName("projectnublar:velociraptor_jp3"));
+    private static final Supplier<IForgeRegistry<Dinosaur>> DINOSAUR_REGISTRY = REGISTER.makeRegistry("dinosaurs", () ->
+        new RegistryBuilder<Dinosaur>()
+            .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "tyrannosaurus"))
+            .set((key, isNetwork) -> DinosaurHandler.TYRANNOSAURUS.get())
+    );
+
+    public static final RegistryObject<Dinosaur> TYRANNOSAURUS = REGISTER.register("tyrannosaurus", Tyrannosaurus::new);
+    public static final RegistryObject<Dinosaur> DILOPHOSAURUS = REGISTER.register("dilophosaurus", Dilophosaurus::new);
+    public static final RegistryObject<VelociraptorJP> VELOCIRAPTOR_JP = REGISTER.register("velociraptor_jp", VelociraptorJP::new);
+    public static final RegistryObject<VelociraptorJP> VELOCIRAPTOR_JP3 = REGISTER.register("velociraptor_jp3", VelociraptorJP::new);
+
+    public static IForgeRegistry<Dinosaur> getRegistry() {
+        return DINOSAUR_REGISTRY.get();
     }
 
 }

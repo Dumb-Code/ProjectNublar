@@ -13,9 +13,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
@@ -53,7 +51,7 @@ public class Dilophosaurus extends Dinosaur {
                 .setDiet(new FeedingDiet()
                     .add(500, 20, new ItemStack(Items.APPLE))
                     .add(500, 20, Blocks.SPONGE)
-                    .add(500, 20, EntityArrow.class)
+                    .add(500, 20, EntityType.ARROW)
                 )
                 .setMaxFood(18000)
                 .setMaxWater(18000)
@@ -63,7 +61,7 @@ public class Dilophosaurus extends Dinosaur {
                 .setFoodTicks(32)
                 .setWaterTicks(18);
 
-        this.addComponent(ComponentHandler.MULTIPART, EntityStorageOverrides.DINOSAUR_MULTIPART)
+        this.addComponentWithOverride(ComponentHandler.MULTIPART.get(), EntityStorageOverrides.DINOSAUR_MULTIPART)
             .addCubesForAge(ADULT_AGE,
                 "tail4", "tail3", "tail2", "tail1",
                 "hips", "chest",
@@ -73,15 +71,15 @@ public class Dilophosaurus extends Dinosaur {
                 "legUpperLeft", "legMiddleLeft", "legLowerLeft"
             );
 
-        this.addComponent(ComponentHandler.MOOD);
-        this.addComponent(EntityComponentTypes.ANIMATION);
+        this.addEmptyComponent(ComponentHandler.MOOD);
+        this.addEmptyComponent(EntityComponentTypes.ANIMATION);
 
         this.addComponent(ComponentHandler.ITEM_DROPS)
             .addFossils("foot", "claw", "leg", "neck", "pelvis", "ribcage", "skull", "tail");
 
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS);
 
-        this.addComponent(EntityComponentTypes.GENDER);
+        this.addEmptyComponent(EntityComponentTypes.GENDER);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
             .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))
@@ -89,11 +87,11 @@ public class Dilophosaurus extends Dinosaur {
             .setDefaultStageName(ADULT_AGE);
 
         this.addComponent(EntityComponentTypes.MODEL).setShadowSize(1F);
-        this.addComponent(EntityComponentTypes.SPEED_TRACKING);
+        this.addEmptyComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
                 .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
-        this.addComponent(ComponentHandler.WANDER_AI);
-        this.addComponent(ComponentHandler.ATTACK_AI);
+        this.addEmptyComponent(ComponentHandler.WANDER_AI);
+        this.addEmptyComponent(ComponentHandler.ATTACK_AI);
         this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(2D);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
@@ -109,7 +107,7 @@ public class Dilophosaurus extends Dinosaur {
                 );
 
         this.addComponent(EntityComponentTypes.GENETICS)
-            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER, "movement_speed",0, 0.75F);
+            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed",0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
             .addLayer("base",0F, "base")
@@ -147,7 +145,7 @@ public class Dilophosaurus extends Dinosaur {
             .setSleepTime(13000);
 
 
-        this.addComponent(ComponentHandler.TRACKING_DATA);
-        this.addComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
+        this.addEmptyComponent(ComponentHandler.TRACKING_DATA);
+        this.addEmptyComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
     }
 }

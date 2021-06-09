@@ -99,7 +99,7 @@ public class Plant extends ForgeRegistryEntry<Plant> {
     }
 
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
-        for (Plant plant : ProjectNublar.PLANT_REGISTRY) {
+        for (Plant plant : PlantHandler.getRegistry()) {
             event.getRegistry().register(plant.createBlock().setRegistryName(plant.getRegistryName()));
         }
     }
