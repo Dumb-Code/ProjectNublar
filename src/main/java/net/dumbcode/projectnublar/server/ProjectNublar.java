@@ -84,6 +84,7 @@ public class ProjectNublar {
         bus.addListener(this::preInit);
 
         BlockHandler.REGISTER.register(bus);
+        ItemHandler.REGISTER.register(bus);
         ProjectNublarBlockEntities.REGISTER.register(bus);
         ProjectNublarContainers.REGISTER.register(bus);
         ProjectNublarParticles.REGISTER.register(bus);

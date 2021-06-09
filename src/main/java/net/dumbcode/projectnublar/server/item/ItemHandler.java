@@ -28,7 +28,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID)
 public final class ItemHandler {
 
     private static final ItemGroup TAB = TabHandler.TAB;
