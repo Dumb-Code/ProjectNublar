@@ -160,6 +160,9 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
 
     private double computeRotation() {
         double rotation = 90F;
+        if(this.level == null) {
+            return rotation;
+        }
         BlockState state = this.level.getBlockState(this.getBlockPos());
         if (state.getBlock() instanceof BlockElectricFencePole) {
             BlockElectricFencePole pole = (BlockElectricFencePole) state.getBlock();

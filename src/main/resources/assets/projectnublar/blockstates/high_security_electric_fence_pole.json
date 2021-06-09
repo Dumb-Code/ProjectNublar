@@ -1,28 +1,28 @@
 {
   "variants": {
     "index=0": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=1": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=2": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=3": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=4": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=5": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=6": {
-      "model": "projectnublar:high_security_electric_fence_pole_lower"
+      "model": "projectnublar:block/high_security_electric_fence_pole_lower"
     },
     "index=7,powered=false": {
-      "model": "projectnublar:high_security_electric_fence_pole_upper_unpowered"
+      "model": "projectnublar:block/high_security_electric_fence_pole_upper_unpowered"
     },
     "index=7,powered=true": {
       "model": "projectnublar:block/high_security_electric_fence_pole_upper_powered"
