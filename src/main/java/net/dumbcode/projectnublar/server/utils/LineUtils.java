@@ -29,6 +29,14 @@ public class LineUtils {
             }
             return new double[]{normal.x, reverse.x, normal.z, reverse.z, normal.y, reverse.y};
         }
+        if(position.equals(fromPos) && !result.isPresent() && reverseResult.isPresent()) {
+            Vector3d vec = reverseResult.get();
+            return new double[] { from.x, vec.x, from.z, vec.z, from.y, vec.y };
+        }
+        if(position.equals(toPos) && !reverseResult.isPresent() && result.isPresent()) {
+            Vector3d vec = result.get();
+            return new double[] { vec.x, to.x, vec.z, to.z, vec.y, to.y };
+        }
         return null;
     }
     public static List<BlockPos> getBlocksInbetween(BlockPos fromPos, BlockPos toPos, double offset) {

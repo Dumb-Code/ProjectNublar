@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 import com.google.common.collect.Sets;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.projectnublar.client.render.model.ProjectNublarModelData;
+import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.BlockState;
@@ -11,6 +12,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
@@ -27,6 +30,8 @@ import java.util.stream.Collectors;
 public class BlockEntityElectricFence extends SimpleBlockEntity implements ConnectableBlockEntity {
 
     private final Set<Connection> fenceConnections = Sets.newLinkedHashSet();
+
+    private VoxelShape collidableCache;
 
     public BlockEntityElectricFence(TileEntityType<?> type) {
         super(type);
@@ -57,7 +62,22 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
                 this.fenceConnections.add(connection);
             }
         }
-        this.requestModelDataUpdate();
+
+        if(this.level != null) {
+            this.requestModelDataUpdate();
+        }
+    }
+
+    @Override
+    public VoxelShape getOrCreateCollision() {
+        if(this.collidableCache == null) {
+            VoxelShape shape = VoxelShapes.empty();
+            for (BlockConnectableBase.ConnectionAxisAlignedBB bb : BlockConnectableBase.createBoundingBox(this.getConnections(), this.getBlockPos())) {
+                shape = VoxelShapes.or(shape, VoxelShapes.create(bb));
+            }
+            this.collidableCache = shape;
+        }
+        return this.collidableCache;
     }
 
     @Override
@@ -83,6 +103,15 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
         return new ModelDataMap.Builder()
             .withInitial(ProjectNublarModelData.CONNECTIONS, this.compiledRenderData())
             .build();
+    }
+
+    @Override
+    public void requestModelDataUpdate() {
+        super.requestModelDataUpdate();
+        if(this.level != null) {
+            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+        }
+        this.collidableCache = null;
     }
 
     @OnlyIn(Dist.CLIENT)

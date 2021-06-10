@@ -33,28 +33,29 @@ public class FencePoleBakedModel extends FenceBakedModel {
         List<BakedQuad> out = new ArrayList<>(super.getQuads(state, side, rand, extraData));
 
         Double rotation = extraData.getData(ProjectNublarModelData.FENCE_POLE_ROTATION_DEGS);
-        if(rotation != null) {
-            MatrixStack stack = new MatrixStack();
-            stack.mulPose(Vector3f.YN.rotationDegrees(rotation.floatValue()));
+        if(rotation == null || Double.isNaN(rotation)) {
+            rotation = 0D;
+        }
+        MatrixStack stack = new MatrixStack();
+        stack.mulPose(Vector3f.YN.rotationDegrees(-rotation.floatValue()));
 
-            int size = DefaultVertexFormats.BLOCK.getIntegerSize();
-            for (BakedQuad quad : this.delegate.getQuads(state, side, rand, extraData)) {
-                BakedQuad copied = new BakedQuad(Arrays.copyOf(quad.getVertices(), quad.getVertices().length), quad.getTintIndex(), quad.getDirection(), quad.getSprite(), quad.isShade());
-                int[] vertices = copied.getVertices();
-                for (int v = 0; v < 4; v++) {
-                    Vector4f vec = new Vector4f(
-                        Float.intBitsToFloat(vertices[v*size]),
-                        Float.intBitsToFloat(vertices[v*size+1]),
-                        Float.intBitsToFloat(vertices[v*size+2]),
-                        1F
-                    );
-                    vec.transform(stack.last().pose());
-                    vertices[v*size] = Float.floatToRawIntBits(vec.x());
-                    vertices[v*size+1] = Float.floatToRawIntBits(vec.y());
-                    vertices[v*size+2] = Float.floatToRawIntBits(vec.z());
-                }
-                out.add(copied);
+        int size = DefaultVertexFormats.BLOCK.getIntegerSize();
+        for (BakedQuad quad : this.delegate.getQuads(state, side, rand, extraData)) {
+            BakedQuad copied = new BakedQuad(Arrays.copyOf(quad.getVertices(), quad.getVertices().length), quad.getTintIndex(), quad.getDirection(), quad.getSprite(), quad.isShade());
+            int[] vertices = copied.getVertices();
+            for (int v = 0; v < 4; v++) {
+                Vector4f vec = new Vector4f(
+                    Float.intBitsToFloat(vertices[v*size]) - 0.5F,
+                    Float.intBitsToFloat(vertices[v*size+1]),
+                    Float.intBitsToFloat(vertices[v*size+2]) - 0.5F,
+                    1F
+                );
+                vec.transform(stack.last().pose());
+                vertices[v*size] = Float.floatToRawIntBits(vec.x() + 0.5F);
+                vertices[v*size+1] = Float.floatToRawIntBits(vec.y());
+                vertices[v*size+2] = Float.floatToRawIntBits(vec.z() + 0.5F);
             }
+            out.add(copied);
         }
         return out;
     }

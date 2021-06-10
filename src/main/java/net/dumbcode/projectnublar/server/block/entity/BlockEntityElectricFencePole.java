@@ -38,7 +38,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     @Getter
     private VoxelShape cachedShape = VoxelShapes.block();
 
-    private double cachedRotation = 90;
+    private double cachedRotation = 0;
 
     private final MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
     private final LazyOptional<MachineModuleEnergyStorage> energyCap = LazyOptional.of(() -> this.energy);
@@ -135,7 +135,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     public void requestModelDataUpdate() {
         this.cachedRotation = this.computeRotation();
 
-        BlockState state = this.level.getBlockState(this.getBlockPos());
+        BlockState state = this.getBlockState();
         if (state.getBlock() instanceof BlockElectricFencePole) {
             ConnectionType type = ((BlockElectricFencePole) state.getBlock()).getType();
 
@@ -159,7 +159,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     }
 
     private double computeRotation() {
-        double rotation = 90F;
+        double rotation = this.flippedAround ? 0 : 180F;
         if(this.level == null) {
             return rotation;
         }
@@ -168,7 +168,6 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
             BlockElectricFencePole pole = (BlockElectricFencePole) state.getBlock();
             TileEntity te = this.level.getBlockEntity(this.getBlockPos().below(state.getValue((pole).indexProperty)));
             if (te instanceof BlockEntityElectricFencePole) {
-
                 BlockEntityElectricFencePole ef = (BlockEntityElectricFencePole) te;
                 if (!ef.getConnections().isEmpty()) {
 
@@ -189,7 +188,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
                     if (differingConnections.size() == 1) {
                         Connection connection = differingConnections.get(0);
                         double[] in = connection.getIn();
-                        rotation += (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0]))) + 90F;
+                        rotation += (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
                     } else {
                         Connection connection1 = differingConnections.get(0);
                         Connection connection2 = differingConnections.get(1);

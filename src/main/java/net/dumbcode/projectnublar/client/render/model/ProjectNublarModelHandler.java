@@ -25,7 +25,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.Map;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = ProjectNublar.MODID)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = ProjectNublar.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ProjectNublarModelHandler {
 
     private static final ResourceLocation ELECTRIC_FENCE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/electric_fence");

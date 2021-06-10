@@ -247,10 +247,10 @@ public class BlockConnectableBase extends Block {
 
 
     //TODO: revisit this.
-    @Override
-    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-        return this.createDelegateShape(super.getShape(state, world, pos, context), world);
-    }
+//    @Override
+//    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+//        return this.createDelegateShape(super.getShape(state, world, pos, context), world);
+//    }
 
     protected VoxelShape createDelegateShape(VoxelShape shape, IBlockReader world) {
         return new DelegateVoxelShape(shape, (from, to, offset, fallback) -> {
@@ -343,7 +343,7 @@ public class BlockConnectableBase extends Block {
         return set;
     }
 
-    public List<ConnectionAxisAlignedBB> createBoundingBox(Set<Connection> fenceConnections, BlockPos pos) {
+    public static List<ConnectionAxisAlignedBB> createBoundingBox(Set<Connection> fenceConnections, BlockPos pos) {
         List<ConnectionAxisAlignedBB> out = Lists.newArrayList();
         for (Connection connection : fenceConnections) {
             double[] intersect = connection.getIn();
@@ -544,11 +544,7 @@ public class BlockConnectableBase extends Block {
         if (world instanceof ServerWorld ? collidableServer : collidableClient) {
             TileEntity te = world.getBlockEntity(pos);
             if (te instanceof ConnectableBlockEntity) {
-                VoxelShape shape = VoxelShapes.empty();
-                for (ConnectionAxisAlignedBB bb : this.createBoundingBox(((ConnectableBlockEntity) te).getConnections(), pos)) {
-                    shape = VoxelShapes.or(shape, VoxelShapes.create(bb));
-                }
-
+                ((ConnectableBlockEntity) te).getOrCreateCollision();
             }
         }
         return VoxelShapes.empty();
