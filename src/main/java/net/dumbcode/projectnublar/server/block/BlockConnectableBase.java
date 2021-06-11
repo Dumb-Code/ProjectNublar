@@ -20,6 +20,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
@@ -149,28 +150,30 @@ public class BlockConnectableBase extends Block {
         MatrixStack stack = event.getMatrix();
         IVertexBuilder buffer = buffers.getBuffer(RenderType.lines());
         BlockRayTraceResult target = event.getTarget();
+        ActiveRenderInfo info = event.getInfo();
         if (target.getType() == RayTraceResult.Type.BLOCK && target.hitInfo instanceof BlockConnectableBase.HitChunk) {
             World world = Minecraft.getInstance().level;
             BlockPos pos = target.getBlockPos();
-            PlayerEntity player = Minecraft.getInstance().player;
             BlockState state = world.getBlockState(pos);
             if (state.getBlock() instanceof BlockConnectableBase) {
                 BlockConnectableBase.HitChunk chunk = (BlockConnectableBase.HitChunk) target.hitInfo;
                 event.setCanceled(true);
-                double d3 = player.xOld + (player.xo - player.xOld) * (double) event.getPartialTicks();
-                double d4 = player.yOld + (player.yo - player.yOld) * (double) event.getPartialTicks();
-                double d5 = player.zOld + (player.zo - player.zOld) * (double) event.getPartialTicks();
+                Vector3d vector3d = info.getPosition();
+                double d3 = pos.getX() - vector3d.x();
+                double d4 = pos.getY() - vector3d.y();
+                double d5 = pos.getZ() - vector3d.z();
 
                 Connection connection = chunk.getConnection();
                 double[] in = connection.getIn();
 
                 if (ProjectNublar.DEBUG) {
-                    chunk.getResult().debugRender(stack, buffers, -d3, -d4, -d5);
+                    chunk.getResult().debugRender(stack, buffers, d3, d4, d5);
                 }
 
-                double x = -d3 + in[0];
-                double y = -d4 + in[4];
-                double z = -d5 + in[2];
+
+                double x = in[0] - vector3d.x();
+                double y = in[4] - vector3d.y();
+                double z = in[2] - vector3d.z();
 
 
                 boolean pb = connection.brokenSide(world, false);
@@ -203,7 +206,7 @@ public class BlockConnectableBase extends Block {
                         }
                     }
                 } else {
-                    RenderUtils.renderBoxLines(stack, buffer, connection.getRayBox().points());
+                    RenderUtils.renderBoxLines(stack, buffer, connection.getRayBox().points(x, y, z));
                 }
             }
         }
@@ -245,20 +248,23 @@ public class BlockConnectableBase extends Block {
 //        return super.getSelectedBoundingBox(state, worldIn, pos);
 //    }
 
+    protected VoxelShape getDefaultState(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+        return VoxelShapes.empty();
+    }
 
     //TODO: revisit this.
-//    @Override
-//    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-//        return this.createDelegateShape(super.getShape(state, world, pos, context), world);
-//    }
+    @Override
+    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+        return this.createDelegateShape(this.getDefaultState(state, world, pos, context), world);
+    }
 
     protected VoxelShape createDelegateShape(VoxelShape shape, IBlockReader world) {
         return new DelegateVoxelShape(shape, (from, to, offset, fallback) -> {
-            BlockRayTraceResult result = getRaytraceResult(world, offset, from, to);
-            if(result != null) {
-                return result;
+            BlockRayTraceResult raytraceResult = getRaytraceResult(world, offset, from, to);
+            if(raytraceResult == null) {
+                return fallback.get();
             }
-            return fallback.get();
+            return raytraceResult;
         });
     }
 
@@ -318,7 +324,7 @@ public class BlockConnectableBase extends Block {
                     }
                     double dist = result.getDistance();
                     if (dist < hitDist) {
-                        resultOut = result.getResult();
+                        resultOut = result.getResult().withPosition(pos);
                         resultOut.hitInfo = new BlockConnectableBase.HitChunk(chunk.getAabb(), chunk.getConnection(), result.getHitDir(), result);
                         hitDist = dist;
                     }

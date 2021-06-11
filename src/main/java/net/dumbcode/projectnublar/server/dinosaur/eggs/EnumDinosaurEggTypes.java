@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.concurrent.CompletableFuture;
@@ -29,11 +30,9 @@ public enum EnumDinosaurEggTypes { //TODO: check scale
     }
 
 
-    public static void registerResourceReload() {
-        ((IReloadableResourceManager)Minecraft.getInstance().getResourceManager()).registerReloadListener((stage, resourceManager, profiler, profiler1, executor, executor1) -> CompletableFuture.runAsync(() -> {
-            for (EnumDinosaurEggTypes value : values()) {
-                value.type.clearCache();
-            }
-        }));
+    public static void onResourceManagerReload(IResourceManager manager) {
+        for (EnumDinosaurEggTypes value : values()) {
+            value.type.clearCache();
+        }
     }
 }

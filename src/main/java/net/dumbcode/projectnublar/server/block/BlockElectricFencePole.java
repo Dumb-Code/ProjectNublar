@@ -27,7 +27,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
@@ -74,14 +76,21 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
         return this.stateDefinition;
     }
 
+    //    @Override
+    //    public VoxelShape getInteractionShape(BlockState state, IBlockReader world, BlockPos pos) {
+    //
+    //        return super.getInteractionShape(state, world, pos);
+    //    }
     @Override
-    public VoxelShape getInteractionShape(BlockState state, IBlockReader world, BlockPos pos) {
+    protected VoxelShape getDefaultState(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
         TileEntity entity = world.getBlockEntity(pos);
         if(entity instanceof BlockEntityElectricFencePole) {
             return ((BlockEntityElectricFencePole) entity).getCachedShape();
         }
-        return super.getInteractionShape(state, world, pos);
+        return VoxelShapes.block();
     }
+
+
 
     @Override
     public boolean canSurvive(BlockState state, IWorldReader world, BlockPos pos) {

@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public class ProjectNublarBlockRenderLayers {
-    public static void setRenderLayers(FMLClientSetupEvent event) {
+    public static void setRenderLayers() {
         setRenderLayer(ELECTRIC_FENCE.get(), RenderType.solid());
         setRenderLayer(HIGH_SECURITY_ELECTRIC_FENCE_POLE.get(), RenderType.cutout());
         setRenderLayer(LOW_SECURITY_ELECTRIC_FENCE_POLE.get(), RenderType.cutout());

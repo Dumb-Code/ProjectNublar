@@ -40,6 +40,8 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
 
     private double cachedRotation = 0;
 
+    private boolean shouldRefreshNextTick = false;
+
     private final MachineModuleEnergyStorage energy = new MachineModuleEnergyStorage(350, 350, 250);
     private final LazyOptional<MachineModuleEnergyStorage> energyCap = LazyOptional.of(() -> this.energy);
 
@@ -90,7 +92,16 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     }
 
     @Override
+    public void onLoad() {
+        this.shouldRefreshNextTick = true;
+    }
+
+    @Override
     public void tick() {
+        if(this.shouldRefreshNextTick) {
+            this.shouldRefreshNextTick = false;
+            this.requestModelDataUpdate();
+        }
         boolean powered = this.energy.getEnergyStored() > 0;
         boolean update = false;
         if (this.level.getBlockState(this.getBlockPos()).getValue(BlockElectricFencePole.POWERED_PROPERTY) != powered) {
@@ -149,6 +160,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
 
     }
 
+
     @Nonnull
     @Override
     public IModelData getModelData() {
@@ -160,9 +172,10 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
 
     private double computeRotation() {
         double rotation = this.flippedAround ? 0 : 180F;
-        if(this.level == null) {
+        if(this.level == null || !this.level.isLoaded(this.getBlockPos())) {
             return rotation;
         }
+
         BlockState state = this.level.getBlockState(this.getBlockPos());
         if (state.getBlock() instanceof BlockElectricFencePole) {
             BlockElectricFencePole pole = (BlockElectricFencePole) state.getBlock();

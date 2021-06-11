@@ -9,6 +9,8 @@ import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
+import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinterRenderer;
+import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
@@ -16,6 +18,7 @@ import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
@@ -35,6 +38,8 @@ import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.item.Item;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,19 +47,26 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.VanillaResourceType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber
 @Mod(ProjectNublar.MODID)
@@ -113,7 +125,7 @@ public class ProjectNublar {
         IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
         bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
-        forgeBus.addListener(ProjectNublarBlockRenderLayers::setRenderLayers);
+        bus.addListener(this::clientPreInit);
     }
 
     public void gatherData(GatherDataEvent event) {
@@ -123,6 +135,31 @@ public class ProjectNublar {
         if (event.includeServer()) {
             gen.addProvider(new ProjectNublarBlockTagsProvider(gen, helper));
         }
+    }
+
+    public void clientPreInit(FMLClientSetupEvent event) {
+        ProjectNublarBlockRenderLayers.setRenderLayers();
+        IReloadableResourceManager resourceManager = (IReloadableResourceManager) event.getMinecraftSupplier().get().getResourceManager();
+        resourceManager.registerReloadListener(create(BlockEntityEggPrinterRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
+        resourceManager.registerReloadListener(create(EnumDinosaurEggTypes::onResourceManagerReload, null));
+        resourceManager.registerReloadListener(create(BlockEntityIncubatorRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
+    }
+
+    private static ISelectiveResourceReloadListener create(Consumer<IResourceManager> consumer, IResourceType type) {
+        return new ISelectiveResourceReloadListener() {
+            @Override
+            public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+                if(type == null || resourcePredicate.test(type)) {
+                    consumer.accept(resourceManager);
+                }
+            }
+
+            @Nullable
+            @Override
+            public IResourceType getResourceType() {
+                return type;
+            }
+        };
     }
 
     public void preInit(FMLCommonSetupEvent event) {

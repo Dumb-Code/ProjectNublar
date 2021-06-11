@@ -64,10 +64,6 @@ public class ProjectNublarModelHandler {
 //        ClientRegistry.bindTileEntitySpecialRenderer(IncubatorBlockEntity.class, new BlockEntityIncubatorRenderer());
 //        ClientRegistry.bindTileEntitySpecialRenderer(EggPrinterBlockEntity.class, new BlockEntityEggPrinterRenderer());
 
-
-
-
-        EnumDinosaurEggTypes.registerResourceReload();
     }
 
     @SubscribeEvent

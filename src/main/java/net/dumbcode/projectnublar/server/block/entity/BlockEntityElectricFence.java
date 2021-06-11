@@ -109,8 +109,8 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     public void requestModelDataUpdate() {
         super.requestModelDataUpdate();
         if(this.level != null) {
-            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
-        }
+//            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+        }   
         this.collidableCache = null;
     }
 

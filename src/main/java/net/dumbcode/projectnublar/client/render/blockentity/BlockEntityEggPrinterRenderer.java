@@ -25,13 +25,16 @@ import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
-public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> implements IFutureReloadListener {
+public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> {
 
     private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.dcm");
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer.png");
@@ -45,12 +48,10 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
     private static final float[] TARGET_ANIMATION = new float[4];
 
-    private DCMModel model;
-
+    private static DCMModel model;
 
     public BlockEntityEggPrinterRenderer(TileEntityRendererDispatcher renderer) {
         super(renderer);
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
     }
 
     @Override
@@ -174,8 +175,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
     }
 
-    @Override
-    public CompletableFuture<Void> reload(IStage p_215226_1_, IResourceManager p_215226_2_, IProfiler p_215226_3_, IProfiler p_215226_4_, Executor p_215226_5_, Executor p_215226_6_) {
-        return CompletableFuture.runAsync(() -> this.model = DCMUtils.getModel(MODEL_LOCATION));
+    public static void onResourceManagerReload(IResourceManager resourceManager) {
+        model = DCMUtils.getModel(MODEL_LOCATION);
     }
 }

@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.IntStream;
 
-public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBlockEntity> implements IFutureReloadListener {
+public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBlockEntity> {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -66,18 +66,17 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     private final Arm HAND_JOINT = new Arm("ClawNeck2", 4 / 16F);
     private final Arm HAND_JOINT_ROTATE = new Arm("ClawNeck1", 0); //Used for fixing parenting
 
-    private DCMModel armModel;
+    private static DCMModel armModel;
 
     public BlockEntityIncubatorRenderer(TileEntityRendererDispatcher renderer) {
         super(renderer);
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
     }
 
     @Override
     public void render(IncubatorBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
         stack.pushPose();
 
-        this.armModel.resetAnimations();
+        armModel.resetAnimations();
 
         float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D) * 12.5F/16F;
 
@@ -94,7 +93,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
             }
         }
 
-        this.armModel.setOnRenderCallback((cube, atomicLight, atomicOverlay, atomicColors) -> {
+        armModel.setOnRenderCallback((cube, atomicLight, atomicOverlay, atomicColors) -> {
             float lightStart = -0.7F;
            Vector3f vec3f = DCMUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
            int block = (int) MathHelper.clamp((-vec3f.x()/lightStart + 1)*10, blockLight, 15F);
@@ -124,7 +123,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         this.setArmAngles(te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, stack, buffers, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
         this.updateEgg(te, partialTicks);
 
-        this.armModel.renderBoxes(stack, light, buffers, ARM_TEXTURE_LOCATION);
+        armModel.renderBoxes(stack, light, buffers, ARM_TEXTURE_LOCATION);
     }
 
 
@@ -388,12 +387,12 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     }
 
     @Value
-    private class Arm {
+    private static class Arm {
         String armName;
         double length;
 
         DCMModelRenderer getBox() {
-            return BlockEntityIncubatorRenderer.this.armModel.getCube(this.armName);
+            return BlockEntityIncubatorRenderer.armModel.getCube(this.armName);
         }
 
         float getRotation(int index) {
@@ -402,8 +401,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         
     }
 
-    @Override
-    public CompletableFuture<Void> reload(IStage p_215226_1_, IResourceManager p_215226_2_, IProfiler p_215226_3_, IProfiler p_215226_4_, Executor p_215226_5_, Executor p_215226_6_) {
-        return CompletableFuture.runAsync(() -> this.armModel = DCMUtils.getModel(ARM_MODEL_LOCATION));
+    public static void onResourceManagerReload(IResourceManager resourceManager) {
+        armModel = DCMUtils.getModel(ARM_MODEL_LOCATION);
     }
 }

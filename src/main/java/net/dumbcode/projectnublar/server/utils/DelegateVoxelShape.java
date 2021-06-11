@@ -20,7 +20,7 @@ public class DelegateVoxelShape extends VoxelShape {
     }
 
     public BlockRayTraceResult clip(Vector3d from, Vector3d to, BlockPos offset) {
-        return this.callback.getRaytrace(from, to, offset, () -> this.delegate.clip(from, to, offset));
+        return DelegateBlockRayTraceResult.of(this.callback.getRaytrace(from, to, offset, () -> this.delegate.clip(from, to, offset)));
     }
 
     @Override

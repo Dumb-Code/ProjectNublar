@@ -325,14 +325,22 @@ public class Connection {
         double ybot = yrange * this.distance(this.from, this.in[1], this.in[3]) - this.position.getY() + this.from.getY();
         double len = Math.sqrt(Math.pow(ct[0] == ct[2] ? ct[1] - ct[3] : ct[0] - ct[2], 2) + (ytop - ybot) * (ytop - ybot)) / (halfthick * 32F);
         double yThick = halfthick * Math.cos(tangrady);
-
         double x = -this.position.getX();
         double y = this.offset;
         double z = -this.position.getZ();
 
-        Pair<float[], float[]> prevRenderCache = this.genRenderCache(x, y, z, false, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[]{cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, yThick, len, ytop, ybot);
-        Pair<float[], float[]> nextRenderCache = this.genRenderCache(x, y, z, true, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[]{cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, yThick, len, ytop, ybot);
-        double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16) / 16F).toArray();
+        float worldWidth = this.type.getCableWidth() * 32;
+        double uvLen = (Math.sqrt(
+            Math.pow(this.in[0]-this.in[1], 2)
+                + Math.pow(this.in[2]-this.in[3], 2)
+                + Math.pow(this.in[4]-this.in[5], 2)
+        )) / worldWidth;
+
+        Pair<float[], float[]> prevRenderCache = this.genRenderCache(x, y, z, false, new double[]{ct[0], ct[1], cent[0], cent[1], cent[2], cent[3], ct[6], ct[7]}, new double[]{cb[0], cb[1], cenb[0], cenb[1], cenb[2], cenb[3], cb[6], cb[7]}, yThick, uvLen, worldWidth, ytop, ybot);
+        Pair<float[], float[]> nextRenderCache = this.genRenderCache(x, y, z, true, new double[]{cent[0], cent[1], ct[2], ct[3], ct[4], ct[5], cent[2], cent[3]}, new double[]{cenb[0], cenb[1], cb[2], cb[3], cb[4], cb[5], cenb[2], cenb[3]}, yThick, uvLen, worldWidth, ytop, ybot);
+
+        int maximumTexSize = (int) Math.min(64, Math.ceil(Math.max(uvLen * 16, worldWidth) * 2));
+        double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(65 - maximumTexSize) / 64F).toArray();
         float[] main = Floats.toArray(Doubles.asList(
             ct[0] + x, ytop + yThick + y, ct[1] + z,
             ct[2] + x, ybot + yThick + y, ct[3] + z,
@@ -348,7 +356,8 @@ public class Connection {
             uvs[6], uvs[7],
             uvs[8], uvs[9],
             uvs[10], uvs[11],
-            len, this.type.getCableWidth(), this.type.getCableWidth()));
+            uvLen/2F, 1F/64F, 1F/64F
+        ));
         return new RenderData(main, prevRenderCache.getLeft(), nextRenderCache.getLeft(), prevRenderCache.getRight(), nextRenderCache.getRight());
     }
 
@@ -356,10 +365,11 @@ public class Connection {
         return Math.sqrt((from.getX() + 0.5F - x) * (from.getX() + 0.5F - x) + (from.getZ() + 0.5F - z) * (from.getZ() + 0.5F - z));
     }
 
-    private Pair<float[], float[]> genRenderCache(double x, double y, double z, boolean next, double[] ct, double[] cb, double yThick, double len, double ytop, double ybot) {
+    private Pair<float[], float[]> genRenderCache(double x, double y, double z, boolean next, double[] ct, double[] cb, double yThick, double len, double worldWidth, double ytop, double ybot) {
         Vector3f point = next ? this.nextCache.point : this.prevCache.point;
         double ycenter = ybot + (ytop - ybot) / 2D;
-        double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16) / 16F).toArray();
+        int maximumTexSize = (int) Math.min(64, Math.ceil(Math.max(len * 16, worldWidth) * 2));
+        double[] uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(65 - maximumTexSize) / 64F).toArray();
         float[] rotated;
         if (next) {
             ytop = ycenter;
@@ -380,7 +390,7 @@ public class Connection {
                 uvs[6], uvs[7],
                 uvs[8], uvs[9],
                 uvs[10], uvs[11],
-                len / 2, this.type.getCableWidth(), this.type.getCableWidth()
+                len/4F, 1F/64F, 1F/64F
             ));
         } else {
             ybot = ycenter;
@@ -401,10 +411,10 @@ public class Connection {
                 uvs[6], uvs[7],
                 uvs[8], uvs[9],
                 uvs[10], uvs[11],
-                len / 2, this.type.getCableWidth(), this.type.getCableWidth()
+                len/4F, 1F/64F, 1F/64F
             ));
         }
-        uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(16) / 16F).toArray();
+        uvs = IntStream.range(0, 12).mapToDouble(i -> this.random.nextInt(65 - maximumTexSize) / 64F).toArray();
         float[] fixed =
             Floats.toArray(Doubles.asList(
                 x + ct[0], y + ytop + yThick, z + ct[1],
@@ -421,7 +431,7 @@ public class Connection {
                 uvs[6], uvs[7],
                 uvs[8], uvs[9],
                 uvs[10], uvs[11],
-                len / 2, this.type.getCableWidth(), this.type.getCableWidth()
+                len/4F, 1F/64F, 1F/64F
             ));
         return Pair.of(fixed, rotated);
     }

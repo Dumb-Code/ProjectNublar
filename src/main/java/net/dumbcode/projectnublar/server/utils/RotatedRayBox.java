@@ -79,8 +79,8 @@ public class RotatedRayBox {
         vec.set(v.x(), v.y(), v.z());
     }
 
-    public Vector3f[] points() {
-        return points(RotatedRayBox.this.box, 0, 0, 0);
+    public Vector3f[] points(double x, double y, double z) {
+        return points(RotatedRayBox.this.box, x, y, z);
     }
 
     public Vector3f[] points(AxisAlignedBB box, double x, double y, double z) {
@@ -95,13 +95,14 @@ public class RotatedRayBox {
                             xb == 1 ? box.maxX : box.minX,
                             yb == 1 ? box.maxY : box.minY,
                             zb == 1 ? box.maxZ : box.minZ
-                        ).add(x, y, z)
+                        )
                     );
                 }
             }
         }
         for (Vector3f point : points) {
             RotatedRayBox.this.transform(point, RotatedRayBox.this.backwards);
+            point.add((float) x, (float) y, (float) z);
         }
         return points;
     }
