@@ -82,7 +82,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
     //        return super.getInteractionShape(state, world, pos);
     //    }
     @Override
-    protected VoxelShape getDefaultState(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+    protected VoxelShape getDefaultShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
         TileEntity entity = world.getBlockEntity(pos);
         if(entity instanceof BlockEntityElectricFencePole) {
             return ((BlockEntityElectricFencePole) entity).getCachedShape();
@@ -197,7 +197,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                                         }
                                         TileEntity fencete = world.getBlockEntity(position);
                                         if (fencete instanceof ConnectableBlockEntity) {
-                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(this.type, offset, pos1, other1, positions.get(Math.min(i1 + 1, positions.size() - 1)).above(i), positions.get(Math.max(i1 - 1, 0)).above(i), position));
+                                            ((ConnectableBlockEntity) fencete).addConnection(new Connection(fencete, this.type, offset, pos1, other1, positions.get(Math.min(i1 + 1, positions.size() - 1)).above(i), positions.get(Math.max(i1 - 1, 0)).above(i), position));
                                         }
                                     }
                                 }

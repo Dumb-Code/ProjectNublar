@@ -5,27 +5,29 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
 import lombok.*;
 import lombok.experimental.Accessors;
+import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.DistExecutor;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static lombok.EqualsAndHashCode.Include;
@@ -35,6 +37,8 @@ import static lombok.EqualsAndHashCode.Include;
 @ToString
 @Accessors(chain = true)
 public class Connection {
+
+    private final Runnable reRenderCallback;
     @Include
     private final ConnectionType type;
     @Include
@@ -57,7 +61,7 @@ public class Connection {
     @OnlyIn(Dist.CLIENT)
     @Getter(AccessLevel.NONE)
     private RenderData renderData;
-    @Setter
+
     private boolean broken;
 
     private final double[] in;
@@ -74,7 +78,28 @@ public class Connection {
     private final SurroundingCache prevCache;
     private final SurroundingCache nextCache;
 
-    public Connection(ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
+    private final VoxelShape collisionShape;
+
+    public Connection(TileEntity internalBlockEntity, ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
+        this(() -> {
+            internalBlockEntity.requestModelDataUpdate();
+            World level = internalBlockEntity.getLevel();
+            if(level != null) {
+                TileEntity p = level.getBlockEntity(previous);
+                if(p instanceof ConnectableBlockEntity) {
+                    p.requestModelDataUpdate();
+                }
+                TileEntity n = level.getBlockEntity(next);
+                if(n instanceof ConnectableBlockEntity) {
+                    n.requestModelDataUpdate();
+                }
+                level.sendBlockUpdated(position, Blocks.AIR.defaultBlockState(), internalBlockEntity.getBlockState(), 3);
+            }
+        }, type, offset, from, to, previous, next, position);
+    }
+
+    private Connection(Runnable reRenderCallback, ConnectionType type, double offset, BlockPos from, BlockPos to, BlockPos previous, BlockPos next, BlockPos position) {
+        this.reRenderCallback = reRenderCallback;
         this.type = type;
         this.offset = offset;
         this.position = position;
@@ -123,6 +148,22 @@ public class Connection {
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> this.renderData = this.buildRenderData());
 
+        VoxelShape collisionShape = VoxelShapes.empty();
+        for (BlockConnectableBase.ConnectionAxisAlignedBB bb : BlockConnectableBase.createBoundingBox(Collections.singleton(this), position)) {
+            collisionShape = VoxelShapes.or(collisionShape, VoxelShapes.create(bb));
+        }
+        this.collisionShape = collisionShape;
+    }
+
+    public Connection setBroken(boolean broken) {
+        this.broken = broken;
+        this.reRenderCallback.run();
+        return this;
+    }
+
+    private Connection silentlySetBroken(boolean broken) {
+        this.broken = broken;
+        return this;
     }
 
     private SurroundingCache genCache(boolean next) {
@@ -160,7 +201,7 @@ public class Connection {
     }
 
     public Connection copy() {
-        return new Connection(this.type, this.offset, this.from, this.to, this.previous, this.next, this.position).setBroken(this.broken);
+        return new Connection(this.reRenderCallback, this.type, this.offset, this.from, this.to, this.previous, this.next, this.position).setBroken(this.broken);
     }
 
     private RotatedRayBox genRotatedBox(double length, double yang, double zang) {
@@ -187,6 +228,7 @@ public class Connection {
 
     public static Connection fromNBT(CompoundNBT nbt, TileEntity tileEntity) {
         return new Connection(
+            tileEntity,
             ConnectionType.getType(new ResourceLocation(nbt.getString("id"))),
             nbt.getDouble("offset"),
             NBTUtil.readBlockPos(nbt.getCompound("from")),
@@ -194,7 +236,7 @@ public class Connection {
             NBTUtil.readBlockPos(nbt.getCompound("previous")),
             NBTUtil.readBlockPos(nbt.getCompound("next")),
             tileEntity.getBlockPos()
-        ).setBroken(nbt.getBoolean("broken")).setSign(nbt.getBoolean("sign"));
+        ).silentlySetBroken(nbt.getBoolean("broken")).setSign(nbt.getBoolean("sign"));
     }
 
     public boolean lazyEquals(Connection con) {

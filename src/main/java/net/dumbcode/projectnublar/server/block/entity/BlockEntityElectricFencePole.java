@@ -9,6 +9,7 @@ import net.dumbcode.projectnublar.server.block.BlockElectricFencePole;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -74,6 +75,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     public void setFlippedAround(boolean flippedAround) {
         this.flippedAround = flippedAround;
         this.requestModelDataUpdate();
+        this.level.sendBlockUpdated(this.getBlockPos(), Blocks.AIR.defaultBlockState(), this.getBlockState(), 3);
     }
 
     @Nonnull
@@ -151,8 +153,8 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
             ConnectionType type = ((BlockElectricFencePole) state.getBlock()).getType();
 
             float t = type.getHalfSize();
-            double x = Math.sin(this.cachedRotation) * type.getRadius();
-            double z = Math.cos(this.cachedRotation) * type.getRadius();
+            double x = Math.sin(Math.toRadians(this.cachedRotation + 90F - type.getRotationOffset())) * type.getRadius();
+            double z = Math.cos(Math.toRadians(this.cachedRotation + 90F - type.getRotationOffset())) * type.getRadius();
             this.cachedShape = VoxelShapes.box(x-t, 0, z-t, x+t, 1, z+t).move(0.5, 0, 0.5);
         }
 
@@ -171,9 +173,10 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     }
 
     private double computeRotation() {
-        double rotation = this.flippedAround ? 0 : 180F;
+        double rotation = 0;
+
         if(this.level == null || !this.level.isLoaded(this.getBlockPos())) {
-            return rotation;
+            return this.flippedAround ? 0F : 180F;
         }
 
         BlockState state = this.level.getBlockState(this.getBlockPos());
@@ -216,13 +219,10 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
                     }
                 }
 
-                rotation += pole.getType().getRotationOffset() + 90F;
+                rotation += pole.getType().getRotationOffset();
                 if (ef.isFlippedAround()) {
                     rotation += 180;
                 }
-            }
-            while (rotation < 0) {
-                rotation += 360;
             }
         }
         return rotation;

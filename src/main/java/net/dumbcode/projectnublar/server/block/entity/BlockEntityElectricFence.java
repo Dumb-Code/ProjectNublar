@@ -72,11 +72,12 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     public VoxelShape getOrCreateCollision() {
         if(this.collidableCache == null) {
             VoxelShape shape = VoxelShapes.empty();
-            for (BlockConnectableBase.ConnectionAxisAlignedBB bb : BlockConnectableBase.createBoundingBox(this.getConnections(), this.getBlockPos())) {
-                shape = VoxelShapes.or(shape, VoxelShapes.create(bb));
+            for (Connection connection : this.fenceConnections) {
+                shape = VoxelShapes.or(shape, connection.getCollisionShape());
             }
             this.collidableCache = shape;
         }
+
         return this.collidableCache;
     }
 

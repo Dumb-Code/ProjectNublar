@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Getter;
 import lombok.Value;
@@ -12,23 +13,23 @@ import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.entity.DamageSourceHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
-import net.dumbcode.projectnublar.server.utils.Connection;
-import net.dumbcode.projectnublar.server.utils.DelegateVoxelShape;
-import net.dumbcode.projectnublar.server.utils.LineUtils;
-import net.dumbcode.projectnublar.server.utils.RotatedRayBox;
+import net.dumbcode.projectnublar.server.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -151,29 +152,35 @@ public class BlockConnectableBase extends Block {
         IVertexBuilder buffer = buffers.getBuffer(RenderType.lines());
         BlockRayTraceResult target = event.getTarget();
         ActiveRenderInfo info = event.getInfo();
+        Vector3d position = info.getPosition();
+        BlockPos pos = target.getBlockPos();
+        double px = pos.getX() - position.x();
+        double py = pos.getY() - position.y();
+        double pz = pos.getZ() - position.z();
+
+        if(target.getType() == RayTraceResult.Type.BLOCK && target.hitInfo instanceof DelegateVoxelShapeRender) {
+            WorldRenderer.renderShape(stack, buffer, ((DelegateVoxelShapeRender) target.hitInfo).getToRender(), px, py, pz, 0F, 0F, 0F, 0.4F);
+            event.setCanceled(true);
+        }
         if (target.getType() == RayTraceResult.Type.BLOCK && target.hitInfo instanceof BlockConnectableBase.HitChunk) {
             World world = Minecraft.getInstance().level;
-            BlockPos pos = target.getBlockPos();
             BlockState state = world.getBlockState(pos);
             if (state.getBlock() instanceof BlockConnectableBase) {
                 BlockConnectableBase.HitChunk chunk = (BlockConnectableBase.HitChunk) target.hitInfo;
                 event.setCanceled(true);
-                Vector3d vector3d = info.getPosition();
-                double d3 = pos.getX() - vector3d.x();
-                double d4 = pos.getY() - vector3d.y();
-                double d5 = pos.getZ() - vector3d.z();
+
 
                 Connection connection = chunk.getConnection();
                 double[] in = connection.getIn();
 
                 if (ProjectNublar.DEBUG) {
-                    chunk.getResult().debugRender(stack, buffers, d3, d4, d5);
+                    chunk.getResult().debugRender(stack, buffers, px, py, pz);
                 }
 
 
-                double x = in[0] - vector3d.x();
-                double y = in[4] - vector3d.y();
-                double z = in[2] - vector3d.z();
+                double x = in[0] - position.x();
+                double y = in[4] - position.y();
+                double z = in[2] - position.z();
 
 
                 boolean pb = connection.brokenSide(world, false);
@@ -248,26 +255,55 @@ public class BlockConnectableBase extends Block {
 //        return super.getSelectedBoundingBox(state, worldIn, pos);
 //    }
 
-    protected VoxelShape getDefaultState(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+    protected VoxelShape getDefaultShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
         return VoxelShapes.empty();
     }
 
-    //TODO: revisit this.
+    @Override
+    public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
+        return true;
+    }
+
+    @Override
+    public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
+        return false;
+    }
+
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-        return this.createDelegateShape(this.getDefaultState(state, world, pos, context), world);
+        return this.createDelegateShape(this.estimateShape(world, pos), this.getDefaultShape(state, world, pos, context), world);
     }
 
-    protected VoxelShape createDelegateShape(VoxelShape shape, IBlockReader world) {
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+        if (world instanceof ServerWorld ? collidableServer : collidableClient) {
+            return this.estimateShape(world, pos);
+        }
+        return VoxelShapes.empty();
+    }
+
+    protected VoxelShape estimateShape(IBlockReader world, BlockPos pos) {
+        TileEntity te = world.getBlockEntity(pos);
+        if (te instanceof ConnectableBlockEntity) {
+            return ((ConnectableBlockEntity) te).getOrCreateCollision();
+        }
+        return VoxelShapes.empty();
+    }
+
+    protected VoxelShape createDelegateShape(VoxelShape shape, VoxelShape interactionShape, IBlockReader world) {
         return new DelegateVoxelShape(shape, (from, to, offset, fallback) -> {
             BlockRayTraceResult raytraceResult = getRaytraceResult(world, offset, from, to);
-            if(raytraceResult == null) {
-                return fallback.get();
+            BlockRayTraceResult defaultResult = interactionShape.clip(from, to, offset);
+            if(defaultResult == null) {
+                return raytraceResult;
             }
-            return raytraceResult;
+            defaultResult.hitInfo = new DelegateVoxelShapeRender(interactionShape);
+            if(raytraceResult == null) {
+                return defaultResult;
+            }
+            return raytraceResult.getLocation().subtract(from).lengthSqr() < defaultResult.getLocation().subtract(from).lengthSqr() ? raytraceResult : defaultResult;
         });
     }
-
 
     @Nullable
     public static HitChunk getHitChunk(PlayerEntity viewer) {
@@ -353,7 +389,7 @@ public class BlockConnectableBase extends Block {
         List<ConnectionAxisAlignedBB> out = Lists.newArrayList();
         for (Connection connection : fenceConnections) {
             double[] intersect = connection.getIn();
-            double amount = 16;
+            double amount = 8;
 
             double x = (intersect[1] - intersect[0]) / amount;
             double y = (intersect[5] - intersect[4]) / amount;
@@ -395,7 +431,7 @@ public class BlockConnectableBase extends Block {
     }
 
     public static void breakEffect(World worldIn, BlockPos pos) {
-        worldIn.globalLevelEvent(2001, pos, Block.getId(worldIn.getBlockState(pos)));
+        worldIn.levelEvent(2001, pos, Block.getId(worldIn.getBlockState(pos)));
     }
 
     @Override
@@ -503,7 +539,7 @@ public class BlockConnectableBase extends Block {
                                 List<BlockPos> positions = LineUtils.getBlocksInbetween(connection.getFrom(), connection.getTo(), connection.getOffset());
                                 for (int i = 0; i < positions.size(); i++) {
                                     if (positions.get(i).equals(pos)) {
-                                        Connection con = new Connection(connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.min(i + 1, positions.size() - 1)), positions.get(Math.max(i - 1, 0)), pos);
+                                        Connection con = new Connection(tileentity, connection.getType(), connection.getOffset(), connection.getFrom(), connection.getTo(), positions.get(Math.min(i + 1, positions.size() - 1)), positions.get(Math.max(i - 1, 0)), pos);
                                         double[] in = con.getIn();
                                         double yin = (in[4] + in[5]) / 2D;
                                         if (side == Direction.DOWN == yin > yRef) {
@@ -544,18 +580,6 @@ public class BlockConnectableBase extends Block {
         }
         return ref != null;
     }
-
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-        if (world instanceof ServerWorld ? collidableServer : collidableClient) {
-            TileEntity te = world.getBlockEntity(pos);
-            if (te instanceof ConnectableBlockEntity) {
-                ((ConnectableBlockEntity) te).getOrCreateCollision();
-            }
-        }
-        return VoxelShapes.empty();
-    }
-
 
     @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
@@ -617,5 +641,10 @@ public class BlockConnectableBase extends Block {
     public static class ChunkedInfo {
         AxisAlignedBB aabb;
         Connection connection;
+    }
+
+    @Value
+    public static class DelegateVoxelShapeRender {
+        VoxelShape toRender;
     }
 }
