@@ -8,10 +8,7 @@ import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -46,10 +43,6 @@ public class PylonHeadConnectionRenderer {
     public static void renderWorldLast(RenderWorldLastEvent event) {
         float partialTicks = event.getPartialTicks();
 
-        Entity e = MC.getCameraEntity();
-        if (e == null) {
-            return;
-        }
 
         MC.getProfiler().push(ProjectNublar.MODID + "_pylon_connection_render");
         Set<PylonHeadBlockEntity.Connection> connections = new HashSet<>();
@@ -58,13 +51,13 @@ public class PylonHeadConnectionRenderer {
                 connections.addAll(((PylonHeadBlockEntity) te).getConnections());
             }
         }
-        double posX = MathHelper.lerp(partialTicks, e.xOld, e.getX());
-        double posY = MathHelper.lerp(partialTicks, e.yOld, e.getY());
-        double posZ = MathHelper.lerp(partialTicks, e.zOld, e.getZ());
+
+        ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Vector3d pos = info.getPosition();
 
         MatrixStack stack = event.getMatrixStack();
         stack.pushPose();
-        stack.translate(-posX, -posY, -posZ);
+        stack.translate(-pos.x, -pos.y, -pos.z);
 
         RenderHelper.setupForFlatItems();
         RenderSystem.disableBlend();
@@ -86,8 +79,8 @@ public class PylonHeadConnectionRenderer {
                 float current = (float) i / iterations;
                 float next = (float) (i+1) / iterations;
 
-                Vector3d cPos = new Vector3d(from.x + (to.x - from.x) * current, connection.beizerCurve(current)+0.5, from.z + (to.z - from.z) * current);
-                Vector3d nPos = new Vector3d(from.x + (to.x - from.x) * next, connection.beizerCurve(next)+0.5, from.z + (to.z - from.z) * next);
+                Vector3d cPos = new Vector3d(from.x + (to.x - from.x) * current, connection.beizerCurve(current)+0.75, from.z + (to.z - from.z) * current);
+                Vector3d nPos = new Vector3d(from.x + (to.x - from.x) * next, connection.beizerCurve(next)+0.75, from.z + (to.z - from.z) * next);
 
                 DirVec c = DirVec.get(connection.beizerCurveGradient(current), diff, 0.025F);
                 DirVec n = DirVec.get(connection.beizerCurveGradient(next), diff, 0.025F);
