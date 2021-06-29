@@ -147,6 +147,7 @@ public class RotatedRayBox {
         private final double distance;
 
         public void debugRender(MatrixStack stack, IRenderTypeBuffer buffers, double x, double y, double z) {
+            stack.pushPose();
             stack.translate(x + this.parent.origin.x(), y + this.parent.origin.y(), z + this.parent.origin.z());
             Matrix4f pose = stack.last().pose();
 
@@ -177,10 +178,12 @@ public class RotatedRayBox {
             //Draw a cubeoid of the transformed collision box
             RenderHelper.setupForFlatItems();
             AxisAlignedBB aabb = this.parent.box;
-            RenderUtils.drawCubeoid(stack, new Vector3d(aabb.minX, aabb.minY, aabb.minZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ), buffers.getBuffer(RenderType.waterMask()));
-
             WorldRenderer.renderLineBox(stack, buff, aabb, 1, 0, 0, 1F);
 
+            RenderUtils.drawCubeoid(stack, new Vector3d(aabb.minX, aabb.minY, aabb.minZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ), buffers.getBuffer(RenderType.lightning()));
+
+            //We need the lines type to begin buffering again.
+            buffers.getBuffer(RenderType.lines());
             stack.popPose();
         }
     }

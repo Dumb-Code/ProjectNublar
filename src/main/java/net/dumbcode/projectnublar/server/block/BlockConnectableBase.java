@@ -154,12 +154,12 @@ public class BlockConnectableBase extends Block {
         ActiveRenderInfo info = event.getInfo();
         Vector3d position = info.getPosition();
         BlockPos pos = target.getBlockPos();
-        double px = pos.getX() - position.x();
-        double py = pos.getY() - position.y();
-        double pz = pos.getZ() - position.z();
+        double px = -position.x();
+        double py = -position.y();
+        double pz = -position.z();
 
         if(target.getType() == RayTraceResult.Type.BLOCK && target.hitInfo instanceof DelegateVoxelShapeRender) {
-            WorldRenderer.renderShape(stack, buffer, ((DelegateVoxelShapeRender) target.hitInfo).getToRender(), px, py, pz, 0F, 0F, 0F, 0.4F);
+            WorldRenderer.renderShape(stack, buffer, ((DelegateVoxelShapeRender) target.hitInfo).getToRender(), pos.getX()+px, pos.getY()+py, pos.getZ()+pz, 0F, 0F, 0F, 0.4F);
             event.setCanceled(true);
         }
         if (target.getType() == RayTraceResult.Type.BLOCK && target.hitInfo instanceof BlockConnectableBase.HitChunk) {
