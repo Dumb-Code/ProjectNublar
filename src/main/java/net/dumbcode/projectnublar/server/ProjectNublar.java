@@ -13,6 +13,7 @@ import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinte
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.block.BlockPylonPole;
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
@@ -113,6 +114,7 @@ public class ProjectNublar {
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
 
         forgeBus.addListener(this::gatherData);
+        forgeBus.addListener(BlockPylonPole::onBlockBreak);
 
         if(FMLEnvironment.dist == Dist.CLIENT) {
             this.clientSetup();

@@ -20,7 +20,7 @@ public class PylonNetworkSavedData extends WorldSavedData {
         super(name);
     }
 
-    private Map<UUID, Set<BlockPos>> uuidPosMap = new HashMap<>();
+    private final Map<UUID, Set<BlockPos>> uuidPosMap = new HashMap<>();
 
     public Set<BlockPos> getPositions(UUID uuid) {
         return this.uuidPosMap.computeIfAbsent(uuid, u -> new HashSet<>());
@@ -45,7 +45,13 @@ public class PylonNetworkSavedData extends WorldSavedData {
     }
 
     public void clean() {
-        this.uuidPosMap.values().removeIf(Set::isEmpty);
+        Set<UUID> toRemove = new HashSet<>();
+        this.uuidPosMap.forEach((uuid, set) -> {
+            if(set.isEmpty()) {
+                toRemove.add(uuid);
+            }
+        });
+        toRemove.forEach(this.uuidPosMap::remove);
     }
 
     @Override

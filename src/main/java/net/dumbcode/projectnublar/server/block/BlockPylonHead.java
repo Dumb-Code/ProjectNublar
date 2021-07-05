@@ -23,6 +23,9 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
@@ -39,11 +42,46 @@ import java.util.UUID;
 
 public class BlockPylonHead extends Block implements IItemBlock {
 
+    private static final VoxelShape BASE_POLE_SHAPE = box(6, 0, 6, 10, 10, 10);
+    private static final VoxelShape POLE_RING_1 = box(5.5, 3, 5.5, 10.5, 4, 10.5);
+    private static final VoxelShape POLE_RING_2 = box(5.5, 4.5, 5.5, 10.5, 5.5, 10.5);
+    private static final VoxelShape POLE_RING_3 = box(5.5, 6, 5.5, 10.5, 7, 10.5);
+    private static final VoxelShape POLE_RING_4 = box(5.5, 7.5, 5.5, 10.5, 8.5, 10.5);
+    private static final VoxelShape TOP_POLE = box(7.75, 10, 7.75, 8.25, 14.4, 8.25);
+    private static final VoxelShape TOP_RING_1 = box(6.8, 10.3, 6.8, 9.2, 10.7, 9.2);
+    private static final VoxelShape TOP_RING_2 = box(6.8, 11.3, 6.8, 9.2, 11.7, 9.2);
+    private static final VoxelShape TOP_RING_3 = box(6.8, 11.8, 6.8, 9.2, 12.3, 9.2);
+    private static final VoxelShape TOP_RING_4 = box(6.8, 12.9, 6.8, 9.2, 13.3, 9.2);
+
+    private static final VoxelShape TOP_RING_BAR_SEGMENT = box(3.7, 11.8, 6.2, 4.3, 12.4, 9.8);
+    private static final VoxelShape TOP_RING_INNER_SEGMENT = box(3.83, 12.17, 7.83, 6.8, 11.83, 8.17);
+    private static final VoxelShape TOP_RING_DIAGONAL_BAR = VoxelShapes.or(
+        box(4.25, 11.8, 9.75, 5.275, 12.4, 11.065),
+        box(4.7875, 11.8, 10.4325, 5.7625, 12.4, 11.6975),
+        box(5.275, 11.8, 11.065, 6.3, 12.4, 12.38)
+    );
+    private static final VoxelShape TOP_RING = VoxelShapes.or(TOP_RING_BAR_SEGMENT, TOP_RING_INNER_SEGMENT, TOP_RING_DIAGONAL_BAR);
+
+    private static final VoxelShape TOP_RING_ROT1 = rotateShape(1, TOP_RING);
+    private static final VoxelShape TOP_RING_ROT2 = rotateShape(2, TOP_RING);
+    private static final VoxelShape TOP_RING_ROT3 = rotateShape(3, TOP_RING);
+
+    private static final VoxelShape SHAPE = VoxelShapes.or(
+        BASE_POLE_SHAPE, POLE_RING_1, POLE_RING_2, POLE_RING_3, POLE_RING_4, TOP_POLE,
+        TOP_RING_1, TOP_RING_2, TOP_RING_3, TOP_RING_4,
+        TOP_RING, TOP_RING_ROT1, TOP_RING_ROT2, TOP_RING_ROT3
+    );
+
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
     public BlockPylonHead(Properties p_i48440_1_) {
         super(p_i48440_1_);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.UP));
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState p_220053_1_, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
+        return SHAPE;
     }
 
     @Override
@@ -98,9 +136,9 @@ public class BlockPylonHead extends Block implements IItemBlock {
     }
 
     @Override
-    public void destroy(IWorld worldIn, BlockPos pos, BlockState state) {
+    public void onRemove(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean flag) {
         TileEntity old = worldIn.getBlockEntity(pos);
-        super.destroy(worldIn, pos, state);
+        super.onRemove(state, worldIn, pos, newState, flag);
         if(worldIn instanceof ServerWorld && old instanceof PylonHeadBlockEntity) {
             ServerWorld world = (ServerWorld) worldIn;
             //Remove connections from other pylons
@@ -188,5 +226,17 @@ public class BlockPylonHead extends Block implements IItemBlock {
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return new PylonHeadBlockEntity();
+    }
+
+    public static VoxelShape rotateShape(int times, VoxelShape shape) {
+        VoxelShape[] buffer = new VoxelShape[]{shape, VoxelShapes.empty()};
+
+        for (int i = 0; i < times; i++) {
+            buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = VoxelShapes.or(buffer[1], VoxelShapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+            buffer[0] = buffer[1];
+            buffer[1] = VoxelShapes.empty();
+        }
+
+        return buffer[0];
     }
 }

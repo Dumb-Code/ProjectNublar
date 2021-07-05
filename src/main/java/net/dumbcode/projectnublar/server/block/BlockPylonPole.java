@@ -7,7 +7,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,10 +19,16 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.event.world.BlockEvent;
 
 public class BlockPylonPole extends Block implements IItemBlock {
+
+    private static final VoxelShape SHAPE = box(6, 0, 6, 10, 16, 10);
 
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
@@ -35,6 +40,11 @@ public class BlockPylonPole extends Block implements IItemBlock {
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(AXIS);
         super.createBlockStateDefinition(builder);
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState p_220053_1_, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
+        return SHAPE;
     }
 
     @Override
@@ -64,35 +74,32 @@ public class BlockPylonPole extends Block implements IItemBlock {
     }
 
     @Override
-    public void destroy(IWorld p_176206_1_, BlockPos p_176206_2_, BlockState p_176206_3_) {
-        super.destroy(p_176206_1_, p_176206_2_, p_176206_3_);
-    }
-
-    @Override
-    public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
-        BlockPos testPos = pos;
-        while(world.getBlockState(testPos).getBlock() == BlockHandler.PYLON_POLE.get()) {
-            testPos = testPos.above();
-        }
-        BlockState head = world.getBlockState(testPos);
-        if(head.getBlock() == BlockHandler.PYLON_HEAD.get() && head.getValue(BlockPylonHead.FACING) == Direction.UP) {
-            TileEntity old = world.getBlockEntity(testPos);
-            if(!world.isClientSide && old instanceof PylonHeadBlockEntity) {
-                if(!player.isCreative()) {
-                    InventoryHelper.dropItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(BlockHandler.PYLON_POLE.get()));
-                }
-                world.setBlock(testPos, Blocks.AIR.defaultBlockState(), 3);
-                world.setBlock(testPos.below(), head, 3);
-                ItemPylonPole.moveConnections((PylonHeadBlockEntity) old, testPos.below());
-            }
-            return true;
-        }
-        return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
-    }
-
-    @Override
     public Item createItem(Item.Properties properties) {
         return new ItemPylonPole(properties);
+    }
+
+    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (event.getState().getBlock() == BlockHandler.PYLON_POLE.get()) {
+            BlockPos pos = event.getPos();
+            BlockPos testPos = event.getPos();
+            World world = event.getPlayer().level;
+            while(world.getBlockState(testPos).getBlock() == BlockHandler.PYLON_POLE.get()) {
+                testPos = testPos.above();
+            }
+            BlockState head = world.getBlockState(testPos);
+            if(head.getBlock() == BlockHandler.PYLON_HEAD.get() && head.getValue(BlockPylonHead.FACING) == Direction.UP) {
+                TileEntity old = world.getBlockEntity(testPos);
+                if(!world.isClientSide() && old instanceof PylonHeadBlockEntity) {
+                    if(!event.getPlayer().isCreative()) {
+                        InventoryHelper.dropItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(BlockHandler.PYLON_POLE.get()));
+                    }
+                    world.setBlock(testPos.below(), head, 3);
+                    world.setBlock(testPos, Blocks.AIR.defaultBlockState(), 3);
+                    ItemPylonPole.moveConnections((PylonHeadBlockEntity) old, testPos.below());
+                }
+                event.setCanceled(true);
+            }
+        }
     }
 
 }

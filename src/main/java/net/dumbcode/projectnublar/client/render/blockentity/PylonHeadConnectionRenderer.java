@@ -37,7 +37,7 @@ public class PylonHeadConnectionRenderer {
     private static final Matrix3f RESULT_MATRIX = new Matrix3f();
     private static final Matrix3f TEMP_MATRIX = new Matrix3f();
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/electric_fence.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(ProjectNublar.MODID, "textures/block/electric_fence.png");
 
     @SubscribeEvent
     public static void renderWorldLast(RenderWorldLastEvent event) {
@@ -74,13 +74,15 @@ public class PylonHeadConnectionRenderer {
             Vector3d diff = to.subtract(from);
 
             double dist = from.distanceTo(to);
-            int iterations = (int) (dist * ITERATIONS_PER_BLOCK);
-            for (int i = 0; i < iterations; i++) {
+            int iterations = (int) Math.ceil(dist * ITERATIONS_PER_BLOCK);
+            for (int i = 0; i < iterations; i+=1) {
                 float current = (float) i / iterations;
                 float next = (float) (i+1) / iterations;
 
                 Vector3d cPos = new Vector3d(from.x + (to.x - from.x) * current, connection.beizerCurve(current)+0.75, from.z + (to.z - from.z) * current);
                 Vector3d nPos = new Vector3d(from.x + (to.x - from.x) * next, connection.beizerCurve(next)+0.75, from.z + (to.z - from.z) * next);
+
+                double segmentDiff = nPos.subtract(cPos).length();
 
                 DirVec c = DirVec.get(connection.beizerCurveGradient(current), diff, 0.025F);
                 DirVec n = DirVec.get(connection.beizerCurveGradient(next), diff, 0.025F);
@@ -118,16 +120,16 @@ public class PylonHeadConnectionRenderer {
 
                 float[] uvs = new float[12];
                 for (int ui = 0; ui < uvs.length; ui++) {
-                    uvs[ui] = random.nextInt(16)/16F;
+                    uvs[ui] = random.nextInt(16)/32F;
                 }
 
                 IRenderTypeBuffer.Impl buffers = Minecraft.getInstance().renderBuffers().bufferSource();
-                IVertexBuilder buffer = buffers.getBuffer(RenderType.solid());
+                IVertexBuilder buffer = buffers.getBuffer(RenderType.entitySolid(TEXTURE));
                 RenderUtils.drawSpacedCube(stack, buffer, r, g, b, a, light, OverlayTexture.NO_OVERLAY,
                     points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7],
                     points[8], points[9], points[10], points[11], points[12], points[13], points[14], points[15],
                     points[16], points[17], points[18], points[19], points[20], points[21], points[22], points[23],
-                    uvs[0], uvs[1], uvs[2], uvs[3], uvs[4], uvs[5], uvs[6], uvs[7], uvs[8], uvs[9], uvs[10], uvs[11], Math.round(diff.length())/16F, 1/16F, 1/16F);
+                    uvs[0], uvs[1], uvs[2], uvs[3], uvs[4], uvs[5], uvs[6], uvs[7], uvs[8], uvs[9], uvs[10], uvs[11], Math.round(segmentDiff * 32F) / 64F, 1/32F, 1/32F);
                 buffers.endBatch();
             }
         }
@@ -156,8 +158,8 @@ public class PylonHeadConnectionRenderer {
 
         private static DirVec get(double beizerCurveGradient, Vector3d diff, float scale) {
             RESULT_MATRIX.setIdentity();
-            RESULT_MATRIX.mul(Vector3f.ZP.rotation((float) Math.atan(beizerCurveGradient / Math.sqrt(diff.x*diff.x + diff.z*diff.z))));
             RESULT_MATRIX.mul(Vector3f.YP.rotation((float) -Math.atan2(diff.z, diff.x)));
+            RESULT_MATRIX.mul(Vector3f.ZP.rotation((float) Math.atan(beizerCurveGradient / Math.sqrt(diff.x*diff.x + diff.z*diff.z))));
 
             Vector3f f = new Vector3f(scale, 0, 0);
             f.transform(RESULT_MATRIX);
