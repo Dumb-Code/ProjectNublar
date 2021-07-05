@@ -10,7 +10,9 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import org.lwjgl.system.MemoryStack;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
@@ -26,7 +28,7 @@ public class S2CSyncBackgroundImage {
 
     public static void toBytes(S2CSyncBackgroundImage packet, PacketBuffer buf) {
         buf.writeInt(packet.data.length);
-        buf.writeBytes(packet.data);
+        buf.writeByteArray(packet.data);
     }
 
     public static void handle(S2CSyncBackgroundImage packet, Supplier<NetworkEvent.Context> supplier) {
@@ -37,7 +39,7 @@ public class S2CSyncBackgroundImage {
             if(screen instanceof BackgroundableScreen) {
                 NativeImage image = null;
                 try {
-                    image = NativeImage.read(ByteBuffer.wrap(packet.data));
+                    image = NativeImage.read(new ByteArrayInputStream(packet.data));
                 } catch (IOException e) {
                     ProjectNublar.getLogger().error("Unable to load image", e);
                 }

@@ -51,7 +51,7 @@ public class TabletBGImageHandler {
             resized.writeToFile(iconImageFile);
         } catch (IOException e) {
             DumbLibrary.getLogger().error("Unable to write to file " + iconImageFile, e);
-        }
+            }
     }
 
     private final Path getTabletBackgrounds() {
@@ -81,19 +81,21 @@ public class TabletBGImageHandler {
 
     private static List<IconEntry> getAllIcons(Path folder, List<IconEntry> list) {
         String folderName = FilenameUtils.getName(folder.toString());
-        try(Stream<Path> stream = Files.walk(folder, 1)) {
-            stream
-                .filter(Files::isRegularFile)
-                .filter(p -> p.toString().endsWith("_icon.png"))
-                .forEach(p -> list.add(new IconEntry(folderName, p.toString().substring(0, p.toString().length() - "_icon.png".length()))));
-        } catch (IOException e) {
-            ProjectNublar.getLogger().error("Unable to walk icons", e);
+        if(Files.exists(folder)) {
+            try(Stream<Path> stream = Files.walk(folder, 1)) {
+                stream
+                    .filter(Files::isRegularFile)
+                    .filter(p -> !p.toString().endsWith("_icon.png"))
+                    .forEach(p -> list.add(new IconEntry(folderName, FilenameUtils.getBaseName(p.toString()))));
+            } catch (IOException e) {
+                ProjectNublar.getLogger().error("Unable to walk icons", e);
+            }
         }
         return list;
     }
 
     public Optional<NativeImage> getFullImage(World world, String uploaderUUID, String imageHash, boolean icon) {
-        Path file = getTabletBackgrounds().resolve(uploaderUUID + File.separator + imageHash + (icon ? "_icon" : "") + ".png");
+        Path file = getTabletBackgrounds().resolve(uploaderUUID).resolve(imageHash + (icon ? "_icon" : "") + ".png");
         if(uploaderUUID.isEmpty() || imageHash.isEmpty()) {
             return Optional.empty();
         }

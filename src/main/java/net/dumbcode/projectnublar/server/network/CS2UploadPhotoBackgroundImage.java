@@ -8,7 +8,10 @@ import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
+import org.lwjgl.system.MemoryStack;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -34,7 +37,7 @@ public class CS2UploadPhotoBackgroundImage {
     public static void toBytes(CS2UploadPhotoBackgroundImage packet, PacketBuffer buf) {
         buf.writeBoolean(packet.global);
         buf.writeInt(packet.data.length);
-        buf.writeBytes(packet.data);
+        buf.writeByteArray(packet.data);
     }
 
     public static void handle(CS2UploadPhotoBackgroundImage packet, Supplier<NetworkEvent.Context> supplier) {
@@ -43,7 +46,8 @@ public class CS2UploadPhotoBackgroundImage {
         context.enqueueWork(() -> {
             ServerPlayerEntity sender = context.getSender();
             try {
-                TabletBGImageHandler.addNewEntry(sender, NativeImage.read(ByteBuffer.wrap(packet.data)), hash(packet.data));
+                TabletBGImageHandler.addNewEntry(sender, NativeImage.read(new ByteArrayInputStream(packet.data)), hash(packet.data));
+                ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2CRequestBackgroundIconHeaders(packet.global, TabletBGImageHandler.getAllIcons(packet.global, context.getSender())));
             } catch (IOException e) {
                 ProjectNublar.getLogger().error("Unable to read image.");
             }

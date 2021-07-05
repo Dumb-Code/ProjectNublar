@@ -35,6 +35,7 @@ public class ShaderSetupPage extends SetupPage<ShaderBackground> {
             this.updateButtonText();
         }));
         this.updateButtonText();
+        super.initPage(x, y);
     }
 
     private void updateButtonText() {

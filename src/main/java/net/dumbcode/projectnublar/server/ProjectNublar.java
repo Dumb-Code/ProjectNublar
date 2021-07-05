@@ -42,6 +42,7 @@ import net.minecraft.item.Item;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -65,9 +66,12 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 @Mod(ProjectNublar.MODID)
@@ -267,5 +271,12 @@ public class ProjectNublar {
         NETWORK.registerMessage(28, S2CSyncOpenedUsers.class, S2CSyncOpenedUsers::toBytes, S2CSyncOpenedUsers::fromBytes, S2CSyncOpenedUsers::handle);
         NETWORK.registerMessage(29, S2CSyncSequencingSynthesizerSelectChange.class, S2CSyncSequencingSynthesizerSelectChange::toBytes, S2CSyncSequencingSynthesizerSelectChange::fromBytes, S2CSyncSequencingSynthesizerSelectChange::handle);
         NETWORK.registerMessage(30, S2STrackingTabletUpdateChunk.class, S2STrackingTabletUpdateChunk::toBytes, S2STrackingTabletUpdateChunk::fromBytes, S2STrackingTabletUpdateChunk::handle);
+    }
+
+    public static TranslationTextComponent translate(Object... args) {
+        return new TranslationTextComponent(
+            MODID + "." +
+            Arrays.stream(args).map(String::valueOf).collect(Collectors.joining("."))
+        );
     }
 }

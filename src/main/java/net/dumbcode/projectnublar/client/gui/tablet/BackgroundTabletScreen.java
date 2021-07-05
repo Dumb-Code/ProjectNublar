@@ -11,6 +11,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 
+import java.nio.file.Path;
+import java.util.List;
+
 public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
 
     private final int ICONS_PER_COLUMN = 1;
@@ -34,6 +37,13 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
             this.setupPage.initPage(this.startX, this.startY);
         }
         super.init();
+    }
+
+    @Override
+    public void onFilesDrop(List<Path> files) {
+        if(this.setupPage != null) {
+            this.setupPage.onFilesDrop(files);
+        }
     }
 
     @Override
@@ -92,12 +102,12 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
                         TabletBackground.Entry<?> e = TabletBackground.REGISTRY.get(s);
                         this.children.remove(this.setupPage);
                         this.setupPage = this.addWidget(e.getSetupPage());
-                        if(e.getBackground().getClass() == this.getBackground().getClass()) {
-                            this.setupPage.setupFromPage(this.getBackground());
-                        }
                         this.startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2;
                         this.startY = this.topStart + this.tabletHeight/2 - this.setupPage.getHeight()/2;
                         this.setupPage.initPage(this.startX, this.startY);
+                        if(e.getBackground().getClass() == this.getBackground().getClass()) {
+                            this.setupPage.setupFromPage(this.getBackground());
+                        }
                     }
 
                     entry++;

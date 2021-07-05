@@ -17,6 +17,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import org.lwjgl.opengl.GL11;
 
+import java.nio.file.Path;
+import java.util.List;
+
 //TabInformationBar
 public abstract class BaseTabletScreen extends Screen {
     protected static final int HOME_ICON_SIZE = 24;
@@ -76,7 +79,6 @@ public abstract class BaseTabletScreen extends Screen {
         RenderUtils.renderBorderExclusive(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 1, 0xFFFF00FF);
 
     }
-
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {

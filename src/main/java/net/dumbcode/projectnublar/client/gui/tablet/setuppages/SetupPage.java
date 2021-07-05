@@ -8,6 +8,7 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
 
 import javax.annotation.Nullable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,14 @@ public abstract class SetupPage<T extends TabletBackground> implements INestedGu
     public abstract T create();
 
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+
+    }
+
+    public void onFilesDrop(List<Path> files) {
+
+    }
+
+    public void onClose() {
 
     }
 

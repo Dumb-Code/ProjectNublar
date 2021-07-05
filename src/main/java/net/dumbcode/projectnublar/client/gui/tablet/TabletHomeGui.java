@@ -20,6 +20,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -104,7 +105,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
 
         this.gallaryIcon = new Vector3i(this.leftStart + this.tabletWidth - GALLARY_ICON_SIZE - 3, this.topStart + 16, 0);
 
-        this.installButton = this.addButton(new Button(200, 20, this.width / 2 - 100, this.height - 40, new StringTextComponent("Add"), p -> {
+        this.installButton = this.addButton(new Button(this.width / 2 - 100, this.height - 40, 200, 20, ProjectNublar.translate("gui.tablethome.add"), p -> {
             if(this.openedInstallPopup && this.dropdownBox.getActive() != null) {
                 this.openedInstallPopup = false;
                 ProjectNublar.NETWORK.sendToServer(new C2SInstallModule(this.dropdownBox.getActive().slot, this.hand));
@@ -176,8 +177,12 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
             }
         }
         if(this.openedInstallPopup) {
-            this.dropdownBox.mouseClicked(mouseX, mouseY, mouseButton);
-            return true;
+            if(this.dropdownBox.mouseClicked(mouseX, mouseY, mouseButton)) {
+                return true;
+            }
+            if(this.installButton.mouseClicked(mouseX, mouseY, mouseButton)) {
+                return true;
+            }
         }
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }

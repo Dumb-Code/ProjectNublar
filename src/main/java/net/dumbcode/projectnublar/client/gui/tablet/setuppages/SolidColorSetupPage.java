@@ -87,6 +87,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
         this.redField.setFilter(predicate);
         this.greenField.setFilter(predicate);
         this.blueField.setFilter(predicate);
+        super.initPage(x, y);
     }
 
     @Override

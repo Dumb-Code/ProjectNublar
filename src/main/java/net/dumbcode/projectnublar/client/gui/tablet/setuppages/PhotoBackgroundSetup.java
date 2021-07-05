@@ -14,9 +14,17 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +33,8 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
     private DynamicTexture currentTestTexture;
     private NativeImage currentTestImage;
     private Button globalChangeButton;
-    private Button button;
+    private Button openFileButton;
+    private Button uploadButton;
 
     private final List<BGIconEntry> userEntries = new ArrayList<>();
     private final List<BGIconEntry> globalEntries = new ArrayList<>();
@@ -41,15 +50,25 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
         ProjectNublar.NETWORK.sendToServer(new C2SPhotoBackgroundRequestAllIcons(false));
     }
 
-
     @Override
     public void initPage(int x, int y) {
-        this.globalChangeButton = this.add(new Button(x + 130, y + 5, 50, 20, new StringTextComponent("User"), b -> {
-            this.globalChangeButton.setMessage(new StringTextComponent(this.userTab ? "Global" : "User"));
+        this.globalChangeButton = this.add(new Button(x + 130, y + 5, 50, 20, new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.mode.user"), b -> {
+            this.globalChangeButton.setMessage(new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.mode." + (this.userTab ? "global" : "user")));
             this.userTab = !this.userTab;
             ProjectNublar.NETWORK.sendToServer(new C2SPhotoBackgroundRequestAllIcons(!this.userTab));
         }));
-        this.button = this.add(new Button(x + 30, y + 110, 50, 20, new StringTextComponent("Upload"), b -> {
+        this.openFileButton = this.add(new Button(x + 30, y + 110, 50, 20, new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.open"), b -> {
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                PointerBuffer filters = stack.mallocPointer(1);
+                filters.put(stack.UTF8("*.png"));
+                filters.flip();
+                String result = TinyFileDialogs.tinyfd_openFileDialog(I18n.get(ProjectNublar.MODID + ".gui.photo.upload.text"), null, filters, "PNG", false);
+                if (result != null) {
+                    this.setAsCurrent(Paths.get(result));
+                }
+            }
+        }));
+        this.uploadButton = this.add(new Button(x + 130, y + 110, 50, 20, new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.upload"), b -> {
             int maxWidth = 250;
             int maxHeight = (int) (maxWidth / TabletBGImageHandler.SCREEN_RATIO);
 
@@ -69,6 +88,7 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
                 ProjectNublar.getLogger().error("Unable to write image", e);
             }
         }));
+        this.uploadButton.active = this.currentTestImage != null;
         super.initPage(x, y);
     }
 
@@ -82,6 +102,23 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
         list.clear();
         entries.stream().map(BGIconEntry::new).forEach(list::add);
         this.updateEntries = true;
+    }
+
+    @Override
+    public void onClose() {
+        if(this.currentTestTexture != null) {
+            this.currentTestTexture.close();
+        }
+        for (BGIconEntry entry : this.globalEntries) {
+            if(entry.texture != null) {
+                entry.texture.close();
+            }
+        }
+        for (BGIconEntry userEntry : this.userEntries) {
+            if(userEntry.texture != null) {
+                userEntry.texture.close();
+            }
+        }
     }
 
     @Override
@@ -103,8 +140,9 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.button.render(stack, mouseX, mouseY, partialTicks);
+        this.uploadButton.render(stack, mouseX, mouseY, partialTicks);
         this.globalChangeButton.render(stack, mouseX, mouseY, partialTicks);
+        this.openFileButton.render(stack, mouseX, mouseY, partialTicks);
 
         if(this.currentTestTexture != null) {
             this.currentTestTexture.bind();
@@ -148,43 +186,26 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
         return true;
     }
 
+    @Override
+    public void onFilesDrop(List<Path> files) {
+        this.setAsCurrent(files.get(0));
+        super.onFilesDrop(files);
+    }
 
-//    Opublic void keyTyped(char typedChar, int keyCode) {
-//        if(GuiScreen.isKeyComboCtrlV(keyCode)) {
-//            Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-//            if (transferable != null) {
-//                try {
-//                    BufferedImage image = null;
-//                    if(transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-//                        Image copied = (Image) transferable.getTransferData(DataFlavor.imageFlavor);
-//                        if(copied instanceof BufferedImage) {
-//                            image = (BufferedImage) copied;
-//                        } else {
-//                            image = new BufferedImage(copied.getWidth(null), copied.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-//
-//                            Graphics2D g = image.createGraphics();
-//                            g.drawImage(copied, 0, 0, null);
-//                            g.dispose();
-//                        }
-//                    } else if(transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-//                        List<File> fileList = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-//                        image = ImageIO.read(fileList.get(0));
-//                    }
-//
-//                    if(image != null) {
-//                        image = TextureUtils.resize(image, image.getWidth(), image.getHeight()); //If the user uploads a gif, it uploads ALL of the frames. This is to make sure it's just one frame
-//                        if(this.currentTestTexture != null) {
-//                            this.currentTestTexture.deleteGlTexture();
-//                        }
-//                        this.currentTestTexture = new DynamicTexture(image);
-//                        this.currentTestImage = image;
-//                    }
-//                } catch (IOException | UnsupportedFlavorException e) {
-//                    DumbLibrary.getLogger().error("Unable to paste clipboard", e);
-//                }
-//            }
-//        }
-//    }
+    private void setAsCurrent(Path path) {
+        try {
+            NativeImage image = NativeImage.read(Files.newInputStream(path));
+            image = TextureUtils.resize(image, image.getWidth(), image.getHeight()); //If the user uploads a gif, it uploads ALL of the frames. This is to make sure it's just one frame
+            if(this.currentTestTexture != null) {
+                this.currentTestTexture.close();
+            }
+            this.currentTestTexture = new DynamicTexture(image);
+            this.currentTestImage = image;
+            this.uploadButton.active = true;
+        } catch (IOException e) {
+            ProjectNublar.getLogger().error("Unable to read file " + path.toAbsolutePath() + " as an image", e);
+        }
+    }
 
     @Override
     public PhotoBackground create() {
@@ -210,7 +231,7 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
     }
 
     @Getter
-    private class BGIconEntry {
+    private static class BGIconEntry {
 
         private int minX;
         private int minY;

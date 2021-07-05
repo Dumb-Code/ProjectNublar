@@ -9,7 +9,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import org.lwjgl.system.MemoryStack;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
@@ -36,7 +38,7 @@ public class S2CSyncBackgroundIcon {
         buf.writeUtf(packet.imageHash);
         buf.writeBoolean(packet.global);
         buf.writeInt(packet.data.length);
-        buf.writeBytes(packet.data);
+        buf.writeByteArray(packet.data);
     }
 
     public static void handle(S2CSyncBackgroundIcon packet, Supplier<NetworkEvent.Context> supplier) {
@@ -49,7 +51,7 @@ public class S2CSyncBackgroundIcon {
                 if(tabletScreen.getSetupPage() instanceof PhotoBackgroundSetup) {
                     NativeImage read = null;
                     try {
-                        read = NativeImage.read(ByteBuffer.wrap(packet.data));
+                        read = NativeImage.read(new ByteArrayInputStream(packet.data));
                     } catch (IOException e) {
                         ProjectNublar.getLogger().error("Unable to read image", e);
                     }
