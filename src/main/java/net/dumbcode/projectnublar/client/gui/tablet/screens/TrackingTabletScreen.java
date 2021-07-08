@@ -169,11 +169,6 @@ public class TrackingTabletScreen extends TabletScreen {
     @Override
     public void onClosed() {
         if(this.texture != null) {
-            try {
-                this.texture.getPixels().writeToFile(new File("C:\\Users\\wynpr\\Documents\\pn_bruh.png"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             this.texture.close();
         }
         ProjectNublar.NETWORK.sendToServer(new C25StopTrackingTablet());
