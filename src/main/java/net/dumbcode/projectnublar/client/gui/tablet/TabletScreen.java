@@ -44,6 +44,11 @@ public class TabletScreen implements INestedGuiEventHandler {
 
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {}
 
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return mouseX >= this.left && mouseX <= this.left + this.xSize &&
+            mouseY >= this.top && mouseY <= this.top + this.ySize;
+    }
 
     @Override
     public List<? extends IGuiEventListener> children() {

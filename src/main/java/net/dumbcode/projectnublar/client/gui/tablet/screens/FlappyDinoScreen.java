@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -34,6 +36,9 @@ public class FlappyDinoScreen extends TabletScreen {
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        stack.pushPose();
+        stack.translate(this.left, this.top, 0);
+        partialTicks = Minecraft.getInstance().getFrameTime();
         for (Pipe pipe : this.pipes) {
             int xPos = (int) (pipe.xPosition - PIPE_PIXELS_PER_TICK * partialTicks);
 
@@ -49,6 +54,7 @@ public class FlappyDinoScreen extends TabletScreen {
         stack.scale(3F, 3F, 3F);
         String text = String.valueOf(this.counter);
         Minecraft.getInstance().font.drawShadow(stack, text, -Minecraft.getInstance().font.width(text) / 2F, 0, 0xBCBCBC);
+        stack.popPose();
         stack.popPose();
     }
 
@@ -128,7 +134,7 @@ public class FlappyDinoScreen extends TabletScreen {
         private boolean counted;
     }
 
-    private class Player {
+    private static class Player {
         int yPosition = 150;
         int prevYPosition = this.yPosition;
         int yVelocity;

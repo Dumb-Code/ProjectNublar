@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
+import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
@@ -19,6 +20,8 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector2f;
@@ -29,6 +32,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
@@ -86,15 +91,16 @@ public class TrackingTabletScreen extends TabletScreen {
 
             stack.pushPose();
 
-            stack.translate(this.xSize / 2F, this.ySize / 2F, 0);
+            stack.translate(this.left + this.xSize / 2F, this.top + this.ySize / 2F, 50);
             Matrix4f pose = stack.last().pose();
             pose.multiply(this.transformation);
+
 
             this.texture.bind();
             RenderSystem.disableBlend();
 
-            AbstractGui.blit(stack, -this.xSize / 2, -this.xSize / 2, 0, 0, 1, 1, this.xSize, this.xSize, 1, 1);
-
+            int rad = Math.max(this.xSize, this.ySize);
+            RenderUtils.drawScaledCustomSizeModalRect(stack,-rad / 2, -rad / 2, 0, 0, 1, 1, this.xSize, this.xSize, 1F, 1F);
             stack.popPose();
 
             for (TrackingSavedData.DataEntry datum : this.trackingData) {
@@ -162,7 +168,14 @@ public class TrackingTabletScreen extends TabletScreen {
 
     @Override
     public void onClosed() {
-        this.texture.releaseId();
+        if(this.texture != null) {
+            try {
+                this.texture.getPixels().writeToFile(new File("C:\\Users\\wynpr\\Documents\\pn_bruh.png"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            this.texture.close();
+        }
         ProjectNublar.NETWORK.sendToServer(new C25StopTrackingTablet());
     }
 
@@ -183,12 +196,14 @@ public class TrackingTabletScreen extends TabletScreen {
                 int posX = startX - this.startX + x;
                 for (int z = 0; z < height; z++) {
                     int posZ = startZ - this.startZ + z;
-                    pixels.setPixelRGBA(posX, posZ, setIntoArray[z*height + x]);
+                    int color = setIntoArray[z*width + x];
+                    int r = (color >> 16 & 255);
+                    int g = (color >> 8 & 255);
+                    int b = (color & 255);
+                    pixels.setPixelRGBA(posX, posZ, 0xFF000000 | b << 16 | g << 8 | r);
                 }
             }
-            this.texture.bind();
-            //TODO: check the parameters here are right
-            pixels.upload(0, startX - this.startX, startZ - this.startZ, 0, 0, width, height, false, false );
+            TextureUtils.uploadSubArea(this.texture, startX - this.startX, startZ - this.startZ, width, height);
         }
     }
 
@@ -201,13 +216,19 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
+    public boolean mouseClicked(double p_231044_1_, double p_231044_3_, int p_231044_5_) {
+        super.mouseClicked(p_231044_1_, p_231044_3_, p_231044_5_);
+        return true;
+    }
+
+    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double changeX, double changeY) {
         if(!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize()) && clickedMouseButton == 0 && this.selected == null) {
             this.tryMulMatrix(matrix4f -> matrix4f.setTranslation((float) changeX, 0, 0), fail -> {});
             this.tryMulMatrix(matrix4f -> matrix4f.setTranslation(0, (float) changeY, 0), fail -> {});
         }
 
-        return false;
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, changeX, changeY);
     }
     private void translateWithZoom(Consumer<Matrix4f> mat) {
         float modifier = 0.75F;
@@ -218,15 +239,24 @@ public class TrackingTabletScreen extends TabletScreen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollIn) {
         if (!this.scrollBox.isMouseOver(mouseX, mouseY, this.scrollBox.getTotalSize())) {
-            float mod = (float) Math.exp(scroll);
+            float scroll = (float) (scrollIn * 0.75F);
+            float mod = scroll < 0 ? -scroll : 1 / scroll;
 
             //Ignore disgusting code below. In the future maybe remove the matrix stuff, it don't really be needed
-            this.tryMulMatrix(matrix4f -> matrix4f.multiply(Matrix4f.createScaleMatrix(mod, mod, mod)), fail -> {
+            //Diff between the mouse and the center of the tablet.
+            float x = (float)mouseX - (this.left+this.xSize/2F);
+            float y = (float)mouseY - (this.top+this.ySize/2F);
+            this.tryMulMatrix(matrix4f -> {
+                matrix4f.multiply(Matrix4f.createTranslateMatrix(x, y, 0));
+                matrix4f.multiply(Matrix4f.createScaleMatrix(mod, mod, mod));
+                matrix4f.multiply(Matrix4f.createTranslateMatrix(-x, -y, 0));
+            }, fail -> {
                 if(this.selected != null || scroll > 0) {
                     return;
                 }
+
                 boolean leftOut = fail.x() > 0;
                 boolean rightOut = fail.z() < this.xSize;
 
@@ -248,7 +278,7 @@ public class TrackingTabletScreen extends TabletScreen {
                     if(topOut) {
                         yOffset = -fail.y();
                     } else {
-                        yOffset = this.ySize - fail.z();
+                        yOffset = this.ySize - fail.w();
                     }
                 }
 
@@ -256,17 +286,15 @@ public class TrackingTabletScreen extends TabletScreen {
                 float finalYOff = yOffset;
 
                 this.tryMulMatrix(matrix4f -> {
-                    Matrix4f scale = Matrix4f.createScaleMatrix(mod, mod, mod);
-
-                    Matrix4f translation = Matrix4f.createTranslateMatrix(finalXOff, finalYOff, 0);
-
-                    matrix4f.set(translation);
-                    matrix4f.multiply(scale);
+                    matrix4f.set(Matrix4f.createTranslateMatrix(finalXOff, finalYOff, 0));
+                    matrix4f.multiply(Matrix4f.createTranslateMatrix(x, y, 0));
+                    matrix4f.multiply(Matrix4f.createScaleMatrix(mod, mod, mod));
+                    matrix4f.multiply(Matrix4f.createTranslateMatrix(-x, -y, 0));
                 }, failImpossible -> { /*Throw something?*/ });
             });
             return true;
         }
-        return false;
+        return super.mouseScrolled(mouseX, mouseX, scrollIn);
     }
 
 

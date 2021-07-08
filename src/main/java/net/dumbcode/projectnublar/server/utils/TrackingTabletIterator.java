@@ -19,6 +19,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -94,10 +95,10 @@ public class TrackingTabletIterator {
         }
     }
 
-    private Biome[] getBiomes(int startX, int startZ, int endX, int endZ) {
-        Biome[] biomes = new Biome[(endX-startX) * (endZ - startZ)];
+    private Biome[][] getBiomes(int startX, int startZ, int endX, int endZ) {
+        Biome[][] biomes = new Biome[endX - startX + 1][endZ - startZ + 1];
         for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(startX, 0, startZ), new BlockPos(endX, 0, endZ))) {
-            biomes[this.getIndex(startX, endX, startZ, pos.getX(), pos.getZ())] = this.world.getBiome(pos);
+            biomes[pos.getX() - startX][pos.getZ() - startZ] = this.world.getBiome(pos);
         }
         return biomes;
     }
@@ -111,7 +112,7 @@ public class TrackingTabletIterator {
         int zEnd = MathHelper.clamp(this.currentPos.getMaxBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
 
         int[] colorData = new int[(xEnd - xStart + 1)*(zEnd - zStart + 1)];
-        Biome[] biomes = this.getBiomes(xStart, zStart, xEnd, zEnd);
+        Biome[][] biomes = this.getBiomes(xStart-1, zStart-1, xEnd + 1, zEnd + 1);
 
         this.generateBiomeData(xStart, zStart, xEnd, zEnd, colorData, biomes);
 
@@ -122,7 +123,7 @@ public class TrackingTabletIterator {
         ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(() -> this.player), new S2STrackingTabletUpdateChunk(xStart, xEnd, zStart, zEnd, colorData));
     }
 
-    private void generateBlockMapData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[] biomes) {
+    private void generateBlockMapData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[][] biomes) {
         int[] biomeData = Arrays.copyOf(colorData, colorData.length);
         BlockPos.Mutable pos = new BlockPos.Mutable();
 
@@ -140,9 +141,11 @@ public class TrackingTabletIterator {
                 int color;
                 //todo: config these blocks
                 if(state.getBlock() == Blocks.GRASS) {
-                    color = BiomeUtils.getGrassColor(biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, x, z)], 0.5F);
+                    color = BiomeUtils.getGrassColor(biomes[this.index(xStart, x)][this.index(zStart, z)], 0.5F);
                 } else if (state.is(BlockTags.LEAVES)) {
-                    color = BiomeUtils.getGrassColor(biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, x, z)], 0.3F);
+                    color = BiomeUtils.getGrassColor(biomes[this.index(xStart, x)][this.index(zStart, z)], 0.3F);
+                } else if (state.is(Blocks.WATER)) {
+                    color = biomes[this.index(xStart, x)][this.index(zStart, z)].getSpecialEffects().getWaterColor();
                 } else {
                     color = state.getMapColor(this.world, blockPos).col;
                 }
@@ -295,30 +298,31 @@ public class TrackingTabletIterator {
         return this.world.hasChunk(this.currentPos.x + xOff, this.currentPos.z + zOff);
     }
 
-    private void generateBiomeData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[] biomes) {
+    private void generateBiomeData(int xStart, int zStart, int xEnd, int zEnd, int[] colorData, Biome[][] biomes) {
         for (int z = zStart; z <= zEnd ; z++) {
             for (int x = xStart; x <= xEnd; x++) {
 
-                Biome biome = biomes[this.getIndex(xStart-1, xEnd + 1, zStart-1, x, z)];
+                Biome biome = biomes[this.index(xStart, x)][this.index(zStart, z)];
 
-                boolean bordered = false;
+//                boolean bordered = biomes[this.index(xStart, x-1)][this.index(zStart, z)] != biome ||
+//                        biomes[this.index(xStart, x+1)][this.index(zStart, z)] != biome ||
+//                        biomes[this.index(xStart, x)][this.index(zStart, z-1)] != biome;
+//                        biomes[this.index(xStart, x)][this.index(zStart, z+1)] != biome;
 
-                for (int btx = x-1; btx < x+2; btx++) {
-                    for (int btz = z-1; btz < z+2; btz++) {
-                        if(btx >= this.fromPos.getX() && btx <= this.toPos.getX() && btz >= this.fromPos.getZ() && btz <= this.toPos.getZ()) {
-                            bordered |= biomes[this.getIndex(xStart-1, xEnd+1, zStart-1, btx, btz)] != biome;
-                        }
-
-                    }
-                }
-
-
-                if(!bordered) {
-                }
-                colorData[this.getIndex(xStart, xEnd, zStart, x, z)] = BiomeUtils.getBiomeColor(biome);
+                int index = this.getIndex(xStart, xEnd, zStart, x, z);
+//                if(bordered) {
+//                    colorData[index] = 0;
+//                } else {
+                    colorData[index] = BiomeUtils.getBiomeColor(biome);
+//                }
             }
         }
     }
+
+    private int index(int start, int v) {
+        return v - start + 1;
+    }
+
 
     private int getIndex(int xStart, int xEnd, int zStart, int x, int z) {
         return (x - xStart) + (z - zStart)*(xEnd - xStart + 1);
