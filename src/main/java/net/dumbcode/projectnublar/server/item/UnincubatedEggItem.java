@@ -15,8 +15,8 @@ import java.util.function.Function;
 
 public class UnincubatedEggItem extends BasicDinosaurItem {
 
-    public UnincubatedEggItem(Dinosaur dinosaur, Properties properties) {
-        super(dinosaur, properties);
+    public UnincubatedEggItem(Dinosaur dinosaur, String translationKey, Properties properties) {
+        super(dinosaur, translationKey, properties);
     }
 
     @Override

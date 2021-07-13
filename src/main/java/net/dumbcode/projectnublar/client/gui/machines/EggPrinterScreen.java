@@ -1,19 +1,19 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.CoalGeneratorBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
-public class CoalGeneratorGui extends TabbedGuiContainer<MachineModuleContainer> {
+public class EggPrinterScreen extends MachineContainerScreen {
 
-    public CoalGeneratorGui(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public EggPrinterScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
     }
 
@@ -24,10 +24,9 @@ public class CoalGeneratorGui extends TabbedGuiContainer<MachineModuleContainer>
         this.renderTooltip(stack, mouseX, mouseY);
     }
 
-
     @Override
     protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
-        this.minecraft.getTextureManager().bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/coal_generator.png"));
+        this.minecraft.getTextureManager().bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/egg_printer.png"));
         blit(stack, this.leftPos, this.topPos, 0, 0, this.width, this.height);
 
         ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");

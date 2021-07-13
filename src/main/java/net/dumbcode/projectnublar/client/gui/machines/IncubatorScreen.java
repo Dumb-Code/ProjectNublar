@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -18,13 +19,13 @@ import net.minecraft.util.text.ITextComponent;
 
 import java.util.List;
 
-public class IncubatorGuiScreen extends TabbedGuiContainer<MachineModuleContainer> {
+public class IncubatorScreen extends MachineContainerScreen {
 
     private final IncubatorBlockEntity blockEntity;
 
     private boolean justClickedEggPlacement;
 
-    public IncubatorGuiScreen(IncubatorBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public IncubatorScreen(IncubatorBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
         this.height = 200;

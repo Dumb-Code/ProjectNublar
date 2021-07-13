@@ -3,9 +3,11 @@ package net.dumbcode.projectnublar.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
+import net.dumbcode.dumblibrary.server.ecs.component.RegisterStorageOverridesEvent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
+import net.dumbcode.dumblibrary.server.registry.PreBlockRegistryEvent;
 import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
@@ -46,6 +48,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -124,6 +128,11 @@ public class ProjectNublar {
             this.clientSetup();
         }
 
+        //We want this to be called BEFORE the actual block registry, but after the early registries.
+        bus.addListener((PreBlockRegistryEvent.Normal event) -> {
+            DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
+            PlantHandler.getRegistry().forEach(Plant::attachComponents);
+        });
     }
 
     public void clientSetup() {
@@ -169,10 +178,6 @@ public class ProjectNublar {
     }
 
     public void preInit(FMLCommonSetupEvent event) {
-        EntityStorageOverrides.onRegisterStorages();
-
-        DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
-        PlantHandler.getRegistry().forEach(Plant::attachComponents);
 
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry().getValues()) {
             ResourceLocation regName = dinosaur.getRegName();
@@ -273,10 +278,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(30, S2STrackingTabletUpdateChunk.class, S2STrackingTabletUpdateChunk::toBytes, S2STrackingTabletUpdateChunk::fromBytes, S2STrackingTabletUpdateChunk::handle);
     }
 
-    public static TranslationTextComponent translate(Object... args) {
-        return new TranslationTextComponent(
-            MODID + "." +
-            Arrays.stream(args).map(String::valueOf).collect(Collectors.joining("."))
-        );
+    public static TranslationTextComponent translate(String key, Object... args) {
+        return new TranslationTextComponent(MODID + "." + key, args);
     }
 }

@@ -4,11 +4,11 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import net.dumbcode.projectnublar.client.gui.machines.DnaEditingGui;
-import net.dumbcode.projectnublar.client.gui.machines.SequencingGui;
-import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsGui;
+import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
+import net.dumbcode.projectnublar.client.gui.machines.SequencingScreen;
+import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsScreen;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -319,14 +319,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
+    public MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
         switch (tab) {
             case 0:
-                return new SequencingGui(container, inventory, title, info);
+                return new SequencingScreen(container, inventory, title, info);
             case 1:
-                return new DnaEditingGui(this, container, inventory, title, info);
+                return new DnaEditingScreen(this, container, inventory, title, info);
             default:
-                return new SequencingSynthesizerInputsGui(this, container, title, info, inventory);
+                return new SequencingSynthesizerInputsScreen(this, container, title, info, inventory);
         }
     }
 

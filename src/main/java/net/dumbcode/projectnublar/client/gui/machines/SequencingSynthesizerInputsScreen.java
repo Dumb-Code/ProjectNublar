@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -18,11 +19,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 
-public class SequencingSynthesizerInputsGui extends TabbedGuiContainer<MachineModuleContainer> {
+public class SequencingSynthesizerInputsScreen extends MachineContainerScreen {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
-    public SequencingSynthesizerInputsGui(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, ITextComponent title, TabInformationBar bar, PlayerInventory playerInventory) {
+    public SequencingSynthesizerInputsScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, ITextComponent title, TabInformationBar bar, PlayerInventory playerInventory) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
     }

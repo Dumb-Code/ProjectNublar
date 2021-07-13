@@ -28,8 +28,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
@@ -74,42 +76,14 @@ public class MachineUtils {
     }
     
     public static ItemStack fillTank(ItemStack stack, FluidTank tank) {
-        LazyOptional<IFluidHandlerItem> capability = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
-
-        if(capability.isPresent()) {
-            fillItemTank(capability.orElseThrow(NullPointerException::new), tank);
-        } else if(tank.getFluidAmount() < tank.getCapacity()) {
-            if(stack.getItem() == Items.POTION && PotionUtils.getPotion(stack) == Potions.WATER) {
-                tank.fill(new FluidStack(Fluids.WATER, FluidAttributes.BUCKET_VOLUME / 3), IFluidHandler.FluidAction.SIMULATE);
-                return new ItemStack(Items.GLASS_BOTTLE);
-            } else {
-                return fillBucket(stack, tank).orElse(stack);
-            }
+        FluidActionResult result = FluidUtil.tryEmptyContainer(stack, tank, tank.getSpace(), null, false);
+        if(result.isSuccess()) {
+            return result.getResult();
+        } else if(tank.getFluidAmount() < tank.getCapacity() && stack.getItem() == Items.POTION && PotionUtils.getPotion(stack) == Potions.WATER) {
+            tank.fill(new FluidStack(Fluids.WATER, FluidAttributes.BUCKET_VOLUME / 3), IFluidHandler.FluidAction.EXECUTE);
+            return new ItemStack(Items.GLASS_BOTTLE);
         }
         return stack;
-    }
-
-    private static void fillItemTank(IFluidHandler fluidHandler, FluidTank tank) {
-        FluidStack fluidStack = new FluidStack(Fluids.WATER, tank.getCapacity() - tank.getFluidAmount());
-        FluidStack drained = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.SIMULATE);
-        if(!drained.isEmpty() && tank.fill(drained, IFluidHandler.FluidAction.SIMULATE) > 0) {
-            tank.fill(fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-        }
-    }
-
-    private static Optional<ItemStack> fillBucket(ItemStack stack, FluidTank tank) {
-        int waterAmount = getWaterAmount(stack);
-        if(waterAmount != -1) {
-            FluidBucketWrapper wrapper = new FluidBucketWrapper(stack);
-            FluidStack drained = wrapper.drain(waterAmount, IFluidHandler.FluidAction.EXECUTE);
-            if(!drained.isEmpty()) {
-                tank.fill(drained, IFluidHandler.FluidAction.EXECUTE);
-            } else {
-                ProjectNublar.getLogger().warn("Tried to drain item {}, but yielded no results", stack.getItem().getRegistryName());
-            }
-            return Optional.of(wrapper.getContainer());
-        }
-        return Optional.empty();
     }
 
     public static double getPlantMatter(ItemStack stack, World world, BlockPos pos) {

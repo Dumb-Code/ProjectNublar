@@ -24,10 +24,9 @@ import java.util.Locale;
 public class DinosaurSpawnEgg extends BasicDinosaurItem {
 
 
-    public DinosaurSpawnEgg(Dinosaur dinosaur, Properties properties) {
-        super(dinosaur, properties);
+    public DinosaurSpawnEgg(Dinosaur dinosaur, String translationKey, Properties properties) {
+        super(dinosaur, translationKey, properties);
     }
-
 
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {

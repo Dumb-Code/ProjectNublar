@@ -6,8 +6,8 @@ import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -24,7 +24,7 @@ import net.minecraftforge.fml.client.gui.widget.Slider;
 import java.util.Collections;
 import java.util.List;
 
-public class DnaEditingGui extends TabbedGuiContainer<MachineModuleContainer> {
+public class DnaEditingScreen extends MachineContainerScreen {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
@@ -47,7 +47,7 @@ public class DnaEditingGui extends TabbedGuiContainer<MachineModuleContainer> {
 
     private String hoveringText;
 
-    public DnaEditingGui(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public DnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
     }
@@ -346,7 +346,7 @@ public class DnaEditingGui extends TabbedGuiContainer<MachineModuleContainer> {
 
         @Override
         public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
-            DnaEditingGui.this.dirty = true;
+            DnaEditingScreen.this.dirty = true;
             if(dropdownSelectionId != -1) {
                 slotList.get(dropdownSelectionId).setDrive(this);
                 dropdownSelectionId = -1;
@@ -361,7 +361,7 @@ public class DnaEditingGui extends TabbedGuiContainer<MachineModuleContainer> {
         private final DnaSelectModule module;
 
         ClampedGuiSlider(int id, DnaSelectModule module) {
-            super(0, 0, 79, 20, new StringTextComponent(""), new StringTextComponent("%"), 0D, 100D, DnaEditingGui.this.blockEntity.getSelectAmount(id), false, true, p_onPress_1_ -> {});
+            super(0, 0, 79, 20, new StringTextComponent(""), new StringTextComponent("%"), 0D, 100D, DnaEditingScreen.this.blockEntity.getSelectAmount(id), false, true, p_onPress_1_ -> {});
             this.id = id;
             this.module = module;
         }
@@ -395,7 +395,7 @@ public class DnaEditingGui extends TabbedGuiContainer<MachineModuleContainer> {
                 this.sliderValue = MathHelper.clamp(this.sliderValue, 0, Math.max(maxAmount / 100D, 0));
             }
             if(prevValue != this.sliderValue) {
-                DnaEditingGui.this.dirty = true;
+                DnaEditingScreen.this.dirty = true;
             }
             super.updateSlider();
         }

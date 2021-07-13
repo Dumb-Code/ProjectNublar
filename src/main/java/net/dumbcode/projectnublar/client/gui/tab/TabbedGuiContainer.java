@@ -26,7 +26,7 @@ public abstract class TabbedGuiContainer<T extends Container> extends ContainerS
     }
 
     protected int getOffset() {
-        return 10;
+        return 15;
     }
 
     @Override
@@ -43,9 +43,7 @@ public abstract class TabbedGuiContainer<T extends Container> extends ContainerS
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
         this.info.mouseClicked(this.leftPos, this.width, this.topPos, mouseX, mouseY, mouseButton);
-
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 

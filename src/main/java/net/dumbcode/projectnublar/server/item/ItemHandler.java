@@ -36,7 +36,7 @@ public final class ItemHandler {
 
     public static final PreprocessRegisterDeferredRegister<Item> REGISTER = PreprocessRegisterDeferredRegister.create(ForgeRegistries.ITEMS.getRegistrySuperType(), ProjectNublar.MODID);
 
-    public static final RegistryObject<Item> EMPTY_TEST_TUBE = REGISTER.register("test_tube", () -> new Item(new Item.Properties().stacksTo(1).tab(TAB)));
+    public static final RegistryObject<Item> EMPTY_TEST_TUBE = REGISTER.register("test_tube", () -> new Item(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> IRON_FILTER = REGISTER.register("iron_filter", () -> new FilterItem(0.25F, new Item.Properties().durability(150).tab(TAB)));
     public static final RegistryObject<Item> GOLD_FILTER = REGISTER.register("gold_filter", () -> new FilterItem(0.5F, new Item.Properties().durability(250).tab(TAB)));
     public static final RegistryObject<Item> DIAMOND_FILTER = REGISTER.register("diamond_filter", () -> new FilterItem(1.0F, new Item.Properties().durability(500).tab(TAB)));
@@ -85,30 +85,30 @@ public final class ItemHandler {
     public static final RegistryObject<Item> TURBINES_PART_2 = REGISTER.register("turbines_part_2", BASIC_ITEM);
 
     public static final Map<Dinosaur, RegistryObject<Item>> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
-        new BasicDinosaurItem(d, new Item.Properties().food(new Food.Builder()
+        new BasicDinosaurItem(d, "raw_meat", new Item.Properties().food(new Food.Builder()
             .nutrition(d.getItemProperties().getRawMeatHealAmount())
             .saturationMod(d.getItemProperties().getRawMeatSaturation())
             .build()
         ))
     );
     public static final Map<Dinosaur, RegistryObject<Item>> COOKED_MEAT_ITEMS = createMap("%s_cooked_meat", d ->
-        new BasicDinosaurItem(d, new Item.Properties().food(new Food.Builder()
+        new BasicDinosaurItem(d, "cooked_meat", new Item.Properties().food(new Food.Builder()
             .nutrition(d.getItemProperties().getRawMeatHealAmount())
             .saturationMod(d.getItemProperties().getRawMeatSaturation())
             .build()
         ))
     );
 
-    public static final Map<Dinosaur, RegistryObject<Item>> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new BasicDinosaurItem(d, new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, "spawn_egg", new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, "genetic_material_test_tube", new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new BasicDinosaurItem(d, "test_tube", new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties()));
 
     public static final Map<Dinosaur, Map<String, RegistryObject<Item>>> FOSSIL_ITEMS = createNestedMap(
         "%s_fossil_%s",
         dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS.get()), DinosaurDropsComponent.Storage::getFossilList),
-        (dinosaur, fossil) -> new FossilItem(dinosaur, fossil, new Item.Properties())
+        (dinosaur, fossil) -> new FossilItem(dinosaur, "fossil", fossil, new Item.Properties())
         );
 
     public static void registerAllItemBlocks(RegistryEvent.Register<Item> event) {

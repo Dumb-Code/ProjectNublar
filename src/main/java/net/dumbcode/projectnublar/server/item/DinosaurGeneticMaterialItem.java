@@ -3,16 +3,22 @@ package net.dumbcode.projectnublar.server.item;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements DriveUtils.DriveInformation {
 
     private final String key;
 
-    public DinosaurGeneticMaterialItem(Dinosaur dinosaur, Properties properties) {
-        super(dinosaur, properties);
+    public DinosaurGeneticMaterialItem(Dinosaur dinosaur, String translationKey, Properties properties) {
+        super(dinosaur, translationKey, properties);
         this.key = dinosaur.getRegName().toString();
     }
 
@@ -33,6 +39,11 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
         return DriveUtils.DriveType.DINOSAUR;
     }
 
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> components, ITooltipFlag flag) {
+        components.add(ProjectNublar.translate("item.genetic_material_test_tube.size", this.getSize(stack)));
+        super.appendHoverText(stack, world, components, flag);
+    }
 
     public String getTranslationKey(ItemStack stack) {
         ResourceLocation regName = this.getDinosaur().getRegName();

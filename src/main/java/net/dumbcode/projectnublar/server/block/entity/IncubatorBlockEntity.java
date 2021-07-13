@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.dumbcode.projectnublar.client.gui.machines.IncubatorGuiScreen;
+import net.dumbcode.projectnublar.client.gui.machines.IncubatorScreen;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -253,8 +253,8 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
-        return new IncubatorGuiScreen(this, container, inventory,title, info);
+    public MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
+        return new IncubatorScreen(this, container, inventory,title, info);
     }
 
     @Override

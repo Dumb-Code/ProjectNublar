@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -10,9 +11,9 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
-public class DrillExtractorGui extends TabbedGuiContainer<MachineModuleContainer> {
+public class DrillExtractorScreen extends MachineContainerScreen {
 
-    public DrillExtractorGui(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public DrillExtractorScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
     }
 

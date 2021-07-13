@@ -1,11 +1,13 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -23,7 +25,10 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -72,14 +77,18 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     private final Set<UUID> openedUsers = new HashSet<>();
 
     @Getter
-    private EnergyStorage energy;
+    private MachineModuleEnergyStorage energy;
 
     private final LazyOptional<EnergyStorage> energyCapability = LazyOptional.of(() -> this.energy);
 
+    @Getter @Setter
+    private int clientMaxEnergy;
+    @Getter @Setter
+    private int clientEnergyHeld;
 
     public MachineModuleBlockEntity(TileEntityType<?> type) {
         super(type);
-        this.energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), 50);//getEnergyMaxExtractSpeed()
+        this.energy = new MachineModuleEnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), 50);//getEnergyMaxExtractSpeed()
     }
 
     private MachineModuleItemStackWrapper getFromProcesses(Function<MachineProcess<B>, int[]> func, int[] constantSlots) {
@@ -106,6 +115,16 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 nbt.putString("Recipe", process.currentRecipe.getRegistryName().toString());
             }
             nbt.putBoolean("Processing", process.processing); //Is this really needed?
+
+            ListNBT blockedList = new ListNBT();
+            for (BlockedProcess blockedProcess : process.blockedProcessList) {
+                CompoundNBT blockedNbt = new CompoundNBT();
+                blockedNbt.putIntArray("Slots", blockedProcess.getSlots());
+                blockedNbt.put("Item", blockedProcess.getStack().serializeNBT());
+                blockedList.add(blockedNbt);
+            }
+            nbt.put("Blocked", blockedList);
+
             compound.put("Process_" + i, nbt);
         }
 
@@ -127,17 +146,28 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             process.setTotalTime(nbt.getInt("TotalTime"));
             process.setCurrentRecipe(nbt.contains("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
             process.setProcessing(nbt.getBoolean("Processing")); //Is this really needed?
+
+            List<BlockedProcess> list = process.getBlockedProcessList();
+            list.clear();
+            for (INBT blocked : nbt.getList("Blocked", Constants.NBT.TAG_COMPOUND)) {
+                CompoundNBT blockedNbt = (CompoundNBT) blocked;
+                list.add(new BlockedProcess(
+                    ItemStack.of(blockedNbt.getCompound("Item")),
+                    blockedNbt.getIntArray("Slots")
+                ));
+            }
         }
 
         CompoundNBT energyNBT = compound.getCompound("Energy");
-        energy = new EnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInt("Amount"));
+        energy = new MachineModuleEnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInt("Amount"));
     }
 
     @Override
     public void tick() {
         if(this.level != null && !this.level.isClientSide) {
             updateEnergyNetwork();
-            boolean hasPower = energy.extractEnergy(getBaseEnergyConsumption(), false) >= getBaseEnergyConsumption();
+            int i = energy.extractRaw(getBaseEnergyConsumption());
+            boolean hasPower = i >= getBaseEnergyConsumption();
             for (MachineProcess<B> process : this.processes) {
                 if (!canProvideEnergyForProcess(process)) {
                     process.setHasPower(false);
@@ -147,7 +177,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 process.setHasPower(true);
                 if (hasPower && this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
                     if (process.isProcessing() || this.searchForRecipes(process)) {
-                        if (process.isFinished()) {
+                        if (process.isFinished() || !process.currentRecipe.accepts(this.asB, process)) {
                             MachineRecipe<B> recipe = process.getCurrentRecipe();
                             if (recipe != null) {
                                 recipe.onRecipeFinished(this.asB, process);
@@ -165,7 +195,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                                 ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
                             }
                         } else {
-                            energy.extractEnergy(process.getCurrentConsumptionPerTick(), false); // consume energy for process
+                            energy.extractRaw(process.getCurrentConsumptionPerTick()); // consume energy for process
                             energy.receiveEnergy(process.getCurrentProductionPerTick(), false);
                             process.tick();
                         }
@@ -176,7 +206,16 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 }
             }
             //todo: only sync when needed
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S2CSyncMachineProcesses(this.worldPosition, this.processes.stream().map(S2CSyncMachineProcesses.ProcessSync::of).collect(Collectors.toList())));
+            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension),
+                new S2CSyncMachineProcesses(
+                    this.worldPosition,
+                    this.processes.stream()
+                        .map(S2CSyncMachineProcesses.ProcessSync::of)
+                        .collect(Collectors.toList()),
+                    this.energy.getEnergyStored(),
+                    this.energy.getMaxEnergyStored(),
+                    this.gatherExtraSyncData()
+            ));
         } else {
             for (MachineProcess<B> process : this.processes) {
                 if(process.isProcessing() && !process.isFinished()) {
@@ -186,9 +225,16 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         }
     }
 
+    protected int[] gatherExtraSyncData() {
+        return new int[0];
+    }
+
+    public void onExtraSyncData(int[] aint) {
+    }
+
     private boolean canProvideEnergyForProcess(MachineProcess<B> process) {
         int amountToProvide = process.getCurrentConsumptionPerTick();
-        return energy.extractEnergy(amountToProvide, true) >= amountToProvide;
+        return energy.getEnergyStored() >= amountToProvide;
     }
 
     public int getTier(MachineModuleType type) {
@@ -275,10 +321,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             energy.extractEnergy(maxEnergyAbleToReceive, false);
 
             // Extract as much energy as possible from that neighbor
-//            int maxExtractable = neighbor.extractEnergy(Integer.MAX_VALUE, true);
-//            int maxReceivable = energy.receiveEnergy(maxExtractable, true);
-//           //  actual transfer
-//            energy.receiveEnergy(neighbor.extractEnergy(maxReceivable, false), false);
+            int maxExtractable = neighbor.extractEnergy(Integer.MAX_VALUE, true);
+            int maxReceivable = energy.receiveEnergy(maxExtractable, true);
+           //  actual transfer
+            energy.receiveEnergy(neighbor.extractEnergy(maxReceivable, false), false);
         }
     }
 
@@ -452,7 +498,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 //    public abstract GuiScreen createScreen(EntityPlayer player, TabInformationBar info, int tab);
 
     @OnlyIn(Dist.CLIENT)
-    public abstract TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab);
+    public abstract MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab);
     public abstract MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab);
     public abstract ITextComponent createTitle(int tab);
 
@@ -460,7 +506,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(player.getLevel()::dimension), new S2CSyncOpenedUsers(this.worldPosition, this.getOpenedUsers()));
         NetworkHooks.openGui(player, new SimpleNamedContainerProvider(
             (id, inv, p) -> this.createContainer(id, p, tab),
-            this.createTitle(tab))
+            this.createTitle(tab)),
+            buffer -> {
+                buffer.writeBlockPos(this.worldPosition);
+                buffer.writeInt(tab);
+            }
         );
     }
 
@@ -472,6 +522,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         private final int[] allSlots;
         private final MachineModuleBlockEntity<B> machine;
+
+        private final List<BlockedProcess> blockedProcessList = new ArrayList<>();
 
         private int time;
         private int totalTime;
@@ -495,16 +547,50 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             return this.outputSlots[index];
         }
 
+        public boolean insertOutputItem(ItemStack stack, int... slots) {
+            if(slots.length == 0) {
+                slots = IntStream.range(0, this.outputSlots.length).toArray();
+            }
+            for (int slot : slots) {
+                if(stack.isEmpty()) {
+                    return true;
+                }
+                stack = this.machine.getHandler().insertOutputItem(this.getOutputSlot(slot), stack, false);
+            }
+            if(!stack.isEmpty()) {
+                this.blockOutputSlots(stack, slots);
+                return false;
+            }
+            return true;
+        }
+
+        public void blockOutputSlots(ItemStack stack, int... slots) {
+            if(slots.length == 0) {
+                slots = IntStream.range(0, this.outputSlots.length).toArray();
+            }
+            if(!stack.isEmpty()) {
+                this.blockedProcessList.add(new BlockedProcess(stack, slots));
+            }
+        }
+
         public int getCurrentConsumptionPerTick() {
-            if(isFinished())
+            if(isFinished() || this.isBlocked())
                 return 0;
             if(currentRecipe != null)
                 return currentRecipe.getCurrentConsumptionPerTick(machine.asB, this);
             return 0;
         }
 
+        public float getTimeDone() {
+            return (float) this.time / this.totalTime;
+        }
+
+        public int getTimeDone(int modifier) {
+            return (int) (this.getTimeDone() * modifier);
+        }
+
         public int getCurrentProductionPerTick() {
-            if(isFinished())
+            if(isFinished() || this.isBlocked())
                 return 0;
             if(currentRecipe != null)
                 return currentRecipe.getCurrentProductionPerTick(machine.asB, this);
@@ -517,11 +603,35 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 this.totalTime = currentRecipe.getRecipeTime(machine.asB, this);
                 currentRecipe.onRecipeTick(machine.asB, this);
             }
+            if(this.isBlocked()) {
+                for (Iterator<BlockedProcess> iterator = this.blockedProcessList.iterator(); iterator.hasNext(); ) {
+                    BlockedProcess blockedProcess = iterator.next();
+                    for (int slot : blockedProcess.getSlots()) {
+                        int outputSlot = this.getOutputSlot(slot);
+                        blockedProcess.setStack(this.machine.getHandler().insertOutputItem(outputSlot, blockedProcess.getStack(), false));
+                        if(blockedProcess.getStack().isEmpty()) {
+                            iterator.remove();
+                        }
+                    }
+
+                }
+            }
         }
 
         public boolean isFinished() {
-            return this.time >= this.totalTime;
+            return this.time >= this.totalTime && !this.isBlocked();
         }
+
+        public boolean isBlocked() {
+            return !this.blockedProcessList.isEmpty();
+        }
+    }
+
+    @AllArgsConstructor
+    @Data
+    public static class BlockedProcess {
+        private ItemStack stack;
+        private final int[] slots;
     }
 
     protected enum ProcessInterruptAction {

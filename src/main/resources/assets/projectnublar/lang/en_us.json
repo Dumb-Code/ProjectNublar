@@ -27,6 +27,12 @@
 
     "projectnublar.gui.tablethome.add": "Add",
 
+    "projectnublar.gui.machine.nopower": "No Power",
+    "projectnublar.gui.machine.fullslot": "Output slots full",
+    "projectnublar.gui.machine.time.seconds": "%ss",
+    "projectnublar.gui.machine.time.minutes": "%sm",
+    "projectnublar.gui.machine.time.hours": "%sh",
+
 
     "projectnublar.mood.stressful.positive": "Relaxed",
     "projectnublar.mood.stressful.negative": "Stressed",
@@ -38,16 +44,33 @@
     "projectnublar.mood.reason.full": "Full",
     "projectnublar.mood.reason.hungry": "Hungry",
 
-    "projectnublar.item.fossil": "Fossil: %1$s %2$s",
+    "projectnublar.item.raw_meat.name": "%s Raw Meat",
+    "projectnublar.item.cooked_meat.name": "%s Cooked Meat",
+    "projectnublar.item.spawn_egg.name": "%s Spawn Egg",
+    "projectnublar.item.genetic_material_test_tube.name": "%s Genetic Material",
+    "projectnublar.item.genetic_material_test_tube.size": "Contains %s Genetic Data",
+    "projectnublar.item.test_tube.name": "%s Test Tube",
+    "projectnublar.item.unincubated_egg.name": "%s Unincubated Egg",
+    "projectnublar.item.incubated_egg.name": "%s Incubated Egg",
+    "projectnublar.item.fossil.name": "%1$s %2$s Fossil",
+
+    "projectnublar.item.fossil.type.foot": "Foot",
+    "projectnublar.item.fossil.type.claw": "Claw",
+    "projectnublar.item.fossil.type.leg": "Leg",
+    "projectnublar.item.fossil.type.neck": "Neck",
+    "projectnublar.item.fossil.type.pelvis": "Pelvis",
+    "projectnublar.item.fossil.type.ribcage": "Ribcage",
+    "projectnublar.item.fossil.type.skull": "Skull",
+    "projectnublar.item.fossil.type.tail": "Tail",
 
     "projectnublar.action.skeletal_builder.no_dino_to_display": "No dinosaur to display!",
 
     "item.meat_dinosaur_tyrannosaurus_raw": "Raw Tyrannosaurus meat",
     "item.meat_dinosaur_tyrannosaurus_cooked": "Cooked Tyrannosaurus meat",
 
-    "projectnublar.dino.tyrannosaurus": "Tyrannosaurus",
-    "projectnublar.dino.dilophosaurus": "Dilophosaurus",
-    "projectnublar.dino.velociraptor_jp": "Velociraptor (JP)",
+    "projectnublar.dino.tyrannosaurus.name": "Tyrannosaurus",
+    "projectnublar.dino.dilophosaurus.name": "Dilophosaurus",
+    "projectnublar.dino.velociraptor_jp.name": "Velociraptor (JP)",
     "projectnublar.dino.missing": "<!Missing Dinosaur!>",
 
     "projectnublar.fences.length.toolong": "%sm is too long. The max distance is %sm",

@@ -7,20 +7,21 @@ import net.minecraft.item.Item;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.function.Consumer;
+
 public class FossilItem extends BasicDinosaurItem {
 
     @Getter
     private final String variant;
-    private final TranslationTextComponent stackDisplayName;
 
-    public FossilItem(Dinosaur dinosaur, String variant, Item.Properties properties) {
-        super(dinosaur, properties);
+    public FossilItem(Dinosaur dinosaur, String translationKey, String variant, Properties properties) {
+        super(dinosaur, translationKey, properties);
         this.variant = variant;
-        this.stackDisplayName = new TranslationTextComponent(ProjectNublar.MODID + ".item.fossil.name", this.dinosaur.createNameComponent(), this.variant);
     }
 
     @Override
-    public ITextComponent getDescription() {
-        return this.stackDisplayName;
+    protected void addTranslation(Consumer<Object> consumer) {
+        super.addTranslation(consumer);
+        consumer.accept(ProjectNublar.translate("item.fossil.type." + this.variant));
     }
 }

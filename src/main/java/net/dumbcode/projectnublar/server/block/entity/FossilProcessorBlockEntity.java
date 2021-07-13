@@ -1,9 +1,9 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
-import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorGui;
+import net.dumbcode.projectnublar.client.gui.machines.FossilProcessorScreen;
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
@@ -38,19 +38,23 @@ import java.util.List;
 public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilProcessorBlockEntity> {
 
     private static final int DEFAULT_CAPACITY = FluidAttributes.BUCKET_VOLUME * 2;
-    private final FluidTank tank = new FluidTank(DEFAULT_CAPACITY, s -> s.getFluid() == Fluids.WATER) {
-
-        @Nonnull
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            return FluidStack.EMPTY;
-        }
-    };
+    private final MachineModuleFluidTank tank = new MachineModuleFluidTank(this, DEFAULT_CAPACITY, s -> s.getFluid() == Fluids.WATER).setCanDrain(false);
 
     private final LazyOptional<FluidTank> capability = LazyOptional.of(() -> this.tank);
 
     public FossilProcessorBlockEntity() {
         super(ProjectNublarBlockEntities.FOSSIL_PROCESSOR.get());
+    }
+
+    @Override
+    protected int[] gatherExtraSyncData() {
+        return new int[]{ this.tank.getCapacity(), this.tank.getFluidAmount() };
+    }
+
+    @Override
+    public void onExtraSyncData(int[] aint) {
+        this.tank.setCapacity(aint[0]);
+        this.tank.setFluid(new FluidStack(Fluids.WATER, aint[1]));
     }
 
     @Nonnull
@@ -83,7 +87,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     protected int getInventorySize() {
-        return 5;
+        return 13;
     }
 
     @Override
@@ -128,7 +132,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
         );
     }
 
-    public FluidTank getTank() {
+    public MachineModuleFluidTank getTank() {
         return tank;
     }
 
@@ -139,23 +143,33 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     protected List<MachineProcess<FossilProcessorBlockEntity>> createProcessList() {
-        return Lists.newArrayList(new MachineProcess<>(this, new int[]{1}, new int[]{4}));
+        return Lists.newArrayList(new MachineProcess<>(this, new int[]{1}, new int[]{4, 5, 6, 7, 8, 9, 10, 11, 12}));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public TabbedGuiContainer<MachineModuleContainer> createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
-        return new FossilProcessorGui(container, inventory, title, info, this.tank);
+    public MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
+        return new FossilProcessorScreen(container, inventory, title, info, this.tank, this.getProcess(0));
     }
 
     @Override
     public MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab) {
-        return new MachineModuleContainer(windowId, this, player.inventory, tab, 83, 176,
-            new MachineModuleSlot(this, 0, 8, 61), //water
-            new MachineModuleSlot(this, 1, 67, 12), //fossil
-            new MachineModuleSlot(this, 2, 67, 52), //test tub
-            new MachineModuleSlot(this, 3, 67, 32), //Filter
-            new MachineModuleSlot(this, 4, 126, 32) //output
+        return new MachineModuleContainer(windowId, this, player.inventory, tab, 135, 176,
+            new MachineModuleSlot(this, 0, 22, 35), //water
+            new MachineModuleSlot(this, 1, 80, 13), //fossil
+            new MachineModuleSlot(this, 2, 136, 35), //test tub
+            new MachineModuleSlot(this, 3, 22, 14), //Filter
+
+            //outputs
+            new MachineModuleSlot(this, 4, 59, 61),
+            new MachineModuleSlot(this, 5, 80, 61),
+            new MachineModuleSlot(this, 6, 101, 61),
+            new MachineModuleSlot(this, 7, 59, 82),
+            new MachineModuleSlot(this, 8, 80, 82),
+            new MachineModuleSlot(this, 9, 101, 82),
+            new MachineModuleSlot(this, 10, 59, 103),
+            new MachineModuleSlot(this, 11, 80, 103),
+            new MachineModuleSlot(this, 12, 101, 103)
         );
     }
 
@@ -177,7 +191,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public int getEnergyCapacity() {
-        return 1000;
+        return 5000;
     }
 
     @Override

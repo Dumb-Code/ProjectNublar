@@ -13,8 +13,9 @@ import net.minecraft.world.World;
 
 public class DinosaurEggItem extends BasicDinosaurItem {
 
-    public DinosaurEggItem(Dinosaur dinosaur, Properties properties) {
-        super(dinosaur, properties);
+
+    public DinosaurEggItem(Dinosaur dinosaur, String translationKey, Properties properties) {
+        super(dinosaur, translationKey, properties);
     }
 
     @Override

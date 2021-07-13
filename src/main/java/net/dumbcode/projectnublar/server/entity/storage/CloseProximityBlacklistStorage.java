@@ -13,23 +13,21 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CloseProximityBlacklistStorage extends CloseProximityAngryComponent.Storage implements SaveableEntityStorage<CloseProximityAngryComponent> {
 
-    private List<EntityType<?>> blackListClasses = new ArrayList<>();
+    private List<ResourceLocation> blackListClasses = new ArrayList<>();
 
     @Override
     public void constructTo(CloseProximityAngryComponent component) {
         super.constructTo(component);
-        component.setPredicate(e -> !blackListClasses.contains(e.getType()));
+        component.setPredicate(e -> !blackListClasses.contains(e.getType().getRegistryName()));
     }
 
-    public CloseProximityBlacklistStorage add(EntityType<?>... classes) {
+    public CloseProximityBlacklistStorage add(ResourceLocation... classes) {
         Collections.addAll(this.blackListClasses, classes);
         return this;
     }
@@ -44,7 +42,7 @@ public class CloseProximityBlacklistStorage extends CloseProximityAngryComponent
     public void writeJson(JsonObject json) {
         super.writeJson(json);
         json.add("blacklist_classes", this.blackListClasses.stream()
-            .map(t -> t.getRegistryName().toString())
+            .map(ResourceLocation::toString)
             .collect(CollectorUtils.toJsonArrayString())
         );
     }
@@ -53,23 +51,21 @@ public class CloseProximityBlacklistStorage extends CloseProximityAngryComponent
     public void readJson(JsonObject json) {
         super.readJson(json);
         this.blackListClasses = StreamUtils.stream(JSONUtils.getAsJsonArray(json, "blacklist_classes"))
-            .map(j -> ForgeRegistries.ENTITIES.getValue(new ResourceLocation(j.getAsString())))
-            .filter(Objects::nonNull)
+            .map(j -> new ResourceLocation(j.getAsString()))
             .collect(Collectors.toList());
     }
 
     @Override
     public void readNBT(CompoundNBT nbt) {
         this.blackListClasses = nbt.getList("blacklist_classes", Constants.NBT.TAG_STRING).stream()
-            .map(j -> ForgeRegistries.ENTITIES.getValue(new ResourceLocation(j.getAsString())))
-            .filter(Objects::nonNull)
+            .map(j -> new ResourceLocation(j.getAsString()))
             .collect(Collectors.toList());
     }
 
     @Override
     public CompoundNBT writeNBT(CompoundNBT nbt) {
         nbt.put("blacklist_classes", this.blackListClasses.stream()
-            .map(t -> StringNBT.valueOf(t.getRegistryName().toString()))
+            .map(t -> StringNBT.valueOf(t.toString()))
             .collect(CollectorUtils.toNBTTagList())
         );
         return nbt;

@@ -25,7 +25,7 @@ public class BlockCreativePowerSource extends Block implements IItemBlock {
 
     @Override
     public boolean hasTileEntity(BlockState state) {
-        return false;
+        return true;
     }
 
     @Nullable

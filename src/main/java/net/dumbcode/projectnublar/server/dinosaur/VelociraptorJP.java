@@ -146,7 +146,7 @@ public class VelociraptorJP extends Dinosaur {
         this.addEmptyComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
         this.addComponentWithOverride(EntityComponentTypes.CLOSE_PROXIMITY_ANGRY.get(), EntityStorageOverrides.CLOSE_PROXIMITY_BLACKLIST)
             .setRange(3)
-            .add(EntityHandler.DINOSAUR.get());
+            .add(EntityHandler.DINOSAUR.getId());
 
         this.addComponent(EntityComponentTypes.SOUND_STORAGE)
             .addSound(ECSSounds.EATING_CRUNCH, SoundHandler.VELOCIRAPTOR_FLESH_CRUNCH)
