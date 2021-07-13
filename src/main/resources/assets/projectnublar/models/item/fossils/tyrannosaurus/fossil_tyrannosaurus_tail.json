@@ -1,6 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "projectnublar:item/fossils/tyrannosaurus/tyrannosaurus_tail"
-  }
-}
