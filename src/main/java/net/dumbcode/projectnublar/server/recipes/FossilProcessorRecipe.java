@@ -9,8 +9,12 @@ import net.dumbcode.projectnublar.server.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+
+import java.util.Arrays;
+import java.util.Random;
 
 public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockEntity> {
     INSTANCE;
@@ -30,7 +34,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
 
     @Override
     public int getRecipeTime(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
-        return 5;
+        return 4800 - 1200*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }
 
     @Override
@@ -61,11 +65,20 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         if(item instanceof DinosaurProvider) {
             ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()).get());
             //Sets the size.
-            //See here: https://www.desmos.com/calculator/m2ryadpetn for a distribution for the 3 different filter types.
-            //Where d is the damage of the item (0 is no damage, 1 is fully damaged.)
-            //If less than 1, them set it to 1.
-            DinosaurGeneticMaterialItem.setSize(stack, Math.max(1, MathUtils.getWeightedResult(5*efficiency, 0.6F-efficiency/2F)));
-            process.insertOutputItem(stack);
+            //See here: https://www.desmos.com/calculator/c59djyd7c8 for a distribution for the 3 different filter types.
+            //Where:
+            //  d is the damage of the item (0 is no damage, 1 is fully damaged.)
+            //  the X axis is the size of the genetic material produced.
+            //  green -> iron filter
+            //  red -> gold filter
+            //  blue -> diamond filter
+            //If less than 1, then don't insert the output item.
+            int size = MathUtils.getWeightedResult(5 * efficiency + 1, 0.6F - efficiency / 2F);
+            size = new Random().nextInt(20);
+            if(size > 0) {
+                DinosaurGeneticMaterialItem.setSize(stack, size);
+                process.insertOutputItem(stack);
+            }
         }
     }
 
