@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.client.gui.machines;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -51,9 +50,9 @@ public class IncubatorScreen extends MachineContainerScreen {
                         egg.getXPos() + left - this.leftPos - 8,
                         egg.getYPos() + top - this.topPos - 8
                     ));
-                    slot.setEnabled(true);
+                    slot.setActive(true);
                 } else { //Should always be true
-                    slot.setEnabled(false);
+                    slot.setActive(false);
                 }
             }
         }

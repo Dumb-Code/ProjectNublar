@@ -1,24 +1,17 @@
 package net.dumbcode.projectnublar.server.containers.machines.slots;
 
-import com.mojang.datafixers.util.Either;
-import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class MachineModuleSlot extends SlotItemHandler {
+public class MachineModuleSlot extends SlotItemHandler implements SlotCanBeDisabled {
 
     @Setter
-    @Getter
-    private boolean enabled = true;
+    private boolean active = true;
 
     private final MachineModuleBlockEntity<?> blockEntity;
 
@@ -36,5 +29,10 @@ public class MachineModuleSlot extends SlotItemHandler {
     public MachineModuleSlot setBackground(ResourceLocation atlas, ResourceLocation sprite) {
         super.setBackground(atlas, sprite);
         return this;
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.active;
     }
 }

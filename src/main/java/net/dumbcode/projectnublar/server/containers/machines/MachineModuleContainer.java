@@ -4,7 +4,9 @@ import lombok.NonNull;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
+import net.dumbcode.projectnublar.server.containers.machines.slots.DisableSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.dumbcode.projectnublar.server.containers.machines.slots.SlotCanBeDisabled;
 import net.dumbcode.projectnublar.server.network.S2CSyncOpenedUsers;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -15,6 +17,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 
@@ -25,12 +29,14 @@ public class MachineModuleContainer extends Container {
     private final int tab;
     private final MachineModuleBlockEntity<?> blockEntity;
 
+    public final List<SlotCanBeDisabled> disableSlots = new ArrayList<>();
+
     public MachineModuleContainer(int id, MachineModuleBlockEntity<?> blockEntity, PlayerInventory inventory, int tab, int playerOffset, int xSize, MachineModuleSlot... slots) {
         super(ProjectNublarContainers.MACHINE_MODULES.get(), id);
         this.blockEntity = blockEntity;
         this.tab = tab;
-        for (Slot slot : slots) {
-            this.addSlot(slot);
+        for (MachineModuleSlot slot : slots) {
+            this.slot(slot);
         }
 
         if(playerOffset >= 0) {
@@ -49,16 +55,25 @@ public class MachineModuleContainer extends Container {
 
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, xStart + j * 18, yOffet + i * 18));
+                this.slot(new DisableSlot(playerInventory, j + i * 9 + 9, xStart + j * 18, yOffet + i * 18));
             }
         }
 
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, xStart + i * 18, yOffet + 58));
+            this.slot(new DisableSlot(playerInventory, i, xStart + i * 18, yOffet + 58));
         }
     }
 
+    private <T extends Slot & SlotCanBeDisabled> T slot(T slot) {
+        super.addSlot(slot);
+        this.disableSlots.add(slot);
+        return slot;
+    }
 
+    @Override
+    protected Slot addSlot(Slot p_75146_1_) {
+        throw new IllegalArgumentException("Should call slot()");
+    }
 
     @Override
     public void removed(PlayerEntity playerIn) {

@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.machines.slots.SlotCanBeDisabled;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -19,15 +20,24 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SequencingSynthesizerInputsScreen extends SequencerSynthesizerBaseScreen {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
+    private final List<SlotCanBeDisabled> slots;
     private boolean inventoryOpen;
 
     public SequencingSynthesizerInputsScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, ITextComponent title, TabInformationBar bar, PlayerInventory playerInventory) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
+        this.slots = inventorySlotsIn.disableSlots;
+
+        for (SlotCanBeDisabled slot : this.slots) {
+            slot.setActive(false);
+        }
     }
 
     @Override

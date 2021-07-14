@@ -7,6 +7,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
@@ -20,12 +21,22 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
 
     private static final int RING_SIZE = 175;
 
-    private final Random random = new Random();
+    private final float[] ringModifiers = Util.make(new float[5], arr -> {
+        Random random = new Random();
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = random.nextFloat() + 0.5F;
+        }
+    });
 
     public SequencerSynthesizerBaseScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.imageWidth = 351;
         this.imageHeight = 199;
+    }
+
+    @Override
+    protected void renderLabels(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
+
     }
 
     @Override
@@ -44,7 +55,7 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
             stack.pushPose();
             stack.translate(this.leftPos, this.topPos, 0);
             stack.translate(this.imageWidth / 2F, this.imageHeight / 2F, 0);
-            stack.mulPose(Vector3f.ZP.rotationDegrees((minecraft.player.tickCount + minecraft.getFrameTime()) * (ring % 2 == 0 ? 1 : -1) * this.random.nextFloat() + 0.5F));
+            stack.mulPose(Vector3f.ZP.rotationDegrees((minecraft.player.tickCount + minecraft.getFrameTime()) * (ring % 2 == 0 ? 1 : -1) * this.ringModifiers[ring] + 0.5F));
             stack.translate(-this.imageWidth / 2F, -this.imageHeight / 2F, 0);
             blit(stack, ringStartX, ringStartY, this.getBlitOffset(), u, v, RING_SIZE, RING_SIZE, 350, 525);
             stack.popPose();
