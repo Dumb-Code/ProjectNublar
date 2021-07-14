@@ -76,15 +76,16 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
             blit(stack, this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 0, 0, 16, 16, 32, 32);
             stack.popPose();
 
+            RenderSystem.disableDepthTest();
             for (MachineModuleBlockEntity.BlockedProcess blockedProcess : process.getBlockedProcessList()) {
                 for (int iSlot : blockedProcess.getSlots()) {
                     int index = process.getOutputSlot(iSlot);
                     Slot slot = this.menu.slots.get(index);
 
-                    fill(stack, slot.x, slot.y, slot.x + 16, slot.y + 16, 0xA0FF0000);
+                    fill(stack, this.leftPos + slot.x, this.topPos + slot.y, this.leftPos + slot.x + 16, this.topPos + slot.y + 16, 0xA0FF0000);
                 }
-
             }
+            RenderSystem.enableDepthTest();
         }
     }
 

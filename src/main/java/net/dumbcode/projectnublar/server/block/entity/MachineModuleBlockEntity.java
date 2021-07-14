@@ -598,11 +598,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         }
 
         public void tick() {
-            this.time++;
-            if(currentRecipe != null) {
-                this.totalTime = currentRecipe.getRecipeTime(machine.asB, this);
-                currentRecipe.onRecipeTick(machine.asB, this);
-            }
             if(this.isBlocked()) {
                 for (Iterator<BlockedProcess> iterator = this.blockedProcessList.iterator(); iterator.hasNext(); ) {
                     BlockedProcess blockedProcess = iterator.next();
@@ -614,6 +609,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                         }
                     }
 
+                }
+            } else {
+                this.time++;
+                if(currentRecipe != null) {
+                    this.totalTime = currentRecipe.getRecipeTime(machine.asB, this);
+                    currentRecipe.onRecipeTick(machine.asB, this);
                 }
             }
         }
