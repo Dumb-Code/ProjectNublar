@@ -11,24 +11,23 @@ import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.DriveItem;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
-import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
+import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -63,11 +62,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     public static final int TOTAL_SLOTS = 9;
     public static final int SLOTS_AT_50 = 3;
-    private static final float SLOTS_GRADIENT = (TOTAL_SLOTS - SLOTS_AT_50) / 0.5F;
-    private static final float SLOTS_OFFSET = 2*SLOTS_AT_50 - TOTAL_SLOTS;
+    public static final float SLOTS_END = 0.8F;
+    //https://www.desmos.com/calculator/uphflo6s3s
+    private static final float SLOTS_GRADIENT = (TOTAL_SLOTS - SLOTS_AT_50) / (SLOTS_END - 0.5F);
+    private static final float SLOTS_OFFSET = SLOTS_AT_50 - SLOTS_GRADIENT*(0.5F);
 
-    private static final int HDD_TOTAL_CONSUME_TIME = 200;
-    private static final int SSD_TOTAL_CONSUME_TIME = HDD_TOTAL_CONSUME_TIME / 2;
+
 
     @Getter
     private double totalStorage = DEFAULT_STORAGE;
@@ -127,9 +127,25 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return super.getCapability(cap, side);
     }
 
+    public double waterPercent() {
+        return this.tank.getFluidAmount() / (double) this.tank.getCapacity();
+    }
+
+    public double sugarPercent() {
+        return this.sugarAmount / this.totalStorage;
+    }
+
+    public double bonePercent() {
+        return this.boneAmount / this.totalStorage;
+    }
+
+    public double plantPercent() {
+        return this.plantAmount / this.totalStorage;
+    }
+
     @Override
     public void load(BlockState state, CompoundNBT compound) {
-        super.save(compound);
+        super.load(state, compound);
         this.tank.readFromNBT(compound.getCompound("FluidTank"));
         this.dye = DyeColor.byId(compound.getInt("Dye"));
         this.consumeTimer = compound.getInt("ConsumeTimer");
@@ -177,6 +193,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     protected List<MachineRecipe<SequencingSynthesizerBlockEntity>> getAllRecipes() {
         return Lists.newArrayList(
+                SequencingSynthesizerHardDriveRecipe.INSTANCE,
                 SequencingSynthesizerRecipe.INSTANCE
         );
     }
@@ -188,7 +205,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Override
     protected List<MachineProcess<SequencingSynthesizerBlockEntity>> createProcessList() {
-        return Lists.newArrayList(new MachineProcess<>(this, new int[]{7}, new int[]{8}));
+        return Lists.newArrayList(
+                new MachineProcess<>(this, new int[]{5}, new int[]{6}, SequencingSynthesizerHardDriveRecipe.INSTANCE),
+        new MachineProcess<>(this, new int[]{7}, new int[]{8}, SequencingSynthesizerRecipe.INSTANCE)
+        );
     }
 
     @Override
@@ -199,7 +219,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             case 2: return MachineUtils.getSugarMatter(stack) > 0;
             case 3: return MachineUtils.getBoneMatter(stack) > 0;
             case 4: return MachineUtils.getPlantMatter(stack, this.level, this.worldPosition) > 0;
-            case 5: return stack.getItem() instanceof DriveUtils.DriveInformation && ((DriveUtils.DriveInformation) stack.getItem()).hasInformation(stack);
         }
         return super.isItemValidFor(slot, stack);
     }
@@ -212,12 +231,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.layer++;
             this.handler.setStackInSlot(slot, MachineUtils.fillTank(this.handler.getStackInSlot(slot), this.tank));
             this.layer--;
-        }
-        if(slot == 0) {
-            ItemStack stack = this.handler.getStackInSlot(slot);
-            if(!stack.isEmpty() && stack.getItem() instanceof DriveItem) {
-                this.totalConsumeTime = ((DriveItem) stack.getItem()).isSsd() ? SSD_TOTAL_CONSUME_TIME : HDD_TOTAL_CONSUME_TIME;
-            }
         }
         super.onSlotChanged(slot);
     }
@@ -237,32 +250,11 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.sugarAmount = this.updateAmount(this.sugarAmount, this.handler.getStackInSlot(2), MachineUtils::getSugarMatter);
         this.boneAmount = this.updateAmount(this.boneAmount, this.handler.getStackInSlot(3), MachineUtils::getBoneMatter);
         this.plantAmount = this.updateAmount(this.plantAmount, this.handler.getStackInSlot(4), stack -> MachineUtils.getPlantMatter(stack, this.level, this.worldPosition));
-
-        if(this.consumeTimer != 0) {
-            if(!this.canConsume()) {
-                this.consumeTimer = 0;
-            } else if(this.consumeTimer++ >= this.totalConsumeTime) {
-                ItemStack inStack = this.handler.getStackInSlot(5);
-                ItemStack out = inStack.split(1);
-
-                if(!out.isEmpty() && !this.level.isClientSide) {
-                    DriveUtils.addItemToDrive(this.handler.getStackInSlot(0), out);
-                }
-
-                if(out.getItem() instanceof DriveUtils.DriveInformation) {
-                    ItemStack outItem = ((DriveUtils.DriveInformation) out.getItem()).getOutItem(out);
-                    this.handler.insertOutputItem(6, outItem, false);
-                }
-                this.consumeTimer = 1;
-            }
-        } else if(this.canConsume()) {
-            this.consumeTimer = 1;
-        }
     }
 
     @Override
     public int[] constantInputSlots() {
-        return new int[] { 0, 1, 2, 3, 4, 5 };
+        return new int[] { 0, 1, 2, 3, 4 };
     }
 
     private double updateAmount(double currentAmount, ItemStack stack, ToDoubleFunction<ItemStack> amountGetter) {
@@ -274,15 +266,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             }
         }
         return currentAmount;
-    }
-
-    private boolean canConsume() {
-        ItemStack in = this.handler.getStackInSlot(5);
-        if(in.getItem() instanceof DriveUtils.DriveInformation && this.handler.getStackInSlot(0).getItem() instanceof DriveItem && DriveUtils.canAdd(this.handler.getStackInSlot(0), in)) {
-            ItemStack out = ((DriveUtils.DriveInformation) in.getItem()).getOutItem(in);
-            return out.isEmpty() || this.handler.insertOutputItem(6, out, true).isEmpty();
-        }
-        return false;
     }
 
     @Nonnull
@@ -314,15 +297,15 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Override
     protected void addTabs(List<TabInformationBar.Tab> tabList) {
         tabList.add(new DefaultTab(0));
-        tabList.add(new DefaultTab(1));
-        tabList.add(new DefaultTab(2));
+//        tabList.add(new DefaultTab(1));
+//        tabList.add(new DefaultTab(2));
     }
 
     @Override
     public MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
         switch (tab) {
             case 0:
-                return new SequencingScreen(container, inventory, title, info);
+                return new SequencingScreen(this, container, inventory, title, info);
             case 1:
                 return new DnaEditingScreen(this, container, inventory, title, info);
             default:
@@ -334,29 +317,27 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab) {
         switch (tab) {
             case 0:
-                return new MachineModuleContainer(windowId, this, player.inventory, tab, 110, 208,
-                    new MachineModuleSlot(this, 0, 187, 5)
-                    .setBackground(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(ProjectNublar.MODID, "items/hard_drive")),
-                    new MachineModuleSlot(this, 5, 60, 90),
-                    new MachineModuleSlot(this, 6, 40, 90),
-                    new MachineModuleSlot(this, 7, 118, 90),
-                    new MachineModuleSlot(this, 8, 167, 90)
+                return new MachineModuleContainer(windowId, this, player.inventory, tab, 85, 351,
+                    new MachineModulePopoutSlot(this, 0, 167, 61, 27, 32, createMatterTranslation("insert", "hard_drive")),
+                    new MachineModulePopoutSlot(this, 5, 167, 61, 27, 153, createMatterTranslation("insert", "genetic_material")),
+                    new MachineModulePopoutSlot(this, 6, 167, 61, 308, 153, createMatterTranslation("remove", "leftover"))
                 );
             case 1:
-                return new MachineModuleContainer(windowId, this, player.inventory, tab, -1, 208,
-                    new MachineModuleSlot(this, 0, 187, 5)
-                        .setBackground(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(ProjectNublar.MODID, "items/hard_drive"))
-                    );
+                return new MachineModuleContainer(windowId, this, player.inventory, tab, -1, 208);
             default:
-                return new MachineModuleContainer(windowId, this, player.inventory, tab, 84, 176,
-                    new MachineModuleSlot(this, 0, 78, 6)
-                        .setBackground(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(ProjectNublar.MODID, "items/hard_drive")),
-                    new MachineModuleSlot(this, 1, 21, 58),
-                    new MachineModuleSlot(this, 2, 59, 58),
-                    new MachineModuleSlot(this, 3, 97, 58),
-                    new MachineModuleSlot(this, 4, 135, 58)
+                return new MachineModuleContainer(windowId, this, player.inventory, tab, 85, 351,
+                    new MachineModulePopoutSlot(this, 1, 167, 61,49, 37, createMatterTranslation("insert", "water")), //water
+                    new MachineModulePopoutSlot(this, 2, 167, 61,49, 107, createMatterTranslation("insert", "sugar")), //sugar
+                    new MachineModulePopoutSlot(this, 3, 167, 61,285, 37, createMatterTranslation("insert", "bone")), //bone
+                    new MachineModulePopoutSlot(this, 4, 167, 61,285, 107, createMatterTranslation("insert", "plant")), //plant
+                    new MachineModulePopoutSlot(this, 7, 167, 61, 129, 169, createMatterTranslation("insert", "test_tube")),
+                    new MachineModulePopoutSlot(this, 8, 167, 61, 205, 169, createMatterTranslation("remove", "dna_test_tube"))
                 );
         }
+    }
+
+    private static ITextComponent createMatterTranslation(String operation, String name) {
+        return ProjectNublar.translate("gui.machine.sequencer." + operation, ProjectNublar.translate("gui.machine.sequencer.matter." + name));
     }
 
     @Override

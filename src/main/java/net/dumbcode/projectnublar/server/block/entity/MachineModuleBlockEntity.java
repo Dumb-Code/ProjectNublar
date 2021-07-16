@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -25,7 +26,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -34,6 +34,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -54,6 +55,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -171,13 +173,13 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             for (MachineProcess<B> process : this.processes) {
                 if (!canProvideEnergyForProcess(process)) {
                     process.setHasPower(false);
-                    this.getInterruptAction(process).processConsumer.accept(process);
+                    this.getInterruptAction(process, ProcessInterruptReason.NO_POWER).processConsumer.accept(process);
                     continue;
                 }
                 process.setHasPower(true);
                 if (hasPower && this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
                     if (process.isProcessing() || this.searchForRecipes(process)) {
-                        if (process.isFinished() || !process.currentRecipe.accepts(this.asB, process)) {
+                        if (process.isFinished() && !process.isBlocked()) {
                             MachineRecipe<B> recipe = process.getCurrentRecipe();
                             if (recipe != null) {
                                 recipe.onRecipeFinished(this.asB, process);
@@ -200,9 +202,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                             process.tick();
                         }
                         this.setChanged();
+                    } else if(process.isBlocked()) {
+                        process.tick();
                     }
                 } else if (process.isProcessing()) {
-                    this.getInterruptAction(process).processConsumer.accept(process);
+                    this.getInterruptAction(process, ProcessInterruptReason.INVALID_INPUTS).processConsumer.accept(process);
                 }
             }
             //todo: only sync when needed
@@ -217,11 +221,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                     this.gatherExtraSyncData()
             ));
         } else {
-            for (MachineProcess<B> process : this.processes) {
-                if(process.isProcessing() && !process.isFinished()) {
-                    process.setTime(process.getTime() + 1);
-                }
-            }
+//            for (MachineProcess<B> process : this.processes) {
+//                if(process.isProcessing() && !process.isFinished() && process.isHasPower() && !process.isBlocked()) {
+//                    process.setTime(process.getTime() + 1);
+//                }
+//            }
         }
     }
 
@@ -351,7 +355,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public boolean searchForRecipes(MachineProcess<B> process) {
         if(!this.level.isClientSide) {
             for (MachineRecipe<B> recipe : this.recipes) {
-                if(recipe.accepts(this.asB, process) && this.canProcess(process)) {
+                if(recipe.accepts(this.asB, process) && process.canAcceptRecipe(recipe) && this.canProcess(process)) {
                     process.setCurrentRecipe(recipe);
                     if(!process.isProcessing()) {
                         recipe.onRecipeStarted(asB(), process);
@@ -397,11 +401,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return super.getCapability(cap, side);
     }
 
-    protected boolean canProcess(MachineProcess process) {
+    protected boolean canProcess(MachineProcess<B> process) {
         return true;
     }
 
-    protected ProcessInterruptAction getInterruptAction(MachineProcess process) {
+    protected ProcessInterruptAction getInterruptAction(MachineProcess<B> process, ProcessInterruptReason reason) {
+        if(process.currentRecipe != null) {
+            return process.currentRecipe.getInterruptAction(this.asB, process, reason);
+        }
         return ProcessInterruptAction.RESET;
     }
 
@@ -525,6 +532,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         private final List<BlockedProcess> blockedProcessList = new ArrayList<>();
 
+        private final Predicate<MachineRecipe<B>> recipePredicate;
+
         private int time;
         private int totalTime;
         @Nullable
@@ -532,11 +541,24 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         boolean processing;
         boolean hasPower;
 
-        public MachineProcess(MachineModuleBlockEntity<B> machine, int[] inputSlots, int[] outputSlots) {
+
+        @SafeVarargs
+        public MachineProcess(MachineModuleBlockEntity<B> machine, int[] inputSlots, int[] outputSlots, MachineRecipe<B>... recipesToAccept) {
+            this(machine, inputSlots, outputSlots, Util.<Predicate<MachineRecipe<B>>>make(() -> {
+                if(recipesToAccept.length == 0) {
+                    return bMachineRecipe -> true;
+                }
+                HashSet<MachineRecipe<B>> recipes = Sets.newHashSet(recipesToAccept);
+                return recipes::contains;
+            }));
+        }
+
+        public MachineProcess(MachineModuleBlockEntity<B> machine, int[] inputSlots, int[] outputSlots, Predicate<MachineRecipe<B>> predicate) {
             this.inputSlots = inputSlots;
             this.outputSlots = outputSlots;
             this.machine = machine;
             this.allSlots = ArrayUtils.addAll(this.inputSlots, this.outputSlots);
+            this.recipePredicate = predicate;
         }
 
         public int getInputSlot(int index) {
@@ -626,6 +648,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         public boolean isBlocked() {
             return !this.blockedProcessList.isEmpty();
         }
+
+        public boolean canAcceptRecipe(MachineRecipe<B> recipe) {
+            return this.recipePredicate.test(recipe);
+        }
     }
 
     @AllArgsConstructor
@@ -635,7 +661,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         private final int[] slots;
     }
 
-    protected enum ProcessInterruptAction {
+    public enum ProcessInterruptAction {
         RESET(p -> p.setTime(0)),
         DECREASE(p -> p.setTime(p.getTime() - 1)),
         PAUSE(p -> {});
@@ -645,6 +671,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         ProcessInterruptAction(Consumer<MachineProcess> processConsumer) {
             this.processConsumer = processConsumer;
         }
+    }
+
+    public enum ProcessInterruptReason {
+        NO_POWER, INVALID_INPUTS
     }
 
     protected class DefaultTab implements TabInformationBar.Tab {
@@ -668,5 +698,10 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         public void onClicked() {
             ProjectNublar.NETWORK.sendToServer(new C2SChangeContainerTab(this.tab, MachineModuleBlockEntity.this.worldPosition));
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Class<MachineModuleBlockEntity<?>> getWildcardType() {
+        return (Class<MachineModuleBlockEntity<?>>) (Class<?>) MachineModuleBlockEntity.class;
     }
 }

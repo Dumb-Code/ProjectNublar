@@ -74,7 +74,6 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
             //  blue -> diamond filter
             //If less than 1, then don't insert the output item.
             int size = MathUtils.getWeightedResult(5 * efficiency + 1, 0.6F - efficiency / 2F);
-            size = new Random().nextInt(20);
             if(size > 0) {
                 DinosaurGeneticMaterialItem.setSize(stack, size);
                 process.insertOutputItem(stack);

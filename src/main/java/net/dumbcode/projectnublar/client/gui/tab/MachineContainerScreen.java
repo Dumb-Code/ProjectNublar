@@ -5,6 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
+import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
@@ -25,6 +27,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.energy.EnergyStorage;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,14 +52,18 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
     }
 
     protected void subPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height) {
+        this.subPixelBlit(stack, x, y, u, v, width, height, 256, 256);
+    }
+
+    protected void subPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight) {
         Matrix4f matrix4f = stack.last().pose();
-        int z = this.getOffset();
+        int z = this.getBlitOffset();
         BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.vertex(matrix4f, x, y+height, z).uv(u / 256, (v+height) / 256).endVertex();
-        bufferbuilder.vertex(matrix4f, x+width, y+height, z).uv((u+width) / 256, (v+height) / 256).endVertex();
-        bufferbuilder.vertex(matrix4f, x+width, y, z).uv((u+width) / 256, v / 256).endVertex();
-        bufferbuilder.vertex(matrix4f, x, y, z).uv(u / 256, v / 256).endVertex();
+        bufferbuilder.vertex(matrix4f, x, y+height, z).uv(u / textureWidth, (v+height) / textureHeight).endVertex();
+        bufferbuilder.vertex(matrix4f, x+width, y+height, z).uv((u+width) / textureWidth, (v+height) / textureHeight).endVertex();
+        bufferbuilder.vertex(matrix4f, x+width, y, z).uv((u+width) / textureWidth, v / textureHeight).endVertex();
+        bufferbuilder.vertex(matrix4f, x, y, z).uv(u / textureWidth, v / textureHeight).endVertex();
         bufferbuilder.end();
         RenderSystem.enableAlphaTest();
         WorldVertexBufferUploader.end(bufferbuilder);
@@ -80,9 +87,21 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
             for (MachineModuleBlockEntity.BlockedProcess blockedProcess : process.getBlockedProcessList()) {
                 for (int iSlot : blockedProcess.getSlots()) {
                     int index = process.getOutputSlot(iSlot);
-                    Slot slot = this.menu.slots.get(index);
+                    for (Slot slot : this.menu.slots) {
+                        if(slot instanceof MachineModuleSlot) {
+                            if(slot.getSlotIndex() == index) {
+                                int x = slot.x;
+                                int y = slot.y;
+                                if(slot instanceof MachineModulePopoutSlot) {
+                                    x = ((MachineModulePopoutSlot) slot).getVisualShowX();
+                                    y = ((MachineModulePopoutSlot) slot).getVisualShowY();
+                                }
 
-                    fill(stack, this.leftPos + slot.x, this.topPos + slot.y, this.leftPos + slot.x + 16, this.topPos + slot.y + 16, 0xA0FF0000);
+                                fill(stack, this.leftPos + x, this.topPos + y, this.leftPos + x + 16, this.topPos + y + 16, 0xA0FF0000);
+
+                            }
+                        }
+                    }
                 }
             }
             RenderSystem.enableDepthTest();

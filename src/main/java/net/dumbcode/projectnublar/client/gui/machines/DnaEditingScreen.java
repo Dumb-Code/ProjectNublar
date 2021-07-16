@@ -24,7 +24,7 @@ import net.minecraftforge.fml.client.gui.widget.Slider;
 import java.util.Collections;
 import java.util.List;
 
-public class DnaEditingScreen extends MachineContainerScreen {
+public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
     private final SequencingSynthesizerBlockEntity blockEntity;
 
@@ -171,12 +171,12 @@ public class DnaEditingScreen extends MachineContainerScreen {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if(this.dropdownSelectionId == -1) {
             this.renderBackground(stack);
         }
         this.hoveringText = null;
-        super.render(stack, mouseX, mouseY, partialTicks);
+        super.renderScreen(stack, mouseX, mouseY, partialTicks);
 
         int xStart = this.leftPos + 23;
         int yStart = this.topPos + 165;
@@ -236,12 +236,6 @@ public class DnaEditingScreen extends MachineContainerScreen {
             module.slider.mouseReleased(mouseX, mouseY, state);
         }
         return super.mouseReleased(mouseX, mouseY, state);
-    }
-
-    @Override
-    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
-        this.minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/dna_editing.png"));
-        blit(stack, this.leftPos, this.topPos, 0, 0, this.width, this.height);
     }
 
     private void sync() {

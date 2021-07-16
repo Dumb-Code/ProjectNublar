@@ -47,8 +47,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
                     return false;
                 }
             }
-            return handler.insertOutputItem(process.getOutputSlot(0), this.createStack(blockEntity, true), true).isEmpty();
-
+            return true;
         }
 
         return false;
@@ -63,7 +62,8 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     public void onRecipeFinished(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
         MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
         handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
-        handler.insertOutputItem(process.getOutputSlot(0), this.createStack(blockEntity, false), false);
+
+        process.insertOutputItem(this.createStack(blockEntity), 0);
 
 
         double storageSize = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE;
@@ -83,7 +83,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
         return false;
     }
 
-    private ItemStack createStack(SequencingSynthesizerBlockEntity blockEntity, boolean testOnly) {
+    private ItemStack createStack(SequencingSynthesizerBlockEntity blockEntity) {
         if(blockEntity.getLevel().isClientSide) {
             return ItemStack.EMPTY;
         }
@@ -99,16 +99,15 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
                 tag.putString("translation_key", driveNbt.getCompound(dKey).getString("translation_key"));
                 tag.putInt("amount", (int) (blockEntity.getSelectAmount(i) * 100D));
                 nbt.put(dKey, tag);
-                if(!testOnly) {
-                    CompoundNBT driveTag = driveNbt.getCompound(dKey);
-                    int amount = driveTag.getInt("amount") - (int)(blockEntity.getSelectAmount(i) * 100D);
-                    if(amount <= 0) {
-                        driveNbt.remove(dKey);
-                    } else {
-                        driveTag.putInt("amount", amount);
-                    }
 
+                CompoundNBT driveTag = driveNbt.getCompound(dKey);
+                int amount = driveTag.getInt("amount") - (int)(blockEntity.getSelectAmount(i) * 100D);
+                if(amount <= 0) {
+                    driveNbt.remove(dKey);
+                } else {
+                    driveTag.putInt("amount", amount);
                 }
+
             }
             return out;
         }

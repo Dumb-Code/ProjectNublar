@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
@@ -18,66 +19,74 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SequencingSynthesizerInputsScreen extends SequencerSynthesizerBaseScreen {
 
+    private static final ResourceLocation BASE_LOCATION = get("input_page");
+
     private final SequencingSynthesizerBlockEntity blockEntity;
 
-    private final List<SlotCanBeDisabled> slots;
-    private boolean inventoryOpen;
+    private static final int OVERLAY_WIDTH = 479;
+    private static final int OVERLAY_HEIGHT = 199;
 
     public SequencingSynthesizerInputsScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, ITextComponent title, TabInformationBar bar, PlayerInventory playerInventory) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
-        this.slots = inventorySlotsIn.disableSlots;
-
-        for (SlotCanBeDisabled slot : this.slots) {
-            slot.setActive(false);
-        }
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float state) {
-        this.renderBackground(stack);
-        super.render(stack, mouseX, mouseY, state);
-//        RenderSystem.color4f(1F, 1F, 1F, 1f);
-//
-//        this.setBlitOffset(100);
-//        minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"));
-//        blit(stack, this.leftPos + 21, this.topPos + 5, 176, 0, 16, 52);
-//        blit(stack,this.leftPos + 59, this.topPos + 5, 176, 0, 16, 52);
-//        blit(stack,this.leftPos + 97, this.topPos + 5, 176, 0, 16, 52);
-//        blit(stack,this.leftPos + 135, this.topPos + 5, 176, 0, 16, 52);
-//        this.setBlitOffset(0);
-//
-//        minecraft.textureManager.bind(PlayerContainer.BLOCK_ATLAS);
-//        BlockModelShapes shapes = minecraft.getBlockRenderer().getBlockModelShaper();
-//        RenderSystem.color4f(0.247058824F, 0.462745098F, 0.894117647F, 1F);
-//        String waterTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 21, (float) this.blockEntity.getTank().getFluidAmount() / this.blockEntity.getTank().getCapacity(), shapes.getTexture(Blocks.WATER.defaultBlockState(), minecraft.level, BlockPos.ZERO));
-//
-//        RenderSystem.color4f(1F, 1F, 1F, 1f);
-//        String sugarTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 59, this.blockEntity.getSugarAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.SUGAR_CANE.defaultBlockState(), minecraft.level, BlockPos.ZERO));
-//        String boneTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 97, this.blockEntity.getBoneAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.BONE_BLOCK.defaultBlockState(), minecraft.level, BlockPos.ZERO));
-//
-//        RenderSystem.color4f(0.0941F, 0.7098F, 0.2823F, 1f);
-//        String plantTooltip = this.drawTankWithTooltip(stack, mouseX, mouseY, 135, this.blockEntity.getPlantAmount() / this.blockEntity.getTotalStorage(), shapes.getTexture(Blocks.OAK_LEAVES.defaultBlockState(), minecraft.level, BlockPos.ZERO));
-//
-//        if(waterTooltip != null) {
-//            drawString(stack, minecraft.font, waterTooltip, mouseX, mouseY, -1);
-//        } else if(sugarTooltip != null) {
-//            drawString(stack, minecraft.font, sugarTooltip, mouseX, mouseY, -1);
-//        } else if(boneTooltip != null) {
-//            drawString(stack, minecraft.font, boneTooltip, mouseX, mouseY, -1);
-//        } else if(plantTooltip != null) {
-//            drawString(stack, minecraft.font, plantTooltip, mouseX, mouseY, -1);
-//        }
-        this.renderTooltip(stack, mouseX, mouseY);
+    public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float state) {
+        super.renderScreen(stack, mouseX, mouseY, state);
+        drawCenteredString(stack, font, ProjectNublar.translate("gui.machine.sequencer.matter.water"), this.leftPos + 57, this.topPos + 56, -1);
+        drawCenteredString(stack, font, ProjectNublar.translate("gui.machine.sequencer.matter.sugar"), this.leftPos + 57, this.topPos + 126, -1);
+        drawCenteredString(stack, font, ProjectNublar.translate("gui.machine.sequencer.matter.bone"), this.leftPos + 293, this.topPos + 56, -1);
+        drawCenteredString(stack, font, ProjectNublar.translate("gui.machine.sequencer.matter.plant"), this.leftPos + 293, this.topPos + 126, -1);
+
+        if(this.minecraft != null && this.activeSlot == null) {
+            if(this.isHovering(9, 68, 96, 8, mouseX, mouseY)) {
+                GuiUtils.drawHoveringText(stack, Lists.newArrayList(new StringTextComponent(Math.round(this.blockEntity.waterPercent() * 100) + "%")), mouseX, mouseY, this.width, this.height, -1, this.font);
+            } else if(this.isHovering(9, 138, 96, 8, mouseX, mouseY)) {
+                GuiUtils.drawHoveringText(stack, Lists.newArrayList(new StringTextComponent(Math.round(this.blockEntity.sugarPercent() * 100) + "%")), mouseX, mouseY, this.width, this.height, -1, this.font);
+            } else if(this.isHovering(245, 68, 96, 8, mouseX, mouseY)) {
+                GuiUtils.drawHoveringText(stack, Lists.newArrayList(new StringTextComponent(Math.round(this.blockEntity.bonePercent() * 100) + "%")), mouseX, mouseY, this.width, this.height, -1, this.font);
+            } else if(this.isHovering(245, 138, 96, 8, mouseX, mouseY)) {
+                GuiUtils.drawHoveringText(stack, Lists.newArrayList(new StringTextComponent(Math.round(this.blockEntity.plantPercent() * 100) + "%")), mouseX, mouseY, this.width, this.height, -1, this.font);
+            }
+        }
+
     }
 
+    @Override
+    protected void renderBg(MatrixStack stack, float ticks, int mouseX, int mouseY) {
+        super.renderBg(stack, ticks, mouseX, mouseY);
+
+        minecraft.textureManager.bind(BASE_LOCATION);
+        blit(stack, this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, OVERLAY_HEIGHT, OVERLAY_WIDTH); //There is a vanilla bug that mixes up width and height
+
+        subPixelBlit(stack, this.leftPos + 9, this.topPos + 68, 351, 128, (float) (this.blockEntity.waterPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack, this.leftPos + 9, this.topPos + 138, 351, 128, (float) (this.blockEntity.sugarPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack, this.leftPos + 245, this.topPos + 68, 351, 128, (float) (this.blockEntity.bonePercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack, this.leftPos + 245, this.topPos + 138, 351, 128, (float) (this.blockEntity.plantPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+
+    }
+
+    @Override
+    protected void renderCenterPiece(MatrixStack stack) {
+        stack.pushPose();
+        stack.translate(this.leftPos, this.topPos, 0);
+        stack.translate(this.imageWidth / 2F, this.imageHeight / 2F, 0);
+        stack.mulPose(Vector3f.ZP.rotationDegrees((minecraft.player.tickCount + minecraft.getFrameTime()) * 0.75F));
+        stack.translate(-this.imageWidth / 2F, -this.imageHeight / 2F, 0);
+        blit(stack, (this.imageWidth - 106) / 2, (this.imageHeight - 107) / 2, this.getBlitOffset(), 413, 175, 106, 107, 350, 525);
+        stack.popPose();
+    }
 
     private String drawTankWithTooltip(MatrixStack stack, int mouseX, int mouseY, int left, double value, TextureAtlasSprite sprite) {
         MachineUtils.drawTiledTexture(stack, this.leftPos + left, (float) (this.topPos + 5F + 52F * (1F - value)), this.leftPos + left + 16F, this.topPos + 55F, sprite);

@@ -59,6 +59,11 @@ public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     }
 
     @Override
+    public MachineModuleBlockEntity.ProcessInterruptAction getInterruptAction(EggPrinterBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<EggPrinterBlockEntity> process, MachineModuleBlockEntity.ProcessInterruptReason reason) {
+        return MachineModuleBlockEntity.ProcessInterruptAction.PAUSE;
+    }
+
+    @Override
     public ResourceLocation getRegistryName() {
         return new ResourceLocation(ProjectNublar.MODID, "egg_printing");
     }

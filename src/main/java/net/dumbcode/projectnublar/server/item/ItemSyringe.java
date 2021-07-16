@@ -16,13 +16,18 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+@Mod.EventBusSubscriber(modid = ProjectNublar.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     private final Type type;
@@ -32,8 +37,18 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
         this.type = type;
     }
 
-    @Override
-    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        Item item = event.getItemStack().getItem();
+        if(item instanceof ItemSyringe && event.getTarget() instanceof LivingEntity) {
+            event.setCancellationResult(((ItemSyringe) item).runInteraction(event.getItemStack(), event.getPlayer(), (LivingEntity) event.getTarget(), event.getHand()));
+            if(event.getCancellationResult().consumesAction()) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    public ActionResultType runInteraction(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if(!this.type.filled) {
             ItemStack out;
             if((entity instanceof ChickenEntity || entity instanceof ParrotEntity) && ((AnimalEntity) entity).isInLove()) {
@@ -51,8 +66,9 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
             } else {
                 MachineUtils.giveToInventory(player, out);
             }
+            return ActionResultType.SUCCESS;
         }
-        return super.interactLivingEntity(stack, player, entity, hand);
+        return ActionResultType.PASS;
     }
 
 
@@ -68,12 +84,12 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     @Override
     public String getDescriptionId(ItemStack stack) {
-        return this.getKey(stack);
+        return super.getDescriptionId(stack);
     }
 
     @Override
     public String getDriveTranslationKey(ItemStack stack) {
-        return this.getDescriptionId(stack) + ".name";
+        return this.getKey(stack);
     }
 
     @Override
@@ -84,7 +100,7 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         if(this.type.filled) {
-            tooltip.add(new TranslationTextComponent(this.getDescriptionId(stack)));
+            tooltip.add(new TranslationTextComponent("item.projectnublar.dna_filled_syringe.contains", this.getSize(stack), new TranslationTextComponent(this.getKey(stack))).withStyle(TextFormatting.GRAY));
         }
         super.appendHoverText(stack, world, tooltip, flagIn);
     }

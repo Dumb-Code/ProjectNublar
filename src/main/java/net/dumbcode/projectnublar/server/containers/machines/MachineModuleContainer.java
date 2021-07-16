@@ -36,6 +36,7 @@ public class MachineModuleContainer extends Container {
         this.blockEntity = blockEntity;
         this.tab = tab;
         for (MachineModuleSlot slot : slots) {
+            slot.setIsLocked(integer -> this.predicate.test(integer));
             this.slot(slot);
         }
 
@@ -43,7 +44,6 @@ public class MachineModuleContainer extends Container {
             this.addPlayerSlots(inventory, playerOffset, xSize);
         }
     }
-
 
     public MachineModuleContainer setPredicate(@NonNull IntPredicate predicate) {
         this.predicate = predicate;
@@ -64,7 +64,7 @@ public class MachineModuleContainer extends Container {
         }
     }
 
-    private <T extends Slot & SlotCanBeDisabled> T slot(T slot) {
+    public <T extends Slot & SlotCanBeDisabled> T slot(T slot) {
         super.addSlot(slot);
         this.disableSlots.add(slot);
         return slot;
@@ -107,7 +107,7 @@ public class MachineModuleContainer extends Container {
             } else {
                 boolean flag = false;
                 for (int i = 0; i < otherSlots; i++) {
-                    if(this.predicate.test(i)) {
+                    if(this.predicate.test(this.slots.get(i).getSlotIndex())) {
                         if(current.isEmpty()) {
                             break;
                         }

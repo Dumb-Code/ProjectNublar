@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -41,7 +42,7 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> components, ITooltipFlag flag) {
-        components.add(ProjectNublar.translate("item.genetic_material_test_tube.size", this.getSize(stack)));
+        components.add(ProjectNublar.translate("item.genetic_material_test_tube.size", this.getSize(stack)).withStyle(TextFormatting.GRAY));
         super.appendHoverText(stack, world, components, flag);
     }
 
@@ -60,5 +61,10 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
             stack.getOrCreateTagElement(ProjectNublar.MODID).putInt("GeneticMaterialSize", size);
         }
         return stack;
+    }
+
+    @Override
+    public ItemStack getOutItem(ItemStack stack) {
+        return new ItemStack(ItemHandler.EMPTY_TEST_TUBE.get());
     }
 }

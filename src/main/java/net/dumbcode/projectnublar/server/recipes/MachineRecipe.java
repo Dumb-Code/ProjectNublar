@@ -13,6 +13,12 @@ public interface MachineRecipe<B extends MachineModuleBlockEntity<B>> {
 
     boolean acceptsInputSlot(B blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<B> process);
 
+    default MachineModuleBlockEntity.ProcessInterruptAction getInterruptAction(B blockEntity, MachineModuleBlockEntity.MachineProcess<B> process, MachineModuleBlockEntity.ProcessInterruptReason reason) {
+        return reason == MachineModuleBlockEntity.ProcessInterruptReason.INVALID_INPUTS ? MachineModuleBlockEntity.ProcessInterruptAction.RESET : MachineModuleBlockEntity.ProcessInterruptAction.PAUSE;
+    }
+
+
+
     ResourceLocation getRegistryName();
 
     // energy stuff

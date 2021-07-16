@@ -89,11 +89,6 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
         }
     }
 
-    @Override
-    protected ProcessInterruptAction getInterruptAction(MachineProcess process) {
-        return ProcessInterruptAction.PAUSE;
-    }
-
     // TODO: Change for balance, values are just for testing
     @Override
     public int getBaseEnergyProduction() {

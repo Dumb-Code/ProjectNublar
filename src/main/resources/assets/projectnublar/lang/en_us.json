@@ -33,6 +33,20 @@
     "projectnublar.gui.machine.time.minutes": "%sm",
     "projectnublar.gui.machine.time.hours": "%sh",
 
+    "projectnublar.gui.machine.sequencer.tab.sequencing": "Sequence",
+    "projectnublar.gui.machine.sequencer.tab.editing": "Edit",
+    "projectnublar.gui.machine.sequencer.tab.synthesizing": "Synthesis",
+    "projectnublar.gui.machine.sequencer.insert": "Insert %s",
+    "projectnublar.gui.machine.sequencer.remove": "Collect %s",
+    "projectnublar.gui.machine.sequencer.matter.water": "Water",
+    "projectnublar.gui.machine.sequencer.matter.sugar": "Sugar",
+    "projectnublar.gui.machine.sequencer.matter.bone": "Bone Matter",
+    "projectnublar.gui.machine.sequencer.matter.plant": "Plant Matter",
+    "projectnublar.gui.machine.sequencer.matter.test_tube": "Test Tube",
+    "projectnublar.gui.machine.sequencer.matter.leftover": "Leftover Item",
+    "projectnublar.gui.machine.sequencer.matter.dna_test_tube": "DNA Test Tube",
+    "projectnublar.gui.machine.sequencer.matter.hard_drive": "Hard Drive",
+    "projectnublar.gui.machine.sequencer.matter.genetic_material": "Genetic Material",
 
     "projectnublar.mood.stressful.positive": "Relaxed",
     "projectnublar.mood.stressful.negative": "Stressed",
@@ -67,6 +81,8 @@
 
     "item.meat_dinosaur_tyrannosaurus_raw": "Raw Tyrannosaurus meat",
     "item.meat_dinosaur_tyrannosaurus_cooked": "Cooked Tyrannosaurus meat",
+    "item.projectnublar.dna_filled_syringe": "DNA Filled Syringe",
+    "item.projectnublar.dna_filled_syringe.contains": "Contains %s %s DNA",
 
     "projectnublar.dino.tyrannosaurus.name": "Tyrannosaurus",
     "projectnublar.dino.dilophosaurus.name": "Dilophosaurus",
