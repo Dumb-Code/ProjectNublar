@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.data.GeneticLayerEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
@@ -54,12 +55,12 @@ public class Tyrannosaurus extends Dinosaur {
         this.addEmptyComponent(ComponentHandler.ATTACK_FENCE_AI);
 
         this.addComponentWithOverride(ComponentHandler.MULTIPART.get(), EntityStorageOverrides.DINOSAUR_MULTIPART)
-                .addCubesForAge(ADULT_AGE,
-                        "tail4", "Tail3", "tail2", "tail1",
-                        "legUpperRight", "legMiddleRight", "legLowerRight",
-                        "legUpperLeft", "legMiddleLeft", "legLowerLeft",
-                        "neck3", "hips", "chest", "jawUpper1", "head"
-                );
+            .addCubesForAge(ADULT_AGE,
+                "tail4", "Tail3", "tail2", "tail1",
+                "legUpperRight", "legMiddleRight", "legLowerRight",
+                "legUpperLeft", "legMiddleLeft", "legLowerLeft",
+                "neck3", "hips", "chest", "jawUpper1", "head"
+            );
 
         this.addEmptyComponent(EntityComponentTypes.ANIMATION);
 
@@ -102,25 +103,47 @@ public class Tyrannosaurus extends Dinosaur {
             );
 
         this.addComponent(EntityComponentTypes.GENETICS)
-                .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed", 0, 0.75F);
+            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed", 0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-                .addLayer("body", 0F, "body")
-                .addLayer("stripes", 0.5F, "stripes");
+            .addLayer(GeneticLayerEntry.builder("base", 0F)
+                .defaultColorMin(0.85F)
+            )
+            .addLayer(GeneticLayerEntry.builder("undercolor", 0.1F)
+                .checkIfExists()
+                .variesOpacity()
+                .defaultColorMin(0.85F)
+            )
+            .addLayer(GeneticLayerEntry.builder("back", 0.2F)
+                .checkIfExists()
+                .variesOpacity()
+            )
+            .addLayer(GeneticLayerEntry.builder("belly", 0.3F)
+                .defaultColorMin(0.85F)
+            )
+            .addLayer(GeneticLayerEntry.builder("stripes", 0.4F)
+                .variesOpacity()
+                .defaultColorMin(0.3F)
+            )
+            .addLayer(GeneticLayerEntry.builder("stripes_overlay", 0.5F)
+                .checkIfExists()
+                .variesOpacity()
+                .defaultColorMin(0.3F)
+            );
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
-                .setIndex(1F)
-                .staticLayer("claws", 5F)
-                .staticLayer("mouth", 5F)
-                .staticLayer("nostrils", 5F)
-                .staticLayer("teeth", 5F);
+            .staticLayer("small", 5F);
 
         this.addComponent(EntityComponentTypes.EYES_CLOSED)
-                .setEyesOnTexture("eyes")
-                .setEyesOffTexture("eyes_closed");
+            .setIndex(10F)
+            .setEyesOnTexture("eyelid");
 
         this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(25)
             .setTickTimeClose(5);
+
+        this.addComponent(EntityComponentTypes.CULL_SIZE.get())
+            .setHeight(2.5F)
+            .setWidth(7.5F);
     }
 }

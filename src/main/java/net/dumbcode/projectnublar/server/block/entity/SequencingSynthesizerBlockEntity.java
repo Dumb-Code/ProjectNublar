@@ -207,7 +207,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     protected List<MachineProcess<SequencingSynthesizerBlockEntity>> createProcessList() {
         return Lists.newArrayList(
                 new MachineProcess<>(this, new int[]{5}, new int[]{6}, SequencingSynthesizerHardDriveRecipe.INSTANCE),
-        new MachineProcess<>(this, new int[]{7}, new int[]{8}, SequencingSynthesizerRecipe.INSTANCE)
+                new MachineProcess<>(this, new int[]{7}, new int[]{8}, SequencingSynthesizerRecipe.INSTANCE)
         );
     }
 

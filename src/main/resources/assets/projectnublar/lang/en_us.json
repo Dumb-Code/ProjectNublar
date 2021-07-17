@@ -47,6 +47,7 @@
     "projectnublar.gui.machine.sequencer.matter.dna_test_tube": "DNA Test Tube",
     "projectnublar.gui.machine.sequencer.matter.hard_drive": "Hard Drive",
     "projectnublar.gui.machine.sequencer.matter.genetic_material": "Genetic Material",
+    "projectnublar.gui.machine.sequencer.dinosaur.species": "Species: %s",
 
     "projectnublar.mood.stressful.positive": "Relaxed",
     "projectnublar.mood.stressful.negative": "Stressed",

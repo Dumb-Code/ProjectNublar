@@ -123,6 +123,7 @@ public class ProjectNublar {
 
         forgeBus.addListener(this::gatherData);
         forgeBus.addListener(BlockPylonPole::onBlockBreak);
+        bus.addListener(EntityHandler::onAttributes);
 
         if(FMLEnvironment.dist == Dist.CLIENT) {
             this.clientSetup();

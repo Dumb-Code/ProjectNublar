@@ -5,11 +5,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.SlotCanBeDisabled;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
 import net.dumbcode.projectnublar.server.network.C2SSequencerSynthesizerContainerSlotOpened;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
@@ -22,6 +24,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -80,6 +83,22 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
             this.font.draw(stack, this.activeSlot.getTextComponent(), 95, 37, 0xFF555555);
             stack.popPose();
         }
+    }
+
+    @Override
+    public List<? extends IGuiEventListener> children() {
+        if(this.activeSlot != null) {
+            return Collections.emptyList();
+        }
+        return super.children();
+    }
+
+    @Override
+    protected void drawProcessTooltip(MachineModuleBlockEntity.MachineProcess<?> process, MatrixStack stack, int xStart, int yStart, int width, int height, int mouseX, int mouseY) {
+        if(this.activeSlot != null) {
+            return;
+        }
+        super.drawProcessTooltip(process, stack, xStart, yStart, width, height, mouseX, mouseY);
     }
 
     @Override

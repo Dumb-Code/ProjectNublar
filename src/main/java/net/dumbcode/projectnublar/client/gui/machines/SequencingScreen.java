@@ -1,7 +1,9 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.RequiredArgsConstructor;
+import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
@@ -11,16 +13,29 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
+import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,6 +59,8 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 
     private GuiScrollBox<DriveDisplayEntry> displayEntryScrollBox;
 
+    private Entity cachedEntityRender;
+
     public SequencingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.process = blockEntity.getProcess(0);
@@ -58,13 +75,19 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         this.displayEntryScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 66, this.topPos + 29, 150, 13, 9, () -> this.cachedEntries));
 
         this.displayEntryScrollBox.setBorderColor(0xFF577694);
-        this.displayEntryScrollBox.setInsideColor(0x9F193B59);
+        this.displayEntryScrollBox.setCellHighlightColor(0xCF193B59);
+        this.displayEntryScrollBox.setInsideColor(0xFF193B59);
+        this.displayEntryScrollBox.setShouldCountMouse(() -> this.activeSlot == null);
     }
 
     @Override
     public void tick() {
         this.cacheEntries();
         super.tick();
+        DriveDisplayEntry element = this.displayEntryScrollBox.getSelectedElement();
+        if(element != null && Minecraft.getInstance().player.tickCount % 10 == 0) {
+            this.selectDriveEntry(element.driveEntry);
+        }
     }
 
     private void cacheEntries() {
@@ -90,6 +113,17 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         super.renderScreen(stack, mouseX, mouseY, ticks);
         drawProcessIcon(this.process, stack, 167.5F, 153);
         drawProcessTooltip(this.process, stack, 56, 151, 239, 19, mouseX, mouseY);
+
+        if(this.cachedEntityRender instanceof DinosaurEntity) {
+            Dinosaur dinosaur = ((DinosaurEntity) this.cachedEntityRender).getDinosaur();
+
+
+            RenderUtils.renderBorderExclusive(stack, this.leftPos + 230, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 1, 0xFF577694);
+            fill(stack, this.leftPos + 230, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 0xCF193B59);
+
+            drawString(stack, font, dinosaur.createNameComponent(), this.leftPos + 233, this.topPos + 73, -1);
+
+        }
     }
 
     @Override
@@ -110,6 +144,62 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             subPixelBlit(stack, this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
 //        blit(stack, this.leftPos, this.topPos);
+        if(this.cachedEntityRender != null) {
+            int s = 50;
+            int y = 100;
+            if(this.cachedEntityRender instanceof DinosaurEntity) {
+                s = 100;
+                y = 50;
+            }
+            AxisAlignedBB box = this.cachedEntityRender.getBoundingBoxForCulling();
+            double scale = s / box.getXsize();
+            renderEntity(this.leftPos + 280, (int) (this.topPos + y + box.getYsize()/2*scale), scale, this.cachedEntityRender);
+        }
+    }
+
+    private void renderEntity(int x, int y, double scale, Entity entity) {
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)x, (float)y, 1050.0F);
+        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+        MatrixStack matrixstack = new MatrixStack();
+        matrixstack.translate(0.0D, 0.0D, 1000.0D);
+        matrixstack.scale((float)scale, (float)scale, (float)scale);
+        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+        Quaternion quaternion1 = Vector3f.YP.rotationDegrees(Minecraft.getInstance().player.tickCount);
+        quaternion.mul(quaternion1);
+        matrixstack.mulPose(quaternion);
+        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getEntityRenderDispatcher();
+        quaternion1.conj();
+        entityrenderermanager.overrideCameraOrientation(quaternion1);
+        entityrenderermanager.setRenderShadow(false);
+        RenderSystem.disableAlphaTest();
+        RenderSystem.disableDepthTest();
+        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.runAsFancy(() ->
+                entityrenderermanager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880)
+        );
+        irendertypebuffer$impl.endBatch();
+        entityrenderermanager.setRenderShadow(true);
+        RenderSystem.popMatrix();
+    }
+
+    private void selectDriveEntry(DriveUtils.DriveEntry entry) {
+        Entity entity = null;
+        switch (entry.getDriveType()) {
+            case DINOSAUR:
+                Dinosaur dinosaur = DinosaurHandler.getRegistry().getValue(new ResourceLocation(entry.getKey()));
+                if(dinosaur != null) {
+                    entity = dinosaur.createEntity(Minecraft.getInstance().level);
+                }
+                break;
+            case OTHER:
+                EntityType<?> value = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entry.getKey()));
+                if(value != null) {
+                    entity = value.create(Minecraft.getInstance().level);
+                }
+                break;
+        }
+        this.cachedEntityRender = entity;
     }
 
     @RequiredArgsConstructor
@@ -128,9 +218,10 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
             if(displayEntryScrollBox.getSelectedElement() == this) {
                 displayEntryScrollBox.setSelectedElement(null);
+                cachedEntityRender = null;
                 return false;
             }
-            //On click, do stuff
+            selectDriveEntry(this.driveEntry);
             return true;
         }
 

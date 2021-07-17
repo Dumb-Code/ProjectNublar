@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.ChickenEntity;
@@ -15,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -23,6 +25,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -53,11 +56,11 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
             ItemStack out;
             if((entity instanceof ChickenEntity || entity instanceof ParrotEntity) && ((AnimalEntity) entity).isInLove()) {
                 out = new ItemStack(ItemHandler.EMBRYO_FILLED_SYRINGE.get());
-                out.getOrCreateTagElement(ProjectNublar.MODID).putString("ContainedType", entity.getType().getDescriptionId());
+                out.getOrCreateTagElement(ProjectNublar.MODID).putString("ContainedType", entity.getType().getRegistryName().toString());
             } else {
                 out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE.get());
                 CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
-                nbt.putString("ContainedType", entity.getType().getDescriptionId());
+                nbt.putString("ContainedType", entity.getType().getRegistryName().toString());
                 nbt.putInt("ContainedSize", MathUtils.getWeightedResult(10, 5));
             }
             stack.shrink(1);
@@ -89,7 +92,11 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
 
     @Override
     public String getDriveTranslationKey(ItemStack stack) {
-        return this.getKey(stack);
+        EntityType<?> value = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(this.getKey(stack)));
+        if(value == null) {
+            return "missing";
+        }
+        return value.getDescriptionId();
     }
 
     @Override

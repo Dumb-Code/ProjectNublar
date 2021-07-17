@@ -24,22 +24,22 @@ public class Dilophosaurus extends Dinosaur {
     public Dilophosaurus() {
 
         getItemProperties()
-                .setCookedMeatHealAmount(10)
-                .setCookedMeatSaturation(1f)
-                .setRawMeatHealAmount(4)
-                .setRawMeatSaturation(0.6f)
-                .setCookingExperience(1f);
+            .setCookedMeatHealAmount(10)
+            .setCookedMeatSaturation(1f)
+            .setRawMeatHealAmount(4)
+            .setRawMeatSaturation(0.6f)
+            .setCookingExperience(1f);
 
         DinosaurInformation dinosaurInfomation = this.getDinosaurInfomation();
         dinosaurInfomation.setCanClimb(false);
         dinosaurInfomation.setPeriod(DinosaurPeriod.CRETACEOUS);
         dinosaurInfomation.getBiomeTypes().addAll(Lists.newArrayList(
-                BiomeDictionary.Type.CONIFEROUS,
-                BiomeDictionary.Type.DRY,
-                BiomeDictionary.Type.PLAINS,
-                BiomeDictionary.Type.MESA,
-                BiomeDictionary.Type.FOREST,
-                BiomeDictionary.Type.MOUNTAIN
+            BiomeDictionary.Type.CONIFEROUS,
+            BiomeDictionary.Type.DRY,
+            BiomeDictionary.Type.PLAINS,
+            BiomeDictionary.Type.MESA,
+            BiomeDictionary.Type.FOREST,
+            BiomeDictionary.Type.MOUNTAIN
         ));
     }
 
@@ -47,19 +47,19 @@ public class Dilophosaurus extends Dinosaur {
     public void attachDefaultComponents() {
 
         this.addComponent(ComponentHandler.METABOLISM)
-                .setDistanceSmellFood(30)
-                .setDiet(new FeedingDiet()
-                    .add(500, 20, new ItemStack(Items.APPLE))
-                    .add(500, 20, Blocks.SPONGE)
-                    .add(500, 20, EntityType.ARROW)
-                )
-                .setMaxFood(18000)
-                .setMaxWater(18000)
+            .setDistanceSmellFood(30)
+            .setDiet(new FeedingDiet()
+                .add(500, 20, new ItemStack(Items.APPLE))
+                .add(500, 20, Blocks.SPONGE)
+                .add(500, 20, EntityType.ARROW)
+            )
+            .setMaxFood(18000)
+            .setMaxWater(18000)
 
-                .setHydrateAmountPerTick(500)
+            .setHydrateAmountPerTick(500)
 
-                .setFoodTicks(32)
-                .setWaterTicks(18);
+            .setFoodTicks(32)
+            .setWaterTicks(18);
 
         this.addComponentWithOverride(ComponentHandler.MULTIPART.get(), EntityStorageOverrides.DINOSAUR_MULTIPART)
             .addCubesForAge(ADULT_AGE,
@@ -89,39 +89,42 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.MODEL).setShadowSize(1F);
         this.addEmptyComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
-                .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
+            .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
         this.addEmptyComponent(ComponentHandler.WANDER_AI);
         this.addEmptyComponent(ComponentHandler.ATTACK_AI);
         this.addComponent(ComponentHandler.DEFENSE).setBaseDefense(2D);
 
         this.addComponent(ComponentHandler.SKELETAL_BUILDER)
-                .initializeMap(
-                        "foot", "legLowerLeft",
-                        "foot", "legLowerRight",
-                        "leg", "legUpperLeft",
-                        "leg", "legUpperRight",
-                        "ribs", "hips",
-                        "tail", "tail4",
-                        "neck", "neck3",
-                        "skull", "head"
-                );
+            .initializeMap(
+                "foot", "legLowerLeft",
+                "foot", "legLowerRight",
+                "leg", "legUpperLeft",
+                "leg", "legUpperRight",
+                "ribs", "hips",
+                "tail", "tail4",
+                "neck", "neck3",
+                "skull", "head"
+            );
 
         this.addComponent(EntityComponentTypes.GENETICS)
             .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed",0, 0.75F);
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("base",0F, "base")
-            .addLayer("belly", 0.1F, "belly")
-            .addLayer("overlays", 0.2F, "frills", "patterns", "outlines", "spots");
+            .addLayer("base",0F)
+            .addLayer("belly", 0.1F)
+            .addLayer("frills", 0.2F)
+            .addLayer("patterns", 0.3F)
+            .addLayer("outlines", 0.4F)
+            .addLayer("spots", 0.5F);
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
-            .setIndex(1F)
             .staticLayer("claws", 5F)
             .staticLayer("mouth", 5F)
             .staticLayer("nostrils", 5F)
             .staticLayer("teeth", 5F);
 
         this.addComponent(EntityComponentTypes.EYES_CLOSED)
+            .setIndex(10F)
             .setEyesOnTexture("eyes")
             .setEyesOffTexture("eyes_closed");
 

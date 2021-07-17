@@ -81,7 +81,9 @@ public class FeedingAI extends Goal {
                 }
                 if(this.process == null) {
                     if(this.blockPosList == null) {
-                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.level, entityLiving.blockPosition(), metabolism.getFoodSmellDistance(), (w, pos) -> this.metabolism.getDiet().getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigation().getPath() != null);
+                        this.blockPosList = BlockStateWorker.INSTANCE.runTask(entityLiving.level, entityLiving.blockPosition(), metabolism.getFoodSmellDistance(),
+                            (w, pos) -> this.metabolism.getDiet().getResult(w.getBlockState(pos)).isPresent() && this.entityLiving.getNavigation().getPath() != null
+                        );
                     } else if(this.blockPosList.isDone()) {
                         try {
                             List<BlockPos> results = this.blockPosList.get();
