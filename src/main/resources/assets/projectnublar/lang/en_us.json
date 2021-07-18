@@ -90,6 +90,21 @@
     "projectnublar.dino.velociraptor_jp.name": "Velociraptor (JP)",
     "projectnublar.dino.missing": "<!Missing Dinosaur!>",
 
+    "projectnublar.dino.diet.title": "Diet",
+    "projectnublar.dino.timeperiod.title": "Time Period",
+    "projectnublar.dino.timeperiod.quaternary.name": "Quaternary",
+    "projectnublar.dino.timeperiod.neogene.name": "Neogene",
+    "projectnublar.dino.timeperiod.paleogene.name": "Paleogene",
+    "projectnublar.dino.timeperiod.cretaceous.name": "Cretaceous",
+    "projectnublar.dino.timeperiod.jurassic.name": "Jurassic",
+    "projectnublar.dino.timeperiod.triassic.name": "Triassic",
+    "projectnublar.dino.timeperiod.permian.name": "Permian",
+    "projectnublar.dino.timeperiod.carboniferous.name": "Carboniferous",
+    "projectnublar.dino.timeperiod.devonian.name": "Devonian",
+    "projectnublar.dino.timeperiod.silurian.name": "Silurian",
+    "projectnublar.dino.timeperiod.ordovician.name": "Ordovician",
+    "projectnublar.dino.timeperiod.cambrian.name": "Cambrian",
+
     "projectnublar.fences.length.toolong": "%sm is too long. The max distance is %sm",
     "projectnublar.fences.length.notenough": "Not enough cable. Need a total of %s cable. (You have %s)"
 }

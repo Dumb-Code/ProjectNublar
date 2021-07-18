@@ -126,6 +126,7 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     }
 
     @Accessors(chain = true)
+    @Getter
     @Setter
     public static class Storage implements EntityComponentStorage<MetabolismComponent> {
 

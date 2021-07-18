@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.ai.objects;
 
+import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.server.utils.ItemStackUtils;
 import net.dumbcode.projectnublar.server.entity.ai.FeedingResult;
@@ -17,9 +18,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class FeedingDiet {
     private final Map<BlockState, FeedingResult> blocks = new HashMap<>();
@@ -84,6 +83,18 @@ public class FeedingDiet {
             this.entities.put(entity, result);
         }
         return this;
+    }
+
+    public List<BlockState> getBlocks() {
+        return Collections.unmodifiableList(Lists.newArrayList(this.blocks.keySet()));
+    }
+
+    public List<ItemStack> getItems() {
+        return Collections.unmodifiableList(Lists.newArrayList(this.items.keySet()));
+    }
+
+    public List<EntityType<?>> getEntities() {
+        return Collections.unmodifiableList(Lists.newArrayList(this.entities.keySet()));
     }
 
     public FeedingDiet copyInto(FeedingDiet diet) {

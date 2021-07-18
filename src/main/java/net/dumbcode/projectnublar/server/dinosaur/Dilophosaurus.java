@@ -86,6 +86,7 @@ public class Dilophosaurus extends Dinosaur {
             .addStage(new AgeStage(SKELETON_AGE, -1, SKELETON_AGE))
             .setDefaultStageName(ADULT_AGE);
 
+        this.addEmptyComponent(EntityComponentTypes.RENDER_CONTEXT);
         this.addComponent(EntityComponentTypes.MODEL).setShadowSize(1F);
         this.addEmptyComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
