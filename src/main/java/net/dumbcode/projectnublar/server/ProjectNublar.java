@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
-import net.dumbcode.dumblibrary.server.ecs.component.RegisterStorageOverridesEvent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
@@ -26,7 +25,6 @@ import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
-import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -48,8 +46,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -70,12 +66,9 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 @Mod(ProjectNublar.MODID)
@@ -275,7 +268,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(26, S2CSyncMachineProcesses.class, S2CSyncMachineProcesses::toBytes, S2CSyncMachineProcesses::fromBytes, S2CSyncMachineProcesses::handle);
         NETWORK.registerMessage(27, S2CSyncMachineStack.class, S2CSyncMachineStack::toBytes, S2CSyncMachineStack::fromBytes, S2CSyncMachineStack::handle);
         NETWORK.registerMessage(28, S2CSyncOpenedUsers.class, S2CSyncOpenedUsers::toBytes, S2CSyncOpenedUsers::fromBytes, S2CSyncOpenedUsers::handle);
-        NETWORK.registerMessage(29, S2CSyncSequencingSynthesizerSelectChange.class, S2CSyncSequencingSynthesizerSelectChange::toBytes, S2CSyncSequencingSynthesizerSelectChange::fromBytes, S2CSyncSequencingSynthesizerSelectChange::handle);
+        NETWORK.registerMessage(29, S2CSyncSequencingSynthesizerSyncSelected.class, S2CSyncSequencingSynthesizerSyncSelected::toBytes, S2CSyncSequencingSynthesizerSyncSelected::fromBytes, S2CSyncSequencingSynthesizerSyncSelected::handle);
         NETWORK.registerMessage(30, S2STrackingTabletUpdateChunk.class, S2STrackingTabletUpdateChunk::toBytes, S2STrackingTabletUpdateChunk::fromBytes, S2STrackingTabletUpdateChunk::handle);
         NETWORK.registerMessage(31, C2SSequencerSynthesizerContainerSlotOpened.class, C2SSequencerSynthesizerContainerSlotOpened::toBytes, C2SSequencerSynthesizerContainerSlotOpened::fromBytes, C2SSequencerSynthesizerContainerSlotOpened::handle);
     }

@@ -12,9 +12,9 @@ import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
-import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.DriveItem;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
+import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
@@ -41,7 +41,10 @@ import net.minecraftforge.fluids.capability.templates.FluidTank;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.ToDoubleFunction;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> implements DyableBlockEntity {
@@ -61,11 +64,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public static final double DEFAULT_STORAGE = 16D;
 
     public static final int TOTAL_SLOTS = 9;
-    public static final int SLOTS_AT_50 = 3;
-    public static final float SLOTS_END = 0.8F;
-    //https://www.desmos.com/calculator/uphflo6s3s
-    private static final float SLOTS_GRADIENT = (TOTAL_SLOTS - SLOTS_AT_50) / (SLOTS_END - 0.5F);
-    private static final float SLOTS_OFFSET = SLOTS_AT_50 - SLOTS_GRADIENT*(0.5F);
+    public static final int MINIMUM_SLOTS = 3;
+    public static final float SLOTS_START = 0.5F;
+    public static final float SLOTS_END = 0.95F;
+    //https://www.desmos.com/calculator/or6tpvq2mw
+    private static final float SLOTS_GRADIENT = (TOTAL_SLOTS - MINIMUM_SLOTS) / (SLOTS_END - SLOTS_START);
+    private static final float SLOTS_OFFSET = MINIMUM_SLOTS - SLOTS_GRADIENT*SLOTS_START;
 
 
 
@@ -241,7 +245,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
         CompoundNBT testNbt = this.handler.getStackInSlot(0).getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
         for (SelectedDnaEntry dna : this.selectedDNAs) {
-            if((!dna.getKey().isEmpty() && !testNbt.contains(dna.getKey(), Constants.NBT.TAG_COMPOUND)) || dna.getAmount() == 0 != dna.getKey().isEmpty()) {
+            if((!dna.getKey().isEmpty() && !testNbt.contains(dna.getKey(), Constants.NBT.TAG_COMPOUND))) {
                 dna.setKey("");
                 dna.setAmount(0);
             }
@@ -271,6 +275,60 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     @Nonnull
     public FluidTank getTank() {
         return this.tank;
+    }
+
+    public boolean setAndValidateSelect(int ID, String key, double amount) {
+        if(ID >= 0 && ID < this.selectedDNAs.length) {
+            //Check that the drive actually exists.
+            Optional<DriveUtils.DriveEntry> drive = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().filter(d -> d.getKey().equals(key)).findAny();
+            if(!drive.isPresent() && !key.isEmpty()) {
+                return false;
+            }
+            //ID = 0 must be a dinosaur
+            if(ID == 0 && !key.isEmpty() && drive.get().getDriveType() != DriveUtils.DriveType.DINOSAUR) {
+                return false;
+            }
+            int slots = this.getSlots();
+            double valueLeft = 1D;
+            for (int i = 0; i < ID; i++) {
+                if(key.equals(this.selectedDNAs[i].key) && !key.equals("")) {
+                    return false;
+                }
+                if(i >= slots) {
+                    this.selectedDNAs[i].setKey("");
+                    this.selectedDNAs[i].setAmount(0);
+                    continue;
+                }
+                valueLeft -= this.selectedDNAs[i].amount;
+            }
+
+            if(ID >= slots) {
+                this.selectedDNAs[ID].setKey("");
+                this.selectedDNAs[ID].setAmount(0);
+                return true;
+            }
+            //Make sure not less than whats left
+            amount = Math.min(amount, valueLeft);
+            //Make sure not less than we actually have
+            amount = Math.min(amount, DriveUtils.getAmount(this.handler.getStackInSlot(0), key) / 100D);
+            valueLeft -= amount;
+            this.setSelect(ID, key, amount);
+
+            for (int i = ID + 1; i < TOTAL_SLOTS; i++) {
+                if(this.selectedDNAs[i].key.equals(key) || i >= slots) {
+                    this.selectedDNAs[i].setKey("");
+                    this.selectedDNAs[i].setAmount(0);
+                    continue;
+                }
+                if(valueLeft < this.selectedDNAs[i].amount) {
+                    this.selectedDNAs[i].setAmount(valueLeft);
+                }
+                valueLeft -= this.selectedDNAs[i].amount;
+            }
+            return true;
+        }
+        return false;
+
     }
 
     public void setSelect(int ID, String key, double amount) {
@@ -385,12 +443,29 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         private double amount;
     }
 
-    public static int getSlots(float percentage) {
-        return MathHelper.floor(MathHelper.clamp(percentage, 0.5, 1.0)*SLOTS_GRADIENT + SLOTS_OFFSET);
+    public int getDinosaurAmount() {
+        if(this.selectedDNAs[0].key.isEmpty()) {
+            return 0;
+        }
+        return DriveUtils.getAmount(this.getHandler().getStackInSlot(0), this.selectedDNAs[0].key);
     }
 
-    public static double getPercentageForSlot(int slots) {
-        return Math.round(MathHelper.clamp((slots - SLOTS_OFFSET) / SLOTS_GRADIENT, 0.5, 1) * 100D);
+    public int getSlots() {
+        return getSlots(this.getDinosaurAmount() / 100F);
+    }
+
+    public static int getSlots(float percentage) {
+        return MathHelper.clamp(MathHelper.floor(percentage*SLOTS_GRADIENT + SLOTS_OFFSET), MINIMUM_SLOTS, TOTAL_SLOTS);
+    }
+
+    public static long getPercentageForSlot(int slots) {
+        if(slots <= MINIMUM_SLOTS) {
+            return Math.round(SLOTS_START * 100D);
+        }
+        if(slots >= TOTAL_SLOTS) {
+            return Math.round(SLOTS_END * 100D);
+        }
+        return Math.round((slots - SLOTS_OFFSET) / SLOTS_GRADIENT * 100D);
     }
 
 }

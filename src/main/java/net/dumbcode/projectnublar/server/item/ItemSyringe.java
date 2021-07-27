@@ -107,7 +107,7 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         if(this.type.filled) {
-            tooltip.add(new TranslationTextComponent("item.projectnublar.dna_filled_syringe.contains", this.getSize(stack), new TranslationTextComponent(this.getKey(stack))).withStyle(TextFormatting.GRAY));
+            tooltip.add(new TranslationTextComponent("item.projectnublar.dna_filled_syringe.contains", this.getSize(stack), new TranslationTextComponent(this.getDriveTranslationKey(stack))).withStyle(TextFormatting.GRAY));
         }
         super.appendHoverText(stack, world, tooltip, flagIn);
     }

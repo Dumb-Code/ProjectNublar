@@ -145,7 +145,7 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
     }
 
     @Override
-    public final void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
         boolean background = this.shouldRenderBackground();
         if(background && this.activeSlot == null) {
             this.renderBackground(stack);

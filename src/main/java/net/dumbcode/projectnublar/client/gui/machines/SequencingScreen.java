@@ -82,12 +82,8 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         super.init();
         this.cacheEntries();
 
-        this.displayEntryScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 66, this.topPos + 29, 150, 13, 9, () -> this.cachedEntries).addFromPrevious(this.displayEntryScrollBox));
-
-        this.displayEntryScrollBox.setBorderColor(0xFF577694);
-        this.displayEntryScrollBox.setCellHighlightColor(0xCF193B59);
-        this.displayEntryScrollBox.setInsideColor(0xFF193B59);
-        this.displayEntryScrollBox.setShouldCountMouse(() -> this.activeSlot == null);
+        this.displayEntryScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 66, this.topPos + 29, 150, 13, 9, () -> this.cachedEntries))
+            .addFromPrevious(this.displayEntryScrollBox).setBorderColor(0xFF577694).setCellHighlightColor(0xCF193B59).setCellSelectedColor(0xFF063B6B).setInsideColor(0xFF193B59).setEmptyColor(0xCF0F2234).setRenderFullSize(true).setShouldCountMouse(() -> this.activeSlot == null);
     }
 
     @Override
@@ -221,7 +217,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         if(element != null) {
             amount = element.driveEntry.getAmount();
         }
-        boolean fog = amount < 50;
+        boolean fog = false;// amount < 50;
         if(fog) {
             float p = 1 - amount / 50F;
             float range = 1000000;

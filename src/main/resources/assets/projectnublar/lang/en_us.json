@@ -48,6 +48,7 @@
     "projectnublar.gui.machine.sequencer.matter.hard_drive": "Hard Drive",
     "projectnublar.gui.machine.sequencer.matter.genetic_material": "Genetic Material",
     "projectnublar.gui.machine.sequencer.dinosaur.species": "Species: %s",
+    "projectnublar.gui.machine.sequencer.locked_dna_slot": "Need %s%% of dinosaur sequenced to use. Currently %s%%.",
 
     "projectnublar.mood.stressful.positive": "Relaxed",
     "projectnublar.mood.stressful.negative": "Stressed",
