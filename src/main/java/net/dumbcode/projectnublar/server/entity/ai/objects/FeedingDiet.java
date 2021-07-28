@@ -25,6 +25,15 @@ public class FeedingDiet {
     private final Map<ItemStack, FeedingResult> items = new HashMap<>();
     private final Map<EntityType<?>, FeedingResult> entities = new HashMap<>();
 
+    public static FeedingDiet combine(FeedingDiet main, Collection<FeedingDiet> others) {
+        FeedingDiet diet = new FeedingDiet();
+        diet.add(main);
+        for (FeedingDiet other : others) {
+            diet.add(other);
+        }
+        return diet;
+    }
+
     public Optional<FeedingResult> getResult(BlockState state) {
         return Optional.ofNullable(this.blocks.get(state));
     }
@@ -44,6 +53,12 @@ public class FeedingDiet {
             return Optional.ofNullable(this.entities.get(type));
         }
         return Optional.empty();
+    }
+
+    private void add(FeedingDiet diet) {
+        this.blocks.putAll(diet.blocks);
+        this.items.putAll(diet.items);
+        this.entities.putAll(diet.entities);
     }
 
     public FeedingDiet add(int food, int water, BlockState... states) {

@@ -126,8 +126,8 @@ public class Dilophosaurus extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.EYES_CLOSED)
             .setIndex(10F)
-            .setEyesOnTexture("eyes")
-            .setEyesOffTexture("eyes_closed");
+            .setEyesOpenTexture("eyes")
+            .setEyesClosedTexture("eyes_closed");
 
         this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(25)

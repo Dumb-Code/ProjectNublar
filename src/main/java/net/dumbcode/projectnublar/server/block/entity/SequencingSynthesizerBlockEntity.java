@@ -299,7 +299,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     this.selectedDNAs[i].setAmount(0);
                     continue;
                 }
-                valueLeft -= this.selectedDNAs[i].amount;
+                double amountToSubtract = this.selectedDNAs[i].amount;
+                if(i == 0 && amountToSubtract < 0.5) {
+                    amountToSubtract = 0.5;
+                }
+                valueLeft -= amountToSubtract;
+
             }
 
             if(ID >= slots) {

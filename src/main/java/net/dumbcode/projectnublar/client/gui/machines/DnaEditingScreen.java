@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.client.gui.machines;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -99,7 +101,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                 }
             }
             if (match == null) {
-                DriveEntry e = new DriveEntry(entry.getKey(), entry.getName());
+                DriveEntry e = new DriveEntry(entry.getKey(), entry.getTranslation());
                 if (entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
                     this.dinosaurList.add(e);
                 }
@@ -168,7 +170,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             if(module.drive == null || module.slider.sliderValue == 0) {
                 continue;
             }
-            int value = (int) Math.round(w * Math.round(module.slider.sliderValue * 100D) / 100D);
+            int value = (int) Math.floor(w * MathHelper.clamp(module.slider.sliderValue, 0D, 1D));
             fill(stack, xStart + start, yStart, xStart + start + value-1, yEnd, 0xFF000000|this.colors[module.id]);
             if(module.drive != null && mouseX >= xStart + start && mouseX < xStart + start + value && mouseY >= yStart && mouseY < yEnd) {
                 hoveringText = module.drive.entry;
@@ -176,7 +178,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             start += value;
 
         }
-        fill(stack, xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
+        if(start != w) {
+            fill(stack, xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
+        }
 
 
         if(hoveringText != null) {
@@ -381,15 +385,12 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 //        }
     }
 
+    @RequiredArgsConstructor
     private class DriveEntry implements GuiScrollboxEntry {
 
         private final String key;
         private final TranslationTextComponent entry;
 
-        private DriveEntry(String key, String entry) {
-            this.key = key;
-            this.entry = new TranslationTextComponent(entry);
-        }
 
         @Override
         public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {

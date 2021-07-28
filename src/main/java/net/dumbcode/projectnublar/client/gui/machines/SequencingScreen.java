@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
+import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.GeneticComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.data.GeneticLayerEntry;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -39,16 +41,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -102,7 +102,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         this.cachedEntries.clear();
         this.cachedEntries.addAll(this.driveEntriesGetter.get().stream()
                 .map(DriveDisplayEntry::new)
-                .sorted(Comparator.comparing(DriveDisplayEntry::getSearch))
+                .sorted(Comparator.comparing(e -> e.driveEntry.getKey()))
                 .collect(Collectors.toList())
         );
         if(selectedElement != null) {
@@ -291,15 +291,15 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @RequiredArgsConstructor
-    private class DriveDisplayEntry implements SelectListEntry {
+    private class DriveDisplayEntry implements GuiScrollboxEntry {
 
         private final DriveUtils.DriveEntry driveEntry;
 
         @Override
         public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
-            String translated = I18n.get(this.driveEntry.getName()) + ": " + this.driveEntry.getAmount() + "%";
+            IFormattableTextComponent component = this.driveEntry.getTranslation().append(": " + this.driveEntry.getAmount() + "%");
             FontRenderer font = Minecraft.getInstance().font;
-            font.draw(stack, translated, x + (150 - font.width(translated)) / 2F, y + 3, -1);
+            font.draw(stack, component, x + (150 - font.width(component)) / 2F, y + 3, -1);
         }
 
         @Override
@@ -313,9 +313,5 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             return true;
         }
 
-        @Override
-        public String getSearch() {
-            return I18n.get(this.driveEntry.getName());
-        }
     }
 }

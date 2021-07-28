@@ -1,13 +1,15 @@
 package net.dumbcode.projectnublar.server.item.data;
 
 import com.google.common.collect.Lists;
+import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.List;
+import java.util.Locale;
 
 public class DriveUtils {
 
@@ -29,7 +31,7 @@ public class DriveUtils {
 
         for (String s : nbt.getAllKeys()) {
             CompoundNBT tag = nbt.getCompound(s);
-            out.add(new DriveEntry(s, tag.getString("translation_key"), tag.getInt("amount"), DriveType.values()[tag.getInt("drive_type") % DriveType.values().length]));
+            out.add(new DriveEntry(s, tag.getString("translation_key"), tag.contains("animal_variant") ? tag.getString("animal_variant") : null, tag.getInt("amount"), DriveType.values()[tag.getInt("drive_type") % DriveType.values().length]));
         }
 
         return out;
@@ -47,6 +49,7 @@ public class DriveUtils {
         DriveInformation info = (DriveInformation) inItem.getItem();
         CompoundNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
         String key = info.getKey(inItem);
+        String variant = info.getAnimalVariant(inItem);
         if(key.isEmpty()) {
             return;
         }
@@ -58,16 +61,31 @@ public class DriveUtils {
         int result = info.getSize(inItem);
         inner.putInt("amount", MathHelper.clamp(current + result, 0, 100));
         inner.putString("translation_key", info.getDriveTranslationKey(inItem));
+        if(variant != null) {
+            inner.putString("animal_variant", variant);
+        }
         inner.putInt("drive_type", info.getDriveType(inItem).ordinal());
         nbt.put(key, inner);
 
         drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", nbt);
     }
 
+    public static TranslationTextComponent getTranslation(String name, String variant) {
+        TranslationTextComponent component = new TranslationTextComponent(name);
+        if(variant != null) {
+            return ProjectNublar.translate("entity.genetics.variant." + variant.toLowerCase(Locale.ROOT), component);
+        } else {
+            return component;
+        }
+    }
+
     public interface DriveInformation {
         int getSize(ItemStack stack);
         String getKey(ItemStack stack);
         String getDriveTranslationKey(ItemStack stack);
+        default String getAnimalVariant(ItemStack stack) {
+            return null;
+        }
         default DriveType getDriveType(ItemStack stack) {
             return DriveType.OTHER;
         }
@@ -79,33 +97,16 @@ public class DriveUtils {
         }
     }
 
+    @Value
     public static class DriveEntry {
-        private final String key;
-        private final String name;
-        private final int amount;
-        private final DriveType driveType;
+        String key;
+        String name;
+        String variant;
+        int amount;
+        DriveType driveType;
 
-        public DriveEntry(String key, String name, int amount, DriveType driveType) {
-            this.key = key;
-            this.name = name;
-            this.amount = amount;
-            this.driveType = driveType;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public DriveType getDriveType() {
-            return driveType;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public int getAmount() {
-            return this.amount;
+        public TranslationTextComponent getTranslation() {
+            return DriveUtils.getTranslation(this.name, this.variant);
         }
     }
 

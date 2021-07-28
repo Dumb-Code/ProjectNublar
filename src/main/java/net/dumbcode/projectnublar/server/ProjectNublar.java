@@ -22,6 +22,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.dna.GeneticHandler;
+import net.dumbcode.projectnublar.server.dna.ProjectNublarGeneticRegistry;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
@@ -172,6 +173,7 @@ public class ProjectNublar {
     }
 
     public void preInit(FMLCommonSetupEvent event) {
+        ProjectNublarGeneticRegistry.register();
 
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry().getValues()) {
             ResourceLocation regName = dinosaur.getRegName();

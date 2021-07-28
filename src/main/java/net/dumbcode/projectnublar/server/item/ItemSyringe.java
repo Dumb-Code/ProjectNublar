@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
+import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
@@ -57,11 +58,17 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
             if((entity instanceof ChickenEntity || entity instanceof ParrotEntity) && ((AnimalEntity) entity).isInLove()) {
                 out = new ItemStack(ItemHandler.EMBRYO_FILLED_SYRINGE.get());
                 out.getOrCreateTagElement(ProjectNublar.MODID).putString("ContainedType", entity.getType().getRegistryName().toString());
-            } else {
+            } else if(EntityGeneticRegistry.INSTANCE.isRegistered(entity.getType())) {
                 out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE.get());
                 CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
                 nbt.putString("ContainedType", entity.getType().getRegistryName().toString());
-                nbt.putInt("ContainedSize", MathUtils.getWeightedResult(10, 5));
+                nbt.putInt("ContainedSize", MathUtils.getWeightedResult(65, 10));
+                String variant = EntityGeneticRegistry.INSTANCE.getVariant(entity);
+                if(variant != null) {
+                    nbt.putString("ContainedVariant", variant);
+                }
+            } else {
+                return ActionResultType.PASS;
             }
             stack.shrink(1);
             if(stack.isEmpty()) {
@@ -86,8 +93,9 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
     }
 
     @Override
-    public String getDescriptionId(ItemStack stack) {
-        return super.getDescriptionId(stack);
+    public String getAnimalVariant(ItemStack stack) {
+        CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+        return nbt.contains("ContainedVariant") ? nbt.getString("ContainedVariant") : null;
     }
 
     @Override
@@ -107,7 +115,12 @@ public class ItemSyringe extends Item implements DriveUtils.DriveInformation {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         if(this.type.filled) {
-            tooltip.add(new TranslationTextComponent("item.projectnublar.dna_filled_syringe.contains", this.getSize(stack), new TranslationTextComponent(this.getDriveTranslationKey(stack))).withStyle(TextFormatting.GRAY));
+            tooltip.add(
+                new TranslationTextComponent("item.projectnublar.dna_filled_syringe.contains",
+                    this.getSize(stack),
+                    DriveUtils.getTranslation(this.getDriveTranslationKey(stack), this.getAnimalVariant(stack))
+                ).withStyle(TextFormatting.GRAY)
+            );
         }
         super.appendHoverText(stack, world, tooltip, flagIn);
     }

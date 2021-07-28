@@ -137,7 +137,7 @@ public class Tyrannosaurus extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.EYES_CLOSED)
             .setIndex(10F)
-            .setEyesOnTexture("eyelid");
+            .setEyesClosedTexture("eyelid");
 
         this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(25)

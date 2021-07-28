@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.entity.component.impl;
 
 import com.google.gson.JsonObject;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -25,6 +26,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -48,8 +52,24 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     private int waterTicks;
 
     private FeedingDiet diet = new FeedingDiet();
+    @Getter(AccessLevel.NONE)
+    private Map<UUID, FeedingDiet> geneticDiets = new HashMap<>(); //We don't need to serialize.
+    private FeedingDiet cached = new FeedingDiet();
+
     private int foodSmellDistance;
     private int hydrateAmountPerTick;
+
+    public FeedingDiet getDiet() {
+        if(this.cached != null) {
+            return this.cached;
+        }
+        return FeedingDiet.combine(this.diet, this.geneticDiets.values());
+    }
+
+    public void addGeneticDiet(UUID uuid, FeedingDiet diet) {
+        this.geneticDiets.put(uuid, diet);
+        this.cached = null;
+    }
 
     @Override
     public CompoundNBT serialize(CompoundNBT compound) {

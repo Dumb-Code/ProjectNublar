@@ -12,7 +12,6 @@ import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
@@ -115,8 +114,8 @@ public class VelociraptorJP extends Dinosaur {
 
         this.addComponent(EntityComponentTypes.EYES_CLOSED)
             .setIndex(10F)
-            .setEyesOnTexture("eyes")
-            .setEyesOffTexture("eyes_closed");
+            .setEyesOpenTexture("eyes")
+            .setEyesClosedTexture("eyes_closed");
 
         this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(100)
