@@ -33,6 +33,16 @@ public enum SequencingSynthesizerHardDriveRecipe implements MachineRecipe<Sequen
     }
 
     @Override
+    public boolean shouldSlotChangeCauseReset(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process, int slot) {
+        return slot == 0; //Drive item changed
+    }
+
+    @Override
+    public boolean shouldGlobalSlotChangeCauseReset(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process, int slot) {
+        return slot == 0; //Hard Drive Changed.
+    }
+
+    @Override
     public void onRecipeFinished(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
         MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
         ItemStack inStack = handler.getStackInSlot(process.getInputSlot(0));

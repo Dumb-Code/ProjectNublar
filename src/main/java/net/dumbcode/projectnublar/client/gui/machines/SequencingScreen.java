@@ -296,7 +296,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         private final DriveUtils.DriveEntry driveEntry;
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             IFormattableTextComponent component = this.driveEntry.getTranslation().append(": " + this.driveEntry.getAmount() + "%");
             FontRenderer font = Minecraft.getInstance().font;
             font.draw(stack, component, x + (150 - font.width(component)) / 2F, y + 3, -1);

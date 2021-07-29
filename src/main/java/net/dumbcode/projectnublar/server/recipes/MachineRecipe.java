@@ -14,10 +14,20 @@ public interface MachineRecipe<B extends MachineModuleBlockEntity<B>> {
     boolean acceptsInputSlot(B blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<B> process);
 
     default MachineModuleBlockEntity.ProcessInterruptAction getInterruptAction(B blockEntity, MachineModuleBlockEntity.MachineProcess<B> process, MachineModuleBlockEntity.ProcessInterruptReason reason) {
-        return reason == MachineModuleBlockEntity.ProcessInterruptReason.INVALID_INPUTS ? MachineModuleBlockEntity.ProcessInterruptAction.RESET : MachineModuleBlockEntity.ProcessInterruptAction.PAUSE;
+        return reason == MachineModuleBlockEntity.ProcessInterruptReason.NO_POWER ? MachineModuleBlockEntity.ProcessInterruptAction.PAUSE : MachineModuleBlockEntity.ProcessInterruptAction.RESET;
     }
 
+    default boolean shouldSlotChangeCauseReset(B blockEntity, MachineModuleBlockEntity.MachineProcess<B> process, int slot) {
+        return false;
+    }
 
+    default boolean shouldGlobalSlotChangeCauseReset(B blockEntity, MachineModuleBlockEntity.MachineProcess<B> process, int slot) {
+        return false;
+    }
+
+    default boolean startsAutomatically() {
+        return true;
+    }
 
     ResourceLocation getRegistryName();
 

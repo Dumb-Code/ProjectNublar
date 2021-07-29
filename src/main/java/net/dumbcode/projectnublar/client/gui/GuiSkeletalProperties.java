@@ -192,7 +192,7 @@ public class GuiSkeletalProperties extends Screen {
         }
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             y += 12;
             minecraft.font.draw(stack, pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
 

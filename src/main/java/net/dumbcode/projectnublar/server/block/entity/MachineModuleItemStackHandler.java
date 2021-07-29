@@ -40,8 +40,14 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
     protected void onContentsChanged(int slot) {
         MachineModuleBlockEntity.MachineProcess<B> process = this.blockEntity.getProcessFromSlot(slot);
         if(process != null) {
-            if(!process.isProcessing()) {
-                this.blockEntity.searchForRecipes(process);
+            if(process.isProcessing()) {
+                process.causeSlotResetIfNecessary(slot);
+            } else {
+                this.blockEntity.searchForRecipes(process, false);
+            }
+        } else {
+            for (int i = 0; i < this.blockEntity.getProcessCount(); i++) {
+                this.blockEntity.getProcess(i).causeGlobalSlotResetIfNecessary(slot);
             }
         }
         this.blockEntity.onSlotChanged(slot);

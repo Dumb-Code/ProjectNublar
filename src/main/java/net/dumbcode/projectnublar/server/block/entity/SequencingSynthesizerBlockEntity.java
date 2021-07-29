@@ -4,6 +4,9 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
+import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
+import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsScreen;
@@ -20,6 +23,7 @@ import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveR
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
@@ -28,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -38,14 +43,13 @@ import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> implements DyableBlockEntity {
 
@@ -278,6 +282,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     public boolean setAndValidateSelect(int ID, String key, double amount) {
+        amount = MathHelper.clamp(amount, 0, 1);
         if(ID >= 0 && ID < this.selectedDNAs.length) {
             //Check that the drive actually exists.
             Optional<DriveUtils.DriveEntry> drive = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().filter(d -> d.getKey().equals(key)).findAny();
@@ -310,6 +315,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             if(ID >= slots) {
                 this.selectedDNAs[ID].setKey("");
                 this.selectedDNAs[ID].setAmount(0);
+                if(!this.level.isClientSide) {
+                    this.getProcess(1).setTime(0);
+                }
                 return true;
             }
             //Make sure not less than whats left
@@ -329,6 +337,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     this.selectedDNAs[i].setAmount(valueLeft);
                 }
                 valueLeft -= this.selectedDNAs[i].amount;
+            }
+            if(!this.level.isClientSide) {
+                this.getProcess(1).setTime(0);
             }
             return true;
         }
@@ -459,6 +470,33 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return getSlots(this.getDinosaurAmount() / 100F);
     }
 
+    public List<EntityGeneEntry> gatherAllGeneticEntries() {
+        List<EntityGeneEntry> out = new ArrayList<>();
+        ItemStack drive = this.handler.getStackInSlot(0);
+        int slots = this.getSlots();
+        Map<String, DriveUtils.DriveEntry> collected = DriveUtils.getAll(drive).stream().collect(Collectors.toMap(DriveUtils.DriveEntry::getKey, entry -> entry));
+        for (int i = 0; i < slots; i++) {
+            if(this.selectedDNAs[i].key.isEmpty() || this.selectedDNAs[i].amount == 0) {
+                continue;
+            }
+            DriveUtils.DriveEntry entry = collected.get(this.selectedDNAs[i].key);
+            if(entry == null) {
+                ProjectNublar.getLogger().warn("Illegal Drive Entry. Tried to get {} in list of {}", this.selectedDNAs[i].key, collected.keySet());
+                continue;
+            }
+            if(entry.getDriveType() == DriveUtils.DriveType.OTHER) {
+                ResourceLocation location = new ResourceLocation(entry.getKey());
+                if(ForgeRegistries.ENTITIES.containsKey(location)) {
+                    EntityType<?> value = ForgeRegistries.ENTITIES.getValue(location);
+                    for (EntityGeneticRegistry.Entry<?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.getVariant())) {
+                        out.add(new EntityGeneEntry(value, entry.getVariant(), e, this.selectedDNAs[i].amount));
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     public static int getSlots(float percentage) {
         return MathHelper.clamp(MathHelper.floor(percentage*SLOTS_GRADIENT + SLOTS_OFFSET), MINIMUM_SLOTS, TOTAL_SLOTS);
     }
@@ -471,6 +509,18 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             return Math.round(SLOTS_END * 100D);
         }
         return Math.round((slots - SLOTS_OFFSET) / SLOTS_GRADIENT * 100D);
+    }
+
+    @Value
+    public static class EntityGeneEntry {
+        EntityType<?> source;
+        String variant;
+        EntityGeneticRegistry.Entry<?> geneticEntry;
+        double amount;
+
+        public GeneticEntry<?> create() {
+            return this.geneticEntry.create((float) this.amount);
+        }
     }
 
 }

@@ -178,7 +178,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 }
                 process.setHasPower(true);
                 if (hasPower && this.canProcess(process) && (process.currentRecipe == null || process.currentRecipe.accepts(this.asB, process))) {
-                    if (process.isProcessing() || this.searchForRecipes(process)) {
+                    if (process.isProcessing() || this.searchForRecipes(process, false)) {
                         if (process.isFinished() && !process.isBlocked()) {
                             MachineRecipe<B> recipe = process.getCurrentRecipe();
                             if (recipe != null) {
@@ -189,7 +189,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                                     process.setTotalTime(0);
                                     process.setTime(0);
                                     process.setCurrentRecipe(null);
-                                    this.searchForRecipes(process);
+                                    this.searchForRecipes(process, false);
                                 } else {
                                     recipe.onRecipeStarted(asB(), process);
                                 }
@@ -352,10 +352,14 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         return this.processes.get(id);
     }
 
-    public boolean searchForRecipes(MachineProcess<B> process) {
+    public boolean searchForRecipes(int processId, boolean manualInput) {
+        return this.searchForRecipes(this.getProcess(processId), manualInput);
+    }
+
+    public boolean searchForRecipes(MachineProcess<B> process, boolean manualInput) {
         if(!this.level.isClientSide) {
             for (MachineRecipe<B> recipe : this.recipes) {
-                if(recipe.accepts(this.asB, process) && process.canAcceptRecipe(recipe) && this.canProcess(process)) {
+                if(this.canProcess(process) && (manualInput || recipe.startsAutomatically()) && process.canAcceptRecipe(recipe) && recipe.accepts(this.asB, process)) {
                     process.setCurrentRecipe(recipe);
                     if(!process.isProcessing()) {
                         recipe.onRecipeStarted(asB(), process);
@@ -651,6 +655,28 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
         public boolean canAcceptRecipe(MachineRecipe<B> recipe) {
             return this.recipePredicate.test(recipe);
+        }
+
+
+        public void causeSlotResetIfNecessary(int slot) {
+            if(!this.processing || this.currentRecipe == null) {
+                return;
+            }
+            int idx = -1;
+            for (int i = 0; i < this.inputSlots.length; i++) {
+                if(this.inputSlots[i] == slot) {
+                    idx = i;
+                }
+            }
+            if(idx != -1 && this.currentRecipe.shouldSlotChangeCauseReset(this.machine.asB, this, idx)) {
+                this.time = 0;
+            }
+        }
+
+        public void causeGlobalSlotResetIfNecessary(int slot) {
+            if(this.processing && this.currentRecipe != null && slot != -1 && this.currentRecipe.shouldGlobalSlotChangeCauseReset(this.machine.asB, this, slot)) {
+                this.time = 0;
+            }
         }
     }
 

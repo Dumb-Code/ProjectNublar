@@ -70,23 +70,23 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     private List<GeneticEntry<?>> generateCombinedGenetics(GeneticComponent component, GeneticComponent otherComponent) {
         List<GeneticEntry<?>> combinedGenetics = Lists.newArrayList();
 
-        Set<String> handledGenetics = Sets.newHashSet();
+        Set<GeneticEntry<?>> handledGenetics = Sets.newHashSet();
 
         for (GeneticEntry<?> genetic : component.getGenetics()) {
-            Optional<GeneticEntry<?>> entryOptional = otherComponent.findEntry(genetic.getIdentifier());
+            Optional<GeneticEntry<?>> entryOptional = otherComponent.findEntry(genetic);
             if(entryOptional.isPresent()) {
                 GeneticEntry<?> entry = entryOptional.get();
-                float newValue = genetic.getType().getDataHandler().combine(entry.getModifier(), genetic.getModifier());
+                double newValue = genetic.getType().getDataHandler().combineChild(entry.getModifier(), genetic.getModifier());
                 combinedGenetics.add(entry.copy().setModifier(newValue));
 
-                handledGenetics.add(genetic.getIdentifier());
+                handledGenetics.add(genetic);
             } else {
                 combinedGenetics.add(genetic.copy());
             }
         }
 
         for (GeneticEntry<?> genetic : otherComponent.getGenetics()) {
-            if (!handledGenetics.contains(genetic.getIdentifier())) {
+            if (!handledGenetics.contains(genetic)) {
                 combinedGenetics.add(genetic.copy());
             }
         }

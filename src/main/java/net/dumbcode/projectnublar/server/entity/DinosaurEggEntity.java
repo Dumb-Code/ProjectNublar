@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.dumblibrary.server.ecs.FamilySavedData;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.GeneticComponent;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -72,27 +73,17 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
         if(!this.level.isClientSide && this.tickCount >= this.hatchingTicks) {
             this.kill();
             if(this.dinosaur != null) {
-                DinosaurEntity child = this.dinosaur.createEntity(this.level);
+                DinosaurEntity child = this.dinosaur.createEntity(this.level, this.dinosaur.getAttacher().getDefaultConfig()
+                    .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), component -> this.combinedGenetics.forEach(component::insertGenetic))
+                    .runBeforeFinalize(ComponentHandler.AGE.get(), component -> component.resetStageTo(Dinosaur.CHILD_AGE))
+
+                );
 
                 child.setPos(this.position().x, this.position().y, this.position().z);
-
-                List<GeneticEntry<?>> entries = child.getOrExcept(EntityComponentTypes.GENETICS).getGenetics();
-
-                entries.replaceAll(geneticEntry -> {
-                    for (GeneticEntry<?> genetic : this.combinedGenetics) {
-                        if(genetic.getType() == geneticEntry.getType()) {
-                            return genetic;
-                        }
-                    }
-                    return geneticEntry;
-                });
 
                 if(this.familyUUID != null) {
                     FamilySavedData.getData(this.familyUUID).getChildren().add(child.getUUID());
                 }
-                child.get(ComponentHandler.AGE).ifPresent(a -> a.resetStageTo(Dinosaur.CHILD_AGE));
-
-                child.finalizeComponents();
 
                 this.level.addFreshEntity(child);
 

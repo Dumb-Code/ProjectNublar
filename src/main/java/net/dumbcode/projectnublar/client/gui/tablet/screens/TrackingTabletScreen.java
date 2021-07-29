@@ -347,12 +347,12 @@ public class TrackingTabletScreen extends TabletScreen {
         private final String name;
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             Minecraft.getInstance().font.draw(stack, this.name, x + 5, y + 4, -1);
         }
 
         @Override
-        public void postDraw(MatrixStack stack, int x, int y, int mouseX, int mouseY) {
+        public void postDraw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY) {
             if(mouseX - x >= 0 && mouseX - x <= 100 && mouseY - y >= 0 && mouseY - y <= 15) {
                 GL11.glDisable(GL11.GL_STENCIL_TEST);
                 RenderSystem.enableDepthTest();

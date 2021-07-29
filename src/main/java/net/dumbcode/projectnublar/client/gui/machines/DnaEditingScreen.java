@@ -8,6 +8,10 @@ import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
+import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
+import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
+import net.dumbcode.dumblibrary.server.dna.GeneticType;
+import net.dumbcode.dumblibrary.server.utils.GeneticUtils;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
@@ -20,6 +24,7 @@ import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -28,6 +33,7 @@ import net.minecraftforge.fml.client.gui.widget.Slider;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
@@ -42,15 +48,21 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     private final List<DriveEntry> entryList = Lists.newArrayList();
     private final List<DriveEntry> filteredListForSlot = Lists.newArrayList();
 
+    private final List<SequencingSynthesizerBlockEntity.EntityGeneEntry> allGenes = Lists.newArrayList();
+    private final List<GeneEditEntry> combinedGeneList = Lists.newArrayList();
+
     private int slots = SequencingSynthesizerBlockEntity.MINIMUM_SLOTS;
     private int selectedSlot = -1;
+    private float renderTicks;
 
     private GuiScrollBox<DriveEntry> scrollBox;
-    private TranslationTextComponent hoveringText;
+    private GuiScrollBox<GeneEditEntry> geneScrollBox;
+    private IFormattableTextComponent hoveringText;
 
     public DnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
+        this.refreshGeneList();
     }
 
 
@@ -60,7 +72,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
         this.updateLists();
 
-        this.scrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 232, this.topPos + 24, 100, 20, 5, () -> {
+        this.scrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 232, this.topPos + 24, 109, 20, 5, () -> {
             if(this.selectedSlot == -1) {
                 return Collections.emptyList();
             } else if(this.selectedSlot == 0) {
@@ -69,6 +81,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                 return this.filteredListForSlot;
             }
         }).addFromPrevious(this.scrollBox).setBorderColor(0xFF577694).setCellHighlightColor(0xCF193B59).setCellSelectedColor(0xFF06559C).setInsideColor(0xFF193B59).setEmptyColor(0xCF0F2234).setRenderFullSize(true));
+
+        this.geneScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 104, this.topPos + 134, 237, 14, 3, () -> this.combinedGeneList)
+            .addFromPrevious(this.geneScrollBox).setCellsPerRow(2).setBorderColor(0xFF577694).setCellHighlightColor(0xCF193B59).setCellSelectedColor(0xFF06559C).setInsideColor(0xFF193B59).setEmptyColor(0xCF0F2234).setRenderFullSize(true));
 
         this.slotList.clear();
         for (int i = 0; i < SequencingSynthesizerBlockEntity.TOTAL_SLOTS; i++) {
@@ -157,30 +172,30 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         super.renderScreen(stack, mouseX, mouseY, partialTicks);
 
-        int xStart = this.leftPos + 102;
-        int yStart = this.topPos + 166;
-
-        int w = 128;
-        int yEnd = yStart + 10;
-
-        fill(stack, xStart-1, yStart-1, xStart+w+1, yEnd+1, -1);
-
-        int start = 0;
-        for (DnaSelectModuleSlot module : this.slotList) {
-            if(module.drive == null || module.slider.sliderValue == 0) {
-                continue;
-            }
-            int value = (int) Math.floor(w * MathHelper.clamp(module.slider.sliderValue, 0D, 1D));
-            fill(stack, xStart + start, yStart, xStart + start + value-1, yEnd, 0xFF000000|this.colors[module.id]);
-            if(module.drive != null && mouseX >= xStart + start && mouseX < xStart + start + value && mouseY >= yStart && mouseY < yEnd) {
-                hoveringText = module.drive.entry;
-            }
-            start += value;
-
-        }
-        if(start != w) {
-            fill(stack, xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
-        }
+//        int xStart = this.leftPos + 102;
+//        int yStart = this.topPos + 166;
+//
+//        int w = 128;
+//        int yEnd = yStart + 10;
+//
+//        fill(stack, xStart-1, yStart-1, xStart+w+1, yEnd+1, -1);
+//
+//        int start = 0;
+//        for (DnaSelectModuleSlot module : this.slotList) {
+//            if(module.drive == null || module.slider.getSliderValue() == 0) {
+//                continue;
+//            }
+//            int value = (int) Math.round((w+1) * MathHelper.clamp(module.slider.getSliderValue(), 0D, 1D));
+//            fill(stack, xStart + start, yStart, xStart + start + value-1, yEnd, 0xFF000000|this.colors[module.id]);
+//            if(module.drive != null && mouseX >= xStart + start && mouseX < xStart + start + value && mouseY >= yStart && mouseY < yEnd) {
+//                hoveringText = module.drive.entry;
+//            }
+//            start += value;
+//
+//        }
+//        if(start < w) {
+//            fill(stack, xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
+//        }
 
 
         if(hoveringText != null) {
@@ -190,6 +205,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             drawString(stack, minecraft.font, hoveringText, mouseX + 6, mouseY, -1);
         }
         renderTooltip(stack, mouseX, mouseY);
+        this.renderTicks += partialTicks;
     }
 
     private void setSelectedSlot(int selectedSlot) {
@@ -229,16 +245,40 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         }
     }
 
+    private void refreshGeneList() {
+        this.allGenes.clear();
+        this.allGenes.addAll(this.blockEntity.gatherAllGeneticEntries());
+
+        this.combinedGeneList.clear();
+        List<GeneticEntry<?>> combined = GeneticUtils.combineAll(
+            this.allGenes.stream()
+                .map(SequencingSynthesizerBlockEntity.EntityGeneEntry::create)
+                .collect(Collectors.toList())
+        );
+        for (GeneticEntry<?> entry : combined) {
+            this.combinedGeneList.add(new GeneEditEntry(entry));
+        }
+    }
+
     private void updateAllSlots() {
-        int center = this.topPos + this.imageHeight / 2;
-        int totalWidth = 20*this.slots - 4; //4 is the padding on the bottom element we take away.
-        int yStart = center - totalWidth / 2;
+        int center = this.topPos + this.imageHeight / 2 + 1;
+        int totalHeight = 18*this.slots - 2; //4 is the padding on the bottom element we take away.
+        int yStart = center - totalHeight / 2;
         for (DnaSelectModuleSlot slot : this.slotList) {
             slot.visible = slot.id < this.slots;
             if(slot.visible) {
-                slot.y = yStart + slot.id*20;
+                slot.y = yStart + slot.id*18;
                 slot.slider.y = slot.y;
             }
+        }
+    }
+
+    private void changeDnaSelection(int id, String key, double amount) {
+        if (this.blockEntity.setAndValidateSelect(id, key, amount)) {
+            ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
+                id, key, amount)
+            );
+            this.refreshGeneList();
         }
     }
 
@@ -263,7 +303,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         private DriveEntry drive;
 
         private DnaSelectModuleSlot(int id, int x, int y) {
-            super(x, y, 100, 16, new StringTextComponent(":)"));
+            super(x, y, 109, 16, new StringTextComponent(":)"));
             this.id = id;
             this.slider = new ClampedGuiSlider(id, x + 16, y, this);
         }
@@ -272,6 +312,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float ticks) {
             if(!this.visible) {
                 return;
+            }
+            if(this.isMouseOver(mouseX, mouseY) && this.drive != null) {
+                hoveringText = this.drive.entry;
             }
             this.slider.active = this.id < slots && this.drive != null;
             if(this.drive != null && this.id >= slots) {
@@ -301,28 +344,13 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
         }
 
-//        public void draw(MatrixStack stack) {
-//            StencilStack.pushSquareStencil(stack, x, y + 5, x+75, y+20);
-//            fill(stack, x, y, x+75, y+25, enabled ? 0xFF000000 : 0xFF4A0000);
-//            if(this.drive != null) {
-//                this.drive.draw(stack, x, y+5, mouseX, mouseY, mouseOver);
-//            }
-//            StencilStack.popStencil();
-//            this.slider.render(stack, mouseX, mouseY, 1F);
-//
-//            if(!enabled && mouseOver) {
-//                hoveringText = "Need " + SequencingSynthesizerBlockEntity.getPercentageForSlot(this.id+1) + " % of dino to use";//todo: localize
-//            }
-//        }
-
         public void setDrive(DriveEntry drive) {
+            if(this.drive == drive) {
+                return;
+            }
             this.drive = drive;
             if(this.drive == null) {
-                if (blockEntity.setAndValidateSelect(id, "", 0)) {
-                    ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
-                        id, "", 0)
-                    );
-                }
+                changeDnaSelection(this.id, "", 0);
             }
             if(this.id == 0) {
                 if(drive == null) {
@@ -369,20 +397,23 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             return Collections.singletonList(this.slider);
         }
 
-//        @Override
-//        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
-//            if(relMouseX > 0 && relMouseX < 75 && relMouseY > 0 && relMouseY < 20) {
-//                dropdownSelectionId = this.id;
-//                popupSelection.setScroll(0);
+    }
+
+    @RequiredArgsConstructor
+    private class GeneEditEntry implements GuiScrollboxEntry {
+        private final GeneticEntry<?> entry;
+        @Override
+        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+            entry.getStorage().render(stack, this.entry.getType(), this.entry.getModifier(), x, y, width, height, renderTicks);
+//            if(mouseOver) {
+//                hoveringText = DriveUtils.getTranslation(this.entry.getSource().getDescriptionId(), this.entry.getVariant()).append(": " + Math.round(this.entry.getAmount() * 100) + "%");
 //            }
-//            return false;
-//        }
-//
-//        @Override
-//        public boolean globalClicked(double mouseX, double mouseY, int mouseButton) {
-//            this.slider.mouseClicked(mouseX, mouseY, mouseButton);
-//            return false;
-//        }
+        }
+
+        @Override
+        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
+            return false;
+        }
     }
 
     @RequiredArgsConstructor
@@ -393,7 +424,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             drawString(stack, minecraft.font, this.entry, x + 2, y + 5, -1);
         }
 
@@ -409,11 +440,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                     scrollBox.setSelectedElement(null);
                     ret = false;
                 }
-                if (blockEntity.setAndValidateSelect(id, key, 0)) {
-                    ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
-                        id, key, 0)
-                    );
-                }
+                changeDnaSelection(id, key, 0);
                 //We might only need to do `slotList[id].slider.setValueDirectly(0);`
                 for (DnaSelectModuleSlot slot : slotList) {
                     slot.slider.setValueDirectly(blockEntity.getSelectAmount(slot.id));
@@ -435,7 +462,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         private final DnaSelectModuleSlot module;
 
         ClampedGuiSlider(int id, int x, int y, DnaSelectModuleSlot module) {
-            super(x, y, 70, 16, new StringTextComponent(""), new StringTextComponent("%"), 0D, 100D, DnaEditingScreen.this.blockEntity.getSelectAmount(id), false, true, p_onPress_1_ -> {});
+            super(x, y, 70, 16, new StringTextComponent(""), new StringTextComponent("%"), 0D, id == 0 ? 100D : 50D, DnaEditingScreen.this.blockEntity.getSelectAmount(id), false, true, p_onPress_1_ -> {});
             this.id = id;
             this.module = module;
         }
@@ -443,10 +470,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         @Override
         public void updateSlider() {
             if(module.drive != null) {
-                blockEntity.setAndValidateSelect(this.id, module.drive.getKey(), this.sliderValue);
-                ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
-                    this.id, module.drive.getKey(), this.sliderValue)
-                );
+                changeDnaSelection(this.id, module.drive.getKey(), this.getSliderValue());
 
                 for (DnaSelectModuleSlot slot : slotList) {
                     slot.slider.setValueDirectly(blockEntity.getSelectAmount(slot.id));
@@ -455,8 +479,12 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             }
         }
 
+        public double getSliderValue() {
+            return this.sliderValue * (this.id == 0 ? 1 : 0.5D);
+        }
+
         public void setValueDirectly(double d) {
-            this.sliderValue = d;
+            this.sliderValue = d / (this.id == 0 ? 1 : 0.5D);
             super.updateSlider(); //Must be super to prevent loops
         }
 

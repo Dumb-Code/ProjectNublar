@@ -80,6 +80,16 @@
     "projectnublar.entity.genetics.variant.cyan": "Cyan %s",
     "projectnublar.entity.genetics.variant.purple": "Purple  %s",
 
+    "projectnublar.genetic_type.strength": "Strength",
+    "projectnublar.genetic_type.defense": "Defense",
+    "projectnublar.genetic_type.hunger": "Hunger",
+    "projectnublar.genetic_type.stomach_capacity": "Stomace Capacity",
+    "projectnublar.genetic_type.diet_change": "Diet",
+    "projectnublar.genetic_type.hunting_pack_size": "Hunting Pack Size",
+    "projectnublar.genetic_type.aggression": "Aggression",
+    "projectnublar.genetic_type.herd_size": "Herd Size",
+
+
     "projectnublar.mood.stressful.positive": "Relaxed",
     "projectnublar.mood.stressful.negative": "Stressed",
     "projectnublar.mood.happy.positive": "Happy",

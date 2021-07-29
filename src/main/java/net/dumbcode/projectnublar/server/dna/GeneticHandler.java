@@ -24,14 +24,14 @@ public class GeneticHandler {
     public static final RegistryObject<GeneticType<GeneticDietChangeStorage>> DIET_CHANGE = REGISTER.register("diet_change", () ->
         GeneticType.<GeneticDietChangeStorage>builder()
             .storage(GeneticDietChangeStorage::new)
-            .onChange((value, rawValue, type, storage) -> type.get(ComponentHandler.METABOLISM).ifPresent(m -> m.addGeneticDiet(storage.getRandomUUID(), storage.getDiet())))
+            .onChange((value, type, storage) -> type.get(ComponentHandler.METABOLISM).ifPresent(m -> m.addGeneticDiet(storage.getRandomUUID(), storage.getDiet())))
             .build()
 
     );
 
-    public static final RegistryObject<GeneticType<?>> HUNTING_PACK_SIZE = REGISTER.register("hunting_pack_size", GeneticType::unfinished);
-    public static final RegistryObject<GeneticType<?>> AGGRESSION = REGISTER.register("aggression", GeneticType::unfinished);
-    public static final RegistryObject<GeneticType<?>> HERD_SIZE = REGISTER.register("herd_size", GeneticType::unfinished);
+    public static final RegistryObject<GeneticType<GeneticFieldModifierStorage>> HUNTING_PACK_SIZE = REGISTER.register("hunting_pack_size", GeneticType::unfinished);
+    public static final RegistryObject<GeneticType<GeneticFieldModifierStorage>> AGGRESSION = REGISTER.register("aggression", GeneticType::unfinished);
+    public static final RegistryObject<GeneticType<GeneticFieldModifierStorage>> HERD_SIZE = REGISTER.register("herd_size", GeneticType::unfinished);
 
 
 }

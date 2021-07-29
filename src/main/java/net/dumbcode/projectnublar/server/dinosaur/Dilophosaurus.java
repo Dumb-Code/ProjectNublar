@@ -108,7 +108,7 @@ public class Dilophosaurus extends Dinosaur {
             );
 
         this.addComponent(EntityComponentTypes.GENETICS)
-            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get(), "movement_speed",0, 0.75F);
+            .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get());
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
             .addLayer("base",0F)

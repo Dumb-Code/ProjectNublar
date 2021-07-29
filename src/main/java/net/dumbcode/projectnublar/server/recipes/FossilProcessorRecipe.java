@@ -38,6 +38,11 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     }
 
     @Override
+    public boolean shouldSlotChangeCauseReset(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process, int slot) {
+        return slot == 0;
+    }
+
+    @Override
     public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
         ItemStack inputStack = handler.getStackInSlot(process.getInputSlot(0));

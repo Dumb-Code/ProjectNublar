@@ -54,6 +54,16 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     }
 
     @Override
+    public boolean startsAutomatically() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldGlobalSlotChangeCauseReset(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process, int slot) {
+        return slot == 0; //Hard Drive Changed.
+    }
+
+    @Override
     public int getRecipeTime(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
         return 12000 - 3600*blockEntity.getTier(MachineModuleType.COMPUTER_CHIP);
     }

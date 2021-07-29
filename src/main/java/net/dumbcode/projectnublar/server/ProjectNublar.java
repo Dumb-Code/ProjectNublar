@@ -273,6 +273,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(29, S2CSyncSequencingSynthesizerSyncSelected.class, S2CSyncSequencingSynthesizerSyncSelected::toBytes, S2CSyncSequencingSynthesizerSyncSelected::fromBytes, S2CSyncSequencingSynthesizerSyncSelected::handle);
         NETWORK.registerMessage(30, S2STrackingTabletUpdateChunk.class, S2STrackingTabletUpdateChunk::toBytes, S2STrackingTabletUpdateChunk::fromBytes, S2STrackingTabletUpdateChunk::handle);
         NETWORK.registerMessage(31, C2SSequencerSynthesizerContainerSlotOpened.class, C2SSequencerSynthesizerContainerSlotOpened::toBytes, C2SSequencerSynthesizerContainerSlotOpened::fromBytes, C2SSequencerSynthesizerContainerSlotOpened::handle);
+        NETWORK.registerMessage(32, C2SManualStartRecipe.class, C2SManualStartRecipe::toBytes, C2SManualStartRecipe::fromBytes, C2SManualStartRecipe::handle);
     }
 
     public static TranslationTextComponent translate(String key, Object... args) {
