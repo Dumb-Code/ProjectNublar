@@ -10,29 +10,41 @@ import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
-import net.dumbcode.dumblibrary.server.dna.GeneticType;
+import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.GeneticComponent;
 import net.dumbcode.dumblibrary.server.utils.GeneticUtils;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerSelectChange;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.client.gui.widget.Slider;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
@@ -48,15 +60,18 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     private final List<DriveEntry> entryList = Lists.newArrayList();
     private final List<DriveEntry> filteredListForSlot = Lists.newArrayList();
 
-    private final List<SequencingSynthesizerBlockEntity.EntityGeneEntry> allGenes = Lists.newArrayList();
-    private final List<GeneEditEntry> combinedGeneList = Lists.newArrayList();
+    private final List<GeneticEntry<?, ?>> combineGenetics = Lists.newArrayList();
+    private final List<GuiScrollboxEntry> combinedEditGeneList = Lists.newArrayList();
+    private List<GuiScrollboxEntry> individualBreakdownList;
 
     private int slots = SequencingSynthesizerBlockEntity.MINIMUM_SLOTS;
     private int selectedSlot = -1;
     private float renderTicks;
 
+    private DinosaurEntity cachedEntity;
+
     private GuiScrollBox<DriveEntry> scrollBox;
-    private GuiScrollBox<GeneEditEntry> geneScrollBox;
+    private GuiScrollBox<GuiScrollboxEntry> geneScrollBox;
     private IFormattableTextComponent hoveringText;
 
     public DnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
@@ -70,9 +85,15 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     public void init() {
         super.init();
 
+        this.slotList.clear();
+        for (int i = 0; i < SequencingSynthesizerBlockEntity.TOTAL_SLOTS; i++) {
+            this.slotList.add(this.addButton(new DnaSelectModuleSlot(this.slotList.size(), this.leftPos + 10, 0)));
+        }
+        this.updateAllSlots();
+
         this.updateLists();
 
-        this.scrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 232, this.topPos + 24, 109, 20, 5, () -> {
+        this.scrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 232, this.topPos + 23, 109, 20, 5, () -> {
             if(this.selectedSlot == -1) {
                 return Collections.emptyList();
             } else if(this.selectedSlot == 0) {
@@ -82,14 +103,8 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             }
         }).addFromPrevious(this.scrollBox).setBorderColor(0xFF577694).setCellHighlightColor(0xCF193B59).setCellSelectedColor(0xFF06559C).setInsideColor(0xFF193B59).setEmptyColor(0xCF0F2234).setRenderFullSize(true));
 
-        this.geneScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 104, this.topPos + 134, 237, 14, 3, () -> this.combinedGeneList)
+        this.geneScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 104, this.topPos + 134, 237, 14, 3, () -> this.individualBreakdownList != null ? this.individualBreakdownList : this.combinedEditGeneList)
             .addFromPrevious(this.geneScrollBox).setCellsPerRow(2).setBorderColor(0xFF577694).setCellHighlightColor(0xCF193B59).setCellSelectedColor(0xFF06559C).setInsideColor(0xFF193B59).setEmptyColor(0xCF0F2234).setRenderFullSize(true));
-
-        this.slotList.clear();
-        for (int i = 0; i < SequencingSynthesizerBlockEntity.TOTAL_SLOTS; i++) {
-            this.slotList.add(this.addButton(new DnaSelectModuleSlot(this.slotList.size(), this.leftPos + 10, 0)));
-        }
-        this.updateAllSlots();
     }
 
     @Override
@@ -101,6 +116,10 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         this.slots = this.blockEntity.getSlots();
         if(slots != this.slots) {
             this.updateAllSlots();
+        }
+
+        if(this.cachedEntity != null && Minecraft.getInstance().player.tickCount % 20 == 0) {
+            this.cachedEntity.get(EntityComponentTypes.GENDER.get()).ifPresent(g -> g.male = true);
         }
     }
 
@@ -116,7 +135,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                 }
             }
             if (match == null) {
-                DriveEntry e = new DriveEntry(entry.getKey(), entry.getTranslation());
+                DriveEntry e = new DriveEntry(entry.getKey(), entry, entry.getTranslation());
                 if (entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
                     this.dinosaurList.add(e);
                 }
@@ -143,6 +162,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             moduleSlot.setDrive(foundEntry);
             moduleSlot.slider.setValueDirectly(amount);
         }
+        this.refreshEntity();
+        this.refreshGeneList();
+//        this.refreshGeneticsOnEntity();
     }
 
     private void updateDriveEntires(List<DriveEntry> safeEntries) {
@@ -206,6 +228,49 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         }
         renderTooltip(stack, mouseX, mouseY);
         this.renderTicks += partialTicks;
+
+        if(this.cachedEntity != null) {
+            AxisAlignedBB a = this.cachedEntity.getBoundingBoxForCulling();
+            double min = Math.max(a.getXsize(), Math.max(a.getYsize(), a.getZsize()));
+
+            fill(stack, this.leftPos+105, this.topPos+24, this.leftPos+223, this.topPos+123, 0xAF193B59);
+            RenderUtils.renderBorder(stack, this.leftPos+104, this.topPos+23, this.leftPos+224, this.topPos+124, 1, 0xFF577694);
+
+            StencilStack.pushSquareStencil(stack, this.leftPos+105, this.topPos+24, this.leftPos+223, this.topPos+123);
+            renderEntityAndPlayer(this.leftPos + 167, this.topPos + 110, 200 / min, this.cachedEntity, mouseX, mouseY);
+            StencilStack.popStencil();
+        }
+    }
+
+    private static void renderEntityAndPlayer(int x, int y, double scale, Entity entity, double mouseX, double mouseY) {
+        renderEntityAt(x, y, scale, entity);
+
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        double mx = x + 20 - mouseX;
+        double my = y - scale*1.5 - mouseY;
+
+        float angleX = (float)Math.atan(mx / 40.0F);
+        float angleY = (float)Math.atan(my / 40.0F);
+
+        float yBodyRot = player.yBodyRot;
+        float yRot = player.yRot;
+        float xRot = player.xRot;
+        float yHeadRotO = player.yHeadRotO;
+        float yHeadRot = player.yHeadRot;
+
+        player.yBodyRot = 180.0F + angleX * 20.0F;;
+        player.yRot = 180.0F + angleX * 40.0F;;
+        player.xRot = -angleY * 20.0F;;
+        player.yHeadRot = player.yRot;
+        player.yHeadRotO = player.yRot;
+
+        renderEntityAt(x + 20, y, scale, player, 900, Vector3f.XP.rotationDegrees(angleY * 20.0F));
+
+        player.yBodyRot = yBodyRot;
+        player.yRot = yRot;
+        player.xRot = xRot;
+        player.yHeadRotO = yHeadRotO;
+        player.yHeadRot = yHeadRot;
     }
 
     private void setSelectedSlot(int selectedSlot) {
@@ -242,22 +307,41 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                     this.filteredListForSlot.removeIf(p -> p.key.equals(key));
                 }
             }
+
+            this.individualBreakdownList = new ArrayList<>();
+            DnaSelectModuleSlot slot = this.slotList.get(this.selectedSlot);
+            DriveEntry entry = slot.drive;
+            if(entry != null && entry.driveEntry.getDriveType() == DriveUtils.DriveType.OTHER) {
+                ResourceLocation location = new ResourceLocation(entry.getKey());
+                if(ForgeRegistries.ENTITIES.containsKey(location)) {
+                    EntityType<?> value = ForgeRegistries.ENTITIES.getValue(location);
+                    for (EntityGeneticRegistry.Entry<?, ?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.driveEntry.getVariant())) {
+                        this.individualBreakdownList.add(new GeneEditEntry<>(e.create((float) slot.slider.getSliderValue())));
+                    }
+
+                    SequencingSynthesizerBlockEntity.DnaColourStorage storage = this.blockEntity.getStorage(this.selectedSlot);
+                    if(storage != null) {
+                        List<Integer> tints = EntityGeneticRegistry.INSTANCE.gatherTints(value, entry.driveEntry.getVariant());
+                        for (int i = 0; i < tints.size(); i++) {
+                            this.individualBreakdownList.add(new GeneEditTintEntry(i, tints.get(i), storage));
+                        }
+                    }
+                }
+            }
+
+        } else {
+            this.individualBreakdownList = null;
         }
     }
 
     private void refreshGeneList() {
-        this.allGenes.clear();
-        this.allGenes.addAll(this.blockEntity.gatherAllGeneticEntries());
-
-        this.combinedGeneList.clear();
-        List<GeneticEntry<?>> combined = GeneticUtils.combineAll(
-            this.allGenes.stream()
-                .map(SequencingSynthesizerBlockEntity.EntityGeneEntry::create)
-                .collect(Collectors.toList())
-        );
-        for (GeneticEntry<?> entry : combined) {
-            this.combinedGeneList.add(new GeneEditEntry(entry));
+        this.combinedEditGeneList.clear();
+        this.combineGenetics.clear();
+        this.combineGenetics.addAll(GeneticUtils.combineAll(this.blockEntity.gatherAllGeneticEntries()));
+        for (GeneticEntry<?, ?> entry : this.combineGenetics) {
+            this.combinedEditGeneList.add(new GeneEditEntry<>(entry));
         }
+        this.refreshGeneticsOnEntity();
     }
 
     private void updateAllSlots() {
@@ -276,11 +360,39 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     private void changeDnaSelection(int id, String key, double amount) {
         if (this.blockEntity.setAndValidateSelect(id, key, amount)) {
             ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
-                id, key, amount)
-            );
+                id, key, amount,
+                this.blockEntity.getStorage(id)
+            ));
+            if(id == 0) {
+                this.refreshEntity();
+            }
             this.refreshGeneList();
         }
     }
+
+    private void refreshEntity() {
+        DnaSelectModuleSlot slot = this.slotList.get(0);
+        boolean hasDinosaur = !slot.drive.key.isEmpty() && slot.slider.getSliderValue() != 0;
+        if(hasDinosaur) {
+            Dinosaur dinosaur = DinosaurHandler.getRegistry().getValue(new ResourceLocation(slot.drive.key));
+            if(this.cachedEntity == null || this.cachedEntity.getDinosaur() != dinosaur) {
+                this.cachedEntity = dinosaur.createEntity(
+                    Minecraft.getInstance().level,
+                    dinosaur.getAttacher().getDefaultConfig()
+                        .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), GeneticComponent::disableRandomGenetics)
+                );
+            }
+        } else if(this.cachedEntity != null) {
+            this.cachedEntity = null;
+        }
+    }
+
+    private void refreshGeneticsOnEntity() {
+        if(this.cachedEntity != null) {
+            this.cachedEntity.get(EntityComponentTypes.GENETICS).ifPresent(g -> GeneticComponent.replaceGenetics(g, this.cachedEntity, this.combineGenetics));
+        }
+    }
+
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int state) {
@@ -400,8 +512,8 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @RequiredArgsConstructor
-    private class GeneEditEntry implements GuiScrollboxEntry {
-        private final GeneticEntry<?> entry;
+    private class GeneEditEntry<O> implements GuiScrollboxEntry {
+        private final GeneticEntry<?, O> entry;
         @Override
         public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             entry.getStorage().render(stack, this.entry.getType(), this.entry.getModifier(), x, y, width, height, renderTicks);
@@ -417,9 +529,72 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @RequiredArgsConstructor
+    private class GeneEditTintEntry implements GuiScrollboxEntry {
+        private final int tintIndex;
+        private final int tint;
+        private final SequencingSynthesizerBlockEntity.DnaColourStorage storage;
+
+        private int width;
+        private int height;
+
+        @Override
+        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+            fill(stack, x, y, x+width, y+height, 0xFF000000 | this.tint);
+
+            this.width = width;
+            this.height = height;
+
+            int squareSize = height - 2;
+            int center = x + width/2;
+
+            int overIndex = this.mouseOverSquareIndex(mouseX - x, mouseY - y);
+
+            int primary = this.storage.getPrimary().contains(this.tintIndex) ? 0xBB518851 : 0xBB885151;
+            int secondary = this.storage.getSecondary().contains(this.tintIndex) ? 0xBB518851 : 0xBB885151;
+
+            fill(stack, center-squareSize-2, y+1, center-1, y+1+squareSize, overIndex == 0 ? 0xBB515188 : primary);
+            fill(stack, center+squareSize+2, y+1, center+1, y+1+squareSize, overIndex == 1 ? 0xBB515188 : secondary);
+        }
+
+        private int mouseOverSquareIndex(double mx, double my) {
+            double squareSize = this.height - 2;
+            double center = this.width/2D;
+            if(mx >= center-squareSize-2 && my >= 1 && mx < center-1 && my < 1+squareSize) {
+                return 0;
+            } else if(mx >= center+1 && my >= 1 && mx < center+squareSize+2 && my < 1+squareSize) {
+                return 1;
+            }
+            return -1;
+        }
+
+        private void toggle(Set<Integer> set) {
+            if(set.contains(this.tintIndex)) {
+                set.remove(this.tintIndex);
+            } else {
+                set.add(this.tintIndex);
+            }
+            //TODO: bruh moment sync
+        }
+
+        @Override
+        public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
+            int overIndex = this.mouseOverSquareIndex(relMouseX, relMouseY);
+            if(overIndex == 0) {
+                this.toggle(this.storage.getPrimary());
+                return true;
+            } else if(overIndex == 1) {
+                this.toggle(this.storage.getSecondary());
+                return true;
+            }
+            return false;
+        }
+    }
+
+    @RequiredArgsConstructor
     private class DriveEntry implements GuiScrollboxEntry {
 
         private final String key;
+        private final DriveUtils.DriveEntry driveEntry;
         private final TranslationTextComponent entry;
 
 

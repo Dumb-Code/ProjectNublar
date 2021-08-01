@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
+import net.dumbcode.dumblibrary.server.dna.GeneticFactoryStorage;
+import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
@@ -67,31 +69,36 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     }
 
     //TODO: handle random genetic deviation
-    private List<GeneticEntry<?>> generateCombinedGenetics(GeneticComponent component, GeneticComponent otherComponent) {
-        List<GeneticEntry<?>> combinedGenetics = Lists.newArrayList();
+    private List<GeneticEntry<?, ?>> generateCombinedGenetics(GeneticComponent component, GeneticComponent otherComponent) {
+        List<GeneticEntry<?, ?>> combinedGenetics = Lists.newArrayList();
 
-        Set<GeneticEntry<?>> handledGenetics = Sets.newHashSet();
+        Set<GeneticEntry<?, ?>> handledGenetics = Sets.newHashSet();
 
-        for (GeneticEntry<?> genetic : component.getGenetics()) {
-            Optional<GeneticEntry<?>> entryOptional = otherComponent.findEntry(genetic);
+        for (GeneticEntry<?, ?> genetic : component.getGenetics()) {
+            Optional<GeneticEntry<?, ?>> entryOptional = otherComponent.findEntry(genetic);
             if(entryOptional.isPresent()) {
-                GeneticEntry<?> entry = entryOptional.get();
-                double newValue = genetic.getType().getDataHandler().combineChild(entry.getModifier(), genetic.getModifier());
-                combinedGenetics.add(entry.copy().setModifier(newValue));
-
+                GeneticEntry<?, ?> entry = entryOptional.get();
+                combinedGenetics.add(combine(genetic, entry));
                 handledGenetics.add(genetic);
             } else {
                 combinedGenetics.add(genetic.copy());
             }
         }
 
-        for (GeneticEntry<?> genetic : otherComponent.getGenetics()) {
+        for (GeneticEntry<?, ?> genetic : otherComponent.getGenetics()) {
             if (!handledGenetics.contains(genetic)) {
                 combinedGenetics.add(genetic.copy());
             }
         }
 
         return combinedGenetics;
+    }
+
+    private static <T extends GeneticFactoryStorage<O>, O> GeneticEntry<?, ?> combine(GeneticEntry<?, ?> aRaw, GeneticEntry<?, ?> bRaw) {
+        GeneticEntry<T, O> a = (GeneticEntry<T, O>) aRaw;
+        GeneticEntry<T, O> b = (GeneticEntry<T, O>) bRaw;
+        O o = a.getType().getDataHandler().combineChild(a.getModifier(), b.getModifier());
+        return a.copy().setModifier(o);
     }
 
     @Override
@@ -130,7 +137,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
         private final DinosaurEggType type;
         private int ticksLeft;
         private final int eggTicks;
-        private final List<GeneticEntry<?>> combinedGenetics;
+        private final List<GeneticEntry<?, ?>> combinedGenetics;
     }
 
     @Getter

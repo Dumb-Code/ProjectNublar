@@ -27,7 +27,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeneticDietChangeStorage extends RandomUUIDStorage {
+public class GeneticDietChangeStorage extends RandomUUIDStorage<Float> {
 
     @Getter
     @Setter
@@ -47,7 +47,7 @@ public class GeneticDietChangeStorage extends RandomUUIDStorage {
     }
 
     @Override
-    public void render(MatrixStack stack, GeneticType<?> entry, double value, int x, int y, int width, int height, float ticks) {
+    public void render(MatrixStack stack, GeneticType<?, Float> entry, Float value, int x, int y, int width, int height, float ticks) {
         TranslationTextComponent component = new TranslationTextComponent(DumbLibrary.MODID + ".genetic_storage.diet");
         FontRenderer font = Minecraft.getInstance().font;
 

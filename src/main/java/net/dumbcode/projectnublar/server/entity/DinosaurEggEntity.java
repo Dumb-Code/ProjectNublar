@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnData {
 
-    private final List<GeneticEntry<?>> combinedGenetics = new ArrayList<>();
+    private final List<GeneticEntry<?, ?>> combinedGenetics = new ArrayList<>();
     private Dinosaur dinosaur;
     @Getter
     public float randomRotation;
@@ -42,7 +42,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
         super(eggType, world);
     }
 
-    public DinosaurEggEntity(World world, List<GeneticEntry<?>> combinedGenetics, Dinosaur dinosaur, DinosaurEggType eggType, float randomScaleAdjustment, UUID familyUUID, int hatchingTicks) {
+    public DinosaurEggEntity(World world, List<GeneticEntry<?, ?>> combinedGenetics, Dinosaur dinosaur, DinosaurEggType eggType, float randomScaleAdjustment, UUID familyUUID, int hatchingTicks) {
         this(EntityHandler.DINOSAUR_EGG.get(), world);
         this.combinedGenetics.addAll(combinedGenetics);
         this.dinosaur = dinosaur;
@@ -74,6 +74,7 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
             this.kill();
             if(this.dinosaur != null) {
                 DinosaurEntity child = this.dinosaur.createEntity(this.level, this.dinosaur.getAttacher().getDefaultConfig()
+                    .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), GeneticComponent::useExistingGenetics)
                     .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), component -> this.combinedGenetics.forEach(component::insertGenetic))
                     .runBeforeFinalize(ComponentHandler.AGE.get(), component -> component.resetStageTo(Dinosaur.CHILD_AGE))
 

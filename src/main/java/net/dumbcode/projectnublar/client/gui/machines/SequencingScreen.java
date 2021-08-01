@@ -229,36 +229,13 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             RenderSystem.setupNvFogDistance();
         }
 
+        renderEntityAt(x, y, scale, entity);
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)x, (float)y, 1050.0F);
-        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
-        MatrixStack matrixstack = new MatrixStack();
-        matrixstack.translate(0.0D, 0.0D, 1000.0D);
-        matrixstack.scale((float)scale, (float)scale, (float)scale);
-        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion quaternion1 = Vector3f.YP.rotationDegrees(Minecraft.getInstance().player.tickCount);
-        quaternion.mul(quaternion1);
-        matrixstack.mulPose(quaternion);
-        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternion1.conj();
-        entityrenderermanager.overrideCameraOrientation(quaternion1);
-        entityrenderermanager.setRenderShadow(false);
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableDepthTest();
-        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderSystem.runAsFancy(() ->
-                entityrenderermanager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880)
-        );
-
-        irendertypebuffer$impl.endBatch();
-        entityrenderermanager.setRenderShadow(true);
         if(fog) {
             RenderSystem.fogMode(GlStateManager.FogMode.EXP2);
             RenderSystem.disableFog();
         }
 
-        RenderSystem.popMatrix();
 
         FogRenderer.fogRed = fogRed;
         FogRenderer.fogGreen = fogGreen;
@@ -275,7 +252,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
                         Minecraft.getInstance().level,
                         dinosaur.getAttacher()
                             .getDefaultConfig()
-                            .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), GeneticComponent::disableRandomGenetics)
+                            .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), GeneticComponent::useExistingGenetics)
                     );
                 }
                 break;

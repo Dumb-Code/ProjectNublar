@@ -9,7 +9,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
@@ -21,7 +23,8 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
     public static S2CSyncSequencingSynthesizerSyncSelected fromBlockEntity(SequencingSynthesizerBlockEntity blockEntity) {
         return new S2CSyncSequencingSynthesizerSyncSelected(
             blockEntity.getBlockPos(),
-            IntStream.range(0, 9).mapToObj(i -> new SyncDnaEntry(blockEntity.getSelectKey(i), blockEntity.getSelectAmount(i)))
+            IntStream.range(0, 9).mapToObj(i ->
+                new SyncDnaEntry(blockEntity.getSelectKey(i), blockEntity.getSelectAmount(i), blockEntity.getStorage(i)))
             .toArray(SyncDnaEntry[]::new)
         );
     }
@@ -30,7 +33,13 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
         return new S2CSyncSequencingSynthesizerSyncSelected(
             buf.readBlockPos(),
             IntStream.range(0, 9)
-                .mapToObj(i -> new SyncDnaEntry(buf.readUtf(), buf.readDouble()))
+                .mapToObj(i -> new SyncDnaEntry(
+                    buf.readUtf(), buf.readDouble(),
+                    new SequencingSynthesizerBlockEntity.DnaColourStorage(
+                        IntStream.range(0, buf.readShort()).mapToObj(i2 -> (int) buf.readByte()).collect(Collectors.toSet()),
+                        IntStream.range(0, buf.readShort()).mapToObj(i2 -> (int) buf.readByte()).collect(Collectors.toSet())
+                    )
+                ))
                 .toArray(SyncDnaEntry[]::new)
         );
     }
@@ -40,6 +49,18 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
         for (SyncDnaEntry data : packet.datas) {
             buf.writeUtf(data.key);
             buf.writeDouble(data.amount);
+
+            Set<Integer> primary = data.storage.getPrimary();
+            buf.writeShort(primary.size());
+            for (int i : primary) {
+                buf.writeByte(i);
+            }
+
+            Set<Integer> secondary = data.storage.getSecondary();
+            buf.writeShort(secondary.size());
+            for (int i : secondary) {
+                buf.writeByte(i);
+            }
         }
     }
 
@@ -51,6 +72,7 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
                 for (int i = 0; i < message.datas.length; i++) {
                     SyncDnaEntry data = message.datas[i];
                     ((SequencingSynthesizerBlockEntity) blockEntity).setSelect(i, data.key, data.amount);
+                    ((SequencingSynthesizerBlockEntity) blockEntity).setStorage(i, data.storage);
                 }
             }
         });
@@ -61,6 +83,7 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
     private static class SyncDnaEntry {
         String key;
         double amount;
+        SequencingSynthesizerBlockEntity.DnaColourStorage storage;
     }
 
 }

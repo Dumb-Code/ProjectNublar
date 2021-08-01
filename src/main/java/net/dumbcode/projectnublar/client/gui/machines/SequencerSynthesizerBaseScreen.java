@@ -11,19 +11,21 @@ import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModule
 import net.dumbcode.projectnublar.server.containers.machines.slots.SlotCanBeDisabled;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
 import net.dumbcode.projectnublar.server.network.C2SSequencerSynthesizerContainerSlotOpened;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -143,6 +145,39 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
 
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
+
+    public static void renderEntityAt(int x, int y, double scale, Entity entity) {
+        renderEntityAt(x, y, scale, entity, 1000, Vector3f.YP.rotationDegrees(Minecraft.getInstance().player.tickCount + Minecraft.getInstance().getFrameTime()));
+    }
+
+    public static void renderEntityAt(int x, int y, double scale, Entity entity, double zLevel, Quaternion rotation) {
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)x, (float)y, 1550.0F);
+        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+        MatrixStack matrixstack = new MatrixStack();
+        matrixstack.translate(0.0D, 0.0D, zLevel);
+        matrixstack.scale((float)scale, (float)scale, (float)scale);
+        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+        quaternion.mul(rotation);
+        matrixstack.mulPose(quaternion);
+        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getEntityRenderDispatcher();
+        rotation.conj();
+        entityrenderermanager.overrideCameraOrientation(rotation);
+        entityrenderermanager.setRenderShadow(false);
+        RenderSystem.disableAlphaTest();
+        RenderSystem.disableDepthTest();
+
+        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.runAsFancy(() ->
+            entityrenderermanager.render(entity, 0, 0, 0, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880)
+        );
+
+        irendertypebuffer$impl.endBatch();
+        entityrenderermanager.setRenderShadow(true);
+        RenderSystem.popMatrix();
+    }
+
+
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {

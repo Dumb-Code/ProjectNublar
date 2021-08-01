@@ -1,12 +1,14 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Value;
+import lombok.*;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
+import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
+import net.dumbcode.dumblibrary.server.dna.data.ColouredGeneticDataHandler;
+import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
+import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeOverallTintStorage;
+import net.dumbcode.dumblibrary.server.utils.GeneticUtils;
 import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsScreen;
@@ -29,12 +31,14 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.NBTTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
@@ -163,6 +167,11 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             CompoundNBT tag = list.getCompound(i);
             this.selectedDNAs[i].setKey(tag.getString("Key"));
             this.selectedDNAs[i].setAmount(tag.getDouble("Amount"));
+            this.selectedDNAs[i].setColorStorage(new DnaColourStorage(
+                Arrays.stream(tag.getIntArray("Primary")).mapToObj(Integer::valueOf).collect(Collectors.toSet()),
+                Arrays.stream(tag.getIntArray("Secondary")).mapToObj(Integer::valueOf).collect(Collectors.toSet())
+            ));
+
         }
 
         this.sugarAmount = compound.getDouble("SugarAmount");
@@ -182,6 +191,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             CompoundNBT tag = new CompoundNBT();
             tag.putString("Key", selectedDNA.getKey());
             tag.putDouble("Amount", selectedDNA.getAmount());
+            tag.putIntArray("Primary", selectedDNA.getColorStorage().getPrimary().stream().mapToInt(value -> value).toArray());
+            tag.putIntArray("Secondary", selectedDNA.getColorStorage().getSecondary().stream().mapToInt(value -> value).toArray());
             list.add(tag);
         }
         compound.put("SelectedDnaList", list);
@@ -302,6 +313,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 if(i >= slots) {
                     this.selectedDNAs[i].setKey("");
                     this.selectedDNAs[i].setAmount(0);
+                    this.selectedDNAs[i].setColorStorage(new DnaColourStorage(new HashSet<>(), new HashSet<>()));
                     continue;
                 }
                 double amountToSubtract = this.selectedDNAs[i].amount;
@@ -315,6 +327,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             if(ID >= slots) {
                 this.selectedDNAs[ID].setKey("");
                 this.selectedDNAs[ID].setAmount(0);
+                this.selectedDNAs[ID].setColorStorage(new DnaColourStorage(new HashSet<>(), new HashSet<>()));
                 if(!this.level.isClientSide) {
                     this.getProcess(1).setTime(0);
                 }
@@ -331,6 +344,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 if(this.selectedDNAs[i].key.equals(key) || i >= slots) {
                     this.selectedDNAs[i].setKey("");
                     this.selectedDNAs[i].setAmount(0);
+                    this.selectedDNAs[i].setColorStorage(new DnaColourStorage(new HashSet<>(), new HashSet<>()));
                     continue;
                 }
                 if(valueLeft < this.selectedDNAs[i].amount) {
@@ -354,6 +368,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         }
     }
 
+    public void setStorage(int ID, DnaColourStorage storage) {
+        if(ID >= 0 && ID < this.selectedDNAs.length) {
+            this.selectedDNAs[ID].setColorStorage(storage);
+        }
+    }
+
     public double getSelectAmount(int ID) {
         if(ID >= 0 && ID < this.selectedDNAs.length) {
             return this.selectedDNAs[ID].getAmount();
@@ -368,7 +388,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return "";
     }
 
-    @Override
+    public DnaColourStorage getStorage(int ID) {
+        if(ID >= 0 && ID < this.selectedDNAs.length) {
+            return this.selectedDNAs[ID].getColorStorage();
+        }
+        return null;
+    }
+
+     @Override
     protected void addTabs(List<TabInformationBar.Tab> tabList) {
         tabList.add(new DefaultTab(0));
 //        tabList.add(new DefaultTab(1));
@@ -457,6 +484,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public static class SelectedDnaEntry {
         private String key = "";
         private double amount;
+        private DnaColourStorage colorStorage = new DnaColourStorage(new HashSet<>(), new HashSet<>());
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class DnaColourStorage {
+        private Set<Integer> primary;
+        private Set<Integer> secondary;
     }
 
     public int getDinosaurAmount() {
@@ -470,8 +505,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return getSlots(this.getDinosaurAmount() / 100F);
     }
 
-    public List<EntityGeneEntry> gatherAllGeneticEntries() {
-        List<EntityGeneEntry> out = new ArrayList<>();
+    public List<GeneticEntry<?, ?>> gatherAllGeneticEntries() {
+        List<GeneticEntry<?, ?>> out = new ArrayList<>();
         ItemStack drive = this.handler.getStackInSlot(0);
         int slots = this.getSlots();
         Map<String, DriveUtils.DriveEntry> collected = DriveUtils.getAll(drive).stream().collect(Collectors.toMap(DriveUtils.DriveEntry::getKey, entry -> entry));
@@ -488,9 +523,44 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 ResourceLocation location = new ResourceLocation(entry.getKey());
                 if(ForgeRegistries.ENTITIES.containsKey(location)) {
                     EntityType<?> value = ForgeRegistries.ENTITIES.getValue(location);
-                    for (EntityGeneticRegistry.Entry<?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.getVariant())) {
-                        out.add(new EntityGeneEntry(value, entry.getVariant(), e, this.selectedDNAs[i].amount));
+                    for (EntityGeneticRegistry.Entry<?, ?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.getVariant())) {
+                        out.add(e.create((float) this.selectedDNAs[i].amount));
                     }
+
+                    List<Integer> tints = EntityGeneticRegistry.INSTANCE.gatherTints(value, entry.getVariant());
+                    List<GeneticTint.Part> allPrimaryColours = new ArrayList<>();
+                    List<GeneticTint.Part> allSecondaryColours = new ArrayList<>();
+
+                    DnaColourStorage storage = this.selectedDNAs[i].getColorStorage();
+                    for (int t = 0; t < tints.size(); t++) {
+                        int tint = tints.get(t);
+
+                        if(storage.getPrimary().contains(t)) {
+                            allPrimaryColours.add(new GeneticTint.Part(
+                                ((tint >> 16) & 0xFF) / 255F,
+                                ((tint >> 8) & 0xFF) / 255F,
+                                ((tint) & 0xFF) / 255F,
+                                1F,
+                                (int) (GeneticUtils.DEFAULT_COLOUR_IMPORTANCE * this.selectedDNAs[i].amount)
+                            ));
+                        }
+                        if(storage.getSecondary().contains(t)) {
+                            allSecondaryColours.add(new GeneticTint.Part(
+                                ((tint >> 16) & 0xFF) / 255F,
+                                ((tint >> 8) & 0xFF) / 255F,
+                                ((tint) & 0xFF) / 255F,
+                                1F,
+                                (int) (GeneticUtils.DEFAULT_COLOUR_IMPORTANCE * this.selectedDNAs[i].amount)
+                            ));
+                        }
+                    }
+
+                    GeneticTint.Part primary = ColouredGeneticDataHandler.combineMultipleParts(allPrimaryColours);
+                    GeneticTint.Part secondary = ColouredGeneticDataHandler.combineMultipleParts(allSecondaryColours);
+
+                    out.add(new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get(), new GeneticTypeOverallTintStorage())
+                        .setModifier(new GeneticTint(primary, secondary))
+                    );
                 }
             }
         }
@@ -512,15 +582,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Value
-    public static class EntityGeneEntry {
-        EntityType<?> source;
-        String variant;
-        EntityGeneticRegistry.Entry<?> geneticEntry;
-        double amount;
-
-        public GeneticEntry<?> create() {
-            return this.geneticEntry.create((float) this.amount);
-        }
+    public static class EntityGeneTintEntry {
+        int tint;
+        int index;
+        DnaColourStorage colourStorage;
     }
 
 }

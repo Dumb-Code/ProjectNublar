@@ -5,8 +5,10 @@ import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,23 +24,37 @@ public class DriveUtils {
         if(key.isEmpty()) {
             return false;
         }
-        return drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information").getCompound(key).getInt("amount") < 100;
+        return getAmount(drive, key) < 100;
     }
 
     public static List<DriveEntry> getAll(ItemStack drive) {
         List<DriveEntry> out = Lists.newArrayList();
-        CompoundNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
+        ListNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getList("drive_information", Constants.NBT.TAG_COMPOUND);
 
-        for (String s : nbt.getAllKeys()) {
-            CompoundNBT tag = nbt.getCompound(s);
-            out.add(new DriveEntry(s, tag.getString("translation_key"), tag.contains("animal_variant") ? tag.getString("animal_variant") : null, tag.getInt("amount"), DriveType.values()[tag.getInt("drive_type") % DriveType.values().length]));
+        for (int i = 0; i < nbt.size(); i++) {
+            CompoundNBT tag = nbt.getCompound(i);
+            out.add(new DriveEntry(tag.getString("drive_key"), tag.getString("translation_key"), tag.contains("animal_variant") ? tag.getString("animal_variant") : null, tag.getInt("amount"), DriveType.values()[tag.getInt("drive_type") % DriveType.values().length]));
         }
 
         return out;
     }
 
     public static int getAmount(ItemStack drive, String key) {
-        return drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information").getCompound(key).getInt("amount");
+        for (DriveEntry entry : getAll(drive)) {
+            if(entry.getKey().equals(key)) {
+                return entry.getAmount();
+            }
+        }
+        return 0;
+    }
+
+    public static DriveType getType(ItemStack drive, String key) {
+        for (DriveEntry entry : getAll(drive)) {
+            if(entry.getKey().equals(key)) {
+                return entry.getDriveType();
+            }
+        }
+        return DriveType.OTHER; //??
     }
 
     public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
@@ -47,27 +63,36 @@ public class DriveUtils {
         }
 
         DriveInformation info = (DriveInformation) inItem.getItem();
-        CompoundNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
+        ListNBT list = drive.getOrCreateTagElement(ProjectNublar.MODID).getList("drive_information", Constants.NBT.TAG_COMPOUND);
         String key = info.getKey(inItem);
         String variant = info.getAnimalVariant(inItem);
         if(key.isEmpty()) {
             return;
         }
-        CompoundNBT inner = nbt.getCompound(key);
+
+        int index = list.size();
+        for (int i = 0; i < list.size(); i++) {
+            if(list.getCompound(i).getString("drive_key").equals(key)) {
+                index = i;
+            }
+        }
+        CompoundNBT inner = list.getCompound(index);
         int current = inner.getInt("amount");
         if(current >= 100) {
             return;
         }
         int result = info.getSize(inItem);
+        inner.putString("drive_key", key);
         inner.putInt("amount", MathHelper.clamp(current + result, 0, 100));
         inner.putString("translation_key", info.getDriveTranslationKey(inItem));
         if(variant != null) {
             inner.putString("animal_variant", variant);
         }
         inner.putInt("drive_type", info.getDriveType(inItem).ordinal());
-        nbt.put(key, inner);
 
-        drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", nbt);
+        list.add(index, inner);
+
+        drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", list);
     }
 
     public static TranslationTextComponent getTranslation(String name, String variant) {
