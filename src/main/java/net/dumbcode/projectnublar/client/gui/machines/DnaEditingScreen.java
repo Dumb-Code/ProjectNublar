@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
@@ -129,13 +128,13 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         for (DriveUtils.DriveEntry entry : DriveUtils.getAll(this.blockEntity.getHandler().getStackInSlot(0))) {
             DriveEntry match = null;
             for (DriveEntry driveEntry : this.entryList) {
-                if(driveEntry.key.equals(entry.getKey())) {
+                if(driveEntry.combined.equals(SequencingSynthesizerBlockEntity.combine(entry.getKey(), entry.getVariant()))) {
                     match = driveEntry;
                     break;
                 }
             }
             if (match == null) {
-                DriveEntry e = new DriveEntry(entry.getKey(), entry, entry.getTranslation());
+                DriveEntry e = new DriveEntry(entry);
                 if (entry.getDriveType() == DriveUtils.DriveType.DINOSAUR) {
                     this.dinosaurList.add(e);
                 }
@@ -152,9 +151,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             String key = this.blockEntity.getSelectKey(moduleSlot.id);
             double amount = this.blockEntity.getSelectAmount(moduleSlot.id);
 
-            DriveEntry foundEntry = null;
+                DriveEntry foundEntry = null;
             for (DriveEntry entry : this.entryList) {
-                if(entry.key.equals(key)) {
+                if(entry.combined.equals(key)) {
                     foundEntry = entry;
                     break;
                 }
@@ -284,9 +283,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         if(selectedSlot != -1) {
             DriveEntry drive = this.slotList.get(selectedSlot).getDrive();
             if(drive != null) {
-                String key = drive.getKey();
+                String key = drive.combined;
                 for (DriveEntry entry : this.filteredListForSlot) {
-                    if(entry.key.equals(key)) {
+                    if(entry.combined.equals(key)) {
                         scrollBox.setSelectedElement(entry);
                         break;
                     }
@@ -303,8 +302,8 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             for (int i = 0; i < this.selectedSlot; i++) {
                 DriveEntry drive = this.slotList.get(i).getDrive();
                 if(drive != null) {
-                    String key = drive.getKey();
-                    this.filteredListForSlot.removeIf(p -> p.key.equals(key));
+                    String key = drive.combined;
+                    this.filteredListForSlot.removeIf(p -> p.combined.equals(key));
                 }
             }
 
@@ -312,7 +311,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             DnaSelectModuleSlot slot = this.slotList.get(this.selectedSlot);
             DriveEntry entry = slot.drive;
             if(entry != null && entry.driveEntry.getDriveType() == DriveUtils.DriveType.OTHER) {
-                ResourceLocation location = new ResourceLocation(entry.getKey());
+                ResourceLocation location = new ResourceLocation(entry.driveEntry.getKey());
                 if(ForgeRegistries.ENTITIES.containsKey(location)) {
                     EntityType<?> value = ForgeRegistries.ENTITIES.getValue(location);
                     for (EntityGeneticRegistry.Entry<?, ?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.driveEntry.getVariant())) {
@@ -372,9 +371,9 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
     private void refreshEntity() {
         DnaSelectModuleSlot slot = this.slotList.get(0);
-        boolean hasDinosaur = !slot.drive.key.isEmpty() && slot.slider.getSliderValue() != 0;
+        boolean hasDinosaur = slot.drive != null && !slot.drive.driveEntry.getKey().isEmpty() && slot.slider.getSliderValue() != 0;
         if(hasDinosaur) {
-            Dinosaur dinosaur = DinosaurHandler.getRegistry().getValue(new ResourceLocation(slot.drive.key));
+            Dinosaur dinosaur = DinosaurHandler.getRegistry().getValue(new ResourceLocation(slot.drive.driveEntry.getKey()));
             if(this.cachedEntity == null || this.cachedEntity.getDinosaur() != dinosaur) {
                 this.cachedEntity = dinosaur.createEntity(
                     Minecraft.getInstance().level,
@@ -468,7 +467,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                 if(drive == null) {
                     slots = SequencingSynthesizerBlockEntity.MINIMUM_SLOTS;
                 } else {
-                    slots = SequencingSynthesizerBlockEntity.getSlots(DriveUtils.getAmount(blockEntity.getHandler().getStackInSlot(0), drive.getKey()) / 100F);
+                    slots = SequencingSynthesizerBlockEntity.getSlots(DriveUtils.getAmount(blockEntity.getHandler().getStackInSlot(0), drive.driveEntry.getKey(), drive.driveEntry.getVariant()) / 100F);
                 }
                 updateAllSlots();
             }
@@ -590,13 +589,17 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         }
     }
 
-    @RequiredArgsConstructor
     private class DriveEntry implements GuiScrollboxEntry {
 
-        private final String key;
         private final DriveUtils.DriveEntry driveEntry;
         private final TranslationTextComponent entry;
+        private final String combined;
 
+        private DriveEntry(DriveUtils.DriveEntry driveEntry) {
+            this.driveEntry = driveEntry;
+            this.entry = driveEntry.getTranslation();
+            this.combined = SequencingSynthesizerBlockEntity.combine(driveEntry.getKey(), driveEntry.getVariant());
+        }
 
         @Override
         public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
@@ -608,7 +611,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             int id = selectedSlot;
             boolean ret = GuiScrollboxEntry.super.onClicked(relMouseX, relMouseY, mouseX, mouseY);
             if(id != -1) {
-                String key = this.key;
+                String key = this.combined;
                 if(scrollBox.getSelectedElement() == this) {
                     slotList.get(id).setDrive(null);
                     key = "";
@@ -624,9 +627,6 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             return ret;
         }
 
-        public String getKey() {
-            return this.key;
-        }
 
 
     }
@@ -645,7 +645,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         @Override
         public void updateSlider() {
             if(module.drive != null) {
-                changeDnaSelection(this.id, module.drive.getKey(), this.getSliderValue());
+                changeDnaSelection(this.id, module.drive.combined, this.getSliderValue());
 
                 for (DnaSelectModuleSlot slot : slotList) {
                     slot.slider.setValueDirectly(blockEntity.getSelectAmount(slot.id));

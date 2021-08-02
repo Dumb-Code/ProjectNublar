@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.item;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -25,10 +26,8 @@ public class DriveItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
-        for (String key : nbt.getAllKeys()) {
-            CompoundNBT compound = nbt.getCompound(key);
-            tooltip.add(new TranslationTextComponent(compound.getString("translation_key")).append(": " + compound.getInt("amount")));
+        for (DriveUtils.DriveEntry entry : DriveUtils.getAll(stack)) {
+            tooltip.add(new TranslationTextComponent(entry.getName()).append(": " + entry.getAmount()));
         }
         super.appendHoverText(stack, world, tooltip, flagIn);
     }

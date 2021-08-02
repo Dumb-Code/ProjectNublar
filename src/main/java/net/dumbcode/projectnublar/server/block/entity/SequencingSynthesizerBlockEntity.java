@@ -258,11 +258,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public void tick() {
         super.tick();
 
-        CompoundNBT testNbt = this.handler.getStackInSlot(0).getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
+        Set<String> collect = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().map(d -> combine(d.getKey(), d.getVariant())).collect(Collectors.toSet());
         for (SelectedDnaEntry dna : this.selectedDNAs) {
-            if((!dna.getKey().isEmpty() && !testNbt.contains(dna.getKey(), Constants.NBT.TAG_COMPOUND))) {
-                dna.setKey("");
-                dna.setAmount(0);
+            if((!dna.getKey().isEmpty() && !collect.contains(dna.getKey()))) {
+                dna.clear();
             }
         }
 
@@ -296,7 +295,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         amount = MathHelper.clamp(amount, 0, 1);
         if(ID >= 0 && ID < this.selectedDNAs.length) {
             //Check that the drive actually exists.
-            Optional<DriveUtils.DriveEntry> drive = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().filter(d -> d.getKey().equals(key)).findAny();
+            Optional<DriveUtils.DriveEntry> drive = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().filter(d -> combine(d.getKey(), d.getVariant()).equals(key)).findAny();
             if(!drive.isPresent() && !key.isEmpty()) {
                 return false;
             }
@@ -304,6 +303,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             if(ID == 0 && !key.isEmpty() && drive.get().getDriveType() != DriveUtils.DriveType.DINOSAUR) {
                 return false;
             }
+            int amountInDrive = drive.map(DriveUtils.DriveEntry::getAmount).orElse(0);
             int slots = this.getSlots();
             double valueLeft = 1D;
             for (int i = 0; i < ID; i++) {
@@ -311,9 +311,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     return false;
                 }
                 if(i >= slots) {
-                    this.selectedDNAs[i].setKey("");
-                    this.selectedDNAs[i].setAmount(0);
-                    this.selectedDNAs[i].setColorStorage(new DnaColourStorage(new HashSet<>(), new HashSet<>()));
+                    this.selectedDNAs[i].clear();
                     continue;
                 }
                 double amountToSubtract = this.selectedDNAs[i].amount;
@@ -325,9 +323,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             }
 
             if(ID >= slots) {
-                this.selectedDNAs[ID].setKey("");
-                this.selectedDNAs[ID].setAmount(0);
-                this.selectedDNAs[ID].setColorStorage(new DnaColourStorage(new HashSet<>(), new HashSet<>()));
+                this.selectedDNAs[ID].clear();
                 if(!this.level.isClientSide) {
                     this.getProcess(1).setTime(0);
                 }
@@ -336,15 +332,13 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             //Make sure not less than whats left
             amount = Math.min(amount, valueLeft);
             //Make sure not less than we actually have
-            amount = Math.min(amount, DriveUtils.getAmount(this.handler.getStackInSlot(0), key) / 100D);
+            amount = Math.min(amount, amountInDrive / 100D);
             valueLeft -= amount;
             this.setSelect(ID, key, amount);
 
             for (int i = ID + 1; i < TOTAL_SLOTS; i++) {
                 if(this.selectedDNAs[i].key.equals(key) || i >= slots) {
-                    this.selectedDNAs[i].setKey("");
-                    this.selectedDNAs[i].setAmount(0);
-                    this.selectedDNAs[i].setColorStorage(new DnaColourStorage(new HashSet<>(), new HashSet<>()));
+                    this.selectedDNAs[i].clear();
                     continue;
                 }
                 if(valueLeft < this.selectedDNAs[i].amount) {
@@ -358,7 +352,16 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             return true;
         }
         return false;
+    }
 
+    public static String combine(String key, @Nullable String variant) {
+        if(key.isEmpty()) {
+            return "";
+        }
+        if(variant == null || variant.isEmpty()) {
+            return key;
+        }
+        return key + "#" + variant;
     }
 
     public void setSelect(int ID, String key, double amount) {
@@ -485,6 +488,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         private String key = "";
         private double amount;
         private DnaColourStorage colorStorage = new DnaColourStorage(new HashSet<>(), new HashSet<>());
+
+        public void clear() {
+            this.key = "";
+            this.amount = 0;
+            this.colorStorage = new DnaColourStorage(new HashSet<>(), new HashSet<>());
+        }
     }
 
     @Data
@@ -498,7 +507,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         if(this.selectedDNAs[0].key.isEmpty()) {
             return 0;
         }
-        return DriveUtils.getAmount(this.getHandler().getStackInSlot(0), this.selectedDNAs[0].key);
+        return DriveUtils.getAmount(this.getHandler().getStackInSlot(0), this.selectedDNAs[0].key, null);
     }
 
     public int getSlots() {
@@ -509,7 +518,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         List<GeneticEntry<?, ?>> out = new ArrayList<>();
         ItemStack drive = this.handler.getStackInSlot(0);
         int slots = this.getSlots();
-        Map<String, DriveUtils.DriveEntry> collected = DriveUtils.getAll(drive).stream().collect(Collectors.toMap(DriveUtils.DriveEntry::getKey, entry -> entry));
+        Map<String, DriveUtils.DriveEntry> collected = DriveUtils.getAll(drive).stream().collect(Collectors.toMap(d -> combine(d.getKey(), d.getVariant()), entry -> entry));
         for (int i = 0; i < slots; i++) {
             if(this.selectedDNAs[i].key.isEmpty() || this.selectedDNAs[i].amount == 0) {
                 continue;

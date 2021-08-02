@@ -12,6 +12,7 @@ import net.minecraftforge.common.util.Constants;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class DriveUtils {
 
@@ -24,7 +25,7 @@ public class DriveUtils {
         if(key.isEmpty()) {
             return false;
         }
-        return getAmount(drive, key) < 100;
+        return getAmount(drive, key, info.getAnimalVariant(inItem)) < 100;
     }
 
     public static List<DriveEntry> getAll(ItemStack drive) {
@@ -39,18 +40,18 @@ public class DriveUtils {
         return out;
     }
 
-    public static int getAmount(ItemStack drive, String key) {
+    public static int getAmount(ItemStack drive, String key, String variant) {
         for (DriveEntry entry : getAll(drive)) {
-            if(entry.getKey().equals(key)) {
+            if(entry.getKey().equals(key) && Objects.equals(variant, entry.getVariant())) {
                 return entry.getAmount();
             }
         }
         return 0;
     }
 
-    public static DriveType getType(ItemStack drive, String key) {
+    public static DriveType getType(ItemStack drive, String key, String variant) {
         for (DriveEntry entry : getAll(drive)) {
-            if(entry.getKey().equals(key)) {
+            if(entry.getKey().equals(key) && Objects.equals(variant, entry.getVariant())) {
                 return entry.getDriveType();
             }
         }
@@ -70,9 +71,10 @@ public class DriveUtils {
             return;
         }
 
-        int index = list.size();
+        int index = -1;
         for (int i = 0; i < list.size(); i++) {
-            if(list.getCompound(i).getString("drive_key").equals(key)) {
+            CompoundNBT nbt = list.getCompound(i);
+            if(nbt.getString("drive_key").equals(key) && (nbt.contains("animal_variant") ? nbt.getString("animal_variant").equals(variant) : variant == null)) {
                 index = i;
             }
         }
@@ -90,7 +92,11 @@ public class DriveUtils {
         }
         inner.putInt("drive_type", info.getDriveType(inItem).ordinal());
 
-        list.add(index, inner);
+        if(index == -1) {
+            list.add(inner);
+        } else {
+            list.set(index, inner);
+        }
 
         drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", list);
     }
