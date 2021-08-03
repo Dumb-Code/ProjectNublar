@@ -156,7 +156,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
                 .map(d -> Pair.of(DriveUtils.getTranslation(EntityType.TROPICAL_FISH.getDescriptionId(), d.getName()), tropicalFishColours.getOrDefault(d, 0) / 100D))
                 .collect(Collectors.toList())
         ));
-        this.cachedIsolatedEntries.sort(Collections.reverseOrder(Comparator.comparing(d -> d.progress)));
+        this.cachedIsolatedEntries.sort(Comparator.<IsolatedDriveEntry, Double>comparing(d -> d.progress).reversed().thenComparing(d -> d.title.getString()));
 
         this.cachedDriveEntries.addAll(DriveUtils.getAll(drive).stream()
             .map(DriveDisplayEntry::new)
@@ -414,7 +414,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             this.title = title;
             this.progress = progress;
             this.entityAmounts = entityAmounts;
-            this.entityAmounts.sort(Collections.reverseOrder(Comparator.comparing(Pair::getSecond)));
+            this.entityAmounts.sort(Comparator.<Pair<TranslationTextComponent, Double>, Double>comparing(Pair::getSecond).reversed().thenComparing(d -> d.getFirst().getString()));
         }
 
         @Override
