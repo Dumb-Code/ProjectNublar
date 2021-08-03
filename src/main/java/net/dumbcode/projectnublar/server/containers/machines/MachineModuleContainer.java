@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
 
 public class MachineModuleContainer extends Container {
@@ -30,6 +31,8 @@ public class MachineModuleContainer extends Container {
     private final MachineModuleBlockEntity<?> blockEntity;
 
     public final List<SlotCanBeDisabled> disableSlots = new ArrayList<>();
+
+    private final List<BiConsumer<Integer, ItemStack>> onSlotChangeListeners = new ArrayList<>();
 
     public MachineModuleContainer(int id, MachineModuleBlockEntity<?> blockEntity, PlayerInventory inventory, int tab, int playerOffset, int xSize, MachineModuleSlot... slots) {
         super(ProjectNublarContainers.MACHINE_MODULES.get(), id);
@@ -73,6 +76,23 @@ public class MachineModuleContainer extends Container {
     @Override
     protected Slot addSlot(Slot p_75146_1_) {
         throw new IllegalArgumentException("Should call slot()");
+    }
+
+    public void addListener(BiConsumer<Integer, ItemStack> slotListner) {
+        if(!this.onSlotChangeListeners.contains(slotListner)) {
+            this.onSlotChangeListeners.add(slotListner);
+//            for (Slot slot : this.slots) {
+//                slotListner.accept(slot.getSlotIndex(), slot.getItem());
+//            }
+        }
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        super.setItem(slot, stack);
+        for (BiConsumer<Integer, ItemStack> consumer : this.onSlotChangeListeners) {
+            consumer.accept(slot, stack);
+        }
     }
 
     @Override

@@ -30,6 +30,7 @@ import net.minecraftforge.energy.EnergyStorage;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineModuleContainer> {
 
@@ -40,6 +41,7 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
     public MachineContainerScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = inventorySlotsIn.getBlockEntity();
+        inventorySlotsIn.addListener(this::onSlotChanged);
     }
 
     @Override
@@ -144,5 +146,9 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
             }
             renderComponentTooltip(stack, componentList, mouseX, mouseY);
         }
+    }
+
+    public void onSlotChanged(int slot, ItemStack stack) {
+
     }
 }

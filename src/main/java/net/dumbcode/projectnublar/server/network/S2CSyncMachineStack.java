@@ -1,7 +1,9 @@
 package net.dumbcode.projectnublar.server.network;
 
+import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
@@ -47,6 +49,10 @@ public class S2CSyncMachineStack {
             TileEntity te = Minecraft.getInstance().level.getBlockEntity(packet.pos);
             if(te instanceof MachineModuleBlockEntity) {
                 ((MachineModuleBlockEntity<?>) te).getHandler().setStackInSlot(packet.slot, packet.stack);
+                Screen screen = Minecraft.getInstance().screen;
+                if(screen instanceof MachineContainerScreen) {
+                    ((MachineContainerScreen) screen).onSlotChanged(packet.slot, packet.stack);
+                }
             }
         });
 

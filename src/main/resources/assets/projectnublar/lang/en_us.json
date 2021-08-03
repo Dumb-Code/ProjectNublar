@@ -33,6 +33,8 @@
     "projectnublar.gui.machine.time.minutes": "%sm",
     "projectnublar.gui.machine.time.hours": "%sh",
 
+    "projectnublar.gui.machine.sequencer.tab.sequencing.regular": "Regular",
+    "projectnublar.gui.machine.sequencer.tab.sequencing.isolated": "Isolated",
     "projectnublar.gui.machine.sequencer.tab.sequencing": "Sequence",
     "projectnublar.gui.machine.sequencer.tab.editing": "Edit",
     "projectnublar.gui.machine.sequencer.tab.synthesizing": "Synthesis",
@@ -79,6 +81,9 @@
     "projectnublar.entity.genetics.variant.light_gray": "Light Gray %s",
     "projectnublar.entity.genetics.variant.cyan": "Cyan %s",
     "projectnublar.entity.genetics.variant.purple": "Purple  %s",
+
+    "projectnublar.genetic_type.dummy.colour": "Color",
+
 
     "projectnublar.genetic_type.strength": "Strength",
     "projectnublar.genetic_type.defense": "Defense",

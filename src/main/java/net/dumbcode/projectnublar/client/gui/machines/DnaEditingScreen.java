@@ -118,7 +118,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         }
 
         if(this.cachedEntity != null && Minecraft.getInstance().player.tickCount % 20 == 0) {
-            this.cachedEntity.get(EntityComponentTypes.GENDER.get()).ifPresent(g -> g.male = true);
+            this.cachedEntity.get(EntityComponentTypes.GENDER.get()).ifPresent(g -> g.male = !g.male);
         }
     }
 
@@ -311,9 +311,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             DnaSelectModuleSlot slot = this.slotList.get(this.selectedSlot);
             DriveEntry entry = slot.drive;
             if(entry != null && entry.driveEntry.getDriveType() == DriveUtils.DriveType.OTHER) {
-                ResourceLocation location = new ResourceLocation(entry.driveEntry.getKey());
-                if(ForgeRegistries.ENTITIES.containsKey(location)) {
-                    EntityType<?> value = ForgeRegistries.ENTITIES.getValue(location);
+                entry.driveEntry.getEntity().ifPresent(value -> {
                     for (EntityGeneticRegistry.Entry<?, ?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.driveEntry.getVariant())) {
                         this.individualBreakdownList.add(new GeneEditEntry<>(e.create((float) slot.slider.getSliderValue())));
                     }
@@ -325,7 +323,7 @@ public class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
                             this.individualBreakdownList.add(new GeneEditTintEntry(i, tints.get(i), storage));
                         }
                     }
-                }
+                });
             }
 
         } else {

@@ -1,18 +1,24 @@
 package net.dumbcode.projectnublar.server.item.data;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import lombok.Value;
+import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
+import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.dna.GeneticHandler;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DriveUtils {
 
@@ -39,6 +45,7 @@ public class DriveUtils {
 
         return out;
     }
+
 
     public static int getAmount(ItemStack drive, String key, String variant) {
         for (DriveEntry entry : getAll(drive)) {
@@ -101,6 +108,31 @@ public class DriveUtils {
         drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", list);
     }
 
+    public static List<IsolatedGeneEntry> getAllIsolatedGenes(ItemStack drive) {
+        Map<GeneticType<?, ?>, Double> counter = new HashMap<>();
+        Map<EntityType<?>, Integer> entityAmountMap = new HashMap<>();
+        for (DriveEntry entry : getAll(drive)) {
+            entry.getEntity().ifPresent(e -> {
+                entityAmountMap.compute(e, (t, amount) -> Math.max(amount != null ? amount : 0, entry.getAmount()));
+                for (EntityGeneticRegistry.Entry<?, ?> registryEntry : EntityGeneticRegistry.INSTANCE.gatherEntry(e, null)) {
+                    counter.compute(registryEntry.getType(), (type, amount) -> (amount == null ? 0 : amount) + entry.getAmount() / 100D);
+                }
+            });
+        }
+
+        List<IsolatedGeneEntry> entries = new ArrayList<>();
+        counter.forEach((type, amount) -> {
+            List<EntityGeneticRegistry.IsolatePart> isolate = EntityGeneticRegistry.INSTANCE.getEntriesToIsolate(type);
+            entries.add(new IsolatedGeneEntry(type, amount / isolate.size(),
+                isolate.stream()
+                    .map(p -> Pair.<EntityType<?>, Double>of(p.getEntityType(), entityAmountMap.getOrDefault(p.getEntityType(), 0) / 100D))
+                    .collect(Collectors.toList())
+            ));
+        });
+        return entries;
+    }
+
+
     public static TranslationTextComponent getTranslation(String name, String variant) {
         TranslationTextComponent component = new TranslationTextComponent(name);
         if(variant != null) {
@@ -139,6 +171,23 @@ public class DriveUtils {
         public TranslationTextComponent getTranslation() {
             return DriveUtils.getTranslation(this.name, this.variant);
         }
+
+        public Optional<EntityType<?>> getEntity() {
+            if(this.driveType == DriveType.OTHER) {
+                ResourceLocation location = new ResourceLocation(this.getKey());
+                if (ForgeRegistries.ENTITIES.containsKey(location)) {
+                    return Optional.ofNullable(ForgeRegistries.ENTITIES.getValue(location));
+                }
+            }
+            return Optional.empty();
+        }
+    }
+
+    @Value
+    public static class IsolatedGeneEntry {
+        GeneticType<?, ?> geneticType;
+        double progress;
+        List<Pair<EntityType<?>, Double>> parts;
     }
 
     public enum DriveType {

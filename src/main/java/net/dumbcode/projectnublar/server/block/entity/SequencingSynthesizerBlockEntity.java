@@ -422,7 +422,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         switch (tab) {
             case 0:
                 return new MachineModuleContainer(windowId, this, player.inventory, tab, 85, 351,
-                    new MachineModulePopoutSlot(this, 0, 167, 61, 27, 32, createMatterTranslation("insert", "hard_drive")),
+                    new MachineModulePopoutSlot(this, 0, 167, 61, 11, 45, createMatterTranslation("insert", "hard_drive")),
                     new MachineModulePopoutSlot(this, 5, 167, 61, 27, 153, createMatterTranslation("insert", "genetic_material")),
                     new MachineModulePopoutSlot(this, 6, 167, 61, 308, 153, createMatterTranslation("remove", "leftover"))
                 );
@@ -529,18 +529,17 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 continue;
             }
             if(entry.getDriveType() == DriveUtils.DriveType.OTHER) {
-                ResourceLocation location = new ResourceLocation(entry.getKey());
-                if(ForgeRegistries.ENTITIES.containsKey(location)) {
-                    EntityType<?> value = ForgeRegistries.ENTITIES.getValue(location);
+                int index = i;
+                entry.getEntity().ifPresent(value -> {
                     for (EntityGeneticRegistry.Entry<?, ?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.getVariant())) {
-                        out.add(e.create((float) this.selectedDNAs[i].amount));
+                        out.add(e.create((float) this.selectedDNAs[index].amount * 2F));
                     }
 
                     List<Integer> tints = EntityGeneticRegistry.INSTANCE.gatherTints(value, entry.getVariant());
                     List<GeneticTint.Part> allPrimaryColours = new ArrayList<>();
                     List<GeneticTint.Part> allSecondaryColours = new ArrayList<>();
 
-                    DnaColourStorage storage = this.selectedDNAs[i].getColorStorage();
+                    DnaColourStorage storage = this.selectedDNAs[index].getColorStorage();
                     for (int t = 0; t < tints.size(); t++) {
                         int tint = tints.get(t);
 
@@ -550,7 +549,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                                 ((tint >> 8) & 0xFF) / 255F,
                                 ((tint) & 0xFF) / 255F,
                                 1F,
-                                (int) (GeneticUtils.DEFAULT_COLOUR_IMPORTANCE * this.selectedDNAs[i].amount)
+                                (int) (GeneticUtils.DEFAULT_COLOUR_IMPORTANCE * this.selectedDNAs[index].amount * 2F)
                             ));
                         }
                         if(storage.getSecondary().contains(t)) {
@@ -559,7 +558,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                                 ((tint >> 8) & 0xFF) / 255F,
                                 ((tint) & 0xFF) / 255F,
                                 1F,
-                                (int) (GeneticUtils.DEFAULT_COLOUR_IMPORTANCE * this.selectedDNAs[i].amount)
+                                (int) (GeneticUtils.DEFAULT_COLOUR_IMPORTANCE * this.selectedDNAs[index].amount * 2F)
                             ));
                         }
                     }
@@ -570,7 +569,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     out.add(new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get(), new GeneticTypeOverallTintStorage())
                         .setModifier(new GeneticTint(primary, secondary))
                     );
-                }
+                });
             }
         }
         return out;
