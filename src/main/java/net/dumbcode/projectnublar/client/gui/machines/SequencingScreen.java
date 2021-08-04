@@ -238,10 +238,17 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 
         int regWidth = font.width(REGULAR);
         int regLeft = this.leftPos - regWidth + 174;
-        font.draw(stack, REGULAR, regLeft, this.topPos + 22, -1);
 
         int isoWidth = font.width(ISOLATED);
         int isoLeft = this.leftPos + 180;
+
+        if(this.showIsolatedGenes) {
+            fill(stack, isoLeft-1, this.topPos+21, isoLeft+isoWidth+1, this.topPos+23+font.lineHeight, 0x997777AA);
+        } else {
+            fill(stack, regLeft-1, this.topPos+21, regLeft+regWidth+1, this.topPos+23+font.lineHeight, 0x997777AA);
+        }
+
+        font.draw(stack, REGULAR, regLeft, this.topPos + 22, -1);
         font.draw(stack, ISOLATED, isoLeft, this.topPos + 22, -1);
 
         if(mouseY >= this.topPos + 22 && mouseY < this.topPos + 22 + font.lineHeight) {

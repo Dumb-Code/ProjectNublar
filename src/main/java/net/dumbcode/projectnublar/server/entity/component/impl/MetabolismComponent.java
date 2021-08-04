@@ -71,6 +71,11 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
         this.cached = null;
     }
 
+    public void removeGeneticDiet(UUID uuid) {
+        this.geneticDiets.remove(uuid);
+        this.cached = null;
+    }
+
     @Override
     public CompoundNBT serialize(CompoundNBT compound) {
         compound.putFloat("food", this.food);

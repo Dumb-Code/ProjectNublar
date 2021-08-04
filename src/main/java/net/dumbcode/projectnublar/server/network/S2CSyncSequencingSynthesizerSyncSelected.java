@@ -2,8 +2,10 @@ package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -73,6 +75,10 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
                     SyncDnaEntry data = message.datas[i];
                     ((SequencingSynthesizerBlockEntity) blockEntity).setSelect(i, data.key, data.amount);
                     ((SequencingSynthesizerBlockEntity) blockEntity).setStorage(i, data.storage);
+                }
+                Screen screen = Minecraft.getInstance().screen;
+                if(screen instanceof DnaEditingScreen) {
+                    ((DnaEditingScreen) screen).onSelectChange();
                 }
             }
         });

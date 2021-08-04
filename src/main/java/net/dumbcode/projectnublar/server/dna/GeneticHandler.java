@@ -25,6 +25,7 @@ public class GeneticHandler {
         GeneticType.<GeneticDietChangeStorage>builder()
             .storage(GeneticDietChangeStorage::new)
             .onChange((value, type, storage) -> type.get(ComponentHandler.METABOLISM).ifPresent(m -> m.addGeneticDiet(storage.getRandomUUID(), storage.getDiet())))
+            .onRemove((value, type, storage) -> type.get(ComponentHandler.METABOLISM).ifPresent(m -> m.removeGeneticDiet(storage.getRandomUUID())))
             .build()
 
     );

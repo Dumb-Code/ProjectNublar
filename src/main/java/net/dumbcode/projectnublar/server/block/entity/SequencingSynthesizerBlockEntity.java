@@ -9,7 +9,8 @@ import net.dumbcode.dumblibrary.server.dna.data.ColouredGeneticDataHandler;
 import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
 import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeOverallTintStorage;
 import net.dumbcode.dumblibrary.server.utils.GeneticUtils;
-import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
+import net.dumbcode.projectnublar.client.gui.machines.AdvancedDnaEditingScreen;
+import net.dumbcode.projectnublar.client.gui.machines.BasicDnaEditingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.SequencingSynthesizerInputsScreen;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
@@ -25,29 +26,23 @@ import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveR
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.NBTTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -411,7 +406,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             case 0:
                 return new SequencingScreen(this, container, inventory, title, info);
             case 1:
-                return new DnaEditingScreen(this, container, inventory, title, info);
+                return new BasicDnaEditingScreen(this, container, inventory, title, info);
+            case 3:
+                return new AdvancedDnaEditingScreen(this, container, inventory, title, info);
             default:
                 return new SequencingSynthesizerInputsScreen(this, container, title, info, inventory);
         }
@@ -427,6 +424,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     new MachineModulePopoutSlot(this, 6, 167, 61, 308, 153, createMatterTranslation("remove", "leftover"))
                 );
             case 1:
+            case 3:
                 return new MachineModuleContainer(windowId, this, player.inventory, tab, -1, 208);
             default:
                 return new MachineModuleContainer(windowId, this, player.inventory, tab, 85, 351,
@@ -450,6 +448,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             case 0:
                 return new TranslationTextComponent(ProjectNublar.MODID + ".container.sequencing.title");
             case 1:
+            case 3:
                 return new TranslationTextComponent(ProjectNublar.MODID + ".container.dna_editing.title");
             default:
                 return new TranslationTextComponent(ProjectNublar.MODID + ".container.sequencing_synthesizing.title");

@@ -52,7 +52,7 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
     private final float[] ringModifiers = new float[5];
     protected final List<SlotCanBeDisabled> slots;
 
-    private final BlockPos sequencerBlockPos;
+    protected final BlockPos sequencerBlockPos;
     protected MachineModulePopoutSlot activeSlot;
 
     public SequencerSynthesizerBaseScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
