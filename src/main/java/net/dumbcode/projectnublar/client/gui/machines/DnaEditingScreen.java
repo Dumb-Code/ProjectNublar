@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -48,6 +49,8 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
     private final TranslationTextComponent nextTab;
     private final int nextTabIndex;
+
+    protected IFormattableTextComponent hoveringText;
 
     public DnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar, String nextTabName, int nextTabIndex) {
         super(inventorySlotsIn, playerInventory, title, bar);
@@ -71,6 +74,19 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
             .setRenderFullSize(true);
 
     }
+
+    @Override
+    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+        hoveringText = null;
+        super.render(stack, mouseX, mouseY, ticks);
+        if(hoveringText != null) {
+            int width = minecraft.font.width(hoveringText);
+            fill(stack, mouseX+5, mouseY-1, mouseX + width + 6, mouseY + minecraft.font.lineHeight+1, 0xFF23374A);
+            RenderUtils.renderBorderExclusive(stack, mouseX+5, mouseY-1, mouseX + width +6, mouseY + minecraft.font.lineHeight+1, 1, 0xFF577694);
+            drawString(stack, minecraft.font, hoveringText, mouseX + 6, mouseY, -1);
+        }
+    }
+
 
     @Override
     protected void renderBg(MatrixStack stack, float ticks, int mouseX, int mouseY) {

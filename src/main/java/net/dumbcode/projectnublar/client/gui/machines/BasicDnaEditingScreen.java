@@ -49,7 +49,6 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 
 
     private GuiScrollBox<DriveEntry> scrollBox;
-    private IFormattableTextComponent hoveringText;
 
     public BasicDnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(blockEntity, inventorySlotsIn, playerInventory, title, bar, "advanced", 3);
@@ -188,12 +187,6 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
-        hoveringText = null;
-        super.render(stack, mouseX, mouseY, ticks);
-    }
-
-    @Override
     public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         super.renderScreen(stack, mouseX, mouseY, partialTicks);
 
@@ -221,14 +214,6 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 //        if(start < w) {
 //            fill(stack, xStart + start, yStart, xStart + w, yEnd, 0xFF000000);
 //        }
-
-
-        if(hoveringText != null) {
-            int width = minecraft.font.width(hoveringText);
-            fill(stack, mouseX+5, mouseY-1, mouseX + width + 6, mouseY + minecraft.font.lineHeight+1, 0xFF23374A);
-            RenderUtils.renderBorderExclusive(stack, mouseX+5, mouseY-1, mouseX + width +6, mouseY + minecraft.font.lineHeight+1, 1, 0xFF577694);
-            drawString(stack, minecraft.font, hoveringText, mouseX + 6, mouseY, -1);
-        }
         renderTooltip(stack, mouseX, mouseY);
 
 
