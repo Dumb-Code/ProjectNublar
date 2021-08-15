@@ -84,7 +84,8 @@
     "projectnublar.entity.genetics.variant.cyan": "Cyan %s",
     "projectnublar.entity.genetics.variant.purple": "Purple  %s",
 
-    "projectnublar.genetic_type.dummy.colour": "Color",
+    "projectnublar.genetic_type.dummy.colour.primary": "Primary Color",
+    "projectnublar.genetic_type.dummy.colour.secondary": "Secondary Color",
 
 
     "projectnublar.genetic_type.strength": "Strength",

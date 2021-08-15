@@ -5,6 +5,7 @@ import lombok.Value;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.dna.GeneticType;
+import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
@@ -13,6 +14,7 @@ import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nullable;
@@ -48,10 +50,9 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     private int chromoTableLeft;
     private int chromoTableTop;
-    @Nullable
-    private GeneticType<?, ?> selectedType;
-    @Nullable
-    private GeneticType<?, ?> hoveredGeneticType;
+    private int previousHash;
+    private int selectedId = -1;
+    private int hoveredId = -1;
 
     private boolean mouseDown;
 
@@ -83,35 +84,44 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     }
 
     private void generateChromosomes(ItemStack drive) {
-        Random random = new Random(this.hashGenetics());
+        int hashGenetics = this.hashGenetics();
+        Random random = new Random(hashGenetics);
         random.nextBytes(new byte[256]); //Just so if we get a bad seed we don't have the same results.
 
         List<Chromosome> list = new ArrayList<>();
         List<DriveUtils.IsolatedGeneEntry> isolatedGenes = DriveUtils.getAllIsolatedGenes(drive);
         for (int i = 0; i < this.chromosomes.length; i++) {
-            Chromosome chromosome;
-            if(i == 0) {
-                chromosome = new Chromosome(null, true, random.nextFloat());
+            //If is the tint, add both the primary and secondary.
+            if(!isolatedGenes.isEmpty() && isolatedGenes.get(0).getGeneticType() == GeneticTypes.OVERALL_TINT.get()) {
+                list.add(new Chromosome(GeneticTypes.OVERALL_TINT.get(), false, random.nextFloat()));
+                list.add(new Chromosome(GeneticTypes.OVERALL_TINT.get(), true, random.nextFloat()));
+                isolatedGenes.remove(0);
             } else {
-                chromosome = new Chromosome(isolatedGenes.isEmpty() ? null : isolatedGenes.remove(0).getGeneticType(), false, random.nextFloat());
+                list.add(new Chromosome(isolatedGenes.isEmpty() ? null : isolatedGenes.remove(0).getGeneticType(), false, random.nextFloat()));
             }
-            list.add(chromosome);
         }
         Collections.shuffle(list, random);
         for (int i = 0; i < this.chromosomes.length; i++) {
             this.chromosomes[i] = list.get(i);
         }
+
+        if(hashGenetics != this.previousHash) {
+            this.previousHash = hashGenetics;
+            this.selectedId = -1;
+        }
+
     }
 
 
     @Override
     public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float ticks) {
         super.renderScreen(stack, mouseX, mouseY, ticks);
-        if(this.selectedType != null) {
-
-            boolean chaneged = this.blockEntity.getOrCreateIsolationEntry(this.selectedType).renderAndModify(stack, this.leftPos + 100, this.topPos + 20, 110, 160, mouseX, mouseY, this.mouseDown);
-            if(chaneged) {
-                System.out.println("CHANGED: " + this.blockEntity.getOrCreateIsolationEntry(this.selectedType).getValue());
+        if(this.selectedId != -1) {
+            Chromosome chromosome = this.chromosomes[this.selectedId];
+            SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType(), chromosome.isSecondaryColour());
+            boolean changed = entry.renderAndModify(stack, this.leftPos + 100, this.topPos + 20, 110, 160, mouseX, mouseY, this.mouseDown);
+            if(changed) {
+                System.out.println("CHANGED: " + entry.getValue());
                 //TODO: SYNC, and add to the S2C sync thingy
             }
         }
@@ -121,23 +131,24 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     protected void renderBg(MatrixStack stack, float ticks, int mouseX, int mouseY) {
         super.renderBg(stack, ticks, mouseX, mouseY);
 
-        this.hoveredGeneticType = null;
+        this.hoveredId = -1;
         for (int x = 0; x < CHROMO_TABLE_WIDTH; x++) {
             int xStart = this.chromoTableLeft + x*CHROMO_FULL_CELL_WIDTH;
             for (int y = 0; y < CHROMO_TABLE_HEIGHT; y++) {
                 int yStart = this.chromoTableTop + y*CHROMO_FULL_CELL_HEIGHT;
 
-                Chromosome chromosome = this.chromosomes[x+y*CHROMO_TABLE_WIDTH];
+                int id = x + y * CHROMO_TABLE_WIDTH;
+                Chromosome chromosome = this.chromosomes[id];
 
                 int colour;
                 GeneticType<?, ?> editType = chromosome.getDirectEditType();
                 if(editType != null) {
-                    boolean selected = this.selectedType == editType;
+                    boolean selected = this.selectedId == id;
 
                     colour = selected ? 0xFFD93434 : 0xFFB340B1;
                     if(mouseX >= xStart && mouseX < xStart + CHROMO_CELL_WIDTH && mouseY >= yStart && mouseY < yStart + CHROMO_CELL_HEIGHT) {
-                        this.hoveringText = editType.getTranslationComponent();
-                        this.hoveredGeneticType = editType;
+                        this.hoveringText = chromosome.getText().orElse(this.hoveringText);
+                        this.hoveredId = id;
                         colour = selected ? 0xFFD16969 : 0xFFB55EB4;
                     }
 
@@ -156,12 +167,12 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if(this.hoveredGeneticType != null) {
+        if(this.hoveredId != -1) {
             //If already selected, toggle
-            if(this.selectedType == this.hoveredGeneticType) {
-                this.selectedType = null;
+            if(this.selectedId == this.hoveredId) {
+                this.selectedId = -1;
             } else {
-                this.selectedType = this.hoveredGeneticType;
+                this.selectedId = this.hoveredId;
             }
             return true;
         }
@@ -205,12 +216,12 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     @Value
     private static class Chromosome {
         @Nullable GeneticType<?, ?> directEditType;
-        boolean isColourGene;
+        boolean isSecondaryColour;
         float randomDist; //[0-1]
 
-        public Optional<ITextComponent> getText() {
-            if(this.isColourGene) {
-                return Optional.of(ProjectNublar.translate("genetic_type.dummy.colour"));
+        public Optional<IFormattableTextComponent> getText() {
+            if(this.directEditType == GeneticTypes.OVERALL_TINT.get()) {
+                return Optional.of(ProjectNublar.translate("genetic_type.dummy.colour." + (this.isSecondaryColour ? "secondary" : "primary")));
             }
             if(this.directEditType != null) {
                 return Optional.of(this.directEditType.getTranslationComponent());

@@ -92,7 +92,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 
-    private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
+    private final Map<IsolatedGeneticKey, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
 
     public SequencingSynthesizerBlockEntity() {
         super(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get());
@@ -129,8 +129,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return super.getCapability(cap, side);
     }
 
-    public IsolatedGeneticEntry<?> getOrCreateIsolationEntry(GeneticType<?, ?> type) {
-        return this.isolationOverrides.computeIfAbsent(type, IsolatedGeneticEntry::new);
+    public IsolatedGeneticEntry<?> getOrCreateIsolationEntry(GeneticType<?, ?> type, boolean secondary) {
+        return this.isolationOverrides.computeIfAbsent(new IsolatedGeneticKey(type, secondary), k -> new IsolatedGeneticEntry<>(type));
     }
 
     public double waterPercent() {
@@ -170,8 +170,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.isolationOverrides.clear();
         ListNBT iList = compound.getList("IsolationOverrides", 10);
         for (int i = 0; i < iList.size(); i++) {
-            IsolatedGeneticEntry<?> read = IsolatedGeneticEntry.read(list.getCompound(i));
-            this.isolationOverrides.put(read.getType(), read);
+            CompoundNBT nbt = list.getCompound(i);
+            IsolatedGeneticEntry<?> read = IsolatedGeneticEntry.read(nbt.getCompound("entry"));
+            this.isolationOverrides.put(new IsolatedGeneticKey(read.getType(), nbt.getBoolean("secondary")), read);
         }
 
         this.sugarAmount = compound.getDouble("SugarAmount");
@@ -198,7 +199,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         compound.put("SelectedDnaList", list);
 
         ListNBT iList = new ListNBT();
-        this.isolationOverrides.forEach((type, geneticEntry) -> iList.add(IsolatedGeneticEntry.write(geneticEntry, new CompoundNBT())));
+        this.isolationOverrides.forEach((type, geneticEntry) -> {
+            CompoundNBT compoundNBT = new CompoundNBT();
+            compoundNBT.put("entry", IsolatedGeneticEntry.write(geneticEntry, new CompoundNBT()));
+            compoundNBT.putBoolean("secondary", type.isSecondary());
+            iList.add(compoundNBT);
+        });
         compound.put("IsolationOverrides", iList);
 
         compound.putDouble("SugarAmount", this.sugarAmount);
@@ -609,6 +615,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         int tint;
         int index;
         DnaColourStorage colourStorage;
+    }
+
+    @Value
+    public static class IsolatedGeneticKey {
+        GeneticType<?, ?> type;
+        boolean secondary;
     }
 
     @Data
