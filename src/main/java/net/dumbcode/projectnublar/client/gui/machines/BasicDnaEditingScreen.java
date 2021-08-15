@@ -5,7 +5,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.dumbcode.dumblibrary.client.StencilStack;
+import net.dumbcode.dumblibrary.client.SimpleSlider;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
@@ -15,13 +15,11 @@ import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlock
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerSelectChange;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -522,9 +520,6 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
             }
             return ret;
         }
-
-
-
     }
 
     private class ClampedGuiSlider extends Slider {
@@ -560,7 +555,7 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         }
 
         @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partial) {
+        public void renderButton(MatrixStack mStack, int mouseX, int mouseY, float partial) {
             if(!this.visible) {
                 return;
             }
@@ -568,37 +563,8 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
                 this.sliderValue = (mouseX - (this.x + 4)) / (float)(this.width - 8);
                 updateSlider();
             }
-            Minecraft mc = Minecraft.getInstance();
             this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-
-            int thumbLeft = this.x + (int)(this.sliderValue * (float)(this.width - 8));
-            int thumbTop = this.y + 1;
-            int thumbRight = thumbLeft + 8;
-            int thumbBottom = thumbTop + this.height - 2;
-
-            StencilStack.pushSquareStencil(stack, thumbLeft, thumbTop, thumbRight, thumbBottom, StencilStack.Type.NOT);
-            fill(stack, this.x, this.y + 4, this.x + this.width, this.y + 12, 0xCF193B59);
-            if(this.isHovered && this.active) {
-                fill(stack, this.x, this.y + 4, this.x + this.width, this.y + 12, 0x2299bbff);
-            }
-            RenderUtils.renderBorderExclusive(stack, this.x, this.y + 4, this.x + this.width, this.y + 12, 1, 0xFF577694);
-            StencilStack.popStencil();
-
-            fill(stack, thumbLeft, thumbTop, thumbRight, thumbBottom, 0xCF193B59);
-            if(this.isHovered && this.active) {
-                fill(stack, thumbLeft, thumbTop, thumbRight, thumbBottom, 0x2299bbff);
-            }
-            RenderUtils.renderBorderExclusive(stack, thumbLeft, thumbTop, thumbRight, thumbBottom, 1, 0xFF577694);
-
-            ITextComponent buttonText = this.getMessage();
-            int strWidth = mc.font.width(buttonText);
-            int ellipsisWidth = mc.font.width("...");
-
-            if (strWidth > width - 6 && strWidth > ellipsisWidth)
-                //TODO, srg names make it hard to figure out how to append to an ITextProperties from this trim operation, wraping this in StringTextComponent is kinda dirty.
-                buttonText = new StringTextComponent(mc.font.substrByWidth(buttonText, width - 6 - ellipsisWidth).getString() + "...");
-
-            drawCenteredString(stack, mc.font, buttonText, this.x + this.width / 2, this.y + (this.height - 8) / 2, getFGColor());
+            SimpleSlider.renderSlider(this, mStack, mouseX, mouseY);
         }
     }
 }

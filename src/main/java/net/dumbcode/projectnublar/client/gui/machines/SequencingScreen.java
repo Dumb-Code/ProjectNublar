@@ -127,35 +127,12 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
                 new IsolatedDriveEntry(
                     isolatedGene.getGeneticType().getTranslationComponent(),
                     isolatedGene.getProgress(),
-                    isolatedGene.getParts().stream()
-                        .map(p -> Pair.of(
-                            new TranslationTextComponent(p.getFirst().getDescriptionId()),
-                            p.getSecond()
-                        ))
-                        .collect(Collectors.toList())
+                    isolatedGene.getParts()
                 )
             )
             .collect(Collectors.toList())
         );
-        Map<DyeColor, Integer> tropicalFishColours = new HashMap<>();
-        for (DriveUtils.DriveEntry entry : DriveUtils.getAll(drive)) {
-            if(entry.getEntity().isPresent()) {
-                EntityType<?> type = entry.getEntity().get();
-                if(type == EntityType.TROPICAL_FISH) {
-                    DyeColor dyeColor = DyeColor.byName(entry.getVariant(), null);
-                    if(dyeColor != null) {
-                        tropicalFishColours.put(dyeColor, entry.getAmount());
-                    }
-                }
-            }
-        }
-        this.cachedIsolatedEntries.add(new IsolatedDriveEntry(
-            ProjectNublar.translate("genetic_type.dummy.colour"),
-            tropicalFishColours.values().stream().mapToDouble(Integer::doubleValue).sum() / DyeColor.values().length / 100D,
-            Arrays.stream(DyeColor.values())
-                .map(d -> Pair.of(DriveUtils.getTranslation(EntityType.TROPICAL_FISH.getDescriptionId(), d.getName()), tropicalFishColours.getOrDefault(d, 0) / 100D))
-                .collect(Collectors.toList())
-        ));
+
         this.cachedIsolatedEntries.sort(Comparator.<IsolatedDriveEntry, Double>comparing(d -> d.progress).reversed().thenComparing(d -> d.title.getString()));
 
         this.cachedDriveEntries.addAll(DriveUtils.getAll(drive).stream()

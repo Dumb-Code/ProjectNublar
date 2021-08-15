@@ -5,9 +5,11 @@ import com.mojang.datafixers.util.Pair;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.dna.GeneticType;
+import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -111,11 +113,21 @@ public class DriveUtils {
     public static List<IsolatedGeneEntry> getAllIsolatedGenes(ItemStack drive) {
         Map<GeneticType<?, ?>, Double> counter = new HashMap<>();
         Map<EntityType<?>, Integer> entityAmountMap = new HashMap<>();
+
+        Map<DyeColor, Integer> tropicalFishColours = new HashMap<>(); //For the colours;
+
         for (DriveEntry entry : getAll(drive)) {
             entry.getEntity().ifPresent(e -> {
                 entityAmountMap.compute(e, (t, amount) -> Math.max(amount != null ? amount : 0, entry.getAmount()));
                 for (EntityGeneticRegistry.Entry<?, ?> registryEntry : EntityGeneticRegistry.INSTANCE.gatherEntry(e, null)) {
                     counter.compute(registryEntry.getType(), (type, amount) -> (amount == null ? 0 : amount) + entry.getAmount() / 100D);
+                }
+
+                if(e == EntityType.TROPICAL_FISH) {
+                    DyeColor dyeColor = DyeColor.byName(entry.getVariant(), null);
+                    if(dyeColor != null) {
+                        tropicalFishColours.put(dyeColor, entry.getAmount());
+                    }
                 }
             });
         }
@@ -125,10 +137,21 @@ public class DriveUtils {
             List<EntityGeneticRegistry.IsolatePart> isolate = EntityGeneticRegistry.INSTANCE.getEntriesToIsolate(type);
             entries.add(new IsolatedGeneEntry(type, amount / isolate.size(),
                 isolate.stream()
-                    .map(p -> Pair.<EntityType<?>, Double>of(p.getEntityType(), entityAmountMap.getOrDefault(p.getEntityType(), 0) / 100D))
+                    .map(p -> Pair.of(new TranslationTextComponent(p.getEntityType().getDescriptionId()), entityAmountMap.getOrDefault(p.getEntityType(), 0) / 100D))
                     .collect(Collectors.toList())
             ));
         });
+
+        if(!tropicalFishColours.isEmpty()) {
+            entries.add(new IsolatedGeneEntry(
+                GeneticTypes.OVERALL_TINT.get(),
+                tropicalFishColours.values().stream().mapToDouble(Integer::doubleValue).sum() / DyeColor.values().length / 100D,
+                Arrays.stream(DyeColor.values())
+                    .map(d -> Pair.of(DriveUtils.getTranslation(EntityType.TROPICAL_FISH.getDescriptionId(), d.getName()), tropicalFishColours.getOrDefault(d, 0) / 100D))
+                    .collect(Collectors.toList())
+            ));
+        }
+
         return entries;
     }
 
@@ -187,7 +210,7 @@ public class DriveUtils {
     public static class IsolatedGeneEntry {
         GeneticType<?, ?> geneticType;
         double progress;
-        List<Pair<EntityType<?>, Double>> parts;
+        List<Pair<TranslationTextComponent, Double>> parts;
     }
 
     public enum DriveType {

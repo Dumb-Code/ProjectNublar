@@ -1,10 +1,9 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.*;
-import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
-import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
-import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
+import net.dumbcode.dumblibrary.server.dna.*;
 import net.dumbcode.dumblibrary.server.dna.data.ColouredGeneticDataHandler;
 import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
 import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeOverallTintStorage;
@@ -26,6 +25,7 @@ import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveR
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.gui.screen.GPUWarningScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
@@ -34,9 +34,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -75,7 +78,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private static final float SLOTS_OFFSET = MINIMUM_SLOTS - SLOTS_GRADIENT*SLOTS_START;
 
 
-
     @Getter
     private double totalStorage = DEFAULT_STORAGE;
 
@@ -88,16 +90,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Getter @Setter private DyeColor dye = DyeColor.BLACK;
 
-//    private String selectOneKey = "";
-//    private double selectOneAmount;
-//
-//    private String selectTwoKey = "";
-//    private double selectTwoAmount;
-//
-//    private String selectThreeKey = "";
-//    private double selectThreeAmount;
-
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
+
+    private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
 
     public SequencingSynthesizerBlockEntity() {
         super(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get());
@@ -134,6 +129,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return super.getCapability(cap, side);
     }
 
+    public IsolatedGeneticEntry<?> getOrCreateIsolationEntry(GeneticType<?, ?> type) {
+        return this.isolationOverrides.computeIfAbsent(type, IsolatedGeneticEntry::new);
+    }
+
     public double waterPercent() {
         return this.tank.getFluidAmount() / (double) this.tank.getCapacity();
     }
@@ -166,7 +165,13 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 Arrays.stream(tag.getIntArray("Primary")).mapToObj(Integer::valueOf).collect(Collectors.toSet()),
                 Arrays.stream(tag.getIntArray("Secondary")).mapToObj(Integer::valueOf).collect(Collectors.toSet())
             ));
+        }
 
+        this.isolationOverrides.clear();
+        ListNBT iList = compound.getList("IsolationOverrides", 10);
+        for (int i = 0; i < iList.size(); i++) {
+            IsolatedGeneticEntry<?> read = IsolatedGeneticEntry.read(list.getCompound(i));
+            this.isolationOverrides.put(read.getType(), read);
         }
 
         this.sugarAmount = compound.getDouble("SugarAmount");
@@ -191,6 +196,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             list.add(tag);
         }
         compound.put("SelectedDnaList", list);
+
+        ListNBT iList = new ListNBT();
+        this.isolationOverrides.forEach((type, geneticEntry) -> iList.add(IsolatedGeneticEntry.write(geneticEntry, new CompoundNBT())));
+        compound.put("IsolationOverrides", iList);
 
         compound.putDouble("SugarAmount", this.sugarAmount);
         compound.putDouble("BoneAmount", this.boneAmount);
@@ -363,6 +372,13 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         if(ID >= 0 && ID < this.selectedDNAs.length) {
             this.selectedDNAs[ID].setKey(key);
             this.selectedDNAs[ID].setAmount(amount);
+
+            if(ID == 0 && key.isEmpty()) {
+                for (SelectedDnaEntry dna : this.selectedDNAs) {
+                    dna.clear();
+                }
+                this.isolationOverrides.clear();
+            }
         }
     }
 
@@ -565,7 +581,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     GeneticTint.Part primary = ColouredGeneticDataHandler.combineMultipleParts(allPrimaryColours);
                     GeneticTint.Part secondary = ColouredGeneticDataHandler.combineMultipleParts(allSecondaryColours);
 
-                    out.add(new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get(), new GeneticTypeOverallTintStorage())
+                    out.add(new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get(), new GeneticTypeOverallTintStorage().setTintType(GeneticTypeOverallTintStorage.TintType.TARGET))
                         .setModifier(new GeneticTint(primary, secondary))
                     );
                 });
@@ -593,6 +609,43 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         int tint;
         int index;
         DnaColourStorage colourStorage;
+    }
+
+    @Data
+    public static class IsolatedGeneticEntry<O> {
+        GeneticType<?, O> type;
+        O value;
+
+        public IsolatedGeneticEntry(GeneticType<?, O> type) {
+            this(type, type.getDataHandler().defaultValue());
+        }
+        public IsolatedGeneticEntry(GeneticType<?, O> type, O value) {
+            this.type = type;
+            this.value = value;
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        public boolean renderAndModify(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseDown) {
+            O newVal = this.type.getDataHandler().renderIsolationEdit(stack, x, y, width, height, mouseX, mouseY, mouseDown, this.value);
+            if(this.value != newVal) {
+                this.value = newVal;
+                return true;
+            }
+            return false;
+        }
+
+        public static IsolatedGeneticEntry<?> read(CompoundNBT nbt) {
+            return readWithType(nbt.getCompound("value"), GeneticTypes.registry().getValue(new ResourceLocation(nbt.getString("type"))));
+        }
+        private static <O> IsolatedGeneticEntry<O> readWithType(CompoundNBT nbt, GeneticType<?, O> type) {
+            return new IsolatedGeneticEntry<>(type, type.getDataHandler().read(nbt));
+        }
+
+        public static <O> CompoundNBT write(IsolatedGeneticEntry<O> entry, CompoundNBT nbt) {
+            nbt.putString("type", entry.type.getRegistryName().toString());
+            nbt.put("value", entry.type.getDataHandler().write(entry.value, new CompoundNBT()));
+            return nbt;
+        }
     }
 
 }

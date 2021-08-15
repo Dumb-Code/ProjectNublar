@@ -6,12 +6,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.dumbcode.dumblibrary.server.dna.DefaultGeneticFactoryStorageTypes;
-import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
-import net.dumbcode.dumblibrary.server.dna.GeneticFactoryStorageType;
 import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.storages.RandomUUIDStorage;
-import net.dumbcode.projectnublar.server.dna.ProjectNublarGeneticFactoryStorageTypes;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -79,7 +75,7 @@ public class GeneticDietChangeStorage extends RandomUUIDStorage<Float> {
 
 
     @Override
-    public GeneticFactoryStorageType<?> getType() {
-        return ProjectNublarGeneticFactoryStorageTypes.DIET;
+    public Object getCombinerKey() {
+        return this.diet;
     }
 }
