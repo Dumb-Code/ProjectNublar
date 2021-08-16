@@ -2,8 +2,9 @@ package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
 import com.google.common.base.Predicate;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.dumblibrary.client.gui.ColourUtils;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.SolidColorBackground;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -17,7 +18,6 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.StringTextComponent;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.io.IOException;
 
 public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
@@ -40,11 +40,12 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
     public SolidColorSetupPage() {
         super(WHEEL_DIAMETER + 103, WHEEL_DIAMETER);
+        //TODO: move to ColourWheelSelector
         if(shaderManager == null) {
             try {
-                shaderManager = new ShaderInstance(MC.getResourceManager(), ProjectNublar.MODID + ":colorwheel");
+                shaderManager = new ShaderInstance(MC.getResourceManager(), DumbLibrary.MODID + ":colorwheel");
             } catch (IOException e) {
-                ProjectNublar.getLogger().error("Unable to load color wheel shader :/", e);
+                DumbLibrary.getLogger().error("Unable to load color wheel shader :/", e);
             }
         }
     }
@@ -144,7 +145,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     private int calculateColor() {
         double theta = -Math.atan2(this.selectedPoint.getY(), this.selectedPoint.getX()) - Math.PI/2D;
         double brightness = Math.min(1F, Math.sqrt(this.selectedPoint.getX()*this.selectedPoint.getX() + this.selectedPoint.getY()*this.selectedPoint.getY()) / (WHEEL_DIAMETER/2D));
-        return Color.HSBtoRGB((float) (theta / (2*Math.PI)), (float) brightness, 1F - this.lightness);
+        return ColourUtils.HSBtoRGB((float) (theta / (2*Math.PI)), (float) brightness, 1F - this.lightness);
     }
 
     private void updateTextFields() {
@@ -163,7 +164,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     }
 
     private void updateSelectors() {
-        float[] hsb = Color.RGBtoHSB(this.stringToNumber(this.redField.getValue()), this.stringToNumber(this.greenField.getValue()), this.stringToNumber(this.blueField.getValue()), null);
+        float[] hsb = ColourUtils.RGBtoHSB(this.stringToNumber(this.redField.getValue()), this.stringToNumber(this.greenField.getValue()), this.stringToNumber(this.blueField.getValue()), null);
         this.lightness = 1F - hsb[2];
 
         double theta = -2*Math.PI*hsb[0] - Math.PI/2D;

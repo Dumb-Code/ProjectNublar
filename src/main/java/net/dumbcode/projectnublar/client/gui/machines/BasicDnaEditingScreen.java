@@ -522,7 +522,7 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         }
     }
 
-    private class ClampedGuiSlider extends Slider {
+    private class ClampedGuiSlider extends SimpleSlider {
 
         private final int id;
         private final DnaSelectModuleSlot module;
@@ -552,19 +552,6 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         public void setValueDirectly(double d) {
             this.sliderValue = d / (this.id == 0 ? 1 : 0.5D);
             super.updateSlider(); //Must be super to prevent loops
-        }
-
-        @Override
-        public void renderButton(MatrixStack mStack, int mouseX, int mouseY, float partial) {
-            if(!this.visible) {
-                return;
-            }
-            if (this.dragging) {
-                this.sliderValue = (mouseX - (this.x + 4)) / (float)(this.width - 8);
-                updateSlider();
-            }
-            this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-            SimpleSlider.renderSlider(this, mStack, mouseX, mouseY);
         }
     }
 }
