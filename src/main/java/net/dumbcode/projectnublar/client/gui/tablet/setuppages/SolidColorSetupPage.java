@@ -164,7 +164,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     }
 
     private void updateSelectors() {
-        float[] hsb = ColourUtils.RGBtoHSB(this.stringToNumber(this.redField.getValue()), this.stringToNumber(this.greenField.getValue()), this.stringToNumber(this.blueField.getValue()), null);
+        float[] hsb = ColourUtils.RGBtoHSB(this.stringToNumber(this.redField.getValue()), this.stringToNumber(this.greenField.getValue()), this.stringToNumber(this.blueField.getValue()));
         this.lightness = 1F - hsb[2];
 
         double theta = -2*Math.PI*hsb[0] - Math.PI/2D;

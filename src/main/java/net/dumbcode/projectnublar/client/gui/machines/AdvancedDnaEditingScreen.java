@@ -12,6 +12,7 @@ import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlock
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -54,7 +55,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     private int selectedId = -1;
     private int hoveredId = -1;
 
-    private boolean mouseDown;
+    private Widget elementWidget;
 
 
     public AdvancedDnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
@@ -107,24 +108,9 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
         if(hashGenetics != this.previousHash) {
             this.previousHash = hashGenetics;
-            this.selectedId = -1;
+            this.deselect();
         }
 
-    }
-
-
-    @Override
-    public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float ticks) {
-        super.renderScreen(stack, mouseX, mouseY, ticks);
-        if(this.selectedId != -1) {
-            Chromosome chromosome = this.chromosomes[this.selectedId];
-            SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType(), chromosome.isSecondaryColour());
-            boolean changed = entry.renderAndModify(stack, this.leftPos + 100, this.topPos + 20, 110, 160, mouseX, mouseY, this.mouseDown);
-            if(changed) {
-                System.out.println("CHANGED: " + entry.getValue());
-                //TODO: SYNC, and add to the S2C sync thingy
-            }
-        }
     }
 
     @Override
@@ -165,27 +151,42 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
     }
 
+    private void deselect() {
+        this.selectedId = -1;
+        this.children.remove(this.elementWidget);
+        this.buttons.remove(this.elementWidget);
+        this.elementWidget = null;
+    }
+
+    public void selectHovered() {
+        this.selectedId = this.hoveredId;
+
+        Chromosome chromosome = this.chromosomes[this.selectedId];
+        SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType());
+        this.elementWidget = this.createWidget(entry, chromosome.isSecondaryColour);
+        this.children.add(this.elementWidget);
+        this.buttons.add(this.elementWidget);
+    }
+
+    private <O> Widget createWidget(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> entry, boolean isSecondaryColour) {
+        return entry.getType().getDataHandler().createIsolationWidget(this.leftPos + 100, this.topPos + 20, 110, 160, isSecondaryColour, entry::getValue, o -> {
+            entry.setValue(o);
+            //TODO: sync entry bruh moment, and add to the S2C sync thingy
+        });
+    }
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if(this.hoveredId != -1) {
             //If already selected, toggle
-            if(this.selectedId == this.hoveredId) {
-                this.selectedId = -1;
-            } else {
-                this.selectedId = this.hoveredId;
+            boolean set = this.selectedId != this.hoveredId;
+            this.deselect();
+            if(set) {
+                this.selectHovered();
             }
             return true;
         }
-        if(mouseX >= this.leftPos+100 && mouseY >= this.topPos+20 && mouseX < this.leftPos+210 && mouseY < this.topPos+180) {
-            this.mouseDown = true;
-        }
         return super.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int mouseButton) {
-        this.mouseDown = false;
-        return super.mouseReleased(mouseX, mouseY, mouseButton);
     }
 
     private int hashGenetics() {
@@ -197,6 +198,11 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         return result;
     }
 
+    @Override
+    public boolean mouseDragged(double p_231045_1_, double p_231045_3_, int p_231045_5_, double p_231045_6_, double p_231045_8_) {
+        boolean normalRet = this.getFocused() != null && this.isDragging() && p_231045_5_ == 0 && this.getFocused().mouseDragged(p_231045_1_, p_231045_3_, p_231045_5_, p_231045_6_, p_231045_8_);
+        return normalRet || super.mouseDragged(p_231045_1_, p_231045_3_, p_231045_5_, p_231045_6_, p_231045_8_);
+    }
 
     @Override
     protected int getEntityLeft() {

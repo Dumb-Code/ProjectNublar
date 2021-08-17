@@ -1,9 +1,11 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.*;
-import net.dumbcode.dumblibrary.server.dna.*;
+import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
+import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
+import net.dumbcode.dumblibrary.server.dna.GeneticType;
+import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.dna.data.ColouredGeneticDataHandler;
 import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
 import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeOverallTintStorage;
@@ -25,7 +27,6 @@ import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveR
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.gui.screen.GPUWarningScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
@@ -38,8 +39,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -92,7 +91,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 
-    private final Map<IsolatedGeneticKey, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
+    private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
 
     public SequencingSynthesizerBlockEntity() {
         super(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get());
@@ -129,8 +128,8 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         return super.getCapability(cap, side);
     }
 
-    public IsolatedGeneticEntry<?> getOrCreateIsolationEntry(GeneticType<?, ?> type, boolean secondary) {
-        return this.isolationOverrides.computeIfAbsent(new IsolatedGeneticKey(type, secondary), k -> new IsolatedGeneticEntry<>(type));
+    public IsolatedGeneticEntry<?> getOrCreateIsolationEntry(GeneticType<?, ?> type) {
+        return this.isolationOverrides.computeIfAbsent(type, IsolatedGeneticEntry::new);
     }
 
     public double waterPercent() {
@@ -172,7 +171,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         for (int i = 0; i < iList.size(); i++) {
             CompoundNBT nbt = list.getCompound(i);
             IsolatedGeneticEntry<?> read = IsolatedGeneticEntry.read(nbt.getCompound("entry"));
-            this.isolationOverrides.put(new IsolatedGeneticKey(read.getType(), nbt.getBoolean("secondary")), read);
+            this.isolationOverrides.put(read.getType(), read);
         }
 
         this.sugarAmount = compound.getDouble("SugarAmount");
@@ -202,7 +201,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.isolationOverrides.forEach((type, geneticEntry) -> {
             CompoundNBT compoundNBT = new CompoundNBT();
             compoundNBT.put("entry", IsolatedGeneticEntry.write(geneticEntry, new CompoundNBT()));
-            compoundNBT.putBoolean("secondary", type.isSecondary());
             iList.add(compoundNBT);
         });
         compound.put("IsolationOverrides", iList);
@@ -617,15 +615,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         DnaColourStorage colourStorage;
     }
 
-    @Value
-    public static class IsolatedGeneticKey {
-        GeneticType<?, ?> type;
-        boolean secondary;
-    }
-
     @Data
     public static class IsolatedGeneticEntry<O> {
         GeneticType<?, O> type;
+        @Setter
         O value;
 
         public IsolatedGeneticEntry(GeneticType<?, O> type) {
@@ -634,16 +627,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         public IsolatedGeneticEntry(GeneticType<?, O> type, O value) {
             this.type = type;
             this.value = value;
-        }
-
-        @OnlyIn(Dist.CLIENT)
-        public boolean renderAndModify(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseDown) {
-            O newVal = this.type.getDataHandler().renderIsolationEdit(stack, x, y, width, height, mouseX, mouseY, mouseDown, this.value);
-            if(this.value != newVal) {
-                this.value = newVal;
-                return true;
-            }
-            return false;
         }
 
         public static IsolatedGeneticEntry<?> read(CompoundNBT nbt) {
