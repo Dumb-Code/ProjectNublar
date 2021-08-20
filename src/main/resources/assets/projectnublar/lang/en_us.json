@@ -54,6 +54,7 @@
     "projectnublar.gui.machine.sequencer.dna_editing.tab.basic": "Basic",
     "projectnublar.gui.machine.sequencer.dna_editing.tab.advanced": "Advanced",
     "projectnublar.gui.machine.sequencer.reset": "Reset Gene",
+    "projectnublar.gui.machine.sequencer.begin": "Begin",
 
     "projectnublar.entity.genetics.variant.red": "Red %s",
     "projectnublar.entity.genetics.variant.snow": "Snow %s",

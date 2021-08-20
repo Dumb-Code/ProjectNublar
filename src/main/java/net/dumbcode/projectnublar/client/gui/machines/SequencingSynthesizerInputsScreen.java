@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.client.gui.machines;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.dumbcode.dumblibrary.client.gui.SimpleButton;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
@@ -39,6 +40,14 @@ public class SequencingSynthesizerInputsScreen extends SequencerSynthesizerBaseS
     public SequencingSynthesizerInputsScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, ITextComponent title, TabInformationBar bar, PlayerInventory playerInventory) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        this.addButton(new SimpleButton(this.leftPos + 128, this.topPos + 21, 94, 16, ProjectNublar.translate("gui.machine.sequencer.begin"), b -> {
+            System.out.println("Kash has smol pp");
+        }));
     }
 
     @Override
