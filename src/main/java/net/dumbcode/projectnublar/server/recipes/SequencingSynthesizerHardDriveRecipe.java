@@ -48,7 +48,7 @@ public enum SequencingSynthesizerHardDriveRecipe implements MachineRecipe<Sequen
         ItemStack inStack = handler.getStackInSlot(process.getInputSlot(0));
         ItemStack out = inStack.split(1);
         if(!out.isEmpty()) {
-            DriveUtils.addItemToDrive(handler.getStackInSlot(0), out);
+            handler.setStackInSlot(0, DriveUtils.addItemToDrive(handler.getStackInSlot(0), out));
         }
         if(out.getItem() instanceof DriveUtils.DriveInformation) {
             ItemStack outItem = ((DriveUtils.DriveInformation) out.getItem()).getOutItem(out);

@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.containers.machines;
 
 import lombok.NonNull;
+import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
@@ -14,6 +15,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
 public class MachineModuleContainer extends Container {
@@ -99,7 +102,7 @@ public class MachineModuleContainer extends Container {
     public void removed(PlayerEntity playerIn) {
         if(!playerIn.level.isClientSide) {
             this.blockEntity.getOpenedUsers().remove(playerIn.getUUID());
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(playerIn.level::dimension), new S2CSyncOpenedUsers(this.blockEntity.getBlockPos(), this.blockEntity.getOpenedUsers()));
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(playerIn.level, this.blockEntity.getBlockPos()), new S2CSyncOpenedUsers(this.blockEntity.getBlockPos(), this.blockEntity.getOpenedUsers()));
         }
         super.removed(playerIn);
     }
@@ -156,6 +159,10 @@ public class MachineModuleContainer extends Container {
 
     public MachineModuleBlockEntity<?> getBlockEntity() {
         return blockEntity;
+    }
+
+    public static <T extends MachineModuleBlockEntity<T>> void runWhenOnMenu(NetworkEvent.Context context, Class<T> expected, Consumer<T> onRun) {
+        context.enqueueWork(() -> getFromMenu(expected, context.getSender()).ifPresent(onRun));
     }
 
     public static <T extends MachineModuleBlockEntity<T>> Optional<T> getFromMenu(Class<T> expected, @Nullable ServerPlayerEntity player) {

@@ -4,15 +4,20 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
+import net.dumbcode.dumblibrary.client.gui.SimpleButton;
 import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
+import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
+import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerIsolationChange;
+import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerIsolationRemoved;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -57,10 +62,11 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     private Widget elementWidget;
 
+    private Button resetButton;
+
 
     public AdvancedDnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(blockEntity, inventorySlotsIn, playerInventory, title, bar, "basic", 1);
-        this.generateChromosomes(blockEntity.getHandler().getStackInSlot(0));
     }
 
     @Override
@@ -68,6 +74,37 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         super.init();
         this.chromoTableLeft = this.leftPos + 20;//this.leftPos + (this.imageWidth - TOTAL_WIDTH) / 2;
         this.chromoTableTop = 1 + this.topPos + (this.imageHeight - TOTAL_HEIGHT) / 2;
+
+        this.resetButton = this.addButton(new SimpleButton(this.leftPos + 232, this.topPos + 107, 109, 16, ProjectNublar.translate("gui.machine.sequencer.reset"), b -> {
+            if(this.selectedId != -1) {
+                Chromosome chromosome = this.chromosomes[this.selectedId];
+                if(chromosome.directEditType == GeneticTypes.OVERALL_TINT.get()) {
+                    @SuppressWarnings("unchecked")
+                    SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<GeneticTint> entry = (SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<GeneticTint>) this.blockEntity.getIsolationOverrides().get(GeneticTypes.OVERALL_TINT.get());
+                    if(entry != null) {
+                        GeneticTint value = entry.getValue();
+                        GeneticTint newTint = new GeneticTint(
+                            chromosome.isSecondaryColour ? value.getPrimary() : new GeneticTint.Part(1, 1, 1, 1, 0),
+                            chromosome.isSecondaryColour ? new GeneticTint.Part(1, 1, 1, 1, 0) : value.getSecondary()
+                        );
+                        entry.setValue(newTint);
+                        ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));
+                    }
+                } else {
+                    this.blockEntity.removeIsolationEntry(chromosome.directEditType);
+                    ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationRemoved(chromosome.directEditType));
+                }
+
+                this.children.remove(this.elementWidget);
+                this.buttons.remove(this.elementWidget);
+                SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType());
+                this.elementWidget = this.createWidget(entry, chromosome.isSecondaryColour);
+                this.children.add(this.elementWidget);
+                this.buttons.add(this.elementWidget);
+            }
+        }));
+        this.resetButton.active = this.selectedId != -1;
+        this.onSelectChange();
     }
 
     @Override
@@ -153,6 +190,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     private void deselect() {
         this.selectedId = -1;
+        this.resetButton.active = false;
         this.children.remove(this.elementWidget);
         this.buttons.remove(this.elementWidget);
         this.elementWidget = null;
@@ -160,7 +198,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     public void selectHovered() {
         this.selectedId = this.hoveredId;
-
+        this.resetButton.active = true;
         Chromosome chromosome = this.chromosomes[this.selectedId];
         SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType());
         this.elementWidget = this.createWidget(entry, chromosome.isSecondaryColour);
@@ -169,10 +207,10 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     }
 
     private <O> Widget createWidget(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> entry, boolean isSecondaryColour) {
-        return entry.getType().getDataHandler().createIsolationWidget(this.leftPos + 100, this.topPos + 20, 110, 160, isSecondaryColour, entry::getValue, o -> {
+        return entry.getType().getDataHandler().createIsolationWidget(this.leftPos + 232, this.topPos + 23, 109, 80, isSecondaryColour, entry::getValue, o -> {
             entry.setValue(o);
-            //TODO: sync entry bruh moment, and add to the S2C sync thingy
-        });
+            ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));
+        }, entry.getType());
     }
 
     @Override
@@ -206,17 +244,17 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     @Override
     protected int getEntityLeft() {
-        return 222;
+        return 105;
     }
 
     @Override
     protected int getEntityRight() {
-        return 340;
+        return 223;
     }
 
     @Override
     protected GuiScrollBox<GuiScrollboxEntry> createOverviewScrollBox() {
-        return new GuiScrollBox<>(this.leftPos + 222, this.topPos + 134, 118, 14, 3, this::createOverviewScrollBoxList);
+        return new GuiScrollBox<>(this.leftPos + 104, this.topPos + 134, 237, 14, 3, this::createOverviewScrollBoxList);
     }
 
     @Value

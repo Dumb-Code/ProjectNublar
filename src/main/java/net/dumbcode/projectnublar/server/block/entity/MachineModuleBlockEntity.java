@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
+import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -210,7 +211,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                 }
             }
             //todo: only sync when needed
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension),
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(this.level, this.worldPosition),
                 new S2CSyncMachineProcesses(
                     this.worldPosition,
                     this.processes.stream()
@@ -418,7 +419,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
     protected void onSlotChanged(int slot) {
         if(!this.level.isClientSide) {
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(this.level::dimension), new S2CSyncMachineStack(this, slot));
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(this.level, this.worldPosition), new S2CSyncMachineStack(this, slot));
         }
     }
 
@@ -514,7 +515,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     public abstract ITextComponent createTitle(int tab);
 
     public void openContainer(ServerPlayerEntity player, int tab) {
-        ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(player.getLevel()::dimension), new S2CSyncOpenedUsers(this.worldPosition, this.getOpenedUsers()));
+        ProjectNublar.NETWORK.send(NetworkUtils.forPos(this.level, this.worldPosition), new S2CSyncOpenedUsers(this.worldPosition, this.getOpenedUsers()));
         NetworkHooks.openGui(player, new SimpleNamedContainerProvider(
             (id, inv, p) -> this.createContainer(id, p, tab),
             this.createTitle(tab)),

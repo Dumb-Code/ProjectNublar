@@ -9,6 +9,7 @@ import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.dna.data.ColouredGeneticDataHandler;
 import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
 import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeOverallTintStorage;
+import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.dumblibrary.server.utils.GeneticUtils;
 import net.dumbcode.projectnublar.client.gui.machines.AdvancedDnaEditingScreen;
 import net.dumbcode.projectnublar.client.gui.machines.BasicDnaEditingScreen;
@@ -22,11 +23,14 @@ import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModule
 import net.dumbcode.projectnublar.server.item.DriveItem;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
+import net.dumbcode.projectnublar.server.network.S2CSyncSequencingSynthesizerSyncIsolationEntries;
+import net.dumbcode.projectnublar.server.network.S2CSyncSequencingSynthesizerSyncSelected;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerHardDriveRecipe;
 import net.dumbcode.projectnublar.server.recipes.SequencingSynthesizerRecipe;
 import net.dumbcode.projectnublar.server.utils.MachineUtils;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
@@ -91,7 +95,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 
-    private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
+    @Getter private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
 
     public SequencingSynthesizerBlockEntity() {
         super(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get());
@@ -129,8 +133,20 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     public IsolatedGeneticEntry<?> getOrCreateIsolationEntry(GeneticType<?, ?> type) {
+        this.setChanged();
         return this.isolationOverrides.computeIfAbsent(type, IsolatedGeneticEntry::new);
     }
+
+    public void insertIsolationEntry(IsolatedGeneticEntry<?> entry) {
+        this.isolationOverrides.put(entry.getType(), entry);
+        this.setChanged();
+    }
+
+    public void removeIsolationEntry(GeneticType<?, ?> type) {
+        this.isolationOverrides.remove(type);
+        this.setChanged();
+    }
+
 
     public double waterPercent() {
         return this.tank.getFluidAmount() / (double) this.tank.getCapacity();
@@ -169,7 +185,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.isolationOverrides.clear();
         ListNBT iList = compound.getList("IsolationOverrides", 10);
         for (int i = 0; i < iList.size(); i++) {
-            CompoundNBT nbt = list.getCompound(i);
+            CompoundNBT nbt = iList.getCompound(i);
             IsolatedGeneticEntry<?> read = IsolatedGeneticEntry.read(nbt.getCompound("entry"));
             this.isolationOverrides.put(read.getType(), read);
         }
@@ -258,6 +274,16 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.layer++;
             this.handler.setStackInSlot(slot, MachineUtils.fillTank(this.handler.getStackInSlot(slot), this.tank));
             this.layer--;
+        }
+        if(!this.level.isClientSide && slot == 0) {
+            for (SelectedDnaEntry dna : this.selectedDNAs) {
+                dna.clear();
+            }
+            this.isolationOverrides.clear();
+            this.setChanged();
+
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(this.level, this.worldPosition), S2CSyncSequencingSynthesizerSyncSelected.fromBlockEntity(this));
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(this.level, this.worldPosition), S2CSyncSequencingSynthesizerSyncIsolationEntries.fromBlockEntity(this));
         }
         super.onSlotChanged(slot);
     }
@@ -382,6 +408,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     dna.clear();
                 }
                 this.isolationOverrides.clear();
+                this.setChanged();
             }
         }
     }
@@ -535,6 +562,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     public List<GeneticEntry<?, ?>> gatherAllGeneticEntries() {
         List<GeneticEntry<?, ?>> out = new ArrayList<>();
+        GeneticEntry<?, GeneticTint> tintGeneticEntry = null;
         ItemStack drive = this.handler.getStackInSlot(0);
         int slots = this.getSlots();
         Map<String, DriveUtils.DriveEntry> collected = DriveUtils.getAll(drive).stream().collect(Collectors.toMap(d -> combine(d.getKey(), d.getVariant()), entry -> entry));
@@ -549,7 +577,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             }
             if(entry.getDriveType() == DriveUtils.DriveType.OTHER) {
                 int index = i;
-                entry.getEntity().ifPresent(value -> {
+                Optional<EntityType<?>> entity = entry.getEntity();
+                if(entity.isPresent()) {
+                    EntityType<?> value = entity.get();
                     for (EntityGeneticRegistry.Entry<?, ?> e : EntityGeneticRegistry.INSTANCE.gatherEntry(value, entry.getVariant())) {
                         out.add(e.create((float) this.selectedDNAs[index].amount * 2F));
                     }
@@ -584,13 +614,29 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
                     GeneticTint.Part primary = ColouredGeneticDataHandler.combineMultipleParts(allPrimaryColours);
                     GeneticTint.Part secondary = ColouredGeneticDataHandler.combineMultipleParts(allSecondaryColours);
-
-                    out.add(new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get(), new GeneticTypeOverallTintStorage().setTintType(GeneticTypeOverallTintStorage.TintType.TARGET))
+                    out.add(tintGeneticEntry = new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get())
                         .setModifier(new GeneticTint(primary, secondary))
                     );
-                });
+                };
             }
         }
+
+        for (IsolatedGeneticEntry<?> value : this.isolationOverrides.values()) {
+            GeneticEntry<?, ?> entry = value.create();
+            if(entry.getType() == GeneticTypes.OVERALL_TINT.get() && tintGeneticEntry != null) {
+                @SuppressWarnings("unchecked")
+                GeneticEntry<?, GeneticTint> geneticEntry = (GeneticEntry<?, GeneticTint>) entry;
+                GeneticTint modifier = geneticEntry.getModifier();
+                geneticEntry.setModifier(new GeneticTint(
+                    modifier.getPrimary().getImportance() == 0 ? tintGeneticEntry.getModifier().getPrimary() : modifier.getPrimary(),
+                    modifier.getSecondary().getImportance() == 0 ? tintGeneticEntry.getModifier().getSecondary() : modifier.getSecondary()
+                ));
+            }
+            out.removeIf(e -> e.getType() == value.getType());
+
+            out.add(entry);
+        }
+
         return out;
     }
 
@@ -640,6 +686,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             nbt.putString("type", entry.type.getRegistryName().toString());
             nbt.put("value", entry.type.getDataHandler().write(entry.value, new CompoundNBT()));
             return nbt;
+        }
+
+        public GeneticEntry<?, O> create() {
+            return new GeneticEntry<>(this.type).setModifier(this.value);
         }
     }
 

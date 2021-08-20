@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.UnincubatedEggItem;
 import net.minecraft.item.ItemStack;
@@ -31,19 +32,15 @@ public class C2SPlaceIncubatorEgg {
 
     public static void handle(C2SPlaceIncubatorEgg packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
-
-        context.enqueueWork(() -> MachineModuleContainer.getFromMenu(
-            IncubatorBlockEntity.class,
-            context.getSender()).ifPresent(i -> {
-                ItemStack stack = context.getSender().getUseItem();
-                if (stack.getItem() instanceof UnincubatedEggItem) {
-                    i.placeEgg(packet.xPos, packet.yPos, stack);
-                    context.getSender().broadcastCarriedItem();
-                    i.syncToClient();
-                }
-            })
-
-        );
+        
+        MachineModuleContainer.runWhenOnMenu(context, IncubatorBlockEntity.class, i -> {
+            ItemStack stack = context.getSender().getUseItem();
+            if (stack.getItem() instanceof UnincubatedEggItem) {
+                i.placeEgg(packet.xPos, packet.yPos, stack);
+                context.getSender().broadcastCarriedItem();
+                i.syncToClient();
+            }
+        });
 
         context.setPacketHandled(true);
     }

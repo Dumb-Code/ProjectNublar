@@ -274,6 +274,9 @@ public class ProjectNublar {
         NETWORK.registerMessage(30, S2STrackingTabletUpdateChunk.class, S2STrackingTabletUpdateChunk::toBytes, S2STrackingTabletUpdateChunk::fromBytes, S2STrackingTabletUpdateChunk::handle);
         NETWORK.registerMessage(31, C2SSequencerSynthesizerContainerSlotOpened.class, C2SSequencerSynthesizerContainerSlotOpened::toBytes, C2SSequencerSynthesizerContainerSlotOpened::fromBytes, C2SSequencerSynthesizerContainerSlotOpened::handle);
         NETWORK.registerMessage(32, C2SManualStartRecipe.class, C2SManualStartRecipe::toBytes, C2SManualStartRecipe::fromBytes, C2SManualStartRecipe::handle);
+        NETWORK.registerMessage(33, C2SSequencingSynthesizerIsolationChange.class, C2SSequencingSynthesizerIsolationChange::toBytes, C2SSequencingSynthesizerIsolationChange::fromBytes, C2SSequencingSynthesizerIsolationChange::handle);
+        NETWORK.registerMessage(34, S2CSyncSequencingSynthesizerSyncIsolationEntries.class, S2CSyncSequencingSynthesizerSyncIsolationEntries::toBytes, S2CSyncSequencingSynthesizerSyncIsolationEntries::fromBytes, S2CSyncSequencingSynthesizerSyncIsolationEntries::handle);
+        NETWORK.registerMessage(35, C2SSequencingSynthesizerIsolationRemoved.class, C2SSequencingSynthesizerIsolationRemoved::toBytes, C2SSequencingSynthesizerIsolationRemoved::fromBytes, C2SSequencingSynthesizerIsolationRemoved::handle);
     }
 
     public static TranslationTextComponent translate(String key, Object... args) {

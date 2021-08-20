@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
+import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -51,15 +52,11 @@ public class C2SSequencingSynthesizerSelectChange {
 
     public static void handle(C2SSequencingSynthesizerSelectChange message, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> MachineModuleContainer.getFromMenu(
-            SequencingSynthesizerBlockEntity.class,
-            context.getSender()).ifPresent(b -> {
-                b.setAndValidateSelect(message.id, message.key, message.amount);
-                b.setStorage(message.id, message.storage);
-                ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), S2CSyncSequencingSynthesizerSyncSelected.fromBlockEntity(b));
-
-            })
-        );
+        MachineModuleContainer.runWhenOnMenu(context, SequencingSynthesizerBlockEntity.class, b -> {
+            b.setAndValidateSelect(message.id, message.key, message.amount);
+            b.setStorage(message.id, message.storage);
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(b.getLevel(), b.getBlockPos()), S2CSyncSequencingSynthesizerSyncSelected.fromBlockEntity(b));
+        });
         context.setPacketHandled(true);
     }
 

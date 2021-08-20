@@ -5,7 +5,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
-import net.dumbcode.dumblibrary.client.SimpleSlider;
+import net.dumbcode.dumblibrary.client.gui.SimpleSlider;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
@@ -23,7 +23,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.client.gui.widget.Slider;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -110,7 +109,7 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 
     @Override
     public void onSelectChange() {
-        super.onGeneticsChanged();
+        super.onSelectChange();
         this.refreshSlots();
     }
 

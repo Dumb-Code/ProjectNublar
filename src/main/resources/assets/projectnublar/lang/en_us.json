@@ -53,6 +53,7 @@
     "projectnublar.gui.machine.sequencer.locked_dna_slot": "Need %s%% of dinosaur sequenced to use. Currently %s%%.",
     "projectnublar.gui.machine.sequencer.dna_editing.tab.basic": "Basic",
     "projectnublar.gui.machine.sequencer.dna_editing.tab.advanced": "Advanced",
+    "projectnublar.gui.machine.sequencer.reset": "Reset Gene",
 
     "projectnublar.entity.genetics.variant.red": "Red %s",
     "projectnublar.entity.genetics.variant.snow": "Snow %s",

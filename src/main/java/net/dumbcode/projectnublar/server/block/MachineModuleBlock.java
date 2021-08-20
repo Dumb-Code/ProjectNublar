@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.item.MachineModulePart;
@@ -65,7 +66,7 @@ public class MachineModuleBlock extends Block implements IItemBlock{
     @Override
     public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
         if(world instanceof ServerWorld) {
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(((ServerWorld) world)::dimension), new S2CMachinePositionDirty(pos));
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(world, pos), new S2CMachinePositionDirty(pos));
         }
     }
 
