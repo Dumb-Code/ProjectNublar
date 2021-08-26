@@ -164,7 +164,7 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     public void onGeneticsChanged() {
         this.combinedEditGeneList.clear();
         this.combineGenetics.clear();
-        this.combineGenetics.addAll(GeneticUtils.combineAll(this.blockEntity.gatherAllGeneticEntries()));
+        this.combineGenetics.addAll(this.blockEntity.gatherAllGeneticEntries());
         for (GeneticEntry<?, ?> entry : this.combineGenetics) {
             this.combinedEditGeneList.add(new GeneEditEntry<>(entry));
         }

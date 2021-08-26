@@ -20,6 +20,7 @@ import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -65,6 +66,9 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         this.updateAllSlots();
 
         this.scrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 232, this.topPos + 23, 109, 20, 5, () -> {
+            if(blockEntity.isProcessingMain()) {
+                return Collections.emptyList();
+            }
             if(this.selectedSlot == -1) {
                 return Collections.emptyList();
             } else if(this.selectedSlot == 0) {
@@ -218,6 +222,9 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 
 
     private void setSelectedSlot(int selectedSlot) {
+        if(blockEntity.isProcessingMain()) {
+            return;
+        }
         if(this.selectedSlot == selectedSlot) {
             selectedSlot = -1;
             this.scrollBox.setSelectedElement(null);
@@ -290,7 +297,8 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
     }
 
     private void changeDnaSelection(int id, String key, double amount) {
-        if (this.blockEntity.setAndValidateSelect(id, key, amount)) {
+        amount = MathHelper.clamp(Math.round(amount * 100D) / 100D, 0, 1);
+        if (!blockEntity.isProcessingMain() && this.blockEntity.setAndValidateSelect(id, key, amount)) {
             ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerSelectChange(
                 id, key, amount,
                 this.blockEntity.getStorage(id)
@@ -361,6 +369,9 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         }
 
         public void setDrive(DriveEntry drive) {
+//            if(blockEntity.isProcessingMain()) {
+//                return;
+//            }
             if(this.drive == drive) {
                 return;
             }
@@ -380,7 +391,7 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if(this.active && this.visible && mouseX >= this.x && mouseX < this.x+16 && mouseY >= this.y && mouseY < this.y+16) {
+            if(!blockEntity.isProcessingMain() && this.active && this.visible && mouseX >= this.x && mouseX < this.x+16 && mouseY >= this.y && mouseY < this.y+16) {
                 setSelectedSlot(this.id);
                 return true;
             }
@@ -445,6 +456,9 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         }
 
         private int mouseOverSquareIndex(double mx, double my) {
+            if(blockEntity.isProcessingMain()) {
+                return -1;
+            }
             double squareSize = this.height - 2;
             double center = this.width/2D;
             if(mx >= center-squareSize-2 && my >= 1 && mx < center-1 && my < 1+squareSize) {
@@ -501,6 +515,9 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 
         @Override
         public boolean onClicked(double relMouseX, double relMouseY, double mouseX, double mouseY) {
+            if(blockEntity.isProcessingMain()) {
+                return false;
+            }
             int id = selectedSlot;
             boolean ret = GuiScrollboxEntry.super.onClicked(relMouseX, relMouseY, mouseX, mouseY);
             if(id != -1) {

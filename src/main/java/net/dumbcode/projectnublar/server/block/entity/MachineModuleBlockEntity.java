@@ -185,7 +185,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                             if (recipe != null) {
                                 recipe.onRecipeFinished(this.asB, process);
                                 process.setTime(0);
-                                if (!recipe.accepts(this.asB, process)) {
+                                if (!recipe.startsAutomatically() || !recipe.accepts(this.asB, process)) {
                                     process.setProcessing(false);
                                     process.setTotalTime(0);
                                     process.setTime(0);
@@ -689,7 +689,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     public enum ProcessInterruptAction {
-        RESET(p -> p.setTime(0)),
+        RESET(p -> {
+            p.setProcessing(false);
+            p.setTotalTime(0);
+            p.setTime(0);
+            p.setCurrentRecipe(null);
+        }),
         DECREASE(p -> p.setTime(p.getTime() - 1)),
         PAUSE(p -> {});
 

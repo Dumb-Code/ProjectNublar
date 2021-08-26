@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.SlotCanBeDisabled;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
-import net.dumbcode.projectnublar.server.network.C2SSequencerSynthesizerContainerSlotOpened;
+import net.dumbcode.projectnublar.server.network.C2SMachineContainerPopoutSlotOpened;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -128,7 +128,7 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
 
                         int v = slot.getSlotIndex();
                         this.menu.setPredicate(value -> value == v);
-                        ProjectNublar.NETWORK.sendToServer(new C2SSequencerSynthesizerContainerSlotOpened(v));
+                        ProjectNublar.NETWORK.sendToServer(new C2SMachineContainerPopoutSlotOpened(v));
                         return true;
                     }
                 }
@@ -138,7 +138,7 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
                 slot.setActive(false);
             }
             this.menu.setPredicate(value -> true);
-            ProjectNublar.NETWORK.sendToServer(new C2SSequencerSynthesizerContainerSlotOpened(-1));
+            ProjectNublar.NETWORK.sendToServer(new C2SMachineContainerPopoutSlotOpened(-1));
             this.activeSlot = null;
             return true;
         }

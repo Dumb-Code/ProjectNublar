@@ -101,7 +101,7 @@ public final class ItemHandler {
 
     public static final Map<Dinosaur, RegistryObject<Item>> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, "spawn_egg", new Item.Properties()));
     public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, "genetic_material_test_tube", new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new BasicDinosaurItem(d, "test_tube", new Item.Properties()));
+    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new DinosaurTestTube(d, "test_tube", new Item.Properties()));
     public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties()));
     public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties()));
 

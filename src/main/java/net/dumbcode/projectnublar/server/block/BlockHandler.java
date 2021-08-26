@@ -21,6 +21,7 @@ import static net.minecraft.block.AbstractBlock.Properties.of;
 
 public class BlockHandler {
 
+    //TODO: this only works because dumblib is before pn. We need to have this register on PreBlockRegistryEvent.Post
     public static final PreprocessRegisterDeferredRegister<Block> REGISTER = PreprocessRegisterDeferredRegister.create(ForgeRegistries.BLOCKS.getRegistrySuperType(), ProjectNublar.MODID);
 
     public static final RegistryObject<BlockElectricFencePole> LOW_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("low_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.LOW_SECURITY));

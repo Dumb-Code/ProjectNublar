@@ -55,6 +55,14 @@
     "projectnublar.gui.machine.sequencer.dna_editing.tab.advanced": "Advanced",
     "projectnublar.gui.machine.sequencer.reset": "Reset Gene",
     "projectnublar.gui.machine.sequencer.begin": "Begin",
+    "projectnublar.gui.machine.sequencer.cancel": "Cancel",
+
+    "projectnublar.machine.sequencer.blocked.reason.test_tube": "No Test Tube",
+    "projectnublar.machine.sequencer.blocked.reason.water": "Not enough water",
+    "projectnublar.machine.sequencer.blocked.reason.plant": "Not enough plant matter",
+    "projectnublar.machine.sequencer.blocked.reason.bone": "Not enough bone matter",
+    "projectnublar.machine.sequencer.blocked.reason.sugar": "Not enough sugar",
+    "projectnublar.machine.sequencer.blocked.reason.dna": "DNA doesn't reach 100%",
 
     "projectnublar.entity.genetics.variant.red": "Red %s",
     "projectnublar.entity.genetics.variant.snow": "Snow %s",
@@ -128,6 +136,8 @@
     "projectnublar.item.fossil.type.ribcage": "Ribcage",
     "projectnublar.item.fossil.type.skull": "Skull",
     "projectnublar.item.fossil.type.tail": "Tail",
+
+    "projectnublar.item.test_tube.shift_for_info": "Press shift for DNA breakdown.",
 
     "projectnublar.action.skeletal_builder.no_dino_to_display": "No dinosaur to display!",
 

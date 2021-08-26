@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.recipes;
 
-import com.google.common.collect.Maps;
+import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
+import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
@@ -10,47 +11,64 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynthesizerBlockEntity>{
     INSTANCE;
 
     private final ResourceLocation registryName = new ResourceLocation(ProjectNublar.MODID, "dna_creation");
 
-    @Override
-    public boolean accepts(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
+    private static ITextComponent createReason(String reason) {
+        return ProjectNublar.translate("machine.sequencer.blocked.reason." + reason);
+    }
+
+    public static List<ITextComponent> getCannotStartReasons(SequencingSynthesizerBlockEntity blockEntity) {
+        List<ITextComponent> list = new ArrayList<>();
+        MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process = blockEntity.getProcess(1);
         MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
-        ItemStack testTube = handler.getStackInSlot(process.getInputSlot(0));
 
-        double storageSize = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE;
-
-        if(blockEntity.getTank().getFluidAmount() >= FluidAttributes.BUCKET_VOLUME / 2 &&
-                blockEntity.getPlantAmount() >= storageSize / 2 &&
-                blockEntity.getBoneAmount() >= storageSize / 2 &&
-                blockEntity.getSugarAmount() >= storageSize / 2 &&
-                testTube.getItem() == ItemHandler.EMPTY_TEST_TUBE.get()) {
-            CompoundNBT nbt = handler.getStackInSlot(0).getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
-
-            Map<String, Double> amountMap = Maps.newHashMap();
-
-            amountMap.put(blockEntity.getSelectKey(1), blockEntity.getSelectAmount(1));
-            amountMap.put(blockEntity.getSelectKey(2), blockEntity.getSelectAmount(2));
-            amountMap.put(blockEntity.getSelectKey(3), blockEntity.getSelectAmount(3));
-
-            for (Map.Entry<String, Double> entry : amountMap.entrySet()) {
-                double amountIn = nbt.getCompound(entry.getKey()).getInt("amount") / 100D;
-                if(amountIn < entry.getValue()) {
-                    return false;
-                }
-            }
-            return true;
+        if(handler.getStackInSlot(process.getInputSlot(0)).getItem() != ItemHandler.EMPTY_TEST_TUBE.get()) {
+            list.add(createReason("test_tube"));
         }
 
-        return false;
+        if(blockEntity.getTank().getFluidAmount() < FluidAttributes.BUCKET_VOLUME / 2) {
+            list.add(createReason("water"));
+        }
+        double size = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE / 2;
+        if(blockEntity.getPlantAmount() < size) {
+            list.add(createReason("plant"));
+        }
+        if(blockEntity.getBoneAmount() < size) {
+            list.add(createReason("bone"));
+        }
+        if(blockEntity.getSugarAmount() < size) {
+            list.add(createReason("sugar"));
+        }
+
+        DinosaurHandler.getRegistry().containsKey(new ResourceLocation(blockEntity.getSelectKey(0)));
+
+        double amount = 0;
+        for (int i = 0; i < blockEntity.getSlots(); i++) {
+            amount += blockEntity.getSelectAmount(i);
+        }
+        if(amount != 1) {
+            list.add(createReason("dna"));
+        }
+
+        return list;
+    }
+
+    @Override
+    public boolean accepts(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
+        return getCannotStartReasons(blockEntity).isEmpty();
     }
 
     @Override
@@ -78,10 +96,11 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
 
         double storageSize = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE;
 
-        blockEntity.getTank().drain(FluidAttributes.BUCKET_VOLUME / 2, IFluidHandler.FluidAction.EXECUTE);
+        blockEntity.getTank().drainInternal(FluidAttributes.BUCKET_VOLUME / 2, IFluidHandler.FluidAction.EXECUTE);
         blockEntity.setBoneAmount(blockEntity.getBoneAmount() - storageSize / 2);
         blockEntity.setPlantAmount(blockEntity.getPlantAmount() - storageSize / 2);
         blockEntity.setSugarAmount(blockEntity.getSugarAmount() - storageSize / 2);
+        blockEntity.syncToClient();
 
     }
 
@@ -94,33 +113,17 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     }
 
     private ItemStack createStack(SequencingSynthesizerBlockEntity blockEntity) {
-        if(blockEntity.getLevel().isClientSide) {
-            return ItemStack.EMPTY;
+        ResourceLocation location = new ResourceLocation(blockEntity.getSelectKey(0));
+        if(DinosaurHandler.getRegistry().containsKey(location)) {
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_DNA.get(DinosaurHandler.getRegistry().getValue(location)).get());
+            List<GeneticEntry<?, ?>> geneticEntries = blockEntity.gatherAllGeneticEntries();
+            ListNBT collected = geneticEntries.stream()
+                .map(g -> g.serialize(new CompoundNBT()))
+                .collect(CollectorUtils.toNBTTagList());
+            stack.getOrCreateTagElement(ProjectNublar.MODID).put("Genetics", collected);
+            return stack;
         }
-        CompoundNBT driveNbt = blockEntity.getHandler().getStackInSlot(0).getOrCreateTagElement(ProjectNublar.MODID).getCompound("drive_information");
-
-        String key = blockEntity.getSelectKey(1);
-        if(!key.isEmpty() && DinosaurHandler.getRegistry().containsKey(new ResourceLocation(key))) {
-            ItemStack out = new ItemStack(ItemHandler.TEST_TUBES_DNA.get(DinosaurHandler.getRegistry().getValue(new ResourceLocation(key))).get());
-            CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID).getCompound("dna_info");
-            for (int i = 1; i < 4; i++) {
-                String dKey = blockEntity.getSelectKey(i);
-                CompoundNBT tag = new CompoundNBT();
-                tag.putString("translation_key", driveNbt.getCompound(dKey).getString("translation_key"));
-                tag.putInt("amount", (int) (blockEntity.getSelectAmount(i) * 100D));
-                nbt.put(dKey, tag);
-
-                CompoundNBT driveTag = driveNbt.getCompound(dKey);
-                int amount = driveTag.getInt("amount") - (int)(blockEntity.getSelectAmount(i) * 100D);
-                if(amount <= 0) {
-                    driveNbt.remove(dKey);
-                } else {
-                    driveTag.putInt("amount", amount);
-                }
-
-            }
-            return out;
-        }
+        ProjectNublar.getLogger().warn("Unable to complete recipe, {} was not a dinosaur", location);
         return ItemStack.EMPTY;
     }
 

@@ -58,14 +58,7 @@ import java.util.stream.Collectors;
 
 public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<SequencingSynthesizerBlockEntity> implements DyableBlockEntity {
 
-    private final FluidTank tank = new FluidTank(FluidAttributes.BUCKET_VOLUME, p -> p.getFluid() == Fluids.WATER) {
-
-        @Nonnull
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            return FluidStack.EMPTY;
-        }
-    };
+    private final MachineModuleFluidTank tank = new MachineModuleFluidTank(this, FluidAttributes.BUCKET_VOLUME, p -> p.getFluid() == Fluids.WATER).setCanDrain(false);
 
     private final LazyOptional<FluidTank> capability = LazyOptional.of(() -> this.tank);
 
@@ -102,6 +95,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         for (int i = 0; i < this.selectedDNAs.length; i++) {
             this.selectedDNAs[i] = new SelectedDnaEntry();
         }
+    }
+
+    public boolean isProcessingMain() {
+        return this.getProcess(1).isProcessing();
     }
 
     @Override
@@ -321,12 +318,15 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Nonnull
-    public FluidTank getTank() {
+    public MachineModuleFluidTank getTank() {
         return this.tank;
     }
 
     public boolean setAndValidateSelect(int ID, String key, double amount) {
-        amount = MathHelper.clamp(amount, 0, 1);
+        if(this.isProcessingMain()) {
+            return false;
+        }
+        amount = MathHelper.clamp(Math.round(amount * 100D) / 100D, 0, 1);
         if(ID >= 0 && ID < this.selectedDNAs.length) {
             //Check that the drive actually exists.
             Optional<DriveUtils.DriveEntry> drive = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().filter(d -> combine(d.getKey(), d.getVariant()).equals(key)).findAny();
@@ -562,7 +562,6 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     public List<GeneticEntry<?, ?>> gatherAllGeneticEntries() {
         List<GeneticEntry<?, ?>> out = new ArrayList<>();
-        GeneticEntry<?, GeneticTint> tintGeneticEntry = null;
         ItemStack drive = this.handler.getStackInSlot(0);
         int slots = this.getSlots();
         Map<String, DriveUtils.DriveEntry> collected = DriveUtils.getAll(drive).stream().collect(Collectors.toMap(d -> combine(d.getKey(), d.getVariant()), entry -> entry));
@@ -614,22 +613,31 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
                     GeneticTint.Part primary = ColouredGeneticDataHandler.combineMultipleParts(allPrimaryColours);
                     GeneticTint.Part secondary = ColouredGeneticDataHandler.combineMultipleParts(allSecondaryColours);
-                    out.add(tintGeneticEntry = new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get())
+                    out.add(new GeneticEntry<>(GeneticTypes.OVERALL_TINT.get())
                         .setModifier(new GeneticTint(primary, secondary))
                     );
                 };
             }
         }
 
+        out = GeneticUtils.combineAll(out);
+
+        GeneticTint tintGenetic = null;
+        for (GeneticEntry<?, ?> entry : out) {
+            if(entry.getType() == GeneticTypes.OVERALL_TINT.get()) {
+                tintGenetic = (GeneticTint) entry.getModifier();
+            }
+        }
+
         for (IsolatedGeneticEntry<?> value : this.isolationOverrides.values()) {
             GeneticEntry<?, ?> entry = value.create();
-            if(entry.getType() == GeneticTypes.OVERALL_TINT.get() && tintGeneticEntry != null) {
+            if(entry.getType() == GeneticTypes.OVERALL_TINT.get() && tintGenetic != null) {
                 @SuppressWarnings("unchecked")
                 GeneticEntry<?, GeneticTint> geneticEntry = (GeneticEntry<?, GeneticTint>) entry;
                 GeneticTint modifier = geneticEntry.getModifier();
                 geneticEntry.setModifier(new GeneticTint(
-                    modifier.getPrimary().getImportance() == 0 ? tintGeneticEntry.getModifier().getPrimary() : modifier.getPrimary(),
-                    modifier.getSecondary().getImportance() == 0 ? tintGeneticEntry.getModifier().getSecondary() : modifier.getSecondary()
+                    modifier.getPrimary().getImportance() == 0 ? tintGenetic.getPrimary() : modifier.getPrimary(),
+                    modifier.getSecondary().getImportance() == 0 ? tintGenetic.getSecondary() : modifier.getSecondary()
                 ));
             }
             out.removeIf(e -> e.getType() == value.getType());

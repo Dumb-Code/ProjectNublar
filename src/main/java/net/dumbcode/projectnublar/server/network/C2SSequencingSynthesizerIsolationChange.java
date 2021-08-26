@@ -37,8 +37,10 @@ public class C2SSequencingSynthesizerIsolationChange {
     public static void handle(C2SSequencingSynthesizerIsolationChange message, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         MachineModuleContainer.runWhenOnMenu(context, SequencingSynthesizerBlockEntity.class, b -> {
-            b.insertIsolationEntry(message.entry);
-            ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(context.getSender().level::dimension), S2CSyncSequencingSynthesizerSyncIsolationEntries.fromBlockEntity(b));
+            if(!b.isProcessingMain()) {
+                b.insertIsolationEntry(message.entry);
+                ProjectNublar.NETWORK.send(PacketDistributor.DIMENSION.with(context.getSender().level::dimension), S2CSyncSequencingSynthesizerSyncIsolationEntries.fromBlockEntity(b));
+            }
         });
         context.setPacketHandled(true);
     }

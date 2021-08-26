@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -24,7 +25,23 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
         if(!this.blockEntity.isItemValidFor(slot, stack)) {
             return stack;
         }
-        return super.insertItem(slot, stack, simulate);
+        ItemStack old = this.getStackInSlot(slot);
+        ItemStack returnValue = super.insertItem(slot, stack, simulate);
+        if(!simulate) {
+            this.searchForNewRecipesIfNeeded(slot, old);
+        }
+        return returnValue;
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        ItemStack old = this.getStackInSlot(slot);
+        ItemStack returnValue = super.extractItem(slot, amount, simulate);
+        if(!simulate) {
+            this.searchForNewRecipesIfNeeded(slot, old);
+        }
+        return returnValue;
     }
 
     public ItemStack insertOutputItem(int slot, @Nonnull ItemStack stack, boolean simulationOnly) {
@@ -38,6 +55,24 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
 
     @Override
     protected void onContentsChanged(int slot) {
+        this.blockEntity.onSlotChanged(slot);
+        this.blockEntity.setChanged();
+        super.onContentsChanged(slot);
+    }
+
+    @Override
+    public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+        ItemStack old = this.getStackInSlot(slot);
+        super.setStackInSlot(slot, stack);
+        this.searchForNewRecipesIfNeeded(slot, old);
+    }
+
+    private void searchForNewRecipesIfNeeded(int slot, ItemStack oldStack) {
+        ItemStack newStack = this.getStackInSlot(slot);
+        boolean shouldKeep = !newStack.isEmpty() && newStack.sameItem(oldStack) && ItemStack.tagMatches(newStack, oldStack);
+        if(shouldKeep) {
+            return;
+        }
         MachineModuleBlockEntity.MachineProcess<B> process = this.blockEntity.getProcessFromSlot(slot);
         if(process != null) {
             if(process.isProcessing()) {
@@ -50,9 +85,6 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
                 this.blockEntity.getProcess(i).causeGlobalSlotResetIfNecessary(slot);
             }
         }
-        this.blockEntity.onSlotChanged(slot);
-        this.blockEntity.setChanged();
-        super.onContentsChanged(slot);
     }
 
     @Override

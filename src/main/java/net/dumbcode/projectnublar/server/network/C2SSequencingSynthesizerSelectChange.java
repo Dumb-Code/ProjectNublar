@@ -53,9 +53,11 @@ public class C2SSequencingSynthesizerSelectChange {
     public static void handle(C2SSequencingSynthesizerSelectChange message, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         MachineModuleContainer.runWhenOnMenu(context, SequencingSynthesizerBlockEntity.class, b -> {
-            b.setAndValidateSelect(message.id, message.key, message.amount);
-            b.setStorage(message.id, message.storage);
-            ProjectNublar.NETWORK.send(NetworkUtils.forPos(b.getLevel(), b.getBlockPos()), S2CSyncSequencingSynthesizerSyncSelected.fromBlockEntity(b));
+            if(!b.isProcessingMain()) {
+                b.setAndValidateSelect(message.id, message.key, message.amount);
+                b.setStorage(message.id, message.storage);
+                ProjectNublar.NETWORK.send(NetworkUtils.forPos(b.getLevel(), b.getBlockPos()), S2CSyncSequencingSynthesizerSyncSelected.fromBlockEntity(b));
+            }
         });
         context.setPacketHandled(true);
     }

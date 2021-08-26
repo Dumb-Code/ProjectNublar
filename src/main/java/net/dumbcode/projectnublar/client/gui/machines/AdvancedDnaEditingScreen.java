@@ -76,6 +76,9 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         this.chromoTableTop = 1 + this.topPos + (this.imageHeight - TOTAL_HEIGHT) / 2;
 
         this.resetButton = this.addButton(new SimpleButton(this.leftPos + 232, this.topPos + 107, 109, 16, ProjectNublar.translate("gui.machine.sequencer.reset"), b -> {
+            if(this.blockEntity.isProcessingMain()) {
+                return;
+            }
             if(this.selectedId != -1) {
                 Chromosome chromosome = this.chromosomes[this.selectedId];
                 if(chromosome.directEditType == GeneticTypes.OVERALL_TINT.get()) {
@@ -129,13 +132,16 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         List<Chromosome> list = new ArrayList<>();
         List<DriveUtils.IsolatedGeneEntry> isolatedGenes = DriveUtils.getAllIsolatedGenes(drive);
         for (int i = 0; i < this.chromosomes.length; i++) {
+            boolean full = !isolatedGenes.isEmpty() && isolatedGenes.get(0).getProgress() == 1;
             //If is the tint, add both the primary and secondary.
-            if(!isolatedGenes.isEmpty() && isolatedGenes.get(0).getGeneticType() == GeneticTypes.OVERALL_TINT.get()) {
+            if(full && isolatedGenes.get(0).getGeneticType() == GeneticTypes.OVERALL_TINT.get()) {
                 list.add(new Chromosome(GeneticTypes.OVERALL_TINT.get(), false, random.nextFloat()));
                 list.add(new Chromosome(GeneticTypes.OVERALL_TINT.get(), true, random.nextFloat()));
-                isolatedGenes.remove(0);
             } else {
-                list.add(new Chromosome(isolatedGenes.isEmpty() ? null : isolatedGenes.remove(0).getGeneticType(), false, random.nextFloat()));
+                list.add(new Chromosome(isolatedGenes.isEmpty() || !full ? null : isolatedGenes.get(0).getGeneticType(), false, random.nextFloat()));
+            }
+            if(!isolatedGenes.isEmpty()) {
+                isolatedGenes.remove(0);
             }
         }
         Collections.shuffle(list, random);
@@ -215,7 +221,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if(this.hoveredId != -1) {
+        if(!this.blockEntity.isProcessingMain() && this.hoveredId != -1) {
             //If already selected, toggle
             boolean set = this.selectedId != this.hoveredId;
             this.deselect();
