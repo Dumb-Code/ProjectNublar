@@ -222,11 +222,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                     this.gatherExtraSyncData()
             ));
         } else {
-//            for (MachineProcess<B> process : this.processes) {
-//                if(process.isProcessing() && !process.isFinished() && process.isHasPower() && !process.isBlocked()) {
-//                    process.setTime(process.getTime() + 1);
-//                }
-//            }
+            for (MachineProcess<B> process : this.processes) {
+                if(process.isProcessing() && !process.isFinished() && process.isHasPower() && !process.isBlocked()) {
+                    process.setTime(process.getTime() + 1);
+                }
+            }
         }
     }
 
@@ -540,6 +540,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         private final Predicate<MachineRecipe<B>> recipePredicate;
 
         private int time;
+        private int previousTime;
         private int totalTime;
         @Nullable
         MachineRecipe<B> currentRecipe;

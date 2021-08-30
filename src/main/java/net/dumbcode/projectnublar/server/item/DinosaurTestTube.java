@@ -4,6 +4,7 @@ import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -23,7 +24,7 @@ public class DinosaurTestTube extends BasicDinosaurItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         super.appendHoverText(stack, world, list, flag);
-        if(Minecraft.getInstance().player.isShiftKeyDown()) {
+        if(Screen.hasShiftDown()) {
             stack.getOrCreateTagElement(ProjectNublar.MODID).getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
                 .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
                 .map(GeneticEntry::gatherTextComponents)

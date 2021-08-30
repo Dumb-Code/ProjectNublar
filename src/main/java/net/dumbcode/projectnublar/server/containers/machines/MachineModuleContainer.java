@@ -49,6 +49,12 @@ public class MachineModuleContainer extends Container {
         if(playerOffset >= 0) {
             this.addPlayerSlots(inventory, playerOffset, xSize);
         }
+
+        PlayerEntity player = inventory.player;
+        if(!player.level.isClientSide) {
+            this.blockEntity.getOpenedUsers().add(player.getUUID());
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(player.level, blockEntity.getBlockPos()), new S2CSyncOpenedUsers(blockEntity.getBlockPos(), blockEntity.getOpenedUsers()));
+        }
     }
 
     public MachineModuleContainer setPredicate(@NonNull IntPredicate predicate) {

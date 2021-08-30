@@ -9,9 +9,11 @@ import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
+import net.dumbcode.studio.model.ModelMirror;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -54,10 +56,10 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.dcm");
     private static final ResourceLocation ARM_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_arm.png");
 
-    private static final BakedModelResolver LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid.dcm"));
-    private static final BakedModelResolver TRANSLUCENT_LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans.dcm"));
+    private static final BakedModelResolver LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid"));
+    private static final BakedModelResolver TRANSLUCENT_LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans"));
     private static final BakedModelResolver[] LIGHT_MODELS = IntStream.range(0, 4) //4 is the amount of incubator bulb upgrades + 1
-        .mapToObj(i -> new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_light_" + i + ".dcm")))
+        .mapToObj(i -> new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_light_" + i)))
         .toArray(BakedModelResolver[]::new);
 
     private final Arm BASE_ROTATION = new Arm("ArmBase1", 3 / 16F);
@@ -75,7 +77,9 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     @Override
     public void render(IncubatorBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
         stack.pushPose();
-
+        stack.translate(0.5, 0, 0.5);
+        stack.mulPose(te.getBlockState().getValue(MachineModuleBlock.FACING).getRotation());
+        stack.translate(-0.5, 0, -0.5);
         armModel.resetAnimations();
 
         float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D) * 12.5F/16F;
@@ -396,7 +400,9 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         }
 
         float getRotation(int index) {
-            return this.getBox().getInfo().getRotation()[index];
+            return this.getBox()
+                .getInfo()
+                .getRotation()[index];
         }
         
     }

@@ -5,8 +5,8 @@ import lombok.Value;
 @Value
 public class MachineModuleType {
 
-    public static final MachineModuleType TEST = new MachineModuleType("test1");
 
+    //Upgrades:
     public static final MachineModuleType COMPUTER_CHIP = new MachineModuleType("computer");
     public static final MachineModuleType TANKS = new MachineModuleType("tanks");
     public static final MachineModuleType DRILL_BIT = new MachineModuleType("drill_bit");

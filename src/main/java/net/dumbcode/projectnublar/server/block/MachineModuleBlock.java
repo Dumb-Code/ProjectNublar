@@ -10,12 +10,16 @@ import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.dumbcode.projectnublar.server.network.S2CMachinePositionDirty;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -33,12 +37,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class MachineModuleBlock extends Block implements IItemBlock{
+public class MachineModuleBlock extends HorizontalBlock implements IItemBlock {
 
     private final List<MachineModulePart> values; //Not needed
     private final Map<MachineModuleType, IntegerProperty> propertyMap = Maps.newHashMap();
     private final Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier;
     private final StateContainer<Block, BlockState> stateDefinition;
+
 
     public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, Properties properties) {
         super(properties);
@@ -52,6 +57,7 @@ public class MachineModuleBlock extends Block implements IItemBlock{
         //Needed as the container making is usually created in the block constructor, so the propertyMap values arn't set correctly (the map is null)
         StateContainer.Builder<Block, BlockState> builder = new StateContainer.Builder<>(this);
         this.createBlockStateDefinition(builder);
+        builder.add(FACING);
         builder.add(this.propertyMap.values().toArray(new Property<?>[0]));
         this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
 
@@ -61,6 +67,12 @@ public class MachineModuleBlock extends Block implements IItemBlock{
         }
 
         this.registerDefaultState(baseState);
+    }
+
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getClockWise());
     }
 
     @Override

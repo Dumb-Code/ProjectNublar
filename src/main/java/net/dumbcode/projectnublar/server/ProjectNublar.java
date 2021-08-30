@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
@@ -12,6 +13,7 @@ import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinterRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
+import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.BlockPylonPole;
@@ -38,6 +40,7 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -49,6 +52,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -153,9 +157,28 @@ public class ProjectNublar {
         resourceManager.registerReloadListener(create(BlockEntityEggPrinterRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
         resourceManager.registerReloadListener(create(EnumDinosaurEggTypes::onResourceManagerReload, null));
         resourceManager.registerReloadListener(create(BlockEntityIncubatorRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
+
+        ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.EGG_PRINTER.get(), BlockEntityEggPrinterRenderer::new);
+        ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.SKELETAL_BUILDER.get(), BlockEntitySkeletalBuilderRenderer::new);
+        ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.INCUBATOR.get(), BlockEntityIncubatorRenderer::new);
+
+        YRotatedModel.addYRotation(
+            BlockHandler.FOSSIL_PROCESSOR.get(),
+            BlockHandler.DRILL_EXTRACTOR.get(),
+            BlockHandler.SEQUENCING_SYNTHESIZER.get(),
+            BlockHandler.EGG_PRINTER.get(),
+            BlockHandler.INCUBATOR.get(),
+            BlockHandler.COAL_GENERATOR.get(),
+
+            BlockHandler.UNBUILT_FOSSIL_PROCESSOR.get(),
+            BlockHandler.UNBUILT_SEQUENCING_SYNTHESIZER.get(),
+            BlockHandler.UNBUILT_EGG_PRINTER.get(),
+            BlockHandler.UNBUILT_INCUBATOR.get()
+        );
     }
 
     private static ISelectiveResourceReloadListener create(Consumer<IResourceManager> consumer, IResourceType type) {
+        consumer.accept(Minecraft.getInstance().getResourceManager());
         return new ISelectiveResourceReloadListener() {
             @Override
             public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {

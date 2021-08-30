@@ -1,7 +1,7 @@
 {
   "multipart": [
     {
-      "apply": { "model": "block/projectnublar:incubator" }
+      "apply": { "model": "projectnublar:block/incubator" }
     }
   ]
 }

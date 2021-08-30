@@ -3,12 +3,14 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
 import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
 import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
@@ -25,6 +27,7 @@ import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
@@ -37,8 +40,8 @@ import java.util.function.Predicate;
 public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> {
 
     private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.dcm");
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer.png");
-    private static final ResourceLocation EGG_PRINTER_GLASS = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/egg_printer_glass.png");
+    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/block/egg_printer.png");
+    private static final ResourceLocation EGG_PRINTER_GLASS = new ResourceLocation(ProjectNublar.MODID, "textures/block/egg_printer_glass.png");
 
     private static final DinosaurEggType EGG_TYPE = EnumDinosaurEggTypes.ROUND.getType();
     private static final String NEEDLE_Z_MOVEMENT = "PrinterNeedleHolder";
@@ -61,7 +64,15 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
         light = WorldRenderer.getLightColor(te.getLevel(), te.getBlockPos().above());
 
+        stack.pushPose();
+        YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));
+
+        stack.mulPose(Vector3f.XP.rotationDegrees(180));
+        stack.translate(0.5, -1.5, 0.5);
+
         this.renderPrinterParts(te, buffers, stack, light, partialTicks);
+
+        stack.popPose();
     }
 
 
@@ -78,6 +89,9 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
             recipeProgress = 1;
             platformMove = true;
         }
+
+        recipeProgress = ((Minecraft.getInstance().player.tickCount + partialTicks) % 40) / 40F;
+
 
         this.animateNeedle(te, partialTicks);
         this.animateLid(te, partialTicks, outputSlot);
@@ -99,15 +113,15 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     private void applyAnimations() {
         DCMModelRenderer platform = this.model.getCube("platform");
         platform.resetRotationPoint();
-        platform.yRot += TARGET_ANIMATION[0];
+        platform.y += TARGET_ANIMATION[0];
 
         DCMModelRenderer xCube = this.model.getCube("printingRail1");
         xCube.resetRotationPoint();
-        xCube.xRot += TARGET_ANIMATION[1];
+        xCube.x += TARGET_ANIMATION[1];
 
         DCMModelRenderer zCube = this.model.getCube(NEEDLE_Z_MOVEMENT);
         zCube.resetRotationPoint();
-        zCube.zRot += TARGET_ANIMATION[2];
+        zCube.z += TARGET_ANIMATION[2];
 
         DCMModelRenderer lidPart = this.model.getCube("lidrotatehelper");
         lidPart.resetRotations();
@@ -116,7 +130,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     }
 
     private void animateLid(EggPrinterBlockEntity te, float partialTicks, boolean outputSlot) {
-        this.animatePart(te, !te.getOpenedUsers().isEmpty() || outputSlot, 2, 3, partialTicks, (float) (-60F * Math.PI/180F), 0);
+        this.animatePart(te, !te.getOpenedUsers().isEmpty() || outputSlot, 2, 3, partialTicks, (float) (60F * Math.PI/180F), 0);
     }
 
     private void animateNeedle(EggPrinterBlockEntity te, float partialTicks) {
@@ -165,14 +179,14 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     }
 
     private void renderEgg(MatrixStack stack, IRenderTypeBuffer buffers, int light, boolean doPlatform, float eggLength) {
-
+        stack.pushPose();
         if(doPlatform) {
             stack.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);
             MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), TabulaModelClipPlane::new).render(stack, light, EGG_TYPE.getTexture(), -1.5 + eggLength, 0xFFF7F1DD);
         } else {
             EGG_TYPE.getEggModel().renderBoxes(stack, light, buffers, EGG_TYPE.getTexture());
         }
-
+        stack.popPose();
     }
 
     public static void onResourceManagerReload(IResourceManager resourceManager) {

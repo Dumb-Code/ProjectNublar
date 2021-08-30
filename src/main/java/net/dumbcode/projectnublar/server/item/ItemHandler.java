@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
+import com.sun.org.apache.regexp.internal.RE;
 import net.dumbcode.dumblibrary.server.utils.JavaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -83,6 +84,32 @@ public final class ItemHandler {
 
     public static final RegistryObject<Item> TURBINES_PART_1 = REGISTER.register("turbines_part_1", BASIC_ITEM);
     public static final RegistryObject<Item> TURBINES_PART_2 = REGISTER.register("turbines_part_2", BASIC_ITEM);
+
+
+    public static final RegistryObject<Item> FOSSIL_PROCESSOR_BODY = REGISTER.register("fossil_processor_body", BASIC_ITEM);
+    public static final RegistryObject<Item> FOSSIL_PROCESSOR_TANKS = REGISTER.register("fossil_processor_tanks", BASIC_ITEM);
+    public static final RegistryObject<Item> FOSSIL_PROCESSOR_LID = REGISTER.register("fossil_processor_lid", BASIC_ITEM);
+
+//    public static final RegistryObject<Item> EGG_PRINTER_BASE = REGISTER.register("egg_printer_base", BASIC_ITEM);
+    public static final RegistryObject<Item> EGG_PRINTER_LID = REGISTER.register("egg_printer_lid", BASIC_ITEM);
+    public static final RegistryObject<Item> EGG_PRINTER_PLATFORM = REGISTER.register("egg_printer_platform", BASIC_ITEM);
+    public static final RegistryObject<Item> EGG_PRINTER_NEEDLE = REGISTER.register("egg_printer_needle", BASIC_ITEM);
+
+//    public static final RegistryObject<Item> INCUBATOR_BASE = REGISTER.register("incubator_base", BASIC_ITEM);
+    public static final RegistryObject<Item> INCUBATOR_NEST = REGISTER.register("incubator_nest", BASIC_ITEM);
+    public static final RegistryObject<Item> INCUBATOR_LID = REGISTER.register("incubator_lid", BASIC_ITEM);
+    public static final RegistryObject<Item> INCUBATOR_LIFT = REGISTER.register("incubator_lift", BASIC_ITEM);
+    public static final RegistryObject<Item> INCUBATOR_ARM_BASE = REGISTER.register("incubator_arm_base", BASIC_ITEM);
+    public static final RegistryObject<Item> INCUBATOR_ARM = REGISTER.register("incubator_arm", BASIC_ITEM);
+
+
+//    public static final RegistryObject<Item> SEQUENCER_BASE = REGISTER.register("sequencer_base", BASIC_ITEM);
+    public static final RegistryObject<Item> SEQUENCER_STORAGE = REGISTER.register("sequencer_storage", BASIC_ITEM);
+    public static final RegistryObject<Item> SEQUENCER_COMPUTER = REGISTER.register("sequencer_computer", BASIC_ITEM);
+    public static final RegistryObject<Item> SEQUENCER_SCREEN = REGISTER.register("sequencer_screen", BASIC_ITEM);
+
+
+
 
     public static final Map<Dinosaur, RegistryObject<Item>> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
         new BasicDinosaurItem(d, "raw_meat", new Item.Properties().food(new Food.Builder()
