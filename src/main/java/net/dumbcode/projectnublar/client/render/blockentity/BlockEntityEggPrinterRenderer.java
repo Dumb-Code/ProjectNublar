@@ -59,7 +59,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
     @Override
     public void render(EggPrinterBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
-        RenderSystem.disableBlend();
+        RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         light = WorldRenderer.getLightColor(te.getLevel(), te.getBlockPos().above());
@@ -67,8 +67,8 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         stack.pushPose();
         YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));
 
-        stack.mulPose(Vector3f.XP.rotationDegrees(180));
-        stack.translate(0.5, -1.5, 0.5);
+        stack.translate(0.5, 1.5, 0.5);
+        stack.mulPose(Vector3f.ZP.rotationDegrees(180));
 
         this.renderPrinterParts(te, buffers, stack, light, partialTicks);
 
@@ -89,9 +89,6 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
             recipeProgress = 1;
             platformMove = true;
         }
-
-        recipeProgress = ((Minecraft.getInstance().player.tickCount + partialTicks) % 40) / 40F;
-
 
         this.animateNeedle(te, partialTicks);
         this.animateLid(te, partialTicks, outputSlot);

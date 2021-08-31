@@ -39,7 +39,7 @@ public class TabulaModelClipPlane {
                 for (int yb : values) {
                     for (int zb : values) {
                         //TODO: don't call this method, as that means doing it 8 times per cube. instead create a matrix stack and navigate through the cube tree recursively, applying the different transformations.
-                        Vector3f partOrigin = DCMUtils.getModelPosAlpha(cube, xb, yb, zb, true);
+                        Vector3f partOrigin = DCMUtils.getModelPosAlpha(cube, xb, yb, zb);
                         points[(xb<<2)|(yb<<1)|zb] = new Vector3d(partOrigin);
                     }
                 }
@@ -57,7 +57,8 @@ public class TabulaModelClipPlane {
         Vector3f normal = new Vector3f(0, 1, 0);
         Vector3f movedNormal = normal.copy();
         movedNormal.mul((float) dist);
-        Matrix4f copy = stack.last().pose().copy();
+        Matrix4f pose = stack.last().pose();
+        Matrix4f copy = pose.copy();
         if(!copy.invert()) {
             return;
         }
@@ -94,6 +95,7 @@ public class TabulaModelClipPlane {
 
                 RenderSystem.disableCull();
                 RenderSystem.disableTexture();
+                RenderSystem.enableDepthTest();
                 if(outlist.size() == 4) {
 
                     outlist.sort((o1, o2) -> {
@@ -105,7 +107,7 @@ public class TabulaModelClipPlane {
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
                     for (int coord : new int[]{0, 1, 3, 2, 1, 0, 2, 3}) {
                         Vector3d vec = outlist.get(coord);
-                        buff.vertex(vec.x - movedNormal.x(), vec.y - movedNormal.y(), vec.z - movedNormal.z()).color(r, g, b, 255).endVertex();
+                        buff.vertex(pose, (float) vec.x - movedNormal.x(), (float) vec.y - movedNormal.y(), (float) vec.z - movedNormal.z()).color(r, g, b, 255).endVertex();
                     }
                     Tessellator.getInstance().end();
                 }
