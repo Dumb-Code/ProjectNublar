@@ -8,7 +8,7 @@ import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
-import net.dumbcode.projectnublar.client.render.TabulaModelClipPlane;
+import net.dumbcode.projectnublar.client.render.DCMModelClipPlane;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.MachineModuleBlock;
 import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
@@ -16,26 +16,17 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IFutureReloadListener;
-import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.Predicate;
 
 public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> {
 
@@ -47,7 +38,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     private static final String NEEDLE_Z_MOVEMENT = "PrinterNeedleHolder";
     private static final int MOVEMENT_TICKS = 10;
 
-    private static final Map<DCMModel, TabulaModelClipPlane> MODEL_TO_CLIP_PLANE = new HashMap<>();
+    private static final Map<DCMModel, DCMModelClipPlane> MODEL_TO_CLIP_PLANE = new HashMap<>();
 
     private static final float[] TARGET_ANIMATION = new float[4];
 
@@ -179,7 +170,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         stack.pushPose();
         if(doPlatform) {
             stack.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);
-            MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), TabulaModelClipPlane::new).render(stack, light, EGG_TYPE.getTexture(), -1.5 + eggLength, 0xFFF7F1DD);
+            MODEL_TO_CLIP_PLANE.computeIfAbsent(EGG_TYPE.getEggModel(), DCMModelClipPlane::new).render(stack, light, EGG_TYPE.getTexture(), -1.5 + eggLength, 0xFFF7F1DD);
         } else {
             EGG_TYPE.getEggModel().renderBoxes(stack, light, buffers, EGG_TYPE.getTexture());
         }

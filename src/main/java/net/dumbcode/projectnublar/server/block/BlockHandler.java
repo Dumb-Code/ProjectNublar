@@ -50,17 +50,17 @@ public class BlockHandler {
         create("lid", ItemHandler.FOSSIL_PROCESSOR_LID, "body"),
         create("tanks", ItemHandler.FOSSIL_PROCESSOR_TANKS, "body")
     ));
-    public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_SEQUENCING_SYNTHESIZER = REGISTER.register("unbuilt_sequencing_synthesizer", () -> new UnbuiltMachineModuleBlock(FOSSIL_PROCESSOR, of(Material.HEAVY_METAL),
-        create("storage", ItemHandler.SEQUENCER_STORAGE),
+    public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_SEQUENCING_SYNTHESIZER = REGISTER.register("unbuilt_sequencing_synthesizer", () -> new UnbuiltMachineModuleBlock(SEQUENCING_SYNTHESIZER, of(Material.HEAVY_METAL),
+        create("door", ItemHandler.SEQUENCER_DOOR),
         create("computer", ItemHandler.SEQUENCER_COMPUTER),
-        create("screen", ItemHandler.SEQUENCER_SCREEN, "computer")
+        create("monitor", ItemHandler.MONITOR, "computer")
     ));
-    public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_EGG_PRINTER = REGISTER.register("unbuilt_egg_printer", () -> new UnbuiltMachineModuleBlock(FOSSIL_PROCESSOR, of(Material.HEAVY_METAL),
+    public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_EGG_PRINTER = REGISTER.register("unbuilt_egg_printer", () -> new UnbuiltMachineModuleBlock(EGG_PRINTER, of(Material.HEAVY_METAL),
         create("lid", ItemHandler.EGG_PRINTER_LID),
         create("platform", ItemHandler.EGG_PRINTER_PLATFORM),
         create("needle", ItemHandler.EGG_PRINTER_NEEDLE)
     ));
-    public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_INCUBATOR = REGISTER.register("unbuilt_incubator", () -> new UnbuiltMachineModuleBlock(FOSSIL_PROCESSOR, of(Material.HEAVY_METAL),
+    public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_INCUBATOR = REGISTER.register("unbuilt_incubator", () -> new UnbuiltMachineModuleBlock(INCUBATOR, of(Material.HEAVY_METAL),
         create("lid", ItemHandler.INCUBATOR_LID),
         create("nest", ItemHandler.INCUBATOR_NEST),
         create("lift", ItemHandler.INCUBATOR_LIFT),

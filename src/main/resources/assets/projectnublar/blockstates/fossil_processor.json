@@ -1,8 +1,8 @@
 {
   "multipart": [
-    {
-      "apply": { "model": "projectnublar:block/fossil_processor_base" }
-    },
+    { "apply": { "model": "projectnublar:block/fossil_processor_base" } },
+    { "apply": { "model": "projectnublar:block/fossil_processor_body" } },
+    { "apply": { "model": "projectnublar:block/fossil_processor_lid" } },
     {
       "when": { "tanks": "0" },
       "apply": { "model": "projectnublar:block/fossil_processor_tanks_0" }

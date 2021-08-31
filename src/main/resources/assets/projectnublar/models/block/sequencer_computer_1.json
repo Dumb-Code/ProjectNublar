@@ -1,9 +1,8 @@
-
 {
   "loader": "dumblibrary:dcm",
   "parent": "block/cube_all",
   "textures": {
     "layer0": "projectnublar:block/sequencer_base"
   },
-  "model": "projectnublar:models/block/sequencer_monitor"
+  "model": "projectnublar:models/block/sequencer_computer_1"
 }

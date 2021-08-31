@@ -1,0 +1,19 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "projectnublar:block/sequencer_base" }
+    },
+    {
+      "when": { "door": "true" },
+      "apply": { "model": "projectnublar:block/sequencer_door" }
+    },
+    {
+      "when": { "computer": "true" },
+      "apply": { "model": "projectnublar:block/sequencer_computer" }
+    },
+    {
+      "when": { "monitor": "true" },
+      "apply": { "model": "projectnublar:block/sequencer_monitor" }
+    }
+  ]
+}

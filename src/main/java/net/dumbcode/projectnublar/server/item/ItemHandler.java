@@ -104,9 +104,10 @@ public final class ItemHandler {
 
 
 //    public static final RegistryObject<Item> SEQUENCER_BASE = REGISTER.register("sequencer_base", BASIC_ITEM);
-    public static final RegistryObject<Item> SEQUENCER_STORAGE = REGISTER.register("sequencer_storage", BASIC_ITEM);
+    public static final RegistryObject<Item> SEQUENCER_DOOR = REGISTER.register("sequencer_door", BASIC_ITEM);
     public static final RegistryObject<Item> SEQUENCER_COMPUTER = REGISTER.register("sequencer_computer", BASIC_ITEM);
-    public static final RegistryObject<Item> SEQUENCER_SCREEN = REGISTER.register("sequencer_screen", BASIC_ITEM);
+
+    public static final RegistryObject<Item> MONITOR = REGISTER.register("monitor", BASIC_ITEM);
 
 
 

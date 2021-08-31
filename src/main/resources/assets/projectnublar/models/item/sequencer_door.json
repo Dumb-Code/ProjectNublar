@@ -2,6 +2,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "projectnublar:item/sequencer_storage"
+    "layer0": "projectnublar:item/sequencer_door"
   }
 }

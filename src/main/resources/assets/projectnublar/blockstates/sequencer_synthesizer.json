@@ -1,7 +1,15 @@
 {
 	"multipart": [
+		{ "apply": { "model": "projectnublar:block/sequencer_base" } },
+		{ "apply": { "model": "projectnublar:block/sequencer_computer" } },
+		{ "apply": { "model": "projectnublar:block/sequencer_monitor" } },
 		{
-			"apply": { "model": "projectnublar:block/sequencer" }
+			"when": { "computer": "1" },
+			"apply": { "model": "projectnublar:block/sequencer_computer_1" }
+		},
+		{
+			"when": { "computer": "2" },
+			"apply": { "model": "projectnublar:block/sequencer_computer_2" }
 		}
 	]
 }

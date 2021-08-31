@@ -22,13 +22,13 @@ import java.nio.DoubleBuffer;
 import java.util.List;
 import java.util.Map;
 
-public class TabulaModelClipPlane {
+public class DCMModelClipPlane {
 
     private static final DoubleBuffer BUFFER = BufferUtils.createDoubleBuffer(4);
     private final DCMModel model;
     private final Map<DCMModelRenderer, Vector3d[]> pointsMap = Maps.newHashMap();
 
-    public TabulaModelClipPlane(DCMModel model) {
+    public DCMModelClipPlane(DCMModel model) {
         this.model = model;
 
         for (DCMModelRenderer cube : this.model.getAllCubes()) {

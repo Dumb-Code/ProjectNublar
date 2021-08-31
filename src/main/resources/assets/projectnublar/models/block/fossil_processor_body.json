@@ -5,5 +5,5 @@
   "textures": {
     "layer0": "projectnublar:block/fossil_processor"
   },
-  "model": "projectnublar:models/block/unbuilt_fossil_processor_lid"
+  "model": "projectnublar:models/block/fossil_processor_body"
 }

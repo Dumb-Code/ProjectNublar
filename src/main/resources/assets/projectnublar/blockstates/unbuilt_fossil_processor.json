@@ -1,11 +1,11 @@
 {
   "multipart": [
     {
-      "apply": { "model": "projectnublar:block/unbuilt_fossil_processor_base" }
+      "apply": { "model": "projectnublar:block/fossil_processor_base" }
     },
     {
       "when": { "body": "true" },
-      "apply": { "model": "projectnublar:block/unbuilt_fossil_processor_body" }
+      "apply": { "model": "projectnublar:block/fossil_processor_body" }
     },
     {
       "when": { "tanks": "true" },
@@ -13,7 +13,7 @@
     },
     {
       "when": { "lid": "true" },
-      "apply": { "model": "projectnublar:block/unbuilt_fossil_processor_lid" }
+      "apply": { "model": "projectnublar:block/fossil_processor_lid" }
     }
   ]
 }
