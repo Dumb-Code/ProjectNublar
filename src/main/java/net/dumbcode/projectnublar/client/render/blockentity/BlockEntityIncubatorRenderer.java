@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.BakedModelResolver;
+import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
@@ -54,7 +55,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     private static final float TICKS_COOLDOWN = 20F;
 
     private static final ResourceLocation ARM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/incubator_arm.dcm");
-    private static final ResourceLocation ARM_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/blocks/incubator_arm.png");
+    private static final ResourceLocation ARM_TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/block/incubator_arm.png");
 
     private static final BakedModelResolver LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid"));
     private static final BakedModelResolver TRANSLUCENT_LID_MODEL = new BakedModelResolver(new ResourceLocation(ProjectNublar.MODID, "block/incubator_lid_trans"));
@@ -77,9 +78,8 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     @Override
     public void render(IncubatorBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
         stack.pushPose();
-        stack.translate(0.5, 0, 0.5);
-        stack.mulPose(te.getBlockState().getValue(MachineModuleBlock.FACING).getRotation());
-        stack.translate(-0.5, 0, -0.5);
+        YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));
+
         armModel.resetAnimations();
 
         float lidHeight = (float) (Math.sin(Math.PI * ((te.lidTicks[1] + (te.lidTicks[0] - te.lidTicks[1]) * partialTicks) / IncubatorBlockEntity.TICKS_TO_OPEN - 0.5D)) * 0.5D + 0.5D) * 12.5F/16F;
@@ -114,7 +114,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     }
 
     private void renderLid(MatrixStack stack, World world, BlockPos pos, IRenderTypeBuffer buffers, int bulbTier) {
-        IVertexBuilder buffer = buffers.getBuffer(RenderType.solid());
+        IVertexBuilder buffer = buffers.getBuffer(RenderType.cutout());
         BlockState blockState = world.getBlockState(pos);
         MC.getBlockRenderer().getModelRenderer().renderModel(world, LID_MODEL.getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
         MC.getBlockRenderer().getModelRenderer().renderModel(world, LIGHT_MODELS[bulbTier].getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
@@ -408,6 +408,22 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     }
 
     public static void onResourceManagerReload(IResourceManager resourceManager) {
-        armModel = DCMUtils.getModel(ARM_MODEL_LOCATION);
+        armModel = DCMUtils.getModel(ARM_MODEL_LOCATION, false);
+        for (DCMModelRenderer root : armModel.getRoots()) {
+            float[] position = root.getPosition();
+            root.setPosition(
+                position[0] + 8F,
+                position[1],
+                position[2] + 8F
+            );
+        }
+    }
+
+    public static void markResolvers() {
+        LID_MODEL.mark();
+        TRANSLUCENT_LID_MODEL.mark();
+        for (BakedModelResolver model : LIGHT_MODELS) {
+            model.mark();
+        }
     }
 }

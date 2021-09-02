@@ -13,6 +13,7 @@ import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinterRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
+import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySequencerRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntitySkeletalBuilderRenderer;
 import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -140,6 +141,9 @@ public class ProjectNublar {
 
         bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
         bus.addListener(this::clientPreInit);
+
+        BlockEntityIncubatorRenderer.markResolvers();
+
     }
 
     public void gatherData(GatherDataEvent event) {
@@ -157,10 +161,12 @@ public class ProjectNublar {
         resourceManager.registerReloadListener(create(BlockEntityEggPrinterRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
         resourceManager.registerReloadListener(create(EnumDinosaurEggTypes::onResourceManagerReload, null));
         resourceManager.registerReloadListener(create(BlockEntityIncubatorRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
+        resourceManager.registerReloadListener(create(BlockEntitySequencerRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
 
         ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.EGG_PRINTER.get(), BlockEntityEggPrinterRenderer::new);
         ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.SKELETAL_BUILDER.get(), BlockEntitySkeletalBuilderRenderer::new);
         ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.INCUBATOR.get(), BlockEntityIncubatorRenderer::new);
+        ClientRegistry.bindTileEntityRenderer(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get(), BlockEntitySequencerRenderer::new);
 
         YRotatedModel.addYRotation(
             BlockHandler.FOSSIL_PROCESSOR.get(),

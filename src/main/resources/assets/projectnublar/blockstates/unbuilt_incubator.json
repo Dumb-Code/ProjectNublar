@@ -1,0 +1,31 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "projectnublar:block/incubator_base" }
+    },
+    {
+      "when": { "lid": "true" },
+      "apply": { "model": "projectnublar:block/incubator_lid" }
+    },
+    {
+      "when": { "lid": "true" },
+      "apply": { "model": "projectnublar:block/incubator_lid_trans" }
+    },
+    {
+      "when": { "nest": "false" },
+      "apply": { "model": "projectnublar:block/incubator_nest_cover" }
+    },
+    {
+      "when": { "lift": "true" },
+      "apply": { "model": "projectnublar:block/incubator_lift" }
+    },
+    {
+      "when": { "arm_base": "true" },
+      "apply": { "model": "projectnublar:block/incubator_arm_base" }
+    },
+    {
+      "when": { "arm": "true" },
+      "apply": { "model": "projectnublar:block/incubator_arm" }
+    }
+  ]
+}

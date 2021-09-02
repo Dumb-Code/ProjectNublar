@@ -4,5 +4,5 @@
   "textures": {
     "layer0": "projectnublar:block/egg_printer"
   },
-  "model": "projectnublar:models/block/egg_printer"
+  "model": "projectnublar:models/block/egg_printer_base"
 }

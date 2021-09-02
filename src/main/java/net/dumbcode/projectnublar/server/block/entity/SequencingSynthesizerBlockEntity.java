@@ -8,7 +8,6 @@ import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.dna.data.ColouredGeneticDataHandler;
 import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
-import net.dumbcode.dumblibrary.server.dna.storages.GeneticTypeOverallTintStorage;
 import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.dumblibrary.server.utils.GeneticUtils;
 import net.dumbcode.projectnublar.client.gui.machines.AdvancedDnaEditingScreen;
@@ -89,6 +88,11 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 
     @Getter private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
+
+    public float snapshot;
+    public float previousSnapshot;
+    public int movementTicksLeft;
+    public boolean openState;
 
     public SequencingSynthesizerBlockEntity() {
         super(ProjectNublarBlockEntities.SEQUENCING_SYNTHESIZER.get());
@@ -285,9 +289,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         super.onSlotChanged(slot);
     }
 
+
     @Override
     public void tick() {
         super.tick();
+
+        if(this.movementTicksLeft > 0) {
+            this.movementTicksLeft--;
+        }
 
         Set<String> collect = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().map(d -> combine(d.getKey(), d.getVariant())).collect(Collectors.toSet());
         for (SelectedDnaEntry dna : this.selectedDNAs) {

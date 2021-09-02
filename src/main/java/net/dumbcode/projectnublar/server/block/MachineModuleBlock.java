@@ -22,6 +22,7 @@ import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -39,14 +40,16 @@ import java.util.function.Supplier;
 
 public class MachineModuleBlock extends HorizontalBlock implements IItemBlock {
 
+    private final int rotateAmount;
     private final List<MachineModulePart> values; //Not needed
     private final Map<MachineModuleType, IntegerProperty> propertyMap = Maps.newHashMap();
     private final Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier;
     private final StateContainer<Block, BlockState> stateDefinition;
 
 
-    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, Properties properties) {
+    public MachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, int rotateAmount, MachineModulePart[] values, Properties properties) {
         super(properties);
+        this.rotateAmount= rotateAmount;
         this.values = Lists.newArrayList(values);
         this.machineSupplier = machineSupplier;
 
@@ -69,10 +72,18 @@ public class MachineModuleBlock extends HorizontalBlock implements IItemBlock {
         this.registerDefaultState(baseState);
     }
 
+    public int getRotateAmount() {
+        return rotateAmount;
+    }
+
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getClockWise());
+        Direction direction = context.getHorizontalDirection();
+        for (int i = 0; i < this.rotateAmount; i++) {
+            direction = direction.getClockWise();
+        }
+        return this.defaultBlockState().setValue(FACING, direction);
     }
 
     @Override

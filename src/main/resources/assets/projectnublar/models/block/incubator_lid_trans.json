@@ -4,6 +4,9 @@
   "textures": {
     "layer0": "projectnublar:block/incubator_lid_trans"
   },
+  "render_layers": {
+    "translucent": ["layer0"]
+  },
   "model": "projectnublar:models/block/incubator_lid_trans",
   "lightup_data": [
     {

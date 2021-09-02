@@ -1,0 +1,58 @@
+{
+  "loader": "dumblibrary:dcm",
+  "parent": "block/cube_all",
+  "textures": {
+    "layer0": "projectnublar:block/incubator"
+  },
+  "render_layers": {
+    "solid": ["layer0"]
+  },
+  "model": "projectnublar:models/block/incubator_base",
+  "lightup_data": [
+    {
+      "smooth_cubes": [{
+        "cube_name": "nestingBase",
+        "origin": "up",
+        "size_block": 1,
+        "size_sky": 0
+      }],
+      "block_light": 8,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "CareBase5",
+        "origin": "up",
+        "size_block": 4,
+        "size_sky": 0
+      }],
+      "block_light": 7,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "CareBase4",
+        "origin": "up",
+        "size_block": 2,
+        "size_sky": 0
+      }],
+      "block_light": 4,
+      "sky_light": 0
+    },
+    {
+      "smooth_cubes": [{
+        "cube_name": "CareBase3",
+        "origin": "up",
+        "size_block": 2,
+        "size_sky": 0
+      }],
+      "block_light": 2,
+      "sky_light": 0
+    },
+    {
+      "cubes_lit": [ "CareBase3" ],
+      "block_light": 1,
+      "sky_light": 0
+    }
+  ]
+}

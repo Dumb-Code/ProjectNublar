@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 
 public class DyableMachineModuleBlock extends MachineModuleBlock {
 
-    public DyableMachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, MachineModulePart[] values, Properties properties) {
-        super(machineSupplier, values, properties);
+    public DyableMachineModuleBlock(Supplier<? extends MachineModuleBlockEntity<?>> machineSupplier, int rotateAmount, MachineModulePart[] values, Properties properties) {
+        super(machineSupplier, rotateAmount, values, properties);
     }
 
     @Override

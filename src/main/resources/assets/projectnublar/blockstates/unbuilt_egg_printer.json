@@ -1,0 +1,19 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "projectnublar:block/egg_printer_base" }
+    },
+    {
+      "when": { "lid": "true" },
+      "apply": { "model": "projectnublar:block/egg_printer_lid" }
+    },
+    {
+      "when": { "platform": "true" },
+      "apply": { "model": "projectnublar:block/egg_printer_platform" }
+    },
+    {
+      "when": { "needle": "true" },
+      "apply": { "model": "projectnublar:block/egg_printer_needle" }
+    }
+  ]
+}

@@ -30,19 +30,24 @@ import java.util.Map;
 
 public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinterBlockEntity> {
 
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_animatable.dcm");
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(ProjectNublar.MODID, "textures/block/egg_printer.png");
     private static final ResourceLocation EGG_PRINTER_GLASS = new ResourceLocation(ProjectNublar.MODID, "textures/block/egg_printer_glass.png");
 
+    private static final ResourceLocation LID_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_lid.dcm");
+    private static final ResourceLocation NEEDLE_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_needle.dcm");
+    private static final ResourceLocation PLATFORM_MODEL_LOCATION = new ResourceLocation(ProjectNublar.MODID, "models/block/egg_printer_platform.dcm");
+
+
     private static final DinosaurEggType EGG_TYPE = EnumDinosaurEggTypes.ROUND.getType();
-    private static final String NEEDLE_Z_MOVEMENT = "PrinterNeedleHolder";
     private static final int MOVEMENT_TICKS = 10;
 
     private static final Map<DCMModel, DCMModelClipPlane> MODEL_TO_CLIP_PLANE = new HashMap<>();
 
     private static final float[] TARGET_ANIMATION = new float[4];
 
-    private static DCMModel model;
+    private static DCMModel lidModel;
+    private static DCMModel needleModel;
+    private static DCMModel platformModel;
 
     public BlockEntityEggPrinterRenderer(TileEntityRendererDispatcher renderer) {
         super(renderer);
@@ -91,27 +96,30 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
         System.arraycopy(TARGET_ANIMATION, 0, te.getSnapshot(), 4, 4);
 
-        this.model.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
+        needleModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
+        platformModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
+        lidModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
+
         RenderSystem.enableBlend();
-        this.model.renderBoxes(stack, light, buffers, EGG_PRINTER_GLASS);
+        lidModel.renderBoxes(stack, light, buffers, EGG_PRINTER_GLASS);
 
         stack.popPose();
     }
 
     private void applyAnimations() {
-        DCMModelRenderer platform = this.model.getCube("platform");
+        DCMModelRenderer platform = platformModel.getCube("platform"); //Platform
         platform.resetRotationPoint();
         platform.y += TARGET_ANIMATION[0];
 
-        DCMModelRenderer xCube = this.model.getCube("printingRail1");
+        DCMModelRenderer xCube = needleModel.getCube("printingRail1"); //Needle
         xCube.resetRotationPoint();
         xCube.x += TARGET_ANIMATION[1];
 
-        DCMModelRenderer zCube = this.model.getCube(NEEDLE_Z_MOVEMENT);
+        DCMModelRenderer zCube = needleModel.getCube("PrinterNeedleHolder"); //Needle
         zCube.resetRotationPoint();
         zCube.z += TARGET_ANIMATION[2];
 
-        DCMModelRenderer lidPart = this.model.getCube("lidrotatehelper");
+        DCMModelRenderer lidPart = lidModel.getCube("lidrotatehelper"); //Lid
         lidPart.resetRotations();
         lidPart.xRot += TARGET_ANIMATION[3];
 
@@ -144,13 +152,15 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         float[] snapshot = te.getSnapshot();
         int length = data.length / 2;
 
-        if(active) {
+        boolean previousState = te.getPreviousStates()[stateID];
+
+        if(previousState) {
             System.arraycopy(data, 0, TARGET_ANIMATION, partOffset, length);
         } else {
             System.arraycopy(data, length, TARGET_ANIMATION, partOffset, length);
         }
 
-        if(active != te.getPreviousStates()[stateID]) {
+        if(active != previousState) {
             te.getPreviousStates()[stateID] = active;
             for (int i = 0; i < length; i++) {
                 snapshot[partOffset+i] = snapshot[4+partOffset+i];
@@ -178,6 +188,8 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     }
 
     public static void onResourceManagerReload(IResourceManager resourceManager) {
-        model = DCMUtils.getModel(MODEL_LOCATION);
+        platformModel = DCMUtils.getModel(PLATFORM_MODEL_LOCATION);
+        lidModel = DCMUtils.getModel(LID_MODEL_LOCATION);
+        needleModel = DCMUtils.getModel(NEEDLE_MODEL_LOCATION);
     }
 }

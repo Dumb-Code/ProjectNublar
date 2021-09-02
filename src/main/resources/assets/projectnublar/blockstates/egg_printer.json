@@ -1,7 +1,7 @@
 {
   "multipart": [
     {
-      "apply": { "model": "projectnublar:block/egg_printer" }
+      "apply": { "model": "projectnublar:block/egg_printer_base" }
     }
   ]
 }

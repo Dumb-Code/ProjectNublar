@@ -1,0 +1,9 @@
+{
+  "loader": "dumblibrary:dcm",
+  "parent": "block/cube_all",
+  "textures": {
+    "layer0": "projectnublar:block/egg_printer",
+    "layer1": "projectnublar:block/egg_printer_glass"
+  },
+  "model": "projectnublar:models/block/egg_printer_lid"
+}

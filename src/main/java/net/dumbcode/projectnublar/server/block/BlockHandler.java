@@ -38,12 +38,12 @@ public class BlockHandler {
 
     public static final RegistryObject<SkeletalBuilderBlock> SKELETAL_BUILDER = REGISTER.register("skeletal_builder", () -> new SkeletalBuilderBlock(of(Material.HEAVY_METAL).noCollission()));
 
-    public static final RegistryObject<MachineModuleBlock> FOSSIL_PROCESSOR = REGISTER.register("fossil_processor", () -> new MachineModuleBlock(FossilProcessorBlockEntity::new, MachineModuleParts.FOSSIL_PROCESSOR, of(Material.HEAVY_METAL)));
-    public static final RegistryObject<MachineModuleBlock> DRILL_EXTRACTOR = REGISTER.register("drill_extractor", () -> new MachineModuleBlock(DrillExtractorBlockEntity::new, MachineModuleParts.DRILL_EXTRACTOR, of(Material.HEAVY_METAL)));
-    public static final RegistryObject<MachineModuleBlock> SEQUENCING_SYNTHESIZER = REGISTER.register("sequencer_synthesizer", () -> new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, MachineModuleParts.SEQUENCING_SYNTHESIZER, of(Material.HEAVY_METAL)));
-    public static final RegistryObject<MachineModuleBlock> EGG_PRINTER = REGISTER.register("egg_printer", () -> new DyableMachineModuleBlock(EggPrinterBlockEntity::new, MachineModuleParts.EGG_PRINTER, of(Material.HEAVY_METAL)));
-    public static final RegistryObject<MachineModuleBlock> INCUBATOR = REGISTER.register("incubator", () -> new MachineModuleBlock(IncubatorBlockEntity::new, MachineModuleParts.INCUBATOR, of(Material.HEAVY_METAL)));
-    public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> FOSSIL_PROCESSOR = REGISTER.register("fossil_processor", () -> new MachineModuleBlock(FossilProcessorBlockEntity::new, 3, MachineModuleParts.FOSSIL_PROCESSOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> DRILL_EXTRACTOR = REGISTER.register("drill_extractor", () -> new MachineModuleBlock(DrillExtractorBlockEntity::new, 3, MachineModuleParts.DRILL_EXTRACTOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> SEQUENCING_SYNTHESIZER = REGISTER.register("sequencer_synthesizer", () -> new DyableMachineModuleBlock(SequencingSynthesizerBlockEntity::new, 3, MachineModuleParts.SEQUENCING_SYNTHESIZER, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> EGG_PRINTER = REGISTER.register("egg_printer", () -> new DyableMachineModuleBlock(EggPrinterBlockEntity::new, 1, MachineModuleParts.EGG_PRINTER, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> INCUBATOR = REGISTER.register("incubator", () -> new MachineModuleBlock(IncubatorBlockEntity::new, 1, MachineModuleParts.INCUBATOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, 1, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
 
     public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_FOSSIL_PROCESSOR = REGISTER.register("unbuilt_fossil_processor", () -> new UnbuiltMachineModuleBlock(FOSSIL_PROCESSOR, of(Material.HEAVY_METAL),
         create("body", ItemHandler.FOSSIL_PROCESSOR_BODY),

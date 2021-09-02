@@ -1,7 +1,7 @@
 {
   "multipart": [
-    {
-      "apply": { "model": "projectnublar:block/incubator" }
-    }
+    { "apply": { "model": "projectnublar:block/incubator_base" } },
+    { "apply": { "model": "projectnublar:block/incubator_lift" } },
+    { "apply": { "model": "projectnublar:block/incubator_arm_base" } }
   ]
 }

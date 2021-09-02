@@ -15,6 +15,7 @@ import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -69,7 +70,12 @@ public class UnbuiltMachineModuleBlock extends HorizontalBlock implements IItemB
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getClockWise());
+        Direction direction = context.getHorizontalDirection();
+        int rotateAmount = this.fullyBuilt.get().getRotateAmount();
+        for (int i = 0; i < rotateAmount; i++) {
+            direction = direction.getClockWise();
+        }
+        return this.defaultBlockState().setValue(FACING, direction);
     }
 
     @Override
