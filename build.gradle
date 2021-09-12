@@ -79,6 +79,9 @@ minecraft {
                 projectnublar {
                     source sourceSets.main
                 }
+                dumblibrary {
+                    source sourceSets.dumb_library
+                }
             }
         }
     }
