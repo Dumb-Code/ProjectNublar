@@ -407,7 +407,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         
     }
 
-    public static void onResourceManagerReload(IResourceManager resourceManager) {
+    public static void onResourceManagerReload() {
         armModel = DCMUtils.getModel(ARM_MODEL_LOCATION, false);
         for (DCMModelRenderer root : armModel.getRoots()) {
             float[] position = root.getPosition();

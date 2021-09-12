@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
+import net.dumbcode.dumblibrary.server.registry.PostEarlyDeferredRegister;
+import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -25,8 +27,7 @@ import static net.minecraft.block.AbstractBlock.Properties.of;
 
 public class BlockHandler {
 
-    //TODO: this only works because dumblib is before pn. We need to have this register on PreBlockRegistryEvent.Post
-    public static final PreprocessRegisterDeferredRegister<Block> REGISTER = PreprocessRegisterDeferredRegister.create(ForgeRegistries.BLOCKS.getRegistrySuperType(), ProjectNublar.MODID);
+    public static final PostEarlyDeferredRegister<Block> REGISTER = PostEarlyDeferredRegister.create(ForgeRegistries.BLOCKS.getRegistrySuperType(), ProjectNublar.MODID);
 
     public static final RegistryObject<BlockElectricFencePole> LOW_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("low_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.LOW_SECURITY));
     public static final RegistryObject<BlockElectricFencePole> HIGH_SECURITY_ELECTRIC_FENCE_POLE = REGISTER.register("high_security_electric_fence_pole", () -> new BlockElectricFencePole(of(Material.HEAVY_METAL), EnumConnectionType.HIGH_SECURITY));
@@ -73,16 +74,16 @@ public class BlockHandler {
     public static final RegistryObject<Block> UNNAMED_SCIENTIST_BLOCK = REGISTER.register("unnamed_scientist_block", () -> new Block(of(Material.METAL)));
     public static final RegistryObject<Block> UNNAMED_PALEONTOLOGIST_BLOCK = REGISTER.register("unnamed_paleontologist_block", () -> new Block(of(Material.METAL)));
 
-    public static final Map<FossilBlock.FossilType, Map<Dinosaur, RegistryObject<FossilBlock>>> FOSSIL = REGISTER.beforeRegister(new HashMap<>(), map -> {
+    public static final Map<FossilBlock.FossilType, RegistryMap<Dinosaur, FossilBlock>> FOSSIL = REGISTER.beforeRegister(new HashMap<>(), map -> {
         for(FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
             map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value, copy(value.getCopy()))));
         }
     });
 
-    private static <T extends Block> Map<Dinosaur, RegistryObject<T>> createMap(String nameFormat, Function<Dinosaur, T> supplier) {
-        Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
+    private static <T extends Block> RegistryMap<Dinosaur, T> createMap(String nameFormat, Function<Dinosaur, T> supplier) {
+        RegistryMap<Dinosaur, T> map = new RegistryMap<>();
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
-            map.put(dinosaur, REGISTER.register(String.format(nameFormat, dinosaur.getFormattedName()), () -> supplier.apply(dinosaur)));
+            map.putRegistry(dinosaur, REGISTER.register(String.format(nameFormat, dinosaur.getFormattedName()), () -> supplier.apply(dinosaur)));
         }
         return map;
     }

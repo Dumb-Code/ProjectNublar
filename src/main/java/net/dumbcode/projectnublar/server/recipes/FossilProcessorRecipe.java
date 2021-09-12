@@ -24,9 +24,9 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public boolean accepts(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
-        ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack inSlot = process.getInputStack(0);
         Item item = inSlot.getItem();
-        return item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).values().stream().anyMatch(i -> i.get() == item)
+        return item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item)
             && handler.getStackInSlot(3).getItem() instanceof FilterItem
             && blockEntity.getTank().getFluidAmount() >= FLUID_AMOUNT
             && handler.getStackInSlot(2).getItem() == ItemHandler.EMPTY_TEST_TUBE.get();
@@ -45,7 +45,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
-        ItemStack inputStack = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack inputStack = process.getInputStack(0);
 
         //Shrink the fossil
         inputStack.shrink(1);
@@ -68,7 +68,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         //Insert the output item
         Item item = inputStack.getItem();
         if(item instanceof DinosaurProvider) {
-            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()).get());
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()));
             //Sets the size.
             //See here: https://www.desmos.com/calculator/c59djyd7c8 for a distribution for the 3 different filter types.
             //Where:
@@ -89,7 +89,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         Item item = testStack.getItem();
-        return slotIndex == 0 && item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).values().stream().anyMatch(i -> i.get() == item);
+        return slotIndex == 0 && item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item);
     }
 
     @Override

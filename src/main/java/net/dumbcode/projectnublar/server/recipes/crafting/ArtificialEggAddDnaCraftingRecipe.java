@@ -10,6 +10,7 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.SpecialRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 
 public class ArtificialEggAddDnaCraftingRecipe extends SpecialRecipe {
 
@@ -47,7 +48,7 @@ public class ArtificialEggAddDnaCraftingRecipe extends SpecialRecipe {
             if (!stack.isEmpty()) {
                 if(stack.getItem() == ItemHandler.ARTIFICIAL_EGG.get()) {
                     egg = stack;
-                } else if(stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_DNA.values().stream().anyMatch(r -> stack.getItem() == r.get())) {
+                } else if(stack.getItem() instanceof BasicDinosaurItem && ItemHandler.TEST_TUBES_DNA.containsValue(stack.getItem())) {
                     dna = stack;
                 }
             }
@@ -60,8 +61,8 @@ public class ArtificialEggAddDnaCraftingRecipe extends SpecialRecipe {
 
         ItemStack out = ItemStack.EMPTY;
         if(dna.getItem() instanceof DinosaurProvider) {
-            out = new ItemStack(ItemHandler.DINOSAUR_UNINCUBATED_EGG.get(((DinosaurProvider) dna.getItem()).getDinosaur()).get());
-            out.getOrCreateTagElement(ProjectNublar.MODID).put("dna_info", dna.getOrCreateTagElement(ProjectNublar.MODID).getCompound("dna_info").copy());
+            out = new ItemStack(ItemHandler.DINOSAUR_UNINCUBATED_EGG.get(((DinosaurProvider) dna.getItem()).getDinosaur()));
+            out.getOrCreateTagElement(ProjectNublar.MODID).put("Genetics", dna.getOrCreateTagElement(ProjectNublar.MODID).getList("Genetics", Constants.NBT.TAG_COMPOUND).copy());
         }
         return out;
 

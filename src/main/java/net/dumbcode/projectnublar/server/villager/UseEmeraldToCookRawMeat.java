@@ -26,8 +26,8 @@ public class UseEmeraldToCookRawMeat implements VillagerTrades.ITrade {
     @Override
     public MerchantOffer getOffer(Entity entity, Random random) {
         Dinosaur dinosaur = Dinosaur.getRandom();
-        Item buyItem = ItemHandler.RAW_MEAT_ITEMS.get(dinosaur).get();
-        Item sellItem = ItemHandler.COOKED_MEAT_ITEMS.get(dinosaur).get();
+        Item buyItem = ItemHandler.RAW_MEAT_ITEMS.get(dinosaur);
+        Item sellItem = ItemHandler.COOKED_MEAT_ITEMS.get(dinosaur);
         return new MerchantOffer(
             new ItemStack(Items.EMERALD, this.emeraldAmount),
             new ItemStack(buyItem, this.conversionAmount),

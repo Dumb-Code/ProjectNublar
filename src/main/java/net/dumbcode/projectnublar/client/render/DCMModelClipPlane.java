@@ -113,6 +113,7 @@ public class DCMModelClipPlane {
                 }
                 RenderSystem.enableCull();
                 RenderSystem.enableTexture();
+                RenderSystem.enableDepthTest();
             }
         }
 

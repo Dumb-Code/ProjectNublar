@@ -109,9 +109,7 @@ public class SequencingSynthesizerInputsScreen extends SequencerSynthesizerBaseS
 
         float timeDone = this.process.getTimeDone(); //mouseX / (float)this.width;//
 
-        int pHeight = 127;
-        float inverseHeight = (1-timeDone)*pHeight;
-        subPixelBlit(stack, this.leftPos + 111, this.topPos + 36 + inverseHeight, 351, inverseHeight, 128, timeDone*pHeight, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        bottomUpSubPixelBlit(stack, this.leftPos + 111, this.topPos + 36, 351, 0, 128, 127, OVERLAY_WIDTH, OVERLAY_HEIGHT, timeDone);
         subPixelBlit(stack, this.leftPos + 159, this.topPos + 171, 351, 136, 33*timeDone, 11, OVERLAY_WIDTH, OVERLAY_HEIGHT);
     }
 

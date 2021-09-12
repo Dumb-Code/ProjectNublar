@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Function;
 
-public class UnincubatedEggItem extends BasicDinosaurItem {
+public class UnincubatedEggItem extends DnaHoverDinosaurItem {
 
     public UnincubatedEggItem(Dinosaur dinosaur, String translationKey, Properties properties) {
         super(dinosaur, translationKey, properties);

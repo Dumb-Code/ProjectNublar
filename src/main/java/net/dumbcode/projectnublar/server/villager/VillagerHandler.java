@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.villager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -165,16 +166,16 @@ public class VillagerHandler {
             this.mul = mul;
         }
 
-        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, RegistryObject<Item>> map) {
+        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, RegistryMap<?, Item> map) {
             return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
-                .map(r -> new ItemStack(r.get()))
+                .map(ItemStack::new)
                 .toArray(ItemStack[]::new)
             );
         }
-        public static RandomChoiceCheckTrade ofNestedMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, ? extends Map<?, RegistryObject<Item>>> nestedMap) {
+        public static RandomChoiceCheckTrade ofNestedMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, ? extends RegistryMap<?, Item>> nestedMap) {
             return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, nestedMap.values().stream()
                 .flatMap(m -> m.values().stream())
-                .map(r -> new ItemStack(r.get()))
+                .map(ItemStack::new)
                 .toArray(ItemStack[]::new)
             );
         }

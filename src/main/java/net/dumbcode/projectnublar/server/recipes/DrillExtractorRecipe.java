@@ -18,7 +18,7 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     @Override
     public boolean accepts(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         ItemStackHandler handler = blockEntity.getHandler();
-        ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack inSlot = process.getInputStack(0);
         if(inSlot.getItem() == ItemHandler.AMBER.get()) {
             for (int i = 0; i < process.getOutputSlots().length; i++) {
                 if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE.get()) {
@@ -37,10 +37,10 @@ public enum DrillExtractorRecipe implements MachineRecipe<DrillExtractorBlockEnt
     @Override
     public void onRecipeFinished(DrillExtractorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<DrillExtractorBlockEntity> process) {
         ItemStackHandler handler = blockEntity.getHandler();
-        ItemStack inSlot = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack inSlot = process.getInputStack(0);
         for (int i : process.getOutputSlots()) {
             if(handler.getStackInSlot(i).getItem() == ItemHandler.EMPTY_TEST_TUBE.get()) {
-                ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom()).get());
+                ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(Dinosaur.getRandom()));
                 DinosaurGeneticMaterialItem.setSize(stack, MathUtils.getWeightedResult(blockEntity.getTier(MachineModuleType.DRILL_BIT) + 1, 0.5));
                 if(!blockEntity.getLevel().isClientSide) {
                     handler.setStackInSlot(i, stack);

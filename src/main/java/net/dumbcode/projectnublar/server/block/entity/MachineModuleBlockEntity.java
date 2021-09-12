@@ -567,10 +567,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             this.recipePredicate = predicate;
         }
 
-        public int getInputSlot(int index) {
-            return this.inputSlots[index];
+        public ItemStack getInputStack(int index) {
+            return this.machine.getHandler().getStackInSlot(this.inputSlots[index]);
         }
 
+//        @Deprecated
         public int getOutputSlot(int index) {
             return this.outputSlots[index];
         }
@@ -699,9 +700,9 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         DECREASE(p -> p.setTime(p.getTime() - 1)),
         PAUSE(p -> {});
 
-        private final Consumer<MachineProcess> processConsumer;
+        private final Consumer<MachineProcess<?>> processConsumer;
 
-        ProcessInterruptAction(Consumer<MachineProcess> processConsumer) {
+        ProcessInterruptAction(Consumer<MachineProcess<?>> processConsumer) {
             this.processConsumer = processConsumer;
         }
     }

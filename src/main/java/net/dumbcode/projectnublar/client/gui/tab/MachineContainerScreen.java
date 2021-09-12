@@ -53,6 +53,11 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
         super.render(stack, mouseX, mouseY, ticks);
     }
 
+    protected void bottomUpSubPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight, float percent) {
+        float inverseHeight = (1-percent)*height;
+        subPixelBlit(stack, x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
+    }
+
     protected void subPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height) {
         this.subPixelBlit(stack, x, y, u, v, width, height, 256, 256);
     }

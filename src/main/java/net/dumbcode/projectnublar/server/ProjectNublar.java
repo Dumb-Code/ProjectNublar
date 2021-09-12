@@ -21,6 +21,7 @@ import net.dumbcode.projectnublar.server.block.BlockPylonPole;
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
+import net.dumbcode.projectnublar.server.data.ProjectNublarRecipeProvider;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
@@ -30,6 +31,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
+import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
 import net.dumbcode.projectnublar.server.particles.ProjectNublarParticles;
@@ -119,9 +121,10 @@ public class ProjectNublar {
 
         bus.addGenericListener(Block.class, Plant::registerBlocks);
         bus.addGenericListener(Item.class, ItemHandler::registerAllItemBlocks);
+        bus.addListener(this::gatherData);
 
-        forgeBus.addListener(this::gatherData);
         forgeBus.addListener(BlockPylonPole::onBlockBreak);
+        forgeBus.addListener(EmptySyringeItemHandler::onEntityInteract);
         bus.addListener(EntityHandler::onAttributes);
 
         if(FMLEnvironment.dist == Dist.CLIENT) {
@@ -152,6 +155,7 @@ public class ProjectNublar {
 
         if (event.includeServer()) {
             gen.addProvider(new ProjectNublarBlockTagsProvider(gen, helper));
+            gen.addProvider(new ProjectNublarRecipeProvider(gen));
         }
     }
 
@@ -181,6 +185,10 @@ public class ProjectNublar {
             BlockHandler.UNBUILT_EGG_PRINTER.get(),
             BlockHandler.UNBUILT_INCUBATOR.get()
         );
+    }
+
+    private static ISelectiveResourceReloadListener create(Runnable runnable, IResourceType type) {
+        return create(m -> runnable.run(), type);
     }
 
     private static ISelectiveResourceReloadListener create(Consumer<IResourceManager> consumer, IResourceType type) {

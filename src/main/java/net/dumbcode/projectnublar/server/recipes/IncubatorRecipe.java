@@ -17,8 +17,8 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
 
     @Override
     public boolean accepts(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
-        Item item = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0)).getItem();
-        return blockEntity.getPlantMatter() >= IncubatorBlockEntity.DEFAULT_PLANT_MATTER && item instanceof BasicDinosaurItem && ItemHandler.DINOSAUR_UNINCUBATED_EGG.values().stream().anyMatch(r -> r.get() == item);
+        Item item = process.getInputStack(0).getItem();
+        return blockEntity.getPlantMatter() >= IncubatorBlockEntity.DEFAULT_PLANT_MATTER && item instanceof BasicDinosaurItem && ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(item);
     }
 
     @Override
@@ -28,7 +28,7 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
 
     @Override
     public void onRecipeTick(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
-        ItemStack out = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0));
+        ItemStack out = process.getInputStack(0);
         CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
         nbt.putFloat("AmountDone", Math.round(1000F * process.getTime() / (float)process.getTotalTime()) / 10F);
 
@@ -36,8 +36,8 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
 
     @Override
     public void onRecipeFinished(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
-        ItemStack out = blockEntity.getHandler().getStackInSlot(process.getInputSlot(0));
-        blockEntity.getHandler().setStackInSlot(process.getOutputSlot(0), new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) out.getItem()).getDinosaur()).get()));
+        ItemStack out = process.getInputStack(0);
+        blockEntity.getHandler().setStackInSlot(process.getOutputSlot(0), new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) out.getItem()).getDinosaur())));
     }
 
     @Override

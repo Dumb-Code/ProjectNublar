@@ -36,12 +36,12 @@ public class FossilBlock extends Block implements IItemBlock {
 
         public static BlockState guess(BlockState state, Dinosaur dino) {
             if(state.is(ProjectNublarBlockTags.FOSSIL_CLAY_REPLACEMENT)) {
-                return BlockHandler.FOSSIL.get(CLAY).get(dino).get().defaultBlockState();
+                return BlockHandler.FOSSIL.get(CLAY).get(dino).defaultBlockState();
             }
             if(state.is(ProjectNublarBlockTags.FOSSIL_SANDSTONE_REPLACEMENT)) {
-                return BlockHandler.FOSSIL.get(SANDSTONE).get(dino).get().defaultBlockState();
+                return BlockHandler.FOSSIL.get(SANDSTONE).get(dino).defaultBlockState();
             }
-            return BlockHandler.FOSSIL.get(STONE).get(dino).get().defaultBlockState();
+            return BlockHandler.FOSSIL.get(STONE).get(dino).defaultBlockState();
         }
     }
 

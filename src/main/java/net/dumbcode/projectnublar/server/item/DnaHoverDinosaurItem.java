@@ -16,8 +16,8 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DinosaurTestTube extends BasicDinosaurItem {
-    public DinosaurTestTube(Dinosaur dinosaur, String translationKey, Properties properties) {
+public class DnaHoverDinosaurItem extends BasicDinosaurItem {
+    public DnaHoverDinosaurItem(Dinosaur dinosaur, String translationKey, Properties properties) {
         super(dinosaur, translationKey, properties);
     }
 

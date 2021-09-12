@@ -33,9 +33,8 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     public static List<ITextComponent> getCannotStartReasons(SequencingSynthesizerBlockEntity blockEntity) {
         List<ITextComponent> list = new ArrayList<>();
         MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process = blockEntity.getProcess(1);
-        MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
 
-        if(handler.getStackInSlot(process.getInputSlot(0)).getItem() != ItemHandler.EMPTY_TEST_TUBE.get()) {
+        if(process.getInputStack(0).getItem() != ItemHandler.EMPTY_TEST_TUBE.get()) {
             list.add(createReason("test_tube"));
         }
 
@@ -88,8 +87,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
 
     @Override
     public void onRecipeFinished(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
-        MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
-        handler.getStackInSlot(process.getInputSlot(0)).shrink(1);
+        process.getInputStack(0).shrink(1);
 
         process.insertOutputItem(this.createStack(blockEntity), 0);
 
@@ -115,7 +113,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
     private ItemStack createStack(SequencingSynthesizerBlockEntity blockEntity) {
         ResourceLocation location = new ResourceLocation(blockEntity.getSelectKey(0));
         if(DinosaurHandler.getRegistry().containsKey(location)) {
-            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_DNA.get(DinosaurHandler.getRegistry().getValue(location)).get());
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_DNA.get(DinosaurHandler.getRegistry().getValue(location)));
             List<GeneticEntry<?, ?>> geneticEntries = blockEntity.gatherAllGeneticEntries();
             ListNBT collected = geneticEntries.stream()
                 .map(g -> g.serialize(new CompoundNBT()))

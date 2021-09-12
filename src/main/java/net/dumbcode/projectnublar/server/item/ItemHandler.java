@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.item;
 
-import com.sun.org.apache.regexp.internal.RE;
+import net.dumbcode.dumblibrary.server.registry.PostEarlyDeferredRegister;
+import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.dumblibrary.server.utils.JavaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -9,7 +10,6 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
-import net.dumbcode.dumblibrary.server.registry.PreprocessRegisterDeferredRegister;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
@@ -18,7 +18,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
@@ -35,7 +34,7 @@ public final class ItemHandler {
 
     private static final Supplier<Item> BASIC_ITEM = () -> new Item(new Item.Properties().tab(TAB));
 
-    public static final PreprocessRegisterDeferredRegister<Item> REGISTER = PreprocessRegisterDeferredRegister.create(ForgeRegistries.ITEMS.getRegistrySuperType(), ProjectNublar.MODID);
+    public static final PostEarlyDeferredRegister<Item> REGISTER = PostEarlyDeferredRegister.create(ForgeRegistries.ITEMS.getRegistrySuperType(), ProjectNublar.MODID);
 
     public static final RegistryObject<Item> EMPTY_TEST_TUBE = REGISTER.register("test_tube", () -> new Item(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> IRON_FILTER = REGISTER.register("iron_filter", () -> new FilterItem(0.25F, new Item.Properties().durability(150).tab(TAB)));
@@ -44,9 +43,9 @@ public final class ItemHandler {
     public static final RegistryObject<Item> AMBER = REGISTER.register("amber", BASIC_ITEM);
     public static final RegistryObject<Item> HARD_DRIVE = REGISTER.register("hard_drive", () -> new DriveItem(false, new Item.Properties().stacksTo(1).tab(TAB)));
     public static final RegistryObject<Item> SOLID_STATE_DRIVE = REGISTER.register("solid_state_drive", () -> new DriveItem(true, new Item.Properties().stacksTo(1).tab(TAB)));
-    public static final RegistryObject<Item> EMPTY_SYRINGE = REGISTER.register("empty_syringe", () -> new ItemSyringe(ItemSyringe.Type.EMPTY, new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> DNA_FILLED_SYRINGE = REGISTER.register("dna_filled_syringe", () -> new ItemSyringe(ItemSyringe.Type.FILLED_DNA, new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> EMBRYO_FILLED_SYRINGE = REGISTER.register("embryo_filled_syringe", () -> new ItemSyringe(ItemSyringe.Type.FILLED_EMBRYO, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> EMPTY_SYRINGE = REGISTER.register("empty_syringe", () -> new Item(new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> DNA_FILLED_SYRINGE = REGISTER.register("dna_filled_syringe", () -> new DnaSyringeItem(new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> EMBRYO_FILLED_SYRINGE = REGISTER.register("embryo_filled_syringe", () -> new Item(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> FENCE_REMOVER = REGISTER.register("fence_remover", () -> new ItemFenceRemover(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> CREATIVE_FENCE_REMOVER = REGISTER.register("creative_fence_remover", () -> new CreativeFenceRemovers(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> ARTIFICIAL_EGG = REGISTER.register("artificial_egg", BASIC_ITEM);
@@ -112,14 +111,14 @@ public final class ItemHandler {
 
 
 
-    public static final Map<Dinosaur, RegistryObject<Item>> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
+    public static final RegistryMap<Dinosaur, Item> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
         new BasicDinosaurItem(d, "raw_meat", new Item.Properties().food(new Food.Builder()
             .nutrition(d.getItemProperties().getRawMeatHealAmount())
             .saturationMod(d.getItemProperties().getRawMeatSaturation())
             .build()
         ))
     );
-    public static final Map<Dinosaur, RegistryObject<Item>> COOKED_MEAT_ITEMS = createMap("%s_cooked_meat", d ->
+    public static final RegistryMap<Dinosaur, Item> COOKED_MEAT_ITEMS = createMap("%s_cooked_meat", d ->
         new BasicDinosaurItem(d, "cooked_meat", new Item.Properties().food(new Food.Builder()
             .nutrition(d.getItemProperties().getRawMeatHealAmount())
             .saturationMod(d.getItemProperties().getRawMeatSaturation())
@@ -127,13 +126,13 @@ public final class ItemHandler {
         ))
     );
 
-    public static final Map<Dinosaur, RegistryObject<Item>> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, "spawn_egg", new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, "genetic_material_test_tube", new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new DinosaurTestTube(d, "test_tube", new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties()));
-    public static final Map<Dinosaur, RegistryObject<Item>> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties()));
+    public static final RegistryMap<Dinosaur, Item> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, "spawn_egg", new Item.Properties()));
+    public static final RegistryMap<Dinosaur, Item> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, "genetic_material_test_tube", new Item.Properties()));
+    public static final RegistryMap<Dinosaur, Item> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new DnaHoverDinosaurItem(d, "test_tube", new Item.Properties()));
+    public static final RegistryMap<Dinosaur, Item> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties()));
+    public static final RegistryMap<Dinosaur, Item> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties()));
 
-    public static final Map<Dinosaur, Map<String, RegistryObject<Item>>> FOSSIL_ITEMS = createNestedMap(
+    public static final Map<Dinosaur, RegistryMap<String, Item>> FOSSIL_ITEMS = createNestedMap(
         "%s_fossil_%s",
         dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS.get()), DinosaurDropsComponent.Storage::getFossilList),
         (dinosaur, fossil) -> new FossilItem(dinosaur, "fossil", fossil, new Item.Properties())
@@ -150,11 +149,11 @@ public final class ItemHandler {
         }
     }
 
-    private static <T extends Item> Map<Dinosaur, RegistryObject<T>> createMap(String format, Function<Dinosaur, T> supplier) {
-        Map<Dinosaur, RegistryObject<T>> map = new HashMap<>();
+    private static <T extends Item> RegistryMap<Dinosaur, T> createMap(String format, Function<Dinosaur, T> supplier) {
+        RegistryMap<Dinosaur, T> map = new RegistryMap<>();
         REGISTER.beforeRegister(() -> {
             for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
-                map.put(dinosaur, REGISTER.register(
+                map.putRegistry(dinosaur, REGISTER.register(
                     String.format(format, dinosaur.getFormattedName()),
                     () -> supplier.apply(dinosaur)
                 ));
@@ -163,7 +162,7 @@ public final class ItemHandler {
         return map;
     }
 
-    private static <T extends Item, S> Map<Dinosaur, Map<S, RegistryObject<T>>> createNestedMap(
+    private static <T extends Item, S> Map<Dinosaur, RegistryMap<S, T>> createNestedMap(
         String format,
         Function<Dinosaur, Collection<S>> getterFunction,
         BiFunction<Dinosaur, S, T> creationFunc
@@ -171,25 +170,25 @@ public final class ItemHandler {
         return createNestedMap(format, getterFunction, Object::toString, creationFunc);
     }
 
-    private static <T extends Item, S> Map<Dinosaur, Map<S, RegistryObject<T>>> createNestedMap(
+    private static <T extends Item, S> Map<Dinosaur, RegistryMap<S, T>> createNestedMap(
         String format,
         Function<Dinosaur, Collection<S>> getterFunction,
         Function<S, String> toStringFunction,
         BiFunction<Dinosaur, S, T> creationFunc
     ) {
-        Map<Dinosaur, Map<S, RegistryObject<T>>> map = new HashMap<>();
+        Map<Dinosaur, RegistryMap<S, T>> map = new HashMap<>();
         REGISTER.beforeRegister(() -> {
             for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
                 Collection<S> collection = getterFunction.apply(dinosaur);
                 if (collection != null) {
                     for (S s : collection) {
-                        map.computeIfAbsent(dinosaur, d -> new HashMap<>()).put(s, REGISTER.register(
+                        map.computeIfAbsent(dinosaur, d -> new RegistryMap<>()).putRegistry(s, REGISTER.register(
                             String.format(format, dinosaur.getFormattedName(), toStringFunction.apply(s)),
                             () -> creationFunc.apply(dinosaur, s)
                         ));
                     }
                 } else {
-                    map.put(dinosaur, new HashMap<>());
+                    map.put(dinosaur, new RegistryMap<>());
                 }
             }
         });

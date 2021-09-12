@@ -54,7 +54,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
     public void collectItems(ComponentAccess access, Consumer<ItemStack> itemPlacer) {
         Dinosaur dino = access.get(ComponentHandler.DINOSAUR).orElseThrow(IllegalArgumentException::new).getDinosaur();
         for (String fossil : this.fossilList) {
-            itemPlacer.accept(new ItemStack(ItemHandler.FOSSIL_ITEMS.get(dino).get(fossil).get()));
+            itemPlacer.accept(new ItemStack(ItemHandler.FOSSIL_ITEMS.get(dino).get(fossil)));
         }
     }
 

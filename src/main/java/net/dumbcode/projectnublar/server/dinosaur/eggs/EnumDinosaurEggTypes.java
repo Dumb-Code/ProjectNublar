@@ -30,7 +30,7 @@ public enum EnumDinosaurEggTypes { //TODO: check scale
     }
 
 
-    public static void onResourceManagerReload(IResourceManager manager) {
+    public static void onResourceManagerReload() {
         for (EnumDinosaurEggTypes value : values()) {
             value.type.clearCache();
         }

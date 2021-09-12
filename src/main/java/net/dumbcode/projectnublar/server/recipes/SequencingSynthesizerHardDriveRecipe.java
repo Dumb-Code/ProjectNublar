@@ -20,7 +20,7 @@ public enum SequencingSynthesizerHardDriveRecipe implements MachineRecipe<Sequen
     public boolean accepts(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
         MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
         ItemStack drive = handler.getStackInSlot(0);
-        ItemStack in = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack in = process.getInputStack(0);
 
         return !drive.isEmpty() && drive.getItem() instanceof DriveItem &&
                 in.getItem() instanceof DriveUtils.DriveInformation &&
@@ -45,7 +45,7 @@ public enum SequencingSynthesizerHardDriveRecipe implements MachineRecipe<Sequen
     @Override
     public void onRecipeFinished(SequencingSynthesizerBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process) {
         MachineModuleItemStackHandler<SequencingSynthesizerBlockEntity> handler = blockEntity.getHandler();
-        ItemStack inStack = handler.getStackInSlot(process.getInputSlot(0));
+        ItemStack inStack = process.getInputStack(0);
         ItemStack out = inStack.split(1);
         if(!out.isEmpty()) {
             handler.setStackInSlot(0, DriveUtils.addItemToDrive(handler.getStackInSlot(0), out));

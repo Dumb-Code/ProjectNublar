@@ -17,6 +17,7 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -55,9 +56,6 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
     @Override
     public void render(EggPrinterBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
         light = WorldRenderer.getLightColor(te.getLevel(), te.getBlockPos().above());
 
         stack.pushPose();
@@ -99,9 +97,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         needleModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
         platformModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
         lidModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
-
-        RenderSystem.enableBlend();
-        lidModel.renderBoxes(stack, light, buffers, EGG_PRINTER_GLASS);
+        lidModel.renderBoxes(stack, light, buffers, RenderType.entityTranslucent(EGG_PRINTER_GLASS));
 
         stack.popPose();
     }
@@ -187,7 +183,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         stack.popPose();
     }
 
-    public static void onResourceManagerReload(IResourceManager resourceManager) {
+    public static void onResourceManagerReload() {
         platformModel = DCMUtils.getModel(PLATFORM_MODEL_LOCATION);
         lidModel = DCMUtils.getModel(LID_MODEL_LOCATION);
         needleModel = DCMUtils.getModel(NEEDLE_MODEL_LOCATION);

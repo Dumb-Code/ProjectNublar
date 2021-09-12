@@ -26,7 +26,7 @@ public abstract class TabbedGuiContainer<T extends Container> extends ContainerS
     }
 
     protected int getOffset() {
-        return 15;
+        return 10;
     }
 
     @Override
