@@ -64,6 +64,7 @@ public class MultipartSystem implements EntitySystem {
         }
 
         Matrix3f entityRotate = new Matrix3f();
+        entityRotate.setIdentity();
         entityRotate.mul(Vector3f.YP.rotationDegrees(-entity.yRot));
 
         for (AnimatedReferenceCube modelCube : animation.getModelCubes()) {
@@ -90,11 +91,12 @@ public class MultipartSystem implements EntitySystem {
 
                     for (int i = 0; i < 8; i++) {
                         Vector3f startPoint = DCMUtils.getModelPosAlpha(modelCube, (i >> 2) & 1, (i >> 1) & 1, i & 1);
-                        Vector3f point = new Vector3f(startPoint.x(), startPoint.y() + 1.5F, startPoint.z());
+                        Vector3f point = new Vector3f(startPoint.x(), -startPoint.y() + 1.5F, -startPoint.z());
 
                         if (dinosaur != null) {
                             dinosaur.get(EntityComponentTypes.RENDER_ADJUSTMENTS).map(RenderAdjustmentsComponent::getScale).ifPresent(floats -> point.mul(floats[0], floats[1], floats[2]));
                         }
+
                         point.transform(entityRotate);
 
                         minX = Math.min(minX, point.x());
@@ -121,7 +123,11 @@ public class MultipartSystem implements EntitySystem {
                     Objects.requireNonNull(sp);
 
                     Vector3d position = entity.position();
-                    part.setPos(sp.x() + (ep.x() - sp.x()) / 2D + position.x, sp.y() + (ep.y() - sp.y()) / 2D + position.y - size.y / 2F, sp.z() + (ep.z() - sp.z()) / 2D + position.z);
+                    part.setPos(
+                        sp.x() + (ep.x() - sp.x()) / 2D + position.x,
+                        sp.y() + (ep.y() - sp.y()) / 2D + position.y - size.y / 2F,
+                        sp.z() + (ep.z() - sp.z()) / 2D + position.z
+                    );
                 }
             }
         }

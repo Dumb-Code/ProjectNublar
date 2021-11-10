@@ -72,9 +72,11 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
 
     @Override
     public void finalizeComponent(ComponentAccess entity) {
-        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c ->
-            c.setAnimationContainer(this.dinosaur.getModelContainer().get(entity.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).orElse(AgeStage.MISSING).getName()))
-        );
+        entity.get(EntityComponentTypes.ANIMATION).ifPresent(c -> {
+            String name = entity.get(ComponentHandler.AGE).flatMap(AgeComponent::getModelState).orElse(AgeStage.MISSING).getName();
+            System.out.println(name);
+            c.setAnimationContainer(this.dinosaur.getModelContainer().get(name));
+        });
     }
 
     @Override

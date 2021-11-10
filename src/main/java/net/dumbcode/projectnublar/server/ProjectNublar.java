@@ -19,6 +19,7 @@ import net.dumbcode.projectnublar.server.animation.AnimationFactorHandler;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.BlockPylonPole;
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
+import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
 import net.dumbcode.projectnublar.server.data.ProjectNublarRecipeProvider;
@@ -53,6 +54,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -74,6 +76,8 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -145,8 +149,14 @@ public class ProjectNublar {
         bus.addListener(ProjectNublarParticleFactories::onParticleFactoriesRegister);
         bus.addListener(this::clientPreInit);
 
+        forgeBus.addListener(this::registerCommands);
+
         BlockEntityIncubatorRenderer.markResolvers();
 
+    }
+
+    public void registerCommands(RegisterCommandsEvent event) {
+        CommandProjectNublar.register(event.getDispatcher());
     }
 
     public void gatherData(GatherDataEvent event) {
@@ -214,13 +224,13 @@ public class ProjectNublar {
 
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry().getValues()) {
             ResourceLocation regName = dinosaur.getRegName();
+            Map<String, AnimationContainer> container = dinosaur.getModelContainer();
+
             for (AgeStage orderedAge : dinosaur.getAttacher().getStorage(ComponentHandler.AGE).getOrderedAges()) {
-                Map<String, AnimationContainer> container = dinosaur.getModelContainer();
-
                 container.computeIfAbsent(orderedAge.getModelStage(),
-                    s -> new AnimationContainer(new ResourceLocation(regName.getNamespace(), regName.getPath() + "/" + s)));
-
+                    s -> AnimationContainer.of(new ResourceLocation(regName.getNamespace(), regName.getPath() + "/" + s)));
             }
+            container.put(AgeStage.MISSING.getModelStage(), AnimationContainer.empty());
         }
 //        registerJsonDinosaurs();
 

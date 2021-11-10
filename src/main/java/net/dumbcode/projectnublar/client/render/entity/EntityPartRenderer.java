@@ -23,7 +23,7 @@ public class EntityPartRenderer extends EntityRenderer<EntityPart> {
     @Override
     public void render(EntityPart entity, float entityYaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light) {
         super.render(entity, entityYaw, partialTicks, stack, buffers, light);
-        if (ProjectNublar.DEBUG) {
+        if (ProjectNublar.DEBUG && false) {
             stack.pushPose();
             stack.translate(
                 -MathHelper.lerp(partialTicks, entity.xOld, entity.position().x),

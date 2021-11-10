@@ -105,7 +105,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
         this.setPosRaw(x, y, z);
         Vector3d size = this.entityData == null ? Vector3d.ZERO : this.entityData.get(WATCHER_SIZE);
         double width = size.x / 2.0F;
-        double height = size.y / 2.0F;
+        double height = size.y;
         double depth = size.z / 2.0F;
 
         this.setBoundingBox(new AxisAlignedBB(x - width, y, z - depth, x + width, y + height, z + depth));
@@ -141,7 +141,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 //    }
 
     @Override
-    public boolean canBeCollidedWith() {
+    public boolean isPushable() {
         return true;
     }
 

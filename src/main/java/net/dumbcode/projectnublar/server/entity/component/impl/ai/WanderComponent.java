@@ -35,7 +35,7 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
             CreatureEntity creature = (CreatureEntity) entity;
             creature.goalSelector.addGoal(this.priority, new WanderAI(creature, this));
             creature.goalSelector.addGoal(this.priority - 1, new FloatAi(creature));
-//            ((EntityCreature) entity).tasks.addTask(this.priority, this.avoidWater ? new EntityAIWanderAvoidWater(creature, this.speed, 1F / this.chance) : new EntityAIWander(creature, this.speed, this.chance));
+//            ((CreatureEntity) entity).tasks.addTask(this.priority, this.avoidWater ? new EntityAIWanderAvoidWater(creature, this.speed, 1F / this.chance) : new EntityAIWander(creature, this.speed, this.chance));
         } else {
             throw new IllegalArgumentException("Tried to attach a wander component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of MobEntity");
         }
