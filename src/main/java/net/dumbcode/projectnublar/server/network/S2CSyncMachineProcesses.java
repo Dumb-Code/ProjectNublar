@@ -30,7 +30,7 @@ public class S2CSyncMachineProcesses {
             buf.readBlockPos(),
             IntStream.range(0, buf.readByte()).mapToObj(i ->
                 new ProcessSync(
-                    buf.readShort(), buf.readShort(),
+                    buf.readInt(), buf.readInt(),
                     buf.readBoolean(), buf.readBoolean(),
                     IntStream.range(0, buf.readByte())
                         .mapToObj(i2 -> buf.readVarIntArray())
@@ -47,8 +47,8 @@ public class S2CSyncMachineProcesses {
         buf.writeBlockPos(packet.pos);
         buf.writeByte(packet.processList.size());
         for (ProcessSync sync : packet.processList) {
-            buf.writeShort(sync.getTime());
-            buf.writeShort(sync.getTotalTime());
+            buf.writeInt(sync.getTime());
+            buf.writeInt(sync.getTotalTime());
             buf.writeBoolean(sync.isProcessing());
             buf.writeBoolean(sync.isHasPower());
             buf.writeByte(sync.getBlocked().size());

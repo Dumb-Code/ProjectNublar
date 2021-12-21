@@ -5,9 +5,11 @@ import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.data.GeneticLayerEntry;
+import net.dumbcode.dumblibrary.server.utils.GaussianValue;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurPeriod;
+import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityStorageOverrides;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
@@ -152,5 +154,24 @@ public class Tyrannosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.CULL_SIZE.get())
             .setHeight(2.5F)
             .setWidth(7.5F);
+
+        this.addComponent(EntityComponentTypes.BREEDING)
+            .setMinTicksBetweenBreeding(240000); //10 Minecraft days
+
+        this.addComponent(ComponentHandler.DINOSAUR_EGG_LAYING)
+            .addEggType(EnumDinosaurEggTypes.TYRANNOSAURUS.getType())
+            .setEggModifier(new GaussianValue(1F, 0.1F))
+            .setEggAmount(new GaussianValue(7F, 1F))
+            .setTicksPregnancy(new GaussianValue(192000, 12000)) //8 Minecraft days, give or take half a day
+            .setTicksEggHatch(new GaussianValue(24000, 2000)); //1 Minecraft day, give or take 100 seconds
+
+        this.addComponent(EntityComponentTypes.SLEEPING)
+            .setSleepingAnimation(new ResourceLocation(ProjectNublar.MODID, "resting"))
+            .setWakeupTime(1000)
+            .setSleepTime(13000);
+
+
+        this.addEmptyComponent(ComponentHandler.TRACKING_DATA);
+        this.addEmptyComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
     }
 }

@@ -27,7 +27,7 @@ public class EggPrinterScreen extends MachineContainerScreen {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
         this.process = this.blockEntity.getProcess(0);
-        this.imageHeight = 230;
+        this.imageHeight = TEXTURE_HEIGHT;
     }
 
 

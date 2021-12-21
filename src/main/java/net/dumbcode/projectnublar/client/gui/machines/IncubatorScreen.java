@@ -1,43 +1,75 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
+import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.C2SPlaceIncubatorEgg;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.shader.ShaderInstance;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class IncubatorScreen extends MachineContainerScreen {
 
+    private static final int TEXTURE_WIDTH = 334;
+    private static final int TEXTURE_HEIGHT = 222;
+
+    private static final int OVERLAY_START_X = 9;
+    private static final int OVERLAY_START_Y = 9;
+
+
     private final IncubatorBlockEntity blockEntity;
+    private final List<MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity>> processes;
+
+    private static ShaderInstance shaderManager;
+
 
     private boolean justClickedEggPlacement;
 
     public IncubatorScreen(IncubatorBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
-        this.height = 200;
+        this.processes = IntStream.range(0, 9)
+            .mapToObj(blockEntity::getProcess)
+            .collect(Collectors.toList());
+        this.imageHeight = TEXTURE_HEIGHT;
+
+        if(shaderManager == null) {
+            try {
+                shaderManager = new ShaderInstance(Minecraft.getInstance().getResourceManager(), ProjectNublar.MODID + ":incubator_bed");
+            } catch (IOException e) {
+                ProjectNublar.getLogger().error("Unable to load incubator bed shader :/", e);
+            }
+        }
     }
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
 
-        int left = this.leftPos + 38;
-        int top = this.topPos + 8;
-        int right = this.leftPos + this.width - 38;
-        int bottom = this.topPos + 108;
+        int left = this.leftPos + OVERLAY_START_X;
+        int top = this.topPos + OVERLAY_START_Y;
 
         for (int i = 0; i < 9; i++) {
             Slot slotRaw = this.menu.getSlot(i + 1);
@@ -50,6 +82,7 @@ public class IncubatorScreen extends MachineContainerScreen {
                         egg.getXPos() + left - this.leftPos - 8,
                         egg.getYPos() + top - this.topPos - 8
                     ));
+                    ((Slot)slot).index = slot.getSlotIndex();
                     slot.setActive(true);
                 } else { //Should always be true
                     slot.setActive(false);
@@ -59,23 +92,17 @@ public class IncubatorScreen extends MachineContainerScreen {
 
         super.render(stack, mouseX, mouseY, partialTicks);
 
-        ItemStack itemStack = Minecraft.getInstance().player.inventory.getCarried();
-        int color = 0xFF000000;
-        boolean holdingEgg = ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(itemStack.getItem());
-        List<IncubatorBlockEntity.Egg> eggs = this.blockEntity.getCollidingEggs(mouseX - left, mouseY - top);
-        if(mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom && holdingEgg) {
-            color = eggs.isEmpty() ? 0xFF00FF00 : 0xFFFF0000;
-        }
-        fill(stack, left, top, right, bottom, color);
-        if(holdingEgg) {
-            for (IncubatorBlockEntity.Egg egg : eggs) {
-                fill(stack,
-                    Math.max(left + egg.getXPos() - IncubatorBlockEntity.HALF_EGG_SIZE - IncubatorBlockEntity.EGG_PADDING, left),
-                    Math.max(top + egg.getYPos() - IncubatorBlockEntity.HALF_EGG_SIZE - IncubatorBlockEntity.EGG_PADDING, top),
-                    Math.min(left + egg.getXPos() + IncubatorBlockEntity.HALF_EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, right),
-                    Math.min(top + egg.getYPos() + IncubatorBlockEntity.HALF_EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, bottom),
-                    -1
-                );
+        /*
+        * ######### ISSUES ########
+        *  - creative power block no texture
+        *  - when removing eggs in incubator it glitches
+        * */
+
+        for (int i = 0; i < 9; i++) {
+            MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process = this.processes.get(i);
+            IncubatorBlockEntity.Egg egg = this.blockEntity.getEggList()[i];
+            if(egg != null) {
+                this.drawProcessIcon(process, stack, OVERLAY_START_X+egg.getXPos() - 8, OVERLAY_START_Y+egg.getYPos() + 8);
             }
         }
 
@@ -84,11 +111,16 @@ public class IncubatorScreen extends MachineContainerScreen {
     }
 
     @Override
+    protected void renderLabels(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
+
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int state) {
-        int left = this.leftPos + 38;
-        int top = this.topPos + 8;
-        int right = this.leftPos + this.width - 38;
-        int bottom = this.topPos + 108;
+        int left = this.leftPos + OVERLAY_START_X;
+        int top = this.topPos + OVERLAY_START_Y;
+        int right = left + IncubatorBlockEntity.BED_WIDTH;
+        int bottom = top + IncubatorBlockEntity.BED_HEIGHT;
 
         ItemStack stack = minecraft.player.inventory.getCarried();
         if(mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom && ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(stack.getItem())) {
@@ -112,12 +144,52 @@ public class IncubatorScreen extends MachineContainerScreen {
     @Override
     protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         this.minecraft.getTextureManager().bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"));
-        blit(stack, this.leftPos, this.topPos, 0, 0, this.width, this.height);
+        blit(stack, this.leftPos + OVERLAY_START_X, this.topPos + OVERLAY_START_Y, this.getBlitOffset(), this.imageWidth, 0, IncubatorBlockEntity.BED_WIDTH, IncubatorBlockEntity.BED_HEIGHT, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
 
-        ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
-        this.minecraft.textureManager.bind(slotLocation);
-        for(Slot slot : this.menu.slots) {
-            blit(stack, this.leftPos + slot.x - 1, this.topPos + slot.y- 1, 7, 17, 18, 18);
+        float progress = this.blockEntity.getPlantMatter() / this.blockEntity.getTotalPlantMatter();
+
+        RenderSystem.enableBlend();
+        RenderSystem.enableAlphaTest();
+        shaderManager.safeGetUniform("progress").set(progress);
+        shaderManager.safeGetUniform("seed").set(this.blockEntity.getBlockPos().asLong());
+        shaderManager.apply();
+
+        int left = this.leftPos + OVERLAY_START_X;
+        int top = this.topPos + OVERLAY_START_Y;
+        int right = left + IncubatorBlockEntity.BED_WIDTH;
+        int bottom = top + IncubatorBlockEntity.BED_HEIGHT;
+
+        BufferBuilder buff = Tessellator.getInstance().getBuilder();
+        buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        buff.vertex(left, top, 0).uv(0, 0).endVertex();
+        buff.vertex(left, bottom, 0).uv(0, 1).endVertex();
+        buff.vertex(right, bottom, 0).uv(1, 1).endVertex();
+        buff.vertex(right, top, 0).uv(1, 0).endVertex();
+
+        Tessellator.getInstance().end();
+        shaderManager.clear();
+
+        ItemStack itemStack = Minecraft.getInstance().player.inventory.getCarried();
+        boolean holdingEgg = ItemHandler.DINOSAUR_UNINCUBATED_EGG.containsValue(itemStack.getItem());
+        List<IncubatorBlockEntity.Egg> eggs = this.blockEntity.getCollidingEggs(mouseX - left, mouseY - top);
+        if(mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom && holdingEgg) {
+            fill(stack, left, top, right, bottom, eggs.isEmpty() ? 0x6600FF00 : 0x66FF0000);
         }
+        if(holdingEgg) {
+            for (IncubatorBlockEntity.Egg egg : eggs) {
+                fill(stack,
+                    Math.max(left + egg.getXPos() - IncubatorBlockEntity.HALF_EGG_SIZE - IncubatorBlockEntity.EGG_PADDING, left),
+                    Math.max(top + egg.getYPos() - IncubatorBlockEntity.HALF_EGG_SIZE - IncubatorBlockEntity.EGG_PADDING, top),
+                    Math.min(left + egg.getXPos() + IncubatorBlockEntity.HALF_EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, right),
+                    Math.min(top + egg.getYPos() + IncubatorBlockEntity.HALF_EGG_SIZE + IncubatorBlockEntity.EGG_PADDING, bottom),
+                    -1
+                );
+            }
+        }
+
+
+        blit(stack, this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
+
+        fill(stack, this.leftPos + 28, this.topPos + 121, (int) (this.leftPos + 28 + 63 * progress), this.topPos + 125, 0xFFA9E444);
     }
 }

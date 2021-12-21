@@ -366,6 +366,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         buff.vertex(pose, (float) target.x, (float) target.y, (float) target.z).color(0F, 1F, 0F, 1F).endVertex();
         buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
 
+        stack.pushPose();
         stack.translate(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
         stack.mulPose(Vector3f.YP.rotation((float) (-baseYRotation - Math.PI)));
         stack.mulPose(Vector3f.ZP.rotation((float) -angleFirstArm));

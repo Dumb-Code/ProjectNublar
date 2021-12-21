@@ -36,7 +36,10 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
@@ -540,7 +543,6 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         private final Predicate<MachineRecipe<B>> recipePredicate;
 
         private int time;
-        private int previousTime;
         private int totalTime;
         @Nullable
         MachineRecipe<B> currentRecipe;
@@ -642,7 +644,15 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             } else {
                 this.time++;
                 if(currentRecipe != null) {
+                    int previousTotalTime = this.totalTime;
                     this.totalTime = currentRecipe.getRecipeTime(machine.asB, this);
+
+                    //Update the timeDone to make sure the % complete is kept the same
+                    if(previousTotalTime != this.totalTime) {
+                        float timeDone = this.time / (float)previousTotalTime;
+                        this.setTime(MathHelper.floor(timeDone * this.totalTime));
+                    }
+
                     currentRecipe.onRecipeTick(machine.asB, this);
                 }
             }
@@ -680,6 +690,31 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             if(this.processing && this.currentRecipe != null && slot != -1 && this.currentRecipe.shouldGlobalSlotChangeCauseReset(this.machine.asB, this, slot)) {
                 this.time = 0;
             }
+        }
+
+        public IFormattableTextComponent getTimeLeftText() {
+            int timeLeft = MathHelper.ceil((this.getTotalTime() - this.getTime()) / 20F);
+
+            IFormattableTextComponent component = new StringTextComponent("");
+            int seconds = timeLeft % 60;
+            int minutes = (timeLeft / 60) % 60;
+            int hours = (timeLeft / 3600);
+
+            boolean forceRender = false;
+            if(hours != 0) {
+                component = component.append(ProjectNublar.translate("gui.machine.time.hours", hours)).append(" ");
+                forceRender = true;
+            }
+
+            if(minutes != 0 || forceRender) {
+                component = component.append(ProjectNublar.translate("gui.machine.time.minutes", minutes)).append(" ");
+                forceRender = true;
+            }
+
+            if(seconds != 0 || forceRender) {
+                component = component.append(ProjectNublar.translate("gui.machine.time.seconds", seconds)).append(" ");
+            }
+            return component;
         }
     }
 

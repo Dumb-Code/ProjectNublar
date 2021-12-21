@@ -176,10 +176,10 @@
     "item.projectnublar.drill_bit_part_3": "Gold Drill Bit Upgrade",
     "item.projectnublar.drill_bit_part_4": "Diamond Drill Bit Upgrade",
     "item.projectnublar.drill_bit_part_5": "Netherite Drill Bit Upgrade",
-    "item.projectnublar.leveling_sensor_part": "Leveling Sensor Part",
-    "item.projectnublar.bulb_part_1": " Bulb Upgrade",
-    "item.projectnublar.bulb_part_2": " Bulb Upgrade",
-    "item.projectnublar.bulb_part_3": " Bulb Upgrade",
+    "item.projectnublar.levelling_sensor_part": "Levelling Sensor Part",
+    "item.projectnublar.bulb_part_1": "Warm Bulb Upgrade",
+    "item.projectnublar.bulb_part_2": "Warmer Bulb Upgrade",
+    "item.projectnublar.bulb_part_3": "Hot Bulb Upgrade",
     "item.projectnublar.container_part_1": "Small Container Upgrade",
     "item.projectnublar.container_part_2": "Medium Container Upgrade",
     "item.projectnublar.container_part_3": "Large Container Upgrade",
@@ -201,6 +201,10 @@
     "item.projectnublar.sequencer_computer": "Sequencer Computer",
     "item.projectnublar.monitor": "Monitor",
 
+    "block.projectnublar.unbuilt_fossil_processor": "Fossil Processor Base",
+    "block.projectnublar.unbuilt_sequencing_synthesizer": "Sequencer Base",
+    "block.projectnublar.unbuilt_egg_printer": "Egg Printer base",
+    "block.projectnublar.unbuilt_incubator": "Incubator base",
 
 
     "projectnublar.dino.tyrannosaurus.name": "Tyrannosaurus",

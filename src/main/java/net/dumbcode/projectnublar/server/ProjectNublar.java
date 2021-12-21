@@ -44,6 +44,7 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.item.Item;
@@ -170,6 +171,7 @@ public class ProjectNublar {
     }
 
     public void clientPreInit(FMLClientSetupEvent event) {
+        System.out.println(Blocks.ACACIA_LOG);
         ProjectNublarBlockRenderLayers.setRenderLayers();
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) event.getMinecraftSupplier().get().getResourceManager();
         resourceManager.registerReloadListener(create(BlockEntityEggPrinterRenderer::onResourceManagerReload, VanillaResourceType.MODELS));

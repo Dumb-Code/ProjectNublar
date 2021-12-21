@@ -86,7 +86,7 @@ public class MachineUtils {
         return stack;
     }
 
-    public static double getPlantMatter(ItemStack stack, World world, BlockPos pos) {
+    public static float getPlantMatter(ItemStack stack, World world, BlockPos pos) {
         if(stack.getItem() == Items.AIR) {
             return 0;
         }
@@ -94,10 +94,11 @@ public class MachineUtils {
         if(block instanceof BushBlock) {
             BlockState state = block.defaultBlockState();
             VoxelShape shape = block.getShape(state, world, pos, ISelectionContext.empty());
-            double area = 0;
+            float area = 0;
             for (AxisAlignedBB aabb : shape.toAabbs()) {
                 area += aabb.getXsize() * aabb.getYsize() * aabb.getZsize();
             }
+            return Math.round(area * 10) / 10F;
         } else if(block instanceof LeavesBlock) {
             return 4;
         } else if(block instanceof VineBlock) {
@@ -112,7 +113,7 @@ public class MachineUtils {
         }
         if(stack.getItem() == Items.BONE) {
             return 1D;
-        } else if(stack.getItem() == Items.WHITE_DYE) {
+        } else if(stack.getItem() == Items.BONE_MEAL) {
             return 1/3D;
         } else if(stack.getItem() == Items.SKELETON_SKULL) {
             return 4D;

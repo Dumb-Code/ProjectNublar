@@ -47,6 +47,11 @@ public class MachineModuleSlot extends SlotItemHandler implements SlotCanBeDisab
         return this;
     }
 
+    public MachineModuleSlot disable() {
+        this.active = false;
+        return this;
+    }
+
     @Override
     public boolean isActive() {
         return this.active;

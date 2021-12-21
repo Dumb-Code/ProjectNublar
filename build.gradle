@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -100,7 +100,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'
     implementation project(path: ':studio_jar', configuration: 'default')
 
-    compile project('dumb_library')
+    implementation sourceSets.dumb_library.output
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

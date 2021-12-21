@@ -136,7 +136,8 @@ public class MachineModuleContainer extends Container {
             } else {
                 boolean flag = false;
                 for (int i = 0; i < otherSlots; i++) {
-                    if(this.predicate.test(this.slots.get(i).getSlotIndex())) {
+                    Slot otherSlot = this.slots.get(i);
+                    if(this.predicate.test(otherSlot.getSlotIndex()) && otherSlot.isActive()) {
                         if(current.isEmpty()) {
                             break;
                         }
@@ -158,6 +159,7 @@ public class MachineModuleContainer extends Container {
 
         return transferred;
     }
+
 
     public int getTab() {
         return tab;

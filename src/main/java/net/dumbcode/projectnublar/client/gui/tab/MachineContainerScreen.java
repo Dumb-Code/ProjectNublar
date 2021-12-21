@@ -11,26 +11,15 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.energy.EnergyStorage;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineModuleContainer> {
 
@@ -121,29 +110,9 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
 
         if(mX >= xStart && mX < xStart+width && mY >= yStart && mY < yStart+height) {
             List<ITextComponent> componentList = new ArrayList<>();
-            int timeLeft = MathHelper.ceil((process.getTotalTime() - process.getTime()) / 20F);
 
-            IFormattableTextComponent component = new StringTextComponent("");
-            int seconds = timeLeft % 60;
-            int minutes = (timeLeft / 60) % 60;
-            int hours = (timeLeft / 3600);
 
-            boolean forceRender = false;
-            if(hours != 0) {
-                component = component.append(ProjectNublar.translate("gui.machine.time.hours", hours)).append(" ");
-                forceRender = true;
-            }
-
-            if(minutes != 0 || forceRender) {
-                component = component.append(ProjectNublar.translate("gui.machine.time.minutes", minutes)).append(" ");
-                forceRender = true;
-            }
-
-            if(seconds != 0 || forceRender) {
-                component = component.append(ProjectNublar.translate("gui.machine.time.seconds", seconds)).append(" ");
-            }
-
-            componentList.add(component.append("(" + Math.round(process.getTimeDone() * 100F) + "%)"));
+            componentList.add(process.getTimeLeftText().append("(" + Math.round(process.getTimeDone() * 100F) + "%)"));
             if(!process.isHasPower()) {
                 componentList.add(ProjectNublar.translate("gui.machine.nopower"));
             } else if(process.isBlocked()) {

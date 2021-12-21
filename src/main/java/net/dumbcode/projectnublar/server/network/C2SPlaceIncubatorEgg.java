@@ -20,8 +20,8 @@ public class C2SPlaceIncubatorEgg {
 
     public static C2SPlaceIncubatorEgg fromBytes(PacketBuffer buf) {
         return new C2SPlaceIncubatorEgg(
-            MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, 100-IncubatorBlockEntity.HALF_EGG_SIZE),
-            MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, 100-IncubatorBlockEntity.HALF_EGG_SIZE)
+            MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_WIDTH-IncubatorBlockEntity.HALF_EGG_SIZE),
+            MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_HEIGHT-IncubatorBlockEntity.HALF_EGG_SIZE)
         );
     }
 
@@ -34,7 +34,7 @@ public class C2SPlaceIncubatorEgg {
         NetworkEvent.Context context = supplier.get();
         
         MachineModuleContainer.runWhenOnMenu(context, IncubatorBlockEntity.class, i -> {
-            ItemStack stack = context.getSender().getUseItem();
+            ItemStack stack = context.getSender().inventory.getCarried();
             if (stack.getItem() instanceof UnincubatedEggItem) {
                 i.placeEgg(packet.xPos, packet.yPos, stack);
                 context.getSender().broadcastCarriedItem();

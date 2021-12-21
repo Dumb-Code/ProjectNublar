@@ -10,4 +10,5 @@ license="All right reserved"
 
   [[dependencies.projectnublar]]
     modId="dumblibrary"
+    versionRange="1.0"
     mandatory=true

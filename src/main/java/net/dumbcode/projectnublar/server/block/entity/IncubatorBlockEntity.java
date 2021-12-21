@@ -43,6 +43,9 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     public static final int TICKS_TO_OPEN = 20;
     public static final int TICKS_LID_WAIT_TO_CLOSE = 30;
 
+    public static final int BED_WIDTH = 158;
+    public static final int BED_HEIGHT = 115;
+
     public float movementTicks = 100000;
     public int[] lidTicks = new int[3];
     public float[] snapshot = new float[7];
@@ -51,10 +54,10 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Getter
     @Setter
-    private double plantMatter;
+    private float plantMatter;
 
     @Getter
-    private double totalPlantMatter = DEFAULT_PLANT_MATTER;
+    private float totalPlantMatter = DEFAULT_PLANT_MATTER;
 
     public IncubatorBlockEntity() {
         super(ProjectNublarBlockEntities.INCUBATOR.get());
@@ -146,6 +149,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
             for (int i = 0; i < this.eggList.length; i++) {
                 if(this.eggList[i] == null) {
                     this.eggList[i] = new Egg(x, y, position, normal, type);
+//                    this.getProcess(i).
                     this.handler.setStackInSlot(i + 1, stack.split(1));
                     break;
                 }
@@ -156,7 +160,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public CompoundNBT save(CompoundNBT compound) {
-        compound.putDouble("PlantMatter", this.plantMatter);
+        compound.putFloat("PlantMatter", this.plantMatter);
         ListNBT list = new ListNBT();
         for (int i = 0; i < this.eggList.length; i++) {
             Egg egg = this.eggList[i];
@@ -165,8 +169,8 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
                 nbt.putByte("Slot", (byte) i);
 
-                nbt.putByte("XPos", (byte) egg.xPos);
-                nbt.putByte("YPos", (byte) egg.yPos);
+                nbt.putShort("XPos", (short) egg.xPos);
+                nbt.putShort("YPos", (short) egg.yPos);
 
                 nbt.putDouble("EggPositionX", egg.eggPosition.x);
                 nbt.putDouble("EggPositionY", egg.eggPosition.y);
@@ -187,13 +191,13 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public void load(BlockState state, CompoundNBT compound) {
-        this.plantMatter = compound.getDouble("PlantMatter");
+        this.plantMatter = compound.getFloat("PlantMatter");
 
         ListNBT eggs = compound.getList("Eggs", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < eggs.size(); i++) {
             CompoundNBT t = eggs.getCompound(i);
             this.eggList[t.getByte("Slot")] = new Egg(
-                t.getByte("XPos"), t.getByte("YPos"),
+                t.getShort("XPos"), t.getShort("YPos"),
                 new Vector3d(t.getDouble("EggPositionX"), t.getDouble("EggPositionY"), t.getDouble("EggPositionZ")),
                 new Vector3d(t.getDouble("PickupDirectionX"), t.getDouble("PickupDirectionY"), t.getDouble("PickupDirectionZ")),
                 DinosaurEggType.readFromNBT(t.getCompound("EggType"))
@@ -252,6 +256,16 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
+    protected int[] gatherExtraSyncData() {
+        return new int[] { Float.floatToRawIntBits(this.plantMatter) };
+    }
+
+    @Override
+    public void onExtraSyncData(int[] aint) {
+        this.plantMatter = Float.intBitsToFloat(aint[0]);
+    }
+
+    @Override
     @OnlyIn(Dist.CLIENT)
     public MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
         return new IncubatorScreen(this, container, inventory,title, info);
@@ -259,17 +273,17 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public MachineModuleContainer createContainer(int windowId, PlayerEntity player, int tab) {
-        return new MachineModuleContainer(windowId, this, player.inventory, tab, 117, 176,
-            new MachineModuleSlot(this, 0, 8, 96),
-            new MachineModuleSlot(this, 1, 0, 0),
-            new MachineModuleSlot(this, 2, 0, 0),
-            new MachineModuleSlot(this, 3, 0, 0),
-            new MachineModuleSlot(this, 4, 0, 0),
-            new MachineModuleSlot(this, 5, 0, 0),
-            new MachineModuleSlot(this, 6, 0, 0),
-            new MachineModuleSlot(this, 7, 0, 0),
-            new MachineModuleSlot(this, 8, 0, 0),
-            new MachineModuleSlot(this, 9, 0, 0)
+        return new MachineModuleContainer(windowId, this, player.inventory, tab, 140, 176,
+            new MachineModuleSlot(this, 0, 7, 110),
+            new MachineModuleSlot(this, 1, 0, 0).disable(),
+            new MachineModuleSlot(this, 2, 0, 0).disable(),
+            new MachineModuleSlot(this, 3, 0, 0).disable(),
+            new MachineModuleSlot(this, 4, 0, 0).disable(),
+            new MachineModuleSlot(this, 5, 0, 0).disable(),
+            new MachineModuleSlot(this, 6, 0, 0).disable(),
+            new MachineModuleSlot(this, 7, 0, 0).disable(),
+            new MachineModuleSlot(this, 8, 0, 0).disable(),
+            new MachineModuleSlot(this, 9, 0, 0).disable()
         );
     }
 

@@ -31,7 +31,12 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
         ItemStack out = process.getInputStack(0);
         CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
         nbt.putFloat("AmountDone", Math.round(1000F * process.getTime() / (float)process.getTotalTime()) / 10F);
+    }
 
+    @Override
+    public void onRecipeStarted(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
+        ItemStack stack = process.getInputStack(0);
+        process.setTime((int) (stack.getOrCreateTagElement(ProjectNublar.MODID).getFloat("AmountDone") * process.getTotalTime()));
     }
 
     @Override
