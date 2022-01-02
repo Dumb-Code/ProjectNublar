@@ -1,19 +1,17 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = "https://plugins.gradle.org/m2/" }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath "net.dumbcode.gradlehook:GradleHook:2.0.2"
     }
 }
 
-plugins {
-    id "net.dumbcode.gradlehook" version "2.0.2"
-}
-
 apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: "net.dumbcode.gradlehook"
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
