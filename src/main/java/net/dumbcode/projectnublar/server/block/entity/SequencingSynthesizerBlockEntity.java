@@ -547,7 +547,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         public void clear() {
             this.key = "";
             this.amount = 0;
-            this.colorStorage = new DnaColourStorage(new HashSet<>(), new HashSet<>());
+            this.colorStorage = new DnaColourStorage(new HashSet<>(0), new HashSet<>(1));
         }
     }
 

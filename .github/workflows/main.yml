@@ -31,7 +31,22 @@ jobs:
         run: |
           mkdir run
           echo "eula=true" > run/eula.txt
-      #      - name: Dummy Run Server Until World Tick
-      #        run: ./gradlew runServer
+#        - name: Dummy Run Server Until World Tick
+#          run: ./gradlew runServer
       - name: Deploy Webhook
         run: ./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:javadoc -x javadoc
+  Github-Webhook-If-Fail:
+    needs: Test-And-Deploy
+#    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: sarisia/actions-status-discord@v1.8.5
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.PN_WEBHOOK }}
+        with:
+          status: failure
+          nodetail: true
+          title: Error In Job
+          description: |
+            [Build ${{ env.GITHUB_RUN_NUMBER }} has errored - ${{ github.event.commits[0].message }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            Blame ${{ github.event.commits[0].author.name }}
