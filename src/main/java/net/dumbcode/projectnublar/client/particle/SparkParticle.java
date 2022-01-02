@@ -34,7 +34,11 @@ public class SparkParticle extends SpriteTexturedParticle {
     @Override
     public void tick() {
         super.tick();
-        this.setSpriteFromAge(this.sprite);
+        if (this.age++ >= this.lifetime) {
+            this.remove();
+        } else {
+            this.setSpriteFromAge(this.sprite);
+        }
     }
 
     @Override
