@@ -8,12 +8,16 @@ buildscript {
     }
 }
 
+plugins {
+    id "net.dumbcode.gradlehook" version "2.0.2"
+}
+
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0'
+version = '1.16.5-' + (System.getenv("GITHUB_ACTIONS") ? System.getenv("GITHUB_RUN_NUMBER") : 'dev')
 group = 'net.dumbcode.projectnublar' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'projectnublar'
 
@@ -93,11 +97,13 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
 
     implementation 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
+
     implementation project(path: ':studio_jar', configuration: 'default')
 
     implementation sourceSets.dumb_library.output
@@ -133,4 +139,10 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
+}
+
+gradlehook {
+    urlToken System.getenv('WEBHOOK_URL')
+    addField 'payload_json', '{ "embeds": [{ "title":"' + System.getenv("COMMIT_MESSAGE") + " - " + System.getenv("COMMIT_AUTHOR") + '", "timestamp": "{{datetime}}" }] }'
+    addArtifact jar
 }
