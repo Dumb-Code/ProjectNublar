@@ -37,7 +37,7 @@ jobs:
         run: ./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:javadoc -x javadoc
   Github-Webhook-If-Fail:
     needs: Test-And-Deploy
-#    if: failure()
+    if: failure()
     runs-on: ubuntu-latest
     steps:
       - uses: sarisia/actions-status-discord@v1.8.5

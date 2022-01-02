@@ -126,12 +126,14 @@ public class MachineModuleBlock extends HorizontalBlock implements IItemBlock {
     }
 
     @Override
-    public void destroy(IWorld world, BlockPos pos, BlockState state) {
-        TileEntity tileEntity = world.getBlockEntity(pos);
-        if(tileEntity instanceof MachineModuleBlockEntity) {
-            ((MachineModuleBlockEntity<?>) tileEntity).dropEmStacks();
+    public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean idk) {
+        if (!state.is(newState.getBlock())) {
+            TileEntity tileEntity = world.getBlockEntity(pos);
+            if (tileEntity instanceof MachineModuleBlockEntity) {
+                ((MachineModuleBlockEntity<?>) tileEntity).dropEmStacks();
+            }
         }
-        super.destroy(world, pos, state);
+        super.onRemove(state, world, pos, newState, idk);
     }
 
     @Override

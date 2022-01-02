@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.*;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
@@ -542,12 +543,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public static class SelectedDnaEntry {
         private String key = "";
         private double amount;
-        private DnaColourStorage colorStorage = new DnaColourStorage(new HashSet<>(), new HashSet<>());
+        private DnaColourStorage colorStorage = new DnaColourStorage(Sets.newHashSet(0), Sets.newHashSet(1));
 
         public void clear() {
             this.key = "";
             this.amount = 0;
-            this.colorStorage = new DnaColourStorage(new HashSet<>(0), new HashSet<>(1));
+            this.colorStorage = new DnaColourStorage(Sets.newHashSet(0), Sets.newHashSet(1));
         }
     }
 
