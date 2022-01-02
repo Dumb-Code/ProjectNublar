@@ -104,7 +104,7 @@ dependencies {
 
     implementation project(path: ':studio_jar', configuration: 'default')
 
-    implementation sourceSets.dumb_library.output
+    implementation project(path: ':dumb_library', configuration: 'default')
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
