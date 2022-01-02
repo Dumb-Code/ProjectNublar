@@ -30,7 +30,6 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
         PlayerEntity player = context.getPlayer();
         World world = player.level;
         Vector3d location = context.getClickLocation();
-        BlockPos pos = context.getClickedPos();
         if(!world.isClientSide) {
             DinosaurEntity entity = this.getDinosaur().createEntity(world);
             entity.get(EntityComponentTypes.GENDER).ifPresent(c -> c.male = world.random.nextBoolean());
@@ -46,7 +45,7 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
                 GeneticComponent.mutateGenes(genetics, entity);
             });
 
-            entity.setPos(pos.getX() + location.x, pos.getY() + location.y, pos.getZ() + location.z);
+            entity.setPos(location.x, location.y, location.z);
             entity.xRot = 0;
             entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
 
