@@ -34,4 +34,4 @@ jobs:
       #      - name: Dummy Run Server Until World Tick
       #        run: ./gradlew runServer
       - name: Deploy Webhook
-        run: ./gradlew postRequest
+        run: ./gradlew postRequest -x :dumb_library:postRequest -x :dumb_library:javadoc -x javadoc
