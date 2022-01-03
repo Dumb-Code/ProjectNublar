@@ -36,12 +36,13 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
                     .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), genetics -> {
                         genetics.disableRandomGenetics();
                         context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID)
-                        .getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
-                        .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
-                        .forEach(genetics::insertGenetic);
+                            .getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
+                            .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
+                            .forEach(genetics::insertGenetic);
                     })
                     .runBeforeFinalize(EntityComponentTypes.GENDER.get(), gender -> gender.male = world.random.nextBoolean())
             );
+            entity.get(EntityComponentTypes.GENETICS.get()).ifPresent(genetics -> GeneticComponent.mutateGenes(genetics, entity));
             entity.setPos(location.x, location.y, location.z);
             entity.xRot = 0;
             entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
