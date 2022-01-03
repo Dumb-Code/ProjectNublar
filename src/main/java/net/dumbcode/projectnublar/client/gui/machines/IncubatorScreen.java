@@ -76,27 +76,22 @@ public class IncubatorScreen extends MachineContainerScreen {
             if(slotRaw instanceof MachineModuleSlot) {
                 MachineModuleSlot slot = (MachineModuleSlot) slotRaw;
                 IncubatorBlockEntity.Egg egg = this.blockEntity.getEggList()[i];
+
                 if (egg != null) {
-                    this.menu.slots.set(i + 1, slot = new MachineModuleSlot(
-                        this.blockEntity, slot.getSlotIndex(),
-                        egg.getXPos() + left - this.leftPos - 8,
-                        egg.getYPos() + top - this.topPos - 8
-                    ));
-                    ((Slot)slot).index = slot.getSlotIndex();
+                    int x = egg.getXPos() + left - this.leftPos - 8;
+                    int y = egg.getYPos() + top - this.topPos - 8;
+                    if(x != slot.x || y != slot.y) {
+                        this.menu.slots.set(i + 1, slot = new MachineModuleSlot(this.blockEntity, slot.getSlotIndex(),x,y));
+                        ((Slot) slot).index = slot.getSlotIndex();
+                    }
                     slot.setActive(true);
-                } else { //Should always be true
+                } else {
                     slot.setActive(false);
                 }
             }
         }
 
         super.render(stack, mouseX, mouseY, partialTicks);
-
-        /*
-        * ######### ISSUES ########
-        *  - creative power block no texture
-        *  - when removing eggs in incubator it glitches
-        * */
 
         for (int i = 0; i < 9; i++) {
             MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process = this.processes.get(i);

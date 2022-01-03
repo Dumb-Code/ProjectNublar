@@ -42,7 +42,7 @@ public class MachineModuleContainer extends Container {
         this.blockEntity = blockEntity;
         this.tab = tab;
         for (MachineModuleSlot slot : slots) {
-            slot.setIsLocked(integer -> this.predicate.test(integer));
+            slot.setIsLocked(integer -> !this.predicate.test(integer));
             this.slot(slot);
         }
 

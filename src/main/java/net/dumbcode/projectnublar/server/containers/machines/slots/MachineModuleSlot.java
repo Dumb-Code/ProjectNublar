@@ -35,7 +35,7 @@ public class MachineModuleSlot extends SlotItemHandler implements SlotCanBeDisab
 
     @Override
     public boolean mayPickup(PlayerEntity playerIn) {
-        if(!this.isLocked.test(this.getSlotIndex())) {
+        if(this.isLocked.test(this.getSlotIndex())) {
             return false;
         }
         return super.mayPickup(playerIn);
