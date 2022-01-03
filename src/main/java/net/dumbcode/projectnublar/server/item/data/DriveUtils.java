@@ -67,18 +67,17 @@ public class DriveUtils {
         return DriveType.OTHER; //??
     }
 
-    public static ItemStack addItemToDrive(ItemStack drive, ItemStack inItem) {
+    public static void addItemToDrive(ItemStack drive, ItemStack inItem) {
         if (!(inItem.getItem() instanceof DriveInformation)) {
-            return drive;
+            return;
         }
 
         DriveInformation info = (DriveInformation) inItem.getItem();
-        ItemStack out = drive.copy();
-        ListNBT list = out.getOrCreateTagElement(ProjectNublar.MODID).getList("drive_information", Constants.NBT.TAG_COMPOUND);
+        ListNBT list = drive.getOrCreateTagElement(ProjectNublar.MODID).getList("drive_information", Constants.NBT.TAG_COMPOUND);
         String key = info.getKey(inItem);
         String variant = info.getAnimalVariant(inItem);
         if(key.isEmpty()) {
-            return drive;
+            return;
         }
 
         int index = -1;
@@ -91,7 +90,7 @@ public class DriveUtils {
         CompoundNBT inner = list.getCompound(index);
         int current = inner.getInt("amount");
         if(current >= 100) {
-            return drive;
+            return;
         }
         int result = info.getSize(inItem);
         inner.putString("drive_key", key);
@@ -108,8 +107,7 @@ public class DriveUtils {
             list.set(index, inner);
         }
 
-        out.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", list);
-        return out;
+        drive.getOrCreateTagElement(ProjectNublar.MODID).put("drive_information", list);
     }
 
     public static List<IsolatedGeneEntry> getAllIsolatedGenes(ItemStack drive) {

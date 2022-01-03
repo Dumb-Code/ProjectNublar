@@ -78,7 +78,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     @Override
     public void render(IncubatorBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
         stack.pushPose();
-        YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));
+        this.doModelTransforms(stack, te);
 
         armModel.resetAnimations();
 
@@ -109,8 +109,11 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.translate(0, lidHeight, 0);
         this.renderLid(stack, te.getLevel(), te.getBlockPos(), buffers, te.getTier(MachineModuleType.BULB));
 
-
         stack.popPose();
+    }
+
+    private void doModelTransforms(MatrixStack stack, IncubatorBlockEntity te) {
+        YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));
     }
 
     private void renderLid(MatrixStack stack, World world, BlockPos pos, IRenderTypeBuffer buffers, int bulbTier) {
@@ -124,7 +127,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     }
 
     private void renderIncubatorParts(IncubatorBlockEntity te, MatrixStack stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
-        this.setArmAngles(te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, stack, buffers, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
+        this.setArmAngles(te, te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, stack, buffers, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
         this.updateEgg(te, partialTicks);
 
         armModel.renderBoxes(stack, light, buffers, ARM_TEXTURE_LOCATION);
@@ -226,7 +229,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         snapshot[6] = HAND_JOINT.getBox().yRot;
     }
 
-    private void setArmAngles(@Nullable IncubatorBlockEntity.Egg egg, MatrixStack stack, IRenderTypeBuffer buffers, float movementTicks, float[] snapshot, int eggMoveAmount) {
+    private void setArmAngles(IncubatorBlockEntity te, @Nullable IncubatorBlockEntity.Egg egg, MatrixStack stack, IRenderTypeBuffer buffers, float movementTicks, float[] snapshot, int eggMoveAmount) {
         float rotateInterp = movementTicks / TICKS_TO_ROTATE;
         if(egg == null) {
             float movementInterp = (movementTicks - TICKS_TO_ROTATE) / TICKS_TO_MOVE;
@@ -270,10 +273,10 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         double handRotZ = Math.atan2(-normal.y, this.xzDistance(Vector3d.ZERO, normal));
 
         if(ProjectNublar.DEBUG) {
-            stack.popPose();
+//            stack.popPose();
             this.drawDebugRenderers(stack, buffers, origin, target, handJointTarget, baseYRotation, baseJoinTarget, angleFirstArm, angleLastArm);
-            stack.pushPose();
-            //doTabulaTransforms
+//            stack.pushPose();
+//            this.doModelTransforms(stack, te);
         }
 
         BASE_ROTATION.getBox().yRot = this.interpolate(snapshot[0], baseYRotation, rotateInterp);

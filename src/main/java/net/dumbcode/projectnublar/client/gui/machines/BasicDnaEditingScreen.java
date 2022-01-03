@@ -101,6 +101,8 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
         if(slots != this.slots) {
             this.updateAllSlots();
         }
+
+        this.refreshHardDrive(this.blockEntity.getHandler().getStackInSlot(0));
     }
 
     @Override

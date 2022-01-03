@@ -31,20 +31,17 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
         World world = player.level;
         Vector3d location = context.getClickLocation();
         if(!world.isClientSide) {
-            DinosaurEntity entity = this.getDinosaur().createEntity(world);
-            entity.get(EntityComponentTypes.GENDER).ifPresent(c -> c.male = world.random.nextBoolean());
-
-            entity.get(EntityComponentTypes.GENETICS).ifPresent(genetics -> {
-                GeneticComponent.replaceGenetics(genetics, entity,
-                    context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID)
+            DinosaurEntity entity = this.getDinosaur().createEntity(world,
+                this.getDinosaur().getAttacher().getDefaultConfig()
+                    .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), genetics -> {
+                        genetics.disableRandomGenetics();
+                        context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID)
                         .getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
                         .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
-                        .collect(Collectors.toList())
-                );
-
-                GeneticComponent.mutateGenes(genetics, entity);
-            });
-
+                        .forEach(genetics::insertGenetic);
+                    })
+                    .runBeforeFinalize(EntityComponentTypes.GENDER.get(), gender -> gender.male = world.random.nextBoolean())
+            );
             entity.setPos(location.x, location.y, location.z);
             entity.xRot = 0;
             entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
