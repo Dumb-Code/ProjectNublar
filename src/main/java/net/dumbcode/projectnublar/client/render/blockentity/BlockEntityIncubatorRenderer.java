@@ -64,7 +64,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         .toArray(BakedModelResolver[]::new);
 
     private final Arm BASE_ROTATION = new Arm("ArmBase1", 3 / 16F);
-    private final Arm FIRST_ARM = new Arm("Arm1", 8.5 / 16F);
+    private final Arm FIRST_ARM = new Arm("Arm1", 8.75 / 16F);
     private final Arm LAST_ARM = new Arm("Arm2Base", 7 / 16F);
     private final Arm HAND_JOINT = new Arm("ClawNeck2", 4 / 16F);
     private final Arm HAND_JOINT_ROTATE = new Arm("ClawNeck1", 0); //Used for fixing parenting
@@ -260,16 +260,15 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         Vector3d target = egg.getEggPosition();
         Vector3d normal = egg.getPickupDirection().normalize();
         Vector3d handJointTarget = target.add(normal.scale(HAND_JOINT.length));
-        double baseYRotation = Math.atan2(handJointTarget.z - origin.z, handJointTarget.x - origin.x);
-        Vector3d baseJoinTarget = new Vector3d(Math.cos(baseYRotation), 0, Math.sin(baseYRotation)).scale(BASE_ROTATION.length).add(origin);
+        double baseYRotation = -Math.atan2(handJointTarget.z - origin.z, handJointTarget.x - origin.x);
+        Vector3d baseJoinTarget = new Vector3d(Math.cos(baseYRotation), 0, -Math.sin(baseYRotation)).scale(BASE_ROTATION.length).add(origin);
 
         double xzlen = this.xzDistance(baseJoinTarget, handJointTarget);
         double angleFirstArmTriangle = this.cosineRule(LAST_ARM.length, FIRST_ARM.length, xzlen);
         double angleFirstArm = angleFirstArmTriangle + 1.5*Math.PI + Math.atan2(handJointTarget.y - baseJoinTarget.y, xzlen);
         double angleLastArm = this.cosineRule(xzlen, FIRST_ARM.length, LAST_ARM.length);
 
-        //Usually this would be flipped, but because the model is also flipped, we flip it here.
-        double handRotY = Math.atan2(-normal.x, -normal.z);
+        double handRotY = -Math.atan2(-normal.x, -normal.z);
         double handRotZ = Math.atan2(-normal.y, this.xzDistance(Vector3d.ZERO, normal));
 
         if(ProjectNublar.DEBUG) {
@@ -288,7 +287,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         HAND_JOINT_ROTATE.getBox().zRot = this.interpolate(snapshot[3], -(angleFirstArm + angleLastArm), movementInterp);
         HAND_JOINT_ROTATE.getBox().yRot = this.interpolate(snapshot[4], -(baseYRotation + handRotY + Math.PI/2D), movementInterp);
 
-        HAND_JOINT.getBox().zRot = this.interpolate(snapshot[5], -(handRotZ + Math.PI/2D), movementInterp);
+        HAND_JOINT.getBox().zRot = this.interpolate(snapshot[5], handRotZ + Math.PI/2D, movementInterp);
 
         if(eggMoveAmount == 1 && movementTicks > TICKS_TO_ROTATE && movementTicks < TICKS_TO_ROTATE + TICKS_WOBBLE) {
             BASE_ROTATION.getBox().yRot += this.wobble((movementTicks - TICKS_TO_ROTATE) / TICKS_WOBBLE);
@@ -359,19 +358,19 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         IVertexBuilder buff = buffer.getBuffer(RenderType.lines());
 
         Matrix4f pose = stack.last().pose();
-        buff.vertex(pose, (float) baseJoinTarget.x, (float) baseJoinTarget.y, (float) baseJoinTarget.z).color(0F, 1F, 0F, 1F).endVertex();
-        buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
+        buff.vertex(pose, (float) baseJoinTarget.x, (float) baseJoinTarget.y, (float) baseJoinTarget.z).color(0F, 1F, 1F, 1F).endVertex();
+        buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 1F, 1F).endVertex();
 
         this.drawDebugLines(stack, buff, origin.x, origin.y, origin.z);
         this.drawDebugLines(stack, buff, target.x, target.y, target.z);
         this.drawDebugLines(stack, buff, baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
 
-        buff.vertex(pose, (float) target.x, (float) target.y, (float) target.z).color(0F, 1F, 0F, 1F).endVertex();
-        buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 0F, 1F).endVertex();
+        buff.vertex(pose, (float) target.x, (float) target.y, (float) target.z).color(0F, 1F, 1F, 1F).endVertex();
+        buff.vertex(pose, (float) handJointTarget.x, (float) handJointTarget.y, (float) handJointTarget.z).color(0F, 1F, 1F, 1F).endVertex();
 
         stack.pushPose();
         stack.translate(baseJoinTarget.x, baseJoinTarget.y, baseJoinTarget.z);
-        stack.mulPose(Vector3f.YP.rotation((float) (-baseYRotation - Math.PI)));
+        stack.mulPose(Vector3f.YP.rotation((float) (baseYRotation - Math.PI)));
         stack.mulPose(Vector3f.ZP.rotation((float) -angleFirstArm));
         stack.translate(0, FIRST_ARM.length, 0);
         this.drawDebugLines(stack, buff, 0, 0, 0);

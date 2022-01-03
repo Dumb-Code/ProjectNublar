@@ -131,7 +131,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
             DinosaurEggType type = eggTypes.get(this.level.random.nextInt(eggTypes.size()));
 
             Vector3d armPos = new Vector3d(1.6, 1.4, 0.5);
-            Vector3d position = new Vector3d(4D + 12D*x/100D, 22.2, 2D + 12D*y/100D).scale(1/16F);
+            Vector3d position = new Vector3d(4D + 12D*x/BED_WIDTH, 22.2, 2D + 12D*y/BED_HEIGHT).scale(1/16F);
 
             double handLength = 4 / 16F; // BlockEntityIncubatorRenderer#HAND_JOIN.length
 
