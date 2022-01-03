@@ -365,11 +365,11 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             for (MachineRecipe<B> recipe : this.recipes) {
                 if(this.canProcess(process) && (manualInput || recipe.startsAutomatically()) && process.canAcceptRecipe(recipe) && recipe.accepts(this.asB, process)) {
                     process.setCurrentRecipe(recipe);
+                    process.setTotalTime(recipe.getRecipeTime(this.asB, process));
                     if(!process.isProcessing()) {
                         recipe.onRecipeStarted(asB(), process);
                     }
                     process.setProcessing(true);
-                    process.setTotalTime(recipe.getRecipeTime(this.asB, process));
                     this.setChanged();
                     return true;
                 }
