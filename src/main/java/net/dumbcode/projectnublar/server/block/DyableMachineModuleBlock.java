@@ -34,6 +34,7 @@ public class DyableMachineModuleBlock extends MachineModuleBlock {
             if(((DyableBlockEntity) entity).getDye() != color) {
                 ((DyableBlockEntity) entity).setDye(color);
                 entity.setChanged();
+                world.sendBlockUpdated(pos, state, state, 3);
                 if(!player.isCreative()) {
                     stack.shrink(1);
                 }

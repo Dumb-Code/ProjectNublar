@@ -11,7 +11,7 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = ProjectNublar.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = ProjectNublar.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TintHandler {
 
     @SubscribeEvent
