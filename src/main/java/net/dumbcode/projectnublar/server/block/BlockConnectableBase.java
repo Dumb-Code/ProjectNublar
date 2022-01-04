@@ -104,8 +104,8 @@ public class BlockConnectableBase extends Block {
                 if (entityBox.intersects(box.move(pos)) && box.getConnection().isPowered(worldIn)) {
 
                     Vector3d vec = new Vector3d((entityBox.maxX + entityBox.minX) / 2, (entityBox.maxY + entityBox.minY) / 2, (entityBox.maxZ + entityBox.minZ) / 2);
-                    vec.subtract(box.getConnection().getCenter());
-                    vec.normalize();
+                    vec = vec.subtract(box.getConnection().getCenter());
+                    vec = vec.normalize();
 
                     Vector3d center = this.center(box.move(pos));
                     Vector3d other = this.center(entityBox);
@@ -400,7 +400,7 @@ public class BlockConnectableBase extends Block {
                 out.add(new ConnectionAxisAlignedBB(
                     new AxisAlignedBB(x * i, y * i, z * i, x * next, y * next, z * next)
                         .move(intersect[0] - pos.getX(), intersect[4] - pos.getY(), intersect[2] - pos.getZ())
-                        .inflate(0, connection.getType().getCableWidth() / 2D, 0), connection)
+                        .inflate(connection.getType().getCableWidth() / 2D), connection)
                 );
             }
         }
