@@ -44,6 +44,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
@@ -195,6 +196,10 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.isolationOverrides.put(read.getType(), read);
         }
 
+        this.dinosaurGender = compound.contains("DinosaurGender", Constants.NBT.TAG_BYTE) ?
+            DinosaurSetGender.values()[compound.getByte("DinosaurGender") % DinosaurSetGender.values().length] :
+            DinosaurSetGender.RANDOM;
+
         this.sugarAmount = compound.getDouble("SugarAmount");
         this.boneAmount = compound.getDouble("BoneAmount");
         this.plantAmount = compound.getDouble("PlantAmount");
@@ -225,6 +230,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             iList.add(compoundNBT);
         });
         compound.put("IsolationOverrides", iList);
+        compound.putByte("DinosaurGender", (byte) this.dinosaurGender.ordinal());
 
         compound.putDouble("SugarAmount", this.sugarAmount);
         compound.putDouble("BoneAmount", this.boneAmount);
