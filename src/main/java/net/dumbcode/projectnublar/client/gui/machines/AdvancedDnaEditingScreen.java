@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
@@ -12,6 +13,7 @@ import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerIsolationChange;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerIsolationRemoved;
@@ -26,6 +28,8 @@ import net.minecraft.util.text.ITextComponent;
 import javax.annotation.Nullable;
 import javax.swing.text.html.Option;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
@@ -81,27 +85,11 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
             }
             if(this.selectedId != -1) {
                 Chromosome chromosome = this.chromosomes[this.selectedId];
-                if(chromosome.directEditType == GeneticTypes.OVERALL_TINT.get()) {
-                    @SuppressWarnings("unchecked")
-                    SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<GeneticTint> entry = (SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<GeneticTint>) this.blockEntity.getIsolationOverrides().get(GeneticTypes.OVERALL_TINT.get());
-                    if(entry != null) {
-                        GeneticTint value = entry.getValue();
-                        GeneticTint newTint = new GeneticTint(
-                            chromosome.isSecondaryColour ? value.getPrimary() : new GeneticTint.Part(1, 1, 1, 1, 0),
-                            chromosome.isSecondaryColour ? new GeneticTint.Part(1, 1, 1, 1, 0) : value.getSecondary()
-                        );
-                        entry.setValue(newTint);
-                        ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));
-                    }
-                } else {
-                    this.blockEntity.removeIsolationEntry(chromosome.directEditType);
-                    ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationRemoved(chromosome.directEditType));
-                }
+                chromosome.resetButton();
 
                 this.children.remove(this.elementWidget);
                 this.buttons.remove(this.elementWidget);
-                SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType());
-                this.elementWidget = this.createWidget(entry, chromosome.isSecondaryColour);
+                this.elementWidget = chromosome.createWidget(this.leftPos + 232, this.topPos + 23, 109, 80);
                 this.children.add(this.elementWidget);
                 this.buttons.add(this.elementWidget);
             }
@@ -132,18 +120,33 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         List<Chromosome> list = new ArrayList<>();
         List<DriveUtils.IsolatedGeneEntry> isolatedGenes = DriveUtils.getAllIsolatedGenes(drive);
         for (int i = 0; i < this.chromosomes.length; i++) {
+            if(i == 0) {
+                //If more than 80% of the dinosaur is sequenced, add gender
+                String dinosaurKey = this.blockEntity.getSelectKey(0);
+                int amount = DriveUtils.getAmount(drive, dinosaurKey, null);
+                if (amount > 80) {
+                    list.add(new GenderChromosome(this.blockEntity, random.nextFloat()));
+                    continue;
+                }
+            }
+
+
             boolean full = !isolatedGenes.isEmpty() && isolatedGenes.get(0).getProgress() == 1;
             //If is the tint, add both the primary and secondary.
             if(full && isolatedGenes.get(0).getGeneticType() == GeneticTypes.OVERALL_TINT.get()) {
-                list.add(new Chromosome(GeneticTypes.OVERALL_TINT.get(), false, random.nextFloat()));
-                list.add(new Chromosome(GeneticTypes.OVERALL_TINT.get(), true, random.nextFloat()));
+                list.add(new GeneticTintChromosome(this.blockEntity, false, random.nextFloat()));
+                list.add(new GeneticTintChromosome(this.blockEntity, true, random.nextFloat()));
+                i++;
+            } else if(full) {
+                list.add(new GeneticChromosome(this.blockEntity, isolatedGenes.get(0).getGeneticType(), random.nextFloat()));
             } else {
-                list.add(new Chromosome(isolatedGenes.isEmpty() || !full ? null : isolatedGenes.get(0).getGeneticType(), false, random.nextFloat()));
+                list.add(new EmptyChromosome(random.nextFloat()));
             }
             if(!isolatedGenes.isEmpty()) {
                 isolatedGenes.remove(0);
             }
         }
+
         Collections.shuffle(list, random);
         for (int i = 0; i < this.chromosomes.length; i++) {
             this.chromosomes[i] = list.get(i);
@@ -170,8 +173,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
                 Chromosome chromosome = this.chromosomes[id];
 
                 int colour;
-                GeneticType<?, ?> editType = chromosome.getDirectEditType();
-                if(editType != null) {
+                if(!chromosome.isEmpty()) {
                     boolean selected = this.selectedId == id;
 
                     colour = selected ? 0xFFD93434 : 0xFFB340B1;
@@ -206,18 +208,11 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         this.selectedId = this.hoveredId;
         this.resetButton.active = true;
         Chromosome chromosome = this.chromosomes[this.selectedId];
-        SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry = this.blockEntity.getOrCreateIsolationEntry(chromosome.getDirectEditType());
-        this.elementWidget = this.createWidget(entry, chromosome.isSecondaryColour);
+        this.elementWidget = chromosome.createWidget(this.leftPos + 232, this.topPos + 23, 109, 80);
         this.children.add(this.elementWidget);
         this.buttons.add(this.elementWidget);
     }
 
-    private <O> Widget createWidget(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> entry, boolean isSecondaryColour) {
-        return entry.getType().getDataHandler().createIsolationWidget(this.leftPos + 232, this.topPos + 23, 109, 80, isSecondaryColour, entry::getValue, o -> {
-            entry.setValue(o);
-            ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));
-        }, entry.getType());
-    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
@@ -263,20 +258,135 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         return new GuiScrollBox<>(this.leftPos + 104, this.topPos + 134, 237, 14, 3, this::createOverviewScrollBoxList);
     }
 
+    interface Chromosome {
+        void resetButton();
+        Widget createWidget(int x, int y, int width, int height);
+        Optional<IFormattableTextComponent> getText();
+        default boolean isEmpty() {
+            return false;
+        }
+        float getRandomDist();
+    }
+
     @Value
-    private static class Chromosome {
-        @Nullable GeneticType<?, ?> directEditType;
+    private static class EmptyChromosome implements Chromosome {
+        float randomDist; //[0-1]
+
+        @Override
+        public void resetButton() {
+
+        }
+
+        @Override
+        public Widget createWidget(int x, int y, int width, int height) {
+            return null;
+        }
+
+        @Override
+        public Optional<IFormattableTextComponent> getText() {
+            return Optional.empty();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+    }
+
+    @Value
+    private static class GenderChromosome implements Chromosome {
+        SequencingSynthesizerBlockEntity blockEntity;
+        float randomDist; //[0-1]
+
+        @Override
+        public void resetButton() {
+            this.blockEntity.setDinosaurGender(SequencingSynthesizerBlockEntity.DinosaurSetGender.RANDOM);
+        }
+
+        @Override
+        public Widget createWidget(int x, int y, int width, int height) {
+            int[] index = new int[]{ this.blockEntity.getDinosaurGender().ordinal() };
+            SequencingSynthesizerBlockEntity.DinosaurSetGender[] values = SequencingSynthesizerBlockEntity.DinosaurSetGender.values();
+            return new SimpleButton(x, y + height/2 - 10, width, 20, ProjectNublar.translate("gender.title", values[index[0]].getText()),
+                press -> {
+                    index[0]++;
+                    SequencingSynthesizerBlockEntity.DinosaurSetGender gender = values[index[0] % values.length];
+                    this.blockEntity.setDinosaurGender(gender);
+                    press.setMessage(ProjectNublar.translate("gender.title", values[index[0] % values.length].getText()));
+                }
+            );
+        }
+
+        @Override
+        public Optional<IFormattableTextComponent> getText() {
+            return Optional.of(ProjectNublar.translate("genetic_type.dummy.gender"));
+        }
+    }
+
+
+    @Value
+    private static class GeneticTintChromosome implements Chromosome {
+        SequencingSynthesizerBlockEntity blockEntity;
         boolean isSecondaryColour;
         float randomDist; //[0-1]
 
-        public Optional<IFormattableTextComponent> getText() {
-            if(this.directEditType == GeneticTypes.OVERALL_TINT.get()) {
-                return Optional.of(ProjectNublar.translate("genetic_type.dummy.colour." + (this.isSecondaryColour ? "secondary" : "primary")));
+        @Override
+        public void resetButton() {
+            @SuppressWarnings("unchecked")
+            SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<GeneticTint> entry = (SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<GeneticTint>) blockEntity.getIsolationOverrides().get(GeneticTypes.OVERALL_TINT.get());
+            if(entry != null) {
+                GeneticTint value = entry.getValue();
+                GeneticTint newTint = new GeneticTint(
+                    this.isSecondaryColour ? value.getPrimary() : new GeneticTint.Part(1, 1, 1, 1, 0),
+                    this.isSecondaryColour ? new GeneticTint.Part(1, 1, 1, 1, 0) : value.getSecondary()
+                );
+                entry.setValue(newTint);
+                ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));
             }
+        }
+
+        @Override
+        public Widget createWidget(int x, int y, int width, int height) {
+            return createWidgetFromEntry(this.blockEntity.getOrCreateIsolationEntry(GeneticTypes.OVERALL_TINT.get()), x, y, width, height, 0);
+        }
+
+        @Override
+        public Optional<IFormattableTextComponent> getText() {
+            return Optional.of(ProjectNublar.translate("genetic_type.dummy.colour." + (this.isSecondaryColour ? "secondary" : "primary")));
+        }
+    }
+
+
+    @Value
+    private static class GeneticChromosome implements Chromosome {
+        SequencingSynthesizerBlockEntity blockEntity;
+        @Nullable GeneticType<?, ?> directEditType;
+        float randomDist; //[0-1]
+
+        @Override
+        public void resetButton() {
+            blockEntity.removeIsolationEntry(this.directEditType);
+            ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationRemoved(this.directEditType));
+        }
+
+        @Override
+        public Widget createWidget(int x, int y, int width, int height) {
+            return createWidgetFromEntry(this.blockEntity.getOrCreateIsolationEntry(this.directEditType), x, y, width, height, 0);
+        }
+
+        @Override
+        public Optional<IFormattableTextComponent> getText() {
             if(this.directEditType != null) {
                 return Optional.of(this.directEditType.getTranslationComponent());
             }
             return Optional.empty();
         }
+    }
+
+    private static <O> Widget createWidgetFromEntry(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> entry, int x, int y, int width, int height, int data) {
+        return entry.getType().getDataHandler().createIsolationWidget(x, y, width, height, data, entry::getValue, o -> {
+            entry.setValue(o);
+            ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));
+        }, entry.getType());
     }
 }

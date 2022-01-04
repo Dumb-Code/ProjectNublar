@@ -96,7 +96,12 @@
 
     "projectnublar.genetic_type.dummy.colour.primary": "Primary Color",
     "projectnublar.genetic_type.dummy.colour.secondary": "Secondary Color",
+    "projectnublar.genetic_type.dummy.gender": "Gender",
 
+    "projectnublar.gender.title": "Gender: %s",
+    "projectnublar.gender.type.male": "Male",
+    "projectnublar.gender.type.female": "Female",
+    "projectnublar.gender.type.random": "Random",
 
     "projectnublar.genetic_type.strength": "Strength",
     "projectnublar.genetic_type.defense": "Defense",

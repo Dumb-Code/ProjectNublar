@@ -1,19 +1,13 @@
 package net.dumbcode.projectnublar.server.recipes;
 
-import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.dumbcode.projectnublar.server.item.BasicDinosaurItem;
-import net.dumbcode.projectnublar.server.item.DinosaurProvider;
-import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.dumbcode.projectnublar.server.item.MachineModuleType;
+import net.dumbcode.projectnublar.server.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
 
 public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     INSTANCE;
@@ -46,8 +40,7 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     public void onRecipeFinished(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
         ItemStack in = process.getInputStack(0);
         ItemStack out = new ItemStack(ItemHandler.DINOSAUR_INCUBATED_EGG.get(((DinosaurProvider) in.getItem()).getDinosaur()));
-        ListNBT genetics = in.getOrCreateTagElement(ProjectNublar.MODID).getList("Genetics", Constants.NBT.TAG_COMPOUND);
-        out.getOrCreateTagElement(ProjectNublar.MODID).put("Genetics", genetics.copy());
+        DnaHoverDinosaurItem.copyDataNBT(in, out);
         blockEntity.getHandler().setStackInSlot(process.getOutputSlot(0), out);
     }
 

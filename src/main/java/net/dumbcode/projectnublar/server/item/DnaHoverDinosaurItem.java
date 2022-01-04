@@ -25,12 +25,39 @@ public class DnaHoverDinosaurItem extends BasicDinosaurItem {
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         super.appendHoverText(stack, world, list, flag);
         if(Screen.hasShiftDown()) {
-            stack.getOrCreateTagElement(ProjectNublar.MODID).getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
+            CompoundNBT tag = stack.getOrCreateTagElement(ProjectNublar.MODID);
+
+            tag.getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
                 .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
                 .map(GeneticEntry::gatherTextComponents)
                 .forEach(list::add);
+
+            Object arg;
+            if(tag.contains("IsMale", Constants.NBT.TAG_BYTE)) {
+                if(tag.getBoolean("IsMale")) {
+                    arg = ProjectNublar.translate("gender.type.male");
+                } else {
+                    arg = ProjectNublar.translate("gender.type.female");
+                }
+
+            } else {
+                arg = ProjectNublar.translate("gender.type.random");
+            }
+            list.add(ProjectNublar.translate("gender.title", arg));
+
         } else {
             list.add(ProjectNublar.translate("item.test_tube.shift_for_info").withStyle(TextFormatting.AQUA));
+        }
+
+    }
+
+    public static void copyDataNBT(ItemStack from, ItemStack to) {
+        CompoundNBT inTag = from.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundNBT outTag = to.getOrCreateTagElement(ProjectNublar.MODID);
+
+        outTag.put("Genetics", inTag.getList("Genetics", Constants.NBT.TAG_COMPOUND).copy());
+        if(inTag.contains("IsMale", Constants.NBT.TAG_BYTE)) {
+            outTag.putBoolean("IsMale", inTag.getBoolean("IsMale"));
         }
 
     }

@@ -90,6 +90,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
     @Getter private final Map<GeneticType<?, ?>, IsolatedGeneticEntry<?>> isolationOverrides = new HashMap<>();
 
+    @Getter @Setter private DinosaurSetGender dinosaurGender = DinosaurSetGender.RANDOM;
+
+
     public float snapshot;
     public float previousSnapshot;
     public int movementTicksLeft;
@@ -282,6 +285,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                 dna.clear();
             }
             this.isolationOverrides.clear();
+            this.dinosaurGender = DinosaurSetGender.RANDOM;
             this.setChanged();
 
             ProjectNublar.NETWORK.send(NetworkUtils.forPos(this.level, this.worldPosition), S2CSyncSequencingSynthesizerSyncSelected.fromBlockEntity(this));
@@ -418,6 +422,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
                     dna.clear();
                 }
                 this.isolationOverrides.clear();
+                this.dinosaurGender = DinosaurSetGender.RANDOM;
                 this.setChanged();
             }
         }
@@ -708,6 +713,27 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
         public GeneticEntry<?, O> create() {
             return new GeneticEntry<>(this.type).setModifier(this.value);
+        }
+    }
+
+    public enum DinosaurSetGender {
+        MALE("gender.type.male", true),
+        FEMALE("gender.type.female", false),
+        RANDOM("gender.type.random", null);
+
+        @Getter
+        private final TranslationTextComponent text;
+
+        @Getter
+        private final Boolean male;
+
+        DinosaurSetGender(String text, Boolean male) {
+            this.text = ProjectNublar.translate(text);
+            this.male = male;
+        }
+
+        public boolean hasValue() {
+            return this.male != null;
         }
     }
 

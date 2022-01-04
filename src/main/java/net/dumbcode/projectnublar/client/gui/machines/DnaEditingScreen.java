@@ -120,11 +120,16 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     @Override
     public void tick() {
         super.tick();
-        if(this.cachedEntity != null && Minecraft.getInstance().player.tickCount % 20 == 0) {
-            this.cachedEntity.get(EntityComponentTypes.GENDER.get()).ifPresent(g -> g.male = !g.male);
+        if(this.cachedEntity != null) {
+            this.cachedEntity.get(EntityComponentTypes.GENDER.get()).ifPresent(g -> {
+                SequencingSynthesizerBlockEntity.DinosaurSetGender gender = this.blockEntity.getDinosaurGender();
+                if(gender.hasValue()) {
+                    g.male = gender.getMale();
+                } else if(Minecraft.getInstance().player.tickCount % 20 == 0) {
+                    g.male = !g.male;
+                }
+            });
         }
-
-//        this.refreshEntity();
     }
 
     protected abstract int getEntityLeft();

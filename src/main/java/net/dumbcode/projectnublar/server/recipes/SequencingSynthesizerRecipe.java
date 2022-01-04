@@ -118,7 +118,12 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
             ListNBT collected = geneticEntries.stream()
                 .map(g -> g.serialize(new CompoundNBT()))
                 .collect(CollectorUtils.toNBTTagList());
-            stack.getOrCreateTagElement(ProjectNublar.MODID).put("Genetics", collected);
+            CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+            nbt.put("Genetics", collected);
+
+            if(blockEntity.getDinosaurGender().hasValue()) {
+                nbt.putBoolean("IsMale", blockEntity.getDinosaurGender().getMale());
+            }
             return stack;
         }
         ProjectNublar.getLogger().warn("Unable to complete recipe, {} was not a dinosaur", location);

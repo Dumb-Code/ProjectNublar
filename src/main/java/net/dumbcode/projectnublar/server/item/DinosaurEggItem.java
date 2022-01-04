@@ -30,17 +30,23 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
         PlayerEntity player = context.getPlayer();
         World world = player.level;
         Vector3d location = context.getClickLocation();
+        CompoundNBT nbt = context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID);
         if(!world.isClientSide) {
             DinosaurEntity entity = this.getDinosaur().createEntity(world,
                 this.getDinosaur().getAttacher().getDefaultConfig()
                     .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), genetics -> {
                         genetics.disableRandomGenetics();
-                        context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID)
-                            .getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
+                        nbt.getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
                             .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
                             .forEach(genetics::insertGenetic);
                     })
-                    .runBeforeFinalize(EntityComponentTypes.GENDER.get(), gender -> gender.male = world.random.nextBoolean())
+                    .runBeforeFinalize(EntityComponentTypes.GENDER.get(), gender -> {
+                        if(nbt.contains("IsMale", Constants.NBT.TAG_BYTE)) {
+                            gender.male = nbt.getBoolean("IsMale");
+                        } else {
+                            gender.male = world.random.nextBoolean();
+                        }
+                    })
             );
             entity.get(EntityComponentTypes.GENETICS.get()).ifPresent(genetics -> GeneticComponent.mutateGenes(genetics, entity));
             entity.setPos(location.x, location.y, location.z);
