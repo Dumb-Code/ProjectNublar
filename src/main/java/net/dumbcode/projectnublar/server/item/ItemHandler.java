@@ -112,30 +112,30 @@ public final class ItemHandler {
 
 
     public static final RegistryMap<Dinosaur, Item> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
-        new BasicDinosaurItem(d, "raw_meat", new Item.Properties().food(new Food.Builder()
+        new BasicDinosaurItem(d, "raw_meat", new Item.Properties().tab(TAB).food(new Food.Builder()
             .nutrition(d.getItemProperties().getRawMeatHealAmount())
             .saturationMod(d.getItemProperties().getRawMeatSaturation())
             .build()
         ))
     );
     public static final RegistryMap<Dinosaur, Item> COOKED_MEAT_ITEMS = createMap("%s_cooked_meat", d ->
-        new BasicDinosaurItem(d, "cooked_meat", new Item.Properties().food(new Food.Builder()
+        new BasicDinosaurItem(d, "cooked_meat", new Item.Properties().tab(TAB).food(new Food.Builder()
             .nutrition(d.getItemProperties().getRawMeatHealAmount())
             .saturationMod(d.getItemProperties().getRawMeatSaturation())
             .build()
         ))
     );
 
-    public static final RegistryMap<Dinosaur, Item> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, "spawn_egg", new Item.Properties()));
-    public static final RegistryMap<Dinosaur, Item> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, "genetic_material_test_tube", new Item.Properties()));
-    public static final RegistryMap<Dinosaur, Item> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new DnaHoverDinosaurItem(d, "test_tube", new Item.Properties()));
-    public static final RegistryMap<Dinosaur, Item> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties()));
-    public static final RegistryMap<Dinosaur, Item> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties()));
+    public static final RegistryMap<Dinosaur, Item> SPAWN_EGG_ITEMS = createMap("%s_spawn_egg", d -> new DinosaurSpawnEgg(d, "spawn_egg", new Item.Properties().tab(TAB)));
+    public static final RegistryMap<Dinosaur, Item> TEST_TUBES_GENETIC_MATERIAL = createMap("%s_genetic_material_test_tube", d -> new DinosaurGeneticMaterialItem(d, "genetic_material_test_tube", new Item.Properties().tab(TAB)));
+    public static final RegistryMap<Dinosaur, Item> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new DnaHoverDinosaurItem(d, "test_tube", new Item.Properties().tab(TAB)));
+    public static final RegistryMap<Dinosaur, Item> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties().tab(TAB)));
+    public static final RegistryMap<Dinosaur, Item> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties().tab(TAB)));
 
     public static final Map<Dinosaur, RegistryMap<String, Item>> FOSSIL_ITEMS = createNestedMap(
         "%s_fossil_%s",
         dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS.get()), DinosaurDropsComponent.Storage::getFossilList),
-        (dinosaur, fossil) -> new FossilItem(dinosaur, "fossil", fossil, new Item.Properties())
+        (dinosaur, fossil) -> new FossilItem(dinosaur, "fossil", fossil, new Item.Properties().tab(TAB))
         );
 
     public static void registerAllItemBlocks(RegistryEvent.Register<Item> event) {
