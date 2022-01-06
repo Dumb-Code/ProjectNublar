@@ -7,9 +7,9 @@ import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
 import java.util.List;
 
 @UtilityClass
-public class MoreTabulaUtils {
+public class MoreDCMUtils {
     public static List<DCMModelRenderer> getAllChildren(DCMModelRenderer box, List<String> ignoreList) {
-        if(box.getChildCubes() == null) {
+        if(box.getChildCubes().isEmpty()) {
             return Lists.newArrayList();
         }
         List<DCMModelRenderer> list = Lists.newArrayList(box);

@@ -13,7 +13,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.RenderAdjustmentsComponent;
 import net.dumbcode.dumblibrary.server.taxidermy.TaxidermyHistory;
 import net.dumbcode.dumblibrary.server.utils.DCMUtils;
-import net.dumbcode.projectnublar.client.render.MoreTabulaUtils;
+import net.dumbcode.projectnublar.client.render.MoreDCMUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.SkeletalBuilderBlock;
@@ -416,7 +416,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         String currentState = modelList.get(id - 1);
         for (int i = 0; i < modelList.size(); i++) {
             String model = modelList.get(i);
-            modelChildMap.put(model, MoreTabulaUtils.getAllChildren(tabulaModel.getCube(model), modelList));
+            modelChildMap.put(model, MoreDCMUtils.getAllChildren(tabulaModel.getCube(model), modelList));
             if(i <= modelList.indexOf(currentState)) {
                 activeStates.add(model);
             }
