@@ -51,7 +51,7 @@ public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
         Matrix4f pose = last.pose();
         Matrix3f normal = last.normal();
         IVertexBuilder buffer = buffers.getBuffer(RenderType.entityTranslucent(new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png")));
-        for (GyrosphereSphere.Vertex vertex : GyrosphereSphere.generate()) {
+        for (GyrosphereSphere.Vertex vertex : getSphere()) {
             Vector4f vec = new Vector4f(vertex.x, vertex.y, vertex.z, 1.0F);
             vec.transform(pose);
             buffer
