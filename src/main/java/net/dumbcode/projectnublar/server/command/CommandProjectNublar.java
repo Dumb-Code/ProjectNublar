@@ -16,6 +16,7 @@ public class CommandProjectNublar {
                 .then(GenerateCommand.createCommand())
                 .then(EditDinosaurDataCommand.createCommand())
                 .then(RaceWarCommand.createCommand())
+                .then(FinishProcessCommand.createCommand())
         );
     }
 }
