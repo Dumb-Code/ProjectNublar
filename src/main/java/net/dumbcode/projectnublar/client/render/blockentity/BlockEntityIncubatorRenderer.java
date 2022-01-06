@@ -153,9 +153,9 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.translate(eggEnd.x, eggEnd.y, eggEnd.z);
 
         stack.mulPose(Vector3f.YP.rotation((float) (-eggRotationY + Math.PI)));
-        stack.mulPose(Vector3f.ZP.rotation((float) (-eggRotationZ + Math.PI/2)));
+        stack.mulPose(Vector3f.ZP.rotation((float) (-eggRotationZ - Math.PI/2)));
 
-        stack.mulPose(Vector3f.YP.rotation(egg.getRotation()));
+        stack.mulPose(Vector3f.YP.rotation(-egg.getRotation()));
         stack.scale(scale, scale, scale);
 
         IVertexBuilder lines = buffers.getBuffer(RenderType.lines());
@@ -165,7 +165,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         }
         stack.translate(0, eggLength*scale, 0);
         if(ProjectNublar.DEBUG) {
-            this.drawDebugLines(stack, lines, 0, 0, 0);
+            this.drawDebugLines(stack, lines, 0, -2*eggLength*scale, 0);
         }
         stack.translate(0, -1.5, 0);
         type.getEggModel().renderBoxes(stack, light, buffers, type.getTexture());
