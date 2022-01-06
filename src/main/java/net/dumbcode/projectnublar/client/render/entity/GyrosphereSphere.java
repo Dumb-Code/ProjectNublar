@@ -21,7 +21,7 @@ public class GyrosphereSphere {
         float s, t, ds, dt;
         int i, j, imin, imax;
 
-        for (float nsign : new float[] { -1.0F, 1.0F }) {
+        for (float nsign : new float[] { 1.0F }) {
 
             drho = PI / stacks;
             dtheta = 2.0f * PI / slices;
@@ -34,6 +34,8 @@ public class GyrosphereSphere {
 
             // draw intermediate stacks as quad strips
             for (i = imin; i < imax; i++) {
+
+                List<Vertex> strip = new ArrayList<>();
                 rho = i * drho;
                 s = 0.0f;
                 for (j = 0; j <= slices; j++) {
@@ -43,7 +45,7 @@ public class GyrosphereSphere {
                     y = cos(theta) * sin(rho);
                     z = nsign * cos(rho);
 
-                    vertices.add(new Vertex(
+                    strip.add(new Vertex(
                         x * radius, y * radius, z * radius,
                         s, t,
                         x * nsign, y * nsign, z * nsign
@@ -53,7 +55,7 @@ public class GyrosphereSphere {
                     y = cos(theta) * sin(rho + drho);
                     z = nsign * cos(rho + drho);
 
-                    vertices.add(new Vertex(
+                    strip.add(new Vertex(
                         x * radius, y * radius, z * radius,
                         s, t - dt,
                         x * nsign, y * nsign, z * nsign
@@ -61,21 +63,25 @@ public class GyrosphereSphere {
 
                     s += ds;
                 }
+
+                //We need to convert from a quad strip to just quads.
+                for (int si = 2; si < strip.size(); si += 2) {
+                    Vertex a = strip.get(si-2);
+                    Vertex b = strip.get(si-1);
+                    Vertex c = strip.get(si);
+                    Vertex d = strip.get(si+1);
+
+                    vertices.add(b);
+                    vertices.add(a);
+                    vertices.add(c);
+                    vertices.add(d);
+                }
+
                 t -= dt;
             }
         }
 
-        List<Vertex> outList = new ArrayList<>();
-        for (int v = 0; v < vertices.size(); v+=4) {
-            outList.add(vertices.get(v));
-            outList.add(vertices.get(v+1));
-            outList.add(vertices.get(v+2));
-
-            outList.add(vertices.get(v+3));
-            outList.add(vertices.get(v));
-            outList.add(vertices.get(v+2));
-        }
-        return outList;
+        return vertices;
     }
 
     private static float sin(float f) {

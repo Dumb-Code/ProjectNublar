@@ -9,12 +9,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.util.math.vector.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +20,7 @@ import java.util.Map;
 
 public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
-
+    private static final ResourceLocation TEXTURE = new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png");
     private static List<GyrosphereSphere.Vertex> sphere;
 
     public GyrosphereRenderer(EntityRendererManager manager) {
@@ -47,25 +44,27 @@ public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
             stack.mulPose(slerp(entity.prevRotation, entity.rotation, partialTicks));
         }
 
-        stack.scale(entity.getBbWidth()/2F, entity.getBbWidth()/2F, entity.getBbWidth()/2F);
+        float scale = entity.getBbWidth() / 2F;
+        stack.scale(scale, scale, scale);
 
         MatrixStack.Entry last = stack.last();
         Matrix4f pose = last.pose();
         Matrix3f normal = last.normal();
-        IVertexBuilder buffer = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
-        Map<BlockPos, Integer> lightValueCache = new HashMap<>();
-        for (GyrosphereSphere.Vertex vertex : getSphere()) {
+        IVertexBuilder buffer = buffers.getBuffer(RenderType.entityTranslucent(new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png")));
+        for (GyrosphereSphere.Vertex vertex : GyrosphereSphere.generate()) {
             Vector4f vec = new Vector4f(vertex.x, vertex.y, vertex.z, 1.0F);
             vec.transform(pose);
-            int l = lightValueCache.computeIfAbsent(new BlockPos(vec.x(), vec.y(), vec.z()), pos -> WorldRenderer.getLightColor(entity.level, pos));
-            buffer.vertex(vec.x(), vec.y(), vec.z())
+            buffer
+                .vertex(vec.x(), vec.y(), vec.z())
+                .color(1F, 1F, 1F, 1F)
                 .uv(vertex.u, vertex.v)
-                .uv2(l)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(light)
                 .normal(normal, vertex.nx, vertex.ny, vertex.nz)
                 .endVertex();
         }
 
-
+        stack.popPose();
     }
 
     //Adapted from https://github.com/JOML-CI/JOML/blob/master/src/org/joml/Quaternionf.java

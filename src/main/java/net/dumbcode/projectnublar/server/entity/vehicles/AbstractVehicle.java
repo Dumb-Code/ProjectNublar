@@ -80,6 +80,11 @@ public abstract class AbstractVehicle<E extends Enum<E>> extends Entity {
         }
     }
 
+    @Override
+    public boolean isPickable() {
+        return true;
+    }
+
     @OnlyIn(Dist.CLIENT)
     protected abstract boolean isActive(ClientPlayerEntity player, E e);
 

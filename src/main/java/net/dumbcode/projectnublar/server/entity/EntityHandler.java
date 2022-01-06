@@ -36,8 +36,8 @@ public class EntityHandler {
         EntityType.Builder.<GyrosphereVehicle>of(GyrosphereVehicle::new, EntityClassification.MISC)
             .clientTrackingRange(64)
             .setTrackingRange(64)
-            .setUpdateInterval(10)
-            .setShouldReceiveVelocityUpdates(true)
+            .setUpdateInterval(20)
+            .setShouldReceiveVelocityUpdates(false)
             .sized(4, 4)
             .build("gyrosphere")
     );

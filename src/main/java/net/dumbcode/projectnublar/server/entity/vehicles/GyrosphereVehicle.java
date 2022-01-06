@@ -47,6 +47,12 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
 //        return true;
 //    }
 
+
+    @Override
+    public boolean isPushable() {
+        return true;
+    }
+
     @Override
     protected void readAdditionalSaveData(CompoundNBT compound) {
     }
@@ -55,13 +61,13 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
     protected void addAdditionalSaveData(CompoundNBT compound) {
     }
 
-    @Override
-    public boolean canBeCollidedWith() {
-        if(this.level.isClientSide) {
-            return !this.isPlayerIn();
-        }
-        return true;
-    }
+//    @Override
+//    public boolean canBeCollidedWith() {
+//        if(this.level.isClientSide) {
+//            return !this.isPlayerIn();
+//        }
+//        return true;
+//    }
 
     private boolean isPlayerIn() {
         return this.getPassengers().contains(Minecraft.getInstance().player);
@@ -106,6 +112,11 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
 
     }
 
+    @Override
+    public void push(double x, double y, double z) {
+        super.push(x * 0.25F, y * 0.25F, z * 0.25F);
+    }
+
     private void runClientMovement() {
         if(this.rotation == null) {
             this.rotation = new Quaternion(1, 0, 0, 0);
@@ -115,8 +126,11 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
         Quaternion quatZ = Vector3f.ZP.rotation((float) (-this.getDeltaMovement().x * this.getBbWidth() * Math.PI * 0.017453292F));
         this.prevRotation = this.rotation;
 
-        this.rotation = new Quaternion(quatX);
-        this.rotation.mul(quatZ);
+        Quaternion quaternion = new Quaternion(quatX);
+        quaternion.mul(quatZ);
+        quaternion.mul(this.rotation);
+
+        this.rotation = quaternion;
     }
 
     @Override
@@ -138,7 +152,8 @@ public class GyrosphereVehicle extends AbstractVehicle<AbstractVehicle.DefaultIn
         return ActionResultType.SUCCESS;
     }
 
-    public void updatePassenger(Entity passenger) {
+    @Override
+    public void positionRider(Entity passenger) {
         if (this.hasPassenger(passenger)) {
             passenger.setPos(this.position().x, this.position().y + this.getDimensions(Pose.STANDING).height / 2 - passenger.getDimensions(passenger.getPose()).height / 2, this.position().z);
         }
