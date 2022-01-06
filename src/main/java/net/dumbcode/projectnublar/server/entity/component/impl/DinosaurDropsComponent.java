@@ -46,7 +46,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
         super.deserialize(compound);
         this.fossilList.clear();
         for (INBT base : compound.getList("drop_fossils", Constants.NBT.TAG_STRING)) {
-            this.fossilList.add(base.toString());
+            this.fossilList.add(base.getAsString());
         }
     }
 
