@@ -347,7 +347,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
         @Override
         public Widget createWidget(int x, int y, int width, int height) {
-            return createWidgetFromEntry(this.blockEntity.getOrCreateIsolationEntry(GeneticTypes.OVERALL_TINT.get()), x, y, width, height, 0);
+            return createWidgetFromEntry(this.blockEntity.getOrCreateIsolationEntry(GeneticTypes.OVERALL_TINT.get()), x, y, width, height, this.isSecondaryColour ? 1 : 0);
         }
 
         @Override
