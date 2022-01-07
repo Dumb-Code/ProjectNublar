@@ -118,19 +118,23 @@ public class DriveUtils {
 
         for (DriveEntry entry : getAll(drive)) {
             entry.getEntity().ifPresent(e -> {
+                //Get the maximum amount per animal. If the entity has 50 in the red variant, and 65 in the blue variant, entityAmountMap will contain 65.
                 entityAmountMap.compute(e, (t, amount) -> Math.max(amount != null ? amount : 0, entry.getAmount()));
-                for (EntityGeneticRegistry.Entry<?, ?> registryEntry : EntityGeneticRegistry.INSTANCE.gatherEntry(e, null)) {
-                    counter.compute(registryEntry.getType(), (type, amount) -> (amount == null ? 0 : amount) + entry.getAmount() / 100D);
-                }
 
                 if(e == EntityType.TROPICAL_FISH) {
                     DyeColor dyeColor = DyeColor.byName(entry.getVariant(), null);
-                    if(dyeColor != null) {
+                    if(dyeColor != null && dyeColor != DyeColor.BLACK) {
                         tropicalFishColours.put(dyeColor, entry.getAmount());
                     }
                 }
             });
         }
+
+        entityAmountMap.forEach((entityType, entityAmount) -> {
+            for (EntityGeneticRegistry.Entry<?, ?> registryEntry : EntityGeneticRegistry.INSTANCE.gatherEntry(entityType, null)) {
+                counter.compute(registryEntry.getType(), (type, amount) -> (amount == null ? 0 : amount) + entityAmount / 100D);
+            }
+        });
 
         List<IsolatedGeneEntry> entries = new ArrayList<>();
         counter.forEach((type, amount) -> {
@@ -145,8 +149,9 @@ public class DriveUtils {
         if(!tropicalFishColours.isEmpty()) {
             entries.add(new IsolatedGeneEntry(
                 GeneticTypes.OVERALL_TINT.get(),
-                tropicalFishColours.values().stream().mapToDouble(Integer::doubleValue).sum() / DyeColor.values().length / 100D,
+                tropicalFishColours.values().stream().mapToDouble(Integer::doubleValue).sum() / (DyeColor.values().length-1) / 100D,
                 Arrays.stream(DyeColor.values())
+                    .filter(c -> c != DyeColor.BLACK)
                     .map(d -> Pair.of(DriveUtils.getTranslation(EntityType.TROPICAL_FISH.getDescriptionId(), d.getName()), tropicalFishColours.getOrDefault(d, 0) / 100D))
                     .collect(Collectors.toList())
             ));
