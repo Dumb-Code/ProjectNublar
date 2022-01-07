@@ -204,7 +204,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
                     if (differingConnections.size() == 1) {
                         Connection connection = differingConnections.get(0);
                         double[] in = connection.getIn();
-                        rotation += (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0])));
+                        rotation += (float) Math.toDegrees(Math.atan((in[2] - in[3]) / (in[1] - in[0]))) + 90;
                     } else {
                         Connection connection1 = differingConnections.get(0);
                         Connection connection2 = differingConnections.get(1);
