@@ -58,6 +58,8 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -70,8 +72,10 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.resource.VanillaResourceType;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -88,9 +92,6 @@ import java.util.function.Predicate;
 public class ProjectNublar {
 
     public static final String MODID = "projectnublar";
-    public static final String NAME = "Project Nublar";
-    public static final String VERSION = "0.1.25";
-    public static final String DUMBLIBRARY_VERSION = "0.2.4";
 
     public static final boolean DEBUG = true;
 
@@ -105,6 +106,11 @@ public class ProjectNublar {
     );
 
     public ProjectNublar() {
+        ArtifactVersion version = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion();
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(
+            version::toString,
+            (remote, isServer) -> true
+        ));
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
