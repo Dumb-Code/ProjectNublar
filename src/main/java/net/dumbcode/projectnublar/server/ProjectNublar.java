@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.brigadier.arguments.ArgumentType;
 import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
@@ -20,6 +21,7 @@ import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.BlockPylonPole;
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
 import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
+import net.dumbcode.projectnublar.server.command.DinosaurArgument;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
 import net.dumbcode.projectnublar.server.data.ProjectNublarRecipeProvider;
@@ -46,6 +48,8 @@ import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.command.arguments.ArgumentSerializer;
+import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -147,6 +151,8 @@ public class ProjectNublar {
             DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
             PlantHandler.getRegistry().forEach(Plant::attachComponents);
         });
+
+//        ArgumentTypes.register("pn:dinosuar", DinosaurArgument.class, new ArgumentSerializer<>(DinosaurArgument::new));
     }
 
     public void clientSetup() {

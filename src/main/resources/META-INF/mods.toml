@@ -12,3 +12,4 @@ license="All right reserved"
     modId="dumblibrary"
     versionRange="1.0"
     mandatory=true
+    ordering="AFTER"

@@ -35,4 +35,5 @@ public class DinosaurArgument implements ArgumentType<Dinosaur> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return ISuggestionProvider.suggest(DinosaurHandler.getRegistry().getValues().stream().map(d -> Objects.requireNonNull(d.getRegistryName()).toString()), builder);
     }
+
 }

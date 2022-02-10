@@ -75,7 +75,7 @@ public class ArtificialEggAddDnaCraftingRecipe extends SpecialRecipe {
 
     @Override
     public IRecipeSerializer<?> getSerializer() {
-        return null;
+        return ProjectNublarRecipesSerializers.ARTIFICIAL_EGG_ADD_DNA.get();
     }
 
 }
