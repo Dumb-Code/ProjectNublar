@@ -101,7 +101,7 @@ public class ProjectNublar {
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel NETWORK = NetworkRegistry.newSimpleChannel(
         new ResourceLocation(MODID, "main"), () -> PROTOCOL_VERSION,
-        PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals
+        s -> true, s -> true
     );
 
     public ProjectNublar() {
