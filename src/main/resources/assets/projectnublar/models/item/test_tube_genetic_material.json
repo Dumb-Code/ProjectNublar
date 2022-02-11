@@ -1,6 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "projectnublar:item/test_tube_genetic_material"
-  }
-}

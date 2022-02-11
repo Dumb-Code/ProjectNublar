@@ -9,6 +9,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.dumblibrary.server.ecs.system.RegisterSystemsEvent;
 import net.dumbcode.dumblibrary.server.json.JsonUtil;
 import net.dumbcode.dumblibrary.server.registry.PreBlockRegistryEvent;
+import net.dumbcode.projectnublar.client.DinoItemResourcePack;
 import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
@@ -54,6 +55,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
+import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -164,6 +166,7 @@ public class ProjectNublar {
 
         BlockEntityIncubatorRenderer.markResolvers();
 
+
     }
 
     public void registerCommands(RegisterCommandsEvent event) {
@@ -182,7 +185,11 @@ public class ProjectNublar {
 
 
     public void clientPreInit(FMLClientSetupEvent event) {
-        System.out.println(Blocks.ACACIA_LOG);
+
+        IResourceManager manager = Minecraft.getInstance().getResourceManager();
+        ((SimpleReloadableResourceManager)manager).add(new DinoItemResourcePack());
+
+
         ProjectNublarBlockRenderLayers.setRenderLayers();
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) event.getMinecraftSupplier().get().getResourceManager();
         resourceManager.registerReloadListener(create(BlockEntityEggPrinterRenderer::onResourceManagerReload, VanillaResourceType.MODELS));
