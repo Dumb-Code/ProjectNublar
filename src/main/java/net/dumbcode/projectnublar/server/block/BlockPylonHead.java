@@ -81,7 +81,7 @@ public class BlockPylonHead extends Block implements IItemBlock {
 
     @Override
     public VoxelShape getShape(BlockState p_220053_1_, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
-        return SHAPE;
+        return Block.box(3, 3, 3, 12, 12, 12);
     }
 
     @Override

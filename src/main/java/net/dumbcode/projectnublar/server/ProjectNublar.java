@@ -97,7 +97,7 @@ public class ProjectNublar {
 
     public static final String MODID = "projectnublar";
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
 
     private static Logger logger = LogManager.getLogger(MODID);
@@ -151,8 +151,6 @@ public class ProjectNublar {
             DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
             PlantHandler.getRegistry().forEach(Plant::attachComponents);
         });
-
-//        ArgumentTypes.register("pn:dinosuar", DinosaurArgument.class, new ArgumentSerializer<>(DinosaurArgument::new));
     }
 
     public void clientSetup() {
@@ -181,6 +179,7 @@ public class ProjectNublar {
             gen.addProvider(new ProjectNublarRecipeProvider(gen));
         }
     }
+
 
     public void clientPreInit(FMLClientSetupEvent event) {
         System.out.println(Blocks.ACACIA_LOG);
@@ -234,6 +233,7 @@ public class ProjectNublar {
     }
 
     public void preInit(FMLCommonSetupEvent event) {
+        ArgumentTypes.register("pn:dinosuar", DinosaurArgument.class, new ArgumentSerializer<>(DinosaurArgument::new));
         ProjectNublarGeneticRegistry.register();
 
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry().getValues()) {
