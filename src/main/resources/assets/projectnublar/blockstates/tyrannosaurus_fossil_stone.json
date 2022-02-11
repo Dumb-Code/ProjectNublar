@@ -1,6 +1,6 @@
 {
   "variants": {
-    "normal": [
+    "": [
       { "model": "projectnublar:block/tyrannosaurus_fossil_stone_leg" },
       { "model": "projectnublar:block/tyrannosaurus_fossil_stone_leg_mirrored" },
       { "model": "projectnublar:block/tyrannosaurus_fossil_stone_leg", "y": 180 },

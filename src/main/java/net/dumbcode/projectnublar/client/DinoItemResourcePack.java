@@ -20,6 +20,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+//TODO: move this to a data generator
+@Deprecated
 public class DinoItemResourcePack extends ResourcePack {
     private final List<Pair<RegistryMap<Dinosaur, Item>, String>> entries = new ArrayList<>();
 

@@ -1,11 +1,26 @@
 {
-  "todo:":"make it so the overlay isnt facing the same way",
   "variants": {
-    "normal": [
+    "": [
       { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_leg" },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_leg", "y": 90 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_leg", "y": 180 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_leg", "y": 270 },
+
       { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_ribcage" },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_ribcage", "y": 90 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_ribcage", "y": 180 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_ribcage", "y": 270 },
+
       { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_skull" },
-      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_tail" }
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_skull", "y": 90 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_skull", "y": 180 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_skull", "y": 270 },
+
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_tail" },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_tail", "y": 90 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_tail", "y": 180 },
+      { "model": "projectnublar:block/tyrannosaurus_fossil_sandstone_tail", "y": 270 }
+
     ]
   }
 }
