@@ -92,14 +92,14 @@ public class VillagerHandler {
                     new RandomChoiceCheckTrade(15, 1, 8, 5, 0.75F,
                         new ItemStack(ItemHandler.COMPUTER_CHIP_PART_2.get()), new ItemStack(ItemHandler.TANKS_PART_2.get()),
                         new ItemStack(ItemHandler.DRILL_BIT_PART_2.get()), new ItemStack(ItemHandler.BULB_PART_2.get()),
-                        new ItemStack(ItemHandler.CONTAINER_PART_2.get()), new ItemStack(ItemHandler.TURBINES_PART_2.get())
+                        new ItemStack(ItemHandler.TURBINES_PART_2.get())
                     )
                 ))
                 .put(3, Arrays.asList(
                     new RandomChoiceCheckTrade(30, 1, 4, 8, 1F,
                         new ItemStack(ItemHandler.COMPUTER_CHIP_PART_3.get()), new ItemStack(ItemHandler.TANKS_PART_3.get()),
                         new ItemStack(ItemHandler.DRILL_BIT_PART_3.get()), new ItemStack(ItemHandler.BULB_PART_3.get()),
-                        new ItemStack(ItemHandler.CONTAINER_PART_3.get())
+                        new ItemStack(ItemHandler.CONTAINER_PART_2.get())
                     )
                 ))
                 .put(4, Arrays.asList(

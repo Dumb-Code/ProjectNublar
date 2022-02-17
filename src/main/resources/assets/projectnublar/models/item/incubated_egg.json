@@ -2,7 +2,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "projectnublar:item/container_part_3"
+    "layer0": "projectnublar:item/incubated_egg"
   }
 }
 

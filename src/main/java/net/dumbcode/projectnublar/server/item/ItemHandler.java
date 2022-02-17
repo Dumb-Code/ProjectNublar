@@ -79,7 +79,6 @@ public final class ItemHandler {
 
     public static final RegistryObject<Item> CONTAINER_PART_1 = REGISTER.register("container_part_1", BASIC_ITEM);
     public static final RegistryObject<Item> CONTAINER_PART_2 = REGISTER.register("container_part_2", BASIC_ITEM);
-    public static final RegistryObject<Item> CONTAINER_PART_3 = REGISTER.register("container_part_3", BASIC_ITEM);
 
     public static final RegistryObject<Item> TURBINES_PART_1 = REGISTER.register("turbines_part_1", BASIC_ITEM);
     public static final RegistryObject<Item> TURBINES_PART_2 = REGISTER.register("turbines_part_2", BASIC_ITEM);

@@ -33,7 +33,7 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     @Override
     public void onRecipeStarted(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
         ItemStack stack = process.getInputStack(0);
-        process.setTime((int) (stack.getOrCreateTagElement(ProjectNublar.MODID).getFloat("AmountDone") * process.getTotalTime()));
+        process.setTime((int) (stack.getOrCreateTagElement(ProjectNublar.MODID).getFloat("AmountDone") * process.getTotalTime() / 100));
     }
 
     @Override

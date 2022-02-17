@@ -5,6 +5,7 @@ import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.item.DyeColor;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -32,6 +33,8 @@ public class TintHandler {
             }
             return -1;
         }, BlockHandler.SEQUENCING_SYNTHESIZER.get());
+
+        colors.register((state, worldIn, pos, index) -> index == 1 ? DyeColor.BLACK.getColorValue() : -1, BlockHandler.UNBUILT_SEQUENCING_SYNTHESIZER.get());
 
         colors.register((state, worldIn, pos, tintIndex) -> {
             if(worldIn != null && pos != null && tintIndex == 1) {

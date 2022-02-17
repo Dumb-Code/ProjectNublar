@@ -1,10 +1,10 @@
 {
   "parent": "projectnublar:block/fossil_mirrored",
   "textures": {
-    "particle": "blocks/stone",
-    "bottom": "blocks/stone",
-    "top": "blocks/stone",
-    "side": "blocks/stone",
+    "particle": "block/stone",
+    "bottom": "block/stone",
+    "top": "block/stone",
+    "side": "block/stone",
     "overlay": "projectnublar:block/tyrannosaurus_fossil_skull"
   }
 }

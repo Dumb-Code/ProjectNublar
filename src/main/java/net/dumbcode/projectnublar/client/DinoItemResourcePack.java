@@ -30,6 +30,9 @@ public class DinoItemResourcePack extends ResourcePack {
     public DinoItemResourcePack() {
         super(new File("."));
         this.entries.add(Pair.of(ItemHandler.TEST_TUBES_GENETIC_MATERIAL, "test_tube_genetic_material"));
+        this.entries.add(Pair.of(ItemHandler.TEST_TUBES_DNA, "test_tube_genetic_material"));
+        this.entries.add(Pair.of(ItemHandler.DINOSAUR_UNINCUBATED_EGG, "unincubated_egg"));
+        this.entries.add(Pair.of(ItemHandler.DINOSAUR_INCUBATED_EGG, "incubated_egg"));
     }
 
     @Override

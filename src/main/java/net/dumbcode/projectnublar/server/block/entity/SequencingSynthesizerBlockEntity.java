@@ -85,7 +85,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     private int totalConsumeTime;
     private int consumeTimer;
 
-    @Getter @Setter private DyeColor dye = DyeColor.WHITE;
+    @Getter @Setter private DyeColor dye = DyeColor.BLACK;
 
     private final SelectedDnaEntry[] selectedDNAs = new SelectedDnaEntry[TOTAL_SLOTS];
 

@@ -35,7 +35,7 @@ public class MachineModuleParts {
 
     public static final MachineModulePart[] INCUBATOR = {
         simplePartItem(MachineModuleType.BULB, null, ItemHandler.BULB_PART_1, ItemHandler.BULB_PART_2, ItemHandler.BULB_PART_3),
-        simplePartItem(MachineModuleType.CONTAINER, null, ItemHandler.CONTAINER_PART_1, ItemHandler.CONTAINER_PART_2, ItemHandler.CONTAINER_PART_3), //todo: implement this
+        simplePartItem(MachineModuleType.CONTAINER, null, ItemHandler.CONTAINER_PART_1, ItemHandler.CONTAINER_PART_2), //todo: implement this
         simplePartItem(MachineModuleType.TANKS, null, ItemHandler.TANKS_PART_1, ItemHandler.TANKS_PART_2),
     };
 

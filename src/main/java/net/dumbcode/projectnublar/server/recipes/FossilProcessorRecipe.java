@@ -46,6 +46,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     public void onRecipeFinished(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
         ItemStack inputStack = process.getInputStack(0);
+        Item item = inputStack.getItem();
 
         //Shrink the fossil
         inputStack.shrink(1);
@@ -66,7 +67,6 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         blockEntity.getTank().drainInternal(FLUID_AMOUNT, IFluidHandler.FluidAction.EXECUTE);
 
         //Insert the output item
-        Item item = inputStack.getItem();
         if(item instanceof DinosaurProvider) {
             ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()));
             //Sets the size.

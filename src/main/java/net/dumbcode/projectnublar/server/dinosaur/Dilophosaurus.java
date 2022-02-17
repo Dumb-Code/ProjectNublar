@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.data.GeneticLayerEntry;
 import net.dumbcode.dumblibrary.server.utils.GaussianValue;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.data.DinosaurInformation;
@@ -111,12 +112,35 @@ public class Dilophosaurus extends Dinosaur {
             .addGeneticEntry(GeneticTypes.SPEED_MODIFIER.get());
 
         this.addComponent(EntityComponentTypes.GENETIC_LAYER_COLORS)
-            .addLayer("base",0F)
-            .addLayer("belly", 0.1F)
-            .addLayer("frills", 0.2F)
-            .addLayer("patterns", 0.3F)
-            .addLayer("outlines", 0.4F)
-            .addLayer("spots", 0.5F);
+            .addLayer(GeneticLayerEntry.builder("base", 0F)
+                .colorMutateMin(0.85F)
+                .layerWeight(0.65F)
+            )
+            .addLayer(GeneticLayerEntry.builder("belly", 0.1F)
+                .colorMutateMin(0.85F)
+                .secondaryColours()
+            )
+            .addLayer(GeneticLayerEntry.builder("frills", 0.2F)
+                .colorMutateMin(0.85F)
+                .secondaryColours()
+                .layerWeight(0.2F)
+            )
+            .addLayer(GeneticLayerEntry.builder("patterns", 0.3F)
+                .colorMutateMin(0.85F)
+                .secondaryColours()
+                .variesOpacity()
+                .layerWeight(0.65F)
+            )
+            .addLayer(GeneticLayerEntry.builder("outlines", 0.4F)
+                .colorMutateMin(0.85F)
+                .variesOpacity()
+                .layerWeight(0.25F)
+            )
+            .addLayer(GeneticLayerEntry.builder("spots", 0.5F)
+                .colorMutateMin(0.85F)
+                .variesOpacity()
+                .secondaryColours()
+            );
 
         this.addComponent(EntityComponentTypes.FLATTENED_LAYER)
             .staticLayer("claws", 5F)
@@ -132,6 +156,10 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.BLINKING)
             .setTickTimeOpen(25)
             .setTickTimeClose(5);
+
+        this.addComponent(EntityComponentTypes.CULL_SIZE.get())
+            .setHeight(2.8F)
+            .setWidth(6F);
 
         this.addComponent(EntityComponentTypes.BREEDING)
             .setMinTicksBetweenBreeding(240000); //10 Minecraft days
