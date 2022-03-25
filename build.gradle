@@ -93,6 +93,12 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
@@ -105,6 +111,8 @@ dependencies {
     implementation project(path: ':studio_jar', configuration: 'default')
 
     implementation project(path: ':dumb_library', configuration: 'default')
+
+    implementation fg.deobf("curse.maven:world-edit-225608:3283693")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

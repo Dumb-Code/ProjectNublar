@@ -91,7 +91,6 @@ public class VelociraptorJP extends Dinosaur {
 
         this.addEmptyComponent(EntityComponentTypes.RENDER_CONTEXT);
         this.addComponent(EntityComponentTypes.MODEL).setShadowSize(2F);
-        this.addEmptyComponent(EntityComponentTypes.SPEED_TRACKING);
         this.addComponent(EntityComponentTypes.HERD)
             .setHerdTypeID(new ResourceLocation(ProjectNublar.MODID, "dinosaur_herd_" + this.getFormattedName()));
 

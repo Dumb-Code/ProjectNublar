@@ -60,7 +60,7 @@ public class MultipartSystem implements EntitySystem {
         }
 
         if(!entity.level.isClientSide) {
-            handler.animate(animation.getModelCubes(), 1 / 20F);
+//            handler.animate(animation.getModelCubes(), 1 / 20F);
         }
 
         Matrix3f entityRotate = new Matrix3f();

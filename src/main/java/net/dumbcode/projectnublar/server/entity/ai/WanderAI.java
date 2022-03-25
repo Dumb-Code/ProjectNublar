@@ -13,7 +13,7 @@ public class WanderAI extends RandomWalkingGoal {
     private final WanderComponent component;
 
     public WanderAI(CreatureEntity creatureIn, WanderComponent component) {
-        super(creatureIn, component.getSpeed(), component.getChance());
+        super(creatureIn, component.getSpeed() * 3, component.getChance());
         this.component = component;
     }
 

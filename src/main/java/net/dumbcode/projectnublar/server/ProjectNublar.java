@@ -155,6 +155,7 @@ public class ProjectNublar {
         });
     }
 
+
     public void clientSetup() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         IEventBus forgeBus = MinecraftForge.EVENT_BUS;
