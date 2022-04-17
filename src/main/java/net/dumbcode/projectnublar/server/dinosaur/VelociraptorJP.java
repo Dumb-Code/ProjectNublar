@@ -83,6 +83,7 @@ public class VelociraptorJP extends Dinosaur {
             .setScaleZ(0.75F);
 
         this.addEmptyComponent(EntityComponentTypes.GENDER);
+        this.addEmptyComponent(ComponentHandler.GOAL);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
             .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))

@@ -2,22 +2,25 @@ package net.dumbcode.projectnublar.server.entity.component.impl.ai;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.dumbcode.dumblibrary.server.ai.EntityGoal;
+import net.dumbcode.dumblibrary.server.ai.GoalManager;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.EntityGoalSupplier;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.MovePredicateComponent;
 import net.dumbcode.projectnublar.server.entity.ai.FloatAi;
-import net.dumbcode.projectnublar.server.entity.ai.WanderAI;
+import net.dumbcode.projectnublar.server.entity.ai.WanderGoal;
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.MobEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Getter
 @Setter
-public class WanderComponent extends EntityComponent implements FinalizableComponent {
+public class WanderComponent extends EntityComponent implements FinalizableComponent, EntityGoalSupplier {
 
     //TODO-stream: ew -- ai should be on a system that is task based, only executing one at a time, with tasks having "importance"
     //This would allow for entities to wake up from sleep as they're too hungry
@@ -33,7 +36,7 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
     public void finalizeComponent(ComponentAccess entity) {
         if(entity instanceof CreatureEntity) {
             CreatureEntity creature = (CreatureEntity) entity;
-            creature.goalSelector.addGoal(this.priority, new WanderAI(creature, this));
+//            creature.goalSelector.addGoal(this.priority, new WanderGoal(creature, this));
             creature.goalSelector.addGoal(this.priority - 1, new FloatAi(creature));
 //            ((CreatureEntity) entity).tasks.addTask(this.priority, this.avoidWater ? new EntityAIWanderAvoidWater(creature, this.speed, 1F / this.chance) : new EntityAIWander(creature, this.speed, this.chance));
         } else {
@@ -48,5 +51,12 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
         }
         this.canExecute = registry.stream().reduce(() -> true, (b1, b2) -> () -> b1.get() && b2.get());
 
+    }
+
+    @Override
+    public void addGoals(GoalManager manager, Consumer<EntityGoal> consumer, ComponentAccess access) {
+        if(access instanceof CreatureEntity) {
+            consumer.accept(new WanderGoal(manager, this, (CreatureEntity) access));
+        }
     }
 }

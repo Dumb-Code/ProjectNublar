@@ -286,6 +286,7 @@ public class ProjectNublar {
 
     @SubscribeEvent
     public static void register(RegisterSystemsEvent event) {
+        event.registerSystem(new GoalSystem());
         event.registerSystem(new AgeSystem());
         event.registerSystem(new MultipartSystem());
         event.registerSystem(new DinosaurEggLayingSystem());

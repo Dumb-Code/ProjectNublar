@@ -81,6 +81,7 @@ public class Dilophosaurus extends Dinosaur {
         this.addComponent(EntityComponentTypes.RENDER_ADJUSTMENTS);
 
         this.addEmptyComponent(EntityComponentTypes.GENDER);
+        this.addEmptyComponent(ComponentHandler.GOAL);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
             .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))

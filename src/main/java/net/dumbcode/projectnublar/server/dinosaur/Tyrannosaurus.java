@@ -51,7 +51,12 @@ public class Tyrannosaurus extends Dinosaur {
                 .add(500, 20, new ItemStack(Items.APPLE))
             )
             .setMaxFood(7500)
-            .setMaxWater(6000);
+            .setMaxWater(6000)
+
+            .setHydrateAmountPerTick(500)
+
+            .setFoodTicks(32)
+            .setWaterTicks(18);
 
         this.addEmptyComponent(ComponentHandler.MOOD);
         this.addEmptyComponent(ComponentHandler.ATTACK_FENCE_AI);
@@ -77,6 +82,7 @@ public class Tyrannosaurus extends Dinosaur {
 
 
         this.addEmptyComponent(EntityComponentTypes.GENDER);
+        this.addEmptyComponent(ComponentHandler.GOAL);
         this.addComponent(ComponentHandler.AGE)
             .addStage(new AgeStage(CHILD_AGE, 72000, ADULT_AGE))
             .addStage(new AgeStage(ADULT_AGE, -1, ADULT_AGE).setCanBreed(true))

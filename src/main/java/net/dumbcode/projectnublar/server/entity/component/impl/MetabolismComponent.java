@@ -5,15 +5,17 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.dumbcode.dumblibrary.server.ai.EntityGoal;
+import net.dumbcode.dumblibrary.server.ai.GoalManager;
 import net.dumbcode.dumblibrary.server.attributes.ModifiableField;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
-import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.CanBreedComponent;
+import net.dumbcode.dumblibrary.server.ecs.component.additionals.EntityGoalSupplier;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.ai.DrinkingAI;
-import net.dumbcode.projectnublar.server.entity.ai.FeedingAI;
+import net.dumbcode.projectnublar.server.entity.ai.DrinkingGoal;
+import net.dumbcode.projectnublar.server.entity.ai.FeedingGoal;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.MoodChangingComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
@@ -35,7 +37,7 @@ import java.util.function.Supplier;
 
 @Getter
 @Setter
-public class MetabolismComponent extends EntityComponent implements FinalizableComponent, CanBreedComponent, MoodChangingComponent, TrackingDataComponent {
+public class MetabolismComponent extends EntityComponent implements CanBreedComponent, MoodChangingComponent, TrackingDataComponent, EntityGoalSupplier {
 
     public static final int METABOLISM_CHANNEL = 61;
 
@@ -54,7 +56,7 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     private FeedingDiet diet = new FeedingDiet();
     @Getter(AccessLevel.NONE)
     private Map<UUID, FeedingDiet> geneticDiets = new HashMap<>(); //We don't need to serialize.
-    private FeedingDiet cached = new FeedingDiet();
+    private FeedingDiet cached;
 
     private int foodSmellDistance;
     private int hydrateAmountPerTick;
@@ -119,13 +121,14 @@ public class MetabolismComponent extends EntityComponent implements FinalizableC
     }
 
     @Override
-    public void finalizeComponent(ComponentAccess entity) {
-        if(entity instanceof MobEntity) {
-            MobEntity living = (MobEntity) entity;
-            living.goalSelector.addGoal(2, new FeedingAI(entity, (MobEntity) entity, this));
-            living.goalSelector.addGoal(2, new DrinkingAI(entity, (MobEntity) entity, this));
+    public void addGoals(GoalManager manager, Consumer<EntityGoal> consumer, ComponentAccess access) {
+        if(access instanceof MobEntity) {
+            MobEntity living = (MobEntity) access;
+            consumer.accept(new FeedingGoal(manager, access, living, this));
+            consumer.accept(new DrinkingGoal(manager, access, living, this));
         }
     }
+
 
     @Override
     public boolean canBreedWith(ComponentAccess otherEntity) {

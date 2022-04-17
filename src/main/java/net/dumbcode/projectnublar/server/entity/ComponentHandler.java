@@ -1,6 +1,8 @@
 package net.dumbcode.projectnublar.server.entity;
 
+import net.dumbcode.dumblibrary.server.ai.GoalManager;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentType;
+import net.dumbcode.dumblibrary.server.ecs.component.impl.GoalManagerComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.component.impl.*;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
@@ -31,5 +33,6 @@ public class ComponentHandler {
     public static final RegistryObject<EntityComponentType<TrackingComponent, ?>> TRACKING_DATA = REGISTER.register("tracking_data", () -> of(TrackingComponent.class, TrackingComponent::new));
     public static final RegistryObject<EntityComponentType<BasicEntityInformationComponent, ?>> BASIC_ENTITY_INFORMATION = REGISTER.register("basic_entity_information", () -> of(BasicEntityInformationComponent.class, BasicEntityInformationComponent::new));
     public static final RegistryObject<EntityComponentType<DefenseComponent, DefenseComponent.Storage>> DEFENSE = REGISTER.register("defense", () -> of(DefenseComponent.class, DefenseComponent::new, DefenseComponent.Storage::new));
+    public static final RegistryObject<EntityComponentType<GoalManagerComponent, ?>> GOAL = REGISTER.register("goal_manager", () -> of(GoalManagerComponent.class, GoalManagerComponent::new));
 }
 

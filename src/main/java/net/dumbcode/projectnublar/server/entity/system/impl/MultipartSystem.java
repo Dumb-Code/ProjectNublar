@@ -48,10 +48,6 @@ public class MultipartSystem implements EntitySystem {
     }
 
     private void updatePart(Entity entity, MultipartEntityComponent multipart, AnimationComponent animation) {
-        if(entity.tickCount % 3 != 0) {
-            return;
-        }
-
         ModelAnimationHandler handler = animation.getAnimationHandler();
 
         DinosaurEntity dinosaur = null;
@@ -59,8 +55,12 @@ public class MultipartSystem implements EntitySystem {
             dinosaur = (DinosaurEntity) entity;
         }
 
-        if(!entity.level.isClientSide) {
-//            handler.animate(animation.getModelCubes(), 1 / 20F);
+        if(!entity.level.isClientSide && entity.level.getGameTime() % 5 == 0) {
+            handler.animate(animation.getModelCubes(), 1 / 4F);
+        }
+
+        if(entity.tickCount % 3 != 0) {
+            return;
         }
 
         Matrix3f entityRotate = new Matrix3f();

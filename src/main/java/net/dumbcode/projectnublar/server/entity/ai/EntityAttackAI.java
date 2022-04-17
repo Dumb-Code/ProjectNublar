@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class EntityAttackAI extends MeleeAttackGoal {
+public class  EntityAttackAI extends MeleeAttackGoal {
 
 //    public static final Animation ATTACK_ANIMATION = new Animation(new ResourceLocation(ProjectNublar.MODID,"attack"));
 
