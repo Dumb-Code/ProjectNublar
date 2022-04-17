@@ -109,7 +109,7 @@ public class DrinkingGoal extends EntityGoal {
 
         BlockPos foundPos = this.foundPositions.get(0);
         Vector3d position = new Vector3d(foundPos.getX() + 0.5D, foundPos.getY() + 0.5D, foundPos.getZ() + 0.5D);
-        double cullSizeHalf = Math.max(this.entity.getBoundingBoxForCulling().getXsize(), this.entity.getBoundingBoxForCulling().getZsize()) / 2F;
+        double cullSizeHalf = Math.max(this.entity.getBoundingBoxForCulling().getXsize(), this.entity.getBoundingBoxForCulling().getZsize()) / 4F;
 
         if(this.entity.position().distanceToSqr(position) <= cullSizeHalf*cullSizeHalf) {
             this.entity.getNavigation().stop();

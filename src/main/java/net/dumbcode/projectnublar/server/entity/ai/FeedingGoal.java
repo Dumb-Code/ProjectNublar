@@ -135,7 +135,7 @@ public class FeedingGoal extends EntityGoal {
         if(this.process != null) {
             if(this.process.active()) {
                 Vector3d position = this.process.position();
-                double cullSizeHalf = this.entityLiving.getBoundingBoxForCulling().getXsize() / 2F;
+                double cullSizeHalf = Math.max(this.entityLiving.getBoundingBoxForCulling().getXsize(), this.entityLiving.getBoundingBoxForCulling().getZsize()) / 4F;
                 if(this.entityLiving.position().distanceToSqr(position) <= cullSizeHalf*cullSizeHalf) {
                     this.entityLiving.getNavigation().stop();
                     this.entityLiving.getLookControl().setLookAt(position.x, position.y, position.z, this.entityLiving.getMaxHeadYRot(), this.entityLiving.getMaxHeadXRot());
