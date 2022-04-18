@@ -178,5 +178,8 @@ public class Tyrannosaurus extends Dinosaur {
 
         this.addEmptyComponent(ComponentHandler.TRACKING_DATA);
         this.addEmptyComponent(ComponentHandler.BASIC_ENTITY_INFORMATION);
+
+        this.addComponent(EntityComponentTypes.SOUND_STORAGE);
+
     }
 }

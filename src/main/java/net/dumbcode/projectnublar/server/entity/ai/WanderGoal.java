@@ -26,19 +26,16 @@ public class WanderGoal extends EntityGoal {
     protected Vector3d getPosition() {
         Vector3d pos = RandomPositionGenerator.getPos(this.mob, 10, 7);
 
-        if(this.component.getCanExecute().get()) {
-            if(this.component.isAvoidWater()) {
-                if (this.mob.isInWater()) {
-                    Vector3d vec3d = RandomPositionGenerator.getLandPos(this.mob, 15, 7);
-                    return vec3d == null ? pos : vec3d;
-                } else {
-                    return this.mob.getRandom().nextFloat() >= 0.001 ? RandomPositionGenerator.getLandPos(this.mob, 10, 7) : pos;
-                }
+        if(this.component.isAvoidWater()) {
+            if (this.mob.isInWater()) {
+                Vector3d vec3d = RandomPositionGenerator.getLandPos(this.mob, 15, 7);
+                return vec3d == null ? pos : vec3d;
             } else {
-                return pos;
+                return this.mob.getRandom().nextFloat() >= 0.001 ? RandomPositionGenerator.getLandPos(this.mob, 10, 7) : pos;
             }
+        } else {
+            return pos;
         }
-        return null;
     }
 
     @Override
@@ -60,7 +57,7 @@ public class WanderGoal extends EntityGoal {
 
     @Override
     protected OptionalDouble getImportance() {
-        if(RANDOM.nextInt(this.component.getChance()) == 0 && this.component.getCanExecute().get()) {
+        if(RANDOM.nextInt(this.component.getChance()) == 0) {
             return OptionalDouble.of(1);
         }
         return OptionalDouble.empty();

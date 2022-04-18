@@ -8,7 +8,6 @@ import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.EntityGoalSupplier;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.MovePredicateComponent;
 import net.dumbcode.projectnublar.server.entity.ai.FloatAi;
 import net.dumbcode.projectnublar.server.entity.ai.WanderGoal;
 import net.minecraft.entity.CreatureEntity;
@@ -21,10 +20,6 @@ import java.util.function.Supplier;
 @Getter
 @Setter
 public class WanderComponent extends EntityComponent implements FinalizableComponent, EntityGoalSupplier {
-
-    //TODO-stream: ew -- ai should be on a system that is task based, only executing one at a time, with tasks having "importance"
-    //This would allow for entities to wake up from sleep as they're too hungry
-    private Supplier<Boolean> canExecute = () -> true;
 
     private boolean avoidWater = true;
 
@@ -42,15 +37,6 @@ public class WanderComponent extends EntityComponent implements FinalizableCompo
         } else {
             throw new IllegalArgumentException("Tried to attach a wander component to an ecs of class " + entity.getClass() + ". The given ecs must be a subclass of MobEntity");
         }
-
-        List<Supplier<Boolean>> registry = new ArrayList<>();
-        for (EntityComponent component : entity.getAllComponents()) {
-            if(component instanceof MovePredicateComponent) {
-                ((MovePredicateComponent) component).addBlockers(registry::add);
-            }
-        }
-        this.canExecute = registry.stream().reduce(() -> true, (b1, b2) -> () -> b1.get() && b2.get());
-
     }
 
     @Override
