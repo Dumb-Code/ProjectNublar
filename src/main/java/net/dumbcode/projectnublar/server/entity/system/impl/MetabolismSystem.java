@@ -14,6 +14,8 @@ import net.minecraft.world.World;
 
 public class MetabolismSystem implements EntitySystem {
 
+    private static final int BLOCKS_PER_SECOND_FOOD = 5;
+    private static final int BLOCKS_PER_SECOND_WATER = 3;
     private MetabolismComponent[] metabolism = new MetabolismComponent[0];
     private Entity[] entities = new Entity[0];
 
@@ -27,17 +29,32 @@ public class MetabolismSystem implements EntitySystem {
     @Override
     public void update(World world) {
         for (int i = 0; i < this.metabolism.length; i++) {
-            if(this.entities[i].tickCount % 20 == 0) {
+            Entity entity = this.entities[i];
+            if(entity.tickCount % 20 == 0) {
                 MetabolismComponent meta = this.metabolism[i];
-                meta.setFood((float) MathHelper.clamp(meta.getFood() - meta.getFoodRate().getValue(), 0, meta.getMaxFood().getValue()));
-                meta.setWater((float) MathHelper.clamp(meta.getWater() - meta.getWaterRate().getValue(), 0, meta.getMaxWater().getValue()));
+                double x = Math.abs(meta.getPreviouslyCheckedPosition().x - entity.position().x);
+                double y = Math.abs(meta.getPreviouslyCheckedPosition().y - entity.position().y);
+                double z = Math.abs(meta.getPreviouslyCheckedPosition().z - entity.position().z);
+                meta.setPreviouslyCheckedPosition(entity.position());
+                double dist = Math.sqrt(x*x + y*y + z*z);
+                double foodPunish = dist * BLOCKS_PER_SECOND_FOOD;
+                double waterPunish = dist * BLOCKS_PER_SECOND_WATER;
 
-                if(this.entities[i] instanceof LivingEntity) {
+                meta.setFood((float) MathHelper.clamp(meta.getFood() - meta.getFoodRate().getValue() - foodPunish, 0, meta.getMaxFood().getValue()));
+                meta.setWater((float) MathHelper.clamp(meta.getWater() - meta.getWaterRate().getValue() - waterPunish, 0, meta.getMaxWater().getValue()));
+
+                //As food gets smaller, this gets smaller
+                //At 25%, linearly decrease to 0
+                //https://www.desmos.com/calculator/zklfbe6wnn
+                double foodEnergyModifier = Math.min(4 * meta.getFood() / meta.getMaxFood().getValue(), 1);
+                meta.setEnergy((float) (meta.getEnergy() + meta.getEnergyRate().getValue() * foodEnergyModifier));
+
+                if(entity instanceof LivingEntity) {
                     if(meta.getFood() == 0) {
-                        this.entities[i].hurt(DamageSource.STARVE, 1F);
+                        entity.hurt(DamageSource.STARVE, 1F);
                     }
                     if(meta.getWater() == 0) {
-                        this.entities[i].hurt(DamageSourceHandler.THIRST, 1F);
+                        entity.hurt(DamageSourceHandler.THIRST, 1F);
                     }
                 }
             }

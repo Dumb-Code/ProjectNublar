@@ -150,6 +150,7 @@ public class FeedingGoal extends EntityGoal {
                     if(this.eatingTicks == 11) {
                         this.process.onProcessRan();
                     }
+                    //todo: move to animation event?
                     if(this.eatingTicks++ >= this.metabolism.getFoodTicks()) {
                         FeedingResult result = this.process.consume();
                         this.metabolism.setFood(this.metabolism.getFood() + result.getFood());

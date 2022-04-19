@@ -27,6 +27,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,15 +44,19 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
 
     private float food;
     private float water;
+    private float energy;
 
     private final ModifiableField maxFood = new ModifiableField();
     private final ModifiableField maxWater = new ModifiableField();
 
     private final ModifiableField foodRate = new ModifiableField();
     private final ModifiableField waterRate = new ModifiableField();
+    private final ModifiableField energyRate = new ModifiableField();
 
     private int foodTicks;
     private int waterTicks;
+
+    private Vector3d previouslyCheckedPosition;
 
     private FeedingDiet diet = new FeedingDiet();
     @Getter(AccessLevel.NONE)
@@ -82,12 +87,14 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
     public CompoundNBT serialize(CompoundNBT compound) {
         compound.putFloat("food", this.food);
         compound.putFloat("water", this.water);
+        compound.putFloat("energy", this.energy);
 
         compound.put("max_food", this.maxFood.writeToNBT());
         compound.put("max_water", this.maxWater.writeToNBT());
 
         compound.put("food_rate", this.foodRate.writeToNBT());
         compound.put("water_rate", this.waterRate.writeToNBT());
+        compound.put("energy_rate", this.energyRate.writeToNBT());
 
         compound.putInt("food_ticks", this.foodTicks);
         compound.putInt("water_ticks", this.waterTicks);
@@ -104,12 +111,14 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
         super.deserialize(compound);
         this.food = compound.getFloat("food");
         this.water = compound.getFloat("water");
+        this.energy = compound.getFloat("energy");
 
         this.maxFood.readFromNBT(compound.getCompound("max_food"));
         this.maxWater.readFromNBT(compound.getCompound("max_water"));
 
         this.foodRate.readFromNBT(compound.getCompound("food_rate"));
         this.waterRate.readFromNBT(compound.getCompound("water_rate"));
+        this.energyRate.readFromNBT(compound.getCompound("energy_rate"));
 
         this.foodTicks = compound.getInt("food_ticks");
         this.waterTicks = compound.getInt("water_ticks");
@@ -165,6 +174,7 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
         // Rate that the food and water decrease every second
         private int waterRate = 1;
         private int foodRate = 1;
+        private int energyRate = 1;
 
         //Ticks to eat and drnk
         private int foodTicks;
@@ -181,6 +191,8 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
             component.maxWater.setBaseValue(component.water = this.maxWater);
             component.waterRate.setBaseValue(this.waterRate);
             component.foodRate.setBaseValue(this.foodRate);
+            component.energyRate.setBaseValue(this.energyRate);
+            component.energy = 2500; //TODO: set this value properly
             component.foodTicks = this.foodTicks;
             component.waterTicks = this.waterTicks;
 
