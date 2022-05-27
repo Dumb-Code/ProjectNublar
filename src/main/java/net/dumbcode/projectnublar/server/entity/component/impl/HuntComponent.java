@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 public class HuntComponent extends EntityComponent implements EntityGoalSupplier {
     public boolean wantsToStartHunt;
+    public boolean isInHunt;
     public UUID followingHuntLeader;
 
     public BlockPos huntStartPosition = BlockPos.ZERO;

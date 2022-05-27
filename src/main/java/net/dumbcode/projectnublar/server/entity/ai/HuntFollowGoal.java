@@ -30,6 +30,11 @@ public class HuntFollowGoal extends EntityGoal {
     }
 
     @Override
+    public void onFinished() {
+        this.component.isInHunt = false;
+    }
+
+    @Override
     protected OptionalDouble getImportance() {
         if(this.component.followingHuntLeader != null) {
             Entity entity = ((ServerWorld) this.entity.level).getEntity(this.component.followingHuntLeader);

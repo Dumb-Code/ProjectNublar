@@ -44,6 +44,7 @@ public class HuntSystem implements EntitySystem {
 
             List<Integer> hungry = members.stream()
                 .filter(m -> isHungry(this.metabolism[m]))
+                .filter(m -> !this.hunts[m].isInHunt)
                 .collect(Collectors.toList());
 
             if((float) hungry.size() / members.size() >= 0.6F) {
@@ -55,10 +56,12 @@ public class HuntSystem implements EntitySystem {
                 this.hunts[leader].wantsToStartHunt = true;
 
                 for (Integer member : hungry) {
+                    HuntComponent hunt = this.hunts[member];
                     if(leader != member) {
-                        this.hunts[member].followingHuntLeader = leaderEntity.getUUID();
+                        hunt.followingHuntLeader = leaderEntity.getUUID();
                     }
-                    this.hunts[member].huntStartPosition = this.entities[member].blockPosition();
+                    hunt.huntStartPosition = this.entities[member].blockPosition();
+                    hunt.isInHunt = true;
                 }
 
 

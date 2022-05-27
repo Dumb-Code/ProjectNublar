@@ -27,6 +27,11 @@ public class HuntLeadGoal extends EntityGoal {
     }
 
     @Override
+    public void onFinished() {
+        this.component.isInHunt = false;
+    }
+
+    @Override
     protected OptionalDouble getImportance() {
         if(this.component.wantsToStartHunt) {
             return OptionalDouble.of(50000);
