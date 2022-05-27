@@ -30,6 +30,12 @@ import java.util.OptionalDouble;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+// Things to do:
+//  + for EntityFeeding (read: hunting)
+//  + add a high energy requirement to start feeding
+//  + modify energy rate to be negative
+//
+// When a feeding goal cannot be found (no food), look in the herd saved data food locations, and try again
 public class FeedingGoal extends EntityGoal {
 
     private final ComponentAccess access;
@@ -75,7 +81,7 @@ public class FeedingGoal extends EntityGoal {
             }
 
             if(closer && isNormalEntity) {
-                this.process = new EntityProcess(entity);
+//                this.process = new EntityProcess(entity);
                 targetEntity = entity;
                 isTargetItem = false;
             }

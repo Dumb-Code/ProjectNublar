@@ -34,5 +34,6 @@ public class ComponentHandler {
     public static final RegistryObject<EntityComponentType<BasicEntityInformationComponent, ?>> BASIC_ENTITY_INFORMATION = REGISTER.register("basic_entity_information", () -> of(BasicEntityInformationComponent.class, BasicEntityInformationComponent::new));
     public static final RegistryObject<EntityComponentType<DefenseComponent, DefenseComponent.Storage>> DEFENSE = REGISTER.register("defense", () -> of(DefenseComponent.class, DefenseComponent::new, DefenseComponent.Storage::new));
     public static final RegistryObject<EntityComponentType<GoalManagerComponent, ?>> GOAL = REGISTER.register("goal_manager", () -> of(GoalManagerComponent.class, GoalManagerComponent::new));
+    public static final RegistryObject<EntityComponentType<HuntComponent, ?>> HUNTING = REGISTER.register("goal_manager", () -> of(HuntComponent.class, HuntComponent::new));
 }
 

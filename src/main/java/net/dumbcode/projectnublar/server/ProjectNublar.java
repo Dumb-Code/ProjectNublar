@@ -295,6 +295,7 @@ public class ProjectNublar {
         event.registerSystem(new MoodSystem());
         event.registerSystem(new DefenseSystem());
         event.registerSystem(new DinosaurMovementSystem());
+        event.registerSystem(new HuntSystem());
     }
 
     public static Logger getLogger() {

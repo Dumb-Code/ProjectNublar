@@ -28,6 +28,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +37,7 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 @Getter
 @Setter
@@ -174,6 +177,8 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
         // Rate that the food and water decrease every second
         private int waterRate = 1;
         private int foodRate = 1;
+
+        // Rate that food converts to energy
         private int energyRate = 1;
 
         //Ticks to eat and drnk
