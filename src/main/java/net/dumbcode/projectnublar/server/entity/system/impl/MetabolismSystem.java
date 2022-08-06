@@ -32,6 +32,9 @@ public class MetabolismSystem implements EntitySystem {
             Entity entity = this.entities[i];
             if(entity.tickCount % 20 == 0) {
                 MetabolismComponent meta = this.metabolism[i];
+                if (meta.getPreviouslyCheckedPosition() == null) {
+                    meta.setPreviouslyCheckedPosition(entity.position());
+                }
                 double x = Math.abs(meta.getPreviouslyCheckedPosition().x - entity.position().x);
                 double y = Math.abs(meta.getPreviouslyCheckedPosition().y - entity.position().y);
                 double z = Math.abs(meta.getPreviouslyCheckedPosition().z - entity.position().z);
