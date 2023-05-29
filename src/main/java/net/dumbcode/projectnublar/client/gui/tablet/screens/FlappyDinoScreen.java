@@ -2,18 +2,16 @@ package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.RequiredArgsConstructor;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import org.lwjgl.glfw.GLFW;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class FlappyDinoScreen extends TabletScreen {
+public class FlappyDinoScreen extends TabletPage {
 
     private static final int HALF_PIPE_WIDTH = 25;
     private static final int TICKS_BETWEEN_PIPES = 30;
@@ -35,7 +33,7 @@ public class FlappyDinoScreen extends TabletScreen {
 
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks, String route) {
         stack.pushPose();
         stack.translate(this.left, this.top, 0);
         partialTicks = Minecraft.getInstance().getFrameTime();

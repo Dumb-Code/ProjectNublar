@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.OpenedTabletScreen;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.minecraft.client.Minecraft;
@@ -37,9 +37,9 @@ public class S2CSetTrackingDataList {
         context.enqueueWork(() -> {
             Screen screen = Minecraft.getInstance().screen;
             if (screen instanceof OpenedTabletScreen) {
-                TabletScreen tabletScreen = ((OpenedTabletScreen) screen).getScreen();
-                if (tabletScreen instanceof TrackingTabletScreen) {
-                    ((TrackingTabletScreen) tabletScreen).setTrackingData(packet.entries);
+                TabletPage tabletPage = ((OpenedTabletScreen) screen).getScreen();
+                if (tabletPage instanceof TrackingTabletScreen) {
+                    ((TrackingTabletScreen) tabletPage).setTrackingData(packet.entries);
                 }
             }
         });

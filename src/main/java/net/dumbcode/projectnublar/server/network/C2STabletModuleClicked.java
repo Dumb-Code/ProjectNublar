@@ -17,17 +17,20 @@ public class C2STabletModuleClicked {
 
     private final ResourceLocation module;
     private final Hand hand;
+    private final String route;
 
     public static C2STabletModuleClicked fromBytes(PacketBuffer buf) {
         return new C2STabletModuleClicked(
-            buf.readResourceLocation(),
-            buf.readEnum(Hand.class)
+                buf.readResourceLocation(),
+                buf.readEnum(Hand.class),
+                buf.readUtf()
         );
     }
 
     public static void toBytes(C2STabletModuleClicked packet, PacketBuffer buf) {
         buf.writeResourceLocation(packet.module);
         buf.writeEnum(packet.hand);
+        buf.writeUtf(packet.route);
     }
 
     public static void handle(C2STabletModuleClicked packet, Supplier<NetworkEvent.Context> supplier) {
@@ -36,7 +39,7 @@ public class C2STabletModuleClicked {
         context.enqueueWork(() -> {
             try (TabletItemStackHandler handler = new TabletItemStackHandler(context.getSender().getItemInHand(packet.hand))) {
                 handler.getEntryList().stream().filter(e -> Objects.equals(e.getType().getRegistryName(), packet.module)).findAny().ifPresent(e ->
-                    ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2COpenTabletModule(e.getType(), e.onOpenScreen(context.getSender())))
+                        ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2COpenTabletModule(e.getType(), e.getType().getRegistryName().toString().split(":")[1].concat(":").concat(packet.route), e.onOpenScreen(context.getSender())))
                 );
             }
         });

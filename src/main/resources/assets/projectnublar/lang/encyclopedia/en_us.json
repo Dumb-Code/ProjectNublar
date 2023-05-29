@@ -1,0 +1,49 @@
+{
+	"dinosaurs": {
+		"mosasaurus": {
+			"name": "Mosasaurus",
+			"scientificName": "Mosasaurus conodon",
+			"age": "Around 70 years",
+			"biomes": "Beach; Ocean;",
+			"size": "21-36 meters long"
+		},
+		"velociraptor": {
+			"name": "Velociraptor",
+			"scientificName": "Velociraptor testicus",
+			"age": "However long it takes me to debug",
+			"biomes": "places",
+			"size": "about 20 lines of code"
+		},
+		"test": {
+			"name": "Velociraptor",
+			"scientificName": "Velociraptor testicus",
+			"age": "However long it takes me to debug",
+			"biomes": "places",
+			"size": "about 20 lines of code"
+		},
+		"test2": {
+			"name": "Velociraptor",
+			"scientificName": "Velociraptor testicus",
+			"age": "However long it takes me to debug",
+			"biomes": "places",
+			"size": "about 20 lines of code"
+		},
+		"test3": {
+			"name": "Velociraptor",
+			"scientificName": "Velociraptor testicus",
+			"age": "However long it takes me to debug",
+			"biomes": "places",
+			"size": "about 20 lines of code"
+		},
+		"testNewRow": {
+			"name": "Velociraptor",
+			"scientificName": "Velociraptor testicus",
+			"age": "However long it takes me to debug",
+			"biomes": "places",
+			"size": "about 20 lines of code"
+		}
+	},
+	"plants": {
+
+	}
+}

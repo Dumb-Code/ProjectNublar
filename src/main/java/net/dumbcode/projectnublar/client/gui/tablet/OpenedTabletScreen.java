@@ -7,16 +7,17 @@ import net.minecraft.util.Hand;
 public class OpenedTabletScreen extends BaseTabletScreen {
 
     @Getter
-    private TabletScreen screen;
+    private TabletPage screen;
 
     public OpenedTabletScreen(Hand hand) {
         super(hand);
     }
 
-    public void setScreen(TabletScreen screen) {
+    public void setScreen(TabletPage screen, String route) {
         this.children.clear();
         this.screen = this.addWidget(screen);
-        this.screen.setData(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight);
+        this.route = route;
+        this.screen.setData(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, route);
     }
 
     @Override

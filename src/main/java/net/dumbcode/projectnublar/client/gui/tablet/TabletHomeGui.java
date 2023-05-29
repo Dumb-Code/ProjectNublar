@@ -255,7 +255,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         public void onClicked() {
             System.out.println(entry.getType().getRegistryName() + ": clicked");
             minecraft.forceSetScreen(new OpenedTabletScreen(hand));
-            ProjectNublar.NETWORK.sendToServer(new C2STabletModuleClicked(this.entry.getType().getRegistryName(), hand));
+            ProjectNublar.NETWORK.sendToServer(new C2STabletModuleClicked(this.entry.getType().getRegistryName(), hand, ""));
         }
     }
 

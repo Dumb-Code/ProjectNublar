@@ -55,6 +55,7 @@ public final class ItemHandler {
     public static final RegistryObject<Item> TABLET = REGISTER.register("tablet", () -> new ItemTablet(new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> TRACKING_MODULE = REGISTER.register("tracking_module", () -> new BasicModuleItem(TabletModuleHandler.TRACKING_TABLET, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> FLAPPY_DINO_MODULE = REGISTER.register("flappy_dino_module", () -> new BasicModuleItem(TabletModuleHandler.FLAPPY_DINO, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> ENCYCLOPEDIA_MODULE = REGISTER.register("encyclopedia_module", () -> new BasicModuleItem(TabletModuleHandler.ENCYCLOPEDIA, new Item.Properties().tab(TAB)));
 
     public static final RegistryObject<Item> COMPUTER_CHIP_PART_1 = REGISTER.register("computer_chip_part_1", BASIC_ITEM);
     public static final RegistryObject<Item> COMPUTER_CHIP_PART_2 = REGISTER.register("computer_chip_part_2", BASIC_ITEM);

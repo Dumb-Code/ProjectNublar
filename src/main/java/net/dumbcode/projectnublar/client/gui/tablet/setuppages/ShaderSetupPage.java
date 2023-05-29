@@ -22,6 +22,7 @@ public class ShaderSetupPage extends SetupPage<ShaderBackground> {
 
     @Override
     public void setupFromPage(ShaderBackground page) {
+        this.textField.setMaxLength(40);
         this.textField.setValue(page.getUrl());
         this.selectedSize = page.getSize();
         this.updateButtonText();

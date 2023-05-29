@@ -8,7 +8,7 @@ import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
 import net.dumbcode.dumblibrary.server.utils.MathUtils;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
@@ -20,8 +20,6 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector2f;
@@ -32,14 +30,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class TrackingTabletScreen extends TabletScreen {
+public class TrackingTabletScreen extends TabletPage {
 
     private GuiScrollBox<ScrollEntry> scrollBox;
     private final List<ScrollEntry> scrollEntries;

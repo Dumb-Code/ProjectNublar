@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.OpenedTabletScreen;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -47,9 +47,9 @@ public class S2STrackingTabletUpdateChunk {
         context.enqueueWork(() -> {
             Screen screen = Minecraft.getInstance().screen;
             if(screen instanceof OpenedTabletScreen) {
-                TabletScreen tabletScreen = ((OpenedTabletScreen) screen).getScreen();
-                if(tabletScreen instanceof TrackingTabletScreen) {
-                    ((TrackingTabletScreen) tabletScreen).setRGB(packet.startX, packet.startZ, packet.endX - packet.startX + 1, packet.endZ - packet.startZ + 1, packet.data);
+                TabletPage tabletPage = ((OpenedTabletScreen) screen).getScreen();
+                if(tabletPage instanceof TrackingTabletScreen) {
+                    ((TrackingTabletScreen) tabletPage).setRGB(packet.startX, packet.startZ, packet.endX - packet.startX + 1, packet.endZ - packet.startZ + 1, packet.data);
                 }
             }
         });

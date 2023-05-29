@@ -32,6 +32,7 @@ public abstract class BaseTabletScreen extends Screen {
     protected int tabletWidth;
     protected int topStart;
     protected int tabletHeight;
+    protected String route;
 
     protected boolean homeButton = true;
 

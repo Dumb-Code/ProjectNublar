@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.tablet;
 
+import net.dumbcode.projectnublar.client.gui.tablet.screens.EncyclopediaScreen;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.FlappyDinoScreen;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -20,6 +21,8 @@ public class TabletModuleHandler {
     public static final DeferredRegister<TabletModuleType<?>> DR = DeferredRegister.create(TabletModuleType.getWildcardType(), ProjectNublar.MODID);
 
     public static final Supplier<IForgeRegistry<TabletModuleType<?>>> REGISTRY = DR.makeRegistry("tablet_module_type", RegistryBuilder::new);
+    public static final RegistryObject<TabletModuleType<?>> ENCYCLOPEDIA = DR.register("encyclopedia",
+            () -> TabletModuleType.builder().screenCreator(b -> new EncyclopediaScreen()).build());
 
     public static final RegistryObject<TabletModuleType<?>> TRACKING_TABLET = DR.register("tracking_tablet", () ->
         TabletModuleType.builder()

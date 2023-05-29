@@ -1,9 +1,8 @@
 package net.dumbcode.projectnublar.server.tablet;
 
-import io.netty.buffer.ByteBuf;
 import lombok.Builder;
 import lombok.Getter;
-import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
+import net.dumbcode.projectnublar.client.gui.tablet.TabletPage;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -17,7 +16,7 @@ import java.util.function.Supplier;
 public class TabletModuleType<S extends TabletModuleStorage> extends ForgeRegistryEntry<TabletModuleType<?>> {
     @Builder.Default
     private final Supplier<S> storageCreator = () -> null;
-    private final Function<PacketBuffer, TabletScreen> screenCreator;
+    private final Function<PacketBuffer, TabletPage> screenCreator;
     @Builder.Default
     private final TriConsumer<S, ServerPlayerEntity, PacketBuffer> screenData = (s, p, b) -> {};
 
