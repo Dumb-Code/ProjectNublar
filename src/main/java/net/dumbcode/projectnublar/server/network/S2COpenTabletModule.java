@@ -6,7 +6,6 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Consumer;
@@ -16,14 +15,14 @@ public class S2COpenTabletModule {
 
     private TabletModuleType<?> module;
     private Consumer<PacketBuffer> bufConsumerWrite;
-
-    private TabletPage screen;
     private String route;
 
+    private TabletPage screen;
+
     //Clientside
-    public S2COpenTabletModule(TabletPage screen, String route) {
-        this.screen = screen;
+    public S2COpenTabletModule(String route, TabletPage screen) {
         this.route = route;
+        this.screen = screen;
     }
 
     //Serverside
@@ -34,14 +33,14 @@ public class S2COpenTabletModule {
     }
 
     public static S2COpenTabletModule fromBytes(PacketBuffer buf) {
-        TabletPage screen = buf.readRegistryIdSafe(TabletModuleType.getWildcardType()).getScreenCreator().apply(buf);
         String route = buf.readUtf();
-        return new S2COpenTabletModule(screen, route);
+        TabletPage screen = buf.readRegistryIdSafe(TabletModuleType.getWildcardType()).getScreenCreator().apply(buf);
+        return new S2COpenTabletModule(route, screen);
     }
 
     public static void toBytes(S2COpenTabletModule packet, PacketBuffer buf) {
-        buf.writeRegistryId(packet.module);
         buf.writeUtf(packet.route);
+        buf.writeRegistryId(packet.module);
         packet.bufConsumerWrite.accept(buf);
     }
 

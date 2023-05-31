@@ -25,7 +25,7 @@ public class OpenedTabletScreen extends BaseTabletScreen {
         super.init();
         if(this.screen != null) {
             this.addWidget(this.screen);
-            this.screen.setData(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight);
+            this.screen.setData(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, route);
         }
     }
 
@@ -37,7 +37,7 @@ public class OpenedTabletScreen extends BaseTabletScreen {
     @Override
     protected void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if(this.screen != null) {
-            this.screen.render(stack, mouseX, mouseY, partialTicks);
+            this.screen.render(stack, mouseX, mouseY, partialTicks, route);
         }
     }
 

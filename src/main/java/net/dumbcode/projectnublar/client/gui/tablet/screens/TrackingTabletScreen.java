@@ -59,8 +59,8 @@ public class TrackingTabletScreen extends TabletPage {
     }
 
     @Override
-    public void setData(int left, int top, int xSize, int ySize) {
-        super.setData(left, top, xSize, ySize);
+    public void setData(int left, int top, int xSize, int ySize, String route) {
+        super.setData(left, top, xSize, ySize, route);
         this.scrollBox = this.add(new GuiScrollBox<>(this.left + this.xSize - 100, this.top + 20, 100, 15, (this.ySize - 30) / 15, () -> this.scrollEntries));
     }
 
@@ -82,7 +82,7 @@ public class TrackingTabletScreen extends TabletPage {
 
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks, String route) {
         if(this.texture != null) {
 
             stack.pushPose();
