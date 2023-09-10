@@ -1,8 +1,8 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = "https://plugins.gradle.org/m2/" }
-        mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
@@ -101,7 +101,7 @@ repositories {
     }
 }
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
 
     implementation 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
@@ -152,3 +152,4 @@ gradlehook {
     addField 'payload_json', '{ "embeds": [{ "title":"' + System.getenv("COMMIT_MESSAGE") + " - " + System.getenv("COMMIT_AUTHOR") + '", "timestamp": "{{datetime}}" }] }'
     addArtifact jar
 }
+apply from: "https://moddingtutorials.org/applesilicon.gradle"
