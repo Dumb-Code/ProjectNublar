@@ -4,11 +4,13 @@ buildscript {
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = "https://plugins.gradle.org/m2/" }
         maven { url = 'https://repo.spongepowered.org/maven' }
+        maven { url = 'https://maven.parchmentmc.org' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath "net.dumbcode.gradlehook:GradleHook:2.0.2"
         classpath 'org.spongepowered:mixingradle:0.7.+'
+        classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 
@@ -17,6 +19,7 @@ apply plugin: "net.dumbcode.gradlehook"
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 version = '1.16.5-' + (System.getenv("GITHUB_ACTIONS") ? System.getenv("GITHUB_RUN_NUMBER") : 'dev')
 group = 'net.dumbcode.projectnublar' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -38,7 +41,7 @@ mixin {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'parchment', version: '2022.03.06-1.16.5'
 
 
     accessTransformer(
