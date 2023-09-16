@@ -7,12 +7,16 @@ import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.fossil.Fossil;
 import net.minecraft.block.Block;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ProjectNublarBlockRenderLayers {
@@ -23,10 +27,8 @@ public class ProjectNublarBlockRenderLayers {
 
         setRenderLayers(UNBUILT_INCUBATOR.get(), RenderType.solid(), RenderType.cutout(), RenderType.translucent());
 
-        for (RegistryMap<Dinosaur, FossilBlock> map : FOSSIL.values()) {
-            for (FossilBlock block : map.values()) {
-                setRenderLayers(block, RenderType.cutout());
-            }
+        for (RegistryObject<Block> block : Fossils.BLOCKS) {
+            setRenderLayers(block.get(), RenderType.cutout());
         }
 
     }

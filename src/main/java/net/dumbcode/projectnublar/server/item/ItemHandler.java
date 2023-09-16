@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 
 public final class ItemHandler {
 
-    private static final ItemGroup TAB = TabHandler.TAB;
+    public static final ItemGroup TAB = TabHandler.TAB;
 
     private static final Supplier<Item> BASIC_ITEM = () -> new Item(new Item.Properties().tab(TAB));
 

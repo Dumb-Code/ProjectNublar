@@ -12,6 +12,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 
 //TODO: move to a simple classs
+
+/**
+ * For removal soon
+ * wtf is this, obsolete with the new system
+ */
+@Deprecated
 public class FossilBlock extends Block implements IItemBlock {
 
     @Getter private final Dinosaur dinosaur;
