@@ -9,6 +9,12 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.function.Consumer;
 
+/**
+ * MARKED FOR REMOVAL
+ * DO NOT USE
+ */
+//TODO: Remove
+@Deprecated
 public class FossilItem extends BasicDinosaurItem {
 
     @Getter

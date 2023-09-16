@@ -2,8 +2,8 @@ package net.dumbcode.projectnublar.server.fossil;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import net.dumbcode.projectnublar.client.model.fossil.FossilItemRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.runtimepack.generator.api.RuntimeResourcePack;
 import net.dumbcode.projectnublar.server.runtimepack.generator.json.lang.JLang;
@@ -34,7 +34,6 @@ public class Fossils {
 
     private static Multimap<StoneType, Fossil> FOSSILS_GENNED;
     public static void generateFossils() {
-        System.out.println("u");
         generateAllFossilsAndStoneTypes();
         FOSSILS_GENNED.forEach(((stoneType, fossil) -> {
             UnSerializedFossilModel model = new UnSerializedFossilModel(stoneType.texture.toString(), fossil.texture.toString(), stoneType.tint);
@@ -50,16 +49,14 @@ public class Fossils {
         generateFossilBlocks().forEach(((name, block) -> {
             RegistryObject<Block> FOSSIL = FOSSIL_BLOCKS.register(name, block);
             BLOCKS.add(FOSSIL);
-            RegistryObject<Item> ITEM = ItemHandler.REGISTER.register(name, () -> ((IItemBlock) block.get()).createItem(new Item.Properties().tab(ItemHandler.TAB)));
+            RegistryObject<Item> ITEM = ItemHandler.REGISTER.register(name, () -> new FossilItem(block.get(), new Item.Properties().tab(ItemHandler.TAB).setISTER(() -> FossilItemRenderer.INSTANCE), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
             ITEMS.add(ITEM);
         }));
         FossilSerializer.serialize(FOSSILS_GENNED);
-        System.out.println("z");
     }
 
     //TODO: remove as this is for testing only
     public static void addBuiltInFossilsAndTypes() {
-        System.out.println("rgersrhfg");
         FOSSILS.add(new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/ammonite"), "Ammonite"));
         FOSSILS.add(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Feather"));
         FOSSILS.add(new Fossil(365, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Feet"));
@@ -92,11 +89,9 @@ public class Fossils {
         STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/red_terracotta"), "Red Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
         STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/black_terracotta"), "Black Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
 //        STONE_TYPES.add(new StoneType(1000, 0, color(255,184, 171, 136), new ResourceLocation("block/sandstone"), "Sandstone", "mineable/pickaxe", Material.STONE, 0, 0.8F));
-        System.out.println("AX");
     }
 
     public static void generateAllFossilsAndStoneTypes() {
-        System.out.println("bg");
         if (FOSSILS_GENNED != null && !FOSSILS_GENNED.isEmpty()) {
         } else {
             ImmutableMultimap.Builder<StoneType, Fossil> builder = new ImmutableMultimap.Builder<>();
@@ -113,7 +108,6 @@ public class Fossils {
                 }
             }
             FOSSILS_GENNED = builder.build();
-            System.out.println("rgwer");
         }
     }
 
@@ -141,13 +135,11 @@ public class Fossils {
     public static Map<String, Supplier<Block>> generateFossilBlocks() {
         Map<String, Supplier<Block>> blocks = new HashMap<>();
         generateAllFossilsAndStoneTypes();
-        System.out.println("A");
         FOSSILS_GENNED.forEach(((stoneType, fossil) -> {
             ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase());
-            FossilBlock block = new FossilBlock(AbstractBlock.Properties.of(stoneType.material).noOcclusion().strength(stoneType.strength, stoneType.blastStrength).requiresCorrectToolForDrops().harvestLevel(stoneType.harvestLevel));
+            FossilBlock block = new FossilBlock(AbstractBlock.Properties.of(stoneType.material).noOcclusion().strength(stoneType.strength, stoneType.blastStrength).requiresCorrectToolForDrops().harvestLevel(stoneType.harvestLevel), fossil, stoneType);
             blocks.put(blockName.getPath(), () -> block);
         }));
-        System.out.println("B");
         return blocks;
     }
 

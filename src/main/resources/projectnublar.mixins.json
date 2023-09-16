@@ -9,6 +9,7 @@
     "ReloadableResourceManagerImplMixin"
   ],
   "client": [
+    "SimpleBakedModelAccessor"
   ],
   "minVersion": "0.8"
 }

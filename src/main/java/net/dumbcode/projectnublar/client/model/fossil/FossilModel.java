@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import joptsimple.internal.Strings;
+import net.dumbcode.projectnublar.mixin.SimpleBakedModelAccessor;
 import net.minecraft.client.renderer.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
@@ -35,6 +36,7 @@ import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.client.model.*;
+import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.client.model.geometry.IModelGeometryPart;
 import net.minecraftforge.client.model.geometry.IMultipartModelGeometry;
 import net.minecraftforge.client.model.obj.LineReader;
@@ -42,18 +44,14 @@ import net.minecraftforge.client.model.obj.MaterialLibrary;
 import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//TODO: make the item models display an overlay
-public class FossilModel implements IMultipartModelGeometry<FossilModel> {
+public class FossilModel implements IModelGeometry<FossilModel> {
 	private static final Vector4f COLOR_WHITE = new Vector4f(1, 1, 1, 1);
 	private static final Vector2f[] DEFAULT_COORDS = {
 			new Vector2f(0, 0),
@@ -235,6 +233,32 @@ public class FossilModel implements IMultipartModelGeometry<FossilModel> {
 	}
 
 	@Override
+	public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation)
+	{
+		TextureAtlasSprite particle = spriteGetter.apply(owner.resolveTexture("particle"));
+
+		IModelBuilder<?> builder = IModelBuilder.of(owner, overrides, particle);
+
+		addQuads(owner, builder, bakery, spriteGetter, modelTransform, modelLocation);
+
+		SimpleBakedModel model = (SimpleBakedModel) builder.build();
+		SimpleBakedModelAccessor modelAccessor = (SimpleBakedModelAccessor) model;
+		return new FossilBakedModel(modelAccessor.getUnculledFaces(), modelAccessor.getCulledFaces(), model.useAmbientOcclusion(), model.usesBlockLight(), model.isGui3d(), model.getParticleIcon(), model.getTransforms(), model.getOverrides()) ;
+	}
+
+	public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ResourceLocation modelLocation) {
+		getParts().stream().filter(owner::getPartVisibility)
+				.forEach(part -> part.addQuads(owner, modelBuilder, bakery, spriteGetter, modelTransform, modelLocation));
+	}
+
+	public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<com.mojang.datafixers.util.Pair<String, String>> missingTextureErrors) {
+		Set<RenderMaterial> combined = Sets.newHashSet();
+		for (IModelGeometryPart part : getParts())
+			combined.addAll(part.getTextures(owner, modelGetter, missingTextureErrors));
+		return combined;
+	}
+
+	@Override
 	public Collection<? extends IModelGeometryPart> getParts() {
 		return parts.values();
 	}
@@ -295,14 +319,11 @@ public class FossilModel implements IMultipartModelGeometry<FossilModel> {
 				transform.transformPosition(position);
 				transform.transformNormal(normal);
 			}
-			;
 			Vector4f tintedColor = new Vector4f(
 					color.x() * colorTint.x(),
 					color.y() * colorTint.y(),
 					color.z() * colorTint.z(),
 					color.w() * colorTint.w());
-			float u = texture.getU(texCoord.x * 16);
-			float v = texture.getV((flipV ? (1 - texCoord.y) : texCoord.y) * 16);
 			putVertexData(builder, position, texCoord, normal, tintedColor, uv2, texture);
 			pos[i] = position;
 			norm[i] = normal;
@@ -423,13 +444,11 @@ public class FossilModel implements IMultipartModelGeometry<FossilModel> {
 
 				for (int[][] face : mesh.faces) {
 					Pair<BakedQuad, Direction> quad = makeQuad(face, tintIndex, colorTint, mat.ambientColor, texture, modelTransform.getRotation());
-					if (quad != null) {
-						if (quad.getRight() == null)
-							modelBuilder.addGeneralQuad(quad.getLeft());
-						else
-							modelBuilder.addFaceQuad(quad.getRight(), quad.getLeft());
-					}
-				}
+                    if (quad.getRight() == null)
+                        modelBuilder.addGeneralQuad(quad.getLeft());
+                    else
+                        modelBuilder.addFaceQuad(quad.getRight(), quad.getLeft());
+                }
 			}
 		}
 

@@ -32,7 +32,6 @@ public class FossilSerializer {
     }
 
     public static byte[] serialize(String id) {
-        System.out.println("w");
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
@@ -49,7 +48,6 @@ public class FossilSerializer {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("m");
         return stream.toByteArray();
     }
 
@@ -70,7 +68,6 @@ public class FossilSerializer {
     }
 
     public static JsonObject serialize(UnSerializedFossilModel src, boolean a) {
-        System.out.println("q");
         JsonObject object = new JsonObject();
         object.addProperty("loader", ProjectNublar.MODID + ":fossil");
         object.addProperty("parent", "block/cube");
@@ -80,12 +77,10 @@ public class FossilSerializer {
         object.addProperty("stone", src.stoneTexture);
         object.addProperty("fossil", src.fossilTexture);
         object.addProperty("tint", src.tint);
-        System.out.println("b");
         return object;
     }
 
     public static byte[] serialize() {
-        System.out.println("n");
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
@@ -103,13 +98,11 @@ public class FossilSerializer {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("p");
         return stream.toByteArray();
     }
 
 
     public static void serialize(Multimap<StoneType, Fossil> fossils) {
-        System.out.println("rgesdg");
         ImmutableMultimap.Builder<String, Pair<StoneType, Collection<Fossil>>> tagsBuilder = new ImmutableMultimap.Builder<>();
         for (StoneType type : fossils.keys()) {
             tagsBuilder.put(type.mineableBy, new Pair<>(type, fossils.get(type)));
@@ -139,6 +132,5 @@ public class FossilSerializer {
             }
             Fossils.PACK.addData(new ResourceLocation("tags/blocks/" + key + ".json"), stream.toByteArray());
         }
-        System.out.println("wrtwgg");
     }
 }
