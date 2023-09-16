@@ -249,7 +249,6 @@ public interface BlockResourceGenerator extends ItemResourceGenerator {
    * <b>Note:</b> Stonecutting recipes will not be generated unless {@link #shouldWriteStonecuttingRecipe()} returns {@code true}.
    *
    * @return The stonecutting recipe.
-   * @see net.dumbcode.projectnublar.server.runtimepack.generator.json.recipe.JStonecuttingRecipe
    */
   default JRecipe getStonecuttingRecipe() {
     return null;
