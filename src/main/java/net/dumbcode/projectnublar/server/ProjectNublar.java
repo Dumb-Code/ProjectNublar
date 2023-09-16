@@ -38,6 +38,7 @@ import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.api.FossilExtensionManager;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -159,6 +160,8 @@ public class ProjectNublar {
             DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
             PlantHandler.getRegistry().forEach(Plant::attachComponents);
         });
+        FossilExtensionManager.initialize();
+        Fossils.generateFossils();
     }
 
 
@@ -173,8 +176,6 @@ public class ProjectNublar {
 
         BlockEntityIncubatorRenderer.markResolvers();
 
-        Fossils.addBuiltInFossilsAndTypes();
-        Fossils.generateFossils();
         Fossils.PACK.dump(Paths.get("fossil/"));
     }
 

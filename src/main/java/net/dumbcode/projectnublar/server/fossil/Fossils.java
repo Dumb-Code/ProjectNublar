@@ -63,42 +63,6 @@ public class Fossils {
         FossilSerializer.serializeLang(generateFossilBlocks().keySet());
     }
 
-    //TODO: remove as this is for testing only and replace with an api – api will probably be registered using annotations to allow for soft deps
-    public static void addBuiltInFossilsAndTypes() {
-        FOSSILS.add(new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/ammonite"), "Ammonite", true));
-        FOSSILS.add(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Feather", true));
-        FOSSILS.add(new Fossil(365, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Feet", true));
-        FOSSILS.add(new Fossil(530, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/fish"), "Fish", true));
-        FOSSILS.add(new Fossil(275, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/imprint"), "Imprint", true));
-        FOSSILS.add(new Fossil(260, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/lizard"), "Lizard", true));
-        FOSSILS.add(new Fossil(500, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Tooth", true));
-        FOSSILS.add(new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/trilobite"), "Trilobite", true));
-
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/stone"), "Stone", "mineable/pickaxe", Material.STONE, 0, 1.5F, 6.0F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,158, 120, 104), new ResourceLocation("block/granite"), "Granite", "mineable/pickaxe", Material.STONE, 0, 1.5F, 6.0F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/andesite"), "Andesite", "mineable/pickaxe", Material.STONE, 0, 1.5F, 6.0F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/diorite"), "Diorite", "mineable/pickaxe", Material.STONE, 0, 1.5F, 6.0F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/clay"), "Stone", "mineable/pickaxe", Material.STONE, 0, 0.6F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,158, 120, 104), new ResourceLocation("block/terracotta"), "Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/white_terracotta"), "White Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/orange_terracotta"), "Orange Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/magenta_terracotta"), "Magenta Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,158, 120, 104), new ResourceLocation("block/light_blue_terracotta"), "Light Blue Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/yellow_terracotta"), "Yellow Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/lime_terracotta"), "Lime Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/pink_terracotta"), "Pink Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,158, 120, 104), new ResourceLocation("block/gray_terracotta"), "Gray Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/light_gray_terracotta"), "Light Gray Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/cyan_terracotta"), "Cyan Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/purple_terracotta"), "Purple Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/blue_terracotta"), "Blue Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/brown_terracotta"), "Brown Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,158, 120, 104), new ResourceLocation("block/green_terracotta"), "Green Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/red_terracotta"), "Red Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-        STONE_TYPES.add(new StoneType(1000, 0, color(255,179, 179, 179), new ResourceLocation("block/black_terracotta"), "Black Terracotta", "mineable/pickaxe", Material.STONE, 0, 1.25F, 4.2F));
-//        STONE_TYPES.add(new StoneType(1000, 0, color(255,184, 171, 136), new ResourceLocation("block/sandstone"), "Sandstone", "mineable/pickaxe", Material.STONE, 0, 0.8F));
-    }
-
     public static void generateAllFossilsAndStoneTypes() {
         if (FOSSILS_GENNED != null && !FOSSILS_GENNED.isEmpty()) {
         } else {
@@ -133,10 +97,6 @@ public class Fossils {
 
     public static int blue(int pPackedColor) {
         return pPackedColor & 255;
-    }
-
-    public static int color(int pAlpha, int pRed, int pGreen, int pBlue) {
-        return pAlpha << 24 | pRed << 16 | pGreen << 8 | pBlue;
     }
 
     public static Map<String, Supplier<Block>> generateFossilBlocks() {
