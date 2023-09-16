@@ -1,7 +1,8 @@
-package net.dumbcode.projectnublar.server.fossil;
+package net.dumbcode.projectnublar.server.fossil.base;
 
 import com.google.common.collect.Range;
 import com.mojang.datafixers.util.Pair;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
 
 import java.util.ArrayList;
 import java.util.List;

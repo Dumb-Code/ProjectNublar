@@ -1,4 +1,4 @@
-package net.dumbcode.projectnublar.server.fossil;
+package net.dumbcode.projectnublar.server.fossil.base.serialization;
 
 public class UnSerializedFossilModel {
     String stoneTexture;

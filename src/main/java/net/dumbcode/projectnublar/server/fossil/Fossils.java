@@ -4,6 +4,13 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.dumbcode.projectnublar.client.model.fossil.FossilItemRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.fossil.base.Fossil;
+import net.dumbcode.projectnublar.server.fossil.base.StoneType;
+import net.dumbcode.projectnublar.server.fossil.base.Time;
+import net.dumbcode.projectnublar.server.fossil.base.serialization.FossilSerializer;
+import net.dumbcode.projectnublar.server.fossil.base.serialization.UnSerializedFossilModel;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.runtimepack.generator.api.RuntimeResourcePack;
 import net.dumbcode.projectnublar.server.runtimepack.generator.json.lang.JLang;
@@ -39,32 +46,33 @@ public class Fossils {
             UnSerializedFossilModel model = new UnSerializedFossilModel(stoneType.texture.toString(), fossil.texture.toString(), stoneType.tint);
             ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase());
             String string = fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase();
-            PACK.addAsset(fix(blockName, "models/block", "json"), FossilSerializer.serialize(model));
-            PACK.addAsset(fix(blockName, "models/item", "json"), FossilSerializer.serialize(model));
-            PACK.addAsset(fix(blockName, "blockstates", "json"), FossilSerializer.serialize("projectnublar:block/" + string));
-            PACK.addAsset(new ResourceLocation(ProjectNublar.MODID, "pack.mcmeta"), FossilSerializer.serialize());
+            PACK.addAsset(fix(blockName, "models/block", "json"), FossilSerializer.serializeModel(model));
+            PACK.addAsset(fix(blockName, "models/item", "json"), FossilSerializer.serializeModel(model));
+            PACK.addAsset(fix(blockName, "blockstates", "json"), FossilSerializer.serializeBlockstate("projectnublar:block/" + string));
+            PACK.addAsset(new ResourceLocation(ProjectNublar.MODID, "pack.mcmeta"), FossilSerializer.generatePackMcmeta());
             PACK.addLang(new ResourceLocation(ProjectNublar.MODID, "en_us"), JLang.lang().entry(WordUtils.capitalizeFully(stoneType.name), WordUtils.capitalizeFully(fossil.name)));
         }));
 
         generateFossilBlocks().forEach(((name, block) -> {
-            RegistryObject<Block> FOSSIL = FOSSIL_BLOCKS.register(name, block);
+            RegistryObject<Block> FOSSIL = FOSSIL_BLOCKS.register(name.replace("_fossil", ""), block);
             BLOCKS.add(FOSSIL);
-            RegistryObject<Item> ITEM = ItemHandler.REGISTER.register(name, () -> new FossilItem(block.get(), new Item.Properties().tab(ItemHandler.TAB).setISTER(() -> FossilItemRenderer.INSTANCE), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
+            RegistryObject<Item> ITEM = ItemHandler.REGISTER.register(name.replace("_fossil", ""), () -> new FossilItem(block.get(), new Item.Properties().tab(ItemHandler.TAB).setISTER(() -> FossilItemRenderer.INSTANCE), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
             ITEMS.add(ITEM);
         }));
-        FossilSerializer.serialize(FOSSILS_GENNED);
+        FossilSerializer.serializeMineableTag(FOSSILS_GENNED);
+        FossilSerializer.serializeLang(generateFossilBlocks().keySet());
     }
 
-    //TODO: remove as this is for testing only
+    //TODO: remove as this is for testing only and replace with an api – api will probably be registered using annotations to allow for soft deps
     public static void addBuiltInFossilsAndTypes() {
-        FOSSILS.add(new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/ammonite"), "Ammonite"));
-        FOSSILS.add(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Feather"));
-        FOSSILS.add(new Fossil(365, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Feet"));
-        FOSSILS.add(new Fossil(530, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/fish"), "Fish"));
-        FOSSILS.add(new Fossil(275, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/imprint"), "Imprint"));
-        FOSSILS.add(new Fossil(260, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/lizard"), "Lizard"));
-        FOSSILS.add(new Fossil(500, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Tooth"));
-        FOSSILS.add(new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/trilobite"), "Trilobite"));
+        FOSSILS.add(new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/ammonite"), "Ammonite", true));
+        FOSSILS.add(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Feather", true));
+        FOSSILS.add(new Fossil(365, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Feet", true));
+        FOSSILS.add(new Fossil(530, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/fish"), "Fish", true));
+        FOSSILS.add(new Fossil(275, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/imprint"), "Imprint", true));
+        FOSSILS.add(new Fossil(260, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/lizard"), "Lizard", true));
+        FOSSILS.add(new Fossil(500, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Tooth", true));
+        FOSSILS.add(new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/trilobite"), "Trilobite", true));
 
         STONE_TYPES.add(new StoneType(1000, 0, color(255,145, 145, 145), new ResourceLocation("block/stone"), "Stone", "mineable/pickaxe", Material.STONE, 0, 1.5F, 6.0F));
         STONE_TYPES.add(new StoneType(1000, 0, color(255,158, 120, 104), new ResourceLocation("block/granite"), "Granite", "mineable/pickaxe", Material.STONE, 0, 1.5F, 6.0F));
@@ -131,12 +139,11 @@ public class Fossils {
         return pAlpha << 24 | pRed << 16 | pGreen << 8 | pBlue;
     }
 
-    //TODO
     public static Map<String, Supplier<Block>> generateFossilBlocks() {
         Map<String, Supplier<Block>> blocks = new HashMap<>();
         generateAllFossilsAndStoneTypes();
         FOSSILS_GENNED.forEach(((stoneType, fossil) -> {
-            ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase());
+            ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase() + (fossil.appendFossil ? "_fossil": ""));
             FossilBlock block = new FossilBlock(AbstractBlock.Properties.of(stoneType.material).noOcclusion().strength(stoneType.strength, stoneType.blastStrength).requiresCorrectToolForDrops().harvestLevel(stoneType.harvestLevel), fossil, stoneType);
             blocks.put(blockName.getPath(), () -> block);
         }));

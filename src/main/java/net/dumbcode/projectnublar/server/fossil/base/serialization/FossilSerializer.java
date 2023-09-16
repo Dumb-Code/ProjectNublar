@@ -1,27 +1,29 @@
-package net.dumbcode.projectnublar.server.fossil;
+package net.dumbcode.projectnublar.server.fossil.base.serialization;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multiset;
 import com.google.gson.*;
 import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.tags.JTag;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.base.Fossil;
+import net.dumbcode.projectnublar.server.fossil.base.StoneType;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class FossilSerializer {
-    public static byte[] serialize(UnSerializedFossilModel object) {
+    public static byte[] serializeModel(UnSerializedFossilModel object) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
-        gson.toJson(serialize(object, true), writer);
+        gson.toJson(unserializedModelToJson(object), writer);
         try {
             writer.close();
         }
@@ -31,7 +33,7 @@ public class FossilSerializer {
         return stream.toByteArray();
     }
 
-    public static byte[] serialize(String id) {
+    public static byte[] serializeBlockstate(String id) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
@@ -51,7 +53,7 @@ public class FossilSerializer {
         return stream.toByteArray();
     }
 
-    public static byte[] serialize(ResourceLocation id) {
+    public static byte[] serializeItemModel(ResourceLocation id) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
@@ -67,7 +69,7 @@ public class FossilSerializer {
         return stream.toByteArray();
     }
 
-    public static JsonObject serialize(UnSerializedFossilModel src, boolean a) {
+    public static JsonObject unserializedModelToJson(UnSerializedFossilModel src) {
         JsonObject object = new JsonObject();
         object.addProperty("loader", ProjectNublar.MODID + ":fossil");
         object.addProperty("parent", "block/cube");
@@ -80,7 +82,7 @@ public class FossilSerializer {
         return object;
     }
 
-    public static byte[] serialize() {
+    public static byte[] generatePackMcmeta() {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
@@ -102,7 +104,7 @@ public class FossilSerializer {
     }
 
 
-    public static void serialize(Multimap<StoneType, Fossil> fossils) {
+    public static void serializeMineableTag(Multimap<StoneType, Fossil> fossils) {
         ImmutableMultimap.Builder<String, Pair<StoneType, Collection<Fossil>>> tagsBuilder = new ImmutableMultimap.Builder<>();
         for (StoneType type : fossils.keys()) {
             tagsBuilder.put(type.mineableBy, new Pair<>(type, fossils.get(type)));
@@ -132,5 +134,24 @@ public class FossilSerializer {
             }
             Fossils.PACK.addData(new ResourceLocation("tags/blocks/" + key + ".json"), stream.toByteArray());
         }
+    }
+
+    public static void serializeLang(Set<String> blocks) {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
+
+        JsonObject object = new JsonObject();
+        for (String block : blocks) {
+            object.addProperty("block." + ProjectNublar.MODID + "." + block.replace("_fossil", ""), WordUtils.capitalizeFully(block.replace("_", " ")));
+        }
+        gson.toJson(object, writer);
+        try {
+            writer.close();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Fossils.PACK.addAsset(new ResourceLocation(ProjectNublar.MODID, "lang/en_us.json"), stream.toByteArray());
     }
 }

@@ -74,6 +74,7 @@ public class FossilModel implements IModelGeometry<FossilModel> {
 
 	public final ResourceLocation modelLocation;
 	public final ResourceLocation particle;
+	public final int tint;
 
 
 	public FossilModel(LineReader reader, OBJModel.ModelSettings settings, ResourceLocation stoneTexture, ResourceLocation fossilTexture, int tint, ResourceLocation particle) throws IOException {
@@ -90,6 +91,7 @@ public class FossilModel implements IModelGeometry<FossilModel> {
 		ModelGroup currentGroup = null;
 		ModelObject currentObject = null;
 		ModelMesh currentMesh = null;
+		this.tint = tint;
 
 		boolean objAboveGroup = false;
 
@@ -243,7 +245,7 @@ public class FossilModel implements IModelGeometry<FossilModel> {
 
 		SimpleBakedModel model = (SimpleBakedModel) builder.build();
 		SimpleBakedModelAccessor modelAccessor = (SimpleBakedModelAccessor) model;
-		return new FossilBakedModel(modelAccessor.getUnculledFaces(), modelAccessor.getCulledFaces(), model.useAmbientOcclusion(), model.usesBlockLight(), model.isGui3d(), model.getParticleIcon(), model.getTransforms(), model.getOverrides()) ;
+		return new FossilBakedModel(modelAccessor.getUnculledFaces(), modelAccessor.getCulledFaces(), model.useAmbientOcclusion(), model.usesBlockLight(), model.isGui3d(), model.getParticleIcon(), model.getTransforms(), model.getOverrides(), tint);
 	}
 
 	public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ResourceLocation modelLocation) {

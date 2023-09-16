@@ -1,22 +1,22 @@
-package net.dumbcode.projectnublar.server.fossil;
+package net.dumbcode.projectnublar.server.fossil.base;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.util.ResourceLocation;
 
 public class StoneType {
-    double start;
-    double end;
-    int tint;
-    ResourceLocation texture;
-    String name;
+    public double start;
+    public double end;
+    public int tint;
+    public ResourceLocation texture;
+    public String name;
     /**
      * points to a tag. For example "mineable/pickaxe" would point to "mincraft:tags/mineable/pickaxe.json", while "example:mineable/randomname" would point to "example:tags/mineable/randomname.json"
      */
-    String mineableBy;
-    Material material;
-    float strength;
-    float blastStrength;
-    int harvestLevel;
+    public String mineableBy;
+    public Material material;
+    public float strength;
+    public float blastStrength;
+    public int harvestLevel;
 
     public StoneType(double start, double end, int tint, ResourceLocation texture, String name, String mineableBy, Material material, int harvestLevel, float strength) {
         this.start = start;

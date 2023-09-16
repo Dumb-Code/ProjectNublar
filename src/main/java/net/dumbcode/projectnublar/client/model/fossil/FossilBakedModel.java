@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 public class FossilBakedModel extends SimpleBakedModel {
-    public FossilBakedModel(List<BakedQuad> unculledFaces, Map<Direction, List<BakedQuad>> culledFaces, boolean hasAmbientOcclusion, boolean usesBlockLight, boolean isGui3d, TextureAtlasSprite particle, ItemCameraTransforms transforms, ItemOverrideList override) {
+    int tint = 0;
+    public FossilBakedModel(List<BakedQuad> unculledFaces, Map<Direction, List<BakedQuad>> culledFaces, boolean hasAmbientOcclusion, boolean usesBlockLight, boolean isGui3d, TextureAtlasSprite particle, ItemCameraTransforms transforms, ItemOverrideList override, int tint) {
         super(unculledFaces, culledFaces, hasAmbientOcclusion, usesBlockLight, isGui3d, particle, transforms, override);
+        this.tint = tint;
     }
 
     @Override
