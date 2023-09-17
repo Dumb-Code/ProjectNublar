@@ -22,7 +22,7 @@ public class FossilExtensionManager {
         Stopwatch stopwatch = Stopwatch.createStarted();
         registerAnnotatedExtensions();
         onFossilRegister();
-        onModelsRegister();
+        onStoneTypeRegister();
         LOGGER.info("Initialized Fossil Extensions, \033[0;31mTook {}\033[0;0m", stopwatch);
     }
 
@@ -41,7 +41,7 @@ public class FossilExtensionManager {
     /**
      * <b><h2><i>INTERNAL USE ONLY! DO NOT CALL</i></h2></b>
      */
-    public static void onModelsRegister() {
+    public static void onStoneTypeRegister() {
         LOGGER.info("Registering Stone Types");
         Stopwatch stopwatch = Stopwatch.createStarted();
         EXTENSIONS.forEach((extension -> {

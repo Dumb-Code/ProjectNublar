@@ -3,9 +3,12 @@ package net.dumbcode.projectnublar.server.fossil.base;
 import com.google.common.collect.Range;
 import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.minecraft.util.math.MathHelper.clamp;
 
 //TODO: HAVE ROCKS AND FOSSILS IDENTIFY TIME PERIODS TO USE FOR SPAWNING
 //TODO: add deviation stuff
@@ -66,7 +69,6 @@ public enum Time {
     HADEAN(4567, 4000);
 
 
-
     private final double start;
     private final double end;
 
@@ -119,10 +121,13 @@ public enum Time {
         return stoneTypes;
     }
 
+    public static Range<Integer> getYLevelsFromTime(int max, double timeStart, double timeEnd) {
+        int y = normalize(timeEnd, 4567, 0, 0, max);
+        int y1 = normalize(timeStart, 4567, 0, 0, max);
+        return Range.closed(y, y1);
+    }
 
-
-    //TODO
-    public static Range<Integer> findAllYLayersThatMatchRange(double start, double end) {
-        return null;
+    private static int normalize(double value, int minValue, int maxValue, int min, int max) {
+        return (int) ((value - minValue) / (minValue - maxValue) * (max - min) + min);
     }
 }

@@ -6,15 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializer;
-import net.dumbcode.projectnublar.server.runtimepack.generator.api.JsonSerializable;
 import net.dumbcode.projectnublar.server.runtimepack.generator.api.RuntimeResourcePack;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.animation.JAnimation;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.blockstate.JBlockStates;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.lang.JLang;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.loot.JLootTable;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.models.JModel;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.recipe.JRecipe;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.tags.JTag;
 import net.dumbcode.projectnublar.server.runtimepack.generator.util.CallableFunction;
 import net.dumbcode.projectnublar.server.runtimepack.generator.util.CountingInputStream;
 import net.dumbcode.projectnublar.server.runtimepack.generator.util.UnsafeByteArrayOutputStream;
@@ -65,7 +57,6 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePa
   public static final Gson GSON = new GsonBuilder()
       .setPrettyPrinting()
       .disableHtmlEscaping()
-      .registerTypeHierarchyAdapter(JsonSerializable.class, JsonSerializable.SERIALIZER)
       .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
       .registerTypeHierarchyAdapter(Advancement.Builder.class, (JsonSerializer<Advancement.Builder>) (builder, type, jsonSerializationContext) -> builder.serializeToJson())
       .create();
@@ -119,7 +110,6 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePa
   private final Map<ResourceLocation, Supplier<byte[]>> data = new ConcurrentHashMap<>();
   private final Map<ResourceLocation, Supplier<byte[]>> assets = new ConcurrentHashMap<>();
   private final Map<String, Supplier<byte[]>> root = new ConcurrentHashMap<>();
-  private final Map<ResourceLocation, JLang> langMergeable = new ConcurrentHashMap<>();
   private boolean forbidsDuplicateResource = false;
 
   public RuntimeResourcePackImpl(ResourceLocation id) {
@@ -176,28 +166,6 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePa
         throw new RuntimeException(e);
       }
     });
-  }
-
-  @Override
-  public byte[] addLang(ResourceLocation identifier, JLang lang) {
-    return this.addAsset(fix(identifier, "lang", "json"), serialize(lang));
-  }
-
-  @Override
-  public void mergeLang(ResourceLocation identifier, JLang lang) {
-    this.langMergeable.compute(identifier, (identifier1, lang1) -> {
-      if (lang1 == null) {
-        lang1 = new JLang();
-        this.addLazyResource(ResourcePackType.CLIENT_RESOURCES, identifier, (pack, identifier2) -> pack.addLang(identifier, lang));
-      }
-      lang1.putAll(lang);
-      return lang1;
-    });
-  }
-
-  @Override
-  public byte[] addLootTable(ResourceLocation identifier, JLootTable table) {
-    return this.addData(fix(identifier, "loot_tables", "json"), serialize(table));
   }
 
   @Override
@@ -288,16 +256,6 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePa
   }
 
   @Override
-  public byte[] addModel(JModel model, ResourceLocation id) {
-    return this.addAsset(fix(id, "models", "json"), serialize(model));
-  }
-
-  @Override
-  public byte[] addBlockState(JBlockStates state, ResourceLocation id) {
-    return this.addAsset(fix(id, "blockstates", "json"), serialize(state));
-  }
-
-  @Override
   public byte[] addTexture(ResourceLocation id, BufferedImage image) {
     UnsafeByteArrayOutputStream ubaos = new UnsafeByteArrayOutputStream();
     try {
@@ -306,21 +264,6 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePa
       throw new RuntimeException("impossible.", e);
     }
     return this.addAsset(fix(id, "textures", "png"), ubaos.getBytes());
-  }
-
-  @Override
-  public byte[] addAnimation(ResourceLocation id, JAnimation animation) {
-    return this.addAsset(fix(id, "textures", "png.mcmeta"), serialize(animation));
-  }
-
-  @Override
-  public byte[] addTag(ResourceLocation id, JTag tag) {
-    return this.addData(fix(id, "tags", "json"), serialize(tag));
-  }
-
-  @Override
-  public byte[] addRecipe(ResourceLocation id, JRecipe recipe) {
-    return this.addData(fix(id, "recipes", "json"), serialize(recipe));
   }
 
   @Override
@@ -586,25 +529,6 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePa
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public void clearResources(ResourcePackType side) {
-    getSys(side).clear();
-    if (side == ResourcePackType.CLIENT_RESOURCES) langMergeable.clear();
-  }
-
-  @Override
-  public void clearResources() {
-    assets.clear();
-    data.clear();
-    root.clear();
-    langMergeable.clear();
-  }
-
-  @Override
-  public void clearRootResources() {
-    root.clear();
   }
 
   private Map<ResourceLocation, Supplier<byte[]>> getSys(ResourcePackType side) {

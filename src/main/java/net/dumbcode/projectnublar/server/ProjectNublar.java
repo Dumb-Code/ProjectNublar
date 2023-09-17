@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.brigadier.arguments.ArgumentType;
 import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
@@ -12,7 +11,6 @@ import net.dumbcode.dumblibrary.server.registry.PreBlockRegistryEvent;
 import net.dumbcode.projectnublar.client.DinoItemResourcePack;
 import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
-import net.dumbcode.projectnublar.client.model.fossil.FossilModelLoader;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinterRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
@@ -162,6 +160,7 @@ public class ProjectNublar {
         });
         FossilExtensionManager.initialize();
         Fossils.generateFossils();
+        Fossils.PACK.dump(Paths.get("fossil/"));
     }
 
 
@@ -176,14 +175,13 @@ public class ProjectNublar {
 
         BlockEntityIncubatorRenderer.markResolvers();
 
-        Fossils.PACK.dump(Paths.get("fossil/"));
     }
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModelRegistryEvents {
         @SubscribeEvent
         public static void onModelsRegistered(ModelRegistryEvent event) {
-            ModelLoaderRegistry.registerLoader(new ResourceLocation(MODID, "fossil"), FossilModelLoader.INSTANCE);
+//            ModelLoaderRegistry.registerLoader(new ResourceLocation(MODID, "fossil"), FossilModelLoader.INSTANCE);
         }
     }
 

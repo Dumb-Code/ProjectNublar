@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server.fossil;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.dumbcode.projectnublar.client.model.fossil.FossilItemRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
@@ -13,10 +12,8 @@ import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.runtimepack.generator.api.RuntimeResourcePack;
-import net.dumbcode.projectnublar.server.runtimepack.generator.json.lang.JLang;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.ResourcePackType;
@@ -43,20 +40,19 @@ public class Fossils {
     public static void generateFossils() {
         generateAllFossilsAndStoneTypes();
         FOSSILS_GENNED.forEach(((stoneType, fossil) -> {
-            UnSerializedFossilModel model = new UnSerializedFossilModel(stoneType.texture.toString(), fossil.texture.toString(), stoneType.tint);
+            UnSerializedFossilModel model = new UnSerializedFossilModel(stoneType, fossil.texture.toString(), stoneType.tint);
             ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase());
             String string = fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase();
             PACK.addAsset(fix(blockName, "models/block", "json"), FossilSerializer.serializeModel(model));
             PACK.addAsset(fix(blockName, "models/item", "json"), FossilSerializer.serializeModel(model));
             PACK.addAsset(fix(blockName, "blockstates", "json"), FossilSerializer.serializeBlockstate("projectnublar:block/" + string));
             PACK.addAsset(new ResourceLocation(ProjectNublar.MODID, "pack.mcmeta"), FossilSerializer.generatePackMcmeta());
-            PACK.addLang(new ResourceLocation(ProjectNublar.MODID, "en_us"), JLang.lang().entry(WordUtils.capitalizeFully(stoneType.name), WordUtils.capitalizeFully(fossil.name)));
         }));
 
         generateFossilBlocks().forEach(((name, block) -> {
             RegistryObject<Block> FOSSIL = FOSSIL_BLOCKS.register(name.replace("_fossil", ""), block);
             BLOCKS.add(FOSSIL);
-            RegistryObject<Item> ITEM = ItemHandler.REGISTER.register(name.replace("_fossil", ""), () -> new FossilItem(block.get(), new Item.Properties().tab(ItemHandler.TAB).setISTER(() -> FossilItemRenderer.INSTANCE), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
+            RegistryObject<Item> ITEM = ItemHandler.REGISTER.register(name.replace("_fossil", ""), () -> new FossilItem(block.get(), new Item.Properties().tab(ItemHandler.TAB), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
             ITEMS.add(ITEM);
         }));
         FossilSerializer.serializeMineableTag(FOSSILS_GENNED);
