@@ -56,7 +56,7 @@ public class Fossils {
             ITEMS.add(ITEM);
         }));
         FossilSerializer.serializeMineableTag(FOSSILS_GENNED);
-        FossilSerializer.serializeLang(generateFossilBlocks().keySet());
+//        FossilSerializer.serializeLang(generateFossilBlocks().keySet());
     }
 
     public static void generateAllFossilsAndStoneTypes() {
