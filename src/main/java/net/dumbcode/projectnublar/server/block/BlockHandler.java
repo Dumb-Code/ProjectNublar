@@ -74,12 +74,6 @@ public class BlockHandler {
     public static final RegistryObject<Block> UNNAMED_SCIENTIST_BLOCK = REGISTER.register("unnamed_scientist_block", () -> new Block(of(Material.METAL)));
     public static final RegistryObject<Block> UNNAMED_PALEONTOLOGIST_BLOCK = REGISTER.register("unnamed_paleontologist_block", () -> new Block(of(Material.METAL)));
 
-    public static final Map<FossilBlock.FossilType, RegistryMap<Dinosaur, FossilBlock>> FOSSIL = REGISTER.beforeRegister(new HashMap<>(), map -> {
-        for(FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
-            map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value, copy(value.getCopy()))));
-        }
-    });
-
     private static <T extends Block> RegistryMap<Dinosaur, T> createMap(String nameFormat, Function<Dinosaur, T> supplier) {
         RegistryMap<Dinosaur, T> map = new RegistryMap<>();
         for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {

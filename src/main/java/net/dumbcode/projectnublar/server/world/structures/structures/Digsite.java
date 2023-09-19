@@ -5,13 +5,11 @@ import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.WorldUtils;
-import net.dumbcode.projectnublar.server.block.FossilBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.utils.BlockUtils;
 import net.dumbcode.projectnublar.server.world.LootTableHandler;
 import net.dumbcode.projectnublar.server.world.constants.ConstantDefinition;
 import net.dumbcode.projectnublar.server.world.constants.StructureConstants;
-import net.dumbcode.projectnublar.server.world.gen.DigsiteStructureNetwork;
 import net.dumbcode.projectnublar.server.world.structures.Structure;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
@@ -362,11 +360,12 @@ public class Digsite extends Structure {
         }
 
         private void setFossils(Set<BlockPos> fossilPositions, Dinosaur dinosaur) {
-            for (BlockPos pos : fossilPositions) {
-                if (!this.world.getBlockState(pos).canBeReplaced(Fluids.EMPTY)) {
-                    this.world.setBlock(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), dinosaur), 2);
-                }
-            }
+            //TODO
+//            for (BlockPos pos : fossilPositions) {
+//                if (!this.world.getBlockState(pos).canBeReplaced(Fluids.EMPTY)) {
+//                    this.world.setBlock(pos, FossilBlock.FossilType.guess(this.world.getBlockState(pos), dinosaur), 2);
+//                }
+//            }
         }
 
         public void iterateCircle(double distX, double distZ, float xSize, float zSize, int radius, BiConsumer<Integer, Integer> consumer) {

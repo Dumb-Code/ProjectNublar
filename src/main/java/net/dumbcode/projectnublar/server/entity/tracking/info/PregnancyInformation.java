@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.tracking.info;
 
-import io.netty.buffer.ByteBuf;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.resources.I18n;
@@ -10,12 +10,13 @@ import net.minecraft.network.PacketBuffer;
 import java.util.*;
 import java.util.stream.IntStream;
 
+@EqualsAndHashCode(callSuper = true)
 @Value
 public class PregnancyInformation extends TooltipInformation {
 
     public static final String KEY = "pregnancy_information";
 
-    private int[] ticksTillGiveBirth;
+    int[] ticksTillGiveBirth;
 
     @Override
     protected String getTypeName() {

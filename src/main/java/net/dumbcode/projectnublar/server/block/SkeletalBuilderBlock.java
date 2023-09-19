@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.item.FossilItem;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -52,11 +52,11 @@ public class SkeletalBuilderBlock extends DirectionalBlock implements IItemBlock
             SkeletalBuilderBlockEntity sb = (SkeletalBuilderBlockEntity) tileEntity;
             if(stack.getItem() instanceof FossilItem) {
                 FossilItem item = (FossilItem)stack.getItem();
-                Dinosaur dinosaur = item.getDinosaur();
+                Dinosaur dinosaur = item.getFossil().dinosaur.get();
                 if(!sb.getDinosaur().isPresent()) {
                     sb.setDinosaur(dinosaur);
                 }
-                this.setBonesInHandler(sb, dinosaur, stack, item.getVariant());
+                this.setBonesInHandler(sb, dinosaur, stack, item.getFossil().name);
                 return ActionResultType.SUCCESS;
             } else if(stack.isEmpty()) {
                 if (sb.getDinosaur().isPresent()) {

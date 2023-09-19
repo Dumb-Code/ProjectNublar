@@ -133,12 +133,6 @@ public final class ItemHandler {
     public static final RegistryMap<Dinosaur, Item> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties().tab(TAB)));
     public static final RegistryMap<Dinosaur, Item> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties().tab(TAB)));
 
-    public static final Map<Dinosaur, RegistryMap<String, Item>> FOSSIL_ITEMS = createNestedMap(
-        "%s_fossil_%s",
-        dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS.get()), DinosaurDropsComponent.Storage::getFossilList),
-        (dinosaur, fossil) -> new FossilItem(dinosaur, "fossil", fossil, new Item.Properties().tab(TAB))
-        );
-
     public static void registerAllItemBlocks(RegistryEvent.Register<Item> event) {
         for (RegistryObject<Block> entry : BlockHandler.REGISTER.getEntries()) {
             Block block = entry.get();

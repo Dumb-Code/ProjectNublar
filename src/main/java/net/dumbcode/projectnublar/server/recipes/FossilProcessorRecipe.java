@@ -5,16 +5,16 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.FossilProcessorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.Objects;
 
 public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockEntity> {
     INSTANCE;
@@ -26,7 +26,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
         ItemStack inSlot = process.getInputStack(0);
         Item item = inSlot.getItem();
-        return item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item)
+        return item instanceof FossilItem && Fossils.ITEMS.get(((FossilItem) item).getFossil().dinosaur) != null
             && handler.getStackInSlot(3).getItem() instanceof FilterItem
             && blockEntity.getTank().getFluidAmount() >= FLUID_AMOUNT
             && handler.getStackInSlot(2).getItem() == ItemHandler.EMPTY_TEST_TUBE.get();
@@ -55,7 +55,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         //Damage the filter item.
         ItemStack filter = handler.getStackInSlot(3);
         float efficiency = ((FilterItem)filter.getItem()).getEfficiency(filter);
-        if (filter.hurt(1, blockEntity.getLevel().getRandom(), null)) {
+        if (filter.hurt(1, Objects.requireNonNull(blockEntity.getLevel()).getRandom(), null)) {
             filter.shrink(1);
         }
 
@@ -68,7 +68,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
 
         //Insert the output item
         if(item instanceof DinosaurProvider) {
-            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getDinosaur()));
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getFossil().dinosaur.get()));
             //Sets the size.
             //See here: https://www.desmos.com/calculator/c59djyd7c8 for a distribution for the 3 different filter types.
             //Where:
@@ -89,7 +89,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         Item item = testStack.getItem();
-        return slotIndex == 0 && item instanceof FossilItem && ItemHandler.FOSSIL_ITEMS.get(((FossilItem) item).getDinosaur()).containsValue(item);
+        return slotIndex == 0 && item instanceof FossilItem && Fossils.ITEMS.containsValue(item);
     }
 
     @Override

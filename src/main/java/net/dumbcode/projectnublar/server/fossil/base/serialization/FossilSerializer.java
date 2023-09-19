@@ -29,6 +29,29 @@ public class FossilSerializer {
         return stream.toByteArray();
     }
 
+    public static byte[] serializeItemModel(String texture) {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
+        gson.toJson(textureToItemJson(texture), writer);
+        try {
+            writer.close();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return stream.toByteArray();
+    }
+
+    private static JsonObject textureToItemJson(String texture) {
+        JsonObject object = new JsonObject();
+        object.addProperty("parent", "item/generated");
+        JsonObject textures = new JsonObject();
+        textures.addProperty("layer0", texture);
+        object.add("textures", textures);
+        return object;
+    }
+
     public static byte[] serializeBlockstate(String id) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

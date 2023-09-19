@@ -1,7 +1,10 @@
 package net.dumbcode.projectnublar.server.fossil.impl;
 
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.fossil.api.Extension;
 import net.dumbcode.projectnublar.server.fossil.api.IFossilExtension;
 import net.dumbcode.projectnublar.server.fossil.api.context.FossilRegistrationContext;
@@ -13,18 +16,28 @@ import net.minecraft.block.material.Material;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
 
+import java.util.Collections;
+
 @Extension
 public class DefaultFossilExtension implements IFossilExtension {
     @Override
     public void registerFossils(FossilRegistrationContext context) {
-        context.registerFossil(new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/ammonite"), "Ammonite", true));
-        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Feather", true));
-        context.registerFossil(new Fossil(365, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Feet", true));
-        context.registerFossil(new Fossil(530, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/fish"), "Fish", true));
-        context.registerFossil(new Fossil(275, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/imprint"), "Imprint", true));
-        context.registerFossil(new Fossil(260, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/lizard"), "Lizard", true));
-        context.registerFossil(new Fossil(500, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Tooth", true));
-        context.registerFossil(new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/trilobite"), "Trilobite", true));
+        //"foot", "claw", "leg", "neck", "pelvis", "ribcage", "skull", "tail"
+        //TODO: set all the item textures on these
+        context.registerFossil(new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/ammonite"), "Ammonite", true, null, null, null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Dilophosaurus Feather", true, DinosaurHandler.DILOPHOSAURUS, "feather", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Tyrannosaurus Feather", true, DinosaurHandler.TYRANNOSAURUS, "feather", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Velociraptor JP Feather", true, DinosaurHandler.VELOCIRAPTOR_JP, "feather", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feather"), "Velociraptor JP 3 Feather", true, DinosaurHandler.VELOCIRAPTOR_JP3, "feather", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Dilophosaurus Feet", true, DinosaurHandler.DILOPHOSAURUS, "foot", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Tyrannosaurus Feet", true, DinosaurHandler.TYRANNOSAURUS, "foot", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Velociraptor JP Feet", true, DinosaurHandler.VELOCIRAPTOR_JP, "foot", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/feet"), "Velociraptor JP 3 Feet", true, DinosaurHandler.VELOCIRAPTOR_JP3, "foot", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Dilophosaurus Tooth", true, DinosaurHandler.DILOPHOSAURUS, "tooth", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Tyrannosaurus Tooth", true, DinosaurHandler.TYRANNOSAURUS, "tooth", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Velociraptor JP Tooth", true, DinosaurHandler.VELOCIRAPTOR_JP, "tooth", null));
+        context.registerFossil(new Fossil(150, 0, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/tooth"), "Velociraptor JP 3 Tooth", true, DinosaurHandler.VELOCIRAPTOR_JP3, "tooth", null));
+        context.registerFossil(new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/fossil/trilobite"), "Trilobite", true, null, null, null));
     }
 
     @Override

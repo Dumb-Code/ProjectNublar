@@ -37,6 +37,7 @@ import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
 import net.dumbcode.projectnublar.server.fossil.api.FossilExtensionManager;
+import net.dumbcode.projectnublar.server.fossil.blockitem.cap.ItemDNACap;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -66,6 +67,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -259,6 +261,7 @@ public class ProjectNublar {
     }
 
     public void preInit(FMLCommonSetupEvent event) {
+        CapabilityManager.INSTANCE.register(ItemDNACap.class, new ItemDNACap(), ItemDNACap::new);
         ArgumentTypes.register("pn:dinosuar", DinosaurArgument.class, new ArgumentSerializer<>(DinosaurArgument::new));
         ProjectNublarGeneticRegistry.register();
 

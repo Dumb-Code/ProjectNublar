@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.fossil.base;
 
-public enum FossilCondition {
+public enum FossilTier {
     WEATHERED(0, 40),
     FRAGMENTED(0.05f, 20),
     COMMON(0.1f, 15),
@@ -22,7 +22,7 @@ public enum FossilCondition {
      */
     private final float weight;
 
-    FossilCondition(float DNAGatherChance, float weight) {
+    FossilTier(float DNAGatherChance, float weight) {
         this.DNAGatherChance = DNAGatherChance;
         this.weight = weight;
     }

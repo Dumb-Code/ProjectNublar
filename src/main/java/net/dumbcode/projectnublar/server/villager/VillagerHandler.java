@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
@@ -57,7 +58,7 @@ public class VillagerHandler {
                     new BasicTrade(7, new ItemStack(Items.STONE_SHOVEL), 4, 2, 0.5F)
                 ))
                 .put(2, Arrays.asList(
-                    RandomChoiceCheckTrade.ofNestedMap(4, 7, 8, 2, 0.5F, ItemHandler.FOSSIL_ITEMS),
+                    RandomChoiceCheckTrade.ofMap(4, 7, 8, 2, 0.5F, Fossils.ITEMS),
                     new UseEmeraldToCookRawMeat(3, 6, 16, 2, 0.5F),
                     new BasicTrade(11, new ItemStack(Items.IRON_PICKAXE), 4, 1, 0.5F),
                     new BasicTrade(11, new ItemStack(Items.IRON_SHOVEL), 4, 1, 0.5F)
@@ -164,6 +165,13 @@ public class VillagerHandler {
             this.maxTrades = maxTrades;
             this.xp = xp;
             this.mul = mul;
+        }
+
+        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, Item> map) {
+            return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
+                .map(ItemStack::new)
+                .toArray(ItemStack[]::new)
+            );
         }
 
         public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, RegistryMap<?, Item> map) {
