@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
-import net.dumbcode.projectnublar.server.fossil.base.Time;
+import net.dumbcode.projectnublar.server.fossil.base.DinosaurAge;
 import net.dumbcode.projectnublar.server.fossil.base.serialization.FossilSerializer;
 import net.dumbcode.projectnublar.server.fossil.base.serialization.UnSerializedFossilModel;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
@@ -80,7 +80,7 @@ public class Fossils {
                         builder.put(stoneType, fossil);
                     }
                 } else {
-                    List<StoneType> types = Time.findAllStoneTypesThatMatchTimePeriods(Time.findAllTimePeriodsThatMatchRange(fossil.timeStart, fossil.timeEnd));
+                    List<StoneType> types = DinosaurAge.findAllStoneTypesThatMatchTimePeriods(DinosaurAge.findAllTimePeriodsThatMatchRange(fossil.timeStart, fossil.timeEnd));
                     for (StoneType type : types) {
                         builder.put(type, fossil);
                     }

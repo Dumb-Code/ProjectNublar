@@ -3,7 +3,6 @@ package net.dumbcode.projectnublar.server.fossil.base;
 import com.google.common.collect.Range;
 import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,7 @@ import static net.minecraft.util.math.MathHelper.clamp;
 //TODO: HAVE ROCKS AND FOSSILS IDENTIFY TIME PERIODS TO USE FOR SPAWNING
 //TODO: add deviation stuff
 //TODO: rock strata
-public enum Time {
+public enum DinosaurAge {
     QUATERNARY_HOLOCENE(0.0117, 0),
     QUATERNARY_PLEISTOCENE(2.58, 0.0117),
     NEOGENE_PLIOCENE(5.333, 2.58),
@@ -72,7 +71,7 @@ public enum Time {
     private final double start;
     private final double end;
 
-    Time(double start, double end) {
+    DinosaurAge(double start, double end) {
         if (end > start) {
             throw new IllegalArgumentException("End time cannot be greater than start");
         }
@@ -80,7 +79,7 @@ public enum Time {
         this.end = end;
     }
 
-    Time() {
+    DinosaurAge() {
         this.start = 0;
         this.end = 0;
     }
@@ -89,14 +88,14 @@ public enum Time {
         return new Pair<>(start, end);
     }
 
-    public static List<Time> findAllTimePeriodsThatMatchRange(double start, double end) {
-        List<Time> times = new ArrayList<>();
-        for (Time time : values()) {
-            if (Range.closed(end, start).contains(time.start) || Range.closed(end, start).contains(time.end)) {
-                times.add(time);
+    public static List<DinosaurAge> findAllTimePeriodsThatMatchRange(double start, double end) {
+        List<DinosaurAge> dinosaurAges = new ArrayList<>();
+        for (DinosaurAge dinosaurAge : values()) {
+            if (Range.closed(end, start).contains(dinosaurAge.start) || Range.closed(end, start).contains(dinosaurAge.end)) {
+                dinosaurAges.add(dinosaurAge);
             }
         }
-        return times;
+        return dinosaurAges;
     }
 
     public static List<StoneType> findAllStoneTypesThatMatchRange(double start, double end) {
@@ -109,11 +108,11 @@ public enum Time {
         return stoneTypes;
     }
 
-    public static List<StoneType> findAllStoneTypesThatMatchTimePeriods(List<Time> times) {
+    public static List<StoneType> findAllStoneTypesThatMatchTimePeriods(List<DinosaurAge> dinosaurAges) {
         List<StoneType> stoneTypes = new ArrayList<>();
-        for (Time time : times) {
+        for (DinosaurAge dinosaurAge : dinosaurAges) {
             for (StoneType type : Fossils.STONE_TYPES) {
-                if (Range.closed(time.end, time.start).contains(type.start) || Range.closed(time.end, time.start).contains(type.end)) {
+                if (Range.closed(dinosaurAge.end, dinosaurAge.start).contains(type.start) || Range.closed(dinosaurAge.end, dinosaurAge.start).contains(type.end)) {
                     stoneTypes.add(type);
                 }
             }

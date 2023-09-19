@@ -1,12 +1,13 @@
 package net.dumbcode.projectnublar.server.dinosaur.data;
 
+import net.dumbcode.projectnublar.server.fossil.base.DinosaurAge;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Random;
 
 
 /**
- * For removal soon. Use {@link net.dumbcode.projectnublar.server.fossil.base.Time Time} instead
+ * For removal soon. Use {@link DinosaurAge Time} instead
  */
 @Deprecated
 public enum DinosaurPeriod {
