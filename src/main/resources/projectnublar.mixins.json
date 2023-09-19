@@ -6,6 +6,7 @@
   "mixins": [
     "BlockLootTablesInvoker",
     "BlockModelProviderInvoker",
+    "PlayerInventoryMixin",
     "ReloadableResourceManagerImplMixin"
   ],
   "client": [

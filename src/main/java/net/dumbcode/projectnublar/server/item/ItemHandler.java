@@ -106,6 +106,8 @@ public final class ItemHandler {
     public static final RegistryObject<Item> SEQUENCER_COMPUTER = REGISTER.register("sequencer_computer", BASIC_ITEM);
 
     public static final RegistryObject<Item> MONITOR = REGISTER.register("monitor", BASIC_ITEM);
+    public static final RegistryObject<Item> FOSSIL_POUCH = REGISTER.register("fossil_pouch", () ->
+            new FossilPouchItem(new Item.Properties().tab(TAB).stacksTo(1)));
 
 
 
