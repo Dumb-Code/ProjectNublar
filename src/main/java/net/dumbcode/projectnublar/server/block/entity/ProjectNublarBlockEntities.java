@@ -4,10 +4,15 @@ import com.mojang.datafixers.types.constant.EmptyPart;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class ProjectNublarBlockEntities {
     public static final DeferredRegister<TileEntityType<?>> REGISTER = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, ProjectNublar.MODID);
@@ -39,8 +44,13 @@ public class ProjectNublarBlockEntities {
 
     public static final RegistryObject<TileEntityType<BlockEntityElectricFence>> ELECTRIC_FENCE
         = REGISTER.register("electric_fence", () -> TileEntityType.Builder.of(BlockEntityElectricFence::new, BlockHandler.ELECTRIC_FENCE.get()).build(new EmptyPart()));
+
+    public static RegistryObject<TileEntityType<FossilBlockEntity>> FOSSIL;
     public static final RegistryObject<TileEntityType<BlockEntityElectricFencePole>> ELECTRIC_FENCE_POLE
         = REGISTER.register("electric_fence_pole", () -> TileEntityType.Builder.of(BlockEntityElectricFencePole::new, BlockHandler.HIGH_SECURITY_ELECTRIC_FENCE_POLE.get(), BlockHandler.LOW_SECURITY_ELECTRIC_FENCE_POLE.get()).build(new EmptyPart()));
 
 
+    public static void deferredFossilBlockEntityRegister() {
+        FOSSIL = REGISTER.register("fossil", () -> TileEntityType.Builder.of(FossilBlockEntity::new, Fossils.BLOCKS.values().toArray(new Block[0])).build(new EmptyPart()));
+    }
 }

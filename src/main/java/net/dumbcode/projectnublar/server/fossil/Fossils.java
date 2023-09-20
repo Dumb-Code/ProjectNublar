@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.ProjectNublar;
+import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
@@ -128,6 +129,7 @@ public class Fossils {
             for (Block item : blocks) {
                 BLOCKS.put(((FossilBlock) item).getFossil().dinosaur, item);
             }
+            ProjectNublarBlockEntities.deferredFossilBlockEntityRegister();
         }
     }
 }
