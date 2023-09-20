@@ -111,7 +111,7 @@ public class Fossils {
         return blocks;
     }
 
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = ProjectNublar.MODID)
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = ProjectNublar.MODID)
     public static class Events {
         @SubscribeEvent(priority = EventPriority.LOWEST)
         public static void registerItem(RegistryEvent.Register<Item> event) {
