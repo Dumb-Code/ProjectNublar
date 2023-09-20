@@ -26,4 +26,18 @@ public enum FossilTier {
         this.DNAGatherChance = DNAGatherChance;
         this.weight = weight;
     }
+
+    public static FossilTier randomTier() {
+        double totalWeight = 0.0;
+        for (FossilTier tier : values()) {
+            totalWeight += tier.weight;
+        }
+
+        int idx = 0;
+        for (double r = Math.random() * totalWeight; idx < values().length - 1; ++idx) {
+            r -= values()[idx].weight;
+            if (r <= 0.0) break;
+        }
+        return values()[idx];
+    }
 }
