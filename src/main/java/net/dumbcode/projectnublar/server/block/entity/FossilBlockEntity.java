@@ -4,13 +4,12 @@ import net.dumbcode.projectnublar.server.fossil.base.FossilTier;
 import net.dumbcode.projectnublar.server.fossil.base.FossilType;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 
 import javax.annotation.Nonnull;
 
-public class FossilBlockEntity extends TileEntity implements ITickableTileEntity {
+public class FossilBlockEntity extends TileEntity {
     private FossilTier tier;
     private FossilType type;
 
@@ -20,6 +19,8 @@ public class FossilBlockEntity extends TileEntity implements ITickableTileEntity
 
     public FossilBlockEntity() {
         this(ProjectNublarBlockEntities.FOSSIL.get());
+        this.tier = FossilTier.randomTier();
+        this.type = FossilType.randomType();
     }
 
     @Override
@@ -32,18 +33,14 @@ public class FossilBlockEntity extends TileEntity implements ITickableTileEntity
     @Nonnull
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
-        nbt.putString("tier", tier.name().toLowerCase());
-        nbt.putString("type", type.name().toLowerCase());
-        return super.save(nbt);
-    }
-
-    @Override
-    public void tick() {
         if (tier == null) {
             tier = FossilTier.randomTier();
         }
         if (type == null) {
             type = FossilType.randomType();
         }
+        nbt.putString("tier", tier.name().toLowerCase());
+        nbt.putString("type", type.name().toLowerCase());
+        return super.save(nbt);
     }
 }
