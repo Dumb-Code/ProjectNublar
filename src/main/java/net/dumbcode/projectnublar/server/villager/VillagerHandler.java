@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.villager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -168,6 +169,13 @@ public class VillagerHandler {
         }
 
         public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, Item> map) {
+            return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
+                .map(ItemStack::new)
+                .toArray(ItemStack[]::new)
+            );
+        }
+
+        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Multimap<?, Item> map) {
             return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
                 .map(ItemStack::new)
                 .toArray(ItemStack[]::new)

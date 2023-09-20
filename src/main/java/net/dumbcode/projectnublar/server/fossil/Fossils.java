@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.fossil;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -38,8 +39,8 @@ public class Fossils {
     public static final List<Fossil> FOSSILS = new ArrayList<>();
     public static final List<RegistryObject<Block>> BLOCK_REG_OBJECTS = new ArrayList<>();
     private static final List<RegistryObject<Item>> ITEM_REG_OBJECTS = new ArrayList<>();
-    public static final Map<Dinosaur, Block> BLOCKS = new HashMap<>();
-    public static final Map<Dinosaur, Item> ITEMS = new HashMap<>();
+    public static final Multimap<RegistryObject<Dinosaur>, Block> BLOCKS = Multimaps.newListMultimap(new HashMap<>(), () -> new ArrayList<>());
+    public static final Multimap<RegistryObject<Dinosaur>, Item> ITEMS = Multimaps.newListMultimap(new HashMap<>(), () -> new ArrayList<>());
     public static final List<StoneType> STONE_TYPES = new ArrayList<>();
     public static final DeferredRegister<Block> FOSSIL_BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, ProjectNublar.MODID);
 
@@ -117,7 +118,7 @@ public class Fossils {
         public static void registerItem(RegistryEvent.Register<Item> event) {
             List<Item> items = ITEM_REG_OBJECTS.stream().map(RegistryObject::get).collect(Collectors.toList());
             for (Item item : items) {
-                ITEMS.put(((FossilItem) item).getFossil().dinosaur.get(), item);
+                ITEMS.put(((FossilItem) item).getFossil().dinosaur, item);
             }
         }
 
@@ -125,7 +126,7 @@ public class Fossils {
         public static void registerBlock(RegistryEvent.Register<Block> event) {
             List<Block> blocks = BLOCK_REG_OBJECTS.stream().map(RegistryObject::get).collect(Collectors.toList());
             for (Block item : blocks) {
-                BLOCKS.put(((FossilBlock) item).getFossil().dinosaur.get(), item);
+                BLOCKS.put(((FossilBlock) item).getFossil().dinosaur, item);
             }
         }
     }
