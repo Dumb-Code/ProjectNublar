@@ -9,6 +9,7 @@ import net.minecraft.tileentity.TileEntityType;
 
 import javax.annotation.Nonnull;
 
+//TODO: make this get block data and pass it into a baked model
 public class FossilBlockEntity extends TileEntity {
     private FossilTier tier;
     private FossilType type;
