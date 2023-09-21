@@ -19,6 +19,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
@@ -106,7 +107,7 @@ public class StructureNetwork {
         ServerWorld world,
         BlockPos pos,
         Random random,
-        Set<Vector2f> placedEntries,
+        Set<Vector3i> placedEntries,
         StructureInstance instance,
         List<BuilderNode.Entry<Structure>> children,
         Set<BlockPos> pathPositions,
@@ -147,11 +148,11 @@ public class StructureNetwork {
         }
     }
 
-    private boolean doesStructureIntersect(StructureInstance instance, int offx, int offz, Set<Vector2f> placedEntries) {
+    private boolean doesStructureIntersect(StructureInstance instance, int offx, int offz, Set<Vector3i> placedEntries) {
         int padding = 5;
         for (int x = -padding; x < instance.getXSize()+padding; x++) {
             for (int z = -padding; z < instance.getZSize()+padding; z++) {
-                if(placedEntries.contains(new Vector2f(offx+x, offz+z))) {
+                if(placedEntries.contains(new Vector3i(offx+x, 0, offz+z))) {
                     return true;
                 }
             }
@@ -192,13 +193,13 @@ public class StructureNetwork {
         }
     }
 
-    private void generateEntry(StructureInstance structure, Random random, Set<Vector2f> placedEntries, int offX, int offZ, List<Runnable> generations, StructureConstants.Decision decision) {
+    private void generateEntry(StructureInstance structure, Random random, Set<Vector3i> placedEntries, int offX, int offZ, List<Runnable> generations, StructureConstants.Decision decision) {
         //2 blocks padding
         int padding = 2;
         //todo: have this as a function on the structure, as to make it more dynamic
         for (int x = -padding; x < structure.getXSize()+padding; x++) {
             for (int z = -padding; z < structure.getZSize()+padding; z++) {
-                placedEntries.add(new Vector2f(offX+x, offZ+z));
+                placedEntries.add(new Vector3i(offX+x, 0, offZ+z));
             }
         }
         Random constRand = new Random(random.nextLong());
