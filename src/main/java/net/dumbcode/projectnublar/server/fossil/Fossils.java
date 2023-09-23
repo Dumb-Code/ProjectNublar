@@ -66,9 +66,9 @@ public class Fossils {
             ItemHandler.REGISTER.register(name.replace("_fossil", ""), () -> new FossilBlockItem(block.get(), new Item.Properties().tab(ItemHandler.TAB), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
         }));
         generateFossilItems().forEach((name, pair) -> {
-            ITEM_REG_OBJECTS.add(ItemHandler.REGISTER.register(name + "_item", pair.getSecond()));
+            ITEM_REG_OBJECTS.add(ItemHandler.REGISTER.register(name, pair.getSecond()));
             if (pair.getFirst().itemTexture != null) {
-                PACK.addAsset(fix(new ResourceLocation(ProjectNublar.MODID, name + "_item"), "models/item", "json"), FossilSerializer.serializeItemModel(pair.getFirst().itemTexture.toString()));
+                PACK.addAsset(fix(new ResourceLocation(ProjectNublar.MODID, name), "models/item", "json"), FossilSerializer.serializeItemModel(pair.getFirst().itemTexture.toString()));
             }
         });
         FossilSerializer.serializeMineableTag(FOSSILS_GENNED);
@@ -108,7 +108,7 @@ public class Fossils {
     public static Map<String, Pair<Fossil, Supplier<Item>>> generateFossilItems() {
         Map<String, Pair<Fossil, Supplier<Item>>> blocks = new HashMap<>();
         FOSSILS.forEach(((fossil) -> {
-            ResourceLocation itemName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + "_item");
+            ResourceLocation itemName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_item");
             FossilItem item = new FossilItem(new Item.Properties().tab(ItemHandler.TAB), fossil);
             blocks.put(itemName.getPath(), new Pair<>(fossil, () -> item));
         }));
