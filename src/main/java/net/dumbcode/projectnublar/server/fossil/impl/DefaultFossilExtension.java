@@ -40,7 +40,7 @@ public class DefaultFossilExtension implements IFossilExtension {
     public void registerStoneTypes(StoneTypeRegistrationContext context) {
         context.registerStoneType(new StoneType(1000, 0, "granite", Blocks.GRANITE::defaultBlockState, 50));
         context.registerStoneType(new StoneType(1000, 0, "andesite", Blocks.ANDESITE::defaultBlockState, 50));
-        context.registerStoneType(new StoneType(1000, 0, "diroite", Blocks.DIORITE::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "diorite", Blocks.DIORITE::defaultBlockState, 50));
         context.registerStoneType(new StoneType(1000, 0, "cobblestone", Blocks.COBBLESTONE::defaultBlockState, 50));
         context.registerStoneType(new StoneType(1000, 0, "clay", Blocks.CLAY::defaultBlockState, 50));
         context.registerStoneType(new StoneType(1000, 0, "terracotta", Blocks.TERRACOTTA::defaultBlockState, 50));
