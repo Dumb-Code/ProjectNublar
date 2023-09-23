@@ -42,7 +42,7 @@ public class FossilBakedModel implements IDynamicBakedModel {
         List<BakedQuad> out =  new ArrayList<>(quads);
 
         for (BakedQuad quad : quads) {
-            out.add(ModelUtils.retextureQuad(quad, this.overlay, 0.0001F));
+            out.add(ModelUtils.retextureQuad(quad, this.overlay, 0.001F));
         }
 
         return ImmutableList.copyOf(out);
