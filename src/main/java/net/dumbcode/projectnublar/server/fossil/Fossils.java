@@ -7,18 +7,16 @@ import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
+import net.dumbcode.projectnublar.server.fossil.base.DinosaurAge;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
-import net.dumbcode.projectnublar.server.fossil.base.DinosaurAge;
-import net.dumbcode.projectnublar.server.fossil.base.serialization.FossilSerializer;
-import net.dumbcode.projectnublar.server.fossil.base.serialization.UnSerializedFossilModel;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlockItem;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
-import net.dumbcode.projectnublar.server.runtimepack.generator.api.RuntimeResourcePack;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -31,16 +29,16 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static net.dumbcode.projectnublar.server.runtimepack.generator.impl.RuntimeResourcePackImpl.fix;
-
 public class Fossils {
-    public static final RuntimeResourcePack PACK = RuntimeResourcePack.create(new ResourceLocation(ProjectNublar.MODID, "fossil"));
     public static final List<Fossil> FOSSILS = new ArrayList<>();
-    public static final List<RegistryObject<Block>> BLOCK_REG_OBJECTS = new ArrayList<>();
+    public static final List<RegistryObject<FossilBlock>> BLOCK_REG_OBJECTS = new ArrayList<>();
     private static final List<RegistryObject<Item>> ITEM_REG_OBJECTS = new ArrayList<>();
     public static final Multimap<RegistryObject<Dinosaur>, Block> BLOCKS = Multimaps.newListMultimap(new HashMap<>(), () -> new ArrayList<>());
     public static final Multimap<RegistryObject<Dinosaur>, Item> ITEMS = Multimaps.newListMultimap(new HashMap<>(), () -> new ArrayList<>());
@@ -50,28 +48,15 @@ public class Fossils {
     private static Multimap<StoneType, Fossil> FOSSILS_GENNED;
     public static void generateFossils() {
         generateAllFossilsAndStoneTypes();
-        FOSSILS_GENNED.forEach(((stoneType, fossil) -> {
-            UnSerializedFossilModel model = new UnSerializedFossilModel(stoneType, fossil.texture.toString(), stoneType.tint);
-            ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase());
-            String string = fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase();
-            PACK.addAsset(fix(blockName, "models/block", "json"), FossilSerializer.serializeModel(model));
-            PACK.addAsset(fix(blockName, "models/item", "json"), FossilSerializer.serializeModel(model));
-            PACK.addAsset(fix(blockName, "blockstates", "json"), FossilSerializer.serializeBlockstate("projectnublar:block/" + string));
-            PACK.addAsset(new ResourceLocation(ProjectNublar.MODID, "pack.mcmeta"), FossilSerializer.generatePackMcmeta());
-        }));
 
         generateFossilBlocks().forEach(((name, block) -> {
-            RegistryObject<Block> FOSSIL = FOSSIL_BLOCKS.register(name.replace("_fossil", ""), block);
+            RegistryObject<FossilBlock> FOSSIL = FOSSIL_BLOCKS.register(name.replace("_fossil", ""), block);
             BLOCK_REG_OBJECTS.add(FOSSIL);
             ItemHandler.REGISTER.register(name.replace("_fossil", ""), () -> new FossilBlockItem(block.get(), new Item.Properties().tab(ItemHandler.TAB), ((FossilBlock) block.get()).fossil, ((FossilBlock) block.get()).stone));
         }));
         generateFossilItems().forEach((name, pair) -> {
             ITEM_REG_OBJECTS.add(ItemHandler.REGISTER.register(name, pair.getSecond()));
-            if (pair.getFirst().itemTexture != null) {
-                PACK.addAsset(fix(new ResourceLocation(ProjectNublar.MODID, name), "models/item", "json"), FossilSerializer.serializeItemModel(pair.getFirst().itemTexture.toString()));
-            }
         });
-        FossilSerializer.serializeMineableTag(FOSSILS_GENNED);
     }
 
     public static void generateAllFossilsAndStoneTypes() {
@@ -94,12 +79,12 @@ public class Fossils {
         }
     }
 
-    public static Map<String, Supplier<Block>> generateFossilBlocks() {
-        Map<String, Supplier<Block>> blocks = new HashMap<>();
+    public static Map<String, Supplier<FossilBlock>> generateFossilBlocks() {
+        Map<String, Supplier<FossilBlock>> blocks = new HashMap<>();
         generateAllFossilsAndStoneTypes();
         FOSSILS_GENNED.forEach(((stoneType, fossil) -> {
             ResourceLocation blockName = new ResourceLocation(ProjectNublar.MODID, fossil.name.replace(" ", "_").toLowerCase() + "_" + stoneType.name.replace(" ", "_").toLowerCase() + (fossil.appendFossil ? "_fossil": ""));
-            FossilBlock block = new FossilBlock(AbstractBlock.Properties.of(stoneType.material).noOcclusion().strength(stoneType.strength, stoneType.blastStrength).requiresCorrectToolForDrops().harvestLevel(stoneType.harvestLevel), fossil, stoneType);
+            FossilBlock block = new FossilBlock(AbstractBlock.Properties.of(Material.STONE).noOcclusion(), fossil, stoneType);
             blocks.put(blockName.getPath(), () -> block);
         }));
         return blocks;

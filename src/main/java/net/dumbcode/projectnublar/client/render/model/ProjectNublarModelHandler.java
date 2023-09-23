@@ -1,17 +1,20 @@
 package net.dumbcode.projectnublar.client.render.model;
 
 import net.dumbcode.dumblibrary.client.component.ComponentRenderer;
+import net.dumbcode.projectnublar.client.model.fossil.FossilBakedModel;
 import net.dumbcode.projectnublar.client.render.entity.DinosaurEggRenderer;
 import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
-import net.dumbcode.projectnublar.server.dinosaur.eggs.EnumDinosaurEggTypes;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
+import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
@@ -20,6 +23,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 
@@ -80,6 +84,21 @@ public class ProjectNublarModelHandler {
             for (BlockState state : block.getStateDefinition().getPossibleStates()) {
                 registry.computeIfPresent(BlockModelShapes.stateToModelLocation(state), (rl, model) -> new FencePoleBakedModel(electricFence, model));
             }
+        }
+
+        for (RegistryObject<FossilBlock> blockRegObject : Fossils.BLOCK_REG_OBJECTS) {
+            FossilBlock block = blockRegObject.get();
+            // This is assuming that there is only one blockstate per block model
+            BlockState blockState = block.defaultBlockState();
+
+            IBakedModel baseModel = registry.get(BlockModelShapes.stateToModelLocation(block.stone.baseState.get()));
+            TextureAtlasSprite overlaySprite = event.getModelLoader().getSpriteMap().getSprite(new RenderMaterial(PlayerContainer.BLOCK_ATLAS, block.fossil.texture));
+
+            registry.put(
+                    BlockModelShapes.stateToModelLocation(blockState),
+                    new FossilBakedModel(baseModel, overlaySprite)
+            );
+
         }
     }
 

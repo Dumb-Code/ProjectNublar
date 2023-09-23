@@ -11,7 +11,6 @@ import net.dumbcode.dumblibrary.server.registry.PreBlockRegistryEvent;
 import net.dumbcode.projectnublar.client.DinoItemResourcePack;
 import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
-import net.dumbcode.projectnublar.client.model.fossil.FossilModelLoader;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinterRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
@@ -51,9 +50,7 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.data.DataGenerator;
@@ -64,9 +61,6 @@ import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -164,7 +158,6 @@ public class ProjectNublar {
         });
         FossilExtensionManager.initialize();
         Fossils.generateFossils();
-        Fossils.PACK.dump(Paths.get("fossil/"));
     }
 
 
@@ -179,14 +172,6 @@ public class ProjectNublar {
 
         BlockEntityIncubatorRenderer.markResolvers();
 
-    }
-
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ModelRegistryEvents {
-        @SubscribeEvent
-        public static void onModelsRegistered(ModelRegistryEvent event) {
-            ModelLoaderRegistry.registerLoader(new ResourceLocation(MODID, "fossil"), FossilModelLoader.INSTANCE);
-        }
     }
 
     public void registerCommands(RegisterCommandsEvent event) {
@@ -209,8 +194,6 @@ public class ProjectNublar {
 
         IResourceManager manager = Minecraft.getInstance().getResourceManager();
         ((SimpleReloadableResourceManager)manager).add(new DinoItemResourcePack());
-        ((SimpleReloadableResourceManager)manager).add(Fossils.PACK);
-
 
         ProjectNublarBlockRenderLayers.setRenderLayers();
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) event.getMinecraftSupplier().get().getResourceManager();

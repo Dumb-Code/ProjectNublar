@@ -7,7 +7,6 @@
     "BlockLootTablesInvoker",
     "BlockModelProviderInvoker",
     "PlayerInventoryMixin",
-    "ReloadableResourceManagerImplMixin"
   ],
   "client": [
     "SimpleBakedModelAccessor"

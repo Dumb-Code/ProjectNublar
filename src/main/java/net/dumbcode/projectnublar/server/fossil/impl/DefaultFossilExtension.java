@@ -1,22 +1,18 @@
 package net.dumbcode.projectnublar.server.fossil.impl;
 
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.fossil.api.Extension;
 import net.dumbcode.projectnublar.server.fossil.api.IFossilExtension;
 import net.dumbcode.projectnublar.server.fossil.api.context.FossilRegistrationContext;
 import net.dumbcode.projectnublar.server.fossil.api.context.StoneTypeRegistrationContext;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
-import net.dumbcode.projectnublar.server.fossil.base.SameTextureStoneType;
+import net.dumbcode.projectnublar.server.fossil.base.StoneType;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
-
-import java.util.Collections;
 
 @Extension
 public class DefaultFossilExtension implements IFossilExtension {
@@ -42,31 +38,30 @@ public class DefaultFossilExtension implements IFossilExtension {
 
     @Override
     public void registerStoneTypes(StoneTypeRegistrationContext context) {
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,158, 120, 104), new ResourceLocation("block/granite"), "Granite", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.GRANITE), 50, 0, 1.5F, 6.0F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/andesite"), "Andesite", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.ANDESITE), 50, 0, 1.5F, 6.0F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/diorite"), "Diorite", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.DIORITE), 50, 0, 1.5F, 6.0F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/cobblestone"), "Cobblestone", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.COBBLESTONE), 50, 0, 1.5F, 6.0F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/clay"), "Clay", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.CLAY), 50, 0, 0.6F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,158, 120, 104), new ResourceLocation("block/terracotta"), "Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/white_terracotta"), "White Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.WHITE_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/orange_terracotta"), "Orange Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.ORANGE_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/magenta_terracotta"), "Magenta Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.MAGENTA_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,158, 120, 104), new ResourceLocation("block/light_blue_terracotta"), "Light Blue Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.LIGHT_BLUE_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/yellow_terracotta"), "Yellow Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.YELLOW_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/lime_terracotta"), "Lime Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.LIME_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/pink_terracotta"), "Pink Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.PINK_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,158, 120, 104), new ResourceLocation("block/gray_terracotta"), "Gray Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.GRAY_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/light_gray_terracotta"), "Light Gray Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.LIGHT_GRAY_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/cyan_terracotta"), "Cyan Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.CYAN_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/purple_terracotta"), "Purple Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.PURPLE_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/blue_terracotta"), "Blue Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.BLUE_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/brown_terracotta"), "Brown Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.BROWN_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,158, 120, 104), new ResourceLocation("block/green_terracotta"), "Green Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.GREEN_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,145, 145, 145), new ResourceLocation("block/red_terracotta"), "Red Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.RED_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/black_terracotta"), "Black Terracotta", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NATURAL_STONE, Either.right(Blocks.BLACK_TERRACOTTA), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,158, 120, 104), new ResourceLocation("block/netherrack"), "Netherrack", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NETHER_ORE_REPLACEABLES, Either.right(Blocks.NETHERRACK), 50, 0, 1.25F, 4.2F));
-        context.registerStoneType(new SameTextureStoneType(1000, 0, context.color(255,179, 179, 179), new ResourceLocation("block/blackstone"), "Blackstone", "mineable/pickaxe", Material.STONE, OreFeatureConfig.FillerBlockType.NETHER_ORE_REPLACEABLES, Either.right(Blocks.BLACKSTONE), 50, 0, 1.25F, 4.2F));
-    }
+        context.registerStoneType(new StoneType(1000, 0, "granite", Blocks.GRANITE::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "andesite", Blocks.ANDESITE::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "diroite", Blocks.DIORITE::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "cobblestone", Blocks.COBBLESTONE::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "clay", Blocks.CLAY::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "terracotta", Blocks.TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "white_terracotta", Blocks.WHITE_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "orange_terracotta", Blocks.ORANGE_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "magenta_terracotta", Blocks.MAGENTA_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "light_blue_terracotta", Blocks.LIGHT_BLUE_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "yellow_terracotta", Blocks.YELLOW_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "lime_terracotta", Blocks.LIME_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "pink_terracotta", Blocks.PINK_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "terracotta", Blocks.GRAY_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "light_gray_terracotta", Blocks.LIGHT_GRAY_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "cyan_terracotta", Blocks.CYAN_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "purple_terracotta", Blocks.PURPLE_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "brown_terracotta", Blocks.BROWN_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "green_terracotta", Blocks.GREEN_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "red_terracotta", Blocks.RED_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "black_terracotta", Blocks.BLACK_TERRACOTTA::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "netherack", Blocks.NETHERRACK::defaultBlockState, 50));
+        context.registerStoneType(new StoneType(1000, 0, "blackstone",Blocks.BLACKSTONE::defaultBlockState, 50));
+   }
 
     @Override
     public String getName() {
