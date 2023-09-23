@@ -19,8 +19,10 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.runtimepack.generator.api.RuntimeResourcePack;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -120,6 +122,20 @@ public class Fossils {
             List<Item> items = ITEM_REG_OBJECTS.stream().map(RegistryObject::get).collect(Collectors.toList());
             for (Item item : items) {
                 ITEMS.put(((FossilItem) item).getFossil().dinosaur, item);
+            }
+        }
+
+        @SubscribeEvent
+        public static void onTextureStitch(TextureStitchEvent.Pre event) {
+            if (event.getMap().location().equals(PlayerContainer.BLOCK_ATLAS)) {
+                for (Fossil fossil : Fossils.FOSSILS) {
+                    if (fossil.texture != null) {
+                        event.addSprite(fossil.texture);
+                    }
+                    if (fossil.itemTexture != null) {
+                        event.addSprite(fossil.itemTexture);
+                    }
+                }
             }
         }
 
