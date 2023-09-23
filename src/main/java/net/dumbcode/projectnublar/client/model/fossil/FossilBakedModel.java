@@ -37,14 +37,15 @@ public class FossilBakedModel implements IDynamicBakedModel {
     @Nonnull
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
-        // We need to clone the contents of the list, as it's often immutable
-        List<BakedQuad> quads = new ArrayList<>(this.baseModel.getQuads(state, side, rand, extraData));
+        List<BakedQuad> quads = this.baseModel.getQuads(state, side, rand, extraData);
+
+        List<BakedQuad> out =  new ArrayList<>(quads);
 
         for (BakedQuad quad : quads) {
-            ModelUtils.retextureQuad(quad, this.overlay, 0.0001F);
+            out.add(ModelUtils.retextureQuad(quad, this.overlay, 0.0001F));
         }
 
-        return ImmutableList.copyOf(quads);
+        return ImmutableList.copyOf(out);
     }
 
     @Override
