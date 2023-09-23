@@ -74,14 +74,13 @@ public class FossilSerializer {
 
     public static JsonObject unserializedModelToJson(UnSerializedFossilModel src) {
         JsonObject object = new JsonObject();
-        object.addProperty("parent", "projectnublar:block/fossil");
-        JsonObject textures = new JsonObject();
-        textures.addProperty("particle", src.particleTexture);
-        textures.addProperty("bottom", src.bottomTexture);
-        textures.addProperty("top", src.topTexture);
-        textures.addProperty("side", src.sideTexture);
-        textures.addProperty("overlay", src.fossilTexture);
-        object.add("textures", textures);
+        object.addProperty("parent", "block/block");
+        object.addProperty("loader", "projectnublar:fossil");
+        object.addProperty("particleTexture", src.particleTexture);
+        object.addProperty("bottomTexture", src.bottomTexture);
+        object.addProperty("topTexture", src.topTexture);
+        object.addProperty("sideTexture", src.sideTexture);
+        object.addProperty("fossilTexture", src.fossilTexture);
         return object;
     }
 

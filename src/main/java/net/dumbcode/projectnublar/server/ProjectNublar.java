@@ -11,6 +11,7 @@ import net.dumbcode.dumblibrary.server.registry.PreBlockRegistryEvent;
 import net.dumbcode.projectnublar.client.DinoItemResourcePack;
 import net.dumbcode.projectnublar.client.ProjectNublarBlockRenderLayers;
 import net.dumbcode.projectnublar.client.gui.icons.EnumWeatherIcons;
+import net.dumbcode.projectnublar.client.model.fossil.FossilModelLoader;
 import net.dumbcode.projectnublar.client.particle.ProjectNublarParticleFactories;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityEggPrinterRenderer;
 import net.dumbcode.projectnublar.client.render.blockentity.BlockEntityIncubatorRenderer;
@@ -184,7 +185,7 @@ public class ProjectNublar {
     public static class ModelRegistryEvents {
         @SubscribeEvent
         public static void onModelsRegistered(ModelRegistryEvent event) {
-//            ModelLoaderRegistry.registerLoader(new ResourceLocation(MODID, "fossil"), FossilModelLoader.INSTANCE);
+            ModelLoaderRegistry.registerLoader(new ResourceLocation(MODID, "fossil"), FossilModelLoader.INSTANCE);
         }
     }
 
