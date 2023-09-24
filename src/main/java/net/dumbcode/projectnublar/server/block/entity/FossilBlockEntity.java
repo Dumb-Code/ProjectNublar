@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
+import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.FossilTier;
@@ -38,7 +39,7 @@ public class FossilBlockEntity extends TileEntity {
     public FossilBlockEntity() {
         this(ProjectNublarBlockEntities.FOSSIL.get());
         this.baseState = Blocks.STONE.defaultBlockState();
-        this.fossil = Fossils.FOSSILS.get(0);
+        this.fossil = FossilHandler.AMMONITE.get();
         this.tier = FossilTier.randomTier();
         this.type = FossilType.randomType();
     }

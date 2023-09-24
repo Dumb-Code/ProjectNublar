@@ -25,31 +25,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class FossilBlock extends Block {
-    public final Fossil fossil;
-    public final StoneType stone;
-    public FossilBlock(Properties properties, Fossil fossil, StoneType stone) {
+    public FossilBlock(Properties properties) {
         super(properties);
-        this.fossil = fossil;
-        this.stone = stone;
-    }
-
-    @Override
-    public IFormattableTextComponent getName() {
-        return new TranslationTextComponent("projectnublar.fossil", this.stone.baseState.get().getBlock().getName(), WordUtils.capitalizeFully(fossil.name));
-    }
-
-    @Nonnull
-    @Override
-    public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
-        return super.getDrops(pState, pBuilder);
-    }
-
-    public Fossil getFossil() {
-        return fossil;
-    }
-
-    public StoneType getStone() {
-        return stone;
     }
 
 
@@ -65,25 +42,26 @@ public class FossilBlock extends Block {
     }
 
     // Methods to delegate to the base state:
-    @Override
-    public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
-        return this.stone.baseState.get().getShape(pLevel, pPos);
-    }
-
-    @Override
-    public int getHarvestLevel(BlockState state) {
-        return this.stone.baseState.get().getHarvestLevel();
-    }
-
-    @Nullable
-    @Override
-    public ToolType getHarvestTool(BlockState state) {
-        return this.stone.baseState.get().getHarvestTool();
-    }
-
-    @Override
-    public SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, @Nullable Entity entity) {
-        return this.stone.baseState.get().getSoundType(world, pos, entity);
-    }
+    // TODO (wp): make this get it from the block entity
+//    @Override
+//    public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
+//        return this.stone.baseState.get().getShape(pLevel, pPos);
+//    }
+//
+//    @Override
+//    public int getHarvestLevel(BlockState state) {
+//        return this.stone.baseState.get().getHarvestLevel();
+//    }
+//
+//    @Nullable
+//    @Override
+//    public ToolType getHarvestTool(BlockState state) {
+//        return this.stone.baseState.get().getHarvestTool();
+//    }
+//
+//    @Override
+//    public SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, @Nullable Entity entity) {
+//        return this.stone.baseState.get().getSoundType(world, pos, entity);
+//    }
 
 }
