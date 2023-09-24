@@ -26,7 +26,6 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import javax.annotation.Nullable;
 
-//TODO: tint the item model fossil overlay
 public class FossilBlockItem extends BlockItem {
 
     public FossilBlockItem(Block block, Properties properties) {
