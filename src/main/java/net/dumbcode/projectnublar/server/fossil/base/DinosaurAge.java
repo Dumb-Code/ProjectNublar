@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.fossil.base;
 import com.google.common.collect.Range;
 import com.mojang.datafixers.util.Pair;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +101,7 @@ public enum DinosaurAge {
 
     public static List<StoneType> findAllStoneTypesThatMatchRange(double start, double end) {
         List<StoneType> stoneTypes = new ArrayList<>();
-        for (StoneType type : Fossils.STONE_TYPES) {
+        for (StoneType type : StoneTypeHandler.STONE_TYPE_REGISTRY.get()) {
             if (Range.closed(end, start).contains(type.start) || Range.closed(end, start).contains(type.end)) {
                 stoneTypes.add(type);
             }
@@ -111,7 +112,7 @@ public enum DinosaurAge {
     public static List<StoneType> findAllStoneTypesThatMatchTimePeriods(List<DinosaurAge> dinosaurAges) {
         List<StoneType> stoneTypes = new ArrayList<>();
         for (DinosaurAge dinosaurAge : dinosaurAges) {
-            for (StoneType type : Fossils.STONE_TYPES) {
+            for (StoneType type : StoneTypeHandler.STONE_TYPE_REGISTRY.get()) {
                 if (Range.closed(dinosaurAge.end, dinosaurAge.start).contains(type.start) || Range.closed(dinosaurAge.end, dinosaurAge.start).contains(type.end)) {
                     stoneTypes.add(type);
                 }

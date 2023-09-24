@@ -18,7 +18,8 @@ public class StoneTypeHandler {
 
     public static final PostEarlyDeferredRegister<StoneType> REGISTER = PostEarlyDeferredRegister.create(StoneType.class, ProjectNublar.MODID);
 
-    public static final Supplier<IForgeRegistry<StoneType>> STONE_TYPE_REGISTRY = REGISTER.makeRegistry("stone_type", RegistryBuilder::new);
+    public static final Supplier<IForgeRegistry<StoneType>> STONE_TYPE_REGISTRY = REGISTER.makeRegistry("stone_type", () -> new RegistryBuilder<StoneType>()
+            .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "granite")));
 
     public static RegistryObject<StoneType> GRANITE = REGISTER.register("granite", () -> new StoneType(1000, 0, Blocks.GRANITE::defaultBlockState, 50));
     public static RegistryObject<StoneType> DIORITE = REGISTER.register("diorite", () -> new StoneType(1000, 0, Blocks.DIORITE::defaultBlockState, 50));

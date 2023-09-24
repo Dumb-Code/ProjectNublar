@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.fossil.blockitem;
 
+import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.block.entity.FossilBlockEntity;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
@@ -7,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.tileentity.TileEntity;
@@ -24,11 +26,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class FossilBlock extends Block {
+public class FossilBlock extends Block implements IItemBlock {
     public FossilBlock(Properties properties) {
         super(properties);
     }
 
+
+    @Override
+    public Item createItem(Item.Properties properties) {
+        return new FossilBlockItem(this, properties);
+    }
 
     @Override
     public boolean hasTileEntity(BlockState state) {

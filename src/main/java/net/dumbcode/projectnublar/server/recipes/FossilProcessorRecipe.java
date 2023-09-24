@@ -26,7 +26,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         MachineModuleItemStackHandler<FossilProcessorBlockEntity> handler = blockEntity.getHandler();
         ItemStack inSlot = process.getInputStack(0);
         Item item = inSlot.getItem();
-        return item instanceof FossilItem && Fossils.ITEMS.get(((FossilItem) item).getFossil().dinosaur) != null
+        return item instanceof FossilItem // TODO (wp): && Fossils.ITEMS.get(((FossilItem) item).getFossil().dinosaur) != null
             && handler.getStackInSlot(3).getItem() instanceof FilterItem
             && blockEntity.getTank().getFluidAmount() >= FLUID_AMOUNT
             && handler.getStackInSlot(2).getItem() == ItemHandler.EMPTY_TEST_TUBE.get();
@@ -89,7 +89,7 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
     @Override
     public boolean acceptsInputSlot(FossilProcessorBlockEntity blockEntity, int slotIndex, ItemStack testStack, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {
         Item item = testStack.getItem();
-        return slotIndex == 0 && item instanceof FossilItem && Fossils.ITEMS.containsValue(item);
+        return slotIndex == 0 && item instanceof FossilItem; // TODO (wp): && Fossils.ITEMS.containsValue(item);
     }
 
     @Override

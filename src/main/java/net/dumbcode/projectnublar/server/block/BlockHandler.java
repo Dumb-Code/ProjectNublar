@@ -46,7 +46,7 @@ public class BlockHandler {
     public static final RegistryObject<MachineModuleBlock> EGG_PRINTER = REGISTER.register("egg_printer", () -> new DyableMachineModuleBlock(EggPrinterBlockEntity::new, 1, MachineModuleParts.EGG_PRINTER, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> INCUBATOR = REGISTER.register("incubator", () -> new MachineModuleBlock(IncubatorBlockEntity::new, 1, MachineModuleParts.INCUBATOR, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, 1, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
-    public static final RegistryObject<FossilBlock> FOSSIL_BLOCK = REGISTER.register("fosisl", () -> new FossilBlock(of(Material.STONE)));
+    public static final RegistryObject<FossilBlock> FOSSIL_BLOCK = REGISTER.register("fossil", () -> new FossilBlock(of(Material.STONE)));
 
 
     public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_FOSSIL_PROCESSOR = REGISTER.register("unbuilt_fossil_processor", () -> new UnbuiltMachineModuleBlock(FOSSIL_PROCESSOR, of(Material.HEAVY_METAL),
