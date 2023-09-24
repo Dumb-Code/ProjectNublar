@@ -5,7 +5,6 @@ import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 
 // TODO: move somewhere else?
@@ -17,8 +16,7 @@ public class Fossils {
         @SubscribeEvent
         public static void onTextureStitch(TextureStitchEvent.Pre event) {
             if (event.getMap().location().equals(PlayerContainer.BLOCK_ATLAS)) {
-                for (RegistryObject<Fossil> fossilReg : FossilHandler.REGISTER.getEntries()) {
-                    Fossil fossil = fossilReg.get();
+                for (Fossil fossil : FossilHandler.FOSSIL_REGISTRY.get()) {
                     if (fossil.texture != null) {
                         event.addSprite(fossil.texture);
                     }

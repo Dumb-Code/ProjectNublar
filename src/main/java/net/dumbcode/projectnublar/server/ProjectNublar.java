@@ -133,8 +133,8 @@ public class ProjectNublar {
         SoundHandler.REGISTER.register(bus);
         GeneticHandler.REGISTER.register(bus);
         DinosaurHandler.REGISTER.register(bus);
-        FossilHandler.REGISTER.register(bus);
-        StoneTypeHandler.REGISTER.register(bus);
+        FossilHandler.DR.register(bus);
+        StoneTypeHandler.DR.register(bus);
         PlantHandler.REGISTER.register(bus);
         ProjectNublarRecipesSerializers.REGISTER.register(bus);
         ComponentHandler.REGISTER.register(bus);

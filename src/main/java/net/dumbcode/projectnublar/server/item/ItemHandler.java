@@ -2,14 +2,12 @@ package net.dumbcode.projectnublar.server.item;
 
 import net.dumbcode.dumblibrary.server.registry.PostEarlyDeferredRegister;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
-import net.dumbcode.dumblibrary.server.utils.JavaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
-import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
@@ -109,8 +107,8 @@ public final class ItemHandler {
     public static final RegistryObject<Item> FOSSIL_POUCH = REGISTER.register("fossil_pouch", () ->
             new FossilPouchItem(new Item.Properties().tab(TAB).stacksTo(1)));
 
-
-
+    public static final RegistryObject<Item> FOSSIL_ITEM =
+            REGISTER.register("fossil_item", () -> new FossilItem(new Item.Properties().tab(TabHandler.FOSSIL_TAB)));
 
     public static final RegistryMap<Dinosaur, Item> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
         new BasicDinosaurItem(d, "raw_meat", new Item.Properties().tab(TAB).food(new Food.Builder()
