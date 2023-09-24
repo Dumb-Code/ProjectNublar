@@ -1,9 +1,11 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
+import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.FossilTier;
 import net.dumbcode.projectnublar.server.fossil.base.FossilType;
-import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -15,9 +17,17 @@ import javax.annotation.Nonnull;
 
 //TODO: make this get block data and pass it into a baked model
 public class FossilBlockEntity extends TileEntity {
+
+    public static final ModelProperty<BlockState> BASE_STATE = new ModelProperty<>();
+
+    public static final ModelProperty<Fossil> FOSSILS = new ModelProperty<>();
     public static final ModelProperty<FossilTier> TIER = new ModelProperty<>();
     public static final ModelProperty<FossilType> TYPE = new ModelProperty<>();
     public static final ModelProperty<String> CRACKS_TEX = new ModelProperty<>();
+
+    private BlockState baseState;
+
+    private Fossil fossil;
     private FossilTier tier;
     private FossilType type;
 
@@ -27,6 +37,8 @@ public class FossilBlockEntity extends TileEntity {
 
     public FossilBlockEntity() {
         this(ProjectNublarBlockEntities.FOSSIL.get());
+        this.baseState = Blocks.STONE.defaultBlockState();
+        this.fossil = Fossils.FOSSILS.get(0);
         this.tier = FossilTier.randomTier();
         this.type = FossilType.randomType();
     }
