@@ -15,13 +15,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FossilHandler {
-    public static final PostEarlyDeferredRegister<Fossil> REGISTER = PostEarlyDeferredRegister.create(Fossil.class, ProjectNublar.MODID);
+    public static final PostEarlyDeferredRegister<Fossil> DR = PostEarlyDeferredRegister.create(Fossil.class, ProjectNublar.MODID);
 
-    public static final Supplier<IForgeRegistry<Fossil>> FOSSIL_REGISTRY = REGISTER.makeRegistry("fossils", () -> new RegistryBuilder<Fossil>()
+    public static final Supplier<IForgeRegistry<Fossil>> FOSSIL_REGISTRY = DR.makeRegistry("fossils", () -> new RegistryBuilder<Fossil>()
             .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "ammonite")));
 
-    public static RegistryObject<Fossil> AMMONITE = REGISTER.register("ammonite", () -> new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/ammonite"), "Ammonite", true, null, null, null));
-    public static RegistryObject<Fossil> TRILOBITE = REGISTER.register("trilobite", () -> new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/trilobite"), "Trilobite", true, null, null, null));
+    public static RegistryObject<Fossil> AMMONITE = DR.register("ammonite", () -> new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/ammonite"), "Ammonite", true, null, null, null));
+    public static RegistryObject<Fossil> TRILOBITE = DR.register("trilobite", () -> new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/trilobite"), "Trilobite", true, null, null, null));
 
     public static RegistryMap<Dinosaur, Fossil> FEATHERS = createSimpleFossilMap("feather", "block/feather");
     public static RegistryMap<Dinosaur, Fossil> FEET = createSimpleFossilMap("feet", "block/feet");
@@ -34,9 +34,9 @@ public class FossilHandler {
     }
     private static RegistryMap<Dinosaur, Fossil> createMap(String format, Function<Dinosaur, Fossil> supplier) {
         RegistryMap<Dinosaur, Fossil> map = new RegistryMap<>();
-        REGISTER.beforeRegister(() -> {
+        DR.beforeRegister(() -> {
             for (Dinosaur dinosaur : DinosaurHandler.getRegistry()) {
-                map.putRegistry(dinosaur, REGISTER.register(
+                map.putRegistry(dinosaur, DR.register(
                         String.format(format, dinosaur.getFormattedName()),
                         () -> supplier.apply(dinosaur)
                 ));

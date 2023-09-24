@@ -51,12 +51,11 @@ public class SkeletalBuilderBlock extends DirectionalBlock implements IItemBlock
         if(tileEntity instanceof SkeletalBuilderBlockEntity) {
             SkeletalBuilderBlockEntity sb = (SkeletalBuilderBlockEntity) tileEntity;
             if(stack.getItem() instanceof FossilItem) {
-                FossilItem item = (FossilItem)stack.getItem();
-                Dinosaur dinosaur = item.getFossil().dinosaur.get();
+                Dinosaur dinosaur = FossilItem.getFossil(stack).dinosaur.get();
                 if(!sb.getDinosaur().isPresent()) {
                     sb.setDinosaur(dinosaur);
                 }
-                this.setBonesInHandler(sb, dinosaur, stack, item.getFossil().name);
+                this.setBonesInHandler(sb, dinosaur, stack, FossilItem.getFossil(stack).name);
                 return ActionResultType.SUCCESS;
             } else if(stack.isEmpty()) {
                 if (sb.getDinosaur().isPresent()) {

@@ -4,6 +4,7 @@ import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.block.entity.FossilBlockEntity;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
+import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -34,7 +35,7 @@ public class FossilBlock extends Block implements IItemBlock {
 
     @Override
     public Item createItem(Item.Properties properties) {
-        return new FossilBlockItem(this, properties);
+        return new FossilBlockItem(this, properties.tab(TabHandler.FOSSIL_TAB));
     }
 
     @Override

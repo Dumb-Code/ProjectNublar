@@ -67,8 +67,8 @@ public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockE
         blockEntity.getTank().drainInternal(FLUID_AMOUNT, IFluidHandler.FluidAction.EXECUTE);
 
         //Insert the output item
-        if(item instanceof DinosaurProvider) {
-            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(((FossilItem) item).getFossil().dinosaur.get()));
+        if(item instanceof FossilItem) {
+            ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_GENETIC_MATERIAL.get(FossilItem.getFossil(inputStack).dinosaur.get()));
             //Sets the size.
             //See here: https://www.desmos.com/calculator/c59djyd7c8 for a distribution for the 3 different filter types.
             //Where:

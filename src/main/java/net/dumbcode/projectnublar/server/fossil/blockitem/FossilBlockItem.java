@@ -35,9 +35,11 @@ public class FossilBlockItem extends BlockItem {
 
     @Override
     public void fillItemCategory(ItemGroup pGroup, NonNullList<ItemStack> pItems) {
-        FossilHandler.FOSSIL_REGISTRY.get().getValues().forEach(fossil ->
-                fossil.getStoneTypes().forEach(stoneType -> pItems.add(setFossilStack(fossil, stoneType)))
-        );
+        if (this.allowdedIn(pGroup)) {
+            FossilHandler.FOSSIL_REGISTRY.get().getValues().forEach(fossil ->
+                    fossil.getStoneTypes().forEach(stoneType -> pItems.add(setFossilStack(fossil, stoneType)))
+            );
+        }
     }
 
     @Override
