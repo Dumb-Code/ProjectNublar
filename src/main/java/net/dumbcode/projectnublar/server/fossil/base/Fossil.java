@@ -8,6 +8,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Fossil implements IForgeRegistryEntry<Fossil> {
 
@@ -21,11 +22,11 @@ public class Fossil implements IForgeRegistryEntry<Fossil> {
     public final String name;
     public final boolean appendFossil;
     @Nullable
-    public final RegistryObject<Dinosaur> dinosaur;
+    public final Supplier<Dinosaur> dinosaur;
     public final String partName;
     public final ResourceLocation itemTexture;
 
-    public Fossil(double timeStart, double timeEnd, @Nullable List<StoneType> stoneTypes, ResourceLocation texture, String name, boolean appendFossil, @Nullable RegistryObject<Dinosaur> dinosaur, String partName, ResourceLocation itemTexture) {
+    public Fossil(double timeStart, double timeEnd, @Nullable List<StoneType> stoneTypes, ResourceLocation texture, String name, boolean appendFossil, @Nullable Supplier<Dinosaur> dinosaur, String partName, ResourceLocation itemTexture) {
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
         this.stoneTypes = stoneTypes;
