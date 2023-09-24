@@ -17,7 +17,6 @@ import net.minecraftforge.client.model.data.ModelProperty;
 
 import javax.annotation.Nonnull;
 
-//TODO: make this get block data and pass it into a baked model
 public class FossilBlockEntity extends TileEntity {
 
     public static final ModelProperty<StoneType> STONE_TYPE = new ModelProperty<>();
