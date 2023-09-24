@@ -28,11 +28,7 @@ import java.util.function.Supplier;
 
 import static net.minecraft.inventory.container.PlayerContainer.BLOCK_ATLAS;
 
-@RequiredArgsConstructor
 public class FossilBakedModel implements IDynamicBakedModel {
-
-    private final IBakedModel baseModel;
-    private final TextureAtlasSprite overlay;
 
     @Nonnull
     @Override

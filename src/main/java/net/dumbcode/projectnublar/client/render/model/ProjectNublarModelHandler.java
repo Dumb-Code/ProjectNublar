@@ -86,20 +86,11 @@ public class ProjectNublarModelHandler {
             }
         }
 
-        for (RegistryObject<FossilBlock> blockRegObject : Fossils.BLOCK_REG_OBJECTS) {
-            FossilBlock block = blockRegObject.get();
-            // This is assuming that there is only one blockstate per block model
-            BlockState blockState = block.defaultBlockState();
-
-            IBakedModel baseModel = registry.get(BlockModelShapes.stateToModelLocation(block.stone.baseState.get()));
-            TextureAtlasSprite overlaySprite = event.getModelLoader().getSpriteMap().getSprite(new RenderMaterial(PlayerContainer.BLOCK_ATLAS, block.fossil.texture));
-
-            registry.put(
-                    BlockModelShapes.stateToModelLocation(blockState),
-                    new FossilBakedModel(baseModel, overlaySprite)
-            );
-
-        }
+        //TODO: convert this to a custom model wrapper.
+        registry.put(
+                BlockModelShapes.stateToModelLocation(BlockHandler.FOSSIL_BLOCK.get().defaultBlockState()),
+                new FossilBakedModel()
+        );
     }
 
 }

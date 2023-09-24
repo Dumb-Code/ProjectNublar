@@ -45,12 +45,8 @@ public class ProjectNublarBlockEntities {
     public static final RegistryObject<TileEntityType<BlockEntityElectricFence>> ELECTRIC_FENCE
         = REGISTER.register("electric_fence", () -> TileEntityType.Builder.of(BlockEntityElectricFence::new, BlockHandler.ELECTRIC_FENCE.get()).build(new EmptyPart()));
 
-    public static RegistryObject<TileEntityType<FossilBlockEntity>> FOSSIL;
+    public static RegistryObject<TileEntityType<FossilBlockEntity>> FOSSIL = REGISTER.register("fossil", () -> TileEntityType.Builder.of(FossilBlockEntity::new, BlockHandler.FOSSIL_BLOCK.get()).build(new EmptyPart()));;
     public static final RegistryObject<TileEntityType<BlockEntityElectricFencePole>> ELECTRIC_FENCE_POLE
         = REGISTER.register("electric_fence_pole", () -> TileEntityType.Builder.of(BlockEntityElectricFencePole::new, BlockHandler.HIGH_SECURITY_ELECTRIC_FENCE_POLE.get(), BlockHandler.LOW_SECURITY_ELECTRIC_FENCE_POLE.get()).build(new EmptyPart()));
 
-
-    public static void deferredFossilBlockEntityRegister() {
-        FOSSIL = REGISTER.register("fossil", () -> TileEntityType.Builder.of(FossilBlockEntity::new, Fossils.BLOCKS.values().toArray(new Block[0])).build(new EmptyPart()));
-    }
 }

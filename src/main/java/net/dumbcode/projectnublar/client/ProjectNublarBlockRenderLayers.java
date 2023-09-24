@@ -20,7 +20,7 @@ public class ProjectNublarBlockRenderLayers {
 
         setRenderLayers(UNBUILT_INCUBATOR.get(), RenderType.solid(), RenderType.cutout(), RenderType.translucent());
 
-        Fossils.BLOCK_REG_OBJECTS.forEach(((block) -> setRenderLayers(block.get(), RenderType.translucent())));
+        setRenderLayers(FOSSIL_BLOCK.get(), RenderType.translucent());
     }
 
     private static void setRenderLayers(Block block, RenderType... types) {

@@ -35,7 +35,9 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
+import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.Fossils;
+import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 import net.dumbcode.projectnublar.server.fossil.api.FossilExtensionManager;
 import net.dumbcode.projectnublar.server.fossil.blockitem.cap.ItemDNACap;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
@@ -134,7 +136,8 @@ public class ProjectNublar {
         SoundHandler.REGISTER.register(bus);
         GeneticHandler.REGISTER.register(bus);
         DinosaurHandler.REGISTER.register(bus);
-        Fossils.FOSSIL_BLOCKS.register(bus);
+        FossilHandler.REGISTER.register(bus);
+        StoneTypeHandler.REGISTER.register(bus);
         PlantHandler.REGISTER.register(bus);
         ProjectNublarRecipesSerializers.REGISTER.register(bus);
         ComponentHandler.REGISTER.register(bus);
@@ -156,8 +159,6 @@ public class ProjectNublar {
             DinosaurHandler.getRegistry().forEach(Dinosaur::attachDefaultComponents);
             PlantHandler.getRegistry().forEach(Plant::attachComponents);
         });
-        FossilExtensionManager.initialize();
-        Fossils.generateFossils();
     }
 
 
