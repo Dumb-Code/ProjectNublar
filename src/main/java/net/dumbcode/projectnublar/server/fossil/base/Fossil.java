@@ -3,22 +3,27 @@ package net.dumbcode.projectnublar.server.fossil.base;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Fossil {
-    public double timeStart;
-    public double timeEnd;
+public class Fossil implements IForgeRegistryEntry<Fossil> {
+
+    private ResourceLocation registryName;
+
+    public final double timeStart;
+    public final double timeEnd;
     @Nullable
-    public List<StoneType> stoneTypes;
-    public ResourceLocation texture;
-    public String name;
-    public boolean appendFossil;
+    public final List<StoneType> stoneTypes;
+    public final ResourceLocation texture;
+    public final String name;
+    public final boolean appendFossil;
     @Nullable
-    public RegistryObject<Dinosaur> dinosaur;
-    public String partName;
-    public ResourceLocation itemTexture;
+    public final RegistryObject<Dinosaur> dinosaur;
+    public final String partName;
+    public final ResourceLocation itemTexture;
 
     public Fossil(double timeStart, double timeEnd, @Nullable List<StoneType> stoneTypes, ResourceLocation texture, String name, boolean appendFossil, @Nullable RegistryObject<Dinosaur> dinosaur, String partName, ResourceLocation itemTexture) {
         this.timeStart = timeStart;
@@ -30,5 +35,22 @@ public class Fossil {
         this.dinosaur = dinosaur;
         this.partName = partName;
         this.itemTexture = itemTexture;
+    }
+
+    @Override
+    public Fossil setRegistryName(ResourceLocation name) {
+        this.registryName = name;
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getRegistryName() {
+        return this.registryName;
+    }
+
+    @Override
+    public Class<Fossil> getRegistryType() {
+        return Fossil.class;
     }
 }
