@@ -17,7 +17,8 @@ import java.util.function.Supplier;
 public class FossilHandler {
     public static final PostEarlyDeferredRegister<Fossil> REGISTER = PostEarlyDeferredRegister.create(Fossil.class, ProjectNublar.MODID);
 
-    public static final Supplier<IForgeRegistry<Fossil>> FOSSIL_REGISTRY = REGISTER.makeRegistry("fosssils", RegistryBuilder::new);
+    public static final Supplier<IForgeRegistry<Fossil>> FOSSIL_REGISTRY = REGISTER.makeRegistry("fossils", () -> new RegistryBuilder<Fossil>()
+            .setDefaultKey(new ResourceLocation(ProjectNublar.MODID, "ammonite")));
 
     public static RegistryObject<Fossil> AMMONITE = REGISTER.register("ammonite", () -> new Fossil(201, 66, null, new ResourceLocation(ProjectNublar.MODID, "block/ammonite"), "Ammonite", true, null, null, null));
     public static RegistryObject<Fossil> TRILOBITE = REGISTER.register("trilobite", () -> new Fossil(521, 320, null, new ResourceLocation(ProjectNublar.MODID, "block/trilobite"), "Trilobite", true, null, null, null));

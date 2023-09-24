@@ -2,19 +2,19 @@ package net.dumbcode.projectnublar.client.render.model;
 
 import net.dumbcode.dumblibrary.client.component.ComponentRenderer;
 import net.dumbcode.projectnublar.client.model.fossil.FossilBakedModel;
+import net.dumbcode.projectnublar.client.model.fossil.FossilItemBakedModel;
 import net.dumbcode.projectnublar.client.render.entity.DinosaurEggRenderer;
 import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
 import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
-import net.dumbcode.projectnublar.server.fossil.Fossils;
-import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
@@ -23,7 +23,6 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 
@@ -90,6 +89,11 @@ public class ProjectNublarModelHandler {
         registry.put(
                 BlockModelShapes.stateToModelLocation(BlockHandler.FOSSIL_BLOCK.get().defaultBlockState()),
                 new FossilBakedModel()
+        );
+
+        registry.put(
+                new ModelResourceLocation(BlockHandler.FOSSIL_BLOCK.get().getRegistryName(), "inventory"),
+                new FossilItemBakedModel()
         );
     }
 
