@@ -15,6 +15,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 
@@ -91,7 +92,10 @@ public class FossilBlockItemBakedModel implements IDynamicBakedModel {
             List<BakedQuad> quads = base.getQuads(state, side, rand, extraData);
             List<BakedQuad> out = new ArrayList<>(quads);
 
-            TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(fossil.texture);
+            //TODO
+            ResourceLocation texture = fossil.textures.get(1.0D);
+            ResourceLocation finalTexture = new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName);
+            TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(finalTexture);
 
             for (BakedQuad quad : quads) {
                 out.add(ModelUtils.retextureQuad(quad, overlay, 0.001F));

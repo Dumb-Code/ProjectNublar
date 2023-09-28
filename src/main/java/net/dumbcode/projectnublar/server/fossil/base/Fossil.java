@@ -1,7 +1,5 @@
 package net.dumbcode.projectnublar.server.fossil.base;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -9,8 +7,6 @@ import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,15 +25,13 @@ public class Fossil extends ForgeRegistryEntry<Fossil> {
     public final double timeEnd;
     @Nullable
     private final List<RegistryObject<StoneType>> stoneTypes;
-    // TODO get the texture based on the registry name
-    @Deprecated
-    public final ResourceLocation texture;
+    public final String textureName;
     public final String name;
     @Nullable
     public final Supplier<Dinosaur> dinosaur;
     public final String partName;
     // TODO get the item texture from the registry name
-    public final Map<Double, ResourceLocation> itemTextures = new HashMap<>();
+    public final Map<Double, ResourceLocation> textures = new HashMap<>();
 
     @Nonnull
     public Collection<StoneType> getStoneTypes() {
@@ -48,7 +42,7 @@ public class Fossil extends ForgeRegistryEntry<Fossil> {
     }
 
     public Fossil withTexture(double dnaValue, ResourceLocation texture) {
-        itemTextures.put(dnaValue, texture);
+        textures.put(dnaValue, texture);
         return this;
     }
 }

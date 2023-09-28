@@ -18,12 +18,10 @@ public class Fossils {
         public static void onTextureStitch(TextureStitchEvent.Pre event) {
             if (event.getMap().location().equals(PlayerContainer.BLOCK_ATLAS)) {
                 for (Fossil fossil : FossilHandler.FOSSIL_REGISTRY.get()) {
-                    if (fossil.texture != null) {
-                        event.addSprite(fossil.texture);
-                    }
-                    for (ResourceLocation itemTexture : fossil.itemTextures.values()) {
-                        if (itemTexture != null) {
-                            event.addSprite(new ResourceLocation(itemTexture.getNamespace(), "block/fossil/" + itemTexture.getPath()));
+                    for (ResourceLocation texture : fossil.textures.values()) {
+                        if (texture != null) {
+                            event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "item/" + fossil.textureName));
+                            event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName));
                         }
                     }
                 }

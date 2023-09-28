@@ -50,15 +50,15 @@ public class FossilItemOverrideList extends ItemOverrideList {
 		ResourceLocation resourceLocation = MissingTextureSprite.getLocation();
 		AtomicReference<Double> dnaValue = new AtomicReference<>(5D); //TODO
 		AtomicReference<Double> lastDnaValue = new AtomicReference<>(Double.MAX_VALUE);
-		fossil.itemTextures.forEach((fossilDnaValue, location) -> {
+		fossil.textures.forEach((fossilDnaValue, location) -> {
 			if (fossilDnaValue < lastDnaValue.get() && fossilDnaValue < dnaValue.get()) {
 				lastDnaValue.set(fossilDnaValue);
 				dnaValue.set(fossilDnaValue);
 			}
 		});
-		if (fossil.itemTextures.containsKey(dnaValue.get())) {
-			ResourceLocation location = fossil.itemTextures.get(dnaValue.get());
-			resourceLocation = new ResourceLocation(location.getNamespace(), "block/fossil/" + location.getPath());
+		if (fossil.textures.containsKey(dnaValue.get())) {
+			ResourceLocation location = fossil.textures.get(dnaValue.get());
+			resourceLocation = new ResourceLocation(location.getNamespace(), "block/fossil/" + location.getPath() + "item/" + fossil.name.replace(" ", "_").toLowerCase());
 		}
         return new RenderMaterial(BLOCK_ATLAS, resourceLocation);
 	}

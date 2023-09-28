@@ -1,21 +1,21 @@
 package net.dumbcode.projectnublar.client.model.fossil;
 
-import com.google.common.collect.ImmutableList;
-import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLayer;
 import net.dumbcode.projectnublar.client.model.ModelUtils;
 import net.dumbcode.projectnublar.server.block.entity.FossilBlockEntity;
 import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
-import net.dumbcode.projectnublar.server.fossil.base.StoneType;
+import net.dumbcode.projectnublar.server.fossil.base.FossilTier;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
@@ -46,11 +46,21 @@ public class FossilBakedModel implements IDynamicBakedModel {
         }
 
         Fossil fossil = getOrDefault(extraData, FossilBlockEntity.FOSSIL, FossilHandler.AMMONITE.get());
-        TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(fossil.texture);
+        FossilTier tier = getOrDefault(extraData, FossilBlockEntity.TIER, FossilTier.WEATHERED);
+        //TODO
+        ResourceLocation texture = fossil.textures.getOrDefault(tier.getDnaValue(), fossil.textures.get(1.0));
+        ResourceLocation finalTexture = new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName);
+        TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(finalTexture);
 
         return solidQuads.stream()
                 .map(quad -> ModelUtils.retextureQuad(quad, overlay, 0.001F))
                 .collect(Collectors.toList());
+    }
+
+    @Nonnull
+    @Override
+    public IModelData getModelData(@Nonnull IBlockDisplayReader world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull IModelData tileData) {
+        return Objects.requireNonNull(world.getBlockEntity(pos)).getModelData();
     }
 
     public static <T> T getOrDefault(IModelData data, ModelProperty<T> property, T fallback) {
@@ -80,6 +90,7 @@ public class FossilBakedModel implements IDynamicBakedModel {
         return false;
     }
 
+    @Nonnull
     @Override
     public TextureAtlasSprite getParticleIcon() {
         return Minecraft.getInstance().getModelManager().getMissingModel().getParticleIcon();
@@ -92,6 +103,7 @@ public class FossilBakedModel implements IDynamicBakedModel {
         return baseModel.getParticleTexture(data);
     }
 
+    @Nonnull
     @Override
     public ItemOverrideList getOverrides() {
         return ItemOverrideList.EMPTY;
