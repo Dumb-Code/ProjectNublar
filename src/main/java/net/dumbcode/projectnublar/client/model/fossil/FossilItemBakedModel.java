@@ -1,115 +1,334 @@
 package net.dumbcode.projectnublar.client.model.fossil;
 
-import com.mojang.datafixers.util.Pair;
-import net.dumbcode.projectnublar.client.model.ModelUtils;
-import net.dumbcode.projectnublar.server.fossil.base.Fossil;
-import net.dumbcode.projectnublar.server.fossil.base.StoneType;
-import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlockItem;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.dumbcode.dumblibrary.client.TransformingBakedQuadGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.TransformationMatrix;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.client.model.BakedItemModel;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.common.model.TransformationHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
 
 import static net.minecraft.inventory.container.PlayerContainer.BLOCK_ATLAS;
 
-public class FossilItemBakedModel implements IDynamicBakedModel {
-    @Nonnull
-    @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
-        return Collections.emptyList();
-    }
+/* Do not use this baked model directly, it'll display nothing, use WandBakedModel#getNewBakedItemModel */
+//TODO: clear cache on resource reload
+@SuppressWarnings("deprecation")
+public class FossilItemBakedModel extends BakedItemModel {
+	private TextureAtlasSprite baseSprite = null;
+	private List<TextureAtlasSprite> sprites = new ArrayList<TextureAtlasSprite>();
+	private final TransformationMatrix transform;
+	/* Cache the result of quads, using a location combination */
+	private static final Map<String, ImmutableList<BakedQuad>> cache = new HashMap<String, ImmutableList<BakedQuad>>();
 
-    @Override
-    public boolean useAmbientOcclusion() {
-        return true;
-    }
+	private static final float NORTH_Z = 7.496f / 16f;
+	private static final float SOUTH_Z = 8.504f / 16f;
+	private final BlockModel parent;
 
-    @Override
-    public boolean isGui3d() {
-        return true;
-    }
+	public FossilItemBakedModel(ImmutableList<TextureAtlasSprite> sprites
+			, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, TextureAtlasSprite particle
+			, ImmutableMap<ItemCameraTransforms.TransformType, TransformationMatrix> transformMap
+			, TransformationMatrix transformIn, boolean isSideLit) {
+		super(ImmutableList.of(), particle, transformMap, new FossilItemOverrideList(spriteGetter), false, isSideLit);
 
-    @Override
-    public boolean usesBlockLight() {
-        return false;
-    }
+		this.transform = transformIn;
+		this.sprites = sprites;
+		this.parent = null;
+	}
 
-    @Override
-    public boolean isCustomRenderer() {
-        return false;
-    }
+	public FossilItemBakedModel(Function<ResourceLocation, IUnbakedModel> modelGetter) {
+		super(ImmutableList.of(), Minecraft.getInstance().getTextureAtlas(BLOCK_ATLAS).apply(MissingTextureSprite.getLocation()), getTransformMap(modelGetter), new FossilItemOverrideList(RenderMaterial::sprite), false, true);
+		this.sprites = new ArrayList<>();
+		this.transform = TransformationMatrix.identity();
+		this.parent = (BlockModel) modelGetter.apply(new ResourceLocation("item/handheld"));
+	}
 
-    @Override
-    public TextureAtlasSprite getParticleIcon() {
-        return Minecraft.getInstance().getModelManager().getMissingModel().getParticleIcon();
-    }
+	private static ImmutableMap<ItemCameraTransforms.TransformType, TransformationMatrix> getTransformMap(Function<ResourceLocation, IUnbakedModel> modelGetter) {
+		ImmutableMap.Builder<ItemCameraTransforms.TransformType, TransformationMatrix> builder = new ImmutableMap.Builder<>();
 
-    @Override
-    public ItemOverrideList getOverrides() {
-        return StackAwareItemOverrides.INSTANCE;
-    }
+		ItemCameraTransforms parent = ((BlockModel) modelGetter.apply(new ResourceLocation("item/handheld"))).getTransforms();
+		addTransform(builder, ItemCameraTransforms.TransformType.GUI, parent.gui);
+		addTransform(builder, ItemCameraTransforms.TransformType.FIXED, parent.fixed);
+		addTransform(builder, ItemCameraTransforms.TransformType.GROUND, parent.ground);
+		addTransform(builder, ItemCameraTransforms.TransformType.HEAD, parent.head);
+		addTransform(builder, ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, parent.firstPersonLeftHand);
+		addTransform(builder, ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, parent.firstPersonRightHand);
+		addTransform(builder, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, parent.thirdPersonLeftHand);
+		addTransform(builder, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, parent.thirdPersonRightHand);
+		return builder.build();
+	}
 
-    private static class StackAwareItemOverrides extends ItemOverrideList {
+	private static void addTransform(ImmutableMap.Builder<ItemCameraTransforms.TransformType, TransformationMatrix> builder, ItemCameraTransforms.TransformType type, ItemTransformVec3f vec) {
+		builder.put(type, TransformationHelper.toTransformation(vec));
+	}
 
-        public static final StackAwareItemOverrides INSTANCE = new StackAwareItemOverrides();
+	private FossilItemBakedModel(FossilItemBakedModel originalModel, List<TextureAtlasSprite> spritesIn) {
+		super(ImmutableList.of(), originalModel.particle, originalModel.transforms, originalModel.overrides, originalModel.transform.isIdentity(), originalModel.isSideLit);
 
-        @Nullable
-        @Override
-        public IBakedModel resolve(IBakedModel model, ItemStack itemStack, @Nullable ClientWorld p_239290_3_, @Nullable LivingEntity p_239290_4_) {
-            return new StackAwareModel(FossilBlockItem.getStoneType(itemStack), FossilBlockItem.getFossil(itemStack));
-        }
-    }
+		this.baseSprite = originalModel.baseSprite;
+		this.sprites = spritesIn;
+		this.transform = originalModel.transform;
+		this.parent = originalModel.parent;
+	}
 
-    private static class StackAwareModel extends FossilItemBakedModel {
-        private final Fossil fossil;
+	@Override
+	public ItemOverrideList getOverrides() {
+		return new FossilItemOverrideList(RenderMaterial::sprite);
+	}
 
-        private final IBakedModel base;
 
-        private StackAwareModel(StoneType type, Fossil fossil) {
-            this.fossil = fossil;
-            this.base = Minecraft.getInstance().getItemRenderer().getItemModelShaper().getItemModel(new ItemStack(type.baseState.get().getBlock()));
-        }
+	/**
+	 *
+	 * When I wrote this god and me knew what it does
+	 * Now, only god knows
+	 *
+	 * @return the quads
+	 */
+	private ImmutableList<BakedQuad> genQuads() {
+		String cacheKey = this.getCacheKeyString();
 
-        @Nonnull
-        @Override
-        public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
-            List<BakedQuad> quads = base.getQuads(state, side, rand, extraData);
-            List<BakedQuad> out = new ArrayList<>(quads);
+		/* Check if this sprite location combination is already baked or not  */
+		if (FossilItemBakedModel.cache.containsKey(cacheKey))
+			return FossilItemBakedModel.cache.get(cacheKey);
 
-            TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(fossil.texture);
+		ImmutableList.Builder<BakedQuad> quads = ImmutableList.builder();
+		List<TextureAtlasSprite> sprites = new ArrayList<TextureAtlasSprite>();
 
-            for (BakedQuad quad : quads) {
-                out.add(ModelUtils.retextureQuad(quad, overlay, 0.001F));
-            }
+		if (this.baseSprite != null)
+			sprites.add(this.baseSprite);
+		sprites.addAll(this.sprites);
 
-            return out;
-        }
+		if (sprites.size() > 0) {
+			/* North & South Side */
+			for (int ix = 0; ix <= 15; ix++) {
+				for (int iy = 0; iy <= 15; iy++) {
+					/* Find the last pixel not transparent in sprites, use that to build North/South quads */
+					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+					if (sprite == null) continue;
 
-        @Override
-        public ItemCameraTransforms getTransforms() {
-            return this.base.getTransforms();
-        }
+					float xStart = ix / 16.0f;
+					float xEnd = (ix + 1) / 16.0f;
 
-        @Override
-        public TextureAtlasSprite getParticleIcon() {
-            return base.getParticleIcon();
-        }
-    }
+					float yStart = (16 - (iy + 1)) / 16.0f;
+					float yEnd = (16 - iy) / 16.0f;
+
+					BakedQuad a = this.createQuad(
+							new Vector3f(xStart, yStart, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(xStart, yEnd, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(xEnd, yEnd, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(xEnd, yStart, FossilItemBakedModel.NORTH_Z)
+							, ix, ix + 1, iy, iy + 1
+							, sprite, Direction.NORTH);
+
+					BakedQuad b = this.createQuad(
+							new Vector3f(xStart, yStart, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(xEnd, yStart, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(xEnd, yEnd, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(xStart, yEnd, FossilItemBakedModel.SOUTH_Z)
+							, ix, ix + 1, iy, iy + 1
+							, sprite, Direction.SOUTH);
+
+					if (a != null) {
+						quads.add(a);
+					}
+					if (b != null) {
+						quads.add(b);
+					}
+				}
+			}
+
+			boolean isTransparent;
+
+			/* Up & Down Side */
+			for (int ix = 0; ix <= 15; ix++) {
+				float xStart = ix / 16.0f;
+				float xEnd = (ix + 1) / 16.0f;
+
+				/* Scan from Up to Bottom, find the pixel not transparent, use that to build Top quads */
+				isTransparent = true;
+				for (int iy = 0; iy <= 15; iy++) {
+					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+					if (sprite == null) {
+						isTransparent = true;
+						continue;
+					}
+
+					if (isTransparent) {
+						quads.add(this.createQuad(
+								new Vector3f(xStart, (16 - iy) / 16.0f, FossilItemBakedModel.NORTH_Z)
+								, new Vector3f(xStart, (16 - iy) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+								, new Vector3f(xEnd, (16 - iy) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+								, new Vector3f(xEnd, (16 - iy) / 16.0f, FossilItemBakedModel.NORTH_Z)
+								, ix, ix + 1, iy, iy + 1
+								, sprite, Direction.UP));
+
+						isTransparent = false;
+					}
+				}
+
+				/* Scan from Bottom to Up, find the pixel not transparent, use that to build Down quads */
+				isTransparent = true;
+				for (int iy = 15; iy >= 0; iy--) {
+					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+					if (sprite == null) {
+						isTransparent = true;
+						continue;
+					}
+
+					if (isTransparent) {
+						quads.add(this.createQuad(
+								new Vector3f(xStart, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.NORTH_Z)
+								, new Vector3f(xEnd, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.NORTH_Z)
+								, new Vector3f(xEnd, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+								, new Vector3f(xStart, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+								, ix, ix + 1, iy, iy + 1
+								, sprite, Direction.DOWN));
+
+						isTransparent = false;
+					}
+				}
+			}
+
+			/* West & East Side */
+			for (int iy = 0; iy <= 15; iy++) {
+				float yStart = (16 - (iy + 1)) / 16.0f;
+				float yEnd = (16 - iy) / 16.0f;
+
+				/* Scan from Left to Right, find the pixel not transparent, use that to build West quads */
+				isTransparent = true;
+				for (int ix = 0; ix <= 15; ix++) {
+					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+					if (sprite == null) {
+						isTransparent = true;
+						continue;
+					}
+					if (isTransparent) {
+						quads.add(this.createQuad(
+								new Vector3f(ix / 16.0f, yStart, FossilItemBakedModel.NORTH_Z)
+								, new Vector3f(ix / 16.0f, yStart, FossilItemBakedModel.SOUTH_Z)
+								, new Vector3f(ix / 16.0f, yEnd, FossilItemBakedModel.SOUTH_Z)
+								, new Vector3f(ix / 16.0f, yEnd, FossilItemBakedModel.NORTH_Z)
+								, ix, ix + 1, iy, iy + 1
+								, sprite, Direction.WEST));
+
+						isTransparent = false;
+					}
+				}
+				/* Scan from Right to Left, find the pixel not transparent, use that to build East quads */
+				isTransparent = true;
+				for (int ix = 15; ix >= 0; ix--) {
+					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+					if (sprite == null) {
+						isTransparent = true;
+						continue;
+					}
+					if (isTransparent) {
+						quads.add(this.createQuad(
+								new Vector3f((ix + 1) / 16.0f, yStart, FossilItemBakedModel.NORTH_Z)
+								, new Vector3f((ix + 1) / 16.0f, yEnd, FossilItemBakedModel.NORTH_Z)
+								, new Vector3f((ix + 1) / 16.0f, yEnd, FossilItemBakedModel.SOUTH_Z)
+								, new Vector3f((ix + 1) / 16.0f, yStart, FossilItemBakedModel.SOUTH_Z)
+								, ix, ix + 1, iy, iy + 1
+								, sprite, Direction.EAST));
+
+						isTransparent = false;
+					}
+				}
+			}
+		}
+
+		ImmutableList<BakedQuad> returnQuads = quads.build();
+		FossilItemBakedModel.cache.put(cacheKey, returnQuads);
+
+		return returnQuads;
+	}
+
+	/* Give four corner, generate a quad */
+	private BakedQuad createQuad(Vector3f v1, Vector3f v2, Vector3f v3, Vector3f v4
+			, int xStart, int xEnd, int yStart, int yEnd, TextureAtlasSprite sprite
+			, Direction orientation) {
+
+		TransformingBakedQuadGenerator consumer = new TransformingBakedQuadGenerator(sprite, transform);
+
+		FossilItemBakedModel.putVertex(consumer, v1, xStart, yEnd, sprite, orientation);
+		FossilItemBakedModel.putVertex(consumer, v2, xStart, yStart, sprite, orientation);
+		FossilItemBakedModel.putVertex(consumer, v3, xEnd, yStart, sprite, orientation);
+		FossilItemBakedModel.putVertex(consumer, v4, xEnd, yEnd, sprite, orientation);
+
+		// we are only putting 4 vertices, so we don't need to worry about there being more quads
+		return consumer.poll().get(0);
+	}
+
+	/* Put data into the consumer */
+	private static void putVertex(TransformingBakedQuadGenerator consumer, Vector3f vec, double u, double v, TextureAtlasSprite sprite, Direction orientation) {
+		float fu = sprite.getU(u);
+		float fv = sprite.getV(v);
+
+		consumer.vertex(vec.x(), vec.y(), vec.z())
+				.normal((float) orientation.getStepX(), (float) orientation.getStepY(), (float) orientation.getStepZ())
+				.uv(fu, fv)
+				.endVertex();
+	}
+
+	@Override
+	public ItemCameraTransforms getTransforms() {
+		return parent.getTransforms();
+	}
+
+	@Override
+	public boolean doesHandlePerspectives() {
+		return true;
+	}
+
+	/* Find the last sprite not transparent in sprites with given position */
+	@Nullable
+	private static TextureAtlasSprite findLastNotTransparent(int x, int y, List<TextureAtlasSprite> sprites){
+		for(int spriteIndex = sprites.size() - 1; spriteIndex >= 0; spriteIndex--){
+			TextureAtlasSprite sprite = sprites.get(spriteIndex);
+			if (sprite != null) {
+				if (!sprite.isTransparent(0, x, y)) {
+					return sprite;
+				}
+			}
+		}
+		return null;
+	}
+
+	/* Give a BakedItemModel base on data in this, can use directly to display */
+	public BakedItemModel getNewBakedItemModel(){
+		return new BakedItemModel(this.genQuads(), this.particle, transforms, this.overrides, false, this.isSideLit);
+	}
+
+	public FossilItemBakedModel setSprites(List<TextureAtlasSprite> spritesIn){
+		return new FossilItemBakedModel(this, spritesIn);
+	}
+
+	/* Get a combination string of locations, used in cache's key */
+	private String getCacheKeyString(){
+		List<String> locations = new ArrayList<String>();
+		if(this.baseSprite != null)
+			locations.add(this.baseSprite.getName().toString());
+
+		for(TextureAtlasSprite sprite : this.sprites) {
+			if (sprite != null) {
+				locations.add(sprite.getName().toString());
+			}
+		}
+
+		String str = String.join(",", locations);
+		return str;
+	}
 }

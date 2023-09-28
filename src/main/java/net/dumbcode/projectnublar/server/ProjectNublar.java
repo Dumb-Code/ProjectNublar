@@ -37,7 +37,6 @@ import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
-import net.dumbcode.projectnublar.server.fossil.blockitem.cap.ItemDNACap;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -243,7 +242,6 @@ public class ProjectNublar {
     }
 
     public void preInit(FMLCommonSetupEvent event) {
-        CapabilityManager.INSTANCE.register(ItemDNACap.class, new ItemDNACap(), ItemDNACap::new);
         ArgumentTypes.register("pn:dinosuar", DinosaurArgument.class, new ArgumentSerializer<>(DinosaurArgument::new));
         ProjectNublarGeneticRegistry.register();
 

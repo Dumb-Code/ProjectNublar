@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.client.render.model;
 
 import net.dumbcode.dumblibrary.client.component.ComponentRenderer;
 import net.dumbcode.projectnublar.client.model.fossil.FossilBakedModel;
+import net.dumbcode.projectnublar.client.model.fossil.FossilBlockItemBakedModel;
 import net.dumbcode.projectnublar.client.model.fossil.FossilItemBakedModel;
 import net.dumbcode.projectnublar.client.render.entity.DinosaurEggRenderer;
 import net.dumbcode.projectnublar.client.render.entity.EntityPartRenderer;
@@ -27,6 +28,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = ProjectNublar.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ProjectNublarModelHandler {
@@ -93,7 +95,12 @@ public class ProjectNublarModelHandler {
 
         registry.put(
                 new ModelResourceLocation(BlockHandler.FOSSIL_BLOCK.get().getRegistryName(), "inventory"),
-                new FossilItemBakedModel()
+                new FossilBlockItemBakedModel()
+        );
+
+        registry.put(
+                new ModelResourceLocation(Objects.requireNonNull(ItemHandler.FOSSIL_ITEM.get().getRegistryName()), "inventory"),
+                new FossilItemBakedModel(resourceLocation -> event.getModelLoader().getModel(resourceLocation))
         );
     }
 
