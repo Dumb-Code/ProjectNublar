@@ -2,52 +2,41 @@ package net.dumbcode.projectnublar.client.model.fossil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.dumblibrary.client.TransformingBakedQuadGenerator;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.*;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.TransformationMatrix;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.client.model.BakedItemModel;
-import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.model.TransformationHelper;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.VanillaResourceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static net.minecraft.inventory.container.PlayerContainer.BLOCK_ATLAS;
 
-/* Do not use this baked model directly, it'll display nothing, use WandBakedModel#getNewBakedItemModel */
-//TODO: clear cache on resource reload
 @SuppressWarnings("deprecation")
-public class FossilItemBakedModel extends BakedItemModel {
+public class FossilItemBakedModel extends BakedItemModel implements ISelectiveResourceReloadListener {
 	private TextureAtlasSprite baseSprite = null;
-	private List<TextureAtlasSprite> sprites = new ArrayList<TextureAtlasSprite>();
+	private final List<TextureAtlasSprite> sprites;
 	private final TransformationMatrix transform;
 	/* Cache the result of quads, using a location combination */
-	private static final Map<String, ImmutableList<BakedQuad>> cache = new HashMap<String, ImmutableList<BakedQuad>>();
+	private static final Map<String, ImmutableList<BakedQuad>> cache = new HashMap<>();
 
 	private static final float NORTH_Z = 7.496f / 16f;
 	private static final float SOUTH_Z = 8.504f / 16f;
 	private final BlockModel parent;
-
-	public FossilItemBakedModel(ImmutableList<TextureAtlasSprite> sprites
-			, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, TextureAtlasSprite particle
-			, ImmutableMap<ItemCameraTransforms.TransformType, TransformationMatrix> transformMap
-			, TransformationMatrix transformIn, boolean isSideLit) {
-		super(ImmutableList.of(), particle, transformMap, new FossilItemOverrideList(spriteGetter), false, isSideLit);
-
-		this.transform = transformIn;
-		this.sprites = sprites;
-		this.parent = null;
-	}
 
 	public FossilItemBakedModel(Function<ResourceLocation, IUnbakedModel> modelGetter) {
 		super(ImmutableList.of(), Minecraft.getInstance().getTextureAtlas(BLOCK_ATLAS).apply(MissingTextureSprite.getLocation()), getTransformMap(modelGetter), new FossilItemOverrideList(RenderMaterial::sprite), false, true);
@@ -84,6 +73,7 @@ public class FossilItemBakedModel extends BakedItemModel {
 		this.parent = originalModel.parent;
 	}
 
+	@Nonnull
 	@Override
 	public ItemOverrideList getOverrides() {
 		return new FossilItemOverrideList(RenderMaterial::sprite);
@@ -105,13 +95,13 @@ public class FossilItemBakedModel extends BakedItemModel {
 			return FossilItemBakedModel.cache.get(cacheKey);
 
 		ImmutableList.Builder<BakedQuad> quads = ImmutableList.builder();
-		List<TextureAtlasSprite> sprites = new ArrayList<TextureAtlasSprite>();
+		List<TextureAtlasSprite> sprites = new ArrayList<>();
 
 		if (this.baseSprite != null)
 			sprites.add(this.baseSprite);
 		sprites.addAll(this.sprites);
 
-		if (sprites.size() > 0) {
+		if (!sprites.isEmpty()) {
 			/* North & South Side */
 			for (int ix = 0; ix <= 15; ix++) {
 				for (int iy = 0; iy <= 15; iy++) {
@@ -152,7 +142,7 @@ public class FossilItemBakedModel extends BakedItemModel {
 
 			boolean isTransparent;
 
-			/* Up & Down Side */
+			/* Up & Down-Side */
 			for (int ix = 0; ix <= 15; ix++) {
 				float xStart = ix / 16.0f;
 				float xEnd = (ix + 1) / 16.0f;
@@ -283,6 +273,7 @@ public class FossilItemBakedModel extends BakedItemModel {
 				.endVertex();
 	}
 
+	@Nonnull
 	@Override
 	public ItemCameraTransforms getTransforms() {
 		return parent.getTransforms();
@@ -318,7 +309,7 @@ public class FossilItemBakedModel extends BakedItemModel {
 
 	/* Get a combination string of locations, used in cache's key */
 	private String getCacheKeyString(){
-		List<String> locations = new ArrayList<String>();
+		List<String> locations = new ArrayList<>();
 		if(this.baseSprite != null)
 			locations.add(this.baseSprite.getName().toString());
 
@@ -328,7 +319,13 @@ public class FossilItemBakedModel extends BakedItemModel {
 			}
 		}
 
-		String str = String.join(",", locations);
-		return str;
+        return String.join(",", locations);
+	}
+
+	@Override
+	public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+		if (resourcePredicate.test(VanillaResourceType.MODELS)) {
+			cache.clear();
+		}
 	}
 }
