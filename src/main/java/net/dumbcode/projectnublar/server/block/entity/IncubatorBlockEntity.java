@@ -143,7 +143,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
             } while(armPos.distanceTo(position.add(normal.scale(handLength))) > 1.1 && times++ < 5000);
 
             if(times >= 5000) {
-                ProjectNublar.getLogger().warn("Invalid placement position for egg. Contact DumbCode and tell them to adjust the distance limit.");
+                ProjectNublar.LOGGER.warn("Invalid placement position for egg. Contact DumbCode and tell them to adjust the distance limit.");
                 return;
             }
             for (int i = 0; i < this.eggList.length; i++) {

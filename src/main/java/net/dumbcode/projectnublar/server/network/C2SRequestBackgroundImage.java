@@ -35,7 +35,7 @@ public class C2SRequestBackgroundImage {
                 try {
                     ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2CSyncBackgroundImage(image.asByteArray()));
                 } catch (IOException e) {
-                    ProjectNublar.getLogger().error("Unable to make image array", e);
+                    ProjectNublar.LOGGER.error("Unable to make image array", e);
                 }
             });
         });

@@ -12,7 +12,6 @@ import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,7 +69,7 @@ public class TabletBGImageHandler {
                 .filter(Files::isDirectory)
                 .forEach(p -> getAllIcons(p, entries));
         } catch (IOException e) {
-            ProjectNublar.getLogger().error("Unable to walk icons", e);
+            ProjectNublar.LOGGER.error("Unable to walk icons", e);
         }
         return entries;
     }
@@ -88,7 +87,7 @@ public class TabletBGImageHandler {
                     .filter(p -> !p.toString().endsWith("_icon.png"))
                     .forEach(p -> list.add(new IconEntry(folderName, FilenameUtils.getBaseName(p.toString()))));
             } catch (IOException e) {
-                ProjectNublar.getLogger().error("Unable to walk icons", e);
+                ProjectNublar.LOGGER.error("Unable to walk icons", e);
             }
         }
         return list;
@@ -102,7 +101,7 @@ public class TabletBGImageHandler {
         try {
             return Optional.of(NativeImage.read(Files.newInputStream(file)));
         } catch (IOException e) {
-            ProjectNublar.getLogger().error("Unable to load file " + file, e);
+            ProjectNublar.LOGGER.error("Unable to load file " + file, e);
         }
         return Optional.empty();
     }

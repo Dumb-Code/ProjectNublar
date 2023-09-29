@@ -31,7 +31,7 @@ public class PlantComponent extends EntityComponent implements FinalizableCompon
         if (PlantHandler.getRegistry().containsKey(identifier)) {
             this.plant = PlantHandler.getRegistry().getValue(identifier);
         } else {
-            ProjectNublar.getLogger().warn("Parsed invalid plant component '{}'", identifier);
+            ProjectNublar.LOGGER.warn("Parsed invalid plant component '{}'", identifier);
             this.plant = PlantHandler.CYCAD.get();
         }
     }

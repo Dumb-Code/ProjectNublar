@@ -2,11 +2,9 @@ package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.EggPrinterBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.IncubatorBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
@@ -59,7 +57,7 @@ public class IncubatorScreen extends MachineContainerScreen {
             try {
                 shaderManager = new ShaderInstance(Minecraft.getInstance().getResourceManager(), ProjectNublar.MODID + ":incubator_bed");
             } catch (IOException e) {
-                ProjectNublar.getLogger().error("Unable to load incubator bed shader :/", e);
+                ProjectNublar.LOGGER.error("Unable to load incubator bed shader :/", e);
             }
         }
     }

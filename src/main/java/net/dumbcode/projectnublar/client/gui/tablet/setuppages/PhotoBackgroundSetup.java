@@ -15,7 +15,6 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -85,7 +84,7 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
             try {
                 ProjectNublar.NETWORK.sendToServer(new CS2UploadPhotoBackgroundImage(!this.userTab, image.asByteArray()));
             } catch (IOException e) {
-                ProjectNublar.getLogger().error("Unable to write image", e);
+                ProjectNublar.LOGGER.error("Unable to write image", e);
             }
         }));
         this.uploadButton.active = this.currentTestImage != null;
@@ -203,7 +202,7 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
             this.currentTestImage = image;
             this.uploadButton.active = true;
         } catch (IOException e) {
-            ProjectNublar.getLogger().error("Unable to read file " + path.toAbsolutePath() + " as an image", e);
+            ProjectNublar.LOGGER.error("Unable to read file " + path.toAbsolutePath() + " as an image", e);
         }
     }
 

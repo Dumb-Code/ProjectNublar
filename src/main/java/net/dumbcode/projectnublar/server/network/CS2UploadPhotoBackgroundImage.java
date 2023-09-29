@@ -9,11 +9,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
-import org.lwjgl.system.MemoryStack;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -49,7 +47,7 @@ public class CS2UploadPhotoBackgroundImage {
                 TabletBGImageHandler.addNewEntry(sender, NativeImage.read(new ByteArrayInputStream(packet.data)), hash(packet.data));
                 ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2CRequestBackgroundIconHeaders(packet.global, TabletBGImageHandler.getAllIcons(packet.global, context.getSender())));
             } catch (IOException e) {
-                ProjectNublar.getLogger().error("Unable to read image.");
+                ProjectNublar.LOGGER.error("Unable to read image.");
             }
         });
 

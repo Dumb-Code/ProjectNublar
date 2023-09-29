@@ -45,7 +45,7 @@
 //                    zos.close();
 //                }
 //            } catch (IOException e) {
-//                ProjectNublar.getLogger().error("There was an issue serializing {}", infomation.getDinosaurLocation().getNamespace());
+//                ProjectNublar.LOGGER.error("There was an issue serializing {}", infomation.getDinosaurLocation().getNamespace());
 //            }
 //        }
 //    }
@@ -83,7 +83,7 @@
 //                lineNum++;
 //            }
 //        } catch (IOException e) {
-//            ProjectNublar.getLogger().error("Unable to load file" + e);
+//            ProjectNublar.LOGGER.error("Unable to load file" + e);
 //        }
 //        return new SkeletalBuilderFileInfomation(fileLocation, map);
 //    }

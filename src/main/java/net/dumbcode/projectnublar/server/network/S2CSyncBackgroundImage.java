@@ -10,11 +10,9 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import org.lwjgl.system.MemoryStack;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
@@ -41,7 +39,7 @@ public class S2CSyncBackgroundImage {
                 try {
                     image = NativeImage.read(new ByteArrayInputStream(packet.data));
                 } catch (IOException e) {
-                    ProjectNublar.getLogger().error("Unable to load image", e);
+                    ProjectNublar.LOGGER.error("Unable to load image", e);
                 }
 
                 BackgroundableScreen bgs = (BackgroundableScreen) screen;

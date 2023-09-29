@@ -241,7 +241,7 @@ public class NBTTemplate {
             @Cleanup InputStream stream = ProjectNublar.class.getResourceAsStream("/assets/" + location.getNamespace() + "/structures/" + location.getPath() + ".nbt");
             template.load(CompressedStreamTools.readCompressed(stream));
         } catch (IOException e) {
-            ProjectNublar.getLogger().error("Error loading structure " + location, e);
+            ProjectNublar.LOGGER.error("Error loading structure " + location, e);
         }
 
         return new NBTTemplate(template, placement == null ? StructurePlacement.EMPTY : placement);

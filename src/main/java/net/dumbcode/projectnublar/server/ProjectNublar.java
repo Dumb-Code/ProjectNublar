@@ -37,7 +37,6 @@ import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
-import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -54,7 +53,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
@@ -62,9 +60,7 @@ import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -105,7 +101,7 @@ public class ProjectNublar {
     public static final boolean DEBUG = false;
 
 
-    private static Logger logger = LogManager.getLogger(MODID);
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
 
     private static final String PROTOCOL_VERSION = "1";
@@ -282,7 +278,7 @@ public class ProjectNublar {
             try (FileWriter writer = new FileWriter(jsonFile)) {
                 gson.toJson(dino, writer);
             } catch (IOException e) {
-                logger.warn("There was an issue writing to {}", jsonFile.getName());
+                LOGGER.warn("There was an issue writing to {}", jsonFile.getName());
             }
         });
     }
@@ -300,11 +296,6 @@ public class ProjectNublar {
         event.registerSystem(new DinosaurMovementSystem());
         event.registerSystem(new HuntSystem());
     }
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
 
     private static void registerJsonDinosaurs() {
         GsonBuilder builder = new GsonBuilder();

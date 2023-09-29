@@ -42,7 +42,7 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
         if (DinosaurHandler.getRegistry().containsKey(identifier)) {
             this.dinosaur = DinosaurHandler.getRegistry().getValue(identifier);
         } else {
-            ProjectNublar.getLogger().warn("Parsed invalid dinosaur component '{}'", identifier);
+            ProjectNublar.LOGGER.warn("Parsed invalid dinosaur component '{}'", identifier);
             this.dinosaur = DinosaurHandler.TYRANNOSAURUS.get();
         }
     }
