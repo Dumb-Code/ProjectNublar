@@ -185,6 +185,9 @@ public class ProjectNublar {
                 }
             }
         }
+        event.addSprite(new ResourceLocation(ProjectNublar.MODID, "block/cracks_low"));
+        event.addSprite(new ResourceLocation(ProjectNublar.MODID, "block/cracks_medium"));
+        event.addSprite(new ResourceLocation(ProjectNublar.MODID, "block/cracks_full"));
     }
 
     public void registerCommands(RegisterCommandsEvent event) {

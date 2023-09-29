@@ -1,6 +1,7 @@
 package net.dumbcode.projectnublar.client.model.fossil;
 
 import net.dumbcode.projectnublar.client.model.ModelUtils;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.FossilBlockEntity;
 import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
@@ -45,15 +46,24 @@ public class FossilBakedModel implements IDynamicBakedModel {
             return solidQuads;
         }
 
+
         Fossil fossil = getOrDefault(extraData, FossilBlockEntity.FOSSIL, FossilHandler.AMMONITE.get());
         FossilTier tier = getOrDefault(extraData, FossilBlockEntity.TIER, FossilTier.WEATHERED);
-        //TODO
+        ResourceLocation crackTexture = tier.getCrackLevel() == 0 ? null: tier.getCrackLevel() == 1 ? new ResourceLocation(ProjectNublar.MODID, "block/cracks_low"): tier.getCrackLevel() == 2 ? new ResourceLocation(ProjectNublar.MODID, "block/cracks_medium"): new ResourceLocation(ProjectNublar.MODID, "block/cracks_full");
         ResourceLocation texture = fossil.textures.getOrDefault(tier.getDnaValue(), fossil.textures.get(1.0));
         ResourceLocation finalTexture = new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName);
         TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(finalTexture);
+        TextureAtlasSprite crack;
+        if (crackTexture != null) {
+            crack = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(crackTexture);
+        } else {
+            crack = null;
+        }
 
+        //FIXME: fossil overlay not rendering
         return solidQuads.stream()
                 .map(quad -> ModelUtils.retextureQuad(quad, overlay, 0.001F))
+                .map(quad -> crack == null ? quad: ModelUtils.retextureQuad(quad, crack, 0.002F))
                 .collect(Collectors.toList());
     }
 
