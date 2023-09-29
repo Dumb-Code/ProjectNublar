@@ -7,7 +7,6 @@ import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
@@ -17,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -34,7 +34,7 @@ public class FossilItemOverrideList extends ItemOverrideList {
 	public IBakedModel resolve(@Nonnull IBakedModel model, ItemStack stack, ClientWorld worldIn, LivingEntity entityIn) {
 		if (stack.getItem() instanceof FossilItem && model instanceof FossilItemBakedModel) {
 			AtomicReference<FossilItemBakedModel> finalWandModel = new AtomicReference<>((FossilItemBakedModel) model);
-			List<TextureAtlasSprite> sprites = new ArrayList<TextureAtlasSprite>();
+			List<TextureAtlasSprite> sprites = new ArrayList<>();
 
 			TextureAtlasSprite sprite = spriteGetter.apply(getFossil(stack));
 			sprites.add(sprite);
@@ -45,7 +45,7 @@ public class FossilItemOverrideList extends ItemOverrideList {
 	}
 
 	private RenderMaterial getFossil(ItemStack stack) {
-		Fossil fossil = FossilHandler.FOSSIL_REGISTRY.get().getValue(new ResourceLocation(stack.getTagElement(ProjectNublar.MODID).getString("fossil")));
+		Fossil fossil = FossilHandler.FOSSIL_REGISTRY.get().getValue(new ResourceLocation(Objects.requireNonNull(stack.getTagElement(ProjectNublar.MODID)).getString("fossil")));
         assert fossil != null;
 		double dnaValue = 5; // TODO: get the fossil DNA value?
 		ResourceLocation location = fossil.getTextureForDNAValue(dnaValue);
