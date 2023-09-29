@@ -37,6 +37,7 @@ import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
 import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
+import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -53,6 +54,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
@@ -60,6 +62,7 @@ import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -145,6 +148,7 @@ public class ProjectNublar {
         forgeBus.addListener(BlockPylonPole::onBlockBreak);
         forgeBus.addListener(EmptySyringeItemHandler::onEntityInteract);
         bus.addListener(EntityHandler::onAttributes);
+        bus.addListener(this::onTextureStitch);
 
         if(FMLEnvironment.dist == Dist.CLIENT) {
             this.clientSetup();
@@ -168,7 +172,19 @@ public class ProjectNublar {
         forgeBus.addListener(this::registerCommands);
 
         BlockEntityIncubatorRenderer.markResolvers();
+    }
 
+    public void onTextureStitch(TextureStitchEvent.Pre event) {
+        if (event.getMap().location().equals(PlayerContainer.BLOCK_ATLAS)) {
+            for (Fossil fossil : FossilHandler.FOSSIL_REGISTRY.get()) {
+                for (ResourceLocation texture : fossil.textures.values()) {
+                    if (texture != null) {
+                        event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "item/" + fossil.textureName));
+                        event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName));
+                    }
+                }
+            }
+        }
     }
 
     public void registerCommands(RegisterCommandsEvent event) {

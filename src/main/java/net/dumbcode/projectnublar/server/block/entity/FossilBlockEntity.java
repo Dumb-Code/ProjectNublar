@@ -110,8 +110,7 @@ public class FossilBlockEntity extends TileEntity {
                 .withInitial(FOSSIL, this.fossil)
                 .withInitial(STONE_TYPE, this.stoneType)
                 .withInitial(TIER, this.tier)
-                .withInitial(TYPE, this.type)
-                ;
+                .withInitial(TYPE, this.type);
 
 //                .withInitial(CRACKS_TEX, ((FossilBlock)this.getBlockState().getBlock()).fossil.crackTexture.toString());
         return builder.build();

@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.fossil.base;
 
+import com.mojang.datafixers.util.Pair;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -43,6 +44,14 @@ public class Fossil extends ForgeRegistryEntry<Fossil> {
 
     public Fossil withTexture(double dnaValue, ResourceLocation texture) {
         textures.put(dnaValue, texture);
+        return this;
+    }
+
+    @SafeVarargs
+    public final Fossil withTextures(Pair<Double, ResourceLocation>... textures) {
+        for (Pair<Double, ResourceLocation> texture : textures) {
+            this.textures.put(texture.getFirst(), texture.getSecond());
+        }
         return this;
     }
 }

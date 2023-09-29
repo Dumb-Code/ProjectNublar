@@ -4,15 +4,10 @@ import com.mojang.datafixers.types.constant.EmptyPart;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockCreativePowerSource;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
-import net.dumbcode.projectnublar.server.fossil.Fossils;
-import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class ProjectNublarBlockEntities {
     public static final DeferredRegister<TileEntityType<?>> REGISTER = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, ProjectNublar.MODID);

@@ -4,9 +4,7 @@ import static net.minecraft.client.renderer.RenderTypeLookup.setRenderLayer;
 import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 
 import net.minecraft.block.Block;
-import net.dumbcode.projectnublar.server.fossil.Fossils;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraftforge.fml.RegistryObject;
 
 import java.util.Arrays;
 import java.util.HashSet;

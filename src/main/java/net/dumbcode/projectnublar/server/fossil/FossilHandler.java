@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.server.fossil;
 
+import com.mojang.datafixers.util.Pair;
 import net.dumbcode.dumblibrary.server.registry.PostEarlyDeferredRegister;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -28,7 +29,7 @@ public class FossilHandler {
     public static RegistryObject<Fossil> REX_FOOT = createSimpleFossilWithOneItemTexture("tyrannosaurus_foot", 83.6, 66, "tyrannosaurus_foot", DinosaurHandler.TYRANNOSAURUS, "foot", "misc/");
     public static RegistryObject<Fossil> REX_HAND = createSimpleFossilWithOneItemTexture("tyrannosaurus_hand", 83.6, 66, "tyrannosaurus_hand", DinosaurHandler.TYRANNOSAURUS, "hand", "misc/");
     public static RegistryObject<Fossil> REX_LEG = createSimpleFossilWithOneItemTexture("tyrannosaurus_leg", 83.6, 66, "tyrannosaurus_leg", DinosaurHandler.TYRANNOSAURUS, "leg", "misc/");
-    public static RegistryObject<Fossil> REX_NECK = createSimpleFossilWithOneItemTexture("tyrannosaurus_neck", 83.6, 66, "tyrannosaurus_neck", DinosaurHandler.TYRANNOSAURUS, "neck", "misc/");
+    public static RegistryObject<Fossil> REX_NECK = createSimpleFossilWithOneItemTexture("tyrannosaurus_neck_part", 83.6, 66, "tyrannosaurus_neck", DinosaurHandler.TYRANNOSAURUS, "neck", "misc/");
     public static RegistryObject<Fossil> REX_PELVIS = createSimpleFossilWithOneItemTexture("tyrannosaurus_pelvis", 83.6, 66, "tyrannosaurus_pelvis", DinosaurHandler.TYRANNOSAURUS, "pelvis", "misc/");
     public static RegistryObject<Fossil> REX_RIBCAGE = createSimpleFossilWithOneItemTexture("tyrannosaurus_ribcage", 83.6, 66, "tyrannosaurus_ribcage", DinosaurHandler.TYRANNOSAURUS, "ribcage", "misc/");
     public static RegistryObject<Fossil> REX_TAIL = createSimpleFossilWithOneItemTexture("tyrannosaurus_tail", 83.6, 66, "tyrannosaurus_tail", DinosaurHandler.TYRANNOSAURUS, "tail", "misc/");
@@ -41,9 +42,11 @@ public class FossilHandler {
         return DR.register(name, () -> new Fossil(
                 timeStart, timeEnd, null, textureName
                 , WordUtils.capitalizeFully(name.replace("_", " ")), dinosaur, partName)
-                .withTexture(0.3, new ResourceLocation(ProjectNublar.MODID, "fragmented/" + itemTexture))
-                .withTexture(0.6, new ResourceLocation(ProjectNublar.MODID, "fossilized/" + itemTexture))
-                .withTexture(1, new ResourceLocation(ProjectNublar.MODID, "fresh/" + itemTexture)));
+                .withTextures(
+                        new Pair<>(0.3, new ResourceLocation(ProjectNublar.MODID, "fragmented/" + itemTexture)),
+                        new Pair<>(0.6, new ResourceLocation(ProjectNublar.MODID, "fossilized/" + itemTexture)),
+                        new Pair<>(1D, new ResourceLocation(ProjectNublar.MODID, "fresh/" + itemTexture))
+                ));
     };
 
     private static RegistryObject<Fossil> createSimpleFossilWithOneItemTexture(String name, double timeStart, double timeEnd, String textureName, Supplier<Dinosaur> dinosaur, String partName, String itemTexture) {
@@ -57,9 +60,11 @@ public class FossilHandler {
         return createMap("%s_" + fossilName, dinosaur ->
                 new Fossil(timeStart, timeEnd, null, textureName, 
                         dinosaur.getFormattedName() + " " + WordUtils.capitalize(fossilName), () -> dinosaur, fossilName)
-                        .withTexture(0.3, new ResourceLocation(ProjectNublar.MODID, "fragmented/" + itemTexture))
-                        .withTexture(0.6, new ResourceLocation(ProjectNublar.MODID, "fossilized/" + itemTexture))
-                        .withTexture(1, new ResourceLocation(ProjectNublar.MODID, "fresh/" + itemTexture)));
+                        .withTextures(
+                                new Pair<>(0.3, new ResourceLocation(ProjectNublar.MODID, "fragmented/" + itemTexture)),
+                                new Pair<>(0.6, new ResourceLocation(ProjectNublar.MODID, "fossilized/" + itemTexture)),
+                                new Pair<>(1D, new ResourceLocation(ProjectNublar.MODID, "fresh/" + itemTexture))
+                        ));
     }
     private static RegistryMap<Dinosaur, Fossil> createMap(String format, Function<Dinosaur, Fossil> supplier) {
         RegistryMap<Dinosaur, Fossil> map = new RegistryMap<>();

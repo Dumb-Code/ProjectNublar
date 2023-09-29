@@ -6,7 +6,6 @@ import com.google.common.collect.Multimap;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
-import net.dumbcode.projectnublar.server.fossil.Fossils;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
