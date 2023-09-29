@@ -36,13 +36,11 @@ public class FossilItemBakedModel extends BakedItemModel implements ISelectiveRe
 
 	private static final float NORTH_Z = 7.496f / 16f;
 	private static final float SOUTH_Z = 8.504f / 16f;
-	private final BlockModel parent;
 
 	public FossilItemBakedModel(Function<ResourceLocation, IUnbakedModel> modelGetter) {
 		super(ImmutableList.of(), Minecraft.getInstance().getTextureAtlas(BLOCK_ATLAS).apply(MissingTextureSprite.getLocation()), getTransformMap(modelGetter), new FossilItemOverrideList(RenderMaterial::sprite), false, true);
 		this.sprites = new ArrayList<>();
 		this.transform = TransformationMatrix.identity();
-		this.parent = (BlockModel) modelGetter.apply(new ResourceLocation("item/handheld"));
 	}
 
 	private static ImmutableMap<ItemCameraTransforms.TransformType, TransformationMatrix> getTransformMap(Function<ResourceLocation, IUnbakedModel> modelGetter) {
@@ -70,7 +68,6 @@ public class FossilItemBakedModel extends BakedItemModel implements ISelectiveRe
 		this.baseSprite = originalModel.baseSprite;
 		this.sprites = spritesIn;
 		this.transform = originalModel.transform;
-		this.parent = originalModel.parent;
 	}
 
 	@Nonnull
@@ -80,170 +77,173 @@ public class FossilItemBakedModel extends BakedItemModel implements ISelectiveRe
 	}
 
 
-	/**
-	 *
-	 * When I wrote this god and me knew what it does
-	 * Now, only god knows
-	 *
-	 * @return the quads
-	 */
 	private ImmutableList<BakedQuad> genQuads() {
 		String cacheKey = this.getCacheKeyString();
 
 		/* Check if this sprite location combination is already baked or not  */
-		if (FossilItemBakedModel.cache.containsKey(cacheKey))
+		if (FossilItemBakedModel.cache.containsKey(cacheKey)) {
 			return FossilItemBakedModel.cache.get(cacheKey);
+		}
 
 		ImmutableList.Builder<BakedQuad> quads = ImmutableList.builder();
 		List<TextureAtlasSprite> sprites = new ArrayList<>();
 
-		if (this.baseSprite != null)
+		if (this.baseSprite != null) {
 			sprites.add(this.baseSprite);
+		}
 		sprites.addAll(this.sprites);
 
 		if (!sprites.isEmpty()) {
 			/* North & South Side */
-			for (int ix = 0; ix <= 15; ix++) {
-				for (int iy = 0; iy <= 15; iy++) {
-					/* Find the last pixel not transparent in sprites, use that to build North/South quads */
-					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
-					if (sprite == null) continue;
-
-					float xStart = ix / 16.0f;
-					float xEnd = (ix + 1) / 16.0f;
-
-					float yStart = (16 - (iy + 1)) / 16.0f;
-					float yEnd = (16 - iy) / 16.0f;
-
-					BakedQuad a = this.createQuad(
-							new Vector3f(xStart, yStart, FossilItemBakedModel.NORTH_Z)
-							, new Vector3f(xStart, yEnd, FossilItemBakedModel.NORTH_Z)
-							, new Vector3f(xEnd, yEnd, FossilItemBakedModel.NORTH_Z)
-							, new Vector3f(xEnd, yStart, FossilItemBakedModel.NORTH_Z)
-							, ix, ix + 1, iy, iy + 1
-							, sprite, Direction.NORTH);
-
-					BakedQuad b = this.createQuad(
-							new Vector3f(xStart, yStart, FossilItemBakedModel.SOUTH_Z)
-							, new Vector3f(xEnd, yStart, FossilItemBakedModel.SOUTH_Z)
-							, new Vector3f(xEnd, yEnd, FossilItemBakedModel.SOUTH_Z)
-							, new Vector3f(xStart, yEnd, FossilItemBakedModel.SOUTH_Z)
-							, ix, ix + 1, iy, iy + 1
-							, sprite, Direction.SOUTH);
-
-					if (a != null) {
-						quads.add(a);
-					}
-					if (b != null) {
-						quads.add(b);
-					}
-				}
-			}
-
-			boolean isTransparent;
-
+			generateZQuads(quads);
 			/* Up & Down-Side */
-			for (int ix = 0; ix <= 15; ix++) {
-				float xStart = ix / 16.0f;
-				float xEnd = (ix + 1) / 16.0f;
-
-				/* Scan from Up to Bottom, find the pixel not transparent, use that to build Top quads */
-				isTransparent = true;
-				for (int iy = 0; iy <= 15; iy++) {
-					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
-					if (sprite == null) {
-						isTransparent = true;
-						continue;
-					}
-
-					if (isTransparent) {
-						quads.add(this.createQuad(
-								new Vector3f(xStart, (16 - iy) / 16.0f, FossilItemBakedModel.NORTH_Z)
-								, new Vector3f(xStart, (16 - iy) / 16.0f, FossilItemBakedModel.SOUTH_Z)
-								, new Vector3f(xEnd, (16 - iy) / 16.0f, FossilItemBakedModel.SOUTH_Z)
-								, new Vector3f(xEnd, (16 - iy) / 16.0f, FossilItemBakedModel.NORTH_Z)
-								, ix, ix + 1, iy, iy + 1
-								, sprite, Direction.UP));
-
-						isTransparent = false;
-					}
-				}
-
-				/* Scan from Bottom to Up, find the pixel not transparent, use that to build Down quads */
-				isTransparent = true;
-				for (int iy = 15; iy >= 0; iy--) {
-					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
-					if (sprite == null) {
-						isTransparent = true;
-						continue;
-					}
-
-					if (isTransparent) {
-						quads.add(this.createQuad(
-								new Vector3f(xStart, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.NORTH_Z)
-								, new Vector3f(xEnd, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.NORTH_Z)
-								, new Vector3f(xEnd, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.SOUTH_Z)
-								, new Vector3f(xStart, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.SOUTH_Z)
-								, ix, ix + 1, iy, iy + 1
-								, sprite, Direction.DOWN));
-
-						isTransparent = false;
-					}
-				}
-			}
-
+			generateTopDownQuads(quads);
 			/* West & East Side */
-			for (int iy = 0; iy <= 15; iy++) {
-				float yStart = (16 - (iy + 1)) / 16.0f;
-				float yEnd = (16 - iy) / 16.0f;
-
-				/* Scan from Left to Right, find the pixel not transparent, use that to build West quads */
-				isTransparent = true;
-				for (int ix = 0; ix <= 15; ix++) {
-					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
-					if (sprite == null) {
-						isTransparent = true;
-						continue;
-					}
-					if (isTransparent) {
-						quads.add(this.createQuad(
-								new Vector3f(ix / 16.0f, yStart, FossilItemBakedModel.NORTH_Z)
-								, new Vector3f(ix / 16.0f, yStart, FossilItemBakedModel.SOUTH_Z)
-								, new Vector3f(ix / 16.0f, yEnd, FossilItemBakedModel.SOUTH_Z)
-								, new Vector3f(ix / 16.0f, yEnd, FossilItemBakedModel.NORTH_Z)
-								, ix, ix + 1, iy, iy + 1
-								, sprite, Direction.WEST));
-
-						isTransparent = false;
-					}
-				}
-				/* Scan from Right to Left, find the pixel not transparent, use that to build East quads */
-				isTransparent = true;
-				for (int ix = 15; ix >= 0; ix--) {
-					TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
-					if (sprite == null) {
-						isTransparent = true;
-						continue;
-					}
-					if (isTransparent) {
-						quads.add(this.createQuad(
-								new Vector3f((ix + 1) / 16.0f, yStart, FossilItemBakedModel.NORTH_Z)
-								, new Vector3f((ix + 1) / 16.0f, yEnd, FossilItemBakedModel.NORTH_Z)
-								, new Vector3f((ix + 1) / 16.0f, yEnd, FossilItemBakedModel.SOUTH_Z)
-								, new Vector3f((ix + 1) / 16.0f, yStart, FossilItemBakedModel.SOUTH_Z)
-								, ix, ix + 1, iy, iy + 1
-								, sprite, Direction.EAST));
-
-						isTransparent = false;
-					}
-				}
-			}
+			generateLeftRightQuads(quads);
 		}
 
 		ImmutableList<BakedQuad> returnQuads = quads.build();
 		FossilItemBakedModel.cache.put(cacheKey, returnQuads);
 
 		return returnQuads;
+	}
+
+	private void generateLeftRightQuads(ImmutableList.Builder<BakedQuad> quads) {
+		for (int iy = 0; iy <= 15; iy++) {
+			float yStart = (16 - (iy + 1)) / 16.0f;
+			float yEnd = (16 - iy) / 16.0f;
+
+			/* Scan from Left to Right, find the pixel not transparent, use that to build West quads */
+			boolean isTransparent = true;
+			for (int ix = 0; ix <= 15; ix++) {
+				TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+				if (sprite == null) {
+					isTransparent = true;
+					continue;
+				}
+				if (isTransparent) {
+					quads.add(this.createQuad(
+							new Vector3f(ix / 16.0f, yStart, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(ix / 16.0f, yStart, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(ix / 16.0f, yEnd, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(ix / 16.0f, yEnd, FossilItemBakedModel.NORTH_Z)
+							, ix, ix + 1, iy, iy + 1
+							, sprite, Direction.WEST));
+
+					isTransparent = false;
+				}
+			}
+			/* Scan from Right to Left, find the pixel not transparent, use that to build East quads */
+			isTransparent = true;
+			for (int ix = 15; ix >= 0; ix--) {
+				TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+				if (sprite == null) {
+					isTransparent = true;
+					continue;
+				}
+				if (isTransparent) {
+					quads.add(this.createQuad(
+							new Vector3f((ix + 1) / 16.0f, yStart, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f((ix + 1) / 16.0f, yEnd, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f((ix + 1) / 16.0f, yEnd, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f((ix + 1) / 16.0f, yStart, FossilItemBakedModel.SOUTH_Z)
+							, ix, ix + 1, iy, iy + 1
+							, sprite, Direction.EAST));
+
+					isTransparent = false;
+				}
+			}
+		}
+	}
+
+	private void generateTopDownQuads(ImmutableList.Builder<BakedQuad> quads) {
+		for (int ix = 0; ix <= 15; ix++) {
+			float xStart = ix / 16.0f;
+			float xEnd = (ix + 1) / 16.0f;
+
+			/* Scan from Up to Bottom, find the pixel not transparent, use that to build Top quads */
+			boolean isTransparent = true;
+			for (int iy = 0; iy <= 15; iy++) {
+				TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+				if (sprite == null) {
+					isTransparent = true;
+					continue;
+				}
+
+				if (isTransparent) {
+					quads.add(this.createQuad(
+							new Vector3f(xStart, (16 - iy) / 16.0f, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(xStart, (16 - iy) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(xEnd, (16 - iy) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(xEnd, (16 - iy) / 16.0f, FossilItemBakedModel.NORTH_Z)
+							, ix, ix + 1, iy, iy + 1
+							, sprite, Direction.UP));
+
+					isTransparent = false;
+				}
+			}
+
+			/* Scan from Bottom to Up, find the pixel not transparent, use that to build Down quads */
+			isTransparent = true;
+			for (int iy = 15; iy >= 0; iy--) {
+				TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+				if (sprite == null) {
+					isTransparent = true;
+					continue;
+				}
+
+				if (isTransparent) {
+					quads.add(this.createQuad(
+							new Vector3f(xStart, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(xEnd, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.NORTH_Z)
+							, new Vector3f(xEnd, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+							, new Vector3f(xStart, (16 - (iy + 1)) / 16.0f, FossilItemBakedModel.SOUTH_Z)
+							, ix, ix + 1, iy, iy + 1
+							, sprite, Direction.DOWN));
+
+					isTransparent = false;
+				}
+			}
+		}
+	}
+
+	private void generateZQuads(ImmutableList.Builder<BakedQuad> quads) {
+		for (int ix = 0; ix <= 15; ix++) {
+			for (int iy = 0; iy <= 15; iy++) {
+				/* Find the last pixel not transparent in sprites, use that to build North/South quads */
+				TextureAtlasSprite sprite = FossilItemBakedModel.findLastNotTransparent(ix, iy, sprites);
+				if (sprite == null) continue;
+
+				float xStart = ix / 16.0f;
+				float xEnd = (ix + 1) / 16.0f;
+
+				float yStart = (16 - (iy + 1)) / 16.0f;
+				float yEnd = (16 - iy) / 16.0f;
+
+				BakedQuad a = this.createQuad(
+						new Vector3f(xStart, yStart, FossilItemBakedModel.NORTH_Z)
+						, new Vector3f(xStart, yEnd, FossilItemBakedModel.NORTH_Z)
+						, new Vector3f(xEnd, yEnd, FossilItemBakedModel.NORTH_Z)
+						, new Vector3f(xEnd, yStart, FossilItemBakedModel.NORTH_Z)
+						, ix, ix + 1, iy, iy + 1
+						, sprite, Direction.NORTH);
+
+				BakedQuad b = this.createQuad(
+						new Vector3f(xStart, yStart, FossilItemBakedModel.SOUTH_Z)
+						, new Vector3f(xEnd, yStart, FossilItemBakedModel.SOUTH_Z)
+						, new Vector3f(xEnd, yEnd, FossilItemBakedModel.SOUTH_Z)
+						, new Vector3f(xStart, yEnd, FossilItemBakedModel.SOUTH_Z)
+						, ix, ix + 1, iy, iy + 1
+						, sprite, Direction.SOUTH);
+
+				if (a != null) {
+					quads.add(a);
+				}
+				if (b != null) {
+					quads.add(b);
+				}
+			}
+		}
 	}
 
 	/* Give four corner, generate a quad */
@@ -258,8 +258,12 @@ public class FossilItemBakedModel extends BakedItemModel implements ISelectiveRe
 		FossilItemBakedModel.putVertex(consumer, v3, xEnd, yStart, sprite, orientation);
 		FossilItemBakedModel.putVertex(consumer, v4, xEnd, yEnd, sprite, orientation);
 
-		// we are only putting 4 vertices, so we don't need to worry about there being more quads
-		return consumer.poll().get(0);
+		List<BakedQuad> quads = consumer.poll();
+		// we are only putting 4 vertices, so we don't need to worry about there being more quads but in case something goes horribly wrong, we throw
+		if (quads.size() != 1) {
+			throw new IllegalStateException("Model should not have put more than four vertices! Something is horribly wrong here!");
+		}
+		return quads.get(0);
 	}
 
 	/* Put data into the consumer */
@@ -271,17 +275,6 @@ public class FossilItemBakedModel extends BakedItemModel implements ISelectiveRe
 				.normal((float) orientation.getStepX(), (float) orientation.getStepY(), (float) orientation.getStepZ())
 				.uv(fu, fv)
 				.endVertex();
-	}
-
-	@Nonnull
-	@Override
-	public ItemCameraTransforms getTransforms() {
-		return parent.getTransforms();
-	}
-
-	@Override
-	public boolean doesHandlePerspectives() {
-		return true;
 	}
 
 	/* Find the last sprite not transparent in sprites with given position */
