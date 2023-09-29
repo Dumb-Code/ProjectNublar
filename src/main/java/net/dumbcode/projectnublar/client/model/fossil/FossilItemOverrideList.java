@@ -49,7 +49,7 @@ public class FossilItemOverrideList extends ItemOverrideList {
         assert fossil != null;
 		double dnaValue = 5; // TODO: get the fossil DNA value?
 		ResourceLocation location = fossil.getTextureForDNAValue(dnaValue);
-		ResourceLocation resourceLocation = new ResourceLocation(location.getNamespace(), "block/fossil/" + location.getPath() + "item/" + fossil.name.replace(" ", "_").toLowerCase());
+		ResourceLocation resourceLocation = new ResourceLocation(location.getNamespace(), "block/fossil/" + location.getPath() + "item/" + fossil.textureName.replace(" ", "_").toLowerCase());
         return new RenderMaterial(BLOCK_ATLAS, resourceLocation);
 	}
 }
