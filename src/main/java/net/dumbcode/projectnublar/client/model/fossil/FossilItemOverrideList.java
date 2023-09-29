@@ -47,19 +47,9 @@ public class FossilItemOverrideList extends ItemOverrideList {
 	private RenderMaterial getFossil(ItemStack stack) {
 		Fossil fossil = FossilHandler.FOSSIL_REGISTRY.get().getValue(new ResourceLocation(stack.getTagElement(ProjectNublar.MODID).getString("fossil")));
         assert fossil != null;
-		ResourceLocation resourceLocation = MissingTextureSprite.getLocation();
-		AtomicReference<Double> dnaValue = new AtomicReference<>(5D); //TODO
-		AtomicReference<Double> lastDnaValue = new AtomicReference<>(Double.MAX_VALUE);
-		fossil.textures.forEach((fossilDnaValue, location) -> {
-			if (fossilDnaValue < lastDnaValue.get() && fossilDnaValue < dnaValue.get()) {
-				lastDnaValue.set(fossilDnaValue);
-				dnaValue.set(fossilDnaValue);
-			}
-		});
-		if (fossil.textures.containsKey(dnaValue.get())) {
-			ResourceLocation location = fossil.textures.get(dnaValue.get());
-			resourceLocation = new ResourceLocation(location.getNamespace(), "block/fossil/" + location.getPath() + "item/" + fossil.name.replace(" ", "_").toLowerCase());
-		}
+		double dnaValue = 5; // TODO: get the fossil DNA value?
+		ResourceLocation location = fossil.getTextureForDNAValue(dnaValue);
+		ResourceLocation resourceLocation = new ResourceLocation(location.getNamespace(), "block/fossil/" + location.getPath() + "item/" + fossil.name.replace(" ", "_").toLowerCase());
         return new RenderMaterial(BLOCK_ATLAS, resourceLocation);
 	}
 }

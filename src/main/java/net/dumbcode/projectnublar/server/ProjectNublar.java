@@ -148,7 +148,6 @@ public class ProjectNublar {
         forgeBus.addListener(BlockPylonPole::onBlockBreak);
         forgeBus.addListener(EmptySyringeItemHandler::onEntityInteract);
         bus.addListener(EntityHandler::onAttributes);
-        bus.addListener(this::onTextureStitch);
 
         if(FMLEnvironment.dist == Dist.CLIENT) {
             this.clientSetup();
@@ -172,22 +171,6 @@ public class ProjectNublar {
         forgeBus.addListener(this::registerCommands);
 
         BlockEntityIncubatorRenderer.markResolvers();
-    }
-
-    public void onTextureStitch(TextureStitchEvent.Pre event) {
-        if (event.getMap().location().equals(PlayerContainer.BLOCK_ATLAS)) {
-            for (Fossil fossil : FossilHandler.FOSSIL_REGISTRY.get()) {
-                for (ResourceLocation texture : fossil.textures.values()) {
-                    if (texture != null) {
-                        event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "item/" + fossil.textureName));
-                        event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName));
-                    }
-                }
-            }
-        }
-        event.addSprite(new ResourceLocation(ProjectNublar.MODID, "block/cracks_low"));
-        event.addSprite(new ResourceLocation(ProjectNublar.MODID, "block/cracks_medium"));
-        event.addSprite(new ResourceLocation(ProjectNublar.MODID, "block/cracks_full"));
     }
 
     public void registerCommands(RegisterCommandsEvent event) {

@@ -93,7 +93,7 @@ public class FossilBlockItemBakedModel implements IDynamicBakedModel {
             List<BakedQuad> out = new ArrayList<>(quads);
 
             //TODO
-            ResourceLocation texture = fossil.textures.get(1.0D);
+            ResourceLocation texture = fossil.getTextureForDNAValue(1);
             ResourceLocation finalTexture = new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName);
             TextureAtlasSprite overlay = Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(finalTexture);
 

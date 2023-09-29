@@ -10,6 +10,8 @@ import net.dumbcode.projectnublar.client.render.entity.GyrosphereRenderer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
+import net.dumbcode.projectnublar.server.fossil.FossilHandler;
+import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -39,12 +41,34 @@ public class ProjectNublarModelHandler {
     private static final ResourceLocation ELECTRIC_FENCE_WARNING_LOCATION = new ResourceLocation(ProjectNublar.MODID, "block/voltage_warning");
     private static TextureAtlasSprite electricFenceWarning;
 
+    private static final ResourceLocation FOSSIL_CRACK_LOW = new ResourceLocation(ProjectNublar.MODID, "block/cracks_low");
+    public static TextureAtlasSprite fossilCrackLow;
+
+    private static final ResourceLocation FOSSIL_CRACK_MEDIUM = new ResourceLocation(ProjectNublar.MODID, "block/cracks_medium");
+    public static TextureAtlasSprite fossilCrackMedium;
+
+    private static final ResourceLocation FOSSIL_CRACK_FULL = new ResourceLocation(ProjectNublar.MODID, "block/cracks_full");
+    public static TextureAtlasSprite fossilCrackFull;
+
 
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if(PlayerContainer.BLOCK_ATLAS.equals(event.getMap().location())) {
             event.addSprite(ELECTRIC_FENCE_LOCATION);
             event.addSprite(ELECTRIC_FENCE_WARNING_LOCATION);
+
+            for (Fossil fossil : FossilHandler.FOSSIL_REGISTRY.get()) {
+                for (ResourceLocation texture : fossil.allTextures()) {
+                    if (texture != null) {
+                        event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "item/" + fossil.textureName));
+                        event.addSprite(new ResourceLocation(texture.getNamespace(), "block/fossil/" + texture.getPath() + "overlay/" + fossil.textureName));
+                    }
+                }
+            }
+
+            event.addSprite(FOSSIL_CRACK_LOW);
+            event.addSprite(FOSSIL_CRACK_MEDIUM);
+            event.addSprite(FOSSIL_CRACK_FULL);
         }
     }
 
@@ -53,6 +77,10 @@ public class ProjectNublarModelHandler {
         if(PlayerContainer.BLOCK_ATLAS.equals(event.getMap().location())) {
             electricFence = event.getMap().getSprite(ELECTRIC_FENCE_LOCATION);
             electricFenceWarning = event.getMap().getSprite(ELECTRIC_FENCE_WARNING_LOCATION);
+
+            fossilCrackLow = event.getMap().getSprite(FOSSIL_CRACK_LOW);
+            fossilCrackMedium = event.getMap().getSprite(FOSSIL_CRACK_MEDIUM);
+            fossilCrackFull = event.getMap().getSprite(FOSSIL_CRACK_FULL);
         }
     }
 

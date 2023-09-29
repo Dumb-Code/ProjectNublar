@@ -63,6 +63,11 @@ public class FossilBlockEntity extends TileEntity {
         return super.save(nbt);
     }
 
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return this.save(new CompoundNBT());
+    }
+
     public Fossil getFossil() {
         return fossil;
     }
