@@ -1,5 +1,7 @@
 package net.dumbcode.projectnublar.server.fossil.base;
 
+import lombok.Getter;
+
 import java.util.Random;
 
 public enum FossilType {
@@ -12,6 +14,7 @@ public enum FossilType {
     IMPRESSION(0.3F),
     PSEUDO(0.2F);
 
+    @Getter
     private final float DNAMultiplier;
 
     FossilType(float DNAMultiplier) {

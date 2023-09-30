@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -47,6 +48,16 @@ public class FossilBlock extends Block implements IItemBlock {
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return new FossilBlockEntity();
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+        TileEntity entity = pBuilder.getOptionalParameter(LootParameters.BLOCK_ENTITY);
+        if (entity instanceof FossilBlockEntity) {
+            FossilBlockEntity fossilBlockEntity = (FossilBlockEntity) entity;
+            return fossilBlockEntity.drops();
+        }
+        return super.getDrops(pState, pBuilder);
     }
 
     // Methods to delegate to the base state:

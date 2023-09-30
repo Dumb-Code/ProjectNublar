@@ -1,12 +1,16 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
+import com.google.common.collect.Range;
+import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 import net.dumbcode.projectnublar.server.fossil.base.Fossil;
 import net.dumbcode.projectnublar.server.fossil.base.FossilTier;
 import net.dumbcode.projectnublar.server.fossil.base.FossilType;
 import net.dumbcode.projectnublar.server.fossil.base.StoneType;
+import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -16,6 +20,10 @@ import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FossilBlockEntity extends TileEntity {
 
@@ -119,5 +127,27 @@ public class FossilBlockEntity extends TileEntity {
 
 //                .withInitial(CRACKS_TEX, ((FossilBlock)this.getBlockState().getBlock()).fossil.crackTexture.toString());
         return builder.build();
+    }
+
+    public List<ItemStack> drops() {
+        int amountOfItemToDrop = chooseValueWithinRange(tier.getAmountOfFossilsToDrop());
+
+        ItemStack stack = new ItemStack(ItemHandler.FOSSIL_ITEM.get(), amountOfItemToDrop);
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putString("fossil", fossil.getRegistryName().toString());
+        nbt.putFloat("tierDNAMultiplier", tier.getDNAGatherChance());
+        nbt.putFloat("typeDNAMultiplier", type.getDNAMultiplier());
+//TODO:        nbt.putFloat("stoneTypeDNAMultiplier", stoneType.getDNAMultiplier());
+//TODO:        nbt.putFloat("fossilDNAMultiplier", fossil.getDNAMultiplier());
+        stack.addTagElement(ProjectNublar.MODID, nbt);
+
+        return Collections.singletonList(stack);
+    }
+
+    private int chooseValueWithinRange(Range<Integer> amountOfFossilsToDrop) {
+        int lowerBound = amountOfFossilsToDrop.lowerEndpoint();
+        int upperBound = amountOfFossilsToDrop.upperEndpoint();
+
+        return ThreadLocalRandom.current().nextInt(lowerBound, upperBound + 1);
     }
 }
