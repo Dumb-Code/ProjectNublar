@@ -1,37 +1,40 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url = 'https://maven.minecraftforge.net' }
+        maven {
+            name = 'NeoForged'
+            url = 'https://maven.neoforged.net/releases'
+        }
         maven { url = "https://plugins.gradle.org/m2/" }
         maven { url = 'https://repo.spongepowered.org/maven' }
         maven { url = 'https://maven.parchmentmc.org' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'net.neoforged.gradle', name: 'net.neoforged.gradle.gradle.plugin', version: '[6.0.13, 6.2)', changing: true
         classpath "net.dumbcode.gradlehook:GradleHook:2.0.2"
         classpath 'org.spongepowered:mixingradle:0.7.+'
         classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'net.neoforged.gradle'
 apply plugin: "net.dumbcode.gradlehook"
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
-version = '1.16.5-' + (System.getenv("GITHUB_ACTIONS") ? System.getenv("GITHUB_RUN_NUMBER") : 'dev')
+version = '1.20.1-' + (System.getenv("GITHUB_ACTIONS") ? System.getenv("GITHUB_RUN_NUMBER") : 'dev')
 group = 'net.dumbcode.projectnublar' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'projectnublar'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 sourceSets {
     dumb_library {
-        java.outputDir = file('dumb_library/build/classes/java/main')
+        java.destinationDirectory = file('dumb_library/build/classes/java/main')
         output.resourcesDir file('dumb_library/build/resources/main')
     }
 }
@@ -41,7 +44,7 @@ mixin {
 }
 
 minecraft {
-    mappings channel: 'parchment', version: '2022.03.06-1.16.5'
+    mappings channel: 'official', version: '1.20.1'
 
 
     accessTransformer(
@@ -113,7 +116,7 @@ repositories {
     }
 }
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
+    minecraft 'net.neoforged:forge:1.20.1-47.1.79'
 
     implementation 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
@@ -125,7 +128,7 @@ dependencies {
 
     implementation project(path: ':dumb_library', configuration: 'default')
 
-    implementation fg.deobf("curse.maven:world-edit-225608:3283693")
+//    implementation fg.deobf("curse.maven:world-edit-225608:3283693")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -148,7 +151,7 @@ jar {
 
 jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
+publish.dependsOn('reobfJar')
 
 publishing {
     publications {
@@ -166,6 +169,6 @@ publishing {
 gradlehook {
     urlToken System.getenv('WEBHOOK_URL')
     addField 'payload_json', '{ "embeds": [{ "title":"' + System.getenv("COMMIT_MESSAGE") + " - " + System.getenv("COMMIT_AUTHOR") + '", "timestamp": "{{datetime}}" }] }'
-    addArtifact jar
+//    addArtifact jar
 }
 apply from: "https://moddingtutorials.org/applesilicon.gradle"
