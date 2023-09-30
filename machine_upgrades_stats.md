@@ -2,12 +2,12 @@
 A list of all the currently updated machine parts
 ## Fossil Processor
 ### Tanks
-Effects the capacity of the water tanks.
+Affects the capacity of the water tanks.
  - Default -> 2 buckets
  - 1 -> 3 buckets
  - 2 -> 4 buckets
 ### Computer Chip
-Effects the time taken to convert fossil to genetic material  .
+Affects the time taken to convert fossil to genetic material  .
  - default -> 4 minutes
  - 1 -> 3 minutes
  - 2 -> 2 minutes
@@ -21,7 +21,7 @@ at full durability is the base efficiency, and at 0 durability is 25% of the bas
  - Diamond -> 100% base efficiency, 500 durability
 ## Drill Extractor
 ### Drill Bit
-Effects the time taken to convert amber into genetic material, and the rough amount of genetic material it produces.
+Affects the time taken to convert amber into genetic material, and the rough amount of genetic material it produces.
  - Default -> 6 minutes, ~1 genetic material
  - 1 -> 5.5 minutes, ~2 genetic material
  - 2 -> 5 minutes, ~3 genetic material
@@ -30,7 +30,7 @@ Effects the time taken to convert amber into genetic material, and the rough amo
  - 5 -> 3.5 minutes, ~6 genetic material
 ## Sequencer
 ### Tanks
-Effects the capacity of the water, bone, sugar and plant tanks. Water is measured in buckets while bone/sugar/plant 
+Affects the capacity of the water, bone, sugar and plant tanks. Water is measured in buckets while bone/sugar/plant 
 is measured in matter.
  - Default -> 1 bucket, 16 matter
  - 1 -> 1.5 bucket, 24 matter
@@ -38,18 +38,18 @@ is measured in matter.
  - 3 -> 2.5 bucket, 40 matter
  - 4 -> 3 bucket, 48 matter
 ### Computer Chip
-Effects the time taken to convert the water, bone, sugar, plant matter and selected dna values into a dna test tube.  
+Affects the time taken to convert the water, bone, sugar, plant matter and selected dna values into a dna test tube.  
  - Default -> 10 minutes
  - 1 -> 7 minutes
  - 2 -> 4 minutes
 ### Storage Type
-The item used to store the data on. Gets put into the storage slot. Effects the time taken to convert a syringe or 
+The item used to store the data on. Gets put into the storage slot. Effects the dinosaurAge taken to convert a syringe or 
 genetic material into data and put the data into the storage item. 
  - hdd -> 10 seconds
  - ssd -> 5 seconds
 ## 3D Printer
 ### Computer Chip
-Effects the time taken to use embryo and bone meal and 3d print it into an artificial egg. 
+Affects the time taken to use embryo and bone meal and 3d print it into an artificial egg. 
  - Default -> 10 minutes
  - 1 -> 8 minutes
  - 2 -> 6 minutes
@@ -60,25 +60,25 @@ Adding this upgrade will remove the change of a broken egg occurring.
  - 1 -> 0% chance
 ## Incubator  
 ### Tanks
-Effects the capacity of the plant matter tank.
+Affects the capacity of the plant matter tank.
  - Default -> 100 plant matter
  - 1 -> 150 plant matter 
  - 2 -> 200 plant matter
 ### Bulb
-Effects the time taken to incubate an egg.
+Affects the time taken to incubate an egg.
  - Default -> 30 minutes (18s per %)
  - 1 -> 25 minutes (15s per %)
  - 2 -> 20 minutes (12s per %)
  - 3 -> 15 minutes (9s per %)
 ### Container
 (needs renaming)  
-Effects the number of eggs that can be incubated at once on a single incubator.
+Affects the number of eggs that can be incubated at once on a single incubator.
  - Default -> 3 eggs
  - 1 -> 6 eggs
  - 2 -> 9 eggs
 ## Generator
 ### Turbines
-Effects the amount of energy (FE) a tick from burning items.
+Affects the amount of energy (FE) a tick from burning items.
  - Default -> 2000
  - 1 -> 3000
  - 2 -> 4000

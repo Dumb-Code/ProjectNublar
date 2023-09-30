@@ -6,6 +6,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.*;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilBlock;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleBuildPart;
 import net.dumbcode.projectnublar.server.item.MachineModuleParts;
@@ -45,6 +46,8 @@ public class BlockHandler {
     public static final RegistryObject<MachineModuleBlock> EGG_PRINTER = REGISTER.register("egg_printer", () -> new DyableMachineModuleBlock(EggPrinterBlockEntity::new, 1, MachineModuleParts.EGG_PRINTER, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> INCUBATOR = REGISTER.register("incubator", () -> new MachineModuleBlock(IncubatorBlockEntity::new, 1, MachineModuleParts.INCUBATOR, of(Material.HEAVY_METAL)));
     public static final RegistryObject<MachineModuleBlock> COAL_GENERATOR = REGISTER.register("coal_generator", () -> new MachineModuleBlock(CoalGeneratorBlockEntity::new, 1, MachineModuleParts.COAL_GENERATOR, of(Material.HEAVY_METAL)));
+    public static final RegistryObject<FossilBlock> FOSSIL_BLOCK = REGISTER.register("fossil_block", () -> new FossilBlock(of(Material.STONE)));
+
 
     public static final RegistryObject<UnbuiltMachineModuleBlock> UNBUILT_FOSSIL_PROCESSOR = REGISTER.register("unbuilt_fossil_processor", () -> new UnbuiltMachineModuleBlock(FOSSIL_PROCESSOR, of(Material.HEAVY_METAL),
         create("body", ItemHandler.FOSSIL_PROCESSOR_BODY),
@@ -73,12 +76,6 @@ public class BlockHandler {
     public static final RegistryObject<Block> PLANTER_BOX = REGISTER.register("planter_box", () -> new Block(of(Material.METAL)));
     public static final RegistryObject<Block> UNNAMED_SCIENTIST_BLOCK = REGISTER.register("unnamed_scientist_block", () -> new Block(of(Material.METAL)));
     public static final RegistryObject<Block> UNNAMED_PALEONTOLOGIST_BLOCK = REGISTER.register("unnamed_paleontologist_block", () -> new Block(of(Material.METAL)));
-
-    public static final Map<FossilBlock.FossilType, RegistryMap<Dinosaur, FossilBlock>> FOSSIL = REGISTER.beforeRegister(new HashMap<>(), map -> {
-        for(FossilBlock.FossilType value : FossilBlock.FossilType.values()) {
-            map.put(value, createMap("%s_fossil_" + value.getName(), dinosaur -> new FossilBlock(dinosaur, value, copy(value.getCopy()))));
-        }
-    });
 
     private static <T extends Block> RegistryMap<Dinosaur, T> createMap(String nameFormat, Function<Dinosaur, T> supplier) {
         RegistryMap<Dinosaur, T> map = new RegistryMap<>();

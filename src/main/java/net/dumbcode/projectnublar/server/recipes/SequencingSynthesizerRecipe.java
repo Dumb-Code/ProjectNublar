@@ -4,7 +4,6 @@ import net.dumbcode.dumblibrary.server.dna.GeneticEntry;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
-import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHandler;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
@@ -19,7 +18,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynthesizerBlockEntity>{
     INSTANCE;
@@ -126,7 +124,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
             }
             return stack;
         }
-        ProjectNublar.getLogger().warn("Unable to complete recipe, {} was not a dinosaur", location);
+        ProjectNublar.LOGGER.warn("Unable to complete recipe, {} was not a dinosaur", location);
         return ItemStack.EMPTY;
     }
 

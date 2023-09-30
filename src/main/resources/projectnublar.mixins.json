@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "net.dumbcode.projectnublar.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "projectnublar.refmap.json",
+  "mixins": [
+    "BlockLootTablesInvoker",
+    "BlockModelProviderInvoker",
+    "PlayerInventoryMixin",
+  ],
+  "client": [
+    "SimpleBakedModelAccessor"
+  ],
+  "minVersion": "0.8"
+}

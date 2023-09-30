@@ -21,8 +21,8 @@ public class DinosaurHandler {
 
     public static final RegistryObject<Dinosaur> TYRANNOSAURUS = REGISTER.register("tyrannosaurus", Tyrannosaurus::new);
     public static final RegistryObject<Dinosaur> DILOPHOSAURUS = REGISTER.register("dilophosaurus", Dilophosaurus::new);
-    public static final RegistryObject<VelociraptorJP> VELOCIRAPTOR_JP = REGISTER.register("velociraptor_jp", VelociraptorJP::new);
-    public static final RegistryObject<VelociraptorJP> VELOCIRAPTOR_JP3 = REGISTER.register("velociraptor_jp3", VelociraptorJP::new);
+    public static final RegistryObject<Dinosaur> VELOCIRAPTOR_JP = REGISTER.register("velociraptor_jp", VelociraptorJP::new);
+    public static final RegistryObject<Dinosaur> VELOCIRAPTOR_JP3 = REGISTER.register("velociraptor_jp3", VelociraptorJP::new);
 
     public static IForgeRegistry<Dinosaur> getRegistry() {
         return DINOSAUR_REGISTRY.get();

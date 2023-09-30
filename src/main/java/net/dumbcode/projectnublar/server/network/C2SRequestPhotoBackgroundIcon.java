@@ -40,7 +40,7 @@ public class C2SRequestPhotoBackgroundIcon {
                 try {
                     bytes = image.asByteArray();
                 } catch (IOException e) {
-                    ProjectNublar.getLogger().error("Unable to write image to array", e);
+                    ProjectNublar.LOGGER.error("Unable to write image to array", e);
                 }
                 ProjectNublar.NETWORK.send(PacketDistributor.PLAYER.with(context::getSender), new S2CSyncBackgroundIcon(packet.uploaderUUID, packet.imageHash, packet.global, bytes));
             });

@@ -5,6 +5,8 @@
 
     "projectnublar.gui.skeletal_builder": "Skeletal Builder",
 
+    "projectnublar.fossil": "%s %s Fossil",
+
     "projectnublar.gui.tracking.health": "Health:",
     "projectnublar.gui.tracking.dinosaur": "Dinosaur: %s",
     "projectnublar.gui.tracking.pregnancy": "Pregnancy Information:",

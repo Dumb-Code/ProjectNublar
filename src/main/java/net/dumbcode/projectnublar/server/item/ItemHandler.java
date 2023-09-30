@@ -2,14 +2,12 @@ package net.dumbcode.projectnublar.server.item;
 
 import net.dumbcode.dumblibrary.server.registry.PostEarlyDeferredRegister;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
-import net.dumbcode.dumblibrary.server.utils.JavaUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
 import net.dumbcode.projectnublar.server.block.IItemBlock;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
-import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
+import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tabs.TabHandler;
 import net.minecraft.block.Block;
@@ -30,7 +28,7 @@ import java.util.function.Supplier;
 
 public final class ItemHandler {
 
-    private static final ItemGroup TAB = TabHandler.TAB;
+    public static final ItemGroup TAB = TabHandler.TAB;
 
     private static final Supplier<Item> BASIC_ITEM = () -> new Item(new Item.Properties().tab(TAB));
 
@@ -106,9 +104,11 @@ public final class ItemHandler {
     public static final RegistryObject<Item> SEQUENCER_COMPUTER = REGISTER.register("sequencer_computer", BASIC_ITEM);
 
     public static final RegistryObject<Item> MONITOR = REGISTER.register("monitor", BASIC_ITEM);
+    public static final RegistryObject<Item> FOSSIL_POUCH = REGISTER.register("fossil_pouch", () ->
+            new FossilPouchItem(new Item.Properties().tab(TAB).stacksTo(1)));
 
-
-
+    public static final RegistryObject<Item> FOSSIL_ITEM =
+            REGISTER.register("fossil_item", () -> new FossilItem(new Item.Properties().tab(TabHandler.FOSSIL_TAB)));
 
     public static final RegistryMap<Dinosaur, Item> RAW_MEAT_ITEMS = createMap("%s_raw_meat", d ->
         new BasicDinosaurItem(d, "raw_meat", new Item.Properties().tab(TAB).food(new Food.Builder()
@@ -130,12 +130,6 @@ public final class ItemHandler {
     public static final RegistryMap<Dinosaur, Item> TEST_TUBES_DNA = createMap("%s_test_tube", d -> new DnaHoverDinosaurItem(d, "test_tube", new Item.Properties().tab(TAB)));
     public static final RegistryMap<Dinosaur, Item> DINOSAUR_UNINCUBATED_EGG = createMap("%s_unincubated_egg", d -> new UnincubatedEggItem(d, "unincubated_egg", new Item.Properties().tab(TAB)));
     public static final RegistryMap<Dinosaur, Item> DINOSAUR_INCUBATED_EGG = createMap("%s_incubated_egg", d -> new DinosaurEggItem(d, "incubated_egg", new Item.Properties().tab(TAB)));
-
-    public static final Map<Dinosaur, RegistryMap<String, Item>> FOSSIL_ITEMS = createNestedMap(
-        "%s_fossil_%s",
-        dino -> JavaUtils.nullOr(dino.getAttacher().getStorageOrNull(ComponentHandler.ITEM_DROPS.get()), DinosaurDropsComponent.Storage::getFossilList),
-        (dinosaur, fossil) -> new FossilItem(dinosaur, "fossil", fossil, new Item.Properties().tab(TAB))
-        );
 
     public static void registerAllItemBlocks(RegistryEvent.Register<Item> event) {
         for (RegistryObject<Block> entry : BlockHandler.REGISTER.getEntries()) {

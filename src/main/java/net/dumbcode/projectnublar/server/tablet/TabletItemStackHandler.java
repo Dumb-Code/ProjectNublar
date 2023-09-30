@@ -48,7 +48,7 @@ public class TabletItemStackHandler implements AutoCloseable {
                 }
                 this.entryList.add(new Entry(value, storage));
             } else {
-                ProjectNublar.getLogger().warn("Unable to find module with identifier {}", identifier);
+                ProjectNublar.LOGGER.warn("Unable to find module with identifier {}", identifier);
             }
         }
 

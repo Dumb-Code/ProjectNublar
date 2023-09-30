@@ -8,10 +8,13 @@ import net.dumbcode.projectnublar.server.block.BlockTrackingBeacon;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
+import net.dumbcode.projectnublar.server.containers.pouch.FossilPouchMenu;
+import net.dumbcode.projectnublar.server.containers.pouch.FossilPouchScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
@@ -21,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.network.IContainerFactory;
 import net.minecraftforge.registries.DeferredRegister;
@@ -47,6 +51,9 @@ public class ProjectNublarContainers {
             throw new IllegalStateException("Illegal point, tried to open machine at " + pos + " but found tileentity of " + teClazz);
         })
     );
+
+
+    public static final RegistryObject<ContainerType/*MenuType*/<FossilPouchMenu>> SACK_MENU = registerMenuType(FossilPouchMenu::new, "sack_menu");
 
     public static final RegistryObject<ContainerType<BlockTrackingBeacon.TrackingContainer>> TRACKING_BEACON = REGISTER.register("tracking_beacon", create((windowId, inv, data) -> {
         BlockPos blockPos = data.readBlockPos();
@@ -77,6 +84,7 @@ public class ProjectNublarContainers {
             }
             return be.createScreen(container, inventory, title, bar, container.getTab());
         });
+        ScreenManager.register(ProjectNublarContainers.SACK_MENU.get(), FossilPouchScreen::new);
 
         ScreenManager.<BlockTrackingBeacon.TrackingContainer, GuiTrackingBeacon>register(TRACKING_BEACON.get(), (container, inventory, title) -> new GuiTrackingBeacon(container));
     }
@@ -86,5 +94,9 @@ public class ProjectNublarContainers {
             return Optional.of(expected.cast(player.containerMenu));
         }
         return Optional.empty();
+    }
+
+    private static <T extends Container> RegistryObject<ContainerType<T>> registerMenuType(IContainerFactory<T> factory, String name) {
+        return REGISTER.register(name, () -> IForgeContainerType.create(factory));
     }
 }

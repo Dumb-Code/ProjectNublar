@@ -2,7 +2,6 @@ package net.dumbcode.projectnublar.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.brigadier.arguments.ArgumentType;
 import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.server.animation.AnimationContainer;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
@@ -25,6 +24,7 @@ import net.dumbcode.projectnublar.server.command.CommandProjectNublar;
 import net.dumbcode.projectnublar.server.command.DinosaurArgument;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
 import net.dumbcode.projectnublar.server.data.ProjectNublarBlockTagsProvider;
+import net.dumbcode.projectnublar.server.data.ProjectNublarFossilOreModelProvider;
 import net.dumbcode.projectnublar.server.data.ProjectNublarRecipeProvider;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
@@ -35,6 +35,8 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DataSerializerHandler;
 import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.system.impl.*;
+import net.dumbcode.projectnublar.server.fossil.FossilHandler;
+import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 import net.dumbcode.projectnublar.server.item.EmptySyringeItemHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.network.*;
@@ -47,7 +49,6 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
@@ -87,8 +88,6 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -102,7 +101,7 @@ public class ProjectNublar {
     public static final boolean DEBUG = false;
 
 
-    private static Logger logger = LogManager.getLogger(MODID);
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
 
     private static final String PROTOCOL_VERSION = "1";
@@ -132,6 +131,8 @@ public class ProjectNublar {
         SoundHandler.REGISTER.register(bus);
         GeneticHandler.REGISTER.register(bus);
         DinosaurHandler.REGISTER.register(bus);
+        FossilHandler.DR.register(bus);
+        StoneTypeHandler.DR.register(bus);
         PlantHandler.REGISTER.register(bus);
         ProjectNublarRecipesSerializers.REGISTER.register(bus);
         ComponentHandler.REGISTER.register(bus);
@@ -166,8 +167,6 @@ public class ProjectNublar {
         forgeBus.addListener(this::registerCommands);
 
         BlockEntityIncubatorRenderer.markResolvers();
-
-
     }
 
     public void registerCommands(RegisterCommandsEvent event) {
@@ -181,6 +180,7 @@ public class ProjectNublar {
         if (event.includeServer()) {
             gen.addProvider(new ProjectNublarBlockTagsProvider(gen, helper));
             gen.addProvider(new ProjectNublarRecipeProvider(gen));
+            gen.addProvider(new ProjectNublarFossilOreModelProvider(gen, helper));
         }
     }
 
@@ -189,7 +189,6 @@ public class ProjectNublar {
 
         IResourceManager manager = Minecraft.getInstance().getResourceManager();
         ((SimpleReloadableResourceManager)manager).add(new DinoItemResourcePack());
-
 
         ProjectNublarBlockRenderLayers.setRenderLayers();
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) event.getMinecraftSupplier().get().getResourceManager();
@@ -279,7 +278,7 @@ public class ProjectNublar {
             try (FileWriter writer = new FileWriter(jsonFile)) {
                 gson.toJson(dino, writer);
             } catch (IOException e) {
-                logger.warn("There was an issue writing to {}", jsonFile.getName());
+                LOGGER.warn("There was an issue writing to {}", jsonFile.getName());
             }
         });
     }
@@ -297,11 +296,6 @@ public class ProjectNublar {
         event.registerSystem(new DinosaurMovementSystem());
         event.registerSystem(new HuntSystem());
     }
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
 
     private static void registerJsonDinosaurs() {
         GsonBuilder builder = new GsonBuilder();

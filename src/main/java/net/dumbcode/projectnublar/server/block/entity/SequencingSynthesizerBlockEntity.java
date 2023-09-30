@@ -592,7 +592,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             }
             DriveUtils.DriveEntry entry = collected.get(this.selectedDNAs[i].key);
             if(entry == null) {
-                ProjectNublar.getLogger().warn("Illegal Drive Entry. Tried to get {} in list of {}", this.selectedDNAs[i].key, collected.keySet());
+                ProjectNublar.LOGGER.warn("Illegal Drive Entry. Tried to get {} in list of {}", this.selectedDNAs[i].key, collected.keySet());
                 continue;
             }
             if(entry.getDriveType() == DriveUtils.DriveType.OTHER) {

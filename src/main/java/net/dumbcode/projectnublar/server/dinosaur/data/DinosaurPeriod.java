@@ -1,9 +1,15 @@
 package net.dumbcode.projectnublar.server.dinosaur.data;
 
+import net.dumbcode.projectnublar.server.fossil.base.DinosaurAge;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Random;
 
+
+/**
+ * For removal soon. Use {@link DinosaurAge Time} instead
+ */
+@Deprecated
 public enum DinosaurPeriod {
     QUATERNARY("quaternary", 2.588F, 0.0F),
     NEOGENE("neogene", 23.03F, 2.589F),

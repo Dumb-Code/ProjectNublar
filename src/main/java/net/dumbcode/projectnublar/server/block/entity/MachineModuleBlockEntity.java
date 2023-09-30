@@ -49,7 +49,6 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.network.NetworkHooks;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -198,7 +197,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                                     recipe.onRecipeStarted(asB(), process);
                                 }
                             } else {
-                                ProjectNublar.getLogger().error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
+                                ProjectNublar.LOGGER.error("Unable to find recipe " + process.getCurrentRecipe() + " as it does not exist.");
                             }
                         } else {
                             energy.extractRaw(process.getCurrentConsumptionPerTick()); // consume energy for process

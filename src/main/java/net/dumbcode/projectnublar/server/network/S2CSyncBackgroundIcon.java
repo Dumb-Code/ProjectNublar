@@ -9,11 +9,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import org.lwjgl.system.MemoryStack;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
@@ -53,7 +51,7 @@ public class S2CSyncBackgroundIcon {
                     try {
                         read = NativeImage.read(new ByteArrayInputStream(packet.data));
                     } catch (IOException e) {
-                        ProjectNublar.getLogger().error("Unable to read image", e);
+                        ProjectNublar.LOGGER.error("Unable to read image", e);
                     }
                     ((PhotoBackgroundSetup) tabletScreen.getSetupPage()).loadIcon(packet.uploaderUUID, packet.imageHash, packet.global, read);
                 }

@@ -2,6 +2,7 @@ package net.dumbcode.projectnublar.server.villager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import net.dumbcode.dumblibrary.server.registry.RegistryMap;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockHandler;
@@ -56,12 +57,13 @@ public class VillagerHandler {
                     new BasicTrade(7, new ItemStack(Items.STONE_PICKAXE), 4, 2, 0.5F),
                     new BasicTrade(7, new ItemStack(Items.STONE_SHOVEL), 4, 2, 0.5F)
                 ))
-                .put(2, Arrays.asList(
-                    RandomChoiceCheckTrade.ofNestedMap(4, 7, 8, 2, 0.5F, ItemHandler.FOSSIL_ITEMS),
-                    new UseEmeraldToCookRawMeat(3, 6, 16, 2, 0.5F),
-                    new BasicTrade(11, new ItemStack(Items.IRON_PICKAXE), 4, 1, 0.5F),
-                    new BasicTrade(11, new ItemStack(Items.IRON_SHOVEL), 4, 1, 0.5F)
-                ))
+                    //TODO (wp)s
+//                .put(2, Arrays.asList(
+//                    RandomChoiceCheckTrade.ofMap(4, 7, 8, 2, 0.5F, Fossils.ITEMS),
+//                    new UseEmeraldToCookRawMeat(3, 6, 16, 2, 0.5F),
+//                    new BasicTrade(11, new ItemStack(Items.IRON_PICKAXE), 4, 1, 0.5F),
+//                    new BasicTrade(11, new ItemStack(Items.IRON_SHOVEL), 4, 1, 0.5F)
+//                ))
                 .build()
             );
         }
@@ -164,6 +166,20 @@ public class VillagerHandler {
             this.maxTrades = maxTrades;
             this.xp = xp;
             this.mul = mul;
+        }
+
+        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Map<?, Item> map) {
+            return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
+                .map(ItemStack::new)
+                .toArray(ItemStack[]::new)
+            );
+        }
+
+        public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, Multimap<?, Item> map) {
+            return new RandomChoiceCheckTrade(emeralds, result, maxTrades, xp, mul, map.values().stream()
+                .map(ItemStack::new)
+                .toArray(ItemStack[]::new)
+            );
         }
 
         public static RandomChoiceCheckTrade ofMap(int emeralds, int result, int maxTrades, int xp, float mul, RegistryMap<?, Item> map) {
