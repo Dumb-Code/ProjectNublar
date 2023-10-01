@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.plants.PlantHandler;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 

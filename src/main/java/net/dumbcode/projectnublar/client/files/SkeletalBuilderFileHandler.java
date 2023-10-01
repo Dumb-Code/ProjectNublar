@@ -3,7 +3,7 @@
 //import com.google.common.collect.Lists;
 //import com.google.common.collect.Maps;
 //import net.dumbcode.projectnublar.server.ProjectNublar;
-//import net.minecraft.util.ResourceLocation;
+//import net.minecraft.resources.ResourceLocation;
 //import org.apache.commons.io.FilenameUtils;
 //import org.apache.commons.io.IOUtils;
 //import org.apache.logging.log4j.util.Strings;

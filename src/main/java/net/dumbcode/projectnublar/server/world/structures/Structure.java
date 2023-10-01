@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.world.structures;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;

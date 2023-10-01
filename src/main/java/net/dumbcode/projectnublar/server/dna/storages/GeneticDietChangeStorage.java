@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.dna.storages;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -13,7 +13,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -43,12 +43,12 @@ public class GeneticDietChangeStorage extends RandomUUIDStorage<Float> {
     }
 
     @Override
-    public void render(MatrixStack stack, GeneticType<?, Float> entry, Float value, int x, int y, int width, int height, float ticks) {
+    public void render(GuiGraphics stack, GeneticType<?, Float> entry, Float value, int x, int y, int width, int height, float ticks) {
         TranslationTextComponent component = new TranslationTextComponent(DumbLibrary.MODID + ".genetic_storage.diet");
         FontRenderer font = Minecraft.getInstance().font;
 
         int w = font.width(component);
-        font.draw(stack, component, x+2, y+4, -1);
+        stack.drawString(font, component, x+2, y+4, -1);
 
         List<ITextComponent> allComponents = new ArrayList<>();
         for (BlockState block : this.diet.getBlocks()) {
@@ -61,7 +61,7 @@ public class GeneticDietChangeStorage extends RandomUUIDStorage<Float> {
             allComponents.add(entity.getDescription());
         }
 
-        IFormattableTextComponent joined = new StringTextComponent("");
+        IFormattableTextComponent joined = Component.literal("");
         int size = allComponents.size();
         for (int i = 0; i < size; i++) {
             joined.append(allComponents.get(i));

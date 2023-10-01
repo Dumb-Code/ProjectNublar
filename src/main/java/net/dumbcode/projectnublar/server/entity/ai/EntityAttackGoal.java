@@ -8,7 +8,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.AnimationComponent;
 import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathPoint;

@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.item.FossilPouchItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraftforge.items.ItemHandlerHelper;

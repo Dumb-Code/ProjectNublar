@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.tracking;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 
@@ -20,7 +20,7 @@ public abstract class TooltipInformation extends TrackingDataInformation {
     }
 
     @Override
-    public void renderInfo(MatrixStack stack, int x, int y, int relativeMouseX, int relativeMouseY) {
+    public void renderInfo(GuiGraphics stack, int x, int y, int relativeMouseX, int relativeMouseY) {
 //        Gui.drawRect(x, y, x + this.getInfoDimensions().width, y + this.getInfoDimensions().height, -1);
         FontRenderer fontRenderer = Minecraft.getInstance().font;
         List<String> lines = this.getTooltipLines();

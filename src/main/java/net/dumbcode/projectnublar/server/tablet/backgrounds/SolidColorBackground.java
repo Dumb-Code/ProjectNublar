@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.gui.AbstractGui;
@@ -45,7 +45,7 @@ public class SolidColorBackground implements TabletBackground {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY) {
-        AbstractGui.fill(stack, x, y, x + width, y + height, this.color | 0xFF000000);
+    public void render(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY) {
+        AbstractGui.stack.fill(x, y, x + width, y + height, this.color | 0xFF000000);
     }
 }

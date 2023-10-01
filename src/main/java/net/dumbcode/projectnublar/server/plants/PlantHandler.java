@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.plants;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 

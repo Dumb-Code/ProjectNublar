@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.ShaderBackground;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -29,8 +29,8 @@ public class ShaderSetupPage extends SetupPage<ShaderBackground> {
 
     @Override
     public void initPage(int x, int y) {
-        this.textField = this.add(new TextFieldWidget(Minecraft.getInstance().font, x + 10, y + 10, 200, 20, new StringTextComponent("")));
-        this.button = this.add(new Button(x + 10, y + 45, 200, 20, new StringTextComponent(""), b -> {
+        this.textField = this.add(new TextFieldWidget(Minecraft.getInstance().font, x + 10, y + 10, 200, 20, Component.literal("")));
+        this.button = this.add(new Button(x + 10, y + 45, 200, 20, Component.literal(""), b -> {
             this.selectedSize = ShaderBackground.ScreenSize.values()[(this.selectedSize.ordinal() + 1) % ShaderBackground.ScreenSize.values().length];
             this.updateButtonText();
         }));
@@ -48,7 +48,7 @@ public class ShaderSetupPage extends SetupPage<ShaderBackground> {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         this.textField.render(stack, mouseX, mouseY, partialTicks);
         this.button.render(stack, mouseX, mouseY, partialTicks);
         super.render(stack, mouseX, mouseY, partialTicks);

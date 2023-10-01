@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.tracking.info;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,10 +28,10 @@ public class DinosaurInformation extends TooltipInformation {
     }
 
     @Override
-    public void renderMap(MatrixStack stack, int x, int y) {
+    public void renderMap(GuiGraphics stack, int x, int y) {
         String s = this.dinosaur.getRegName().getPath().substring(0, 1);
         int width = Minecraft.getInstance().font.width(s);
-        Minecraft.getInstance().font.draw(stack, s, x - width/2F, y - 3, 0xAAAAAA);
+        Minecraft.getInstance().stack.drawString(font, s, x - width/2F, y - 3, 0xAAAAAA);
         super.renderMap(stack, x, y);
     }
 

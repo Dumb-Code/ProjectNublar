@@ -10,7 +10,7 @@ import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.animation.AnimationHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;

@@ -1,22 +1,26 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,31 +31,31 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
 
     private final MachineModuleBlockEntity<?> blockEntity;
 
-    public MachineContainerScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public MachineContainerScreen(MachineModuleContainer inventorySlotsIn, Inventory playerInventory, Component title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = inventorySlotsIn.getBlockEntity();
         inventorySlotsIn.addListener(this::onSlotChanged);
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
-        fill(stack, this.leftPos - 8, this.topPos, this.leftPos, this.topPos + this.imageHeight, 0xFF8c8c8c);
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float ticks) {
+        stack.fill(this.leftPos - 8, this.topPos, this.leftPos, this.topPos + this.imageHeight, 0xFF8c8c8c);
         int heightOffset = (int) ((this.imageHeight - 6) * (1 - (float) this.blockEntity.getClientEnergyHeld() / this.blockEntity.getClientMaxEnergy()));
-        fill(stack, this.leftPos - 5, this.topPos + 3, this.leftPos - 3, this.topPos + this.imageHeight - 3, 0xFFFF0000);
-        fill(stack, this.leftPos - 5, this.topPos + 3 + heightOffset, this.leftPos - 3, this.topPos + this.imageHeight - 3, 0xFF00FF00);
+        stack.fill(this.leftPos - 5, this.topPos + 3, this.leftPos - 3, this.topPos + this.imageHeight - 3, 0xFFFF0000);
+        stack.fill(this.leftPos - 5, this.topPos + 3 + heightOffset, this.leftPos - 3, this.topPos + this.imageHeight - 3, 0xFF00FF00);
         super.render(stack, mouseX, mouseY, ticks);
     }
 
-    protected void bottomUpSubPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight, float percent) {
+    protected void bottomUpSubPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight, float percent) {
         float inverseHeight = (1-percent)*height;
-        subPixelBlit(stack, x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
+        subPixelstack.blit(x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
     }
 
-    protected void subPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height) {
-        this.subPixelBlit(stack, x, y, u, v, width, height, 256, 256);
+    protected void subPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height) {
+        this.subPixelstack.blit(x, y, u, v, width, height, 256, 256);
     }
 
-    protected void subPixelBlit(MatrixStack stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight) {
+    protected void subPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight) {
         Matrix4f matrix4f = stack.last().pose();
         int z = this.getBlitOffset();
         BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
@@ -65,18 +69,18 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
         WorldVertexBufferUploader.end(bufferbuilder);
     }
 
-    protected void drawProcessIcon(MachineModuleBlockEntity.MachineProcess<?> process, MatrixStack stack, float xStartF, float yStartF) {
+    protected void drawProcessIcon(MachineModuleBlockEntity.MachineProcess<?> process, GuiGraphics stack, float xStartF, float yStartF) {
         int xStart = (int) Math.floor(xStartF);
         int yStart = (int) Math.floor(yStartF);
         stack.pushPose();
         stack.translate(xStartF - xStart, yStartF - yStart, 0);
         if(!process.isHasPower()) {
             minecraft.textureManager.bind(MACHINE_ICONS);
-            blit(stack, this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 16, 0, 16, 16, 32, 32);
+            stack.blit(this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 16, 0, 16, 16, 32, 32);
             stack.popPose();
         } else if(process.isBlocked()) {
             minecraft.textureManager.bind(MACHINE_ICONS);
-            blit(stack, this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 0, 0, 16, 16, 32, 32);
+            stack.blit(this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 0, 0, 16, 16, 32, 32);
             stack.popPose();
 
             RenderSystem.disableDepthTest();
@@ -93,7 +97,7 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
                                     y = ((MachineModulePopoutSlot) slot).getVisualShowY();
                                 }
 
-                                fill(stack, this.leftPos + x, this.topPos + y, this.leftPos + x + 16, this.topPos + y + 16, 0xA0FF0000);
+                                stack.fill(this.leftPos + x, this.topPos + y, this.leftPos + x + 16, this.topPos + y + 16, 0xA0FF0000);
 
                             }
                         }
@@ -104,7 +108,7 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
         }
     }
 
-    protected void drawProcessTooltip(MachineModuleBlockEntity.MachineProcess<?> process, MatrixStack stack, int xStart, int yStart, int width, int height, int mouseX, int mouseY) {
+    protected void drawProcessTooltip(MachineModuleBlockEntity.MachineProcess<?> process, GuiGraphics stack, int xStart, int yStart, int width, int height, int mouseX, int mouseY) {
         int mX = mouseX - this.leftPos;
         int mY = mouseY - this.topPos;
 

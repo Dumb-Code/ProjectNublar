@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.utils;
 
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.INBTSerializable;

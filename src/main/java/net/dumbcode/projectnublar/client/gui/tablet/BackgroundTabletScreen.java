@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -9,7 +9,7 @@ import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -47,11 +47,11 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
     }
 
     @Override
-    protected void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void drawTabletScreen(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         super.drawTabletScreen(stack, mouseX, mouseY, partialTicks);
         if(this.setupPage != null) {
-            fill(stack, this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
-            fill(stack, this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
+            stack.fill(this.leftStart, this.topStart + 16, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, 0x77000000);
+            stack.fill(this.startX - 5, this.startY - 5, startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 0xFF666666);
             RenderUtils.renderBorder(stack,this.startX - 5, this.startY - 5, this.startX + this.setupPage.getWidth() + 5, this.startY + this.setupPage.getHeight() + 5, 2, 0xFFAAAAAA);
             this.setupPage.render(stack, mouseX, mouseY, partialTicks);
         } else {
@@ -63,8 +63,8 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
                 int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
                 Minecraft.getInstance().textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/background_icons/" + s + ".png"));
-                blit(stack, xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
-                minecraft.font.draw(stack, s, xPos + ICON_SIZE/2F - minecraft.font.width(s)/2F, yPos + ICON_SIZE + 2, 0xFF888888);
+                stack.blit(xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+                minecraft.stack.drawString(font, s, xPos + ICON_SIZE/2F - minecraft.font.width(s)/2F, yPos + ICON_SIZE + 2, 0xFF888888);
                 entry++;
             }
         }

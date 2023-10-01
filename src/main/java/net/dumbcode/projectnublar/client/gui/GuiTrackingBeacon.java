@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.primitives.Ints;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.BlockTrackingBeacon;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
@@ -37,7 +37,7 @@ public class GuiTrackingBeacon extends Screen implements IHasContainer<BlockTrac
 
     @Override
     public void init() {
-        this.nameField = this.addButton(new TextFieldWidget(minecraft.font, this.width / 4, this.height / 2 - 50, this.width / 2, 20, new StringTextComponent("")));
+        this.nameField = this.addButton(new TextFieldWidget(minecraft.font, this.width / 4, this.height / 2 - 50, this.width / 2, 20, Component.literal("")));
         this.nameField.setValue(this.name);
         this.nameField.setFocus(true);
         this.nameField.setResponder(s -> {
@@ -45,7 +45,7 @@ public class GuiTrackingBeacon extends Screen implements IHasContainer<BlockTrac
             ProjectNublar.NETWORK.sendToServer(new C2STrackingBeaconData(this.name, this.radius));
         });
 
-        this.radiusField = this.addButton(new TextFieldWidget(minecraft.font, this.width / 2 - 25, this.height / 2, 50, 20, new StringTextComponent("")));
+        this.radiusField = this.addButton(new TextFieldWidget(minecraft.font, this.width / 2 - 25, this.height / 2, 50, 20, Component.literal("")));
         this.radiusField.setValue(String.valueOf(this.radius));
         this.radiusField.setResponder(s -> {
             this.radius = s.isEmpty() ? 0 : Integer.parseInt(s);
@@ -58,7 +58,7 @@ public class GuiTrackingBeacon extends Screen implements IHasContainer<BlockTrac
 
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float ticks) {
         this.renderBackground(stack);
         super.render(stack, mouseX, mouseY, ticks);
     }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraftforge.fml.network.NetworkEvent;

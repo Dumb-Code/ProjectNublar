@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[36,)"
+loaderVersion="[47,)"
 license="All right reserved"
 [[mods]]
   modId="projectnublar"

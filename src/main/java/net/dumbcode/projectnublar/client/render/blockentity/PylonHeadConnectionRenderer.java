@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Getter;
@@ -10,14 +10,14 @@ import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -55,7 +55,7 @@ public class PylonHeadConnectionRenderer {
         ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
         Vector3d pos = info.getPosition();
 
-        MatrixStack stack = event.getMatrixStack();
+        GuiGraphics stack = event.getGuiGraphics();
         stack.pushPose();
         stack.translate(-pos.x, -pos.y, -pos.z);
 

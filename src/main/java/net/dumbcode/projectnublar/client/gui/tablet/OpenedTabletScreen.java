@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import net.minecraft.util.Hand;
 
@@ -34,7 +34,7 @@ public class OpenedTabletScreen extends BaseTabletScreen {
     }
 
     @Override
-    protected void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void drawTabletScreen(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         if(this.screen != null) {
             this.screen.render(stack, mouseX, mouseY, partialTicks);
         }

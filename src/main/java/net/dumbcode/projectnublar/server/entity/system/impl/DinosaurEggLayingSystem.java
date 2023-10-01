@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEggEntity;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurEggLayingComponent;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 

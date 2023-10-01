@@ -4,7 +4,7 @@
 //import net.dumbcode.projectnublar.server.ProjectNublar;
 //import net.dumbcode.projectnublar.server.block.FossilBlock;
 //import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
-//import net.minecraft.util.math.BlockPos;
+//import net.minecraft.core.BlockPos;
 //import net.minecraft.world.World;
 //import net.minecraft.world.biome.Biome;
 //import net.minecraft.world.chunk.IChunkProvider;

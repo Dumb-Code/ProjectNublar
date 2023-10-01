@@ -4,7 +4,7 @@ import net.dumbcode.projectnublar.client.gui.tablet.screens.FlappyDinoScreen;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;

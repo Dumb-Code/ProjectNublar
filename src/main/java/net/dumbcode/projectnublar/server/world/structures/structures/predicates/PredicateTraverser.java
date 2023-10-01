@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.world.structures.structures.predicates
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.function.Function;

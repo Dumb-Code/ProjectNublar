@@ -20,10 +20,11 @@ import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComp
 import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
@@ -74,7 +75,7 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
      * @param config custom config.
      * @return customized dinosaur ecs.
      */
-    public DinosaurEntity createEntity(World world, @Nullable EntityComponentAttacher.ConstructConfiguration config) {
+    public DinosaurEntity createEntity(Level world, @Nullable EntityComponentAttacher.ConstructConfiguration config) {
         if(config == null) {
             config = this.attacher.getDefaultConfig();
         }

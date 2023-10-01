@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.block.entity;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;

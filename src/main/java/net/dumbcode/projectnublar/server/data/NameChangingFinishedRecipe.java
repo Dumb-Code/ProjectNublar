@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class NameChangingFinishedRecipe implements IFinishedRecipe {
 

@@ -9,7 +9,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.DefenseComponent;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 
 public class GeneticHandler {

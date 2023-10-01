@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
@@ -27,7 +27,7 @@ public abstract class SetupPage<T extends TabletBackground> implements INestedGu
 
     public abstract T create();
 
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 
     }
 

@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -42,7 +42,7 @@ public class TabletScreen implements INestedGuiEventHandler {
 
     public void updateScreen() {  }
 
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {}
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {}
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {

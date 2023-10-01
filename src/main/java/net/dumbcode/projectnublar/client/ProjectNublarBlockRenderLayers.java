@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.client;
 import static net.minecraft.client.renderer.RenderTypeLookup.setRenderLayer;
 import static net.dumbcode.projectnublar.server.block.BlockHandler.*;
 
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.client.renderer.RenderType;
 
 import java.util.Arrays;

@@ -1,8 +1,8 @@
 package net.dumbcode.projectnublar.server.item;
 
 import com.google.common.collect.Lists;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

@@ -1,12 +1,12 @@
 package net.dumbcode.projectnublar.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.projectnublar.server.entity.DinosaurEggEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class DinosaurEggRenderer extends EntityRenderer<DinosaurEggEntity> {
 
@@ -16,7 +16,7 @@ public class DinosaurEggRenderer extends EntityRenderer<DinosaurEggEntity> {
     }
 
     @Override
-    public void render(DinosaurEggEntity entity, float entityYaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light) {
+    public void render(DinosaurEggEntity entity, float entityYaw, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light) {
         super.render(entity, entityYaw, partialTicks, stack, buffers, light);
 
         float scale = entity.getRandomScaleAdjustment();

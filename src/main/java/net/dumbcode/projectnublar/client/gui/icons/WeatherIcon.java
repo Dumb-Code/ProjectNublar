@@ -1,9 +1,10 @@
 package net.dumbcode.projectnublar.client.gui.icons;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,10 +19,10 @@ public interface WeatherIcon {
         ORDERED_ICONS.sort(Comparator.comparing(WeatherIcon::getPriority));
     }
 
-    static WeatherIcon guess(World world, BlockPos pos) {
-        Biome biome = world.getBiome(pos);
+    static WeatherIcon guess(Level world, BlockPos pos) {
+        Holder<Biome> biome = world.getBiome(pos);
         for (WeatherIcon icon : ORDERED_ICONS) {
-            if (icon.test(world, biome)) {
+            if (icon.test(world, biome.get(), pos)) {
                 return icon;
             }
         }
@@ -31,7 +32,7 @@ public interface WeatherIcon {
     //Lowest = greater
     float getPriority();
 
-    boolean test(World world, Biome biome);
+    boolean test(Level world, Biome biome, BlockPos pos);
 
     ResourceLocation getLocation();
     //[minu, minv, maxu, maxv]

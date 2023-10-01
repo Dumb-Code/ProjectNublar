@@ -7,7 +7,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentTypes;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.HerdComponent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
@@ -27,7 +27,7 @@ public class RaceWarCommand {
                     }
                 }
 
-                context.getSource().sendSuccess(new StringTextComponent("Size: " + dataSet.size()), false);
+                context.getSource().sendSuccess(Component.literal("Size: " + dataSet.size()), false);
 
                 for (HerdSavedData data : dataSet) {
                     for (HerdSavedData other : dataSet) {

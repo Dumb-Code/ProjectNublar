@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.fml.network.NetworkEvent;
 

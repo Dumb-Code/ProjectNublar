@@ -18,7 +18,7 @@ import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation
 import net.dumbcode.projectnublar.server.entity.tracking.info.DinosaurInformation;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

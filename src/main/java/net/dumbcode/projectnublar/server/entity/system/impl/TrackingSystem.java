@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.TrackingComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;

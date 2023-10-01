@@ -6,11 +6,11 @@ import net.dumbcode.projectnublar.server.item.DinosaurProvider;
 import net.dumbcode.projectnublar.server.item.DnaHoverDinosaurItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.SpecialRecipe;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 

@@ -15,7 +15,7 @@ import net.dumbcode.projectnublar.server.world.structures.structures.predicates.
 import net.dumbcode.projectnublar.server.world.structures.structures.predicates.SolidLiquidRatioPredicate;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandler;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.data.DataHandlers;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.Blocks;
 
 public class DigsiteStructureNetwork {

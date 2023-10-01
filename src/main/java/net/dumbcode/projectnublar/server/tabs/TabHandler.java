@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.fossil.FossilHandler;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class TabHandler {
 

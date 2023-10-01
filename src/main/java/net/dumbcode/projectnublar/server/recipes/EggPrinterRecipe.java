@@ -7,10 +7,10 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHand
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public enum  EggPrinterRecipe implements MachineRecipe<EggPrinterBlockEntity> {
     INSTANCE;

@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.block;
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -12,7 +12,7 @@ import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IBlockReader;
@@ -54,7 +54,7 @@ public class BlockTrackingBeacon extends Block implements IItemBlock {
         if(te instanceof TrackingBeaconBlockEntity && player instanceof ServerPlayerEntity) {
             NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider(
                 (id, inv, p) -> new TrackingContainer(id, (TrackingBeaconBlockEntity) te),
-                new StringTextComponent("")
+                Component.literal("")
             ), pos);
         }
         return super.use(state, world, pos, player, hand, ray);

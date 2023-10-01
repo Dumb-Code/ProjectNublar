@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.server.ai.GoalManager;
 import net.dumbcode.projectnublar.server.entity.component.impl.HuntComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismComponent;
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.OptionalDouble;

@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.server.world.gen.DigsiteStructureNetwork;
 import net.dumbcode.projectnublar.server.world.structures.network.StructureNetwork;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 
 import java.util.Random;
@@ -24,7 +24,7 @@ public class GenerateCommand {
     private static int generate(CommandSource source, Random random) {
         StructureNetwork.Stats stats = DigsiteStructureNetwork.NETWORK.generate(source.getLevel(), new BlockPos(source.getPosition()), random);
 
-        source.sendSuccess(new StringTextComponent(
+        source.sendSuccess(Component.literal(
             "-------------\n"+
                 "total:               " + stats.getStructures() + "\n"+
                 "-------------\n"+

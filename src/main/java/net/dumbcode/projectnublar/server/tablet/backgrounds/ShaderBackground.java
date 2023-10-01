@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dumbcode.dumblibrary.client.shader.GlslSandboxShader;
@@ -64,7 +64,7 @@ public class ShaderBackground implements TabletBackground {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY) {
+    public void render(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY) {
         if(this.needsUpdating) {
             this.needsUpdating = false;
             this.dispose();
@@ -80,7 +80,7 @@ public class ShaderBackground implements TabletBackground {
             }
             this.shader.render(mouseX - x, mouseY - y);
             this.shader.startShader();
-            AbstractGui.blit(stack, x, y, 0, 0, width, height, width, height);
+            AbstractGui.stack.blit(x, y, 0, 0, width, height, width, height);
             this.shader.endShader();
         }
     }

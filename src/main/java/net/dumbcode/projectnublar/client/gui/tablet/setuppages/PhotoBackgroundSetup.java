@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -138,14 +138,14 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         this.uploadButton.render(stack, mouseX, mouseY, partialTicks);
         this.globalChangeButton.render(stack, mouseX, mouseY, partialTicks);
         this.openFileButton.render(stack, mouseX, mouseY, partialTicks);
 
         if(this.currentTestTexture != null) {
             this.currentTestTexture.bind();
-            AbstractGui.blit(stack, x, y, 0, 0, 100, 100, 100, 100);
+            AbstractGui.stack.blit(x, y, 0, 0, 100, 100, 100, 100);
         }
 
         List<BGIconEntry> list = this.userTab ? this.userEntries : this.globalEntries;
@@ -156,9 +156,9 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
             }
             if(entry.texture != null) {
                 entry.texture.bind();
-                AbstractGui.blit(stack, entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
+                AbstractGui.stack.blit(entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
                 if(entry == this.selectedEntry) {
-                    AbstractGui.fill(stack, entry.minX - 2, entry.minY + this.scroll - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2 + this.scroll, 0x8800BAFD);
+                    AbstractGui.stack.fill(entry.minX - 2, entry.minY + this.scroll - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2 + this.scroll, 0x8800BAFD);
                 }
             }
         }

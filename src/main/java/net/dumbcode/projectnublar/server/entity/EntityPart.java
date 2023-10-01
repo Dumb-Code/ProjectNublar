@@ -4,7 +4,7 @@ import lombok.Getter;
 import net.dumbcode.dumblibrary.server.ecs.ComponentAccess;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;

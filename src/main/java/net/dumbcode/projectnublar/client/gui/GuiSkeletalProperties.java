@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.dumblibrary.client.gui.GuiModelPoseEdit;
@@ -46,7 +46,7 @@ public class GuiSkeletalProperties extends Screen {
     private TextFieldWidget editText;
 
     public GuiSkeletalProperties(GuiModelPoseEdit parent, SkeletalBuilderBlockEntity builder) {
-        super(new StringTextComponent("bruh"));
+        super(Component.literal("bruh"));
         this.parent = parent;
         this.builder = builder;
         this.properties = builder.getSkeletalProperties();
@@ -70,7 +70,7 @@ public class GuiSkeletalProperties extends Screen {
             bottom += diff = this.height/2 - (bottom + top)/2;
         }
 
-        this.globalRotation = this.addButton(new Slider( (this.width-200)/2, 30 + diff, 200, 20, new StringTextComponent("rotaion"), new StringTextComponent(""),0, 360, 0.0, true, true, p -> {}, s -> {
+        this.globalRotation = this.addButton(new Slider( (this.width-200)/2, 30 + diff, 200, 20, Component.literal("rotaion"), Component.literal(""),0, 360, 0.0, true, true, p -> {}, s -> {
             float val = (float) s.getValue();
             if(this.previousRot != val) {
                 this.previousRot = val;
@@ -79,7 +79,7 @@ public class GuiSkeletalProperties extends Screen {
         }));
         this.globalRotation.setValue(this.properties.getRotation());
 
-        this.addButton(new ExtendedButton(this.width / 2 + 70, 60 + diff, 20, 20, new StringTextComponent("+"), p -> {
+        this.addButton(new ExtendedButton(this.width / 2 + 70, 60 + diff, 20, 20, Component.literal("+"), p -> {
             this.builder.getSkeletalProperties().getPoles().add(new SkeletalProperties.Pole("", PoleFacing.NONE));
             this.sync();
             this.editingPole = this.entries.get(this.entries.size()-1);
@@ -87,12 +87,12 @@ public class GuiSkeletalProperties extends Screen {
             this.editDirection.active = true;
         }));
 
-        this.editText = this.addWidget(new TextFieldWidget(Minecraft.getInstance().font, this.width/2 - 100, bottom + 40, 75, 20, new StringTextComponent("")));
+        this.editText = this.addWidget(new TextFieldWidget(Minecraft.getInstance().font, this.width/2 - 100, bottom + 40, 75, 20, Component.literal("")));
         this.editText.setResponder(value -> {
             this.editingPole.pole.setCubeName(value);
             this.sync();
         });
-        this.editDirection = this.addWidget(new ExtendedButton(this.width/2 + 25, bottom + 40, 75, 20, new StringTextComponent(""), p -> {
+        this.editDirection = this.addWidget(new ExtendedButton(this.width/2 + 25, bottom + 40, 75, 20, Component.literal(""), p -> {
             if(this.editingPole != null) {
                 this.editingPole.pole.setFacing(this.editingPole.pole.getFacing().cycle());
                 this.sync();
@@ -106,7 +106,7 @@ public class GuiSkeletalProperties extends Screen {
 
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
 
@@ -127,7 +127,7 @@ public class GuiSkeletalProperties extends Screen {
             this.builder.getSkeletalProperties().setPrevRotation(this.builder.getSkeletalProperties().getRotation());
         }
         if (this.editingPole != null) {
-            this.editDirection.setMessage(new StringTextComponent(this.editingPole.pole.getFacing().name())); //todo localize
+            this.editDirection.setMessage(Component.literal(this.editingPole.pole.getFacing().name())); //todo localize
         }
     }
 
@@ -181,20 +181,20 @@ public class GuiSkeletalProperties extends Screen {
         private PoleEntry(SkeletalProperties.Pole pole) {
             this.pole = pole;
 
-            this.edit = new ExtendedButton(0, 0, 20, 20, new StringTextComponent(""), p -> {
+            this.edit = new ExtendedButton(0, 0, 20, 20, Component.literal(""), p -> {
                 editingPole = this;
                 editText.setValue(this.pole.getCubeName());
             }); //todo localize
 
-            this.delete = new ExtendedButton(0, 0, 20, 20, new StringTextComponent(""), p -> {
+            this.delete = new ExtendedButton(0, 0, 20, 20, Component.literal(""), p -> {
                 this.markedRemoved = true;
             });
         }
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             y += 12;
-            minecraft.font.draw(stack, pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
+            minecraft.stack.drawString(font, pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
 
             this.edit.x = width/2+40;
             this.edit.y = y - 10;

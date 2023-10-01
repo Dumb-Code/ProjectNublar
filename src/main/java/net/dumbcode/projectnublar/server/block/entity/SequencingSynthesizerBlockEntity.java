@@ -35,11 +35,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -469,7 +471,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public MachineContainerScreen createScreen(MachineModuleContainer container, PlayerInventory inventory, ITextComponent title, TabInformationBar info, int tab) {
+    public MachineContainerScreen createScreen(MachineModuleContainer container, Inventory inventory, Component title, TabInformationBar info, int tab) {
         switch (tab) {
             case 0:
                 return new SequencingScreen(this, container, inventory, title, info);
@@ -728,7 +730,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         RANDOM("gender.type.random", null);
 
         @Getter
-        private final TranslationTextComponent text;
+        private final Component text;
 
         @Getter
         private final Boolean male;

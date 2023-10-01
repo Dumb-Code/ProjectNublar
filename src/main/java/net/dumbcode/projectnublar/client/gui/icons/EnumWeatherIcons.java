@@ -2,36 +2,38 @@ package net.dumbcode.projectnublar.client.gui.icons;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.common.util.TriPredicate;
 
 import java.util.function.BiPredicate;
 
 @Getter
 public enum EnumWeatherIcons implements WeatherIcon {
-    DAY_NORMAL(999, (world, biome) -> true),
+    DAY_NORMAL(999, (world, biome, pos) -> true),
 
-    NIGHT_NORMAL(100, (world, biome) -> world.getDayTime() % 24000 >= 12000),
+    NIGHT_NORMAL(100, (world, biome, pos) -> world.getDayTime() % 24000 >= 12000),
 
-    CLOUDY(90, (world, biome) -> world.isRaining() || world.getRainLevel(1F) > 0F),
+    CLOUDY(90, (world, biome, pos) -> world.isRaining() || world.getRainLevel(1F) > 0F),
 
-    RAIN_LIGHT(80, (world, biome) -> biome.getPrecipitation() == Biome.RainType.RAIN && world.isRaining()),
-    RAIN_HEAVY(75, (world, biome) -> biome.getPrecipitation() == Biome.RainType.RAIN && world.isRaining() && world.getRainLevel(1F) > 0.75F),
+    RAIN_LIGHT(80, (world, biome, pos) -> biome.getPrecipitationAt(pos) == Biome.Precipitation.RAIN && world.isRaining()),
+    RAIN_HEAVY(75, (world, biome, pos) -> biome.getPrecipitationAt(pos) == Biome.Precipitation.RAIN && world.isRaining() && world.getRainLevel(1F) > 0.75F),
 
-    SNOW_LIGHT(70, (world, biome) -> biome.getPrecipitation() == Biome.RainType.SNOW && world.isRaining()),
-    SNOW_HEAVY(65, (world, biome) -> biome.getPrecipitation() == Biome.RainType.SNOW && world.isRaining() && world.getRainLevel(1F) > 0.75F),
+    SNOW_LIGHT(70, (world, biome, pos) -> biome.getPrecipitationAt(pos) == Biome.Precipitation.SNOW && world.isRaining()),
+    SNOW_HEAVY(65, (world, biome, pos) -> biome.getPrecipitationAt(pos) == Biome.Precipitation.SNOW && world.isRaining() && world.getRainLevel(1F) > 0.75F),
 
-    THUNDERSTORM(50, (world, biome) -> biome.getPrecipitation() == Biome.RainType.RAIN && world.isThundering()),
-    SNOWSTORM(40, (world, biome) -> biome.getPrecipitation() == Biome.RainType.SNOW && world.isThundering());
+    THUNDERSTORM(50, (world, biome, pos) -> biome.getPrecipitationAt(pos) == Biome.Precipitation.RAIN && world.isThundering()),
+    SNOWSTORM(40, (world, biome, pos) -> biome.getPrecipitationAt(pos) == Biome.Precipitation.SNOW && world.isThundering());
 
     private final float priority;
     private final ResourceLocation location = new ResourceLocation(ProjectNublar.MODID, "textures/gui/weather_icons.png");
     private final float[] UV;
 
-    private final BiPredicate<World, Biome> predicate;
+    private final TriPredicate<Level, Biome, BlockPos> predicate;
 
-    EnumWeatherIcons(float priority, BiPredicate<World, Biome> predicate) {
+    EnumWeatherIcons(float priority, TriPredicate<Level, Biome, BlockPos> predicate) {
         this.priority = priority;
         this.predicate = predicate;
 
@@ -55,8 +57,8 @@ public enum EnumWeatherIcons implements WeatherIcon {
     }
 
     @Override
-    public boolean test(World world, Biome biome) {
-        return this.predicate.test(world, biome);
+    public boolean test(Level world, Biome biome, BlockPos pos) {
+        return this.predicate.test(world, biome, pos);
     }
 
 

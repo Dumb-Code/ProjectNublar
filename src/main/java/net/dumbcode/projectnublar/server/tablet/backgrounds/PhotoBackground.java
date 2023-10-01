@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
@@ -65,7 +65,7 @@ public class PhotoBackground implements TabletBackground {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY) {
+    public void render(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY) {
         if(!this.requested) {
             this.requested = true;
             ProjectNublar.NETWORK.sendToServer(new C2SRequestBackgroundImage(this.uploaderUUID, this.photoHash));
@@ -73,7 +73,7 @@ public class PhotoBackground implements TabletBackground {
 
         if(this.texture != null) {
             this.texture.bind();
-            AbstractGui.blit(stack, x, y, 0, 0, width, height, width, height);
+            AbstractGui.stack.blit(x, y, 0, 0, width, height, width, height);
         }
     }
 

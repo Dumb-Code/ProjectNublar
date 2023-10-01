@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.block;
 
 import net.dumbcode.projectnublar.server.block.entity.ProjectNublarBlockEntities;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;

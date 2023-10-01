@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.utils;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 @Getter
 public enum EnumConnectionType implements ConnectionType {

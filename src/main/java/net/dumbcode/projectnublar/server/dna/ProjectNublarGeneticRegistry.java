@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.dna;
 import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.projectnublar.server.dna.storages.GeneticDietChangeStorage;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 

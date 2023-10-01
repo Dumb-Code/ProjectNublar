@@ -1,13 +1,13 @@
 package net.dumbcode.projectnublar.client.render.model;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.client.model.data.IModelData;
 
@@ -36,7 +36,7 @@ public class FencePoleBakedModel extends FenceBakedModel {
         if(rotation == null || Double.isNaN(rotation)) {
             rotation = 0D;
         }
-        MatrixStack stack = new MatrixStack();
+        GuiGraphics stack = new GuiGraphics();
         stack.mulPose(Vector3f.YN.rotationDegrees(-rotation.floatValue()));
 
         int size = DefaultVertexFormats.BLOCK.getIntegerSize();

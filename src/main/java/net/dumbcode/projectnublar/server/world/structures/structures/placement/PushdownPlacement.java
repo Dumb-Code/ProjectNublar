@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.world.structures.structures.placement;
 
 import net.dumbcode.dumblibrary.server.utils.WorldUtils;
 import net.dumbcode.projectnublar.server.world.structures.StructureInstance;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.World;
 
 public class PushdownPlacement implements StructurePlacement {

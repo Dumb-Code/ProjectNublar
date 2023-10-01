@@ -12,10 +12,10 @@ import net.dumbcode.projectnublar.server.item.MachineModuleBuildPart;
 import net.dumbcode.projectnublar.server.item.MachineModuleParts;
 import net.dumbcode.dumblibrary.server.registry.PreprocessRegisterDeferredRegister;
 import net.dumbcode.projectnublar.server.utils.EnumConnectionType;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.item.Item;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;

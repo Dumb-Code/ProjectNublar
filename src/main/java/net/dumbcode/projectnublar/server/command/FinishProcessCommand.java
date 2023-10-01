@@ -8,7 +8,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.HerdComponent;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;

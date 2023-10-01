@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.BakedModelResolver;
@@ -26,12 +26,12 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
@@ -76,7 +76,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     }
 
     @Override
-    public void render(IncubatorBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
+    public void render(IncubatorBlockEntity te, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light, int overlay) {
         stack.pushPose();
         this.doModelTransforms(stack, te);
 
@@ -112,11 +112,11 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.popPose();
     }
 
-    private void doModelTransforms(MatrixStack stack, IncubatorBlockEntity te) {
+    private void doModelTransforms(GuiGraphics stack, IncubatorBlockEntity te) {
         YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));
     }
 
-    private void renderLid(MatrixStack stack, World world, BlockPos pos, IRenderTypeBuffer buffers, int bulbTier) {
+    private void renderLid(GuiGraphics stack, World world, BlockPos pos, IRenderTypeBuffer buffers, int bulbTier) {
         IVertexBuilder buffer = buffers.getBuffer(RenderType.cutout());
         BlockState blockState = world.getBlockState(pos);
         MC.getBlockRenderer().getModelRenderer().renderModel(world, LID_MODEL.getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
@@ -126,7 +126,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         MC.getBlockRenderer().getModelRenderer().renderModel(world, TRANSLUCENT_LID_MODEL.getModel(), blockState, pos, stack, buffer, false, new Random(), blockState.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
     }
 
-    private void renderIncubatorParts(IncubatorBlockEntity te, MatrixStack stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
+    private void renderIncubatorParts(IncubatorBlockEntity te, GuiGraphics stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
         this.setArmAngles(te, te.activeEgg[0] != -1 ? te.getEggList()[te.activeEgg[0]] : null, stack, buffers, te.movementTicks + partialTicks, te.snapshot, te.activeEgg[1]);
         this.updateEgg(te, partialTicks);
 
@@ -134,7 +134,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
     }
 
 
-    private void renderEgg(IncubatorBlockEntity.Egg egg, int light, IRenderTypeBuffer buffers, MatrixStack stack) {
+    private void renderEgg(IncubatorBlockEntity.Egg egg, int light, IRenderTypeBuffer buffers, GuiGraphics stack) {
         if(egg.getEggType() == DinosaurEggType.EMPTY) {
             return;
         }
@@ -229,7 +229,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         snapshot[6] = HAND_JOINT.getBox().yRot;
     }
 
-    private void setArmAngles(IncubatorBlockEntity te, @Nullable IncubatorBlockEntity.Egg egg, MatrixStack stack, IRenderTypeBuffer buffers, float movementTicks, float[] snapshot, int eggMoveAmount) {
+    private void setArmAngles(IncubatorBlockEntity te, @Nullable IncubatorBlockEntity.Egg egg, GuiGraphics stack, IRenderTypeBuffer buffers, float movementTicks, float[] snapshot, int eggMoveAmount) {
         float rotateInterp = movementTicks / TICKS_TO_ROTATE;
         if(egg == null) {
             float movementInterp = (movementTicks - TICKS_TO_ROTATE) / TICKS_TO_MOVE;
@@ -354,7 +354,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         return Math.sqrt((from.x - to.x)*(from.x - to.x) + (from.z - to.z)*(from.z - to.z));
     }
 
-    private void drawDebugRenderers(MatrixStack stack, IRenderTypeBuffer buffer, Vector3d origin, Vector3d target, Vector3d handJointTarget, double baseYRotation, Vector3d baseJoinTarget, double angleFirstArm, double angleLastArm) {
+    private void drawDebugRenderers(GuiGraphics stack, IRenderTypeBuffer buffer, Vector3d origin, Vector3d target, Vector3d handJointTarget, double baseYRotation, Vector3d baseJoinTarget, double angleFirstArm, double angleLastArm) {
         IVertexBuilder buff = buffer.getBuffer(RenderType.lines());
 
         Matrix4f pose = stack.last().pose();
@@ -380,7 +380,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.popPose();
     }
 
-    private void drawDebugLines(MatrixStack stack, IVertexBuilder buff, double x, double y, double z) {
+    private void drawDebugLines(GuiGraphics stack, IVertexBuilder buff, double x, double y, double z) {
         stack.pushPose();
         stack.translate(x, y, z);
         Matrix4f pose = stack.last().pose();

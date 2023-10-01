@@ -9,7 +9,7 @@ import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;

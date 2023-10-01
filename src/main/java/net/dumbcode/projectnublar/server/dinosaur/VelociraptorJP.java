@@ -18,7 +18,7 @@ import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.sounds.SoundHandler;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.BiomeDictionary;
 
 public class VelociraptorJP extends Dinosaur {

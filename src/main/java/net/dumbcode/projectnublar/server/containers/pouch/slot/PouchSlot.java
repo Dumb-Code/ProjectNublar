@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.containers.pouch.slot;
 import net.dumbcode.projectnublar.server.fossil.blockitem.FossilItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class PouchSlot extends Slot {
     private final int stackLimit;

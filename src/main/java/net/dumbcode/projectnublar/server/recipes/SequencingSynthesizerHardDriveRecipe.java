@@ -6,8 +6,8 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleItemStackHand
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.item.DriveItem;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 
 public enum SequencingSynthesizerHardDriveRecipe implements MachineRecipe<SequencingSynthesizerBlockEntity> {
 

@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.client.render;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModelRenderer;
@@ -10,10 +10,10 @@ import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -48,7 +48,7 @@ public class DCMModelClipPlane {
         }
     }
 
-    public void render(MatrixStack stack, int light, ResourceLocation texture, double dist, int color) {
+    public void render(GuiGraphics stack, int light, ResourceLocation texture, double dist, int color) {
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;

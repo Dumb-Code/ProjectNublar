@@ -8,7 +8,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -25,7 +25,7 @@ public class UnincubatedEggItem extends DnaHoverDinosaurItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> lines, ITooltipFlag flag) {
-        lines.add(new StringTextComponent(MathUtils.ensureTrailingZeros(stack.getOrCreateTagElement(ProjectNublar.MODID).getFloat("AmountDone"), 1) + "%"));
+        lines.add(Component.literal(MathUtils.ensureTrailingZeros(stack.getOrCreateTagElement(ProjectNublar.MODID).getFloat("AmountDone"), 1) + "%"));
         Screen screen = Minecraft.getInstance().screen;
         if(screen instanceof MachineContainerScreen) {
             MachineModuleBlockEntity<?> blockEntity = ((MachineContainerScreen) screen).getMenu().getBlockEntity();

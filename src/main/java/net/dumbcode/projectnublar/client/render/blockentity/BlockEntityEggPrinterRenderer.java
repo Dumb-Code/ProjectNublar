@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.dumblibrary.client.YRotatedModel;
@@ -21,10 +21,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     }
 
     @Override
-    public void render(EggPrinterBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
+    public void render(EggPrinterBlockEntity te, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light, int overlay) {
         light = WorldRenderer.getLightColor(te.getLevel(), te.getBlockPos().above());
 
         stack.pushPose();
@@ -70,7 +70,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
     }
 
 
-    private void renderPrinterParts(EggPrinterBlockEntity te, IRenderTypeBuffer buffers, MatrixStack stack, int light, float partialTicks) {
+    private void renderPrinterParts(EggPrinterBlockEntity te, IRenderTypeBuffer buffers, GuiGraphics stack, int light, float partialTicks) {
         stack.pushPose();
         MachineModuleBlockEntity.MachineProcess<?> process = te.getProcess(0);
 
@@ -172,7 +172,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
     }
 
-    private void renderEgg(MatrixStack stack, IRenderTypeBuffer buffers, int light, boolean doPlatform, float eggLength) {
+    private void renderEgg(GuiGraphics stack, IRenderTypeBuffer buffers, int light, boolean doPlatform, float eggLength) {
         stack.pushPose();
         if(doPlatform) {
             stack.translate(0, -(24F-6.6F-2.75F)/16F + eggLength, 0);

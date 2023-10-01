@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.experimental.UtilityClass;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.block.*;
@@ -11,7 +11,8 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -19,7 +20,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -137,12 +138,12 @@ public class MachineUtils {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void drawTiledTexture(MatrixStack stack, float left, float top, float right, float bottom, TextureAtlasSprite sprite) {
+    public static void drawTiledTexture(ResourceLocation stack, float left, float top, float right, float bottom, TextureAtlasSprite sprite) {
         drawTiledTexture(stack, left, top, right, bottom, sprite.getWidth(), sprite.getHeight(), sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void drawTiledTexture(MatrixStack stack, float left, float top, float right, float bottom, int renderWidth, int renderHeight, float minU, float minV, float maxU, float maxV) {
+    public static void drawTiledTexture(GuiGraphics stack, float left, float top, float right, float bottom, int renderWidth, int renderHeight, float minU, float minV, float maxU, float maxV) {
         if(renderWidth == 0 || renderHeight == 0) {
             return;
         }

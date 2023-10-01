@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.StencilStack;
@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import org.lwjgl.opengl.GL11;
 
@@ -38,7 +38,7 @@ public abstract class BaseTabletScreen extends Screen {
     protected final Hand hand;
 
     protected BaseTabletScreen(Hand hand) {
-        super(new StringTextComponent("If you see this let me know I need to add it"));
+        super(Component.literal("If you see this let me know I need to add it"));
         this.hand = hand;
     }
 
@@ -54,7 +54,7 @@ public abstract class BaseTabletScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
         boolean stencil = this.allowStenciling();
@@ -94,7 +94,7 @@ public abstract class BaseTabletScreen extends Screen {
     }
 
 
-    private void renderHomePage(MatrixStack stack, int mouseX, int mouseY) {
+    private void renderHomePage(GuiGraphics stack, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
         minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"));
         blit(stack,this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2, this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5, 0, 0, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE);
@@ -105,17 +105,17 @@ public abstract class BaseTabletScreen extends Screen {
         int mouseRelX = mouseX - left;
         int mouseRelY = mouseY - top;
         if(mouseRelX > 0 && mouseRelX < HOME_ICON_SIZE && mouseRelY > 0 && mouseRelY < HOME_ICON_SIZE) {
-            fill(stack, left, top, left + HOME_ICON_SIZE, top + HOME_ICON_SIZE, 0x44000022);
+            stack.fill(left, top, left + HOME_ICON_SIZE, top + HOME_ICON_SIZE, 0x44000022);
         }
     }
 
-    private void renderNotificationBar(MatrixStack stack) {
+    private void renderNotificationBar(GuiGraphics stack) {
         RenderSystem.color4f(1F , 1F, 1F, 1F);
 
         fillGradient(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16, -1072689136, -804253680);
 
         long time = (this.minecraft.level.getDayTime() + 6000) % 24000;
-        this.minecraft.font.draw(stack, this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
+        this.minecraft.stack.drawString(font, this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
 
         WeatherIcon icon = WeatherIcon.guess(this.minecraft.level, this.minecraft.player.blockPosition());
         float[] uv = icon.getUV();
@@ -132,7 +132,7 @@ public abstract class BaseTabletScreen extends Screen {
         return (num < 10 ? "0" : "") + num;
     }
 
-    protected abstract void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks);
+    protected abstract void drawTabletScreen(GuiGraphics stack, int mouseX, int mouseY, float partialTicks);
 
     protected boolean allowStenciling() {
         return true;

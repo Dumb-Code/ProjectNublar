@@ -19,14 +19,15 @@ import net.dumbcode.projectnublar.server.network.S2CSyncMachineProcesses;
 import net.dumbcode.projectnublar.server.network.S2CSyncMachineStack;
 import net.dumbcode.projectnublar.server.network.S2CSyncOpenedUsers;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
-import net.minecraft.block.Block;
+import net.minecraft.client.renderer.texture.Tickable;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -34,7 +35,7 @@ import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -62,7 +63,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements ITickableTileEntity {
+public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntity<B>> extends SimpleBlockEntity implements Tickable {
 
     public final Collection<MachineRecipe<B>> recipes = Collections.unmodifiableCollection(this.getAllRecipes());
     private final B asB = asB();
@@ -694,7 +695,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
         public IFormattableTextComponent getTimeLeftText() {
             int timeLeft = MathHelper.ceil((this.getTotalTime() - this.getTime()) / 20F);
 
-            IFormattableTextComponent component = new StringTextComponent("");
+            IFormattableTextComponent component = Component.literal("");
             int seconds = timeLeft % 60;
             int minutes = (timeLeft / 60) % 60;
             int hours = (timeLeft / 3600);

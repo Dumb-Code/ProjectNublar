@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.blockentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.dumblibrary.client.YRotatedModel;
 import net.dumbcode.dumblibrary.client.model.dcm.DCMModel;
 import net.dumbcode.dumblibrary.server.utils.DCMUtils;
@@ -11,8 +11,8 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class BlockEntitySequencerRenderer extends TileEntityRenderer<SequencingSynthesizerBlockEntity> {
 
@@ -29,7 +29,7 @@ public class BlockEntitySequencerRenderer extends TileEntityRenderer<SequencingS
     }
 
     @Override
-    public void render(SequencingSynthesizerBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
+    public void render(SequencingSynthesizerBlockEntity te, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light, int overlay) {
         light = WorldRenderer.getLightColor(te.getLevel(), te.getBlockPos().above());
         stack.pushPose();
         YRotatedModel.rotateStack(stack, te.getBlockState().getValue(MachineModuleBlock.FACING));

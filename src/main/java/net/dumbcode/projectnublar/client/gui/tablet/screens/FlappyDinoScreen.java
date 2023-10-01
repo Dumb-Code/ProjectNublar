@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet.screens;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.minecraft.client.Minecraft;
@@ -35,19 +35,19 @@ public class FlappyDinoScreen extends TabletScreen {
 
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         stack.pushPose();
         stack.translate(this.left, this.top, 0);
         partialTicks = Minecraft.getInstance().getFrameTime();
         for (Pipe pipe : this.pipes) {
             int xPos = (int) (pipe.xPosition - PIPE_PIXELS_PER_TICK * partialTicks);
 
-            AbstractGui.fill(stack, xPos - HALF_PIPE_WIDTH, 0, xPos + HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening - HALF_PIPE_OPENING_WIDTH, 0xFF000000);
-            AbstractGui.fill(stack, xPos - HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening + HALF_PIPE_OPENING_WIDTH, xPos + HALF_PIPE_WIDTH, this.ySize, 0xFF000000);
+            AbstractGui.stack.fill(xPos - HALF_PIPE_WIDTH, 0, xPos + HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening - HALF_PIPE_OPENING_WIDTH, 0xFF000000);
+            AbstractGui.stack.fill(xPos - HALF_PIPE_WIDTH, this.ySize - pipe.heightOpening + HALF_PIPE_OPENING_WIDTH, xPos + HALF_PIPE_WIDTH, this.ySize, 0xFF000000);
         }
 
         int playerY = (int) (this.player.prevYPosition + (this.player.yPosition - this.player.prevYPosition) * partialTicks);
-        AbstractGui.fill(stack, PLAYER_X_COORD - HALF_PLAYER_WIDTH, this.ySize - playerY - HALF_PLAYER_WIDTH, PLAYER_X_COORD + HALF_PLAYER_WIDTH, this.ySize - playerY + HALF_PLAYER_WIDTH, 0xFF00FF00);
+        AbstractGui.stack.fill(PLAYER_X_COORD - HALF_PLAYER_WIDTH, this.ySize - playerY - HALF_PLAYER_WIDTH, PLAYER_X_COORD + HALF_PLAYER_WIDTH, this.ySize - playerY + HALF_PLAYER_WIDTH, 0xFF00FF00);
 
         stack.pushPose();
         stack.translate(this.xSize / 2F, 20, 0);

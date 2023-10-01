@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.network;
 
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.entity.vehicles.AbstractVehicle;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 

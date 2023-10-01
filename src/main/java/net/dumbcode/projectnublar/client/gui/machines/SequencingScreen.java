@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.datafixers.util.Pair;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +25,16 @@ import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.util.text.*;
 
 import java.util.*;
@@ -155,7 +155,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @Override
-    public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+    public void renderScreen(GuiGraphics stack, int mouseX, int mouseY, float ticks) {
         super.renderScreen(stack, mouseX, mouseY, ticks);
         drawProcessIcon(this.process, stack, 167.5F, 153);
         drawProcessTooltip(this.process, stack, 56, 151, 239, 19, mouseX, mouseY);
@@ -165,12 +165,12 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 
 
             RenderUtils.renderBorderExclusive(stack, this.leftPos + 210, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 1, 0xFF577694);
-            fill(stack, this.leftPos + 210, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 0xCF193B59);
+            stack.fill(this.leftPos + 210, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 0xCF193B59);
 
-            drawString(stack, font, dinosaur.createNameComponent().withStyle(TextFormatting.GOLD), this.leftPos + 213, this.topPos + 73, -1);
-            drawString(stack, font, ProjectNublar.translate("dino.timeperiod.title").withStyle(Style.EMPTY.withUnderlined(true)), this.leftPos + 213, this.topPos + 82, -1);
-            drawString(stack, font, ProjectNublar.translate("dino.timeperiod." + dinosaur.getDinosaurInfomation().getPeriod() + ".name").withStyle(TextFormatting.AQUA), this.leftPos + 213, this.topPos + 92, -1);
-            drawString(stack, font, ProjectNublar.translate("dino.diet.title").withStyle(Style.EMPTY.withUnderlined(true)), this.leftPos + 213, this.topPos + 104, -1);
+            stack.drawString(font, dinosaur.createNameComponent().withStyle(TextFormatting.GOLD), this.leftPos + 213, this.topPos + 73, -1);
+            stack.drawString(font, ProjectNublar.translate("dino.timeperiod.title").withStyle(Style.EMPTY.withUnderlined(true)), this.leftPos + 213, this.topPos + 82, -1);
+            stack.drawString(font, ProjectNublar.translate("dino.timeperiod." + dinosaur.getDinosaurInfomation().getPeriod() + ".name").withStyle(TextFormatting.AQUA), this.leftPos + 213, this.topPos + 92, -1);
+            stack.drawString(font, ProjectNublar.translate("dino.diet.title").withStyle(Style.EMPTY.withUnderlined(true)), this.leftPos + 213, this.topPos + 104, -1);
             FeedingDiet diet = dinosaur.getAttacher().getStorage(ComponentHandler.METABOLISM.get()).getDiet();
             List<BlockState> blocks = diet.getBlocks();
             List<ItemStack> items = diet.getItems();
@@ -195,14 +195,14 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             for (int i = 0; i < component.size(); i++) {
                 ITextComponent textComponent = component.get(i);
                 if(i != component.size() - 1) {
-                    textComponent = new StringTextComponent("").append(textComponent).append(", ");
+                    textComponent = Component.literal("").append(textComponent).append(", ");
                 }
                 int width = font.width(textComponent);
                 if (lineWidthSoFar + width >= 114) {
                     line++;
                     lineWidthSoFar = 0;
                 }
-                drawString(stack, font, textComponent, this.leftPos + 213 + lineWidthSoFar, this.topPos + 114 + 9 * line, -1);
+                stack.drawString(font, textComponent, this.leftPos + 213 + lineWidthSoFar, this.topPos + 114 + 9 * line, -1);
                 lineWidthSoFar += width;
             }
 
@@ -210,7 +210,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @Override
-    protected void renderBg(MatrixStack stack, float ticks, int mouseX, int mouseY) {
+    protected void renderBg(GuiGraphics stack, float ticks, int mouseX, int mouseY) {
         super.renderBg(stack, ticks, mouseX, mouseY);
 
         int regWidth = font.width(REGULAR);
@@ -220,37 +220,37 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         int isoLeft = this.leftPos + 180;
 
         if(this.showIsolatedGenes) {
-            fill(stack, isoLeft-1, this.topPos+21, isoLeft+isoWidth+1, this.topPos+23+font.lineHeight, 0x997777AA);
+            stack.fill(isoLeft-1, this.topPos+21, isoLeft+isoWidth+1, this.topPos+23+font.lineHeight, 0x997777AA);
         } else {
-            fill(stack, regLeft-1, this.topPos+21, regLeft+regWidth+1, this.topPos+23+font.lineHeight, 0x997777AA);
+            stack.fill(regLeft-1, this.topPos+21, regLeft+regWidth+1, this.topPos+23+font.lineHeight, 0x997777AA);
         }
 
-        font.draw(stack, REGULAR, regLeft, this.topPos + 22, -1);
-        font.draw(stack, ISOLATED, isoLeft, this.topPos + 22, -1);
+        stack.drawString(font, REGULAR, regLeft, this.topPos + 22, -1);
+        stack.drawString(font, ISOLATED, isoLeft, this.topPos + 22, -1);
 
         if(mouseY >= this.topPos + 22 && mouseY < this.topPos + 22 + font.lineHeight) {
             if(mouseX >= regLeft && mouseX < regLeft + regWidth) {
-                fill(stack, regLeft-1, this.topPos+21, regLeft+regWidth+1, this.topPos+23+font.lineHeight, 0x2299bbff);
+                stack.fill(regLeft-1, this.topPos+21, regLeft+regWidth+1, this.topPos+23+font.lineHeight, 0x2299bbff);
             }
             if(mouseX >= isoLeft && mouseX < isoLeft + isoWidth) {
-                fill(stack, isoLeft-1, this.topPos+21, isoLeft+isoWidth+1, this.topPos+23+font.lineHeight, 0x2299bbff);
+                stack.fill(isoLeft-1, this.topPos+21, isoLeft+isoWidth+1, this.topPos+23+font.lineHeight, 0x2299bbff);
             }
         }
 
         minecraft.textureManager.bind(BASE_LOCATION);
-        blit(stack, this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, OVERLAY_HEIGHT, OVERLAY_WIDTH); //There is a vanilla bug that mixes up width and height
+        stack.blit(this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, OVERLAY_HEIGHT, OVERLAY_WIDTH); //There is a vanilla bug that mixes up width and height
 
         float timeDone = this.process.getTimeDone();
         float leftDone = MathHelper.clamp(timeDone / FIRST_SECTION_SIZE, 0F, 1F);
         float rightDone = MathHelper.clamp((timeDone - FIRST_SECTION_SIZE) / (1 - FIRST_SECTION_SIZE), 0F, 1F);
 
         if(leftDone != 0) {
-            subPixelBlit(stack, this.leftPos + 56, this.topPos + 151, 351, 0, leftDone * 119F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+            subPixelstack.blit(this.leftPos + 56, this.topPos + 151, 351, 0, leftDone * 119F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
         if(rightDone != 0) {
-            subPixelBlit(stack, this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+            subPixelstack.blit(this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
-//        blit(stack, this.leftPos, this.topPos);
+//        stack.blit(this.leftPos, this.topPos);
         if(this.cachedEntityRender != null && !this.showIsolatedGenes && this.activeSlot == null) {
             int s = 50;
             int y = 100;
@@ -370,10 +370,10 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         private final DriveUtils.DriveEntry driveEntry;
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             IFormattableTextComponent component = this.driveEntry.getTranslation().append(": " + this.driveEntry.getAmount() + "%");
             FontRenderer font = Minecraft.getInstance().font;
-            font.draw(stack, component, x + (150 - font.width(component)) / 2F, y + 3, -1);
+            stack.drawString(font, component, x + (150 - font.width(component)) / 2F, y + 3, -1);
         }
 
         @Override
@@ -402,8 +402,8 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         }
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
-            font.draw(stack, this.title.append(": " + MathHelper.floor(this.progress * 100D) + "%"), x + 2, y + 3, -1);
+        public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+            stack.drawString(font, this.title.append(": " + MathHelper.floor(this.progress * 100D) + "%"), x + 2, y + 3, -1);
         }
 
         @Override

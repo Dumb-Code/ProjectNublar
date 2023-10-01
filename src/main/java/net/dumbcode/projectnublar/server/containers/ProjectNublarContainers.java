@@ -20,12 +20,13 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.extensions.IForgeContainerType;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.network.IContainerFactory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -37,7 +38,7 @@ import java.util.function.Supplier;
 public class ProjectNublarContainers {
     public static final DeferredRegister<ContainerType<?>> REGISTER = DeferredRegister.create(ForgeRegistries.CONTAINERS, ProjectNublar.MODID);
 
-    public static final RegistryObject<ContainerType<MachineModuleContainer>> MACHINE_MODULES = REGISTER.register("machine_module",
+    public static final RegistryObject<MenuType<MachineModuleContainer>> MACHINE_MODULES = REGISTER.register("machine_module",
         create((windowId, inv, data) -> {
             BlockPos pos = data.readBlockPos();
             int tab = data.readInt();

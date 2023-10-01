@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.ai.AttackFenceCom
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.DefenseComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.ai.WanderComponent;
 import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 
 import static net.dumbcode.dumblibrary.server.ecs.component.SimpleComponentType.of;
 

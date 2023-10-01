@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.model;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.dumblibrary.client.BakedQuadGenerator;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.utils.Connection;
@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class FenceBakedModel implements IDynamicBakedModel {
 
-    private static final MatrixStack EMPTY_STACK = new MatrixStack();
+    private static final GuiGraphics EMPTY_STACK = new GuiGraphics();
 
     protected final TextureAtlasSprite texture;
 

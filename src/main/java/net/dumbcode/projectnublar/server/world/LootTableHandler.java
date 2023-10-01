@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.world;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class LootTableHandler {
 

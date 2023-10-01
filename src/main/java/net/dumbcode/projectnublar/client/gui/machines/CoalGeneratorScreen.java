@@ -1,25 +1,23 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.dumbcode.projectnublar.client.gui.tab.MachineContainerScreen;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
-import net.dumbcode.projectnublar.client.gui.tab.TabbedGuiContainer;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.block.entity.CoalGeneratorBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 
 public class CoalGeneratorScreen extends MachineContainerScreen {
 
-    public CoalGeneratorScreen(MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public CoalGeneratorScreen(MachineModuleContainer inventorySlotsIn, Inventory playerInventory, Component title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
         this.renderTooltip(stack, mouseX, mouseY);
@@ -27,14 +25,12 @@ public class CoalGeneratorScreen extends MachineContainerScreen {
 
 
     @Override
-    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
-        this.minecraft.getTextureManager().bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/coal_generator.png"));
-        blit(stack, this.leftPos, this.topPos, 0, 0, this.width, this.height);
+    protected void renderBg(GuiGraphics stack, float partialTicks, int mouseX, int mouseY) {
+        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/coal_generator.png"), this.leftPos, this.topPos, 0, 0, this.width, this.height);
 
         ResourceLocation slotLocation = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
-        this.minecraft.textureManager.bind(slotLocation);
         for(Slot slot : this.menu.slots) {
-            blit(stack, this.leftPos + slot.x - 1, this.topPos + slot.y- 1, 7, 17, 18, 18);
+            stack.blit(slotLocation, this.leftPos + slot.x - 1, this.topPos + slot.y- 1, 7, 17, 18, 18);
         }
     }
 }

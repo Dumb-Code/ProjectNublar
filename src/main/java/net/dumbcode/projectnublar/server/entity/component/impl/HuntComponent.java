@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.entity.ai.HuntFollowGoal;
 import net.dumbcode.projectnublar.server.entity.ai.HuntLeadGoal;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 import java.util.UUID;
 import java.util.function.Consumer;

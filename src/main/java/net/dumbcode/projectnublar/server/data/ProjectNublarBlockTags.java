@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.server.data;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class ProjectNublarBlockTags {
 

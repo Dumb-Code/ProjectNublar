@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.EntityStorageOverrides;
 import net.dumbcode.dumblibrary.server.ecs.item.ItemComponentAccessCreatable;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.PlantType;
 
 import static net.dumbcode.dumblibrary.server.ecs.component.EntityComponentAttacher.create;

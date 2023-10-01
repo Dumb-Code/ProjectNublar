@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.math.Axis;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.StencilStack;
@@ -20,16 +20,16 @@ import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.network.C2SChangeContainerTab;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -47,12 +47,12 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
     private float renderTicks;
 
-    private final TranslationTextComponent nextTab;
+    private final Component nextTab;
     private final int nextTabIndex;
 
-    protected IFormattableTextComponent hoveringText;
+    protected Component hoveringText;
 
-    public DnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar, String nextTabName, int nextTabIndex) {
+    public DnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, Inventory playerInventory, Component title, TabInformationBar bar, String nextTabName, int nextTabIndex) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.blockEntity = blockEntity;
 
@@ -63,7 +63,7 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     @Override
     public void init() {
         super.init();
-        this.geneScrollBox = this.addButton(this.createOverviewScrollBox())
+        this.geneScrollBox = this.addWidget(this.createOverviewScrollBox())
             .addFromPrevious(this.geneScrollBox)
             .setCellsPerRow(2)
             .setBorderColor(0xFF577694)
@@ -76,32 +76,29 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float ticks) {
         hoveringText = null;
         super.render(stack, mouseX, mouseY, ticks);
         if(hoveringText != null) {
             int width = minecraft.font.width(hoveringText);
-            fill(stack, mouseX+5, mouseY-1, mouseX + width + 6, mouseY + minecraft.font.lineHeight+1, 0xFF23374A);
+            stack.fill(mouseX+5, mouseY-1, mouseX + width + 6, mouseY + minecraft.font.lineHeight+1, 0xFF23374A);
             RenderUtils.renderBorderExclusive(stack, mouseX+5, mouseY-1, mouseX + width +6, mouseY + minecraft.font.lineHeight+1, 1, 0xFF577694);
-            drawString(stack, minecraft.font, hoveringText, mouseX + 6, mouseY, -1);
+            stack.drawString(minecraft.font, hoveringText, mouseX + 6, mouseY, -1);
         }
     }
 
 
     @Override
-    protected void renderBg(MatrixStack stack, float ticks, int mouseX, int mouseY) {
-        super.renderBg(stack, ticks, mouseX, mouseY);
-
-        minecraft.textureManager.bind(BASE_LOCATION);
-        blit(stack, this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, this.imageHeight, this.imageWidth); //There is a vanilla bug that mixes up width and height
+    protected void renderBg(GuiGraphics stack, float ticks, int mouseX, int mouseY) {
+        stack.blit(BASE_LOCATION, this.leftPos, this.topPos, this.getOffset(), 0, 0, this.imageWidth, this.imageHeight, this.imageHeight, this.imageWidth); //There is a vanilla bug that mixes up width and height
     }
 
     @Override
-    protected void renderLabels(MatrixStack stack, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics stack, int mouseX, int mouseY) {
         super.renderLabels(stack, mouseX, mouseY);
 
         int width = font.width(this.nextTab);
-        font.draw(stack, this.nextTab, 48 - width/2F, 10, -1);
+        stack.drawString(font, this.nextTab.getString(), 48 - width/2F, 10, -1, false);
     }
 
     @Override
@@ -118,8 +115,7 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
         if(this.cachedEntity != null) {
             this.cachedEntity.get(EntityComponentTypes.GENDER.get()).ifPresent(g -> {
                 SequencingSynthesizerBlockEntity.DinosaurSetGender gender = this.blockEntity.getDinosaurGender();
@@ -136,17 +132,17 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     protected abstract int getEntityRight();
 
     @Override
-    public void renderScreen(MatrixStack stack, int mouseX, int mouseY, float ticks) {
+    public void renderScreen(GuiGraphics stack, int mouseX, int mouseY, float ticks) {
         super.renderScreen(stack, mouseX, mouseY, ticks);
         if(this.cachedEntity != null) {
-            AxisAlignedBB a = this.cachedEntity.getBoundingBoxForCulling();
+            AABB a = this.cachedEntity.getBoundingBoxForCulling();
             double min = Math.max(a.getXsize(), Math.max(a.getYsize(), a.getZsize()));
 
             int left = this.getEntityLeft();
             int right = this.getEntityRight();
             int middle = (left + right) / 2;
 
-            fill(stack, this.leftPos+left, this.topPos+24, this.leftPos+right, this.topPos+123, 0xAF193B59);
+            stack.fill(this.leftPos+left, this.topPos+24, this.leftPos+right, this.topPos+123, 0xAF193B59);
             RenderUtils.renderBorderExclusive(stack, this.leftPos+left, this.topPos+24, this.leftPos+right, this.topPos+123, 1, 0xFF577694);
 
             StencilStack.pushSquareStencil(stack, this.leftPos+left, this.topPos+24, this.leftPos+right, this.topPos+123);
@@ -199,7 +195,7 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     private static void renderEntityAndPlayer(int x, int y, double scale, Entity entity, double mouseX, double mouseY) {
         renderEntityAt(x, y, scale, entity);
 
-        ClientPlayerEntity player = Minecraft.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         double mx = x + 20 - mouseX;
         double my = y - scale*1.5 - mouseY;
 
@@ -207,22 +203,22 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
         float angleY = (float)Math.atan(my / 40.0F);
 
         float yBodyRot = player.yBodyRot;
-        float yRot = player.yRot;
-        float xRot = player.xRot;
+        float yRot = player.yRotO;
+        float xRot = player.xRotO;
         float yHeadRotO = player.yHeadRotO;
         float yHeadRot = player.yHeadRot;
 
-        player.yBodyRot = 180.0F + angleX * 20.0F;;
-        player.yRot = 180.0F + angleX * 40.0F;;
-        player.xRot = -angleY * 20.0F;;
-        player.yHeadRot = player.yRot;
-        player.yHeadRotO = player.yRot;
+        player.yBodyRot = 180.0F + angleX * 20.0F;
+        player.yRotO = 180.0F + angleX * 40.0F;
+        player.xRotO = -angleY * 20.0F;
+        player.yHeadRot = player.yRotO;
+        player.yHeadRotO = player.yRotO;
 
-        renderEntityAt(x + 20, y, scale, player, 900, Vector3f.XP.rotationDegrees(angleY * 20.0F));
+        renderEntityAt(x + 20, y, scale, player, 900, Axis.XP.rotationDegrees(angleY * 20.0F));
 
         player.yBodyRot = yBodyRot;
-        player.yRot = yRot;
-        player.xRot = xRot;
+        player.yRotO = yRot;
+        player.xRotO = xRot;
         player.yHeadRotO = yHeadRotO;
         player.yHeadRot = yHeadRot;
     }
@@ -231,7 +227,7 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
     public class GeneEditEntry<O> implements GuiScrollboxEntry {
         private final GeneticEntry<?, O> entry;
         @Override
-        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+        public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             entry.getStorage().render(stack, this.entry.getType(), this.entry.getModifier(), x, y, width, height, renderTicks);
 //            if(mouseOver) {
 //                hoveringText = DriveUtils.getTranslation(this.entry.getSource().getDescriptionId(), this.entry.getVariant()).append(": " + Math.round(this.entry.getAmount() * 100) + "%");

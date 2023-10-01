@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.minecraft.util.Hand;
 
@@ -40,7 +40,7 @@ public abstract class BaseBackgroundTabletScreen extends BaseTabletScreen implem
     }
 
     @Override
-    protected void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void drawTabletScreen(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         if(this.background != null) {
             this.background.render(stack, this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight, mouseX, mouseY);
         }

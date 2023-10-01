@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,9 +15,9 @@ import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -129,14 +129,14 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
     }
 
     @Override
-    public void drawTabletScreen(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void drawTabletScreen(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         super.drawTabletScreen(stack, mouseX, mouseY, partialTicks);
         this.forAllIcons(icon -> icon.render(stack, icon.isMouseOver(mouseX, mouseY)));
 
         minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_background_icon.png"));
-        blit(stack, this.gallaryIcon.getX(), this.gallaryIcon.getY(), 0, 0, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE);
+        stack.blit(this.gallaryIcon.getX(), this.gallaryIcon.getY(), 0, 0, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE);
         if(mouseX > this.gallaryIcon.getX() && mouseX < this.gallaryIcon.getX() + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.getY() && mouseY < this.gallaryIcon.getY() + GALLARY_ICON_SIZE) {
-            fill(stack, this.gallaryIcon.getX(), this.gallaryIcon.getY(), this.gallaryIcon.getX() + GALLARY_ICON_SIZE, this.gallaryIcon.getY() + GALLARY_ICON_SIZE, 0xAA000000);
+            stack.fill(this.gallaryIcon.getX(), this.gallaryIcon.getY(), this.gallaryIcon.getX() + GALLARY_ICON_SIZE, this.gallaryIcon.getY() + GALLARY_ICON_SIZE, 0xAA000000);
         }
 
         if(this.openedInstallPopup) {
@@ -213,8 +213,8 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         }
 
         @Override
-        public void draw(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
-            Minecraft.getInstance().font.draw(stack, this.getSearch(), x, y, -1);
+        public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
+            Minecraft.getInstance().stack.drawString(font, this.getSearch(), x, y, -1);
         }
     }
 
@@ -226,7 +226,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         protected int width;
         protected int height;
 
-        abstract void render(MatrixStack stack, boolean mouseOver);
+        abstract void render(GuiGraphics stack, boolean mouseOver);
 
         abstract void onClicked();
 
@@ -241,14 +241,14 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         private final TabletItemStackHandler.Entry<?> entry;
 
         @Override
-        public void render(MatrixStack stack, boolean mouseOver) {
+        public void render(GuiGraphics stack, boolean mouseOver) {
             ResourceLocation loc = Objects.requireNonNull(this.entry.getType().getRegistryName());
             if(mouseOver) {
-                fill(stack, this.left, this.top, this.left + this.height, this.top + this.height, 0x44000000);
+                stack.fill(this.left, this.top, this.left + this.height, this.top + this.height, 0x44000000);
             }
             RenderSystem.color4f(1F, 1F, 1F, 1F);
             minecraft.textureManager.bind(new ResourceLocation(loc.getNamespace(), "textures/gui/module_icons/" + loc.getPath() + ".png"));
-            blit(stack, this.left, this.top, 0, 0, this.width, this.height, this.width, this.height);
+            stack.blit(this.left, this.top, 0, 0, this.width, this.height, this.width, this.height);
         }
 
         @Override
@@ -262,8 +262,8 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
     private class InstallIcon extends Icon {
 
         @Override
-        public void render(MatrixStack stack, boolean mouseOver) {
-            fill(stack, left, this.top, this.left + this.height, this.top + this.height, mouseOver ? 0xFF999999 : 0xFF222222);
+        public void render(GuiGraphics stack, boolean mouseOver) {
+            stack.fill(left, this.top, this.left + this.height, this.top + this.height, mouseOver ? 0xFF999999 : 0xFF222222);
         }
 
         @Override

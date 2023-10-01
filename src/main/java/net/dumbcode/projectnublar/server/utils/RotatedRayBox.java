@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.Getter;
 import lombok.Value;
@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.*;
 
@@ -110,7 +110,7 @@ public class RotatedRayBox {
     public static class Builder {
         private final AxisAlignedBB box;
         private Vector3f origin = new Vector3f(0, 0, 0);
-        private MatrixStack matrix = new MatrixStack();
+        private GuiGraphics matrix = new GuiGraphics();
 
         public Builder(AxisAlignedBB box) {
             this.box = box;
@@ -146,7 +146,7 @@ public class RotatedRayBox {
         private final Vector3d hitRotated;
         private final double distance;
 
-        public void debugRender(MatrixStack stack, IRenderTypeBuffer buffers, double x, double y, double z) {
+        public void debugRender(GuiGraphics stack, IRenderTypeBuffer buffers, double x, double y, double z) {
             stack.pushPose();
             stack.translate(x + this.parent.origin.x(), y + this.parent.origin.y(), z + this.parent.origin.z());
             Matrix4f pose = stack.last().pose();

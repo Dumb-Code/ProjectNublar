@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.vehicles.GyrosphereVehicle;
@@ -10,8 +10,8 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.vector.*;
 
 import java.util.HashMap;
@@ -35,7 +35,7 @@ public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
     }
 
     @Override
-    public void render(GyrosphereVehicle entity, float entityYaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light) {
+    public void render(GyrosphereVehicle entity, float entityYaw, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light) {
         super.render(entity, entityYaw, partialTicks, stack, buffers, light);
         stack.pushPose();
         stack.translate(0, entity.getType().getHeight() / 2F, 0);
@@ -47,7 +47,7 @@ public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
         float scale = entity.getBbWidth() / 2F;
         stack.scale(scale, scale, scale);
 
-        MatrixStack.Entry last = stack.last();
+        GuiGraphics.Entry last = stack.last();
         Matrix4f pose = last.pose();
         Matrix3f normal = last.normal();
         IVertexBuilder buffer = buffers.getBuffer(RenderType.entityTranslucent(new ResourceLocation(ProjectNublar.MODID, "textures/entities/test_out.png")));

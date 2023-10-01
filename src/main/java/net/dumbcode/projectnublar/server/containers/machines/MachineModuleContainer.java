@@ -9,12 +9,17 @@ import net.dumbcode.projectnublar.server.containers.machines.slots.DisableSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.SlotCanBeDisabled;
 import net.dumbcode.projectnublar.server.network.S2CSyncOpenedUsers;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -26,7 +31,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
-public class MachineModuleContainer extends Container {
+public class MachineModuleContainer extends AbstractContainerMenu {
 
     private IntPredicate predicate = i -> true;
 
@@ -37,7 +42,7 @@ public class MachineModuleContainer extends Container {
 
     private final List<BiConsumer<Integer, ItemStack>> onSlotChangeListeners = new ArrayList<>();
 
-    public MachineModuleContainer(int id, MachineModuleBlockEntity<?> blockEntity, PlayerInventory inventory, int tab, int playerOffset, int xSize, MachineModuleSlot... slots) {
+    public MachineModuleContainer(int id, MachineModuleBlockEntity<?> blockEntity, Inventory inventory, int tab, int playerOffset, int xSize, MachineModuleSlot... slots) {
         super(ProjectNublarContainers.MACHINE_MODULES.get(), id);
         this.blockEntity = blockEntity;
         this.tab = tab;
@@ -50,10 +55,10 @@ public class MachineModuleContainer extends Container {
             this.addPlayerSlots(inventory, playerOffset, xSize);
         }
 
-        PlayerEntity player = inventory.player;
-        if(!player.level.isClientSide) {
+        Player player = inventory.player;
+        if(!player.level().isClientSide) {
             this.blockEntity.getOpenedUsers().add(player.getUUID());
-            ProjectNublar.NETWORK.send(NetworkUtils.forPos(player.level, blockEntity.getBlockPos()), new S2CSyncOpenedUsers(blockEntity.getBlockPos(), blockEntity.getOpenedUsers()));
+            ProjectNublar.NETWORK.send(NetworkUtils.forPos(player.level(), blockEntity.getBlockPos()), new S2CSyncOpenedUsers(blockEntity.getBlockPos(), blockEntity.getOpenedUsers()));
         }
     }
 
@@ -62,7 +67,7 @@ public class MachineModuleContainer extends Container {
         return this;
     }
 
-    protected void addPlayerSlots(PlayerInventory playerInventory, int yOffet, int xSize) {
+    protected void addPlayerSlots(Inventory playerInventory, int yOffet, int xSize) {
         int xStart = (xSize - 162) / 2 + 1;
 
         for (int i = 0; i < 3; ++i) {

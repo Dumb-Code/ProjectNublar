@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.server.ecs.EntityManager;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.GoalManagerComponent;
 import net.dumbcode.dumblibrary.server.ecs.system.EntitySystem;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.World;
 
 public class GoalSystem implements EntitySystem {

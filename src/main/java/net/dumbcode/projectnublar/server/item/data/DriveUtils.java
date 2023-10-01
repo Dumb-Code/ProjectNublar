@@ -7,16 +7,9 @@ import net.dumbcode.dumblibrary.server.dna.EntityGeneticRegistry;
 import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.dumbcode.projectnublar.server.dna.GeneticHandler;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -196,7 +189,7 @@ public class DriveUtils {
         int amount;
         DriveType driveType;
 
-        public TranslationTextComponent getTranslation() {
+        public Component getTranslation() {
             return DriveUtils.getTranslation(this.name, this.variant);
         }
 

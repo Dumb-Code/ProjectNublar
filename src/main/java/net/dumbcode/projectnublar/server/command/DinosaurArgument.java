@@ -12,7 +12,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Objects;

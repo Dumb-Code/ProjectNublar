@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.item;
 
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 import java.util.Collection;
 import java.util.Collections;

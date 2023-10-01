@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Map;
@@ -38,7 +38,7 @@ public class SkeletonBuilderScene {
 
         this.setup();
 
-        MatrixStack stack = new MatrixStack();
+        GuiGraphics stack = new GuiGraphics();
 
         stack.pushPose();
         stack.translate(0, -15, 0);
@@ -85,7 +85,7 @@ public class SkeletonBuilderScene {
         
     }
     
-    private void renderGrid(MatrixStack stack, int lineAmount, int size) {
+    private void renderGrid(GuiGraphics stack, int lineAmount, int size) {
 
         float diff  = (float) size / (lineAmount - 1);
         float off = size / 2F;
@@ -123,13 +123,13 @@ public class SkeletonBuilderScene {
         RenderHelper.turnOff();
 
         this.lastMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
-        RenderSystem.pushMatrix();
+        GL11.glPushMatrix();
         RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.pushMatrix();
+        GL11.glPushMatrix();
         RenderSystem.loadIdentity();
         RenderSystem.multMatrix(Matrix4f.perspective(30, 2, 0.05F, 100 * MathHelper.SQRT_OF_TWO));
         RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.pushMatrix();
+        GL11.glPushMatrix();
         RenderSystem.loadIdentity();
     }
 

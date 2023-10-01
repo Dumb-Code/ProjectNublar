@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -21,7 +21,7 @@ public class EntityPartRenderer extends EntityRenderer<EntityPart> {
 
 
     @Override
-    public void render(EntityPart entity, float entityYaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light) {
+    public void render(EntityPart entity, float entityYaw, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light) {
         super.render(entity, entityYaw, partialTicks, stack, buffers, light);
         if (ProjectNublar.DEBUG && false) {
             stack.pushPose();
@@ -32,7 +32,7 @@ public class EntityPartRenderer extends EntityRenderer<EntityPart> {
             );
             WorldRenderer.renderLineBox(stack, buffers.getBuffer(RenderType.lines()), entity.getBoundingBox(), 1, 1, 1, 1);
             stack.popPose();
-            renderNameTag(entity, new StringTextComponent(entity.getPartName()), stack, buffers, light);
+            renderNameTag(entity, Component.literal(entity.getPartName()), stack, buffers, light);
         }
     }
 

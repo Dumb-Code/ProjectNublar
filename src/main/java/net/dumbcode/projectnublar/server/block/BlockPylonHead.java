@@ -4,14 +4,14 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.utils.PylonNetworkSavedData;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.DirectionProperty;
@@ -21,7 +21,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -189,7 +189,7 @@ public class BlockPylonHead extends Block implements IItemBlock {
         if(ProjectNublar.DEBUG) {
             TileEntity tileEntity = worldIn.getBlockEntity(pos);
             if(tileEntity instanceof PylonHeadBlockEntity && !worldIn.isClientSide) {
-                Minecraft.getInstance().player.displayClientMessage(new StringTextComponent(((PylonHeadBlockEntity) tileEntity).getNetworkUUID().toString()), false);
+                Minecraft.getInstance().player.displayClientMessage(Component.literal(((PylonHeadBlockEntity) tileEntity).getNetworkUUID().toString()), false);
             }
         }
         super.stepOn(worldIn, pos, entityIn);

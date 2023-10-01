@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.world.structures.structures.template.d
 import net.minecraft.block.Blocks;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class DataHandlers {
     public static DataHandler LOOTTABLE = new DataHandler(DataHandler.Scope.BLOCK, s -> s.startsWith("chest~"), (world, pos, name, random, decision) -> {

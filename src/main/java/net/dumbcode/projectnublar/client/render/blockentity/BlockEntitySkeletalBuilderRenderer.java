@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.client.render.blockentity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -32,9 +32,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.vector.*;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
@@ -64,7 +64,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
     }
 
     @Override
-    public void render(SkeletalBuilderBlockEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffers, int light, int overlay) {
+    public void render(SkeletalBuilderBlockEntity te, float partialTicks, GuiGraphics stack, IRenderTypeBuffer buffers, int light, int overlay) {
         Optional<DinosaurEntity> optionalDinosaurEntity = te.getDinosaurEntity();
         if(!optionalDinosaurEntity.isPresent()) {
             return;
@@ -80,7 +80,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
     }
 
     @SneakyThrows
-    private void render(SkeletalBuilderBlockEntity te, MatrixStack stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
+    private void render(SkeletalBuilderBlockEntity te, GuiGraphics stack, int light, IRenderTypeBuffer buffers, float partialTicks) {
         Direction facing = te.getLevel().getBlockState(te.getBlockPos()).getValue(SkeletalBuilderBlock.FACING);
         float rawRotation = te.getSkeletalProperties().getRotation();
         float teRot = rawRotation + (te.getSkeletalProperties().getPrevRotation() - rawRotation) * partialTicks; //Interpolated version of rawRotation
@@ -107,7 +107,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
 
     }
 
-    private void setupDinosaurGlState(Quaternion rotation, MatrixStack stack, float teRot, ComponentAccess entity) {
+    private void setupDinosaurGlState(Quaternion rotation, GuiGraphics stack, float teRot, ComponentAccess entity) {
         stack.mulPose(rotation);
         stack.mulPose(Vector3f.YP.rotationDegrees(teRot));
         stack.translate(0, -0.5F, 0);
@@ -129,7 +129,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         }
     }
 
-    private void renderDinosaurModel(ComponentAccess entity, DCMModel model, MatrixStack stack, int light, IRenderTypeBuffer buffs, ResourceLocation texture) {
+    private void renderDinosaurModel(ComponentAccess entity, DCMModel model, GuiGraphics stack, int light, IRenderTypeBuffer buffs, ResourceLocation texture) {
         setVisibility(entity, model);
         model.renderBoxes(stack, light, buffs, texture);
         resetVisibility(model);
@@ -153,7 +153,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         return facingMatrix;
     }
 
-    private void renderAllPoles(IRenderTypeBuffer buffers, MatrixStack stack, int light, SkeletalBuilderBlockEntity te, ComponentAccess entity, Direction facing, float teRot, Quaternion rotationDetails, float angle, boolean rotateOnX) {
+    private void renderAllPoles(IRenderTypeBuffer buffers, GuiGraphics stack, int light, SkeletalBuilderBlockEntity te, ComponentAccess entity, Direction facing, float teRot, Quaternion rotationDetails, float angle, boolean rotateOnX) {
         Matrix4f translateMatrix = this.createTranslationMatrix(te.getBlockPos(), facing.getNormal());
         Matrix4f rotateMatrix = this.createRotationMatrix(teRot);
         Matrix4f facingMatrix = this.createFacingMatrix(rotationDetails);
@@ -177,7 +177,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         }
     }
 
-    private void renderPole(IRenderTypeBuffer buffers, MatrixStack stack, int light, SkeletalProperties.Pole pole, SkeletalBuilderBlockEntity te, ComponentAccess entity, Direction facing, float teRot, float angle, boolean rotateOnX, Matrix4f teMatrix) {
+    private void renderPole(IRenderTypeBuffer buffers, GuiGraphics stack, int light, SkeletalProperties.Pole pole, SkeletalBuilderBlockEntity te, ComponentAccess entity, Direction facing, float teRot, float angle, boolean rotateOnX, Matrix4f teMatrix) {
         String anchoredPart = pole.getCubeName();
         PoleFacing poleDirection = pole.getFacing();
         Direction poleFacing = poleDirection.getFacing();
@@ -206,7 +206,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         }
     }
 
-    private void setupPoleGlState(MatrixStack stack, BlockPos pos, Vector3f rendererPos, Direction poleFacing, Direction facing, float teRot, float rotationAngle, boolean rotationOnX, DCMModelRenderer cube) {
+    private void setupPoleGlState(GuiGraphics stack, BlockPos pos, Vector3f rendererPos, Direction poleFacing, Direction facing, float teRot, float rotationAngle, boolean rotationOnX, DCMModelRenderer cube) {
         stack.translate(-pos.getX() + rendererPos.x(), -pos.getY() + rendererPos.y(), -pos.getZ() + rendererPos.z());
 
         switch (poleFacing.getAxis()) {
@@ -226,7 +226,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
 
     }
 
-    private void drawPole(MatrixStack stack, int light, IRenderTypeBuffer buffers, float poleLength) {
+    private void drawPole(GuiGraphics stack, int light, IRenderTypeBuffer buffers, float poleLength) {
 
         Matrix4f pose = stack.last().pose();
         Matrix3f normal = stack.last().normal();
@@ -254,12 +254,12 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         buff.vertex(POLE_WIDTH, 0, 0, 1 / TEXTURE_WIDTH, 0, 1, 0, 0);
     }
 
-    private void drawPoleBase(MatrixStack stack, IRenderTypeBuffer buffers, int light, double poleLength) {
+    private void drawPoleBase(GuiGraphics stack, IRenderTypeBuffer buffers, int light, double poleLength) {
         stack.translate(POLE_WIDTH / 2F, poleLength, POLE_WIDTH / 2F);
         this.renderCube(stack, buffers, light, BASE_WIDTH, BASE_HEIGHT, 1, 0);
     }
 
-    private void drawPoleNotch(MatrixStack stack, IRenderTypeBuffer buffers, int light) {
+    private void drawPoleNotch(GuiGraphics stack, IRenderTypeBuffer buffers, int light) {
         stack.translate(0, BASE_HEIGHT, 0);
         this.renderCube(stack, buffers, light, NOTCH_WIDTH, NOTCH_HEIGHT, 1, 6);
     }
@@ -429,7 +429,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         }
     }
 
-    private void renderCube(MatrixStack stack, IRenderTypeBuffer buffer, int light, float width, float height, int uOffset, int vOffset) {
+    private void renderCube(GuiGraphics stack, IRenderTypeBuffer buffer, int light, float width, float height, int uOffset, int vOffset) {
         stack.pushPose();
         stack.translate(-width / 2F, 0, -width / 2F);
 
@@ -508,7 +508,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
     @RequiredArgsConstructor
     private static class SimpleVertexBuilder {
         private final IVertexBuilder buff;
-        private final MatrixStack.Entry entry;
+        private final GuiGraphics.Entry entry;
         private final int light;
 
         public void vertex(float x, float y, float z, float u, float v, float nx, float ny, float nz) {

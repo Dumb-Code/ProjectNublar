@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.tracking.info;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.netty.buffer.ByteBuf;
 import lombok.EqualsAndHashCode;
@@ -14,7 +14,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -61,14 +61,14 @@ public class MetabolismInformation extends TooltipInformation {
         return new Dimension(d.width + PADDING_AFTER_TEXT + Math.max(this.foodDisplay.getWidth(), this.waterDisplay.getWidth()), Math.max(d.height, 27));
     }
 
-    private void renderFoodIcon(MatrixStack stack, int x, int y, float size) {
+    private void renderFoodIcon(GuiGraphics stack, int x, int y, float size) {
         RenderUtils.draw256Texture(stack, x, y, 16, 27, 9, 9);
         if(size > 0) {
             RenderUtils.draw256Texture(stack, x, y, 52, 27, (int) (9F * size), 9);
         }
     }
 
-    private void renderWaterIcon(MatrixStack stack, int x, int y, float size) {
+    private void renderWaterIcon(GuiGraphics stack, int x, int y, float size) {
         Function<ResourceLocation, TextureAtlasSprite> textureAtlas = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS);
         TextureAtlasSprite bottle = textureAtlas.apply(new ResourceLocation("items/potion_bottle_drinkable"));
         TextureAtlasSprite water = textureAtlas.apply(new ResourceLocation("items/potion_overlay"));
@@ -83,7 +83,7 @@ public class MetabolismInformation extends TooltipInformation {
     }
 
     @Override
-    public void renderInfo(MatrixStack stack, int x, int y, int relativeMouseX, int relativeMouseY) {
+    public void renderInfo(GuiGraphics stack, int x, int y, int relativeMouseX, int relativeMouseY) {
         super.renderInfo(stack, x, y, relativeMouseX, relativeMouseY);
         Dimension dimension = super.getInfoDimensions();
         int startX = dimension.width + PADDING_AFTER_TEXT;

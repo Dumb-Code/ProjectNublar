@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.entity.tracking;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.info.*;
 import net.minecraft.nbt.CompoundNBT;
@@ -24,7 +24,7 @@ public abstract class TrackingDataInformation {
 
     protected abstract String getTypeName();
 
-    public void renderMap(MatrixStack stack, int x, int y) {
+    public void renderMap(GuiGraphics stack, int x, int y) {
 
     }
 
@@ -34,7 +34,7 @@ public abstract class TrackingDataInformation {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void renderInfo(MatrixStack stack, int x, int y, int relativeMouseX, int relativeMouseY) {
+    public void renderInfo(GuiGraphics stack, int x, int y, int relativeMouseX, int relativeMouseY) {
 
     }
 

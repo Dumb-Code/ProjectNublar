@@ -2,8 +2,8 @@ package net.dumbcode.projectnublar.server.dinosaur;
 
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.dumblibrary.server.registry.EarlyDeferredRegister;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 

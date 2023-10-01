@@ -1,7 +1,5 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
 import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
@@ -10,26 +8,23 @@ import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.dumblibrary.server.dna.data.GeneticTint;
 import net.dumbcode.projectnublar.client.gui.tab.TabInformationBar;
+import net.dumbcode.projectnublar.mixin.ScreenAccessor;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
-import net.dumbcode.projectnublar.server.dna.GeneticHandler;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerIsolationChange;
 import net.dumbcode.projectnublar.server.network.C2SSequencingSynthesizerIsolationRemoved;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import org.jline.reader.Widget;
 
 import javax.annotation.Nullable;
-import javax.swing.text.html.Option;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
@@ -64,12 +59,12 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     private int selectedId = -1;
     private int hoveredId = -1;
 
-    private Widget elementWidget;
+    private AbstractWidget elementWidget;
 
     private Button resetButton;
 
 
-    public AdvancedDnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public AdvancedDnaEditingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, Inventory playerInventory, Component title, TabInformationBar bar) {
         super(blockEntity, inventorySlotsIn, playerInventory, title, bar, "basic", 1);
     }
 
@@ -79,7 +74,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         this.chromoTableLeft = this.leftPos + 20;//this.leftPos + (this.imageWidth - TOTAL_WIDTH) / 2;
         this.chromoTableTop = 1 + this.topPos + (this.imageHeight - TOTAL_HEIGHT) / 2;
 
-        this.resetButton = this.addButton(new SimpleButton(this.leftPos + 232, this.topPos + 107, 109, 16, ProjectNublar.translate("gui.machine.sequencer.reset"), b -> {
+        this.resetButton = this.addWidget(new SimpleButton(this.leftPos + 232, this.topPos + 107, 109, 16, ProjectNublar.translate("gui.machine.sequencer.reset"), b -> {
             if(this.blockEntity.isProcessingMain()) {
                 return;
             }
@@ -87,11 +82,11 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
                 Chromosome chromosome = this.chromosomes[this.selectedId];
                 chromosome.resetButton();
 
-                this.children.remove(this.elementWidget);
-                this.buttons.remove(this.elementWidget);
+                ((ScreenAccessor)this).getChildren().remove(this.elementWidget);
+                this.renderables.remove(this.elementWidget);
                 this.elementWidget = chromosome.createWidget(this.leftPos + 232, this.topPos + 23, 109, 80);
-                this.children.add(this.elementWidget);
-                this.buttons.add(this.elementWidget);
+                ((ScreenAccessor) this).getChildren().add(this.elementWidget);
+                this.renderables.add(this.elementWidget);
             }
         }));
         this.resetButton.active = this.selectedId != -1;
@@ -160,8 +155,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     }
 
     @Override
-    protected void renderBg(MatrixStack stack, float ticks, int mouseX, int mouseY) {
-        super.renderBg(stack, ticks, mouseX, mouseY);
+    protected void renderBg(GuiGraphics stack, float ticks, int mouseX, int mouseY) {
 
         this.hoveredId = -1;
         for (int x = 0; x < CHROMO_TABLE_WIDTH; x++) {
@@ -191,7 +185,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
                     colour = 0xFF000000 | (colourR << 16) | (colourG << 8) | colourB;
                 }
-                fill(stack, xStart, yStart, xStart + CHROMO_CELL_WIDTH, yStart + CHROMO_CELL_HEIGHT, colour);
+                stack.fill(xStart, yStart, xStart + CHROMO_CELL_WIDTH, yStart + CHROMO_CELL_HEIGHT, colour);
             }
         }
     }
@@ -199,8 +193,8 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
     private void deselect() {
         this.selectedId = -1;
         this.resetButton.active = false;
-        this.children.remove(this.elementWidget);
-        this.buttons.remove(this.elementWidget);
+        ((ScreenAccessor)this).getChildren().remove(this.elementWidget);
+        this.renderables.remove(this.elementWidget);
         this.elementWidget = null;
     }
 
@@ -209,8 +203,8 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         this.resetButton.active = true;
         Chromosome chromosome = this.chromosomes[this.selectedId];
         this.elementWidget = chromosome.createWidget(this.leftPos + 232, this.topPos + 23, 109, 80);
-        this.children.add(this.elementWidget);
-        this.buttons.add(this.elementWidget);
+        ((ScreenAccessor)this).getChildren().add(this.elementWidget);
+        this.renderables.add(this.elementWidget);
     }
 
 
@@ -260,8 +254,8 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
 
     interface Chromosome {
         void resetButton();
-        Widget createWidget(int x, int y, int width, int height);
-        Optional<IFormattableTextComponent> getText();
+        AbstractWidget createWidget(int x, int y, int width, int height);
+        Optional<Component> getText();
         default boolean isEmpty() {
             return false;
         }
@@ -278,12 +272,12 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
 
         @Override
-        public Widget createWidget(int x, int y, int width, int height) {
+        public AbstractWidget createWidget(int x, int y, int width, int height) {
             return null;
         }
 
         @Override
-        public Optional<IFormattableTextComponent> getText() {
+        public Optional<Component> getText() {
             return Optional.empty();
         }
 
@@ -304,7 +298,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
 
         @Override
-        public Widget createWidget(int x, int y, int width, int height) {
+        public AbstractWidget createWidget(int x, int y, int width, int height) {
             int[] index = new int[]{ this.blockEntity.getDinosaurGender().ordinal() };
             SequencingSynthesizerBlockEntity.DinosaurSetGender[] values = SequencingSynthesizerBlockEntity.DinosaurSetGender.values();
             return new SimpleButton(x, y + height/2 - 10, width, 20, ProjectNublar.translate("gender.title", values[index[0]].getText()),
@@ -318,7 +312,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
 
         @Override
-        public Optional<IFormattableTextComponent> getText() {
+        public Optional<Component> getText() {
             return Optional.of(ProjectNublar.translate("genetic_type.dummy.gender"));
         }
     }
@@ -346,12 +340,12 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
 
         @Override
-        public Widget createWidget(int x, int y, int width, int height) {
+        public AbstractWidget createWidget(int x, int y, int width, int height) {
             return createWidgetFromEntry(this.blockEntity.getOrCreateIsolationEntry(GeneticTypes.OVERALL_TINT.get()), x, y, width, height, this.isSecondaryColour ? 1 : 0);
         }
 
         @Override
-        public Optional<IFormattableTextComponent> getText() {
+        public Optional<Component> getText() {
             return Optional.of(ProjectNublar.translate("genetic_type.dummy.colour." + (this.isSecondaryColour ? "secondary" : "primary")));
         }
     }
@@ -370,12 +364,12 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
 
         @Override
-        public Widget createWidget(int x, int y, int width, int height) {
+        public AbstractWidget createWidget(int x, int y, int width, int height) {
             return createWidgetFromEntry(this.blockEntity.getOrCreateIsolationEntry(this.directEditType), x, y, width, height, 0);
         }
 
         @Override
-        public Optional<IFormattableTextComponent> getText() {
+        public Optional<Component> getText() {
             if(this.directEditType != null) {
                 return Optional.of(this.directEditType.getTranslationComponent());
             }
@@ -383,7 +377,7 @@ public class AdvancedDnaEditingScreen extends DnaEditingScreen {
         }
     }
 
-    private static <O> Widget createWidgetFromEntry(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> entry, int x, int y, int width, int height, int data) {
+    private static <O> AbstractWidget createWidgetFromEntry(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> entry, int x, int y, int width, int height, int data) {
         return entry.getType().getDataHandler().createIsolationWidget(x, y, width, height, data, entry::getValue, o -> {
             entry.setValue(o);
             ProjectNublar.NETWORK.sendToServer(new C2SSequencingSynthesizerIsolationChange(entry));

@@ -17,9 +17,9 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.EntitySelector;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class EditDinosaurDataCommand {
                 for (ComponentAccess access : gather(context)) {
                     runGetters(access, entry).ifPresent(out::add);
                 }
-                context.getSource().sendSuccess(new StringTextComponent("Command Output: " + out), false);
+                context.getSource().sendSuccess(Component.literal("Command Output: " + out), false);
                 return 1;
             })
             .then(Commands.argument("value", IntegerArgumentType.integer())
@@ -64,7 +64,7 @@ public class EditDinosaurDataCommand {
                         affected++;
                     }
                 }
-                context.getSource().sendSuccess(new StringTextComponent("Affected: " + affected), false);
+                context.getSource().sendSuccess(Component.literal("Affected: " + affected), false);
                 return 1;
             }));
     }

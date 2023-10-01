@@ -4,7 +4,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.world.structures.structures.placement.ExtendPlacement;
 import net.dumbcode.projectnublar.server.world.structures.structures.placement.PushdownPlacement;
 import net.dumbcode.projectnublar.server.world.structures.structures.template.NBTTemplate;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Structures {
 

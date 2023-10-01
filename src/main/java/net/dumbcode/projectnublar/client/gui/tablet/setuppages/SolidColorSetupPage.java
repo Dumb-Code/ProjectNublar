@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
 import com.google.common.base.Predicate;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.ColourUtils;
@@ -62,11 +62,11 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     public void initPage(int x, int y) {
         int startX = x + WHEEL_DIAMETER + 30;
 
-        this.redField = this.add(new TextFieldWidget(MC.font, startX + 7, y + 78, 20, 20, this.redField, new StringTextComponent("R")));
+        this.redField = this.add(new TextFieldWidget(MC.font, startX + 7, y + 78, 20, 20, this.redField, Component.literal("R")));
         this.redField.setResponder(s -> this.updateSelectors());
-        this.greenField = this.add(new TextFieldWidget(MC.font, startX + 29, y + 78, 20, 20, this.greenField, new StringTextComponent("G")));
+        this.greenField = this.add(new TextFieldWidget(MC.font, startX + 29, y + 78, 20, 20, this.greenField, Component.literal("G")));
         this.greenField.setResponder(s -> this.updateSelectors());
-        this.blueField = this.add(new TextFieldWidget(MC.font, startX + 51, y + 78, 20, 20, this.blueField, new StringTextComponent("B")));
+        this.blueField = this.add(new TextFieldWidget(MC.font, startX + 51, y + 78, 20, 20, this.blueField, Component.literal("B")));
         this.blueField.setResponder(s -> this.updateSelectors());
 
         this.redField.setTextColor(0xFFFF0000);
@@ -92,7 +92,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         if(shaderManager != null) {
 
             shaderManager.safeGetUniform("lightness").set(1F - this.lightness);
@@ -118,10 +118,10 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
         int halfSliderWidth = 10;
 
-        AbstractGui.fill(stack, x + WHEEL_DIAMETER + halfSliderWidth + 3, y + 5, x + WHEEL_DIAMETER + halfSliderWidth + 7, y + this.getHeight() - 5, 0xFF000000);
-        AbstractGui.fill(stack, x + WHEEL_DIAMETER + 5, (int) (y + 2 + (this.getHeight()-10)*this.lightness), x + WHEEL_DIAMETER + 2*halfSliderWidth + 5, (int) (y + 8 + (this.getHeight()-10)*this.lightness), 0xFF000000);
+        AbstractGui.stack.fill(x + WHEEL_DIAMETER + halfSliderWidth + 3, y + 5, x + WHEEL_DIAMETER + halfSliderWidth + 7, y + this.getHeight() - 5, 0xFF000000);
+        AbstractGui.stack.fill(x + WHEEL_DIAMETER + 5, (int) (y + 2 + (this.getHeight()-10)*this.lightness), x + WHEEL_DIAMETER + 2*halfSliderWidth + 5, (int) (y + 8 + (this.getHeight()-10)*this.lightness), 0xFF000000);
 
-        AbstractGui.fill(stack, x + WHEEL_DIAMETER + 2*halfSliderWidth + 10, y + 5, x + this.getWidth() - 5, y + this.getHeight() - 5, 0xFF000000 | this.calculateColor());
+        AbstractGui.stack.fill(x + WHEEL_DIAMETER + 2*halfSliderWidth + 10, y + 5, x + this.getWidth() - 5, y + this.getHeight() - 5, 0xFF000000 | this.calculateColor());
 
         this.redField.render(stack, mouseX, mouseY, partialTicks);
         this.greenField.render(stack, mouseX, mouseY, partialTicks);

@@ -1,6 +1,6 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.PhotoBackgroundSetup;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
@@ -25,7 +25,7 @@ public interface TabletBackground {
     void readFromBuf(PacketBuffer buf);
 
     @OnlyIn(Dist.CLIENT)
-    void render(MatrixStack stack, int x, int y, int width, int height, int mouseX, int mouseY);
+    void render(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY);
 
     default void dispose(){
     }

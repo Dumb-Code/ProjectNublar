@@ -1,19 +1,17 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.client.gui.IHasContainer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
-public abstract class TabbedGuiContainer<T extends Container> extends ContainerScreen<T> implements IHasContainer<T> {
+public abstract class TabbedGuiContainer<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements MenuAccess<T> {
 
     private final TabInformationBar info;
 
-    public TabbedGuiContainer(T inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public TabbedGuiContainer(T inventorySlotsIn, Inventory playerInventory, Component title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title);
         this.info = bar;
     }
@@ -29,14 +27,14 @@ public abstract class TabbedGuiContainer<T extends Container> extends ContainerS
         return 10;
     }
 
-    @Override
-    public void tick() {
-        super.tick();
+//    @Override
+//    public void tick() {
+//        super.tick();
 //        this.info.update();
-    }
+//    }
 
     @Override
-    public void render(MatrixStack p_230430_1_, int p_230430_2_, int p_230430_3_, float p_230430_4_) {
+    public void render(GuiGraphics p_230430_1_, int p_230430_2_, int p_230430_3_, float p_230430_4_) {
         super.render(p_230430_1_, p_230430_2_, p_230430_3_, p_230430_4_);
 //        this.info.render(p_230430_1_, this.leftPos, this.width, this.topPos);
     }

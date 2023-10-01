@@ -1,10 +1,10 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -48,7 +48,7 @@ public class TabInformationBar {
         }
     }
 
-    public void render(MatrixStack stack, int guiLeft, int guiWidth, int guiTop) {
+    public void render(GuiGraphics stack, int guiLeft, int guiWidth, int guiTop) {
         int nextSize = 20;
 
         int fitAmount = (guiWidth - nextSize - nextSize - this.tabPadding) / (this.tabWidth + this.tabPadding);
@@ -60,21 +60,21 @@ public class TabInformationBar {
         }
         FontRenderer font = Minecraft.getInstance().font;
         String text = String.format("Page %s/%s", this.pageOffset / fitAmount + 1, Math.round(this.cache.size() / (float)fitAmount)); // TODO: 11/11/2018 localize
-        font.draw(stack, text, guiLeft + (guiWidth - font.width(text)) / 2F, guiTop - this.tabHeight - font.lineHeight - 2, -1);
+        stack.drawString(font, text, guiLeft + (guiWidth - font.width(text)) / 2F, guiTop - this.tabHeight - font.lineHeight - 2, -1);
 
         int top = guiTop - this.tabHeight + (this.tabHeight - nextSize) / 2;
         if(this.pageOffset != 0) {
-            AbstractGui.fill(stack, guiLeft, top, guiLeft + nextSize, top + nextSize, -1);
+            AbstractGui.stack.fill(guiLeft, top, guiLeft + nextSize, top + nextSize, -1);
         }
         if(this.pageOffset + fitAmount < this.cache.size()) {
-            AbstractGui.fill(stack, guiLeft + guiWidth - nextSize, top, guiLeft + guiWidth, top + nextSize, -1);
+            AbstractGui.stack.fill(guiLeft + guiWidth - nextSize, top, guiLeft + guiWidth, top + nextSize, -1);
         }
     }
 
-    protected void drawTab(MatrixStack stack, int xStart, int yStart, boolean selected) {
+    protected void drawTab(GuiGraphics stack, int xStart, int yStart, boolean selected) {
         int tabExtension = selected ? 5 : 1;
         Minecraft.getInstance().textureManager.bind(new ResourceLocation("textures/gui/container/creative_inventory/tabs.png"));
-        AbstractGui.blit(stack, xStart, yStart - this.tabHeight - 1, 28, selected ? 32 : 0, this.tabWidth, this.tabHeight + tabExtension, 256, 256);
+        AbstractGui.stack.blit(xStart, yStart - this.tabHeight - 1, 28, selected ? 32 : 0, this.tabWidth, this.tabHeight + tabExtension, 256, 256);
 //      Gui.drawRect(xStart, guiTop - this.tabHeight, xStart + this.tabWidth, guiTop + 5, 0xFF000000 | new Random((i + this.pageOffset) << 21).nextInt());
 //      if(mouseY > guiTop - this.tabHeight && mouseY < guiTop + tabExtension && mouseX > xStart && mouseX < xStart + this.tabWidth) {
 //          Gui.drawRect(xStart, guiTop - this.tabHeight, xStart + this.tabWidth, guiTop + tabExtension, 0x6A0063FF); TODO: Remove this?
