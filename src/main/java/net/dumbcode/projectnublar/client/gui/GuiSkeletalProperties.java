@@ -18,7 +18,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
 import net.minecraftforge.fml.client.gui.widget.Slider;
@@ -63,7 +63,7 @@ public class GuiSkeletalProperties extends Screen {
         int padding = 25;
         int top = 100;
         int total = this.height - top - 50;
-        int totalAmount = MathHelper.floor(total / (float)padding);
+        int totalAmount = Mth.floor(total / (float)padding);
         int bottom = totalAmount < 5 ? this.height - 80 : top + padding * 5;
 
         if(this.height > 275) {

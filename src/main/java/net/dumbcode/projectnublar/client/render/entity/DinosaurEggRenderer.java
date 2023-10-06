@@ -29,7 +29,7 @@ public class DinosaurEggRenderer extends EntityRenderer<DinosaurEggEntity> {
         stack.mulPose(Vector3f.YP.rotationDegrees(entity.getRandomRotation()));
 
         entity.getEggType().getEggModel().renderBoxes(stack, light, buffers, this.getTextureLocation(entity));
-        stack.popPose();
+        stack.pose().popPose();
     }
 
 

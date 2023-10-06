@@ -43,7 +43,7 @@ public class FossilProcessorScreen extends MachineContainerScreen {
 
         RenderSystem.setShaderColor(63F / 255F, 118F / 255F, 228F / 255F, 1F);
         TextureAtlasSprite tas = this.minecraft.getBlockRenderer().getBlockModelShaper().getTexture(Blocks.WATER.defaultBlockState(), minecraft.level, BlockPos.ZERO); //TODO cache
-        MachineUtils.drawTiledTexture(BLOCK_ATLAS, this.leftPos + 22F, this.topPos + 56F + 48F * (1F - this.tank.getFluidAmount() / (float) this.tank.getCapacity()), this.leftPos + 38F, this.topPos + 104F, tas);
+        MachineUtils.drawTiledTexture(stack, this.leftPos + 22F, this.topPos + 56F + 48F * (1F - this.tank.getFluidAmount() / (float) this.tank.getCapacity()), this.leftPos + 38F, this.topPos + 104F, tas);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
         stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/fossil_processor.png"),this.leftPos + 22, this.topPos + 56, 176, 0, 16, 48);

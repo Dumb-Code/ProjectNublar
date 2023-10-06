@@ -3,6 +3,7 @@ package net.dumbcode.projectnublar.server.entity.tracking;
 import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.info.*;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.api.distmarker.Dist;

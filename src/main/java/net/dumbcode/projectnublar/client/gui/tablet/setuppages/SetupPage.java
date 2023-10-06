@@ -4,7 +4,7 @@ import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
 
 import javax.annotation.Nullable;
@@ -21,8 +21,8 @@ public abstract class SetupPage<T extends TabletBackground> implements INestedGu
     protected int x;
     protected int y;
 
-    private final List<IGuiEventListener> children = new ArrayList<>();
-    private IGuiEventListener focused;
+    private final List<GuiEventListener> children = new ArrayList<>();
+    private GuiEventListener focused;
     private boolean dragging;
 
     public abstract T create();
@@ -50,24 +50,24 @@ public abstract class SetupPage<T extends TabletBackground> implements INestedGu
     public void updatePage() {
     }
 
-    public <E extends IGuiEventListener> E add(E element) {
+    public <E extends GuiEventListener> E add(E element) {
         this.children.add(element);
         return element;
     }
 
     @Override
-    public List<? extends IGuiEventListener> children() {
+    public List<? extends GuiEventListener> children() {
         return this.children;
     }
 
     @Override
-    public void setFocused(@Nullable IGuiEventListener listener) {
+    public void setFocused(@Nullable GuiEventListener listener) {
         this.focused = listener;
     }
 
     @Nullable
     @Override
-    public IGuiEventListener getFocused() {
+    public GuiEventListener getFocused() {
         return this.focused;
     }
 

@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.event.TickEvent;
@@ -52,12 +52,12 @@ public class DinosaurMovementSystem implements EntitySystem {
                 .withSpeed(() -> {
                     LivingEntity living = (LivingEntity) entity;
                     float frameTime = Minecraft.getInstance().getFrameTime();
-                    return MathHelper.lerp(frameTime, living.animationSpeedOld, living.animationSpeed);
+                    return Mth.lerp(frameTime, living.animationSpeedOld, living.animationSpeed);
                 })
                 .withDegreeFactor(() -> {
                     LivingEntity living = (LivingEntity) entity;
                     float frameTime = Minecraft.getInstance().getFrameTime();
-                    return MathHelper.lerp(frameTime, living.animationSpeedOld, living.animationSpeed);
+                    return Mth.lerp(frameTime, living.animationSpeedOld, living.animationSpeed);
                 })
                 .loopForever();
 //                .withDegreeFactor(AnimationFactorHandler.LIMB_SWING)

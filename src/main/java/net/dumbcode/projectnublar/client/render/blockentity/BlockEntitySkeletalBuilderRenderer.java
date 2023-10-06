@@ -76,7 +76,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
 
         stack.pushPose();
         this.render(te, stack, light, buffers, partialTicks);
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     @SneakyThrows
@@ -101,7 +101,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         this.renderDinosaurModel(entity, model, stack, light, buffers, te.getTexture());
         this.resetDinosaurGlState();
 
-        stack.popPose();
+        stack.pose().popPose();
 
         this.renderAllPoles(buffers, stack, light, te, entity, facing, teRot, rotationDetails.getLeft(), rotationDetails.getRight(), facing.getAxis() == Direction.Axis.X);
 
@@ -136,7 +136,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
     }
 
     private Matrix4f createTranslationMatrix(BlockPos pos, Vector3i facingRot) {
-        return Matrix4f.createTranslateMatrix(pos.getX() - facingRot.getX() / 2F, pos.getY() - facingRot.getY() / 2F, pos.getZ() - facingRot.getZ() / 2F);
+        return new Matrix4f().translate(pos.getX() - facingRot.getX() / 2F, pos.getY() - facingRot.getY() / 2F, pos.getZ() - facingRot.getZ() / 2F);
     }
 
     private Matrix4f createRotationMatrix(float teRot) {
@@ -202,7 +202,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
             this.drawPoleBase(stack, buffers, light, poleLength);
             this.drawPoleNotch(stack, buffers, light);
 
-            stack.popPose();
+            stack.pose().popPose();
         }
     }
 
@@ -474,7 +474,7 @@ public class BlockEntitySkeletalBuilderRenderer extends TileEntityRenderer<Skele
         buff.vertex(0, 0, width, uTo, vTo, -1, 0, 0);
         buff.vertex(0, height, width, uTo, vFrom, -1, 0, 0);
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
 

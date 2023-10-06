@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.List;
@@ -47,12 +47,12 @@ public class LineUtils {
 
         if (!Double.isNaN(from.x) && !Double.isNaN(from.y) && !Double.isNaN(from.z)) {
             if (!Double.isNaN(to.x) && !Double.isNaN(to.y) && !Double.isNaN(to.z)) {
-                int i = MathHelper.floor(to.x);
-                int j = MathHelper.floor(to.y);
-                int k = MathHelper.floor(to.z);
-                int l = MathHelper.floor(from.x);
-                int i1 = MathHelper.floor(from.y);
-                int j1 = MathHelper.floor(from.z);
+                int i = Mth.floor(to.x);
+                int j = Mth.floor(to.y);
+                int k = Mth.floor(to.z);
+                int l = Mth.floor(from.x);
+                int i1 = Mth.floor(from.y);
+                int j1 = Mth.floor(from.z);
                 set.add(new BlockPos(l, i1, j1));
                 int k1 = 200;
 
@@ -142,9 +142,9 @@ public class LineUtils {
                         from = new Vector3d(from.x + d6 * d5, from.y + d7 * d5, d2);
                     }
 
-                    l = MathHelper.floor(from.x) - (enumfacing == Direction.EAST ? 1 : 0);
-                    i1 = MathHelper.floor(from.y) - (enumfacing == Direction.UP ? 1 : 0);
-                    j1 = MathHelper.floor(from.z) - (enumfacing == Direction.SOUTH ? 1 : 0);
+                    l = Mth.floor(from.x) - (enumfacing == Direction.EAST ? 1 : 0);
+                    i1 = Mth.floor(from.y) - (enumfacing == Direction.UP ? 1 : 0);
+                    j1 = Mth.floor(from.z) - (enumfacing == Direction.SOUTH ? 1 : 0);
                     BlockPos pos = new BlockPos(l, i1, j1);
                     double[] in = intersect(pos, fromPos, toPos, offset); //Surly a better way to do it
                     if(in != null && (in[0] != in[1] || in[2] != in[3] || in[4] != in[5])) {

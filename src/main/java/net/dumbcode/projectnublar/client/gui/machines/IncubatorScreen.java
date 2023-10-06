@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -138,7 +139,7 @@ public class IncubatorScreen extends MachineContainerScreen {
     @Override
     protected void renderBg(GuiGraphics stack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.setShaderTexture(0, new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"));
-        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"), this.leftPos + OVERLAY_START_X, this.topPos + OVERLAY_START_Y, this.getOffset(), this.imageWidth, 0, IncubatorBlockEntity.BED_WIDTH, IncubatorBlockEntity.BED_HEIGHT, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
+        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"), this.leftPos + OVERLAY_START_X, this.topPos + OVERLAY_START_Y, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, this.imageWidth, 0, IncubatorBlockEntity.BED_WIDTH, IncubatorBlockEntity.BED_HEIGHT, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
 
         float progress = this.blockEntity.getPlantMatter() / this.blockEntity.getTotalPlantMatter();
 
@@ -180,7 +181,7 @@ public class IncubatorScreen extends MachineContainerScreen {
         }
 
 
-        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"), this.leftPos, this.topPos, this.getOffset(), 0, 0, this.imageWidth, this.imageHeight, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
+        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/incubator.png"), this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
 
         stack.fill(this.leftPos + 28, this.topPos + 121, (int) (this.leftPos + 28 + 63 * progress), this.topPos + 125, 0xFFA9E444);
     }

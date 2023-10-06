@@ -66,7 +66,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
 
         this.renderPrinterParts(te, buffers, stack, light, partialTicks);
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
 
@@ -99,7 +99,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         lidModel.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
         lidModel.renderBoxes(stack, light, buffers, RenderType.entityTranslucent(EGG_PRINTER_GLASS));
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     private void applyAnimations() {
@@ -180,7 +180,7 @@ public class BlockEntityEggPrinterRenderer extends TileEntityRenderer<EggPrinter
         } else {
             EGG_TYPE.getEggModel().renderBoxes(stack, light, buffers, EGG_TYPE.getTexture());
         }
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     public static void onResourceManagerReload() {

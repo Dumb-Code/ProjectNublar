@@ -62,9 +62,9 @@ public class BasicEntityInformation extends TooltipInformation {
     }
 
     private void renderHeartAt(GuiGraphics stack, int x, int y, float size) {
-        AbstractGui.stack.blit(x, y, 0, 16, 0, HEART_SIZE, HEART_SIZE, 256, 256);
+        stack.blit(x, y, 0, 16, 0, HEART_SIZE, HEART_SIZE, 256, 256);
         if(size > 0) {
-            AbstractGui.stack.blit(x, y, 52, 16, 0, (int) (size * HEART_SIZE), HEART_SIZE, 256, 256);
+            stack.blit(x, y, 52, 16, 0, (int) (size * HEART_SIZE), HEART_SIZE, 256, 256);
         }
     }
 

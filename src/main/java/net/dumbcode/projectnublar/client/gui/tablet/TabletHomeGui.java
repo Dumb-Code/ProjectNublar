@@ -214,7 +214,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
 
         @Override
         public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
-            Minecraft.getInstance().stack.drawString(font, this.getSearch(), x, y, -1);
+            stack.drawString(font, this.getSearch(), x, y, -1);
         }
     }
 

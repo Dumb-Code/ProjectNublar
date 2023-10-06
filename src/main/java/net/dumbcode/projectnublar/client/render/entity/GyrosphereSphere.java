@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.render.entity;
 
 import lombok.RequiredArgsConstructor;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,11 +85,11 @@ public class GyrosphereSphere {
     }
 
     private static float sin(float f) {
-        return MathHelper.sin(f);
+        return Mth.sin(f);
     }
 
     private static float cos(float f) {
-        return MathHelper.cos(f);
+        return Mth.cos(f);
     }
     @RequiredArgsConstructor
     public static class Vertex {

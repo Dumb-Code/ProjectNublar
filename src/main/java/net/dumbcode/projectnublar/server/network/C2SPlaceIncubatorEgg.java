@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContai
 import net.dumbcode.projectnublar.server.item.UnincubatedEggItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -20,8 +20,8 @@ public class C2SPlaceIncubatorEgg {
 
     public static C2SPlaceIncubatorEgg fromBytes(PacketBuffer buf) {
         return new C2SPlaceIncubatorEgg(
-            MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_WIDTH-IncubatorBlockEntity.HALF_EGG_SIZE),
-            MathHelper.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_HEIGHT-IncubatorBlockEntity.HALF_EGG_SIZE)
+            Mth.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_WIDTH-IncubatorBlockEntity.HALF_EGG_SIZE),
+            Mth.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_HEIGHT-IncubatorBlockEntity.HALF_EGG_SIZE)
         );
     }
 

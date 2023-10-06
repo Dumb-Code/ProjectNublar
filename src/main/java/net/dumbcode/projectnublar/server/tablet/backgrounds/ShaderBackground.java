@@ -80,7 +80,7 @@ public class ShaderBackground implements TabletBackground {
             }
             this.shader.render(mouseX - x, mouseY - y);
             this.shader.startShader();
-            AbstractGui.stack.blit(x, y, 0, 0, width, height, width, height);
+            stack.blit(x, y, 0, 0, width, height, width, height);
             this.shader.endShader();
         }
     }

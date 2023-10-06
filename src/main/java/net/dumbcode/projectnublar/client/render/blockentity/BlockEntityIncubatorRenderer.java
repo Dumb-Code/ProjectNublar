@@ -28,7 +28,7 @@ import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import org.joml.Vector3f;
@@ -100,7 +100,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         armModel.setOnRenderCallback((cube, atomicLight, atomicOverlay, atomicColors) -> {
             float lightStart = -0.7F;
            Vector3f vec3f = DCMUtils.getModelPosAlpha(cube, 0.5F, 0.5F, 0.5F);
-           int block = (int) MathHelper.clamp((-vec3f.x()/lightStart + 1)*10, blockLight, 15F);
+           int block = (int) Mth.clamp((-vec3f.x()/lightStart + 1)*10, blockLight, 15F);
             atomicLight.set(skyLight << 20 | block << 4);
         });
 
@@ -109,7 +109,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.translate(0, lidHeight, 0);
         this.renderLid(stack, te.getLevel(), te.getBlockPos(), buffers, te.getTier(MachineModuleType.BULB));
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     private void doModelTransforms(GuiGraphics stack, IncubatorBlockEntity te) {
@@ -170,7 +170,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.translate(0, -1.5, 0);
         type.getEggModel().renderBoxes(stack, light, buffers, type.getTexture());
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     private void updateEgg(IncubatorBlockEntity blockEntity, float partialTicks) {
@@ -272,7 +272,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         double handRotZ = Math.atan2(-normal.y, this.xzDistance(Vector3d.ZERO, normal));
 
         if(ProjectNublar.DEBUG) {
-//            stack.popPose();
+//            stack.pose().popPose();
             this.drawDebugRenderers(stack, buffers, origin, target, handJointTarget, baseYRotation, baseJoinTarget, angleFirstArm, angleLastArm);
 //            stack.pushPose();
 //            this.doModelTransforms(stack, te);
@@ -377,7 +377,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         stack.mulPose(Vector3f.ZP.rotation((float) (-angleLastArm - Math.PI)));
         stack.translate(0, LAST_ARM.length, 0);
         this.drawDebugLines(stack, buff, 0, 0, 0);
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     private void drawDebugLines(GuiGraphics stack, IVertexBuilder buff, double x, double y, double z) {
@@ -390,7 +390,7 @@ public class BlockEntityIncubatorRenderer extends TileEntityRenderer<IncubatorBl
         buff.vertex(pose, 0, 0.3F, 0).color(0F, 1F, 0F, 1F).endVertex();
         buff.vertex(pose, 0, 0, 0).color(0F, 0F, 1F, 1F).endVertex();
         buff.vertex(pose, 0, 0, 0.3F).color(0F, 0F, 1F, 1F).endVertex();
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     @Value

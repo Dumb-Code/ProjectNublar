@@ -14,7 +14,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
@@ -105,11 +105,11 @@ public class TrackingTabletIterator {
 
     private void doCurrentChunk() {
         //All values are inclusive.
-        int xStart = MathHelper.clamp(this.currentPos.getMinBlockX(), this.fromPos.getX(), this.toPos.getX());
-        int xEnd = MathHelper.clamp(this.currentPos.getMaxBlockX(), this.fromPos.getX(), this.toPos.getX());
+        int xStart = Mth.clamp(this.currentPos.getMinBlockX(), this.fromPos.getX(), this.toPos.getX());
+        int xEnd = Mth.clamp(this.currentPos.getMaxBlockX(), this.fromPos.getX(), this.toPos.getX());
 
-        int zStart = MathHelper.clamp(this.currentPos.getMinBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
-        int zEnd = MathHelper.clamp(this.currentPos.getMaxBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
+        int zStart = Mth.clamp(this.currentPos.getMinBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
+        int zEnd = Mth.clamp(this.currentPos.getMaxBlockZ(), this.fromPos.getZ(), this.toPos.getZ());
 
         int[] colorData = new int[(xEnd - xStart + 1)*(zEnd - zStart + 1)];
         Biome[][] biomes = this.getBiomes(xStart-1, zStart-1, xEnd + 1, zEnd + 1);
@@ -135,7 +135,7 @@ public class TrackingTabletIterator {
                 int colorIndex = 1;
                 if(this.world.isLoaded(blockPos.north())) {
                     int prevHeight = blockPos.getY() - this.getTopBlock(blockPos.move(Direction.NORTH)).getY();
-                    colorIndex = MathHelper.clamp(prevHeight, -1, 1) + 1;
+                    colorIndex = Mth.clamp(prevHeight, -1, 1) + 1;
                 }
 
                 int color;
@@ -249,7 +249,7 @@ public class TrackingTabletIterator {
                 float xDist = (x - worldStartX) / 8F - vertex % 2;
                 float zDist = (z - worldStartZ) / 8F - Math.floorDiv(vertex, 2);
 
-                float alpha = (float) (offset + modifier*MathHelper.clamp(Math.sqrt(xDist*xDist + zDist*zDist), 0D, 1D));
+                float alpha = (float) (offset + modifier*Mth.clamp(Math.sqrt(xDist*xDist + zDist*zDist), 0D, 1D));
 
                 int index = this.getIndex(xStart, xEnd, zStart, x, z);
                 colorData[index] = this.interpolateBlockBiome(colorData[index], biomeData[index], alpha);

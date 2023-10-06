@@ -184,7 +184,7 @@ public class RotatedRayBox {
 
             //We need the lines type to begin buffering again.
             buffers.getBuffer(RenderType.lines());
-            stack.popPose();
+            stack.pose().popPose();
         }
     }
 }

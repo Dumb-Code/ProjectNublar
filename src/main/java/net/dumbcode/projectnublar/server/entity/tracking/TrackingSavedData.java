@@ -10,6 +10,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
+import org.joml.Vector3d;
 
 import java.util.*;
 import java.util.stream.IntStream;

@@ -14,7 +14,7 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -99,7 +99,7 @@ public class DinosaurSpawnEgg extends BasicDinosaurItem {
         entity.get(EntityComponentTypes.GENDER).ifPresent(comp -> comp.male = male);
 
         entity.setPos(x, y, z);
-        entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
+        entity.yRot = Mth.wrapDegrees(world.random.nextFloat() * 360.0F);
         return entity;
     }
 

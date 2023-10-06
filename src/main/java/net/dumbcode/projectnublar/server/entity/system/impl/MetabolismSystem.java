@@ -9,7 +9,7 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MetabolismCompone
 import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.world.World;
 
 public class MetabolismSystem implements EntitySystem {
@@ -43,8 +43,8 @@ public class MetabolismSystem implements EntitySystem {
                 double foodPunish = dist * BLOCKS_PER_SECOND_FOOD;
                 double waterPunish = dist * BLOCKS_PER_SECOND_WATER;
 
-                meta.setFood((float) MathHelper.clamp(meta.getFood() - meta.getFoodRate().getValue() - foodPunish, 0, meta.getMaxFood().getValue()));
-                meta.setWater((float) MathHelper.clamp(meta.getWater() - meta.getWaterRate().getValue() - waterPunish, 0, meta.getMaxWater().getValue()));
+                meta.setFood((float) Mth.clamp(meta.getFood() - meta.getFoodRate().getValue() - foodPunish, 0, meta.getMaxFood().getValue()));
+                meta.setWater((float) Mth.clamp(meta.getWater() - meta.getWaterRate().getValue() - waterPunish, 0, meta.getMaxWater().getValue()));
 
                 //As food gets smaller, this gets smaller
                 //At 25%, linearly decrease to 0

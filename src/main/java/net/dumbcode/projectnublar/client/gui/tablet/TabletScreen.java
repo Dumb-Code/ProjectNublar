@@ -1,26 +1,26 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.INestedGuiEventHandler;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabletScreen implements INestedGuiEventHandler {
+public class TabletScreen implements ContainerEventHandler {
     protected static final Minecraft MC = Minecraft.getInstance();
     protected int left;
     protected int top;
     protected int xSize;
     protected int ySize;
-    private final List<IGuiEventListener> children = new ArrayList<>();
+    private final List<GuiEventListener> children = new ArrayList<>();
 
     @Nullable
-    @Getter @Setter private IGuiEventListener focused;
+    @Getter @Setter private GuiEventListener focused;
 
     @Getter @Setter private boolean dragging;
 
@@ -31,7 +31,7 @@ public class TabletScreen implements INestedGuiEventHandler {
         this.ySize = ySize;
     }
 
-    protected <T extends IGuiEventListener> T add(T t) {
+    protected <T extends GuiEventListener> T add(T t) {
         this.children.add(t);
         return t;
     }
@@ -51,7 +51,7 @@ public class TabletScreen implements INestedGuiEventHandler {
     }
 
     @Override
-    public List<? extends IGuiEventListener> children() {
+    public List<? extends GuiEventListener> children() {
         return this.children;
     }
 }

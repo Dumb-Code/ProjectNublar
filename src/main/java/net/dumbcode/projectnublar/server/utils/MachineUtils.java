@@ -1,44 +1,42 @@
 package net.dumbcode.projectnublar.server.utils;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.experimental.UtilityClass;
-import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.block.*;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.potion.Potions;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.world.World;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
-import org.lwjgl.opengl.GL11;
+import org.joml.Matrix4f;
 
 import java.util.Optional;
 
@@ -48,7 +46,7 @@ public class MachineUtils {
     //Returns -1 if there is no water amount
     //todo: abstract to any fluid, not just water
     public static int getWaterAmount(ItemStack stack) {
-        Optional<IFluidHandlerItem> capability = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).resolve();
+        Optional<IFluidHandlerItem> capability = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).resolve();
         if(capability.isPresent()) {
             IFluidHandler fluidHandler = capability.get();
             int totalAmount = getWaterAmount(fluidHandler);
@@ -57,7 +55,7 @@ public class MachineUtils {
             }
         }
         if(stack.getItem() == Items.POTION && PotionUtils.getPotion(stack) == Potions.WATER) {
-            return FluidAttributes.BUCKET_VOLUME / 3;
+            return FluidType.BUCKET_VOLUME / 3;
         }
         FluidStack fluid =  new FluidBucketWrapper(stack).getFluid();
         return !fluid.isEmpty() && fluid.getFluid() == Fluids.WATER ? fluid.getAmount() : -1;
@@ -81,23 +79,23 @@ public class MachineUtils {
         if(result.isSuccess()) {
             return result.getResult();
         } else if(tank.getFluidAmount() < tank.getCapacity() && stack.getItem() == Items.POTION && PotionUtils.getPotion(stack) == Potions.WATER) {
-            tank.fill(new FluidStack(Fluids.WATER, FluidAttributes.BUCKET_VOLUME / 3), IFluidHandler.FluidAction.EXECUTE);
+            tank.fill(new FluidStack(Fluids.WATER, FluidType.BUCKET_VOLUME / 3), IFluidHandler.FluidAction.EXECUTE);
             return new ItemStack(Items.GLASS_BOTTLE);
         }
         return stack;
     }
 
-    public static float getPlantMatter(ItemStack stack, World world, BlockPos pos) {
+    public static float getPlantMatter(ItemStack stack, Level world, BlockPos pos) {
         if(stack.getItem() == Items.AIR) {
             return 0;
         }
         Block block = Block.byItem(stack.getItem());
         if(block instanceof BushBlock) {
             BlockState state = block.defaultBlockState();
-            VoxelShape shape = block.getShape(state, world, pos, ISelectionContext.empty());
+            VoxelShape shape = block.getShape(state, world, pos, CollisionContext.empty());
             float area = 0;
-            for (AxisAlignedBB aabb : shape.toAabbs()) {
-                area += aabb.getXsize() * aabb.getYsize() * aabb.getZsize();
+            for (AABB aabb : shape.toAabbs()) {
+                area += (float) (aabb.getXsize() * aabb.getYsize() * aabb.getZsize());
             }
             return Math.round(area * 10) / 10F;
         } else if(block instanceof LeavesBlock) {
@@ -121,7 +119,7 @@ public class MachineUtils {
         } else if(stack.getItem() == Blocks.BONE_BLOCK.asItem()) {
             return 3D;
         }
-        if(stack.getItem().is(Tags.Items.BONES)) {
+        if(stack.is(Tags.Items.BONES)) {
             return 1D;
         }
         return 0;
@@ -138,8 +136,8 @@ public class MachineUtils {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void drawTiledTexture(ResourceLocation stack, float left, float top, float right, float bottom, TextureAtlasSprite sprite) {
-        drawTiledTexture(stack, left, top, right, bottom, sprite.getWidth(), sprite.getHeight(), sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+    public static void drawTiledTexture(GuiGraphics stack, float left, float top, float right, float bottom, TextureAtlasSprite sprite) {
+        drawTiledTexture(stack, left, top, right, bottom, sprite.contents().width(), sprite.contents().height(), sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -148,9 +146,9 @@ public class MachineUtils {
             return;
         }
 
-        Matrix4f pose = stack.last().pose();
+        Matrix4f pose = stack.pose().last().pose();
 
-        Tessellator tessellator = Tessellator.getInstance();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
         float height = bottom - top;
         float width = right - left;
@@ -158,7 +156,7 @@ public class MachineUtils {
         float endFullHeight = height - (height % renderHeight);
         float endFullWidth = width - (width % renderWidth);
 
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         for(int renderH = 0; renderH < endFullHeight; renderH += renderHeight) {
             float currentH = bottom - renderH;
             for (int renderW = 0; renderW < endFullWidth; renderW+= renderWidth) {
@@ -216,17 +214,17 @@ public class MachineUtils {
 
     //Gives the player an item without the fake item
     //Originally copied and modified from jeis CommandUtilServer
-    public static void giveToInventory(PlayerEntity player, ItemStack itemStack) {
+    public static void giveToInventory(Player player, ItemStack itemStack) {
         int count = itemStack.getCount();
-        boolean addedToInventory = player.inventory.add(itemStack);
+        boolean addedToInventory = player.getInventory().add(itemStack);
 
         if (addedToInventory) {
-            player.level.playSound(null,
+            player.level().playSound(null,
                 player.xo, player.yo, player.zo,
-                SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS,
+                SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS,
                 0.2F, (player.getRandom().nextFloat() * 1.4F + 1.0F) * 2.0F
             );
-            player.inventory.setChanged();
+            player.getInventory().setChanged();
         }
 
         if (addedToInventory && itemStack.isEmpty()) {
@@ -236,7 +234,7 @@ public class MachineUtils {
             ItemEntity entityitem = player.drop(itemStack, false);
             if (entityitem != null) {
                 entityitem.setNoPickUpDelay();
-                entityitem.setOwner(player.getUUID());
+                entityitem.setThrower(player.getUUID());
             }
         }
     }

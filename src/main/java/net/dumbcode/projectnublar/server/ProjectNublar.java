@@ -49,6 +49,7 @@ import net.dumbcode.projectnublar.server.tablet.TabletModuleHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.server.utils.JsonHandlers;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.arguments.ArgumentSerializer;
@@ -348,7 +349,7 @@ public class ProjectNublar {
         NETWORK.registerMessage(36, C2SManualStopRecipe.class, C2SManualStopRecipe::toBytes, C2SManualStopRecipe::fromBytes, C2SManualStopRecipe::handle);
     }
 
-    public static Component translate(String key, Object... args) {
+    public static MutableComponent translate(String key, Object... args) {
         return Component.translatable(MODID + "." + key, args);
     }
 }

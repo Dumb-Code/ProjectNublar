@@ -31,7 +31,7 @@ public class DinosaurInformation extends TooltipInformation {
     public void renderMap(GuiGraphics stack, int x, int y) {
         String s = this.dinosaur.getRegName().getPath().substring(0, 1);
         int width = Minecraft.getInstance().font.width(s);
-        Minecraft.getInstance().stack.drawString(font, s, x - width/2F, y - 3, 0xAAAAAA);
+        stack.drawString(font, s, x - width/2F, y - 3, 0xAAAAAA);
         super.renderMap(stack, x, y);
     }
 

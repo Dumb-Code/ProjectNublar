@@ -90,7 +90,7 @@ public abstract class DnaEditingScreen extends SequencerSynthesizerBaseScreen {
 
     @Override
     protected void renderBg(GuiGraphics stack, float ticks, int mouseX, int mouseY) {
-        stack.blit(BASE_LOCATION, this.leftPos, this.topPos, this.getOffset(), 0, 0, this.imageWidth, this.imageHeight, this.imageHeight, this.imageWidth); //There is a vanilla bug that mixes up width and height
+        stack.blit(BASE_LOCATION, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, this.imageHeight, this.imageWidth); //There is a vanilla bug that mixes up width and height
     }
 
     @Override

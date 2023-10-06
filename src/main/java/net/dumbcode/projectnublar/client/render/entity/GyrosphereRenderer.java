@@ -64,7 +64,7 @@ public class GyrosphereRenderer extends EntityRenderer<GyrosphereVehicle> {
                 .endVertex();
         }
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     //Adapted from https://github.com/JOML-CI/JOML/blob/master/src/org/joml/Quaternionf.java

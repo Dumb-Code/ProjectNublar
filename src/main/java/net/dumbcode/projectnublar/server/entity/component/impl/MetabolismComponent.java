@@ -26,7 +26,7 @@ import net.dumbcode.projectnublar.server.entity.tracking.info.MetabolismInformat
 import net.minecraft.entity.MobEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -152,11 +152,11 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
         Supplier<Float> foodDiff = () -> (this.food / (float) this.maxFood.getValue()) * 4 - 2;
         Supplier<Float> waterDiff = () -> (this.water / (float) this.maxWater.getValue()) * 4 - 2;
 
-        acceptor.accept(MoodReasons.STARVED, () -> -MathHelper.clamp(foodDiff.get(), -2, 0));
-        acceptor.accept(MoodReasons.FULL, () -> MathHelper.clamp(foodDiff.get(), 0, 2));
+        acceptor.accept(MoodReasons.STARVED, () -> -Mth.clamp(foodDiff.get(), -2, 0));
+        acceptor.accept(MoodReasons.FULL, () -> Mth.clamp(foodDiff.get(), 0, 2));
 
-        acceptor.accept(MoodReasons.DEHYDRATED, () -> -MathHelper.clamp(waterDiff.get(), -2, 0));
-        acceptor.accept(MoodReasons.HYDRATED, () -> MathHelper.clamp(waterDiff.get(), 0, 2));
+        acceptor.accept(MoodReasons.DEHYDRATED, () -> -Mth.clamp(waterDiff.get(), -2, 0));
+        acceptor.accept(MoodReasons.HYDRATED, () -> Mth.clamp(waterDiff.get(), 0, 2));
 
     }
 

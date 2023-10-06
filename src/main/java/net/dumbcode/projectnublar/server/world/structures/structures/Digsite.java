@@ -22,7 +22,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
@@ -74,11 +74,11 @@ public class Digsite extends Structure {
                 double distx = Math.sqrt((determinedSize*determinedSize)/xsize);
                 double distz = Math.sqrt((determinedSize*determinedSize)/zsize);
 
-                minx = Math.min(minx, startx-MathHelper.floor(distx));
-                minz = Math.min(minz, startz-MathHelper.floor(distz));
+                minx = Math.min(minx, startx-Mth.floor(distx));
+                minz = Math.min(minz, startz-Mth.floor(distz));
 
-                maxx = Math.max(maxx, startx+MathHelper.ceil(distx));
-                maxz = Math.max(maxz, startz+MathHelper.ceil(distz));
+                maxx = Math.max(maxx, startx+Mth.ceil(distx));
+                maxz = Math.max(maxz, startz+Mth.ceil(distz));
                 layercircs[circle] = new Circle(startx, startz, determinedSize, xsize, zsize, distx, distz);
             }
         }
@@ -369,8 +369,8 @@ public class Digsite extends Structure {
         }
 
         public void iterateCircle(double distX, double distZ, float xSize, float zSize, int radius, BiConsumer<Integer, Integer> consumer) {
-            int minx = MathHelper.floor(distX);
-            int minz = MathHelper.floor(distZ);
+            int minx = Mth.floor(distX);
+            int minz = Mth.floor(distZ);
             for (int x = -minx; x < Math.ceil(distX); x++) {
                 for (int z = -minz; z < Math.ceil(distZ); z++) {
                     if (xSize * x * x + zSize * z * z < radius * radius) {

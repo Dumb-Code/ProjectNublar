@@ -11,7 +11,7 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
@@ -51,7 +51,7 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
             entity.get(EntityComponentTypes.GENETICS.get()).ifPresent(genetics -> GeneticComponent.mutateGenes(genetics, entity));
             entity.setPos(location.x, location.y, location.z);
             entity.xRot = 0;
-            entity.yRot = MathHelper.wrapDegrees(world.random.nextFloat() * 360.0F);
+            entity.yRot = Mth.wrapDegrees(world.random.nextFloat() * 360.0F);
 
             world.addFreshEntity(entity);
         }

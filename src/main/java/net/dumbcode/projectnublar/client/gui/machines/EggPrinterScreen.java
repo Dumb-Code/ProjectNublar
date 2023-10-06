@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.joml.Vector3f;
 
 public class EggPrinterScreen extends MachineContainerScreen {
 
@@ -52,7 +53,7 @@ public class EggPrinterScreen extends MachineContainerScreen {
     @Override
     protected void renderBg(GuiGraphics stack, float partialTicks, int mouseX, int mouseY) {
         ResourceLocation sprite = new ResourceLocation(ProjectNublar.MODID, "textures/gui/egg_printer.png");
-        stack.blit(sprite, this.leftPos, this.topPos, this.getOffset(), 0, 0, this.imageWidth, this.imageHeight, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
+        stack.blit(sprite, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, TEXTURE_HEIGHT, TEXTURE_WIDTH); //There is a vanilla bug that mixes up width and height
 
         float boneProgress = this.blockEntity.getBoneMatter() / EggPrinterBlockEntity.TOTAL_BONE_MATTER;
         bottomUpSubPixelBlit(stack, this.leftPos + 16, this.topPos + 17, 176, 66, 14, 54, TEXTURE_WIDTH, TEXTURE_HEIGHT, boneProgress);

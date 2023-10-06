@@ -145,7 +145,7 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
 
         if(this.currentTestTexture != null) {
             this.currentTestTexture.bind();
-            AbstractGui.stack.blit(x, y, 0, 0, 100, 100, 100, 100);
+            stack.blit(x, y, 0, 0, 100, 100, 100, 100);
         }
 
         List<BGIconEntry> list = this.userTab ? this.userEntries : this.globalEntries;
@@ -156,9 +156,9 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
             }
             if(entry.texture != null) {
                 entry.texture.bind();
-                AbstractGui.stack.blit(entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
+                stack.blit(entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
                 if(entry == this.selectedEntry) {
-                    AbstractGui.stack.fill(entry.minX - 2, entry.minY + this.scroll - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2 + this.scroll, 0x8800BAFD);
+                    stack.fill(entry.minX - 2, entry.minY + this.scroll - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2 + this.scroll, 0x8800BAFD);
                 }
             }
         }

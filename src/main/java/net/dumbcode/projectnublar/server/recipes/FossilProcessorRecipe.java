@@ -18,7 +18,7 @@ import java.util.Objects;
 public enum FossilProcessorRecipe implements MachineRecipe<FossilProcessorBlockEntity> {
     INSTANCE;
 
-    private static final int FLUID_AMOUNT = FluidAttributes.BUCKET_VOLUME / 4;
+    private static final int FLUID_AMOUNT = FluidType.BUCKET_VOLUME / 4;
 
     @Override
     public boolean accepts(FossilProcessorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<FossilProcessorBlockEntity> process) {

@@ -97,7 +97,7 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
     }
 
     @Override
-    public void tick() {
+    public void containerTick() {
         super.tick();
 
         int slots = this.slots;
@@ -210,7 +210,7 @@ public class BasicDnaEditingScreen extends DnaEditingScreen {
 //            if(module.drive == null || module.slider.getSliderValue() == 0) {
 //                continue;
 //            }
-//            int value = (int) Math.round((w+1) * MathHelper.clamp(module.slider.getSliderValue(), 0D, 1D));
+//            int value = (int) Math.round((w+1) * Mth.clamp(module.slider.getSliderValue(), 0D, 1D));
 //            stack.fill(xStart + start, yStart, xStart + start + value-1, yEnd, 0xFF000000|this.colors[module.id]);
 //            if(module.drive != null && mouseX >= xStart + start && mouseX < xStart + start + value && mouseY >= yStart && mouseY < yEnd) {
 //                hoveringText = module.drive.entry;

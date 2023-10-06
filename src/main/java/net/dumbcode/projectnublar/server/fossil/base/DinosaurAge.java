@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.server.fossil.StoneTypeHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.minecraft.util.math.MathHelper.clamp;
+import static net.minecraft.util.math.Mth.clamp;
 
 //TODO: HAVE ROCKS AND FOSSILS IDENTIFY TIME PERIODS TO USE FOR SPAWNING
 //TODO: add deviation stuff

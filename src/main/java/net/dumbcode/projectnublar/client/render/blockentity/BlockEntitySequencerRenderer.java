@@ -53,7 +53,7 @@ public class BlockEntitySequencerRenderer extends TileEntityRenderer<SequencingS
         model.getCube("frontpaneltop").yRot = (float) (target * Math.PI/2F);
         model.renderBoxes(stack, light, buffers, TEXTURE_LOCATION);
 
-        stack.popPose();
+        stack.pose().popPose();
     }
 
     public static void onResourceManagerReload() {

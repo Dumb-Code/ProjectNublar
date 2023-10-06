@@ -123,7 +123,7 @@ public abstract class BaseTabletScreen extends Screen {
 
         BufferBuilder builder = Tessellator.getInstance().getBuilder();
         builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        RenderUtils.drawTexturedQuad(stack, builder, this.leftStart + this.tabletWidth - 16F, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16F, uv[0], uv[1], uv[2], uv[3], this.getBlitOffset());
+        RenderUtils.drawTexturedQuad(stack, builder, this.leftStart + this.tabletWidth - 16F, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16F, uv[0], uv[1], uv[2], uv[3], stack.pose().popPose();pose().last().pose().getTranslation(new Vector3f()).z);
         Tessellator.getInstance().end();
     }
 

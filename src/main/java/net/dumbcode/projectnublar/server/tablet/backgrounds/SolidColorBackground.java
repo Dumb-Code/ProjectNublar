@@ -46,6 +46,6 @@ public class SolidColorBackground implements TabletBackground {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY) {
-        AbstractGui.stack.fill(x, y, x + width, y + height, this.color | 0xFF000000);
+        stack.fill(x, y, x + width, y + height, this.color | 0xFF000000);
     }
 }

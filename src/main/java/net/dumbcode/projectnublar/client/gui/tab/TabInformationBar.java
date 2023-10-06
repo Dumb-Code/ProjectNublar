@@ -1,9 +1,8 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -58,23 +57,22 @@ public class TabInformationBar {
             int xStart = offset + (this.tabWidth + this.tabPadding) * i;
             this.drawTab(stack, xStart, guiTop, this.selectedIndex == i + this.pageOffset);
         }
-        FontRenderer font = Minecraft.getInstance().font;
+        Font font = Minecraft.getInstance().font;
         String text = String.format("Page %s/%s", this.pageOffset / fitAmount + 1, Math.round(this.cache.size() / (float)fitAmount)); // TODO: 11/11/2018 localize
-        stack.drawString(font, text, guiLeft + (guiWidth - font.width(text)) / 2F, guiTop - this.tabHeight - font.lineHeight - 2, -1);
+        stack.drawString(font, text, guiLeft + (guiWidth - font.width(text)) / 2F, guiTop - this.tabHeight - font.lineHeight - 2, -1, false);
 
         int top = guiTop - this.tabHeight + (this.tabHeight - nextSize) / 2;
         if(this.pageOffset != 0) {
-            AbstractGui.stack.fill(guiLeft, top, guiLeft + nextSize, top + nextSize, -1);
+            stack.fill(guiLeft, top, guiLeft + nextSize, top + nextSize, -1);
         }
         if(this.pageOffset + fitAmount < this.cache.size()) {
-            AbstractGui.stack.fill(guiLeft + guiWidth - nextSize, top, guiLeft + guiWidth, top + nextSize, -1);
+            stack.fill(guiLeft + guiWidth - nextSize, top, guiLeft + guiWidth, top + nextSize, -1);
         }
     }
 
     protected void drawTab(GuiGraphics stack, int xStart, int yStart, boolean selected) {
         int tabExtension = selected ? 5 : 1;
-        Minecraft.getInstance().textureManager.bind(new ResourceLocation("textures/gui/container/creative_inventory/tabs.png"));
-        AbstractGui.stack.blit(xStart, yStart - this.tabHeight - 1, 28, selected ? 32 : 0, this.tabWidth, this.tabHeight + tabExtension, 256, 256);
+        stack.blit(new ResourceLocation("textures/gui/container/creative_inventory/tabs.png"), xStart, yStart - this.tabHeight - 1, 28, selected ? 32 : 0, this.tabWidth, this.tabHeight + tabExtension, 256, 256);
 //      Gui.drawRect(xStart, guiTop - this.tabHeight, xStart + this.tabWidth, guiTop + 5, 0xFF000000 | new Random((i + this.pageOffset) << 21).nextInt());
 //      if(mouseY > guiTop - this.tabHeight && mouseY < guiTop + tabExtension && mouseX > xStart && mouseX < xStart + this.tabWidth) {
 //          Gui.drawRect(xStart, guiTop - this.tabHeight, xStart + this.tabWidth, guiTop + tabExtension, 0x6A0063FF); TODO: Remove this?

@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.text.StringTextComponent;
 
 public class EntityPartRenderer extends EntityRenderer<EntityPart> {
@@ -26,12 +26,12 @@ public class EntityPartRenderer extends EntityRenderer<EntityPart> {
         if (ProjectNublar.DEBUG && false) {
             stack.pushPose();
             stack.translate(
-                -MathHelper.lerp(partialTicks, entity.xOld, entity.position().x),
-                -MathHelper.lerp(partialTicks, entity.yOld, entity.position().y),
-                -MathHelper.lerp(partialTicks, entity.zOld, entity.position().z)
+                -Mth.lerp(partialTicks, entity.xOld, entity.position().x),
+                -Mth.lerp(partialTicks, entity.yOld, entity.position().y),
+                -Mth.lerp(partialTicks, entity.zOld, entity.position().z)
             );
             WorldRenderer.renderLineBox(stack, buffers.getBuffer(RenderType.lines()), entity.getBoundingBox(), 1, 1, 1, 1);
-            stack.popPose();
+            stack.pose().popPose();
             renderNameTag(entity, Component.literal(entity.getPartName()), stack, buffers, light);
         }
     }

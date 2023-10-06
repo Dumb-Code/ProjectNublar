@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -78,7 +78,7 @@ public class SkeletonBuilderScene {
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.disableBlend();
 
-        stack.popPose();
+        stack.pose().popPose();
         this.setdown();
 
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
@@ -127,7 +127,7 @@ public class SkeletonBuilderScene {
         RenderSystem.matrixMode(GL11.GL_PROJECTION);
         GL11.glPushMatrix();
         RenderSystem.loadIdentity();
-        RenderSystem.multMatrix(Matrix4f.perspective(30, 2, 0.05F, 100 * MathHelper.SQRT_OF_TWO));
+        RenderSystem.multMatrix(Matrix4f.perspective(30, 2, 0.05F, 100 * Mth.SQRT_OF_TWO));
         RenderSystem.matrixMode(GL11.GL_MODELVIEW);
         GL11.glPushMatrix();
         RenderSystem.loadIdentity();

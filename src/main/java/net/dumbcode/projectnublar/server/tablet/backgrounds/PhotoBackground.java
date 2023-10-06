@@ -73,7 +73,7 @@ public class PhotoBackground implements TabletBackground {
 
         if(this.texture != null) {
             this.texture.bind();
-            AbstractGui.stack.blit(x, y, 0, 0, width, height, width, height);
+            stack.blit(x, y, 0, 0, width, height, width, height);
         }
     }
 

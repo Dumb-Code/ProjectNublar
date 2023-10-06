@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Vector3d;
 import org.joml.Vector3f;
@@ -134,7 +134,7 @@ public class PylonHeadConnectionRenderer {
             }
         }
 
-        stack.popPose();
+        stack.pose().popPose();
 
         RenderSystem.enableDepthTest();
         RenderSystem.enableTexture();

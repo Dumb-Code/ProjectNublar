@@ -42,7 +42,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
@@ -116,18 +116,18 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public void tiersUpdated() {
         super.tiersUpdated();
         float tanks = this.getTierModifier(MachineModuleType.TANKS, 0.5F);
-        this.tank.setCapacity((int) (FluidAttributes.BUCKET_VOLUME * tanks));
+        this.tank.setCapacity((int) (FluidType.BUCKET_VOLUME * tanks));
         if(this.tank.getFluidAmount() > this.tank.getCapacity()) {
             this.tank.setFluid(new FluidStack(this.tank.getFluid(), this.tank.getCapacity()));
         }
         this.totalStorage = DEFAULT_STORAGE * tanks;
 
-        this.sugarAmount = MathHelper.clamp(this.sugarAmount, 0, this.totalStorage);
-        this.boneAmount = MathHelper.clamp(this.boneAmount, 0, this.totalStorage);
-        this.plantAmount = MathHelper.clamp(this.plantAmount, 0, this.totalStorage);
+        this.sugarAmount = Mth.clamp(this.sugarAmount, 0, this.totalStorage);
+        this.boneAmount = Mth.clamp(this.boneAmount, 0, this.totalStorage);
+        this.plantAmount = Mth.clamp(this.plantAmount, 0, this.totalStorage);
         FluidStack fluid = this.tank.getFluid();
         if(!fluid.isEmpty()) {
-            fluid.setAmount(MathHelper.clamp(fluid.getAmount(), 0, this.tank.getCapacity()));
+            fluid.setAmount(Mth.clamp(fluid.getAmount(), 0, this.tank.getCapacity()));
         }
     }
 
@@ -348,7 +348,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         if(this.isProcessingMain()) {
             return false;
         }
-        amount = MathHelper.clamp(Math.round(amount * 100D) / 100D, 0, 1);
+        amount = Mth.clamp(Math.round(amount * 100D) / 100D, 0, 1);
         if(ID >= 0 && ID < this.selectedDNAs.length) {
             //Check that the drive actually exists.
             Optional<DriveUtils.DriveEntry> drive = DriveUtils.getAll(this.handler.getStackInSlot(0)).stream().filter(d -> combine(d.getKey(), d.getVariant()).equals(key)).findAny();
@@ -672,7 +672,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     public static int getSlots(float percentage) {
-        return MathHelper.clamp(MathHelper.floor(percentage*SLOTS_GRADIENT + SLOTS_OFFSET), MINIMUM_SLOTS, TOTAL_SLOTS);
+        return Mth.clamp(Mth.floor(percentage*SLOTS_GRADIENT + SLOTS_OFFSET), MINIMUM_SLOTS, TOTAL_SLOTS);
     }
 
     public static long getPercentageForSlot(int slots) {

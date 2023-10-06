@@ -20,6 +20,7 @@ import net.dumbcode.projectnublar.server.network.S2CSyncMachineStack;
 import net.dumbcode.projectnublar.server.network.S2CSyncOpenedUsers;
 import net.dumbcode.projectnublar.server.recipes.MachineRecipe;
 import net.minecraft.client.renderer.texture.Tickable;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,7 +38,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -650,7 +651,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
                     //Update the timeDone to make sure the % complete is kept the same
                     if(previousTotalTime != this.totalTime) {
                         float timeDone = this.time / (float)previousTotalTime;
-                        this.setTime(MathHelper.floor(timeDone * this.totalTime));
+                        this.setTime(Mth.floor(timeDone * this.totalTime));
                     }
 
                     currentRecipe.onRecipeTick(machine.asB, this);
@@ -692,8 +693,8 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             }
         }
 
-        public IFormattableTextComponent getTimeLeftText() {
-            int timeLeft = MathHelper.ceil((this.getTotalTime() - this.getTime()) / 20F);
+        public MutableComponent getTimeLeftText() {
+            int timeLeft = Mth.ceil((this.getTotalTime() - this.getTime()) / 20F);
 
             IFormattableTextComponent component = Component.literal("");
             int seconds = timeLeft % 60;

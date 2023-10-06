@@ -8,6 +8,7 @@ import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlock
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -28,7 +29,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
         return ProjectNublar.translate("machine.sequencer.blocked.reason." + reason);
     }
 
-    public static List<ITextComponent> getCannotStartReasons(SequencingSynthesizerBlockEntity blockEntity) {
+    public static List<Component> getCannotStartReasons(SequencingSynthesizerBlockEntity blockEntity) {
         List<ITextComponent> list = new ArrayList<>();
         MachineModuleBlockEntity.MachineProcess<SequencingSynthesizerBlockEntity> process = blockEntity.getProcess(1);
 
@@ -36,7 +37,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
             list.add(createReason("test_tube"));
         }
 
-        if(blockEntity.getTank().getFluidAmount() < FluidAttributes.BUCKET_VOLUME / 2) {
+        if(blockEntity.getTank().getFluidAmount() < FluidType.BUCKET_VOLUME / 2) {
             list.add(createReason("water"));
         }
         double size = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE / 2;
@@ -92,7 +93,7 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
 
         double storageSize = SequencingSynthesizerBlockEntity.DEFAULT_STORAGE;
 
-        blockEntity.getTank().drainInternal(FluidAttributes.BUCKET_VOLUME / 2, IFluidHandler.FluidAction.EXECUTE);
+        blockEntity.getTank().drainInternal(FluidType.BUCKET_VOLUME / 2, IFluidHandler.FluidAction.EXECUTE);
         blockEntity.setBoneAmount(blockEntity.getBoneAmount() - storageSize / 2);
         blockEntity.setPlantAmount(blockEntity.getPlantAmount() - storageSize / 2);
         blockEntity.setSugarAmount(blockEntity.getSugarAmount() - storageSize / 2);

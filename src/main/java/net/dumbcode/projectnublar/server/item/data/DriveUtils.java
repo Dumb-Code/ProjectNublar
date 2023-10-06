@@ -8,6 +8,8 @@ import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.dumblibrary.server.dna.GeneticTypes;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -87,7 +89,7 @@ public class DriveUtils {
         }
         int result = info.getSize(inItem);
         inner.putString("drive_key", key);
-        inner.putInt("amount", MathHelper.clamp(current + result, 0, 100));
+        inner.putInt("amount", Mth.clamp(current + result, 0, 100));
         inner.putString("translation_key", info.getDriveTranslationKey(inItem));
         if(variant != null) {
             inner.putString("animal_variant", variant);
@@ -189,7 +191,7 @@ public class DriveUtils {
         int amount;
         DriveType driveType;
 
-        public Component getTranslation() {
+        public MutableComponent getTranslation() {
             return DriveUtils.getTranslation(this.name, this.variant);
         }
 
@@ -208,7 +210,7 @@ public class DriveUtils {
     public static class IsolatedGeneEntry {
         GeneticType<?, ?> geneticType;
         double progress;
-        List<Pair<TranslationTextComponent, Double>> parts;
+        List<Pair<MutableComponent, Double>> parts;
     }
 
     public enum DriveType {

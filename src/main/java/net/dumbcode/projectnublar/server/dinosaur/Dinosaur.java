@@ -19,6 +19,8 @@ import net.dumbcode.projectnublar.server.entity.EntityHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.DinosaurDropsComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MoodComponent;
 import net.dumbcode.projectnublar.server.utils.StringUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -122,7 +124,7 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
         return getRegName().getNamespace()+".dino."+getRegName().getPath()+".name";
     }
 
-    public TranslationTextComponent createNameComponent() {
+    public MutableComponent createNameComponent() {
         return new TranslationTextComponent(this.createNameTranslationKey());
     }
 

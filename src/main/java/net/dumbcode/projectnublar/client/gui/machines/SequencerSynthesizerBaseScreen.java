@@ -196,16 +196,17 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
                 int i = ((MachineModulePopoutSlot) slot).getVisualShowX();
                 int j = ((MachineModulePopoutSlot) slot).getVisualShowY();
                 RenderSystem.enableDepthTest();
-                this.itemRenderer.blitOffset -= 100;
-                this.itemRenderer.renderGuiItemDecorations(this.font, itemstack, i, j, null);
-                this.itemRenderer.blitOffset += 100;
+                stack.pose().pushPose();
+                stack.pose().translate(0, 0, -100);
+                stack.renderItem(itemstack, i, j);
+                stack.pose().popPose();
 
                 if(this.activeSlot == null) {
                     this.renderHoveredSlot(stack, i, j, mouseX, mouseY, super.getSlotColor(slot.index));
                 }
             }
         }
-        RenderSystem.popMatrix();
+        GL11.glPopMatrix();
 
 
         this.renderScreen(stack, mouseX, mouseY, ticks);
@@ -214,13 +215,12 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
         boolean flag = true;
 
         if(this.activeSlot != null) {
-            this.setBlitOffset(200);
+            stack.pose().translate(0, 0, 200);
             if(background) {
                 this.renderBackground(stack);
             }
 
-            minecraft.textureManager.bind(INVENTORY_OVERLAY);
-            stack.blit(this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, this.imageHeight, this.imageWidth);
+            stack.blit(INVENTORY_OVERLAY, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, this.imageHeight, this.imageWidth);
 
             GL11.glPushMatrix();
             GL11.glTranslatef(this.leftPos, this.topPos, 0);
@@ -229,12 +229,12 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
                     this.renderHoveredSlot(stack, slot.x, slot.y, mouseX, mouseY, super.getSlotColor(slot.index));
                 }
             }
-            RenderSystem.popMatrix();
-            this.setBlitOffset(0);
-        } else if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+            GL11.glPopMatrix();
+            stack.pose().translate(0, 0, -200);
+        } else if (this.minecraft.player.getInventory().getSelected().isEmpty()) {
             for (Slot slot : this.menu.slots) {
                 if(slot instanceof MachineModulePopoutSlot && slot.hasItem() && this.isHovering(((MachineModulePopoutSlot) slot).getVisualShowX(), ((MachineModulePopoutSlot) slot).getVisualShowY(), 16, 16, mouseX, mouseY)) {
-                    this.renderTooltip(stack, slot.getItem(), mouseX, mouseY);
+                    this.renderTooltip(stack, mouseX, mouseY);
                     flag = false;
                     break;
                 }
@@ -257,11 +257,11 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
 
     private void renderHoveredSlot(GuiGraphics stack, int x, int y, double mouseX, double mouseY, int slotColor) {
         if(this.isHovering(x, y, 16, 16, mouseX, mouseY)) {
-            this.setBlitOffset(300);
+            stack.pose().translate(0, 0, 300);
             RenderSystem.colorMask(true, true, true, false);
-            this.fillGradient(stack, x, y, x + 16, y + 16, slotColor, slotColor);
+            stack.fillGradient(x, y, x + 16, y + 16, slotColor, slotColor);
             RenderSystem.colorMask(true, true, true, true);
-            this.setBlitOffset(0);
+            stack.pose().translate(0, 0, -300);
         }
     }
 
@@ -272,10 +272,8 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
 
     @Override
     protected void renderBg(GuiGraphics stack, float ticks, int mouseX, int mouseY) {
-        minecraft.textureManager.bind(BASE_LOCATION);
-        stack.blit(this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, this.imageHeight*2, this.imageWidth); //There is a vanilla bug that mixes up width and height
+        stack.blit(BASE_LOCATION, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, this.imageHeight*2, this.imageWidth); //There is a vanilla bug that mixes up width and height
 
-        minecraft.textureManager.bind(CENTER_PIECES);
         int ringStartX = (this.imageWidth - RING_SIZE) / 2;
         int ringStartY = (this.imageHeight - RING_SIZE) / 2;
 
@@ -283,24 +281,23 @@ public class SequencerSynthesizerBaseScreen extends MachineContainerScreen {
             int u = (ring % 3) * RING_SIZE;
             int v = (ring / 3) * RING_SIZE;
 
-            stack.pushPose();
-            stack.translate(this.leftPos, this.topPos, 0);
-            stack.translate(this.imageWidth / 2F, this.imageHeight / 2F, 0);
-            stack.mulPose(Vector3f.ZP.rotationDegrees((minecraft.player.tickCount + minecraft.getFrameTime()) * (ring % 2 == 0 ? 1 : -1) * this.ringModifiers[ring] + 0.5F));
-            stack.translate(-this.imageWidth / 2F, -this.imageHeight / 2F, 0);
-            stack.blit(ringStartX, ringStartY, this.getBlitOffset(), u, v, RING_SIZE, RING_SIZE, 350, 525);
-            stack.popPose();
+            stack.pose().pushPose();
+            stack.pose().translate(this.leftPos, this.topPos, 0);
+            stack.pose().translate(this.imageWidth / 2F, this.imageHeight / 2F, 0);
+            stack.pose().mulPose(Axis.ZP.rotationDegrees((minecraft.player.tickCount + minecraft.getFrameTime()) * (ring % 2 == 0 ? 1 : -1) * this.ringModifiers[ring] + 0.5F));
+            stack.pose().translate(-this.imageWidth / 2F, -this.imageHeight / 2F, 0);
+            stack.blit(CENTER_PIECES, ringStartX, ringStartY, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, u, v, RING_SIZE, RING_SIZE, 350, 525);
+            stack.pose().popPose();
         }
 
         this.renderCenterPiece(stack);
 
-        minecraft.textureManager.bind(BASE_LOCATION);
-        stack.blit(this.leftPos, this.topPos, this.getBlitOffset(), 0, this.imageHeight, this.imageWidth, this.imageHeight, this.imageHeight*2, this.imageWidth); //There is a vanilla bug that mixes up width and height
+        stack.blit(BASE_LOCATION, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, this.imageHeight, this.imageWidth, this.imageHeight, this.imageHeight*2, this.imageWidth); //There is a vanilla bug that mixes up width and height
 
     }
 
     protected void renderCenterPiece(GuiGraphics stack) {
-        stack.blit(this.leftPos + (this.imageWidth - 63) / 2, this.topPos + (this.imageHeight - 63) / 2, this.getBlitOffset(), RING_SIZE*2, RING_SIZE, 63, 63,  350, 525);
+        stack.blit(CENTER_PIECES, this.leftPos + (this.imageWidth - 63) / 2, this.topPos + (this.imageHeight - 63) / 2, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, RING_SIZE*2, RING_SIZE, 63, 63,  350, 525);
     }
 
     protected static ResourceLocation get(String name) {

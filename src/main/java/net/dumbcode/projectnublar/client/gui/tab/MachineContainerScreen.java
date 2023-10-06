@@ -1,26 +1,20 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModulePopoutSlot;
 import net.dumbcode.projectnublar.server.containers.machines.slots.MachineModuleSlot;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,40 +42,37 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
 
     protected void bottomUpSubPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight, float percent) {
         float inverseHeight = (1-percent)*height;
-        subPixelstack.blit(x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
+        subPixelBlit(stack, x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
     }
 
     protected void subPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height) {
-        this.subPixelstack.blit(x, y, u, v, width, height, 256, 256);
+        this.subPixelBlit(stack, x, y, u, v, width, height, 256, 256);
     }
 
     protected void subPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight) {
-        Matrix4f matrix4f = stack.last().pose();
-        int z = this.getBlitOffset();
-        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        Matrix4f matrix4f = stack.pose().last().pose();
+        int z = (int) stack.pose().last().pose().getTranslation(new Vector3f()).z;
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferbuilder.vertex(matrix4f, x, y+height, z).uv(u / textureWidth, (v+height) / textureHeight).endVertex();
         bufferbuilder.vertex(matrix4f, x+width, y+height, z).uv((u+width) / textureWidth, (v+height) / textureHeight).endVertex();
         bufferbuilder.vertex(matrix4f, x+width, y, z).uv((u+width) / textureWidth, v / textureHeight).endVertex();
         bufferbuilder.vertex(matrix4f, x, y, z).uv(u / textureWidth, v / textureHeight).endVertex();
         bufferbuilder.end();
-        RenderSystem.enableAlphaTest();
-        WorldVertexBufferUploader.end(bufferbuilder);
+        bufferbuilder.end();
     }
 
     protected void drawProcessIcon(MachineModuleBlockEntity.MachineProcess<?> process, GuiGraphics stack, float xStartF, float yStartF) {
         int xStart = (int) Math.floor(xStartF);
         int yStart = (int) Math.floor(yStartF);
-        stack.pushPose();
-        stack.translate(xStartF - xStart, yStartF - yStart, 0);
+        stack.pose().pushPose();
+        stack.pose().translate(xStartF - xStart, yStartF - yStart, 0);
         if(!process.isHasPower()) {
-            minecraft.textureManager.bind(MACHINE_ICONS);
-            stack.blit(this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 16, 0, 16, 16, 32, 32);
-            stack.popPose();
+            stack.blit(MACHINE_ICONS, this.leftPos + xStart, this.topPos + yStart, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 16, 0, 16, 16, 32, 32);
+            stack.pose().popPose();
         } else if(process.isBlocked()) {
-            minecraft.textureManager.bind(MACHINE_ICONS);
-            stack.blit(this.leftPos + xStart, this.topPos + yStart, this.getBlitOffset(), 0, 0, 16, 16, 32, 32);
-            stack.popPose();
+            stack.blit(MACHINE_ICONS, this.leftPos + xStart, this.topPos + yStart, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, 16, 16, 32, 32);
+            stack.pose().popPose();
 
             RenderSystem.disableDepthTest();
             for (MachineModuleBlockEntity.BlockedProcess blockedProcess : process.getBlockedProcessList()) {
@@ -113,7 +104,7 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
         int mY = mouseY - this.topPos;
 
         if(mX >= xStart && mX < xStart+width && mY >= yStart && mY < yStart+height) {
-            List<ITextComponent> componentList = new ArrayList<>();
+            List<Component> componentList = new ArrayList<>();
 
 
             componentList.add(process.getTimeLeftText().append("(" + Math.round(process.getTimeDone() * 100F) + "%)"));
@@ -122,7 +113,7 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
             } else if(process.isBlocked()) {
                 componentList.add(ProjectNublar.translate("gui.machine.fullslot"));
             }
-            renderComponentTooltip(stack, componentList, mouseX, mouseY);
+            stack.renderComponentTooltip(this.font, componentList, mouseX, mouseY);
         }
     }
 

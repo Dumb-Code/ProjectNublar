@@ -37,7 +37,7 @@ import java.util.List;
 
 public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilProcessorBlockEntity> {
 
-    private static final int DEFAULT_CAPACITY = FluidAttributes.BUCKET_VOLUME * 2;
+    private static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 2;
     private final MachineModuleFluidTank tank = new MachineModuleFluidTank(this, DEFAULT_CAPACITY, s -> s.getFluid() == Fluids.WATER).setCanDrain(false);
 
     private final LazyOptional<FluidTank> capability = LazyOptional.of(() -> this.tank);

@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.client.gui.machines;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.client.RenderUtils;
@@ -22,20 +22,23 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.dumbcode.projectnublar.server.entity.ai.objects.FeedingDiet;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
-import net.minecraft.block.BlockState;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.DyeColor;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import net.minecraft.util.text.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,8 +47,8 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 
     private static final ResourceLocation BASE_LOCATION = get("sequencer_page");
 
-    private static final TranslationTextComponent REGULAR = ProjectNublar.translate("gui.machine.sequencer.tab.sequencing.regular");
-    private static final TranslationTextComponent ISOLATED = ProjectNublar.translate("gui.machine.sequencer.tab.sequencing.isolated");
+    private static final Component REGULAR = ProjectNublar.translate("gui.machine.sequencer.tab.sequencing.regular");
+    private static final Component ISOLATED = ProjectNublar.translate("gui.machine.sequencer.tab.sequencing.isolated");
 
     private static final int OVERLAY_WIDTH = 472;
     private static final int OVERLAY_HEIGHT = 199;
@@ -65,7 +68,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
     private int cachedEntityAmount;
     private Entity cachedEntityRender;
 
-    public SequencingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, PlayerInventory playerInventory, ITextComponent title, TabInformationBar bar) {
+    public SequencingScreen(SequencingSynthesizerBlockEntity blockEntity, MachineModuleContainer inventorySlotsIn, Inventory playerInventory, Component title, TabInformationBar bar) {
         super(inventorySlotsIn, playerInventory, title, bar);
         this.process = blockEntity.getProcess(0);
         this.cacheEntries(blockEntity.getHandler().getStackInSlot(0));
@@ -82,7 +85,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
     public void init() {
         super.init();
 
-        this.displayEntryScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 36, this.topPos + 42, 150, 13, 8, () ->
+        this.displayEntryScrollBox = this.addWidget(new GuiScrollBox<>(this.leftPos + 36, this.topPos + 42, 150, 13, 8, () ->
                 (List<GuiScrollboxEntry>) (this.showIsolatedGenes ? this.cachedIsolatedEntries : this.cachedDriveEntries)
             ))
             .addFromPrevious(this.displayEntryScrollBox)
@@ -94,7 +97,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             .setRenderFullSize(true)
             .setShouldCountMouse(() -> this.activeSlot == null);
 
-        this.isolatedGeneScrollBox = this.addButton(new GuiScrollBox<>(this.leftPos + 195, this.topPos + 42, 150, 11, 9, () -> this.cachedIsolationEntries))
+        this.isolatedGeneScrollBox = this.addWidget(new GuiScrollBox<>(this.leftPos + 195, this.topPos + 42, 150, 11, 9, () -> this.cachedIsolationEntries))
             .setActive(false)
             .addFromPrevious(this.isolatedGeneScrollBox)
             .setBorderColor(0xFF577694)
@@ -109,8 +112,8 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
+        super.containerTick();
         if(this.cachedEntityRender instanceof DinosaurEntity && Minecraft.getInstance().player.tickCount % 20 == 0) {
             DinosaurEntity e = (DinosaurEntity) this.cachedEntityRender;
             e.get(EntityComponentTypes.GENDER.get())
@@ -167,16 +170,16 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             RenderUtils.renderBorderExclusive(stack, this.leftPos + 210, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 1, 0xFF577694);
             stack.fill(this.leftPos + 210, this.topPos + 70, this.leftPos + 330, this.topPos + 140, 0xCF193B59);
 
-            stack.drawString(font, dinosaur.createNameComponent().withStyle(TextFormatting.GOLD), this.leftPos + 213, this.topPos + 73, -1);
+            stack.drawString(font, dinosaur.createNameComponent().withStyle(ChatFormatting.GOLD), this.leftPos + 213, this.topPos + 73, -1);
             stack.drawString(font, ProjectNublar.translate("dino.timeperiod.title").withStyle(Style.EMPTY.withUnderlined(true)), this.leftPos + 213, this.topPos + 82, -1);
-            stack.drawString(font, ProjectNublar.translate("dino.timeperiod." + dinosaur.getDinosaurInfomation().getPeriod() + ".name").withStyle(TextFormatting.AQUA), this.leftPos + 213, this.topPos + 92, -1);
+            stack.drawString(font, ProjectNublar.translate("dino.timeperiod." + dinosaur.getDinosaurInfomation().getPeriod() + ".name").withStyle(ChatFormatting.AQUA), this.leftPos + 213, this.topPos + 92, -1);
             stack.drawString(font, ProjectNublar.translate("dino.diet.title").withStyle(Style.EMPTY.withUnderlined(true)), this.leftPos + 213, this.topPos + 104, -1);
             FeedingDiet diet = dinosaur.getAttacher().getStorage(ComponentHandler.METABOLISM.get()).getDiet();
             List<BlockState> blocks = diet.getBlocks();
             List<ItemStack> items = diet.getItems();
             List<EntityType<?>> entities = diet.getEntities();
 
-            List<ITextComponent> component = new ArrayList<>();
+            List<Component> component = new ArrayList<>();
 
             for(int i = 0; component.size() < 3 && (i < blocks.size() || i < items.size() || i < entities.size()); i++) {
                 if(i < blocks.size()) {
@@ -193,7 +196,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             int lineWidthSoFar = 0;
             int line = 0;
             for (int i = 0; i < component.size(); i++) {
-                ITextComponent textComponent = component.get(i);
+                Component textComponent = component.get(i);
                 if(i != component.size() - 1) {
                     textComponent = Component.literal("").append(textComponent).append(", ");
                 }
@@ -237,18 +240,17 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             }
         }
 
-        minecraft.textureManager.bind(BASE_LOCATION);
-        stack.blit(this.leftPos, this.topPos, this.getBlitOffset(), 0, 0, this.imageWidth, this.imageHeight, OVERLAY_HEIGHT, OVERLAY_WIDTH); //There is a vanilla bug that mixes up width and height
+        stack.blit(BASE_LOCATION, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, OVERLAY_HEIGHT, OVERLAY_WIDTH); //There is a vanilla bug that mixes up width and height
 
         float timeDone = this.process.getTimeDone();
-        float leftDone = MathHelper.clamp(timeDone / FIRST_SECTION_SIZE, 0F, 1F);
-        float rightDone = MathHelper.clamp((timeDone - FIRST_SECTION_SIZE) / (1 - FIRST_SECTION_SIZE), 0F, 1F);
+        float leftDone = Mth.clamp(timeDone / FIRST_SECTION_SIZE, 0F, 1F);
+        float rightDone = Mth.clamp((timeDone - FIRST_SECTION_SIZE) / (1 - FIRST_SECTION_SIZE), 0F, 1F);
 
         if(leftDone != 0) {
-            subPixelstack.blit(this.leftPos + 56, this.topPos + 151, 351, 0, leftDone * 119F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+            subPixelBlit(stack,this.leftPos + 56, this.topPos + 151, 351, 0, leftDone * 119F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
         if(rightDone != 0) {
-            subPixelstack.blit(this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+            subPixelBlit(stack,this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
 //        stack.blit(this.leftPos, this.topPos);
         if(this.cachedEntityRender != null && !this.showIsolatedGenes && this.activeSlot == null) {
@@ -258,7 +260,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
                 s = 100;
                 y = 50;
             }
-            AxisAlignedBB box = this.cachedEntityRender.getBoundingBoxForCulling();
+            AABB box = this.cachedEntityRender.getBoundingBoxForCulling();
             double scale = s / box.getXsize();
 
             renderEntity(this.leftPos + 265, (int) (this.topPos + y + box.getYsize()/2*scale), scale, this.cachedEntityRender);
@@ -320,8 +322,8 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 //        }
 
         boolean rotateUp = entity.getType() == EntityType.COD || entity.getType() == EntityType.SALMON || entity.getType() == EntityType.TROPICAL_FISH;
-        Quaternion quaternion = Vector3f.YP.rotationDegrees(Minecraft.getInstance().player.tickCount + Minecraft.getInstance().getFrameTime());
-        quaternion.mul(rotateUp ? Vector3f.ZN.rotationDegrees(-90) : Quaternion.ONE);
+        Quaternionf quaternion = Axis.YP.rotationDegrees(Minecraft.getInstance().player.tickCount + Minecraft.getInstance().getFrameTime());
+        quaternion.mul(rotateUp ? Axis.ZN.rotationDegrees(-90) : new Quaternionf(1, 1, 1, 1));
 
         renderEntityAt(x, y, scale, entity, 1000, quaternion);
 
@@ -371,9 +373,9 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 
         @Override
         public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
-            IFormattableTextComponent component = this.driveEntry.getTranslation().append(": " + this.driveEntry.getAmount() + "%");
-            FontRenderer font = Minecraft.getInstance().font;
-            stack.drawString(font, component, x + (150 - font.width(component)) / 2F, y + 3, -1);
+            MutableComponent component = this.driveEntry.getTranslation().append(": " + this.driveEntry.getAmount() + "%");
+            Font font = Minecraft.getInstance().font;
+            stack.drawString(font, component.toString(), x + (150 - font.width(component)) / 2F, y + 3, -1, false);
         }
 
         @Override
@@ -390,20 +392,20 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
 
     private class IsolatedDriveEntry implements GuiScrollboxEntry {
 
-        private final TranslationTextComponent title;
+        private final MutableComponent title;
         private final double progress;
-        private final List<Pair<TranslationTextComponent, Double>> entityAmounts;
+        private final List<Pair<MutableComponent, Double>> entityAmounts;
 
-        private IsolatedDriveEntry(TranslationTextComponent title, double progress, List<Pair<TranslationTextComponent, Double>> entityAmounts) {
+        private IsolatedDriveEntry(MutableComponent title, double progress, List<Pair<MutableComponent, Double>> entityAmounts) {
             this.title = title;
             this.progress = progress;
             this.entityAmounts = entityAmounts;
-            this.entityAmounts.sort(Comparator.<Pair<TranslationTextComponent, Double>, Double>comparing(Pair::getSecond).reversed().thenComparing(d -> d.getFirst().getString()));
+            this.entityAmounts.sort(Comparator.<Pair<MutableComponent, Double>, Double>comparing(Pair::getSecond).reversed().thenComparing(d -> d.getFirst().getString()));
         }
 
         @Override
         public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
-            stack.drawString(font, this.title.append(": " + MathHelper.floor(this.progress * 100D) + "%"), x + 2, y + 3, -1);
+            stack.drawString(font, this.title.append(": " + Mth.floor(this.progress * 100D) + "%"), x + 2, y + 3, -1);
         }
 
         @Override
@@ -416,7 +418,7 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
             cachedIsolationEntries.clear();
             cachedIsolationEntries.addAll(
                 this.entityAmounts.stream()
-                    .map(p -> new TextGuiScrollboxEntry(p.getFirst().copy().append(": " + MathHelper.floor(p.getSecond() * 100D) + "%")))
+                    .map(p -> new TextGuiScrollboxEntry(p.getFirst().copy().append(": " + Mth.floor(p.getSecond() * 100D) + "%")))
                     .collect(Collectors.toList())
             );
             isolatedGeneScrollBox.setScroll(0);

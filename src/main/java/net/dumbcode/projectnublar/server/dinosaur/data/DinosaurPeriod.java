@@ -1,7 +1,7 @@
 package net.dumbcode.projectnublar.server.dinosaur.data;
 
 import net.dumbcode.projectnublar.server.fossil.base.DinosaurAge;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 
 import java.util.Random;
 
@@ -37,8 +37,8 @@ public enum DinosaurPeriod {
     }
 
     public int getYLevel(Random random) {
-        int min = MathHelper.floor(DinosaurPeriod.yStart - DinosaurPeriod.yStart * startTime / 541F);
-        int max = MathHelper.floor(DinosaurPeriod.yStart - DinosaurPeriod.yStart * endTime / 541F);
+        int min = Mth.floor(DinosaurPeriod.yStart - DinosaurPeriod.yStart * startTime / 541F);
+        int max = Mth.floor(DinosaurPeriod.yStart - DinosaurPeriod.yStart * endTime / 541F);
         return random.nextInt(max - min) + min;
     }
 

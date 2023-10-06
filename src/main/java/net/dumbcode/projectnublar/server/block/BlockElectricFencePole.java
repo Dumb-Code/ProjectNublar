@@ -26,7 +26,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -148,7 +148,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                         nbt.put("fence_position", NBTUtil.writeBlockPos(pos));
                     } else if(world.getBlockState(other).getBlock() == this && !other.equals(pos)) {
                         int itemMax;
-                        int itemAmount = itemMax = MathHelper.ceil(dist / BlockElectricFence.ITEM_FOLD*this.type.getHeight());
+                        int itemAmount = itemMax = Mth.ceil(dist / BlockElectricFence.ITEM_FOLD*this.type.getHeight());
                         int total = 0;
                         boolean full = false;
                         List<Pair<ItemStack, Integer>> stacksFound = Lists.newArrayList();
