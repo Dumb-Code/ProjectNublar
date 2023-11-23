@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineModuleContainer> {
-
     private static final ResourceLocation MACHINE_ICONS = new ResourceLocation(ProjectNublar.MODID, "textures/gui/machine_icons.png");
 
     private final MachineModuleBlockEntity<?> blockEntity;
@@ -42,11 +41,11 @@ public abstract class MachineContainerScreen extends TabbedGuiContainer<MachineM
 
     protected void bottomUpSubPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight, float percent) {
         float inverseHeight = (1-percent)*height;
-        subPixelBlit(stack, x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
+        subPixelBlit(stack,  x, y + inverseHeight, u, v + inverseHeight, width, percent*height, textureWidth, textureHeight);
     }
 
     protected void subPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height) {
-        this.subPixelBlit(stack, x, y, u, v, width, height, 256, 256);
+        this.subPixelBlit(stack,  x, y, u, v, width, height, 256, 256);
     }
 
     protected void subPixelBlit(GuiGraphics stack, float x, float y, float u, float v, float width, float height, int textureWidth, int textureHeight) {

@@ -6,9 +6,10 @@
   "mixins": [
     "BlockLootTablesInvoker",
     "BlockModelProviderInvoker",
-    "PlayerInventoryMixin",
+    "PlayerInventoryMixin"
   ],
   "client": [
+    "ButtonAccessor",
     "SimpleBakedModelAccessor"
   ],
   "minVersion": "0.8"

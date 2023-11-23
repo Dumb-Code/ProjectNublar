@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -19,13 +19,13 @@ public class S2CStartTrackingTabletHandshake {
     private final int startZ;
     private final int endZ;
 
-    public static S2CStartTrackingTabletHandshake fromBytes(PacketBuffer buf) {
+    public static S2CStartTrackingTabletHandshake fromBytes(FriendlyByteBuf buf) {
         return new S2CStartTrackingTabletHandshake(
             buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt()
         );
     }
 
-    public static void toBytes(S2CStartTrackingTabletHandshake packet, PacketBuffer buf) {
+    public static void toBytes(S2CStartTrackingTabletHandshake packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.startX);
         buf.writeInt(packet.endX);
         buf.writeInt(packet.startZ);

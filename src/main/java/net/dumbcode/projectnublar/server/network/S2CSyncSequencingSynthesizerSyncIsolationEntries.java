@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -33,7 +33,7 @@ public class S2CSyncSequencingSynthesizerSyncIsolationEntries {
         );
     }
 
-    public static S2CSyncSequencingSynthesizerSyncIsolationEntries fromBytes(PacketBuffer buf) {
+    public static S2CSyncSequencingSynthesizerSyncIsolationEntries fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncSequencingSynthesizerSyncIsolationEntries(
             buf.readBlockPos(),
             IntStream.range(0, buf.readShort())
@@ -45,11 +45,11 @@ public class S2CSyncSequencingSynthesizerSyncIsolationEntries {
         );
     }
 
-    private static <O> SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> readValue(GeneticType<?, O> type, PacketBuffer buffer) {
+    private static <O> SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> readValue(GeneticType<?, O> type, FriendlyByteBuf buffer) {
         return new SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<>(type, type.getDataHandler().read(buffer));
     }
 
-    public static void toBytes(S2CSyncSequencingSynthesizerSyncIsolationEntries packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncSequencingSynthesizerSyncIsolationEntries packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeShort(packet.entryList.size());
         for (SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry : packet.entryList) {
@@ -58,7 +58,7 @@ public class S2CSyncSequencingSynthesizerSyncIsolationEntries {
         }
     }
 
-    private static <O> void writeValue(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> type, PacketBuffer buffer) {
+    private static <O> void writeValue(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> type, FriendlyByteBuf buffer) {
         type.getType().getDataHandler().write(type.getValue(), buffer);
     }
 

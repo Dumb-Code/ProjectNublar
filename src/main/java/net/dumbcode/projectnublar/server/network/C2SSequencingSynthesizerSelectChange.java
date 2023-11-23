@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -22,7 +22,7 @@ public class C2SSequencingSynthesizerSelectChange {
     private final double amount;
     private final SequencingSynthesizerBlockEntity.DnaColourStorage storage;
 
-    public static C2SSequencingSynthesizerSelectChange fromBytes(PacketBuffer buf) {
+    public static C2SSequencingSynthesizerSelectChange fromBytes(FriendlyByteBuf buf) {
         return new C2SSequencingSynthesizerSelectChange(
             buf.readInt(), buf.readUtf(), buf.readDouble(),
             new SequencingSynthesizerBlockEntity.DnaColourStorage(
@@ -32,7 +32,7 @@ public class C2SSequencingSynthesizerSelectChange {
         );
     }
 
-    public static void toBytes(C2SSequencingSynthesizerSelectChange packet, PacketBuffer buf) {
+    public static void toBytes(C2SSequencingSynthesizerSelectChange packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.id);
         buf.writeUtf(packet.key);
         buf.writeDouble(packet.amount);

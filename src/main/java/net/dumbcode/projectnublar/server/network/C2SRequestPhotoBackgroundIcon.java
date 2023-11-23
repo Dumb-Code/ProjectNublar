@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -17,7 +17,7 @@ public class C2SRequestPhotoBackgroundIcon {
     private final String uploaderUUID;
     private final String imageHash;
 
-    public static C2SRequestPhotoBackgroundIcon fromBytes(PacketBuffer buf) {
+    public static C2SRequestPhotoBackgroundIcon fromBytes(FriendlyByteBuf buf) {
         return new C2SRequestPhotoBackgroundIcon(
             buf.readBoolean(),
             buf.readUtf(),
@@ -25,7 +25,7 @@ public class C2SRequestPhotoBackgroundIcon {
         );
     }
 
-    public static void toBytes(C2SRequestPhotoBackgroundIcon packet, PacketBuffer buf) {
+    public static void toBytes(C2SRequestPhotoBackgroundIcon packet, FriendlyByteBuf buf) {
         buf.writeBoolean(packet.global);
         buf.writeUtf(packet.uploaderUUID);
         buf.writeUtf(packet.imageHash);

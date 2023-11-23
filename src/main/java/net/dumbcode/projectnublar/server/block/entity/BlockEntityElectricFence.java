@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.LineUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -42,17 +42,17 @@ public class BlockEntityElectricFence extends SimpleBlockEntity implements Conne
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         ListNBT nbt = new ListNBT();
         for (Connection connection : this.fenceConnections) {
-            nbt.add(connection.writeToNBT(new CompoundNBT()));
+            nbt.add(connection.writeToNBT(new CompoundTag()));
         }
         compound.put("connections", nbt);
         return super.save(compound);
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         super.load(state, compound);
         this.fenceConnections.clear();
         ListNBT nbt = compound.getList("connections", Constants.NBT.TAG_COMPOUND);

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
@@ -128,27 +128,27 @@ public class FeedingDiet {
     }
 
 
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         ListNBT blocks = new ListNBT();
         ListNBT items = new ListNBT();
         ListNBT entities = new ListNBT();
 
         this.blocks.forEach((state, result) -> {
-            CompoundNBT compound = new CompoundNBT();
+            CompoundTag compound = new CompoundTag();
             compound.put("blockstate", NBTUtil.writeBlockState(state));
-            compound.put("result", FeedingResult.writeToNBT(new CompoundNBT(), result));
+            compound.put("result", FeedingResult.writeToNBT(new CompoundTag(), result));
             blocks.add(compound);
         });
         this.items.forEach((stack, result) -> {
-            CompoundNBT compound = new CompoundNBT();
+            CompoundTag compound = new CompoundTag();
             compound.put("itemstack", stack.serializeNBT());
-            compound.put("result", FeedingResult.writeToNBT(new CompoundNBT(), result));
+            compound.put("result", FeedingResult.writeToNBT(new CompoundTag(), result));
             items.add(compound);
         });
         this.entities.forEach((type, result) -> {
-            CompoundNBT compound = new CompoundNBT();
+            CompoundTag compound = new CompoundTag();
             compound.putString("entity_type", type.getRegistryName().toString());
-            compound.put("result", FeedingResult.writeToNBT(new CompoundNBT(), result));
+            compound.put("result", FeedingResult.writeToNBT(new CompoundTag(), result));
             entities.add(compound);
         });
 
@@ -158,21 +158,21 @@ public class FeedingDiet {
         return nbt;
     }
 
-    public void fromNBT(CompoundNBT nbt) {
+    public void fromNBT(CompoundTag nbt) {
         this.blocks.clear();
         this.items.clear();
         this.entities.clear();
 
         for (INBT base : nbt.getList("blocks", Constants.NBT.TAG_COMPOUND)) {
-            CompoundNBT compound = (CompoundNBT) base;
+            CompoundTag compound = (CompoundTag) base;
             this.blocks.put(NBTUtil.readBlockState(compound.getCompound("blockstate")), FeedingResult.readFromNbt(compound.getCompound("result")));
         }
         for (INBT base : nbt.getList("items", Constants.NBT.TAG_COMPOUND)) {
-            CompoundNBT compound = (CompoundNBT) base;
+            CompoundTag compound = (CompoundTag) base;
             this.items.put(ItemStack.of(compound.getCompound("itemstack")), FeedingResult.readFromNbt(compound.getCompound("result")));
         }
         for (INBT base : nbt.getList("entities", Constants.NBT.TAG_COMPOUND)) {
-            CompoundNBT compound = (CompoundNBT) base;
+            CompoundTag compound = (CompoundTag) base;
             ResourceLocation resourceLocation = new ResourceLocation(compound.getString("entity_type"));
             EntityType<?> type = ForgeRegistries.ENTITIES.getValue(resourceLocation);
             if(type != null) {

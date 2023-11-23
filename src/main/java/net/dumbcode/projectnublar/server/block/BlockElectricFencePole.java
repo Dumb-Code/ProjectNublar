@@ -16,7 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.IntegerProperty;
@@ -137,13 +137,13 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                     return ActionResultType.SUCCESS;
                 }
             } else if(stack.getItem() == ItemHandler.WIRE_SPOOL.get()) { //Move to item class ?
-                CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+                CompoundTag nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
                 if(nbt.contains("fence_position", Constants.NBT.TAG_COMPOUND)) {
                     BlockPos other = NBTUtil.readBlockPos(nbt.getCompound("fence_position"));
                     double dist = Math.sqrt(other.distSqr(pos));
                     if(dist > LIMIT) {
                         if(!world.isClientSide) {
-                            player.displayClientMessage(new TranslationTextComponent("projectnublar.fences.length.toolong", Math.round(dist), LIMIT), true);
+                            player.displayClientMessage(Component.translatable("projectnublar.fences.length.toolong", Math.round(dist), LIMIT), true);
                         }
                         nbt.put("fence_position", NBTUtil.writeBlockPos(pos));
                     } else if(world.getBlockState(other).getBlock() == this && !other.equals(pos)) {
@@ -179,7 +179,7 @@ public class BlockElectricFencePole extends BlockConnectableBase implements IIte
                         }
                         if(!full) {
                             if(!world.isClientSide) {
-                                player.displayClientMessage(new TranslationTextComponent("projectnublar.fences.length.notenough", itemMax, total), true);
+                                player.displayClientMessage(Component.translatable("projectnublar.fences.length.notenough", itemMax, total), true);
                             }
                         } else {
                             if(!player.isCreative()) {

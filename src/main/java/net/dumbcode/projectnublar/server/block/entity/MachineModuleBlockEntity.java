@@ -29,7 +29,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
@@ -110,12 +110,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         compound.put("ItemHandler", this.handler.serializeNBT());
         compound.putInt("ProcessCount", this.processes.size());
         for (int i = 0; i < this.processes.size(); i++) {
             MachineProcess<B> process = this.processes.get(i);
-            CompoundNBT nbt = new CompoundNBT();
+            CompoundTag nbt = new CompoundTag();
             nbt.putInt("Time", process.time);
             nbt.putInt("TotalTime", process.totalTime);
             if(process.currentRecipe != null) {
@@ -125,7 +125,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
             ListNBT blockedList = new ListNBT();
             for (BlockedProcess blockedProcess : process.blockedProcessList) {
-                CompoundNBT blockedNbt = new CompoundNBT();
+                CompoundTag blockedNbt = new CompoundTag();
                 blockedNbt.putIntArray("Slots", blockedProcess.getSlots());
                 blockedNbt.put("Item", blockedProcess.getStack().serializeNBT());
                 blockedList.add(blockedNbt);
@@ -135,7 +135,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             compound.put("Process_" + i, nbt);
         }
 
-        CompoundNBT energyNBT = new CompoundNBT();
+        CompoundTag energyNBT = new CompoundTag();
         energyNBT.putInt("Amount", energy.getEnergyStored());
         compound.put("Energy", energyNBT);
         return super.save(compound);
@@ -143,12 +143,12 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
 
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         super.load(state, compound);
         this.handler.deserializeNBT(compound.getCompound("ItemHandler"));
         for (int i = 0; i < compound.getInt("ProcessCount"); i++) {
             MachineProcess<B> process = this.processes.get(i);
-            CompoundNBT nbt = compound.getCompound("Process_" + i);
+            CompoundTag nbt = compound.getCompound("Process_" + i);
             process.setTime(nbt.getInt("Time"));
             process.setTotalTime(nbt.getInt("TotalTime"));
             process.setCurrentRecipe(nbt.contains("Recipe", Constants.NBT.TAG_STRING) ? this.getRecipe(new ResourceLocation(nbt.getString("Recipe"))) : null);
@@ -157,7 +157,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             List<BlockedProcess> list = process.getBlockedProcessList();
             list.clear();
             for (INBT blocked : nbt.getList("Blocked", Constants.NBT.TAG_COMPOUND)) {
-                CompoundNBT blockedNbt = (CompoundNBT) blocked;
+                CompoundTag blockedNbt = (CompoundTag) blocked;
                 list.add(new BlockedProcess(
                     ItemStack.of(blockedNbt.getCompound("Item")),
                     blockedNbt.getIntArray("Slots")
@@ -165,7 +165,7 @@ public abstract class MachineModuleBlockEntity<B extends MachineModuleBlockEntit
             }
         }
 
-        CompoundNBT energyNBT = compound.getCompound("Energy");
+        CompoundTag energyNBT = compound.getCompound("Energy");
         energy = new MachineModuleEnergyStorage(getEnergyCapacity(), getEnergyMaxTransferSpeed(), getEnergyMaxExtractSpeed(), energyNBT.getInt("Amount"));
     }
 

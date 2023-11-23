@@ -1,20 +1,20 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
-import net.minecraft.util.Hand;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.InteractionHand;
 
+@Getter
 public class OpenedTabletScreen extends BaseTabletScreen {
 
-    @Getter
     private TabletScreen screen;
 
-    public OpenedTabletScreen(Hand hand) {
+    public OpenedTabletScreen(InteractionHand hand) {
         super(hand);
     }
 
     public void setScreen(TabletScreen screen) {
-        this.children.clear();
+        this.children().clear();
         this.screen = this.addWidget(screen);
         this.screen.setData(this.leftStart, this.topStart, this.tabletWidth, this.tabletHeight);
     }

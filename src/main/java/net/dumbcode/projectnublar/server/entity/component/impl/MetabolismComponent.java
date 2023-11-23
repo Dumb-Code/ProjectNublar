@@ -24,7 +24,7 @@ import net.dumbcode.projectnublar.server.entity.mood.MoodReasons;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.MetabolismInformation;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.Mth;
 import net.minecraft.util.math.vector.Vector3d;
@@ -87,7 +87,7 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
     }
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.putFloat("food", this.food);
         compound.putFloat("water", this.water);
         compound.putFloat("energy", this.energy);
@@ -105,12 +105,12 @@ public class MetabolismComponent extends EntityComponent implements CanBreedComp
         compound.putInt("food_smell_distance", this.foodSmellDistance);
         compound.putInt("hydrate_amount_per_tick", this.hydrateAmountPerTick);
 
-        compound.put("diet", this.diet.writeToNBT(new CompoundNBT()));
+        compound.put("diet", this.diet.writeToNBT(new CompoundTag()));
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         super.deserialize(compound);
         this.food = compound.getFloat("food");
         this.water = compound.getFloat("water");

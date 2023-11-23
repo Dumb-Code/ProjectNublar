@@ -97,16 +97,16 @@ public class SequencingSynthesizerInputsScreen extends SequencerSynthesizerBaseS
 
         stack.blit(BASE_LOCATION, this.leftPos, this.topPos, (int) stack.pose().last().pose().getTranslation(new Vector3f()).z, 0, 0, this.imageWidth, this.imageHeight, OVERLAY_HEIGHT, OVERLAY_WIDTH); //There is a vanilla bug that mixes up width and height
 
-        subPixelBlit(stack, this.leftPos + 9, this.topPos + 68, 351, 128, (float) (this.blockEntity.waterPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
-        subPixelBlit(stack, this.leftPos + 9, this.topPos + 138, 351, 128, (float) (this.blockEntity.sugarPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
-        subPixelBlit(stack, this.leftPos + 245, this.topPos + 68, 351, 128, (float) (this.blockEntity.bonePercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
-        subPixelBlit(stack, this.leftPos + 245, this.topPos + 138, 351, 128, (float) (this.blockEntity.plantPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack,  this.leftPos + 9, this.topPos + 68, 351, 128, (float) (this.blockEntity.waterPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack,  this.leftPos + 9, this.topPos + 138, 351, 128, (float) (this.blockEntity.sugarPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack,  this.leftPos + 245, this.topPos + 68, 351, 128, (float) (this.blockEntity.bonePercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack,  this.leftPos + 245, this.topPos + 138, 351, 128, (float) (this.blockEntity.plantPercent() * 96), 8, OVERLAY_WIDTH, OVERLAY_HEIGHT);
 
 
         float timeDone = this.process.getTimeDone(); //mouseX / (float)this.width;//
 
         bottomUpSubPixelBlit(stack, this.leftPos + 111, this.topPos + 36, 351, 0, 128, 127, OVERLAY_WIDTH, OVERLAY_HEIGHT, timeDone);
-        subPixelBlit(stack, this.leftPos + 159, this.topPos + 171, 351, 136, 33*timeDone, 11, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        subPixelBlit(stack,  this.leftPos + 159, this.topPos + 171, 351, 136, 33*timeDone, 11, OVERLAY_WIDTH, OVERLAY_HEIGHT);
     }
 
     @Override

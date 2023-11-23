@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalProperties;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.World;
@@ -24,7 +24,7 @@ public class BUpdatePoleList {
     private final BlockPos pos;
     private final List<SkeletalProperties.Pole> poleList;
 
-    public static BUpdatePoleList fromBytes(PacketBuffer buf) {
+    public static BUpdatePoleList fromBytes(FriendlyByteBuf buf) {
         return new BUpdatePoleList(
             buf.readBlockPos(),
             IntStream.range(0, buf.readInt())
@@ -33,7 +33,7 @@ public class BUpdatePoleList {
         );
     }
 
-    public static void toBytes(BUpdatePoleList packet, PacketBuffer buf) {
+    public static void toBytes(BUpdatePoleList packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeInt(packet.poleList.size());
         for (SkeletalProperties.Pole pole : packet.poleList) {

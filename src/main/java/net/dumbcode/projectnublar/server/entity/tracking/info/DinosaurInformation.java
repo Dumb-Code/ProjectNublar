@@ -8,8 +8,8 @@ import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
@@ -40,19 +40,19 @@ public class DinosaurInformation extends TooltipInformation {
         return Collections.singletonList(I18n.get("projectnublar.gui.tracking.dinosaur", I18n.get(this.dinosaur.createNameTranslationKey())));
     }
 
-    public static void encodeNBT(CompoundNBT nbt, DinosaurInformation info) {
+    public static void encodeNBT(CompoundTag nbt, DinosaurInformation info) {
         nbt.putString("dinosaur", info.dinosaur.getRegName().toString());
     }
 
-    public static DinosaurInformation decodeNBT(CompoundNBT nbt) {
+    public static DinosaurInformation decodeNBT(CompoundTag nbt) {
         return new DinosaurInformation(DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("dinosaur"))));
     }
 
-    public static void encodeBuf(PacketBuffer buf, DinosaurInformation info) {
+    public static void encodeBuf(FriendlyByteBuf buf, DinosaurInformation info) {
         buf.writeRegistryId(info.dinosaur);
     }
 
-    public static DinosaurInformation decodeBuf(PacketBuffer buf) {
+    public static DinosaurInformation decodeBuf(FriendlyByteBuf buf) {
         return new DinosaurInformation(buf.readRegistryIdSafe(Dinosaur.class));
     }
 }

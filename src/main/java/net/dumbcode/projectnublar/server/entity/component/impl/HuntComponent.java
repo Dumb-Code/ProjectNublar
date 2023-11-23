@@ -9,7 +9,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.ai.HuntFollowGoal;
 import net.dumbcode.projectnublar.server.entity.ai.HuntLeadGoal;
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
 
 import java.util.UUID;
@@ -23,7 +23,7 @@ public class HuntComponent extends EntityComponent implements EntityGoalSupplier
     public BlockPos huntStartPosition = BlockPos.ZERO;
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.putBoolean("wants_to_start_hunt", this.wantsToStartHunt);
         if(this.followingHuntLeader != null) {
             compound.putUUID("following_hunt_leader", this.followingHuntLeader);
@@ -35,7 +35,7 @@ public class HuntComponent extends EntityComponent implements EntityGoalSupplier
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         this.wantsToStartHunt = compound.getBoolean("wants_to_start_hunt");
         if(compound.hasUUID("following_hunt_leader")) {
             this.followingHuntLeader = compound.getUUID("following_hunt_leader");

@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.dumbcode.projectnublar.server.item.MachineModuleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -115,9 +115,9 @@ public enum SequencingSynthesizerRecipe implements MachineRecipe<SequencingSynth
             ItemStack stack = new ItemStack(ItemHandler.TEST_TUBES_DNA.get(DinosaurHandler.getRegistry().getValue(location)));
             List<GeneticEntry<?, ?>> geneticEntries = blockEntity.gatherAllGeneticEntries();
             ListNBT collected = geneticEntries.stream()
-                .map(g -> g.serialize(new CompoundNBT()))
+                .map(g -> g.serialize(new CompoundTag()))
                 .collect(CollectorUtils.toNBTTagList());
-            CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+            CompoundTag nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
             nbt.put("Genetics", collected);
 
             if(blockEntity.getDinosaurGender().hasValue()) {

@@ -16,8 +16,8 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.DinosaurInformation;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Consumer;
@@ -30,13 +30,13 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
     private Dinosaur dinosaur = DinosaurHandler.TYRANNOSAURUS.get();
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.putString("dinosaur", this.dinosaur.getRegName().toString());
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         super.deserialize(compound);
         ResourceLocation identifier = new ResourceLocation(compound.getString("dinosaur"));
         if (DinosaurHandler.getRegistry().containsKey(identifier)) {
@@ -48,12 +48,12 @@ public class DinosaurComponent extends EntityComponent implements RenderLocation
     }
 
     @Override
-    public void serialize(PacketBuffer buf) {
+    public void serialize(FriendlyByteBuf buf) {
         buf.writeRegistryId(this.dinosaur);
     }
 
     @Override
-    public void deserialize(PacketBuffer buf) {
+    public void deserialize(FriendlyByteBuf buf) {
         this.dinosaur = buf.readRegistryIdSafe(Dinosaur.class);
     }
 

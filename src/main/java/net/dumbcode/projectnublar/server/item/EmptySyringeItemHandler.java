@@ -11,7 +11,7 @@ import net.minecraft.entity.passive.ParrotEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -37,7 +37,7 @@ public class EmptySyringeItemHandler {
             out.getOrCreateTagElement(ProjectNublar.MODID).putString("ContainedType", entity.getType().getRegistryName().toString());
         } else if(EntityGeneticRegistry.INSTANCE.isRegistered(entity.getType())) {
             out = new ItemStack(ItemHandler.DNA_FILLED_SYRINGE.get());
-            CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
+            CompoundTag nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
             nbt.putString("ContainedType", entity.getType().getRegistryName().toString());
             nbt.putInt("ContainedSize", MathUtils.getWeightedResult(65, 10));
             String variant = EntityGeneticRegistry.INSTANCE.getVariant(entity);

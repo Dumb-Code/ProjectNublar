@@ -7,7 +7,7 @@ import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
@@ -52,8 +52,8 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
-        compound.put("Connections", this.connections.stream().collect(CollectorUtils.functionMapper(CompoundNBT::new, (connection, tag) -> {
+    public CompoundTag save(CompoundTag compound) {
+        compound.put("Connections", this.connections.stream().collect(CollectorUtils.functionMapper(CompoundTag::new, (connection, tag) -> {
             tag.put("FromPos", NBTUtil.writeBlockPos(connection.getFrom()));
             tag.put("ToPos", NBTUtil.writeBlockPos(connection.getTo()));
         })).collect(CollectorUtils.toNBTTagList()));
@@ -62,10 +62,10 @@ public class PylonHeadBlockEntity extends SimpleBlockEntity {
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         this.connections.clear();
         StreamUtils.stream(compound.getList("Connections", Constants.NBT.TAG_COMPOUND))
-            .map(t -> (CompoundNBT) t)
+            .map(t -> (CompoundTag) t)
             .map(t -> new Connection(NBTUtil.readBlockPos(t.getCompound("FromPos")), NBTUtil.readBlockPos(t.getCompound("ToPos"))))
             .forEach(this.connections::add);
         this.networkUUID = compound.getUUID("NetworkID");

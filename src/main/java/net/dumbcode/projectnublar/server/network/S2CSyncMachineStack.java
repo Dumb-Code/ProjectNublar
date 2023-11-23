@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -30,13 +30,13 @@ public class S2CSyncMachineStack {
         this.stack = entity.getHandler().getStackInSlot(slot);
     }
 
-    public static S2CSyncMachineStack fromBytes(PacketBuffer buf) {
+    public static S2CSyncMachineStack fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncMachineStack(
             buf.readBlockPos(), buf.readInt(), buf.readItem()
         );
     }
 
-    public static void toBytes(S2CSyncMachineStack packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncMachineStack packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeInt(packet.slot);
         buf.writeItem(packet.stack);

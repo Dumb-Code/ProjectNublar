@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.CloseProximityAngryCom
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -56,14 +56,14 @@ public class CloseProximityBlacklistStorage extends CloseProximityAngryComponent
     }
 
     @Override
-    public void readNBT(CompoundNBT nbt) {
+    public void readNBT(CompoundTag nbt) {
         this.blackListClasses = nbt.getList("blacklist_classes", Constants.NBT.TAG_STRING).stream()
             .map(j -> new ResourceLocation(j.getAsString()))
             .collect(Collectors.toList());
     }
 
     @Override
-    public CompoundNBT writeNBT(CompoundNBT nbt) {
+    public CompoundTag writeNBT(CompoundTag nbt) {
         nbt.put("blacklist_classes", this.blackListClasses.stream()
             .map(t -> StringNBT.valueOf(t.toString()))
             .collect(CollectorUtils.toNBTTagList())

@@ -1,24 +1,22 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.StencilStack;
 import net.dumbcode.projectnublar.client.gui.icons.WeatherIcon;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.Hand;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import org.lwjgl.opengl.GL11;
-
-import java.nio.file.Path;
-import java.util.List;
+import net.minecraft.world.InteractionHand;
+import org.joml.Vector3f;
 
 //TabInformationBar
 public abstract class BaseTabletScreen extends Screen {
@@ -35,9 +33,9 @@ public abstract class BaseTabletScreen extends Screen {
 
     protected boolean homeButton = true;
 
-    protected final Hand hand;
+    protected final InteractionHand hand;
 
-    protected BaseTabletScreen(Hand hand) {
+    protected BaseTabletScreen(InteractionHand hand) {
         super(Component.literal("If you see this let me know I need to add it"));
         this.hand = hand;
     }
@@ -63,7 +61,7 @@ public abstract class BaseTabletScreen extends Screen {
             StencilStack.pushSquareStencil(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight);
         }
 
-        fill(stack,0, 0, this.width, this.height, -1);
+        stack.fill(0, 0, this.width, this.height, -1);
 
         this.drawTabletScreen(stack, mouseX, mouseY, Minecraft.getInstance().getDeltaFrameTime());
 
@@ -96,8 +94,7 @@ public abstract class BaseTabletScreen extends Screen {
 
     private void renderHomePage(GuiGraphics stack, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
-        minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"));
-        blit(stack,this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2, this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5, 0, 0, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE);
+        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_home_icon.png"), this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2, this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5, 0, 0, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE, HOME_ICON_SIZE);
 
         int left = this.leftStart + (this.tabletWidth-HOME_ICON_SIZE)/2;
         int top = this.topStart + this.tabletHeight - HOME_ICON_SIZE - 5;
@@ -110,21 +107,20 @@ public abstract class BaseTabletScreen extends Screen {
     }
 
     private void renderNotificationBar(GuiGraphics stack) {
-        RenderSystem.color4f(1F , 1F, 1F, 1F);
+        RenderSystem.setShaderColor(1F , 1F, 1F, 1F);
 
-        fillGradient(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16, -1072689136, -804253680);
+        stack.fillGradient(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16, -1072689136, -804253680);
 
         long time = (this.minecraft.level.getDayTime() + 6000) % 24000;
-        this.minecraft.stack.drawString(font, this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
+        stack.drawString(font, this.thicken((time / 1000) % 24) + ":" + this.thicken((time % 1000) * 0.06D), this.leftStart + 3, this.topStart + 4, -1);
 
         WeatherIcon icon = WeatherIcon.guess(this.minecraft.level, this.minecraft.player.blockPosition());
         float[] uv = icon.getUV();
-        this.minecraft.textureManager.bind(icon.getLocation());
 
-        BufferBuilder builder = Tessellator.getInstance().getBuilder();
-        builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        RenderUtils.drawTexturedQuad(stack, builder, this.leftStart + this.tabletWidth - 16F, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16F, uv[0], uv[1], uv[2], uv[3], stack.pose().popPose();pose().last().pose().getTranslation(new Vector3f()).z);
-        Tessellator.getInstance().end();
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        RenderUtils.drawTexturedQuad(stack, icon.getLocation(), builder, this.leftStart + this.tabletWidth - 16F, this.topStart, this.leftStart + this.tabletWidth, this.topStart + 16F, uv[0], uv[1], uv[2], uv[3], stack.pose().last().pose().getTranslation(new Vector3f()).z);
+        Tesselator.getInstance().end();
     }
 
     private String thicken(Number number) {

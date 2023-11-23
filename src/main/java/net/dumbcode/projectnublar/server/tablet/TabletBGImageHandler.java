@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.TextureUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.FolderName;

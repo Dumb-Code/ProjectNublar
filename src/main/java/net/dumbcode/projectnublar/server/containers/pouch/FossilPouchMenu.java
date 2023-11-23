@@ -11,7 +11,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.NonNullList;
 
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class FossilPouchMenu extends Container {
     private final UUID uuid;
 
     //gets called clientside. The real inv does not matter
-    public FossilPouchMenu(int syncId, PlayerInventory playerInventory, PacketBuffer /*FriendlyByteBuf*/ packetByteBuf) {
+    public FossilPouchMenu(int syncId, PlayerInventory playerInventory, FriendlyByteBuf /*FriendlyByteBuf*/ packetByteBuf) {
         this(syncId, playerInventory, packetByteBuf.readInt(), packetByteBuf.readInt(), packetByteBuf.readUUID(), Items.AIR.getDefaultInstance());
     }
 

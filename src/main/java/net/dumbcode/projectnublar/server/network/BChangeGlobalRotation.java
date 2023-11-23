@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.dumblibrary.server.network.NetworkUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.World;
@@ -20,11 +20,11 @@ public class BChangeGlobalRotation {
     private final float newRotation;
 
 
-    public static BChangeGlobalRotation fromBytes(PacketBuffer buf) {
+    public static BChangeGlobalRotation fromBytes(FriendlyByteBuf buf) {
         return new BChangeGlobalRotation(buf.readBlockPos(), buf.readFloat());
     }
 
-    public static void toBytes(BChangeGlobalRotation packet, PacketBuffer buf) {
+    public static void toBytes(BChangeGlobalRotation packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeFloat(packet.newRotation);
     }

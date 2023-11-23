@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 import net.dumbcode.projectnublar.server.block.BlockConnectableBase;
 import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.resources.ResourceLocation;
@@ -213,7 +213,7 @@ public class Connection {
             .build();
     }
 
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         nbt.putString("id", this.type.getRegistryName().toString());
         nbt.putDouble("offset", this.offset);
         nbt.put("from", NBTUtil.writeBlockPos(this.getFrom()));
@@ -226,7 +226,7 @@ public class Connection {
     }
 
 
-    public static Connection fromNBT(CompoundNBT nbt, TileEntity tileEntity) {
+    public static Connection fromNBT(CompoundTag nbt, TileEntity tileEntity) {
         return new Connection(
             tileEntity,
             ConnectionType.getType(new ResourceLocation(nbt.getString("id"))),

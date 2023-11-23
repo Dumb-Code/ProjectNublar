@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.dumbcode.projectnublar.server.item.UnincubatedEggItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.math.Mth;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -18,14 +18,14 @@ public class C2SPlaceIncubatorEgg {
     private final int xPos;
     private final int yPos;
 
-    public static C2SPlaceIncubatorEgg fromBytes(PacketBuffer buf) {
+    public static C2SPlaceIncubatorEgg fromBytes(FriendlyByteBuf buf) {
         return new C2SPlaceIncubatorEgg(
             Mth.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_WIDTH-IncubatorBlockEntity.HALF_EGG_SIZE),
             Mth.clamp(buf.readInt(), IncubatorBlockEntity.HALF_EGG_SIZE, IncubatorBlockEntity.BED_HEIGHT-IncubatorBlockEntity.HALF_EGG_SIZE)
         );
     }
 
-    public static void toBytes(C2SPlaceIncubatorEgg packet, PacketBuffer buf) {
+    public static void toBytes(C2SPlaceIncubatorEgg packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.xPos);
         buf.writeInt(packet.yPos);
     }

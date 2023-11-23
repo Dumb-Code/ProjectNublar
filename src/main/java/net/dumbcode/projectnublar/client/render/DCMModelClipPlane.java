@@ -103,13 +103,13 @@ public class DCMModelClipPlane {
                         return compare == 0 ? Double.compare(o2.x, o1.x) : compare;
                     });
 
-                    BufferBuilder buff = Tessellator.getInstance().getBuilder();
+                    BufferBuilder buff = Tesselator.getInstance().getBuilder();
                     buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
                     for (int coord : new int[]{0, 1, 3, 2, 1, 0, 2, 3}) {
                         Vector3d vec = outlist.get(coord);
                         buff.vertex(pose, (float) vec.x - movedNormal.x(), (float) vec.y - movedNormal.y(), (float) vec.z - movedNormal.z()).color(r, g, b, 255).endVertex();
                     }
-                    Tessellator.getInstance().end();
+                    Tesselator.getInstance().end();
                 }
                 RenderSystem.enableCull();
                 RenderSystem.enableTexture();

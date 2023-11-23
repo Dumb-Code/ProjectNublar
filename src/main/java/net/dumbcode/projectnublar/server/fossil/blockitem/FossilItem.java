@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.world.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -32,17 +32,17 @@ public class FossilItem extends Item {
     @Override
     public ITextComponent getName(ItemStack stack) {
         Fossil fossil = getFossil(stack);
-        return new TranslationTextComponent("projectnublar.fossil", "", WordUtils.capitalizeFully(fossil.name));
+        return Component.translatable("projectnublar.fossil", "", WordUtils.capitalizeFully(fossil.name));
     }
 
     public static Fossil getFossil(ItemStack stack) {
-        CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
         return FossilHandler.FOSSIL_REGISTRY.get().getValue(new ResourceLocation(nbt.getString("fossil")));
     }
 
     public static ItemStack stackWithFossil(Fossil fossil) {
         ItemStack stack = new ItemStack(ItemHandler.FOSSIL_ITEM.get());
-        CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
         nbt.putString("fossil", fossil.getRegistryName().toString());
         return stack;
     }

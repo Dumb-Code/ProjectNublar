@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.block.entity;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -88,7 +88,7 @@ public class MachineModuleItemStackHandler<B extends MachineModuleBlockEntity<B>
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         if(this.stacks.size() != this.decidedSize) {
             if(this.stacks.size() < this.decidedSize) {

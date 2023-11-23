@@ -10,8 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -85,24 +85,24 @@ public class BasicEntityInformation extends TooltipInformation {
         }
     }
 
-    public static void encodeNBT(CompoundNBT nbt, BasicEntityInformation info) {
+    public static void encodeNBT(CompoundTag nbt, BasicEntityInformation info) {
         nbt.putFloat("health", info.health);
         nbt.putFloat("max_health", info.maxHealth);
     }
 
-    public static BasicEntityInformation decodeNBT(CompoundNBT nbt) {
+    public static BasicEntityInformation decodeNBT(CompoundTag nbt) {
         return new BasicEntityInformation(
             nbt.getFloat("health"),
             nbt.getFloat("max_health")
         );
     }
 
-    public static void encodeBuf(PacketBuffer buf, BasicEntityInformation info) {
+    public static void encodeBuf(FriendlyByteBuf buf, BasicEntityInformation info) {
         buf.writeFloat(info.health);
         buf.writeFloat(info.maxHealth);
     }
 
-    public static BasicEntityInformation decodeBuf(PacketBuffer buf) {
+    public static BasicEntityInformation decodeBuf(FriendlyByteBuf buf) {
         return new BasicEntityInformation(
             buf.readFloat(),
             buf.readFloat()

@@ -8,7 +8,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.Mth;
@@ -30,14 +30,14 @@ public class DinosaurEggItem extends DnaHoverDinosaurItem {
         PlayerEntity player = context.getPlayer();
         World world = player.level;
         Vector3d location = context.getClickLocation();
-        CompoundNBT nbt = context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = context.getItemInHand().getOrCreateTagElement(ProjectNublar.MODID);
         if(!world.isClientSide) {
             DinosaurEntity entity = this.getDinosaur().createEntity(world,
                 this.getDinosaur().getAttacher().getDefaultConfig()
                     .runBeforeFinalize(EntityComponentTypes.GENETICS.get(), genetics -> {
                         genetics.disableRandomGenetics();
                         nbt.getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
-                            .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
+                            .map(g -> GeneticEntry.deserialize((CompoundTag) g))
                             .forEach(genetics::insertGenetic);
                     })
                     .runBeforeFinalize(EntityComponentTypes.GENDER.get(), gender -> {

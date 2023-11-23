@@ -247,10 +247,10 @@ public class SequencingScreen extends SequencerSynthesizerBaseScreen {
         float rightDone = Mth.clamp((timeDone - FIRST_SECTION_SIZE) / (1 - FIRST_SECTION_SIZE), 0F, 1F);
 
         if(leftDone != 0) {
-            subPixelBlit(stack,this.leftPos + 56, this.topPos + 151, 351, 0, leftDone * 119F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+            subPixelBlit(stack, this.leftPos + 56, this.topPos + 151, 351, 0, leftDone * 119F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
         if(rightDone != 0) {
-            subPixelBlit(stack,this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+            subPixelBlit(stack, this.leftPos + 175, this.topPos + 151, 351, 19, rightDone * 120F, 19, OVERLAY_WIDTH, OVERLAY_HEIGHT);
         }
 //        stack.blit(this.leftPos, this.topPos);
         if(this.cachedEntityRender != null && !this.showIsolatedGenes && this.activeSlot == null) {

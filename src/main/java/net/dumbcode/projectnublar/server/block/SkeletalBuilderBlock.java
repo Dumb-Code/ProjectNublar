@@ -31,7 +31,7 @@ import java.util.List;
 
 public class SkeletalBuilderBlock extends DirectionalBlock implements IItemBlock {
 
-    public static final TranslationTextComponent NO_DINOSAUR_TO_DISPLAY_TEXT = new TranslationTextComponent(ProjectNublar.MODID+".action.skeletal_builder.no_dino_to_display");
+    public static final TranslationTextComponent NO_DINOSAUR_TO_DISPLAY_TEXT = Component.translatable(ProjectNublar.MODID+".action.skeletal_builder.no_dino_to_display");
 
     protected SkeletalBuilderBlock(Properties properties) {
         super(properties);

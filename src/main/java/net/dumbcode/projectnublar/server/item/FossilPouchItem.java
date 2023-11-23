@@ -52,7 +52,7 @@ public class FossilPouchItem extends Item {
         INamedContainerProvider provider = new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("projectnublar.fossil_pouch.menu.title");
+                return Component.translatable("projectnublar.fossil_pouch.menu.title");
             }
 
             @Override

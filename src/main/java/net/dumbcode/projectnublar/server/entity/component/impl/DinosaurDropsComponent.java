@@ -14,7 +14,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.additionals.ItemDropCompone
 import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -31,7 +31,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
     private final List<String> fossilList = Lists.newArrayList();
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         ListNBT list = new ListNBT();
         for (String fossil : this.fossilList) {
             list.add(StringNBT.valueOf(fossil));
@@ -41,7 +41,7 @@ public class DinosaurDropsComponent extends EntityComponent implements ItemDropC
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         super.deserialize(compound);
         this.fossilList.clear();
         for (INBT base : compound.getList("drop_fossils", Constants.NBT.TAG_STRING)) {

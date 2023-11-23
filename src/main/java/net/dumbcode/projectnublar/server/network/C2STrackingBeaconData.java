@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.BlockTrackingBeacon;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
 import net.dumbcode.projectnublar.server.containers.ProjectNublarContainers;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -15,11 +15,11 @@ public class C2STrackingBeaconData {
     private final String name;
     private final int radius;
 
-    public static C2STrackingBeaconData fromBytes(PacketBuffer buf) {
+    public static C2STrackingBeaconData fromBytes(FriendlyByteBuf buf) {
         return new C2STrackingBeaconData(buf.readUtf(), buf.readInt());
     }
 
-    public static void toBytes(C2STrackingBeaconData packet, PacketBuffer buff) {
+    public static void toBytes(C2STrackingBeaconData packet, FriendlyByteBuf buff) {
         buff.writeUtf(packet.name);
         buff.writeInt(packet.radius);
     }

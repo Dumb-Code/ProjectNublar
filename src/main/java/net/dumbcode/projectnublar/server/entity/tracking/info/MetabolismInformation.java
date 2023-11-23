@@ -12,8 +12,8 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -103,7 +103,7 @@ public class MetabolismInformation extends TooltipInformation {
         );
     }
 
-    public static void encodeNBT(CompoundNBT nbt, MetabolismInformation info) {
+    public static void encodeNBT(CompoundTag nbt, MetabolismInformation info) {
         nbt.putFloat("food", info.food);
         nbt.putFloat("max_food", info.maxFood);
 
@@ -111,21 +111,21 @@ public class MetabolismInformation extends TooltipInformation {
         nbt.putFloat("max_water", info.maxWater);
     }
 
-    public static MetabolismInformation decodeNBT(CompoundNBT nbt) {
+    public static MetabolismInformation decodeNBT(CompoundTag nbt) {
         return new MetabolismInformation(
             nbt.getFloat("food"), nbt.getFloat("max_food"),
             nbt.getFloat("water"), nbt.getFloat("max_water")
         );
     }
 
-    public static void encodeBuf(PacketBuffer buf, MetabolismInformation info) {
+    public static void encodeBuf(FriendlyByteBuf buf, MetabolismInformation info) {
         buf.writeFloat(info.food);
         buf.writeFloat(info.maxFood);
         buf.writeFloat(info.water);
         buf.writeFloat(info.maxWater);
     }
 
-    public static MetabolismInformation decodeBuf(PacketBuffer buf) {
+    public static MetabolismInformation decodeBuf(FriendlyByteBuf buf) {
         return new MetabolismInformation(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
     }
 }

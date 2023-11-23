@@ -4,8 +4,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.TooltipInformation;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -53,22 +53,22 @@ public class PregnancyInformation extends TooltipInformation {
         return lines;
     }
 
-    public static void encodeNBT(CompoundNBT nbt, PregnancyInformation info) {
+    public static void encodeNBT(CompoundTag nbt, PregnancyInformation info) {
         nbt.putIntArray("ticks", info.ticksTillGiveBirth);
     }
 
-    public static PregnancyInformation decodeNBT(CompoundNBT nbt) {
+    public static PregnancyInformation decodeNBT(CompoundTag nbt) {
         return new PregnancyInformation(nbt.getIntArray("ticks"));
     }
 
-    public static void encodeBuf(PacketBuffer buf, PregnancyInformation info) {
+    public static void encodeBuf(FriendlyByteBuf buf, PregnancyInformation info) {
         buf.writeShort(info.ticksTillGiveBirth.length);
         for (int i : info.ticksTillGiveBirth) {
             buf.writeInt(i);
         }
     }
 
-    public static PregnancyInformation decodeBuf(PacketBuffer buf) {
+    public static PregnancyInformation decodeBuf(FriendlyByteBuf buf) {
         return new PregnancyInformation(IntStream.range(0, buf.readShort()).map(i -> buf.readInt()).toArray());
     }
 }

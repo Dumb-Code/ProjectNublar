@@ -1,5 +1,6 @@
 package net.dumbcode.projectnublar.client.gui.tab;
 
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -7,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
+@Getter
 public abstract class TabbedGuiContainer<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements MenuAccess<T> {
 
     private final TabInformationBar info;
@@ -45,9 +47,5 @@ public abstract class TabbedGuiContainer<T extends AbstractContainerMenu> extend
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
-
-    public TabInformationBar getInfo() {
-        return info;
-    }
 
 }

@@ -1,14 +1,14 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.minecraft.util.Hand;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.InteractionHand;
 
 public abstract class BaseBackgroundTabletScreen extends BaseTabletScreen implements BackgroundableScreen {
 
     private TabletBackground background;
 
-    protected BaseBackgroundTabletScreen(Hand hand) {
+    protected BaseBackgroundTabletScreen(InteractionHand hand) {
         super(hand);
     }
 

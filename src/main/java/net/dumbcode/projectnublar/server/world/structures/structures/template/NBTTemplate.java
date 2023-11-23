@@ -22,7 +22,7 @@ import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.inventory.IClearable;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
@@ -135,20 +135,20 @@ public class NBTTemplate {
 
         for(Template.EntityInfo entityInfo : this.delegate.entityInfoList) {
             Vector3d vec3 = mappedEntityPositions.get(entityInfo);
-            CompoundNBT compoundnbt = entityInfo.nbt.copy();
+            CompoundTag CompoundTag = entityInfo.nbt.copy();
             ListNBT listnbt = new ListNBT();
             listnbt.add(DoubleNBT.valueOf(vec3.x));
             listnbt.add(DoubleNBT.valueOf(vec3.y));
             listnbt.add(DoubleNBT.valueOf(vec3.z));
-            compoundnbt.put("Pos", listnbt);
-            compoundnbt.remove("UUID");
+            CompoundTag.put("Pos", listnbt);
+            CompoundTag.remove("UUID");
             try {
-                EntityType.create(compoundnbt, worldIn).ifPresent(entity -> {
+                EntityType.create(CompoundTag, worldIn).ifPresent(entity -> {
                     float f = entity.mirror(settingsDecision.getMirror());
                     f = f + (entity.yRot - entity.rotate(settingsDecision.getRotation()));
                     entity.moveTo(vec3.x, vec3.y, vec3.z, f, entity.xRot);
                     if (entity instanceof MobEntity) {
-                        ((MobEntity)entity).finalizeSpawn(worldIn, worldIn.getCurrentDifficultyAt(new BlockPos(vec3)), SpawnReason.STRUCTURE, (ILivingEntityData)null, compoundnbt);
+                        ((MobEntity)entity).finalizeSpawn(worldIn, worldIn.getCurrentDifficultyAt(new BlockPos(vec3)), SpawnReason.STRUCTURE, (ILivingEntityData)null, CompoundTag);
                     }
 
                     worldIn.addFreshEntityWithPassengers(entity);

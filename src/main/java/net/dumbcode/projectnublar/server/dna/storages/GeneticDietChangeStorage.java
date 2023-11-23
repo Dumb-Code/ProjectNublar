@@ -14,7 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -31,20 +31,20 @@ public class GeneticDietChangeStorage extends RandomUUIDStorage<Float> {
     private FeedingDiet diet = new FeedingDiet();
 
     @Override
-    public CompoundNBT serialize(CompoundNBT nbt) {
+    public CompoundTag serialize(CompoundTag nbt) {
         this.diet.writeToNBT(nbt);
         return super.serialize(nbt);
     }
 
     @Override
-    public void deserialize(CompoundNBT nbt) {
+    public void deserialize(CompoundTag nbt) {
         super.deserialize(nbt);
         this.diet.fromNBT(nbt);
     }
 
     @Override
     public void render(GuiGraphics stack, GeneticType<?, Float> entry, Float value, int x, int y, int width, int height, float ticks) {
-        TranslationTextComponent component = new TranslationTextComponent(DumbLibrary.MODID + ".genetic_storage.diet");
+        TranslationTextComponent component = Component.translatable(DumbLibrary.MODID + ".genetic_storage.diet");
         FontRenderer font = Minecraft.getInstance().font;
 
         int w = font.width(component);

@@ -1,11 +1,14 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
-import net.minecraft.client.gui.GuiEventListener;
-import net.minecraft.client.gui.INestedGuiEventHandler;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -13,13 +16,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@RequiredArgsConstructor
-public abstract class SetupPage<T extends TabletBackground> implements INestedGuiEventHandler {
+public abstract class SetupPage<T extends TabletBackground> implements ContainerEventHandler, NarratableEntry {
     private final int width;
     private final int height;
 
     protected int x;
     protected int y;
+
+    public SetupPage(int width, int height, int x, int y, GuiEventListener focused, boolean dragging) {
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        this.focused = focused;
+        this.dragging = dragging;
+    }
 
     private final List<GuiEventListener> children = new ArrayList<>();
     private GuiEventListener focused;
@@ -79,5 +90,14 @@ public abstract class SetupPage<T extends TabletBackground> implements INestedGu
     @Override
     public boolean isDragging() {
         return this.dragging;
+    }
+
+    @Override
+    public @NotNull NarrationPriority narrationPriority() {
+        return NarrationPriority.NONE;
+    }
+
+    @Override
+    public void updateNarration(@NotNull NarrationElementOutput p_169152_) {
     }
 }

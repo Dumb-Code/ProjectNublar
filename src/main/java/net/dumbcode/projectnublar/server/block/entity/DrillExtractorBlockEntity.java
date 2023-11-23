@@ -67,7 +67,7 @@ public class DrillExtractorBlockEntity extends MachineModuleBlockEntity<DrillExt
 
     @Override
     public ITextComponent createTitle(int tab) {
-        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.drill_extractor.title");
+        return Component.translatable(ProjectNublar.MODID + ".containers.drill_extractor.title");
     }
     // TODO: Change for balance, values are just for testing
     @Override

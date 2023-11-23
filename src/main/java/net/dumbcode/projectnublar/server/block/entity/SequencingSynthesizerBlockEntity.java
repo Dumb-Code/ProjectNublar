@@ -38,7 +38,7 @@ import net.minecraft.item.DyeColor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -173,7 +173,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         super.load(state, compound);
         this.tank.readFromNBT(compound.getCompound("FluidTank"));
         this.dye = DyeColor.byId(compound.getInt("Dye"));
@@ -181,7 +181,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
         ListNBT list = compound.getList("SelectedDnaList", 10);
         for (int i = 0; i < this.selectedDNAs.length; i++) {
-            CompoundNBT tag = list.getCompound(i);
+            CompoundTag tag = list.getCompound(i);
             this.selectedDNAs[i].setKey(tag.getString("Key"));
             this.selectedDNAs[i].setAmount(tag.getDouble("Amount"));
             this.selectedDNAs[i].setColorStorage(new DnaColourStorage(
@@ -193,7 +193,7 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
         this.isolationOverrides.clear();
         ListNBT iList = compound.getList("IsolationOverrides", 10);
         for (int i = 0; i < iList.size(); i++) {
-            CompoundNBT nbt = iList.getCompound(i);
+            CompoundTag nbt = iList.getCompound(i);
             IsolatedGeneticEntry<?> read = IsolatedGeneticEntry.read(nbt.getCompound("entry"));
             this.isolationOverrides.put(read.getType(), read);
         }
@@ -209,14 +209,14 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
-        compound.put("FluidTank", this.tank.writeToNBT(new CompoundNBT()));
+    public CompoundTag save(CompoundTag compound) {
+        compound.put("FluidTank", this.tank.writeToNBT(new CompoundTag()));
         compound.putInt("Dye", this.dye.getId());
         compound.putInt("ConsumeTimer", this.consumeTimer);
 
         ListNBT list = new ListNBT();
         for (SelectedDnaEntry selectedDNA : this.selectedDNAs) {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             tag.putString("Key", selectedDNA.getKey());
             tag.putDouble("Amount", selectedDNA.getAmount());
             tag.putIntArray("Primary", selectedDNA.getColorStorage().getPrimary().stream().mapToInt(value -> value).toArray());
@@ -227,9 +227,9 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
 
         ListNBT iList = new ListNBT();
         this.isolationOverrides.forEach((type, geneticEntry) -> {
-            CompoundNBT compoundNBT = new CompoundNBT();
-            compoundNBT.put("entry", IsolatedGeneticEntry.write(geneticEntry, new CompoundNBT()));
-            iList.add(compoundNBT);
+            CompoundTag CompoundTag = new CompoundTag();
+            CompoundTag.put("entry", IsolatedGeneticEntry.write(geneticEntry, new CompoundTag()));
+            iList.add(CompoundTag);
         });
         compound.put("IsolationOverrides", iList);
         compound.putByte("DinosaurGender", (byte) this.dinosaurGender.ordinal());
@@ -516,12 +516,12 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
     public ITextComponent createTitle(int tab) {
         switch (tab) {
             case 0:
-                return new TranslationTextComponent(ProjectNublar.MODID + ".container.sequencing.title");
+                return Component.translatable(ProjectNublar.MODID + ".container.sequencing.title");
             case 1:
             case 3:
-                return new TranslationTextComponent(ProjectNublar.MODID + ".container.dna_editing.title");
+                return Component.translatable(ProjectNublar.MODID + ".container.dna_editing.title");
             default:
-                return new TranslationTextComponent(ProjectNublar.MODID + ".container.sequencing_synthesizing.title");
+                return Component.translatable(ProjectNublar.MODID + ".container.sequencing_synthesizing.title");
 
         }
     }
@@ -706,16 +706,16 @@ public class SequencingSynthesizerBlockEntity extends MachineModuleBlockEntity<S
             this.value = value;
         }
 
-        public static IsolatedGeneticEntry<?> read(CompoundNBT nbt) {
+        public static IsolatedGeneticEntry<?> read(CompoundTag nbt) {
             return readWithType(nbt.getCompound("value"), GeneticTypes.registry().getValue(new ResourceLocation(nbt.getString("type"))));
         }
-        private static <O> IsolatedGeneticEntry<O> readWithType(CompoundNBT nbt, GeneticType<?, O> type) {
+        private static <O> IsolatedGeneticEntry<O> readWithType(CompoundTag nbt, GeneticType<?, O> type) {
             return new IsolatedGeneticEntry<>(type, type.getDataHandler().read(nbt));
         }
 
-        public static <O> CompoundNBT write(IsolatedGeneticEntry<O> entry, CompoundNBT nbt) {
+        public static <O> CompoundTag write(IsolatedGeneticEntry<O> entry, CompoundTag nbt) {
             nbt.putString("type", entry.type.getRegistryName().toString());
-            nbt.put("value", entry.type.getDataHandler().write(entry.value, new CompoundNBT()));
+            nbt.put("value", entry.type.getDataHandler().write(entry.value, new CompoundTag()));
             return nbt;
         }
 

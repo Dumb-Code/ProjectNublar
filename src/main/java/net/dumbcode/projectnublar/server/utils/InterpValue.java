@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.utils;
 import com.google.common.collect.Lists;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid=ProjectNublar.MODID)
-public class InterpValue implements INBTSerializable<CompoundNBT> {
+public class InterpValue implements INBTSerializable<CompoundTag> {
 
     private static final List<InterpValue> INSTANCES = Lists.newArrayList();
     private static final List<InterpValue> MARKED_REMOVE = Lists.newArrayList();
@@ -86,15 +86,15 @@ public class InterpValue implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
         tag.putDouble("target", target);
         tag.putDouble("current", current);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.target = nbt.getDouble("target");
         this.current = nbt.getDouble("current");
         this.previousCurrent = current;

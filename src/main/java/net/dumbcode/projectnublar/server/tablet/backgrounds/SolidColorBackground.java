@@ -4,8 +4,8 @@ import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -23,23 +23,23 @@ public class SolidColorBackground implements TabletBackground {
     }
 
     @Override
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         nbt.putInt("color", this.color);
         return nbt;
     }
 
     @Override
-    public void readFromNBT(CompoundNBT nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         this.color = nbt.getInt("color");
     }
 
     @Override
-    public void writeToBuf(PacketBuffer buf) {
+    public void writeToBuf(FriendlyByteBuf buf) {
         buf.writeInt(this.color);
     }
 
     @Override
-    public void readFromBuf(PacketBuffer buf) {
+    public void readFromBuf(FriendlyByteBuf buf) {
         this.color = buf.readInt();
     }
 

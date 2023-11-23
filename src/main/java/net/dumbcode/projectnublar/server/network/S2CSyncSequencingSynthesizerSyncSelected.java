@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.client.gui.machines.DnaEditingScreen;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -31,7 +31,7 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
         );
     }
 
-    public static S2CSyncSequencingSynthesizerSyncSelected fromBytes(PacketBuffer buf) {
+    public static S2CSyncSequencingSynthesizerSyncSelected fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncSequencingSynthesizerSyncSelected(
             buf.readBlockPos(),
             IntStream.range(0, 9)
@@ -46,7 +46,7 @@ public class S2CSyncSequencingSynthesizerSyncSelected {
         );
     }
 
-    public static void toBytes(S2CSyncSequencingSynthesizerSyncSelected packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncSequencingSynthesizerSyncSelected packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         for (SyncDnaEntry data : packet.datas) {
             buf.writeUtf(data.key);

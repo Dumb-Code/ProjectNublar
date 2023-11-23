@@ -6,8 +6,8 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.PhotoBackgroundSetup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.network.PacketBuffer;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +22,7 @@ public class S2CSyncBackgroundIcon {
     private final boolean global;
     private final byte[] data;
 
-    public static S2CSyncBackgroundIcon fromBytes(PacketBuffer buf) {
+    public static S2CSyncBackgroundIcon fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncBackgroundIcon(
             buf.readUtf(),
             buf.readUtf(),
@@ -31,7 +31,7 @@ public class S2CSyncBackgroundIcon {
         );
     }
 
-    public static void toBytes(S2CSyncBackgroundIcon packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncBackgroundIcon packet, FriendlyByteBuf buf) {
         buf.writeUtf(packet.uploaderUUID);
         buf.writeUtf(packet.imageHash);
         buf.writeBoolean(packet.global);

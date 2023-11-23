@@ -4,8 +4,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
@@ -24,9 +24,9 @@ public class TrackingSavedData extends WorldSavedData {
     }
 
     @Override
-    public void load(CompoundNBT nbt) {
+    public void load(CompoundTag nbt) {
         this.entries.clear();
-        StreamUtils.stream(nbt.getList("entries", Constants.NBT.TAG_COMPOUND)).map(b -> DataEntry.deserialize((CompoundNBT) b)).forEach(this.entries::add);
+        StreamUtils.stream(nbt.getList("entries", Constants.NBT.TAG_COMPOUND)).map(b -> DataEntry.deserialize((CompoundTag) b)).forEach(this.entries::add);
     }
 
     public Set<DataEntry> getEntries() {
@@ -45,7 +45,7 @@ public class TrackingSavedData extends WorldSavedData {
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
+    public CompoundTag save(CompoundTag nbt) {
         nbt.put("entries", this.entries.stream().map(DataEntry::serialize).collect(CollectorUtils.toNBTTagList()));
         return nbt;
     }
@@ -64,20 +64,20 @@ public class TrackingSavedData extends WorldSavedData {
         @EqualsAndHashCode.Exclude
         List<TrackingDataInformation> information = new ArrayList<>();
 
-        public static CompoundNBT serialize(DataEntry info) {
-            CompoundNBT compound = new CompoundNBT();
+        public static CompoundTag serialize(DataEntry info) {
+            CompoundTag compound = new CompoundTag();
             compound.putUUID("uuid", info.uuid);
             compound.putDouble("position_x", info.position.x);
             compound.putDouble("position_y", info.position.y);
             compound.putDouble("position_z", info.position.z);
-            compound.put("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new CompoundNBT(), d)).collect(CollectorUtils.toNBTTagList()));
+            compound.put("infos", info.information.stream().map(d -> TrackingDataInformation.serializeNBT(new CompoundTag(), d)).collect(CollectorUtils.toNBTTagList()));
             return compound;
         }
 
-        public static DataEntry deserialize(CompoundNBT nbt) {
+        public static DataEntry deserialize(CompoundTag nbt) {
             DataEntry info = new DataEntry(nbt.getUUID("uuid"), new Vector3d(nbt.getDouble("position_x"), nbt.getDouble("position_y"), nbt.getDouble("position_z")));
             StreamUtils.stream(nbt.getList("infos", Constants.NBT.TAG_COMPOUND))
-                .map(base -> TrackingDataInformation.deserializeNBT((CompoundNBT) base))
+                .map(base -> TrackingDataInformation.deserializeNBT((CompoundTag) base))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(info.information::add);
@@ -85,7 +85,7 @@ public class TrackingSavedData extends WorldSavedData {
             return info;
         }
 
-        public static void serialize(PacketBuffer buf, DataEntry info) {
+        public static void serialize(FriendlyByteBuf buf, DataEntry info) {
             buf.writeLong(info.uuid.getLeastSignificantBits());
             buf.writeLong(info.uuid.getMostSignificantBits());
 
@@ -97,7 +97,7 @@ public class TrackingSavedData extends WorldSavedData {
             info.information.forEach(d -> TrackingDataInformation.serializeBuf(buf, d));
         }
 
-        public static DataEntry deserailize(PacketBuffer buf) {
+        public static DataEntry deserailize(FriendlyByteBuf buf) {
             DataEntry info = new DataEntry(new UUID(buf.readLong(), buf.readLong()),new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble()));
             IntStream.range(0, buf.readShort())
                 .mapToObj(i -> TrackingDataInformation.deserializeBuf(buf))

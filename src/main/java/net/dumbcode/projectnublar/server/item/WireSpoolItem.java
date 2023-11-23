@@ -10,7 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -67,7 +67,7 @@ public class WireSpoolItem extends BlockItem {
                 PlayerEntity player = (PlayerEntity) entityIn;
                 ItemStack istack = entityIn.getMainHandItem();
                 if (istack.getItem() == ItemHandler.WIRE_SPOOL.get()) {
-                    CompoundNBT nbt = istack.getOrCreateTagElement(ProjectNublar.MODID);
+                    CompoundTag nbt = istack.getOrCreateTagElement(ProjectNublar.MODID);
                     BlockPos pos = null;
                     boolean isFence = false;
                     if (nbt.contains("fence_position", Constants.NBT.TAG_COMPOUND)) {

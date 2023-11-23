@@ -125,7 +125,7 @@ public class Dinosaur extends ForgeRegistryEntry<Dinosaur> implements Comparable
     }
 
     public MutableComponent createNameComponent() {
-        return new TranslationTextComponent(this.createNameTranslationKey());
+        return Component.translatable(this.createNameTranslationKey());
     }
 
     public void attachDefaultComponents() {

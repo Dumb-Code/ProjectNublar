@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -12,11 +12,11 @@ import java.util.function.Supplier;
 public class C2SMachineContainerPopoutSlotOpened {
     private final int slot;
 
-    public static C2SMachineContainerPopoutSlotOpened fromBytes(PacketBuffer buf) {
+    public static C2SMachineContainerPopoutSlotOpened fromBytes(FriendlyByteBuf buf) {
         return new C2SMachineContainerPopoutSlotOpened(buf.readByte());
     }
 
-    public static void toBytes(C2SMachineContainerPopoutSlotOpened packet, PacketBuffer buf) {
+    public static void toBytes(C2SMachineContainerPopoutSlotOpened packet, FriendlyByteBuf buf) {
         buf.writeByte(packet.slot);
     }
 

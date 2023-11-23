@@ -5,7 +5,7 @@ import lombok.Value;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.energy.EnergyStorage;
@@ -25,7 +25,7 @@ public class S2CSyncMachineProcesses {
     private final int maxEnergy;
     private final int[] extraData;
 
-    public static S2CSyncMachineProcesses fromBytes(PacketBuffer buf) {
+    public static S2CSyncMachineProcesses fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncMachineProcesses(
             buf.readBlockPos(),
             IntStream.range(0, buf.readByte()).mapToObj(i ->
@@ -43,7 +43,7 @@ public class S2CSyncMachineProcesses {
         );
     }
 
-    public static void toBytes(S2CSyncMachineProcesses packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncMachineProcesses packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeByte(packet.processList.size());
         for (ProcessSync sync : packet.processList) {

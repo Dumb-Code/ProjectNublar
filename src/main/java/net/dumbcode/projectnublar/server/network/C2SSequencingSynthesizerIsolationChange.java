@@ -5,7 +5,7 @@ import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -16,21 +16,21 @@ public class C2SSequencingSynthesizerIsolationChange {
 
     private final SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<?> entry;
 
-    public static C2SSequencingSynthesizerIsolationChange fromBytes(PacketBuffer buf) {
+    public static C2SSequencingSynthesizerIsolationChange fromBytes(FriendlyByteBuf buf) {
         GeneticType<?, ?> type = buf.readRegistryIdSafe(GeneticType.getWildcardType());
         return new C2SSequencingSynthesizerIsolationChange(readValue(type, buf));
     }
 
-    private static <O> SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> readValue(GeneticType<?, O> type, PacketBuffer buffer) {
+    private static <O> SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> readValue(GeneticType<?, O> type, FriendlyByteBuf buffer) {
         return new SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<>(type, type.getDataHandler().read(buffer));
     }
 
-    public static void toBytes(C2SSequencingSynthesizerIsolationChange packet, PacketBuffer buf) {
+    public static void toBytes(C2SSequencingSynthesizerIsolationChange packet, FriendlyByteBuf buf) {
         buf.writeRegistryId(packet.entry.getType());
         writeValue(packet.entry, buf);
     }
 
-    private static <O> void writeValue(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> type, PacketBuffer buffer) {
+    private static <O> void writeValue(SequencingSynthesizerBlockEntity.IsolatedGeneticEntry<O> type, FriendlyByteBuf buffer) {
         type.getType().getDataHandler().write(type.getValue(), buffer);
     }
 

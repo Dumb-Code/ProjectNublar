@@ -90,6 +90,6 @@ public class CoalGeneratorBlockEntity extends MachineModuleBlockEntity<CoalGener
 
     @Override
     public ITextComponent createTitle(int tab) {
-        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.coalgenerator.title");
+        return Component.translatable(ProjectNublar.MODID + ".containers.coalgenerator.title");
     }
 }

@@ -11,7 +11,7 @@ import net.dumbcode.projectnublar.server.fossil.base.StoneType;
 import net.dumbcode.projectnublar.server.item.ItemHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +53,7 @@ public class FossilBlockEntity extends TileEntity {
     }
 
     @Override
-    public void load(@Nonnull BlockState state, CompoundNBT nbt) {
+    public void load(@Nonnull BlockState state, CompoundTag nbt) {
         this.stoneType = StoneTypeHandler.STONE_TYPE_REGISTRY.get().getValue(new ResourceLocation(nbt.getString("stone_type")));
         this.fossil = FossilHandler.FOSSIL_REGISTRY.get().getValue(new ResourceLocation(nbt.getString("fossil")));
         this.tier = FossilTier.valueOf(nbt.getString("tier").toUpperCase());
@@ -63,7 +63,7 @@ public class FossilBlockEntity extends TileEntity {
 
     @Nonnull
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
+    public CompoundTag save(CompoundTag nbt) {
         nbt.putString("stone_type", this.stoneType.getRegistryName().toString());
         nbt.putString("fossil", this.fossil.getRegistryName().toString());
         nbt.putString("tier", this.tier.name().toLowerCase());
@@ -72,8 +72,8 @@ public class FossilBlockEntity extends TileEntity {
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
-        return this.save(new CompoundNBT());
+    public CompoundTag getUpdateTag() {
+        return this.save(new CompoundTag());
     }
 
     public Fossil getFossil() {
@@ -133,7 +133,7 @@ public class FossilBlockEntity extends TileEntity {
         int amountOfItemToDrop = chooseValueWithinRange(tier.getAmountOfFossilsToDrop());
 
         ItemStack stack = new ItemStack(ItemHandler.FOSSIL_ITEM.get(), amountOfItemToDrop);
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putString("fossil", fossil.getRegistryName().toString());
         nbt.putFloat("tierDNAMultiplier", tier.getDNAGatherChance());
         nbt.putFloat("typeDNAMultiplier", type.getDNAMultiplier());

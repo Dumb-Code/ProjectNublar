@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class DinosaurArgument implements ArgumentType<Dinosaur> {
 
-    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslationTextComponent(ProjectNublar.MODID + ".command.dinosaur.invalid"));
+    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable(ProjectNublar.MODID + ".command.dinosaur.invalid"));
 
     @Override
     public Dinosaur parse(StringReader reader) throws CommandSyntaxException {

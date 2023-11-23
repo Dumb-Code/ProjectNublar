@@ -7,8 +7,8 @@ import net.dumbcode.projectnublar.server.tablet.backgrounds.PhotoBackground;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.network.PacketBuffer;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.io.ByteArrayInputStream;
@@ -20,11 +20,11 @@ public class S2CSyncBackgroundImage {
 
     private final byte[] data;
 
-    public static S2CSyncBackgroundImage fromBytes(PacketBuffer buf) {
+    public static S2CSyncBackgroundImage fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncBackgroundImage(buf.readByteArray(buf.readInt()));
     }
 
-    public static void toBytes(S2CSyncBackgroundImage packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncBackgroundImage packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.data.length);
         buf.writeByteArray(packet.data);
     }

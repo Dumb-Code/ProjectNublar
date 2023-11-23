@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class S2CRequestBackgroundIconHeaders {
     private final boolean global;
     private final List<TabletBGImageHandler.IconEntry> entryList;
 
-    public static S2CRequestBackgroundIconHeaders fromBytes(PacketBuffer buf) {
+    public static S2CRequestBackgroundIconHeaders fromBytes(FriendlyByteBuf buf) {
         return new S2CRequestBackgroundIconHeaders(
           buf.readBoolean(),
             IntStream.range(0, buf.readShort()).mapToObj(i ->
@@ -30,7 +30,7 @@ public class S2CRequestBackgroundIconHeaders {
         );
     }
 
-    public static void toBytes(S2CRequestBackgroundIconHeaders packet, PacketBuffer buf) {
+    public static void toBytes(S2CRequestBackgroundIconHeaders packet, FriendlyByteBuf buf) {
         buf.writeBoolean(packet.global);
         buf.writeShort(packet.entryList.size());
         for (TabletBGImageHandler.IconEntry entry : packet.entryList) {

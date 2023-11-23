@@ -2,7 +2,7 @@ package net.dumbcode.projectnublar.server.utils;
 
 import lombok.Getter;
 import net.dumbcode.projectnublar.server.block.entity.PylonHeadBlockEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
@@ -55,13 +55,13 @@ public class PylonNetworkSavedData extends WorldSavedData {
     }
 
     @Override
-    public void load(CompoundNBT nbt) {
+    public void load(CompoundTag nbt) {
         this.uuidPosMap.clear();
         for (String s : nbt.getAllKeys()) {
             try {
                 Set<BlockPos> set = new HashSet<>();
                 for (INBT inbt : nbt.getList(s, Constants.NBT.TAG_COMPOUND)) {
-                    set.add(NBTUtil.readBlockPos((CompoundNBT) inbt));
+                    set.add(NBTUtil.readBlockPos((CompoundTag) inbt));
                 }
                 this.uuidPosMap.put(UUID.fromString(s), set);
             } catch (IllegalArgumentException e) {
@@ -71,7 +71,7 @@ public class PylonNetworkSavedData extends WorldSavedData {
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         this.uuidPosMap.forEach((uuid, set) -> {
             ListNBT list = new ListNBT();
             for (BlockPos pos : set) {

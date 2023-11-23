@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -25,14 +25,14 @@ public class CS2UploadPhotoBackgroundImage {
     private final boolean global;
     private final byte[] data;
 
-    public static CS2UploadPhotoBackgroundImage fromBytes(PacketBuffer buf) {
+    public static CS2UploadPhotoBackgroundImage fromBytes(FriendlyByteBuf buf) {
         return new CS2UploadPhotoBackgroundImage(
             buf.readBoolean(),
             buf.readByteArray(buf.readInt())
         );
     }
 
-    public static void toBytes(CS2UploadPhotoBackgroundImage packet, PacketBuffer buf) {
+    public static void toBytes(CS2UploadPhotoBackgroundImage packet, FriendlyByteBuf buf) {
         buf.writeBoolean(packet.global);
         buf.writeInt(packet.data.length);
         buf.writeByteArray(packet.data);

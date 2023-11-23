@@ -7,8 +7,8 @@ import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SRequestBackgroundImage;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -41,25 +41,25 @@ public class PhotoBackground implements TabletBackground {
     }
 
     @Override
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         nbt.putString("uploader_uuid", this.uploaderUUID);
         nbt.putString("photo_hash", this.photoHash);
         return nbt;
     }
 
     @Override
-    public void readFromNBT(CompoundNBT nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         this.setPhoto(nbt.getString("uploader_uuid"), nbt.getString("photo_hash"));
     }
 
     @Override
-    public void writeToBuf(PacketBuffer buf) {
+    public void writeToBuf(FriendlyByteBuf buf) {
         buf.writeUtf(this.uploaderUUID);
         buf.writeUtf(this.photoHash);
     }
 
     @Override
-    public void readFromBuf(PacketBuffer buf) {
+    public void readFromBuf(FriendlyByteBuf buf) {
         this.setPhoto(buf.readUtf(), buf.readUtf());
     }
 

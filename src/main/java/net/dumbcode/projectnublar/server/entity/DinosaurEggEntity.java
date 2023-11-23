@@ -11,9 +11,9 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.dinosaur.DinosaurHandler;
 import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.minecraft.entity.*;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -108,10 +108,10 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
+    public void readAdditionalSaveData(CompoundTag nbt) {
         this.combinedGenetics.clear();
         StreamUtils.stream(nbt.getList("genetics", Constants.NBT.TAG_COMPOUND))
-            .map(b -> GeneticEntry.deserialize((CompoundNBT) b))
+            .map(b -> GeneticEntry.deserialize((CompoundTag) b))
             .forEach(this.combinedGenetics::add);
         this.dinosaur = DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("dinosaur")));
         this.randomScaleAdjustment = nbt.getFloat("random_scale");
@@ -122,8 +122,8 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundNBT nbt) {
-        nbt.put("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new CompoundNBT())).collect(CollectorUtils.toNBTTagList()));
+    protected void addAdditionalSaveData(CompoundTag nbt) {
+        nbt.put("genetics", this.combinedGenetics.stream().map(g -> g.serialize(new CompoundTag())).collect(CollectorUtils.toNBTTagList()));
         nbt.putString("dinosaur", this.dinosaur.getRegName().toString());
         nbt.putFloat("random_scale", this.randomScaleAdjustment);
         nbt.put("egg_type", DinosaurEggType.writeToNBT(this.eggType));
@@ -135,13 +135,13 @@ public class DinosaurEggEntity extends Entity implements IEntityAdditionalSpawnD
     }
 
     @Override
-    public void writeSpawnData(PacketBuffer buf) {
+    public void writeSpawnData(FriendlyByteBuf buf) {
         buf.writeFloat(this.randomScaleAdjustment);
         DinosaurEggType.writeToBuf(this.eggType, buf);
     }
 
     @Override
-    public void readSpawnData(PacketBuffer buf) {
+    public void readSpawnData(FriendlyByteBuf buf) {
         this.randomScaleAdjustment = buf.readFloat();
         this.eggType = DinosaurEggType.readFromBuf(buf);
     }

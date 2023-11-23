@@ -15,7 +15,7 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.DinosaurEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -47,17 +47,17 @@ public class SkeletalBuilderBlockEntity extends BaseTaxidermyBlockEntity impleme
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
+    public CompoundTag save(CompoundTag nbt) {
         this.dinosaurEntity.ifPresent(d -> nbt.putString("Dinosaur", d.getDinosaur().getRegName().toString()));
         nbt.put("Inventory", this.boneHandler.serializeNBT());
         // save pose data
-        nbt.put("SkeletalProperties", this.skeletalProperties.serialize(new CompoundNBT()));
+        nbt.put("SkeletalProperties", this.skeletalProperties.serialize(new CompoundTag()));
         return super.save(nbt);
     }
 
 
     @Override
-    public void load(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundTag nbt) {
         setDinosaur(DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("Dinosaur"))));
         this.boneHandler.deserializeNBT(nbt.getCompound("Inventory"));
         // load pose data

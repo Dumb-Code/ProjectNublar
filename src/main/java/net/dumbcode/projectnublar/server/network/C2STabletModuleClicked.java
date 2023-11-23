@@ -3,9 +3,10 @@ package net.dumbcode.projectnublar.server.network;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Hand;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -16,16 +17,16 @@ import java.util.function.Supplier;
 public class C2STabletModuleClicked {
 
     private final ResourceLocation module;
-    private final Hand hand;
+    private final InteractionHand hand;
 
-    public static C2STabletModuleClicked fromBytes(PacketBuffer buf) {
+    public static C2STabletModuleClicked fromBytes(FriendlyByteBuf buf) {
         return new C2STabletModuleClicked(
             buf.readResourceLocation(),
-            buf.readEnum(Hand.class)
+            buf.readEnum(InteractionHand.class)
         );
     }
 
-    public static void toBytes(C2STabletModuleClicked packet, PacketBuffer buf) {
+    public static void toBytes(C2STabletModuleClicked packet, FriendlyByteBuf buf) {
         buf.writeResourceLocation(packet.module);
         buf.writeEnum(packet.hand);
     }

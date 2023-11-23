@@ -6,9 +6,9 @@ import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityCo
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
@@ -147,19 +147,19 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 
 
     @Override
-    protected void readAdditionalSaveData(CompoundNBT compound) {
+    protected void readAdditionalSaveData(CompoundTag compound) {
         this.parentUUID = compound.getUUID("parent");
         this.partName = compound.getString("partname");
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundNBT compound) {
+    protected void addAdditionalSaveData(CompoundTag compound) {
         compound.putUUID("parent", this.parentUUID);
         compound.putString("partname", this.partName);
     }
 
     @Override
-    public void writeSpawnData(PacketBuffer buffer) {
+    public void writeSpawnData(FriendlyByteBuf buffer) {
         buffer.writeBoolean(this.parentUUID != null);
         if(this.parentUUID != null) {
             buffer.writeLong(this.parentUUID.getMostSignificantBits());
@@ -169,7 +169,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public void readSpawnData(PacketBuffer additionalData) {
+    public void readSpawnData(FriendlyByteBuf additionalData) {
         if(additionalData.readBoolean()) {
             this.parentUUID = new UUID(additionalData.readLong(), additionalData.readLong());
             this.partName = additionalData.readUtf();

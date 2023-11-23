@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -25,10 +25,10 @@ public class DnaHoverDinosaurItem extends BasicDinosaurItem {
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         super.appendHoverText(stack, world, list, flag);
         if(Screen.hasShiftDown()) {
-            CompoundNBT tag = stack.getOrCreateTagElement(ProjectNublar.MODID);
+            CompoundTag tag = stack.getOrCreateTagElement(ProjectNublar.MODID);
 
             tag.getList("Genetics", Constants.NBT.TAG_COMPOUND).stream()
-                .map(g -> GeneticEntry.deserialize((CompoundNBT) g))
+                .map(g -> GeneticEntry.deserialize((CompoundTag) g))
                 .map(GeneticEntry::gatherTextComponents)
                 .forEach(list::add);
 
@@ -52,8 +52,8 @@ public class DnaHoverDinosaurItem extends BasicDinosaurItem {
     }
 
     public static void copyDataNBT(ItemStack from, ItemStack to) {
-        CompoundNBT inTag = from.getOrCreateTagElement(ProjectNublar.MODID);
-        CompoundNBT outTag = to.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag inTag = from.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag outTag = to.getOrCreateTagElement(ProjectNublar.MODID);
 
         outTag.put("Genetics", inTag.getList("Genetics", Constants.NBT.TAG_COMPOUND).copy());
         if(inTag.contains("IsMale", Constants.NBT.TAG_BYTE)) {

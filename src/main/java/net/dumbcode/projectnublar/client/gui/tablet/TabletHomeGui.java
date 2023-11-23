@@ -1,12 +1,12 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.client.gui.GuiDropdownBox;
 import net.dumbcode.dumblibrary.client.gui.SelectListEntry;
+import net.dumbcode.projectnublar.mixin.ButtonAccessor;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SInstallModule;
 import net.dumbcode.projectnublar.server.network.C2STabletModuleClicked;
@@ -14,17 +14,18 @@ import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.dumbcode.projectnublar.server.tablet.TabletModuleType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.util.Hand;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class TabletHomeGui extends BaseBackgroundTabletScreen {
 
@@ -50,9 +51,9 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
     private Button installButton;
 
     private int galleryIconTicks;
-    private Vector3i gallaryIcon;
+    private Vector3i galleryIcon;
 
-    public TabletHomeGui(Hand hand) {
+    public TabletHomeGui(InteractionHand hand) {
         super(hand);
         this.addIcons(Minecraft.getInstance().player.getItemInHand(hand));
         this.homeButton = false;
@@ -99,13 +100,13 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
     public void init() {
         super.init();
 
-        this.dropdownBox = this.addButton(new GuiDropdownBox<>(this.width / 2 - 50, (int) (this.height * 0.25F - 10), 100, 20, 10, () -> this.entries));
+        this.dropdownBox = this.addWidget(new GuiDropdownBox<>(this.width / 2 - 50, (int) (this.height * 0.25F - 10), 100, 20, 10, () -> this.entries));
 
         this.initIcons();
 
-        this.gallaryIcon = new Vector3i(this.leftStart + this.tabletWidth - GALLARY_ICON_SIZE - 3, this.topStart + 16, 0);
+        this.galleryIcon = new Vector3i(this.leftStart + this.tabletWidth - GALLARY_ICON_SIZE - 3, this.topStart + 16, 0);
 
-        this.installButton = this.addButton(new Button(this.width / 2 - 100, this.height - 40, 200, 20, ProjectNublar.translate("gui.tablethome.add"), p -> {
+        this.installButton = this.addWidget(construct(this.width / 2 - 100, this.height - 40, 200, 20, ProjectNublar.translate("gui.tablethome.add"), p -> {
             if(this.openedInstallPopup && this.dropdownBox.getActive() != null) {
                 this.openedInstallPopup = false;
                 ProjectNublar.NETWORK.sendToServer(new C2SInstallModule(this.dropdownBox.getActive().slot, this.hand));
@@ -114,6 +115,10 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         this.installButton.active = false;
         this.installButton.visible = false;
 
+    }
+
+    public static Button construct(int x, int y, int width, int height, Component text, Button.OnPress onPress) {
+        return ButtonAccessor.construct(x, y, width, height, text, onPress, Supplier::get);
     }
 
     @Override
@@ -133,16 +138,15 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         super.drawTabletScreen(stack, mouseX, mouseY, partialTicks);
         this.forAllIcons(icon -> icon.render(stack, icon.isMouseOver(mouseX, mouseY)));
 
-        minecraft.textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_background_icon.png"));
-        stack.blit(this.gallaryIcon.getX(), this.gallaryIcon.getY(), 0, 0, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE);
-        if(mouseX > this.gallaryIcon.getX() && mouseX < this.gallaryIcon.getX() + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.getY() && mouseY < this.gallaryIcon.getY() + GALLARY_ICON_SIZE) {
-            stack.fill(this.gallaryIcon.getX(), this.gallaryIcon.getY(), this.gallaryIcon.getX() + GALLARY_ICON_SIZE, this.gallaryIcon.getY() + GALLARY_ICON_SIZE, 0xAA000000);
+        stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/tablet_background_icon.png"), this.galleryIcon.x, this.galleryIcon.y, 0, 0, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE, GALLARY_ICON_SIZE);
+        if(mouseX > this.galleryIcon.x && mouseX < this.galleryIcon.x + GALLARY_ICON_SIZE && mouseY > this.galleryIcon.y && mouseY < this.galleryIcon.y + GALLARY_ICON_SIZE) {
+            stack.fill(this.galleryIcon.x, this.galleryIcon.y, this.galleryIcon.x + GALLARY_ICON_SIZE, this.galleryIcon.y + GALLARY_ICON_SIZE, 0xAA000000);
         }
 
         if(this.openedInstallPopup) {
             this.installButton.render(stack, mouseX, mouseY, partialTicks);
             //Copied from #drawWorldBackground
-            fillGradient(stack, this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, -1072689136, -804253680);
+            stack.fillGradient(this.leftStart, this.topStart, this.leftStart + this.tabletWidth, this.topStart + this.tabletHeight, -1072689136, -804253680);
             this.dropdownBox.render(stack, mouseX, mouseY, partialTicks);
         }
     }
@@ -171,7 +175,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
                     icon.onClicked();
                 }
             });
-            if(mouseX > this.gallaryIcon.getX() && mouseX < this.gallaryIcon.getX() + GALLARY_ICON_SIZE && mouseY > this.gallaryIcon.getY() && mouseY < this.gallaryIcon.getY() + GALLARY_ICON_SIZE) {
+            if(mouseX > this.galleryIcon.x && mouseX < this.galleryIcon.x + GALLARY_ICON_SIZE && mouseY > this.galleryIcon.y && mouseY < this.galleryIcon.y + GALLARY_ICON_SIZE) {
                 Minecraft.getInstance().setScreen(this.transferBackground(new BackgroundTabletScreen(this.hand)));
                 return true;
             }
@@ -214,7 +218,7 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
 
         @Override
         public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
-            stack.drawString(font, this.getSearch(), x, y, -1);
+            stack.drawString(Minecraft.getInstance().font, this.getSearch(), x, y, -1);
         }
     }
 
@@ -246,9 +250,8 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
             if(mouseOver) {
                 stack.fill(this.left, this.top, this.left + this.height, this.top + this.height, 0x44000000);
             }
-            RenderSystem.color4f(1F, 1F, 1F, 1F);
-            minecraft.textureManager.bind(new ResourceLocation(loc.getNamespace(), "textures/gui/module_icons/" + loc.getPath() + ".png"));
-            stack.blit(this.left, this.top, 0, 0, this.width, this.height, this.width, this.height);
+            RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+            stack.blit(new ResourceLocation(loc.getNamespace(), "textures/gui/module_icons/" + loc.getPath() + ".png"), this.left, this.top, 0, 0, this.width, this.height, this.width, this.height);
         }
 
         @Override
@@ -275,8 +278,9 @@ public class TabletHomeGui extends BaseBackgroundTabletScreen {
         private void scanInventory() {
             //Hash map is used as a set to get unique elements.
             Map<TabletModuleType<?>, Integer> typeMaps = new HashMap<>();
-            for (int i = 0; i < minecraft.player.inventory.items.size(); i++) {
-                ItemStack stack = minecraft.player.inventory.getItem(i);
+            for (int i = 0; i < Objects.requireNonNull(Objects.requireNonNull(minecraft).player).getInventory().items.size(); i++) {
+                assert minecraft.player != null;
+                ItemStack stack = minecraft.player.getInventory().getItem(i);
                 if(stack.getItem() instanceof ModuleItem) {
                     TabletModuleType<?> type = ((ModuleItem) stack.getItem()).getType();
                     if (icons.stream().noneMatch(icon -> icon instanceof EntryIcon && ((EntryIcon) icon).entry.getType() == type)) {

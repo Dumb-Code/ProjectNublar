@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -19,14 +19,14 @@ public class S2CSyncOpenedUsers {
     private final BlockPos pos;
     private final Set<UUID> uuidSet;
 
-    public static S2CSyncOpenedUsers fromBytes(PacketBuffer buf) {
+    public static S2CSyncOpenedUsers fromBytes(FriendlyByteBuf buf) {
         return new S2CSyncOpenedUsers(
             buf.readBlockPos(),
             IntStream.range(0, buf.readShort()).mapToObj(i -> buf.readUUID()).collect(Collectors.toSet())
         );
     }
 
-    public static void toBytes(S2CSyncOpenedUsers packet, PacketBuffer buf) {
+    public static void toBytes(S2CSyncOpenedUsers packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
         buf.writeShort(packet.uuidSet.size());
         for (UUID uuid : packet.uuidSet) {

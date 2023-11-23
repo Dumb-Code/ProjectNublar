@@ -16,10 +16,10 @@ import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationC
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.ScaleAdjustmentComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.util.Constants;
 
@@ -64,13 +64,13 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.putInt("Age", this.ageInTicks);
         compound.putString("CurrentAge", this.stage.getName());
 
         ListNBT ages = new ListNBT();
         for (AgeStage age : this.orderedAges) {
-            CompoundNBT ageTag = new CompoundNBT();
+            CompoundTag ageTag = new CompoundTag();
             ageTag.putString("Name", age.getName());
             ageTag.putInt("Time", age.getTime());
             ageTag.putString("ModelStage", age.getModelStage());
@@ -86,14 +86,14 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         this.orderedAges.clear();
         this.stage = AgeStage.MISSING;
 
         this.ageInTicks = compound.getInt("Age");
         ListNBT ages = compound.getList("OrderedAges", Constants.NBT.TAG_COMPOUND);
         for (INBT base : ages) {
-            CompoundNBT ageTag = (CompoundNBT) base;
+            CompoundTag ageTag = (CompoundTag) base;
             this.orderedAges.add(new AgeStage(ageTag.getString("Name"), ageTag.getInt("Time"), ageTag.getString("ModelStage")).setCanBreed(ageTag.getBoolean("CanBreed")));
         }
 
@@ -102,7 +102,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public void serialize(PacketBuffer buf) {
+    public void serialize(FriendlyByteBuf buf) {
         buf.writeShort(this.orderedAges.size());
         for (AgeStage s : this.orderedAges) {
             buf.writeUtf(s.getName());
@@ -116,7 +116,7 @@ public class AgeComponent extends EntityComponent implements RenderLocationCompo
     }
 
     @Override
-    public void deserialize(PacketBuffer buf) {
+    public void deserialize(FriendlyByteBuf buf) {
         this.orderedAges.clear();
         short size = buf.readShort();
         for (int i = 0; i < size; i++) {

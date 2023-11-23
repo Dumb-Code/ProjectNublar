@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.item.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
@@ -26,7 +26,7 @@ public enum IncubatorRecipe implements MachineRecipe<IncubatorBlockEntity> {
     @Override
     public void onRecipeTick(IncubatorBlockEntity blockEntity, MachineModuleBlockEntity.MachineProcess<IncubatorBlockEntity> process) {
         ItemStack out = process.getInputStack(0);
-        CompoundNBT nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = out.getOrCreateTagElement(ProjectNublar.MODID);
         nbt.putFloat("AmountDone", Math.round(1000F * process.getTime() / (float)process.getTotalTime()) / 10F);
     }
 

@@ -1,13 +1,12 @@
 package net.dumbcode.projectnublar.server.tablet.backgrounds;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
-import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.PhotoBackgroundSetup;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.ShaderSetupPage;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SolidColorSetupPage;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -18,11 +17,11 @@ public interface TabletBackground {
 
     String identifier();
 
-    CompoundNBT writeToNBT(CompoundNBT nbt);
-    void readFromNBT(CompoundNBT nbt);
+    CompoundTag writeToNBT(CompoundTag nbt);
+    void readFromNBT(CompoundTag nbt);
 
-    void writeToBuf(PacketBuffer buf);
-    void readFromBuf(PacketBuffer buf);
+    void writeToBuf(FriendlyByteBuf buf);
+    void readFromBuf(FriendlyByteBuf buf);
 
     @OnlyIn(Dist.CLIENT)
     void render(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY);
@@ -38,10 +37,14 @@ public interface TabletBackground {
         REGISTRY.put(ShaderBackground.KEY, new Entry<>(ShaderBackground::new, ShaderSetupPage::new));
     }
 
-    @RequiredArgsConstructor
     class Entry<T extends TabletBackground>  {
         private final Supplier<T> backgroundSupplier;
         private final Supplier<SetupPage<T>> setupPage;
+
+        public Entry(Supplier<T> backgroundSupplier, Supplier<SetupPage<T>> setupPage) {
+            this.backgroundSupplier = backgroundSupplier;
+            this.setupPage = setupPage;
+        }
 
         public SetupPage<T> getSetupPage() {
             return this.setupPage.get();

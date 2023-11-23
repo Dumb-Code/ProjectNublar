@@ -25,7 +25,7 @@ import net.dumbcode.projectnublar.server.dinosaur.eggs.DinosaurEggType;
 import net.dumbcode.projectnublar.server.entity.component.impl.additionals.TrackingDataComponent;
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingDataInformation;
 import net.dumbcode.projectnublar.server.entity.tracking.info.PregnancyInformation;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.util.Constants;
 
@@ -102,7 +102,7 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     }
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.put("egg_amount", GaussianValue.writeToNBT(this.eggAmount));
         compound.put("egg_modifier", GaussianValue.writeToNBT(this.eggModifier));
         compound.put("ticks_pregnancy", GaussianValue.writeToNBT(this.ticksPregnancy));
@@ -113,14 +113,14 @@ public class DinosaurEggLayingComponent extends EntityComponent implements Breed
     }
 
     @Override
-    public void deserialize(CompoundNBT nbt) {
+    public void deserialize(CompoundTag nbt) {
         this.eggAmount = GaussianValue.readFromNBT(nbt.getCompound("egg_amount"));
         this.eggModifier = GaussianValue.readFromNBT(nbt.getCompound("egg_modifier"));
         this.ticksPregnancy = GaussianValue.readFromNBT(nbt.getCompound("ticks_pregnancy"));
         this.ticksEggHatch = GaussianValue.readFromNBT(nbt.getCompound("ticks_egg_hatch"));
 
         this.eggTypes.clear();
-        StreamUtils.stream(nbt.getList("egg_types", Constants.NBT.TAG_COMPOUND)).map(b -> DinosaurEggType.readFromNBT((CompoundNBT) b)).forEach(this.eggTypes::add);
+        StreamUtils.stream(nbt.getList("egg_types", Constants.NBT.TAG_COMPOUND)).map(b -> DinosaurEggType.readFromNBT((CompoundTag) b)).forEach(this.eggTypes::add);
 
         super.deserialize(nbt);
     }

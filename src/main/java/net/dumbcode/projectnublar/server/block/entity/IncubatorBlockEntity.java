@@ -21,7 +21,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
@@ -159,13 +159,13 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         compound.putFloat("PlantMatter", this.plantMatter);
         ListNBT list = new ListNBT();
         for (int i = 0; i < this.eggList.length; i++) {
             Egg egg = this.eggList[i];
             if(egg != null) {
-                CompoundNBT nbt = new CompoundNBT();
+                CompoundTag nbt = new CompoundTag();
 
                 nbt.putByte("Slot", (byte) i);
 
@@ -190,12 +190,12 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         this.plantMatter = compound.getFloat("PlantMatter");
 
         ListNBT eggs = compound.getList("Eggs", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < eggs.size(); i++) {
-            CompoundNBT t = eggs.getCompound(i);
+            CompoundTag t = eggs.getCompound(i);
             this.eggList[t.getByte("Slot")] = new Egg(
                 t.getShort("XPos"), t.getShort("YPos"),
                 new Vector3d(t.getDouble("EggPositionX"), t.getDouble("EggPositionY"), t.getDouble("EggPositionZ")),
@@ -289,7 +289,7 @@ public class IncubatorBlockEntity extends MachineModuleBlockEntity<IncubatorBloc
 
     @Override
     public ITextComponent createTitle(int tab) {
-        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.incubator.title");
+        return Component.translatable(ProjectNublar.MODID + ".containers.incubator.title");
     }
 
     // TODO: Change for balance, values are just for testing

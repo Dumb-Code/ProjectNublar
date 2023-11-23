@@ -6,7 +6,7 @@ import net.dumbcode.projectnublar.client.gui.tablet.TabletScreen;
 import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -21,7 +21,7 @@ public class S2STrackingTabletUpdateChunk {
     private final int endZ;
     private final int[] data;
 
-    public static S2STrackingTabletUpdateChunk fromBytes(PacketBuffer buf) {
+    public static S2STrackingTabletUpdateChunk fromBytes(FriendlyByteBuf buf) {
         return new S2STrackingTabletUpdateChunk(
             buf.readInt(), buf.readInt(),
             buf.readInt(), buf.readInt(),
@@ -29,7 +29,7 @@ public class S2STrackingTabletUpdateChunk {
         );
     }
 
-    public static void toBytes(S2STrackingTabletUpdateChunk packet, PacketBuffer buf) {
+    public static void toBytes(S2STrackingTabletUpdateChunk packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.startX);
         buf.writeInt(packet.endX);
         buf.writeInt(packet.startZ);

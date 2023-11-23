@@ -1,15 +1,14 @@
 package net.dumbcode.projectnublar.client.gui.tablet;
 
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SSetTabletBackground;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.TabletBackground;
 import net.dumbcode.projectnublar.client.gui.tablet.setuppages.SetupPage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Hand;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -27,7 +26,7 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
     private int startX;
     private int startY;
 
-    protected BackgroundTabletScreen(Hand hand) {
+    protected BackgroundTabletScreen(InteractionHand hand) {
         super(hand);
     }
 
@@ -62,9 +61,9 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
                 int xPos = this.leftStart + 25 + entry/ICONS_PER_COLUMN * (ICON_SIZE + ICON_PADDING);
                 int yPos = this.topStart + this.tabletHeight/2 - fullPageIconsHeight/2 + yID*(ICON_SIZE + ICON_PADDING);
 
-                Minecraft.getInstance().textureManager.bind(new ResourceLocation(ProjectNublar.MODID, "textures/gui/background_icons/" + s + ".png"));
-                stack.blit(xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
-                minecraft.stack.drawString(font, s, xPos + ICON_SIZE/2F - minecraft.font.width(s)/2F, yPos + ICON_SIZE + 2, 0xFF888888);
+                stack.blit(new ResourceLocation(ProjectNublar.MODID, "textures/gui/background_icons/" + s + ".png"), xPos, yPos, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+                assert minecraft != null;
+                stack.drawString(font, s, xPos + ICON_SIZE/2F - minecraft.font.width(s)/2F, yPos + ICON_SIZE + 2, 0xFF888888, false);
                 entry++;
             }
         }
@@ -86,7 +85,7 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
                     TabletBackground background = this.setupPage.create();
                     this.setBackground(background);
                     ProjectNublar.NETWORK.sendToServer(new C2SSetTabletBackground(this.hand, background));
-                    this.children.remove(this.setupPage);
+                    this.children().remove(this.setupPage);
                     this.setupPage = null;
                 }
                 return true;
@@ -100,7 +99,7 @@ public class BackgroundTabletScreen extends BaseBackgroundTabletScreen {
 
                     if(mouseX > xPos && mouseX < xPos + ICON_SIZE && mouseY > yPos && mouseY < yPos + ICON_SIZE) {
                         TabletBackground.Entry<?> e = TabletBackground.REGISTRY.get(s);
-                        this.children.remove(this.setupPage);
+                        this.children().remove(this.setupPage);
                         this.setupPage = this.addWidget(e.getSetupPage());
                         this.startX = this.leftStart + this.tabletWidth/2 - this.setupPage.getWidth()/2;
                         this.startY = this.topStart + this.tabletHeight/2 - this.setupPage.getHeight()/2;

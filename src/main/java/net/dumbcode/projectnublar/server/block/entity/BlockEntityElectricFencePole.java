@@ -10,7 +10,7 @@ import net.dumbcode.projectnublar.server.utils.Connection;
 import net.dumbcode.projectnublar.server.utils.ConnectionType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -51,7 +51,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         compound.putBoolean("rotation_flipped", this.flippedAround);
         compound.putInt("energy", this.energy.getEnergyStored());
 
@@ -60,7 +60,7 @@ public class BlockEntityElectricFencePole extends BlockEntityElectricFence imple
 
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         super.load(state, compound);
         this.flippedAround = compound.getBoolean("rotation_flipped");
         this.energy.setEnergy(compound.getInt("energy"));

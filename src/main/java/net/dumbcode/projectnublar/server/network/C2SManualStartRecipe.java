@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -13,11 +13,11 @@ import java.util.function.Supplier;
 public class C2SManualStartRecipe {
     private final int processId;
 
-    public static C2SManualStartRecipe fromBytes(PacketBuffer buf) {
+    public static C2SManualStartRecipe fromBytes(FriendlyByteBuf buf) {
         return new C2SManualStartRecipe(buf.readByte());
     }
 
-    public static void toBytes(C2SManualStartRecipe packet, PacketBuffer buf) {
+    public static void toBytes(C2SManualStartRecipe packet, FriendlyByteBuf buf) {
         buf.writeByte(packet.processId);
     }
 

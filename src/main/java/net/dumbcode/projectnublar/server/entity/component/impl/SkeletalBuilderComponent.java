@@ -9,7 +9,7 @@ import lombok.Getter;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
 import net.dumbcode.dumblibrary.server.ecs.component.additionals.RenderLocationComponent;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -29,10 +29,10 @@ public class SkeletalBuilderComponent extends EntityComponent implements RenderL
     public int modelIndex;
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.putInt("model_index", this.modelIndex);
 
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         for(Map.Entry<String, List<String>> entry : this.boneToModelMap.entrySet()) {
             String bone = entry.getKey();
             List<String> modelParts = entry.getValue();
@@ -50,10 +50,10 @@ public class SkeletalBuilderComponent extends EntityComponent implements RenderL
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         this.modelIndex = compound.getInt("model_index");
 
-        CompoundNBT tag = compound.getCompound("bone_map");
+        CompoundTag tag = compound.getCompound("bone_map");
         Map<String, List<String>> nbtBoneMap = new HashMap<>();
         for (String bone : tag.getAllKeys()) {
             INBT base = tag.get(bone);

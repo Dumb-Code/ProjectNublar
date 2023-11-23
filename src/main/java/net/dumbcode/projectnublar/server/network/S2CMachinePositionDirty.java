@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -15,11 +15,11 @@ public class S2CMachinePositionDirty {
 
     private final BlockPos pos;
 
-    public static S2CMachinePositionDirty fromBytes(PacketBuffer buf) {
+    public static S2CMachinePositionDirty fromBytes(FriendlyByteBuf buf) {
         return new S2CMachinePositionDirty(buf.readBlockPos());
     }
 
-    public static void toBytes(S2CMachinePositionDirty packet, PacketBuffer buf) {
+    public static void toBytes(S2CMachinePositionDirty packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
     }
 

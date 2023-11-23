@@ -7,7 +7,7 @@ import net.dumbcode.projectnublar.client.gui.tablet.screens.TrackingTabletScreen
 import net.dumbcode.projectnublar.server.entity.tracking.TrackingSavedData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.List;
@@ -20,13 +20,13 @@ public class S2CSetTrackingDataList {
 
     private final List<TrackingSavedData.DataEntry> entries;
 
-    public static S2CSetTrackingDataList fromBytes(PacketBuffer buf) {
+    public static S2CSetTrackingDataList fromBytes(FriendlyByteBuf buf) {
         return new S2CSetTrackingDataList(
             IntStream.range(0, buf.readShort()).mapToObj(i -> TrackingSavedData.DataEntry.deserailize(buf)).collect(Collectors.toList())
         );
     }
 
-    public static void toBytes(S2CSetTrackingDataList packet, PacketBuffer buf) {
+    public static void toBytes(S2CSetTrackingDataList packet, FriendlyByteBuf buf) {
         buf.writeShort(packet.entries.size());
         packet.entries.forEach(entry -> TrackingSavedData.DataEntry.serialize(buf, entry));
     }

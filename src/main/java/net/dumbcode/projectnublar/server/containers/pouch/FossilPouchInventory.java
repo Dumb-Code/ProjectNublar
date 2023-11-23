@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 
@@ -29,7 +29,7 @@ public class FossilPouchInventory extends Inventory /*SimpleContainer*/ {
     }
 
     public static NonNullList<ItemStack> getStacks(ItemStack usedStack, int SIZE) {
-        CompoundNBT compoundTag = usedStack.getTagElement(getNBTTag());
+        CompoundTag compoundTag = usedStack.getTagElement(getNBTTag());
         NonNullList<ItemStack> itemStacks = NonNullList.withSize(SIZE, ItemStack.EMPTY);
         if (compoundTag != null && compoundTag.contains("Items", 9)) {
             loadAllItems(compoundTag, itemStacks);
@@ -37,11 +37,11 @@ public class FossilPouchInventory extends Inventory /*SimpleContainer*/ {
         return itemStacks;
     }
 
-    public static void loadAllItems(CompoundNBT pTag, NonNullList<ItemStack> pList) {
+    public static void loadAllItems(CompoundTag pTag, NonNullList<ItemStack> pList) {
         ListNBT listtag = pTag.getList("Items", 10);
 
         for(int i = 0; i < listtag.size(); ++i) {
-            CompoundNBT compoundtag = listtag.getCompound(i);
+            CompoundTag compoundtag = listtag.getCompound(i);
             int j = compoundtag.getByte("Slot") & 255;
             if (j >= 0 && j < pList.size()) {
                 pList.set(j, ItemStack.of(compoundtag));
@@ -53,7 +53,7 @@ public class FossilPouchInventory extends Inventory /*SimpleContainer*/ {
     @Override
     public void setChanged() {
         super.setChanged();
-        CompoundNBT itemTag = itemStack.getTagElement(getNBTTag());
+        CompoundTag itemTag = itemStack.getTagElement(getNBTTag());
         if (itemTag == null)
             itemTag = itemStack.getOrCreateTagElement(getNBTTag());
 
@@ -73,7 +73,7 @@ public class FossilPouchInventory extends Inventory /*SimpleContainer*/ {
         }
     }
 
-    public boolean shouldDeleteNBT(CompoundNBT blockEntityTag) {
+    public boolean shouldDeleteNBT(CompoundTag blockEntityTag) {
         if (!blockEntityTag.contains("Items"))
             return blockEntityTag.getAllKeys().isEmpty();
         return isEmpty();

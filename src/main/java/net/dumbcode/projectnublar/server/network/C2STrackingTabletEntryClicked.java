@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.block.entity.TrackingBeaconBlockEntity;
 import net.dumbcode.projectnublar.server.utils.TrackingTabletIterator;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -16,11 +16,11 @@ public class C2STrackingTabletEntryClicked {
 
     private final BlockPos pos;
 
-    public static C2STrackingTabletEntryClicked fromBytes(PacketBuffer buf) {
+    public static C2STrackingTabletEntryClicked fromBytes(FriendlyByteBuf buf) {
         return new C2STrackingTabletEntryClicked(buf.readBlockPos());
     }
 
-    public static void toBytes(C2STrackingTabletEntryClicked packet, PacketBuffer buf) {
+    public static void toBytes(C2STrackingTabletEntryClicked packet, FriendlyByteBuf buf) {
         buf.writeBlockPos(packet.pos);
     }
 

@@ -1,24 +1,24 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
-import com.google.common.base.Predicate;
-import com.mojang.blaze3d.matrix.GuiGraphics;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.dumbcode.dumblibrary.DumbLibrary;
 import net.dumbcode.dumblibrary.client.RenderUtils;
 import net.dumbcode.dumblibrary.client.gui.ColourUtils;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.SolidColorBackground;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.shader.ShaderInstance;
-import net.minecraft.util.math.Mth;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.StringTextComponent;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import org.joml.Vector3i;
 
 import java.io.IOException;
+import java.util.function.Predicate;
 
 public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
@@ -34,16 +34,16 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
     private Vector3i selectedPoint = new Vector3i(0, 0, 0);
 
-    private TextFieldWidget redField;
-    private TextFieldWidget greenField;
-    private TextFieldWidget blueField;
+    private EditBox redField;
+    private EditBox greenField;
+    private EditBox blueField;
 
     public SolidColorSetupPage() {
         super(WHEEL_DIAMETER + 103, WHEEL_DIAMETER);
         //TODO: move to ColourWheelSelector
         if(shaderManager == null) {
             try {
-                shaderManager = new ShaderInstance(MC.getResourceManager(), DumbLibrary.MODID + ":colorwheel");
+                shaderManager = new ShaderInstance(MC.getResourceManager(), new ResourceLocation(DumbLibrary.MODID, "colorwheel"), DefaultVertexFormat.POSITION_TEX /*FIXME: maybe not right*/);
             } catch (IOException e) {
                 DumbLibrary.getLogger().error("Unable to load color wheel shader :/", e);
             }
@@ -62,11 +62,11 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     public void initPage(int x, int y) {
         int startX = x + WHEEL_DIAMETER + 30;
 
-        this.redField = this.add(new TextFieldWidget(MC.font, startX + 7, y + 78, 20, 20, this.redField, Component.literal("R")));
+        this.redField = this.add(new EditBox(MC.font, startX + 7, y + 78, 20, 20, this.redField, Component.literal("R")));
         this.redField.setResponder(s -> this.updateSelectors());
-        this.greenField = this.add(new TextFieldWidget(MC.font, startX + 29, y + 78, 20, 20, this.greenField, Component.literal("G")));
+        this.greenField = this.add(new EditBox(MC.font, startX + 29, y + 78, 20, 20, this.greenField, Component.literal("G")));
         this.greenField.setResponder(s -> this.updateSelectors());
-        this.blueField = this.add(new TextFieldWidget(MC.font, startX + 51, y + 78, 20, 20, this.blueField, Component.literal("B")));
+        this.blueField = this.add(new EditBox(MC.font, startX + 51, y + 78, 20, 20, this.blueField, Component.literal("B")));
         this.blueField.setResponder(s -> this.updateSelectors());
 
         this.redField.setTextColor(0xFFFF0000);
@@ -79,6 +79,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
                 return true;
             }
             try {
+                assert s != null;
                 return Integer.parseInt(s, 16) <= 0xFF;
             } catch (NumberFormatException e) {
                 return false;
@@ -104,15 +105,15 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
             int radii = WHEEL_DIAMETER/2;
 
-            BufferBuilder buff = Tessellator.getInstance().getBuilder();
+            BufferBuilder buff = Tesselator.getInstance().getBuilder();
 
-            buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+            buff.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             buff.vertex(centerX - radii, centerY - radii, 0).uv(0, 0).endVertex();
             buff.vertex(centerX - radii, centerY + radii, 0).uv(0, 1).endVertex();
             buff.vertex(centerX + radii, centerY + radii, 0).uv(1, 1).endVertex();
             buff.vertex(centerX + radii, centerY - radii, 0).uv(1, 0).endVertex();
 
-            Tessellator.getInstance().end();
+            Tesselator.getInstance().end();
             shaderManager.clear();
         }
 
@@ -129,7 +130,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
         int centerX = x + WHEEL_DIAMETER/2;
         int centerY = y + WHEEL_DIAMETER/2;
-        RenderUtils.renderBorderExclusive(stack, centerX + this.selectedPoint.getX() - 2, centerY + this.selectedPoint.getY() - 2, centerX + this.selectedPoint.getX() + 2, centerY + this.selectedPoint.getY() + 2, 2, -1);
+        RenderUtils.renderBorderExclusive(stack, centerX + this.selectedPoint.x - 2, centerY + this.selectedPoint.y - 2, centerX + this.selectedPoint.x + 2, centerY + this.selectedPoint.y + 2, 2, -1);
 
         super.render(stack, mouseX, mouseY, partialTicks);
     }
@@ -143,8 +144,8 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
     }
 
     private int calculateColor() {
-        double theta = -Math.atan2(this.selectedPoint.getY(), this.selectedPoint.getX()) - Math.PI/2D;
-        double brightness = Math.min(1F, Math.sqrt(this.selectedPoint.getX()*this.selectedPoint.getX() + this.selectedPoint.getY()*this.selectedPoint.getY()) / (WHEEL_DIAMETER/2D));
+        double theta = -Math.atan2(this.selectedPoint.y, this.selectedPoint.x) - Math.PI/2D;
+        double brightness = Math.min(1F, Math.sqrt(this.selectedPoint.x*this.selectedPoint.x + this.selectedPoint.y*this.selectedPoint.y) / (WHEEL_DIAMETER/2D));
         return ColourUtils.HSBtoRGB((float) (theta / (2*Math.PI)), (float) brightness, 1F - this.lightness);
     }
 
@@ -198,7 +199,7 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
 
             if((mouseX - centerX)*(mouseX - centerX) + (mouseY - centerY)*(mouseY - centerY) <= radii*radii) {
                 this.wheelSelected = true;
-                this.selectedPoint = new Vector3i(mouseX - centerX + 5, mouseY - centerY + 5, 0);
+                this.selectedPoint = new Vector3i((int) (mouseX - centerX + 5), (int) (mouseY - centerY + 5), 0);
             } else {
                 this.wheelSelected = false;
             }
@@ -218,9 +219,9 @@ public class SolidColorSetupPage extends SetupPage<SolidColorBackground> {
                 this.lightness = Mth.clamp((float) (mouseY - y) / (WHEEL_DIAMETER-10), 0F, 1F);
             }
             if(this.wheelSelected) {
-                this.selectedPoint = new Vector3i(mouseX - x - WHEEL_DIAMETER/2F + 5, mouseY - y - WHEEL_DIAMETER/2F + 5, 0);
-                double theta = Math.atan2(this.selectedPoint.getY(), this.selectedPoint.getX());
-                double length = Math.min(Math.sqrt(this.selectedPoint.getX()*this.selectedPoint.getX() + this.selectedPoint.getY()*this.selectedPoint.getY()), WHEEL_DIAMETER/2D);
+                this.selectedPoint = new Vector3i((int) (mouseX - x - WHEEL_DIAMETER/2F + 5), (int) (mouseY - y - WHEEL_DIAMETER/2F + 5), 0);
+                double theta = Math.atan2(this.selectedPoint.y, this.selectedPoint.x);
+                double length = Math.min(Math.sqrt(this.selectedPoint.x*this.selectedPoint.x + this.selectedPoint.y*this.selectedPoint.y), WHEEL_DIAMETER/2D);
 
                 this.selectedPoint = new Vector3i((int) (length*Math.cos(theta)), (int) (length*Math.sin(theta)), 0);
             }

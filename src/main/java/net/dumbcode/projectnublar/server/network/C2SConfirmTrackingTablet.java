@@ -2,18 +2,18 @@ package net.dumbcode.projectnublar.server.network;
 
 import net.dumbcode.projectnublar.server.utils.TrackingTabletIterator;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class C2SConfirmTrackingTablet {
 
-    public static C2SConfirmTrackingTablet fromBytes(PacketBuffer buffer) {
+    public static C2SConfirmTrackingTablet fromBytes(FriendlyByteBuf buffer) {
         return new C2SConfirmTrackingTablet();
     }
 
-    public static void toBytes(C2SConfirmTrackingTablet packet, PacketBuffer buffer) {
+    public static void toBytes(C2SConfirmTrackingTablet packet, FriendlyByteBuf buffer) {
 
     }
 

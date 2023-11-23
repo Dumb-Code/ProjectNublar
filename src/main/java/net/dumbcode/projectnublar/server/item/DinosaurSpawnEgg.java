@@ -11,7 +11,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.Mth;
@@ -41,7 +41,7 @@ public class DinosaurSpawnEgg extends BasicDinosaurItem {
                     case FEMALE: modeString = "female"; break;
                     default: modeString = "random"; break;
                 }
-                player.displayClientMessage(new TranslationTextComponent(ProjectNublar.MODID + ".spawnegg.genderchange." + modeString), false);
+                player.displayClientMessage(Component.translatable(ProjectNublar.MODID + ".spawnegg.genderchange." + modeString), false);
             }
             stack.getOrCreateTagElement(ProjectNublar.MODID).put("SpawnEggInfo", info.serialize());
         }
@@ -110,15 +110,15 @@ public class DinosaurSpawnEgg extends BasicDinosaurItem {
         SpawnEggState state;
 
         private static SpawnEggInfo fromStack(ItemStack stack) {
-            CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID).getCompound("SpawnEggInfo");
+            CompoundTag nbt = stack.getOrCreateTagElement(ProjectNublar.MODID).getCompound("SpawnEggInfo");
             return new SpawnEggInfo(
                 DinosaurHandler.getRegistry().getValue(new ResourceLocation(nbt.getString("Dinosaur"))),
                 SpawnEggState.fromName(nbt.getString("State"))
             );
         }
 
-        private CompoundNBT serialize() {
-            CompoundNBT nbt = new CompoundNBT();
+        private CompoundTag serialize() {
+            CompoundTag nbt = new CompoundTag();
             nbt.putString("Dinosaur", this.dinosaur.getRegName().toString());
             nbt.putString("State", this.state.name().toLowerCase(Locale.ROOT));
             return nbt;

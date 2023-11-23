@@ -6,7 +6,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -36,7 +36,7 @@ public class DnaSyringeItem extends Item implements DriveUtils.DriveInformation 
 
     @Override
     public String getAnimalVariant(ItemStack stack) {
-        CompoundNBT nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = stack.getOrCreateTagElement(ProjectNublar.MODID);
         return nbt.contains("ContainedVariant") ? nbt.getString("ContainedVariant") : null;
     }
 
@@ -57,7 +57,7 @@ public class DnaSyringeItem extends Item implements DriveUtils.DriveInformation 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         tooltip.add(
-            new TranslationTextComponent("item.projectnublar.dna_filled_syringe.contains",
+            Component.translatable("item.projectnublar.dna_filled_syringe.contains",
                 this.getSize(stack),
                 DriveUtils.getTranslation(this.getDriveTranslationKey(stack), this.getAnimalVariant(stack))
             ).withStyle(TextFormatting.GRAY)

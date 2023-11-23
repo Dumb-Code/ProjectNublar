@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -88,7 +88,7 @@ public class BlockPylonHead extends Block implements IItemBlock {
     public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity playerIn, Hand hand, BlockRayTraceResult ray) {
         ItemStack item = playerIn.getItemInHand(hand);
         if(item.getItem() == ItemHandler.WIRE_SPOOL.get() && !worldIn.isClientSide) {
-            CompoundNBT nbt = item.getOrCreateTagElement(ProjectNublar.MODID);
+            CompoundTag nbt = item.getOrCreateTagElement(ProjectNublar.MODID);
             if(nbt.contains("pylon_position", Constants.NBT.TAG_COMPOUND)) {
                 BlockPos other = NBTUtil.readBlockPos(nbt.getCompound("pylon_position"));
                 if(!pos.equals(other)) {

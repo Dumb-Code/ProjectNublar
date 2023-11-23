@@ -3,7 +3,7 @@ package net.dumbcode.projectnublar.server.network;
 import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.client.gui.tablet.TabletHomeGui;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Hand;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -14,11 +14,11 @@ public class S2COpenTablet {
 
     private final Hand hand;
 
-    public static S2COpenTablet fromBytes(PacketBuffer buf) {
+    public static S2COpenTablet fromBytes(FriendlyByteBuf buf) {
         return new S2COpenTablet(buf.readEnum(Hand.class));
     }
 
-    public static void toBytes(S2COpenTablet packet, PacketBuffer buf) {
+    public static void toBytes(S2COpenTablet packet, FriendlyByteBuf buf) {
         buf.writeEnum(packet.hand);
     }
 

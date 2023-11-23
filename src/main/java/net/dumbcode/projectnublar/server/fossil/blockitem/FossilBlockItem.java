@@ -14,7 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +65,7 @@ public class FossilBlockItem extends BlockItem {
     public ITextComponent getName(ItemStack stack) {
         StoneType stone = getStoneType(stack);
         Fossil fossil = getFossil(stack);
-        return new TranslationTextComponent("projectnublar.fossil", stone.baseState.get().getBlock().getName(), WordUtils.capitalizeFully(fossil.name));
+        return Component.translatable("projectnublar.fossil", stone.baseState.get().getBlock().getName(), WordUtils.capitalizeFully(fossil.name));
     }
 
     public static ItemStack setFossilStack(Fossil fossil, StoneType stoneType) {
@@ -73,7 +73,7 @@ public class FossilBlockItem extends BlockItem {
     }
 
     public static ItemStack setFossilStack(ItemStack base, Fossil fossil, StoneType stoneType) {
-        CompoundNBT nbt = base.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = base.getOrCreateTagElement(ProjectNublar.MODID);
 
         nbt.putString("fossil", fossil.getRegistryName().toString());
         nbt.putString("stone_type", stoneType.getRegistryName().toString());
@@ -82,12 +82,12 @@ public class FossilBlockItem extends BlockItem {
     }
 
     public static Fossil getFossil(ItemStack base) {
-        CompoundNBT nbt = base.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = base.getOrCreateTagElement(ProjectNublar.MODID);
         return FossilHandler.FOSSIL_REGISTRY.get().getValue(new ResourceLocation(nbt.getString("fossil")));
     }
 
     public static StoneType getStoneType(ItemStack base) {
-        CompoundNBT nbt = base.getOrCreateTagElement(ProjectNublar.MODID);
+        CompoundTag nbt = base.getOrCreateTagElement(ProjectNublar.MODID);
         return StoneTypeHandler.STONE_TYPE_REGISTRY.get().getValue(new ResourceLocation(nbt.getString("stone_type")));
     }
 }

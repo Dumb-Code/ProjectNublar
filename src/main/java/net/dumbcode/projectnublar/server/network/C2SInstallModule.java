@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import net.dumbcode.projectnublar.server.tablet.ModuleItem;
 import net.dumbcode.projectnublar.server.tablet.TabletItemStackHandler;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Hand;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -15,16 +16,16 @@ import java.util.function.Supplier;
 public class C2SInstallModule {
 
     private final int slot;
-    private final Hand hand;
+    private final InteractionHand hand;
 
 
-    public static C2SInstallModule fromBytes(PacketBuffer buf) {
+    public static C2SInstallModule fromBytes(FriendlyByteBuf buf) {
         return new C2SInstallModule(
             buf.readByte(), buf.readEnum(Hand.class)
         );
     }
 
-    public static void toBytes(C2SInstallModule packet, PacketBuffer buf) {
+    public static void toBytes(C2SInstallModule packet, FriendlyByteBuf buf) {
         buf.writeByte(packet.slot);
         buf.writeEnum(packet.hand);
     }

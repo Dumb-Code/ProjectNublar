@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.dinosaur.Dinosaur;
 import net.dumbcode.projectnublar.server.item.data.DriveUtils;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -26,7 +26,7 @@ public class DinosaurGeneticMaterialItem extends BasicDinosaurItem implements Dr
 
     @Override
     public int getSize(ItemStack stack) {
-        CompoundNBT compound = stack.getTagElement(ProjectNublar.MODID);
+        CompoundTag compound = stack.getTagElement(ProjectNublar.MODID);
         return compound != null && compound.contains("GeneticMaterialSize", 99)? compound.getInt("GeneticMaterialSize") : 2;
     }
 

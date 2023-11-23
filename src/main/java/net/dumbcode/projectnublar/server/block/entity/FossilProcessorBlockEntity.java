@@ -18,7 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -72,15 +72,15 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         super.load(state, compound);
         this.tank.readFromNBT(compound.getCompound("FluidTank"));
 
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
-        compound.put("FluidTank", this.tank.writeToNBT(new CompoundNBT()));
+    public CompoundTag save(CompoundTag compound) {
+        compound.put("FluidTank", this.tank.writeToNBT(new CompoundTag()));
 
         return super.save(compound);
     }
@@ -175,7 +175,7 @@ public class FossilProcessorBlockEntity extends MachineModuleBlockEntity<FossilP
 
     @Override
     public ITextComponent createTitle(int tab) {
-        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.fossil_processor.title");
+        return Component.translatable(ProjectNublar.MODID + ".containers.fossil_processor.title");
     }
 
     // TODO: Change for balance, values are just for testing

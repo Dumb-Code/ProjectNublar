@@ -12,10 +12,10 @@ import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.EntityPart;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -70,10 +70,10 @@ public class MultipartEntityComponent extends EntityComponent {
     }
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         ListNBT list = new ListNBT();
         for (LinkedEntity entity : this.entities) {
-            CompoundNBT nbt = new CompoundNBT();
+            CompoundTag nbt = new CompoundTag();
             nbt.putString("partname", entity.cubeName);
             nbt.putUUID("uuid", entity.entityUUID);
             list.add(nbt);
@@ -83,17 +83,17 @@ public class MultipartEntityComponent extends EntityComponent {
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         super.deserialize(compound);
         this.entities.clear();
         for (INBT base : compound.getList("entities", Constants.NBT.TAG_COMPOUND)) {
-            CompoundNBT nbt = (CompoundNBT) base;
+            CompoundTag nbt = (CompoundTag) base;
             this.entities.add(new LinkedEntity(nbt.getString("partname"), nbt.getUUID("uuid")));
         }
     }
 
     @Override
-    public void serialize(PacketBuffer buf) {
+    public void serialize(FriendlyByteBuf buf) {
         buf.writeShort(this.entities.size());
         for (LinkedEntity entity : this.entities) {
             buf.writeUtf(entity.cubeName);
@@ -102,7 +102,7 @@ public class MultipartEntityComponent extends EntityComponent {
     }
 
     @Override
-    public void deserialize(PacketBuffer buf) {
+    public void deserialize(FriendlyByteBuf buf) {
         short size = buf.readShort();
         this.entities.clear();
         for (int i = 0; i < size; i++) {

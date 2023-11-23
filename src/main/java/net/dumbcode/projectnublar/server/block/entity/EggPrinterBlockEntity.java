@@ -17,7 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -74,13 +74,13 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         compound.putFloat("boneMatter", boneMatter);
         return super.save(compound);
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         this.boneMatter = Math.min(compound.getFloat("boneMatter"), TOTAL_BONE_MATTER);
         super.load(state, compound);
     }
@@ -103,7 +103,7 @@ public class EggPrinterBlockEntity extends MachineModuleBlockEntity<EggPrinterBl
 
     @Override
     public ITextComponent createTitle(int tab) {
-        return new TranslationTextComponent(ProjectNublar.MODID + ".containers.egg_printer.title");
+        return Component.translatable(ProjectNublar.MODID + ".containers.egg_printer.title");
     }
 
     @Override

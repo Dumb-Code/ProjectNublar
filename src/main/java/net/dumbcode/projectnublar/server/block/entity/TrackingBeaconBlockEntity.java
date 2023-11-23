@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.server.SimpleBlockEntity;
 import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.core.BlockPos;
@@ -33,14 +33,14 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         this.name = compound.getString("name");
         this.radius = compound.getInt("radius");
         super.load(state, compound);
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         compound.putString("name", this.name);
         compound.putInt("radius", this.radius);
         return super.save(compound);
@@ -82,19 +82,19 @@ public class TrackingBeaconBlockEntity extends SimpleBlockEntity {
         }
 
         @Override
-        public void load(CompoundNBT nbt) {
+        public void load(CompoundTag nbt) {
             StreamUtils.stream(nbt.getList("tracking_entries", Constants.NBT.TAG_COMPOUND))
                 .forEachOrdered(b -> {
-                    CompoundNBT compound = (CompoundNBT) b;
+                    CompoundTag compound = (CompoundTag) b;
                     this.trackingMap.put(NBTUtil.readBlockPos(compound.getCompound("position")), compound.getString("name"));
                 });
         }
 
         @Override
-        public CompoundNBT save(CompoundNBT compound) {
+        public CompoundTag save(CompoundTag compound) {
             ListNBT list = this.trackingMap.entrySet().stream()
                 .map(e -> {
-                    CompoundNBT nbt = new CompoundNBT();
+                    CompoundTag nbt = new CompoundTag();
                     nbt.put("position", NBTUtil.writeBlockPos(e.getKey()));
                     nbt.putString("name", e.getValue());
                     return nbt;

@@ -36,7 +36,7 @@ public class DriveUtils {
         ListNBT nbt = drive.getOrCreateTagElement(ProjectNublar.MODID).getList("drive_information", Constants.NBT.TAG_COMPOUND);
 
         for (int i = 0; i < nbt.size(); i++) {
-            CompoundNBT tag = nbt.getCompound(i);
+            CompoundTag tag = nbt.getCompound(i);
             out.add(new DriveEntry(tag.getString("drive_key"), tag.getString("translation_key"), tag.contains("animal_variant") ? tag.getString("animal_variant") : null, tag.getInt("amount"), DriveType.values()[tag.getInt("drive_type") % DriveType.values().length]));
         }
 
@@ -77,12 +77,12 @@ public class DriveUtils {
 
         int index = -1;
         for (int i = 0; i < list.size(); i++) {
-            CompoundNBT nbt = list.getCompound(i);
+            CompoundTag nbt = list.getCompound(i);
             if(nbt.getString("drive_key").equals(key) && (nbt.contains("animal_variant") ? nbt.getString("animal_variant").equals(variant) : variant == null)) {
                 index = i;
             }
         }
-        CompoundNBT inner = list.getCompound(index);
+        CompoundTag inner = list.getCompound(index);
         int current = inner.getInt("amount");
         if(current >= 100) {
             return;
@@ -136,7 +136,7 @@ public class DriveUtils {
             List<EntityGeneticRegistry.IsolatePart> isolate = EntityGeneticRegistry.INSTANCE.getEntriesToIsolate(type);
             entries.add(new IsolatedGeneEntry(type, amount / isolate.size(),
                 isolate.stream()
-                    .map(p -> Pair.of(new TranslationTextComponent(p.getEntityType().getDescriptionId()), entityAmountMap.getOrDefault(p.getEntityType(), 0) / 100D))
+                    .map(p -> Pair.of(Component.translatable(p.getEntityType().getDescriptionId()), entityAmountMap.getOrDefault(p.getEntityType(), 0) / 100D))
                     .collect(Collectors.toList())
             ));
         });
@@ -157,7 +157,7 @@ public class DriveUtils {
 
 
     public static TranslationTextComponent getTranslation(String name, String variant) {
-        TranslationTextComponent component = new TranslationTextComponent(name);
+        TranslationTextComponent component = Component.translatable(name);
         if(variant != null) {
             return ProjectNublar.translate("entity.genetics.variant." + variant.toLowerCase(Locale.ROOT), component);
         } else {

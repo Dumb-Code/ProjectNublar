@@ -4,8 +4,8 @@ import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Value;
 import net.dumbcode.projectnublar.server.entity.tracking.info.*;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -41,8 +41,8 @@ public abstract class TrackingDataInformation {
 
     public static <T extends TrackingDataInformation> void registerTrackingType(
         String typeName,
-        Function<PacketBuffer, T> bufDeserailizer, BiConsumer<PacketBuffer, T> bufSerializer,
-        Function<CompoundNBT, T> nbtDeserailizer, BiConsumer<CompoundNBT, T> nbtSerailizer
+        Function<FriendlyByteBuf, T> bufDeserailizer, BiConsumer<FriendlyByteBuf, T> bufSerializer,
+        Function<CompoundTag, T> nbtDeserailizer, BiConsumer<CompoundTag, T> nbtSerailizer
     ) {
         REGISTERED_MAP.put(typeName, new Entry<>(bufDeserailizer, bufSerializer, nbtDeserailizer, nbtSerailizer));
     }
@@ -52,20 +52,20 @@ public abstract class TrackingDataInformation {
         return Optional.ofNullable(REGISTERED_MAP.get(name));
     }
 
-    public static Optional<TrackingDataInformation> deserializeBuf(PacketBuffer buf) {
+    public static Optional<TrackingDataInformation> deserializeBuf(FriendlyByteBuf buf) {
         return getEntry(buf.readUtf()).map(c -> c.getBufDeserailizer().apply(buf));
     }
 
-    public static void serializeBuf(PacketBuffer buf, TrackingDataInformation info) {
+    public static void serializeBuf(FriendlyByteBuf buf, TrackingDataInformation info) {
         buf.writeUtf(info.typeName);
         getEntry(info.typeName).ifPresent(c -> c.getBufSerializer().accept(buf, info));
     }
 
-    public static Optional<TrackingDataInformation> deserializeNBT(CompoundNBT nbt) {
+    public static Optional<TrackingDataInformation> deserializeNBT(CompoundTag nbt) {
         return getEntry(nbt.getString("key")).map(c -> c.getNbtDeserailizer().apply(nbt));
     }
 
-    public static CompoundNBT serializeNBT(CompoundNBT nbt, TrackingDataInformation info) {
+    public static CompoundTag serializeNBT(CompoundTag nbt, TrackingDataInformation info) {
         getEntry(info.typeName).ifPresent(c -> {
             nbt.putString("key", info.typeName);
             c.getNbtSerailizer().accept(nbt, info);
@@ -75,10 +75,10 @@ public abstract class TrackingDataInformation {
 
     @Value
     private static class Entry<T extends TrackingDataInformation> {
-        Function<PacketBuffer, T> bufDeserailizer;
-        BiConsumer<PacketBuffer, T> bufSerializer;
-        Function<CompoundNBT, T> nbtDeserailizer;
-        BiConsumer<CompoundNBT, T> nbtSerailizer;
+        Function<FriendlyByteBuf, T> bufDeserailizer;
+        BiConsumer<FriendlyByteBuf, T> bufSerializer;
+        Function<CompoundTag, T> nbtDeserailizer;
+        BiConsumer<CompoundTag, T> nbtSerailizer;
     }
 
     static {

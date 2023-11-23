@@ -6,7 +6,7 @@ import net.dumbcode.dumblibrary.server.dna.GeneticType;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SequencingSynthesizerBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -17,11 +17,11 @@ public class C2SSequencingSynthesizerIsolationRemoved {
 
     private final GeneticType<?, ?> type;
 
-    public static C2SSequencingSynthesizerIsolationRemoved fromBytes(PacketBuffer buf) {
+    public static C2SSequencingSynthesizerIsolationRemoved fromBytes(FriendlyByteBuf buf) {
         return new C2SSequencingSynthesizerIsolationRemoved(buf.readRegistryIdSafe(GeneticType.getWildcardType()));
     }
 
-    public static void toBytes(C2SSequencingSynthesizerIsolationRemoved packet, PacketBuffer buf) {
+    public static void toBytes(C2SSequencingSynthesizerIsolationRemoved packet, FriendlyByteBuf buf) {
         buf.writeRegistryId(packet.type);
     }
 

@@ -6,8 +6,8 @@ import lombok.NonNull;
 import net.dumbcode.dumblibrary.client.shader.GlslSandboxShader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -31,14 +31,14 @@ public class ShaderBackground implements TabletBackground {
     }
 
     @Override
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         nbt.putString("url", this.url);
         nbt.putString("screen_size", this.size.name());
         return nbt;
     }
 
     @Override
-    public void readFromNBT(CompoundNBT nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         this.setUrl(nbt.getString("url"));
         if(nbt.contains("screen_size", Constants.NBT.TAG_STRING)) {
             this.size = ScreenSize.valueOf(nbt.getString("screen_size"));
@@ -46,13 +46,13 @@ public class ShaderBackground implements TabletBackground {
     }
 
     @Override
-    public void writeToBuf(PacketBuffer buf) {
+    public void writeToBuf(FriendlyByteBuf buf) {
         buf.writeUtf(this.url);
         buf.writeByte(this.size.ordinal());
     }
 
     @Override
-    public void readFromBuf(PacketBuffer buf) {
+    public void readFromBuf(FriendlyByteBuf buf) {
         this.setUrl(buf.readUtf());
         this.size = ScreenSize.values()[buf.readByte() % ScreenSize.values().length];
     }

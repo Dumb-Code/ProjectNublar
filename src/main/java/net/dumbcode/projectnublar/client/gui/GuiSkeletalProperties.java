@@ -1,12 +1,9 @@
 package net.dumbcode.projectnublar.client.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.GuiGraphics;
 import lombok.Getter;
 import lombok.Setter;
-import net.dumbcode.dumblibrary.client.gui.GuiModelPoseEdit;
-import net.dumbcode.dumblibrary.client.gui.GuiScrollBox;
-import net.dumbcode.dumblibrary.client.gui.GuiScrollboxEntry;
+import net.dumbcode.dumblibrary.client.gui.*;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.block.entity.SkeletalBuilderBlockEntity;
 import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.PoleFacing;
@@ -14,14 +11,12 @@ import net.dumbcode.projectnublar.server.block.entity.skeletalbuilder.SkeletalPr
 import net.dumbcode.projectnublar.server.network.BChangeGlobalRotation;
 import net.dumbcode.projectnublar.server.network.BUpdatePoleList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.math.Mth;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
-import net.minecraftforge.fml.client.gui.widget.Slider;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraftforge.client.gui.widget.ForgeSlider;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,13 +32,13 @@ public class GuiSkeletalProperties extends Screen {
 
     private GuiScrollBox<PoleEntry> scrollBox = new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries);
 
-    private Slider globalRotation;
-    private Button editDirection;
+    private ForgeSlider globalRotation;
+    private SimpleSlider editDirection;
 
     @Getter @Setter
     private PoleEntry editingPole;
 
-    private TextFieldWidget editText;
+    private EditBox editText;
 
     public GuiSkeletalProperties(GuiModelPoseEdit parent, SkeletalBuilderBlockEntity builder) {
         super(Component.literal("bruh"));
@@ -56,7 +51,7 @@ public class GuiSkeletalProperties extends Screen {
     public void init() {
         this.updateList();
 
-        this.scrollBox = this.addButton(new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries));
+        this.scrollBox = this.addWidget(new GuiScrollBox<>(this.width / 2 - 100, 100, 200, 25, (this.height - 150) / 25, () -> this.entries));
 
         int diff = 0;
 
@@ -70,7 +65,7 @@ public class GuiSkeletalProperties extends Screen {
             bottom += diff = this.height/2 - (bottom + top)/2;
         }
 
-        this.globalRotation = this.addButton(new Slider( (this.width-200)/2, 30 + diff, 200, 20, Component.literal("rotaion"), Component.literal(""),0, 360, 0.0, true, true, p -> {}, s -> {
+        this.globalRotation = this.addWidget(new SimpleSlider((this.width-200)/2, 30 + diff, 200, 20, Component.literal("rotaion"), Component.literal(""),0, 360, 0.0, true, true, p -> {}, s -> {
             float val = (float) s.getValue();
             if(this.previousRot != val) {
                 this.previousRot = val;
@@ -79,7 +74,7 @@ public class GuiSkeletalProperties extends Screen {
         }));
         this.globalRotation.setValue(this.properties.getRotation());
 
-        this.addButton(new ExtendedButton(this.width / 2 + 70, 60 + diff, 20, 20, Component.literal("+"), p -> {
+        this.addWidget(new ExtendedButton(this.width / 2 + 70, 60 + diff, 20, 20, Component.literal("+"), p -> {
             this.builder.getSkeletalProperties().getPoles().add(new SkeletalProperties.Pole("", PoleFacing.NONE));
             this.sync();
             this.editingPole = this.entries.get(this.entries.size()-1);
@@ -194,7 +189,7 @@ public class GuiSkeletalProperties extends Screen {
         @Override
         public void draw(GuiGraphics stack, int x, int y, int width, int height, int mouseX, int mouseY, boolean mouseOver) {
             y += 12;
-            minecraft.stack.drawString(font, pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
+            stack.drawString(font, pole.getCubeName(), x + 5, y - 3, 0xDDDDDD);
 
             this.edit.x = width/2+40;
             this.edit.y = y - 10;

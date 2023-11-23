@@ -8,8 +8,8 @@ import net.dumbcode.dumblibrary.server.ecs.component.FinalizableComponent;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.plants.Plant;
 import net.dumbcode.projectnublar.server.plants.PlantHandler;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -19,13 +19,13 @@ public class PlantComponent extends EntityComponent implements FinalizableCompon
     @NonNull @Getter private Plant plant = PlantHandler.CYCAD.get();
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.putString("plant", Objects.requireNonNull(this.plant.getRegistryName()).toString());
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         super.deserialize(compound);
         ResourceLocation identifier = new ResourceLocation(compound.getString("plant"));
         if (PlantHandler.getRegistry().containsKey(identifier)) {
@@ -37,12 +37,12 @@ public class PlantComponent extends EntityComponent implements FinalizableCompon
     }
 
     @Override
-    public void serialize(PacketBuffer buf) {
+    public void serialize(FriendlyByteBuf buf) {
         buf.writeRegistryId(this.plant);
     }
 
     @Override
-    public void deserialize(PacketBuffer buf) {
+    public void deserialize(FriendlyByteBuf buf) {
         this.plant = buf.readRegistryIdSafe(Plant.class);
     }
 

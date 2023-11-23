@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.block.entity.ConnectableBlockEntity;
 import net.dumbcode.projectnublar.server.utils.Connection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -16,12 +16,12 @@ public class S2CRegenFenceCache {
     public S2CRegenFenceCache() {
     }
 
-    public static S2CRegenFenceCache fromBytes(PacketBuffer buf) {
+    public static S2CRegenFenceCache fromBytes(FriendlyByteBuf buf) {
         return new S2CRegenFenceCache();
     }
 
 
-    public static void toBytes(S2CRegenFenceCache packet, PacketBuffer buf) {
+    public static void toBytes(S2CRegenFenceCache packet, FriendlyByteBuf buf) {
     }
 
     public static void handle(S2CRegenFenceCache packet, Supplier<NetworkEvent.Context> supplier) {

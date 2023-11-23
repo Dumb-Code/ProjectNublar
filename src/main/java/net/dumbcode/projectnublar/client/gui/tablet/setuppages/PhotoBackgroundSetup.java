@@ -1,21 +1,26 @@
 package net.dumbcode.projectnublar.client.gui.tablet.setuppages;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.GuiGraphics;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import lombok.Getter;
 import net.dumbcode.dumblibrary.client.TextureUtils;
+import net.dumbcode.projectnublar.mixin.ButtonAccessor;
 import net.dumbcode.projectnublar.server.ProjectNublar;
 import net.dumbcode.projectnublar.server.network.C2SPhotoBackgroundRequestAllIcons;
 import net.dumbcode.projectnublar.server.network.C2SRequestPhotoBackgroundIcon;
 import net.dumbcode.projectnublar.server.network.CS2UploadPhotoBackgroundImage;
 import net.dumbcode.projectnublar.server.tablet.TabletBGImageHandler;
 import net.dumbcode.projectnublar.server.tablet.backgrounds.PhotoBackground;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -26,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
 
@@ -51,12 +57,12 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
 
     @Override
     public void initPage(int x, int y) {
-        this.globalChangeButton = this.add(new Button(x + 130, y + 5, 50, 20, new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.mode.user"), b -> {
-            this.globalChangeButton.setMessage(new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.mode." + (this.userTab ? "global" : "user")));
+        this.globalChangeButton = this.add(ButtonAccessor.construct(x + 130, y + 5, 50, 20, Component.translatable(ProjectNublar.MODID + ".gui.photo.mode.user"), b -> {
+            this.globalChangeButton.setMessage(Component.translatable(ProjectNublar.MODID + ".gui.photo.mode." + (this.userTab ? "global" : "user")));
             this.userTab = !this.userTab;
             ProjectNublar.NETWORK.sendToServer(new C2SPhotoBackgroundRequestAllIcons(!this.userTab));
-        }));
-        this.openFileButton = this.add(new Button(x + 30, y + 110, 50, 20, new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.open"), b -> {
+        }, Supplier::get));
+        this.openFileButton = this.add(ButtonAccessor.construct(x + 30, y + 110, 50, 20, Component.translatable(ProjectNublar.MODID + ".gui.photo.open"), b -> {
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 PointerBuffer filters = stack.mallocPointer(1);
                 filters.put(stack.UTF8("*.png"));
@@ -66,8 +72,8 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
                     this.setAsCurrent(Paths.get(result));
                 }
             }
-        }));
-        this.uploadButton = this.add(new Button(x + 130, y + 110, 50, 20, new TranslationTextComponent(ProjectNublar.MODID + ".gui.photo.upload"), b -> {
+        }, Supplier::get));
+        this.uploadButton = this.add(ButtonAccessor.construct(x + 130, y + 110, 50, 20, Component.translatable(ProjectNublar.MODID + ".gui.photo.upload"), b -> {
             int maxWidth = 250;
             int maxHeight = (int) (maxWidth / TabletBGImageHandler.SCREEN_RATIO);
 
@@ -86,7 +92,7 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
             } catch (IOException e) {
                 ProjectNublar.LOGGER.error("Unable to write image", e);
             }
-        }));
+        }, Supplier::get));
         this.uploadButton.active = this.currentTestImage != null;
         super.initPage(x, y);
     }
@@ -145,7 +151,8 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
 
         if(this.currentTestTexture != null) {
             this.currentTestTexture.bind();
-            stack.blit(x, y, 0, 0, 100, 100, 100, 100);
+            RenderSystem.setShaderTexture(0, this.currentTestTexture.getId());
+            blit(stack, x, y, 0, 0, 100, 100, 100, 100);
         }
 
         List<BGIconEntry> list = this.userTab ? this.userEntries : this.globalEntries;
@@ -156,13 +163,37 @@ public class PhotoBackgroundSetup extends SetupPage<PhotoBackground> {
             }
             if(entry.texture != null) {
                 entry.texture.bind();
-                stack.blit(entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
+                RenderSystem.setShaderTexture(0, entry.texture.getId());
+                blit(stack, entry.minX, entry.minY + this.scroll, 0, 0, entry.width, entry.height, entry.width, entry.height);
                 if(entry == this.selectedEntry) {
                     stack.fill(entry.minX - 2, entry.minY + this.scroll - 2, entry.minX + entry.width + 2, entry.minY + entry.height + 2 + this.scroll, 0x8800BAFD);
                 }
             }
         }
         super.render(stack, mouseX, mouseY, partialTicks);
+    }
+
+    public void blit(GuiGraphics graphics, int x, int y, int uOffset, int vOffset, float width, float height, int textureWidth, int textureHeight) {
+        this.blit(graphics, x, y, uOffset, vOffset, width, height, uOffset, vOffset, textureWidth, textureHeight);
+    }
+    public void blit(GuiGraphics graphics, int p_283671_, int p_282377_, int p_282058_, int p_281939_, float p_282285_, float p_283199_, int p_282186_, int p_282322_, int p_282481_, int p_281887_) {
+        this.blit(graphics, p_283671_, p_283671_ + p_282058_, p_282377_, p_282377_ + p_281939_, 0, p_282186_, p_282322_, p_282285_, p_283199_, p_282481_, p_281887_);
+    }
+
+    void blit(GuiGraphics graphics, int p_282732_, int p_283541_, int p_281760_, int p_283298_, int p_283429_, int p_282193_, int p_281980_, float p_282660_, float p_281522_, int p_282315_, int p_281436_) {
+        this.innerBlit(graphics, p_282732_, p_283541_, p_281760_, p_283298_, p_283429_, (p_282660_ + 0.0F) / (float)p_282315_, (p_282660_ + (float)p_282193_) / (float)p_282315_, (p_281522_ + 0.0F) / (float)p_281436_, (p_281522_ + (float)p_281980_) / (float)p_281436_);
+    }
+
+    void innerBlit(GuiGraphics graphics, int p_281399_, int p_283222_, int p_283615_, int p_283430_, int p_281729_, float p_283247_, float p_282598_, float p_282883_, float p_283017_) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        Matrix4f matrix4f = graphics.pose().last().pose();
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(matrix4f, (float)p_281399_, (float)p_283615_, (float)p_281729_).uv(p_283247_, p_282883_).endVertex();
+        bufferbuilder.vertex(matrix4f, (float)p_281399_, (float)p_283430_, (float)p_281729_).uv(p_283247_, p_283017_).endVertex();
+        bufferbuilder.vertex(matrix4f, (float)p_283222_, (float)p_283430_, (float)p_281729_).uv(p_282598_, p_283017_).endVertex();
+        bufferbuilder.vertex(matrix4f, (float)p_283222_, (float)p_283615_, (float)p_281729_).uv(p_282598_, p_282883_).endVertex();
+        BufferUploader.drawWithShader(bufferbuilder.end());
     }
 
     @Override

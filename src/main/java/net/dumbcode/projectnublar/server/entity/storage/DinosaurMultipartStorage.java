@@ -11,7 +11,7 @@ import net.dumbcode.dumblibrary.server.ecs.component.impl.AgeStage;
 import net.dumbcode.projectnublar.server.entity.ComponentHandler;
 import net.dumbcode.projectnublar.server.entity.component.impl.AgeComponent;
 import net.dumbcode.projectnublar.server.entity.component.impl.MultipartEntityComponent;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -57,10 +57,10 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
     }
 
     @Override
-    public void readNBT(CompoundNBT nbt) {
+    public void readNBT(CompoundTag nbt) {
         this.ageCubeMap.clear();
         for (INBT element : nbt.getList("cube_map", Constants.NBT.TAG_COMPOUND)) {
-            CompoundNBT cubeMapEntry = (CompoundNBT) element;
+            CompoundTag cubeMapEntry = (CompoundTag) element;
 
             this.ageCubeMap.put(cubeMapEntry.getString("age"),
                     cubeMapEntry.getList("cubes", Constants.NBT.TAG_STRING).stream()
@@ -87,10 +87,10 @@ public class DinosaurMultipartStorage implements SaveableEntityStorage<Multipart
     }
 
     @Override
-    public CompoundNBT writeNBT(CompoundNBT nbt) {
+    public CompoundTag writeNBT(CompoundTag nbt) {
         ListNBT list = new ListNBT();
         for (Map.Entry<String, List<String>> entry : this.ageCubeMap.entrySet()) {
-            CompoundNBT cubeMapEntry = new CompoundNBT();
+            CompoundTag cubeMapEntry = new CompoundTag();
             cubeMapEntry.putString("age", entry.getKey());
             ListNBT cubes = new ListNBT();
             for (String s : entry.getValue()) {

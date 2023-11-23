@@ -10,9 +10,9 @@ import net.dumbcode.dumblibrary.server.utils.CollectorUtils;
 import net.dumbcode.dumblibrary.server.utils.DCMUtils;
 import net.dumbcode.dumblibrary.server.utils.StreamUtils;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -66,8 +66,8 @@ public class DinosaurEggType {
         return this.cachedTexture;
     }
 
-    public static CompoundNBT writeToNBT(DinosaurEggType type) {
-        CompoundNBT nbt = new CompoundNBT();
+    public static CompoundTag writeToNBT(DinosaurEggType type) {
+        CompoundTag nbt = new CompoundTag();
         nbt.putFloat("length", type.eggLength);
         nbt.putFloat("scale", type.scale);
         nbt.putString("model_location", type.modelLocation.toString());
@@ -75,7 +75,7 @@ public class DinosaurEggType {
         return nbt;
     }
 
-    public static DinosaurEggType readFromNBT(CompoundNBT nbt) {
+    public static DinosaurEggType readFromNBT(CompoundTag nbt) {
         return new DinosaurEggType(
             nbt.getFloat("length"),
             nbt.getFloat("scale"),
@@ -102,7 +102,7 @@ public class DinosaurEggType {
         );
     }
 
-    public static void writeToBuf(DinosaurEggType type, PacketBuffer buf) {
+    public static void writeToBuf(DinosaurEggType type, FriendlyByteBuf buf) {
         buf.writeFloat(type.eggLength);
         buf.writeFloat(type.scale);
         buf.writeUtf(type.modelLocation.toString());
@@ -111,7 +111,7 @@ public class DinosaurEggType {
         Arrays.stream(type.texture).forEachOrdered(r -> buf.writeUtf(r.toString()));
     }
 
-    public static DinosaurEggType readFromBuf(PacketBuffer buf) {
+    public static DinosaurEggType readFromBuf(FriendlyByteBuf buf) {
         return new DinosaurEggType(
             buf.readFloat(),
             buf.readFloat(),

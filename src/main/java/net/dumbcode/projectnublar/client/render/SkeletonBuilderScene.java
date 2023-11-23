@@ -92,7 +92,7 @@ public class SkeletonBuilderScene {
 
         Matrix4f pose = stack.last().pose();
 
-        BufferBuilder buff = Tessellator.getInstance().getBuilder();
+        BufferBuilder buff = Tesselator.getInstance().getBuilder();
         buff.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         for (int column = 0; column < lineAmount; column++) {
             buff.vertex(pose, -off, 0, column*diff-off).color(1f, 1f, 1f, 1f).endVertex();
@@ -102,7 +102,7 @@ public class SkeletonBuilderScene {
             buff.vertex(pose, row*diff-off, 0, -off).color(1f, 1f, 1f, 1f).endVertex();
             buff.vertex(pose, row*diff-off, 0, +off).color(1f, 1f, 1f, 1f).endVertex();
         }
-        Tessellator.getInstance().end();
+        Tesselator.getInstance().end();
 
         buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
@@ -111,7 +111,7 @@ public class SkeletonBuilderScene {
         buff.vertex(pose, off, -0.001F, off).color(0, 41, 102, 255).endVertex();
         buff.vertex(pose, off, -0.001F, -off).color(0, 41, 102, 255).endVertex();
 
-        Tessellator.getInstance().end();
+        Tesselator.getInstance().end();
     }
 
     private void setup() {

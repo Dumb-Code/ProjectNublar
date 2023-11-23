@@ -5,7 +5,7 @@ import net.dumbcode.projectnublar.server.block.entity.MachineModuleBlockEntity;
 import net.dumbcode.projectnublar.server.containers.machines.MachineModuleContainer;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -22,11 +22,11 @@ import java.util.function.Supplier;
     private final BlockPos pos;
 
 
-    public static C2SChangeContainerTab fromBytes(PacketBuffer buf) {
+    public static C2SChangeContainerTab fromBytes(FriendlyByteBuf buf) {
         return new C2SChangeContainerTab(buf.readInt(), buf.readBlockPos());
     }
 
-    public static void toBytes(C2SChangeContainerTab packet, PacketBuffer buf) {
+    public static void toBytes(C2SChangeContainerTab packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.tab);
         buf.writeBlockPos(packet.pos);
     }

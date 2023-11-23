@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import net.dumbcode.dumblibrary.server.attributes.ModifiableField;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponent;
 import net.dumbcode.dumblibrary.server.ecs.component.EntityComponentStorage;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.JSONUtils;
 
 @Getter
@@ -16,13 +16,13 @@ public class DefenseComponent extends EntityComponent {
     private final ModifiableField defense = new ModifiableField();
 
     @Override
-    public CompoundNBT serialize(CompoundNBT compound) {
+    public CompoundTag serialize(CompoundTag compound) {
         compound.put("defense", this.defense.writeToNBT());
         return super.serialize(compound);
     }
 
     @Override
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         this.defense.readFromNBT(compound.getCompound("defense"));
         super.deserialize(compound);
     }
